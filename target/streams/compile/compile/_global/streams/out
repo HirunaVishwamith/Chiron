@@ -1,0 +1,4 @@
+[0m[[0m[31merror[0m] [0m[0m/media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/src/main/scala/testbench/uart.scala:15:7: uart is already defined as class uart[0m
+[0m[[0m[31merror[0m] [0m[0mclass uart extends Module {[0m
+[0m[[0m[31merror[0m] [0m[0m      ^[0m
+[0m[[0m[31merror[0m] [0m[0mone error found[0m
