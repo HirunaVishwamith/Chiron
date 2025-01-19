@@ -244,8 +244,6 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/target/scala-2.13/classes/core$$anon$15.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	AluIssuePort.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/target/scala-2.13/classes/AluIssuePort.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	system$$anon$6.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	  /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/target/scala-2.13/classes/system$$anon$6.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	core$$anon$13.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/target/scala-2.13/classes/core$$anon$13.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	Verilog$delayedInit$body.class[0m
@@ -428,8 +426,6 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/target/scala-2.13/classes/soc.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	dCacheRegisters.v[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/target/scala-2.13/classes/dCacheRegisters.v[0m
-[0m[[0m[0mdebug[0m] [0m[0m	system$$anon$5.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	  /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/target/scala-2.13/classes/system$$anon$5.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	writePort.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/target/scala-2.13/classes/writePort.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	LVT_set$$anon$1.class[0m

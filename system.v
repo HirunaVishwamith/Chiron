@@ -45279,7 +45279,7 @@ module Interconnect(
   assign CCU_core2_BREADY = io_acePort2_BREADY; // @[Interconnect.scala 305:20]
   assign CCU_core3_RREADY = io_acePort3_RREADY; // @[Interconnect.scala 329:20]
 endmodule
-module system_Anon_2(
+module MultiUart_Anon(
   input         clock,
   input         reset,
   input         client_AWID,
@@ -45303,8 +45303,8 @@ module system_Anon_2(
   output        client_RVALID,
   input         client_RREADY,
   output        MTIP,
-  output        putCharOut_valid,
-  output [7:0]  putCharOut_byte
+  output        putCharOut0_valid,
+  output [7:0]  putCharOut0_byte
 );
 `ifdef RANDOMIZE_REG_INIT
   reg [31:0] _RAND_0;
@@ -45322,653 +45322,126 @@ module system_Anon_2(
   reg [31:0] _RAND_12;
   reg [31:0] _RAND_13;
   reg [63:0] _RAND_14;
-  reg [31:0] _RAND_15;
-  reg [31:0] _RAND_16;
-  reg [31:0] _RAND_17;
-  reg [31:0] _RAND_18;
-  reg [31:0] _RAND_19;
-  reg [31:0] _RAND_20;
-  reg [31:0] _RAND_21;
-  reg [31:0] _RAND_22;
-  reg [31:0] _RAND_23;
-  reg [31:0] _RAND_24;
-  reg [31:0] _RAND_25;
-  reg [31:0] _RAND_26;
-  reg [31:0] _RAND_27;
-  reg [31:0] _RAND_28;
-  reg [31:0] _RAND_29;
-  reg [31:0] _RAND_30;
-  reg [31:0] _RAND_31;
-  reg [31:0] _RAND_32;
-  reg [31:0] _RAND_33;
-  reg [31:0] _RAND_34;
-  reg [31:0] _RAND_35;
-  reg [31:0] _RAND_36;
-  reg [31:0] _RAND_37;
-  reg [31:0] _RAND_38;
-  reg [31:0] _RAND_39;
-  reg [31:0] _RAND_40;
-  reg [31:0] _RAND_41;
-  reg [31:0] _RAND_42;
-  reg [31:0] _RAND_43;
-  reg [31:0] _RAND_44;
-  reg [31:0] _RAND_45;
-  reg [31:0] _RAND_46;
-  reg [31:0] _RAND_47;
-  reg [31:0] _RAND_48;
-  reg [31:0] _RAND_49;
-  reg [31:0] _RAND_50;
-  reg [31:0] _RAND_51;
-  reg [31:0] _RAND_52;
-  reg [31:0] _RAND_53;
-  reg [31:0] _RAND_54;
-  reg [31:0] _RAND_55;
-  reg [31:0] _RAND_56;
-  reg [31:0] _RAND_57;
-  reg [31:0] _RAND_58;
-  reg [31:0] _RAND_59;
-  reg [31:0] _RAND_60;
-  reg [31:0] _RAND_61;
-  reg [31:0] _RAND_62;
-  reg [31:0] _RAND_63;
-  reg [31:0] _RAND_64;
-  reg [31:0] _RAND_65;
-  reg [31:0] _RAND_66;
-  reg [31:0] _RAND_67;
-  reg [31:0] _RAND_68;
-  reg [31:0] _RAND_69;
-  reg [31:0] _RAND_70;
-  reg [31:0] _RAND_71;
-  reg [31:0] _RAND_72;
-  reg [31:0] _RAND_73;
-  reg [31:0] _RAND_74;
-  reg [31:0] _RAND_75;
-  reg [31:0] _RAND_76;
-  reg [31:0] _RAND_77;
-  reg [31:0] _RAND_78;
-  reg [31:0] _RAND_79;
-  reg [31:0] _RAND_80;
-  reg [31:0] _RAND_81;
-  reg [31:0] _RAND_82;
-  reg [31:0] _RAND_83;
-  reg [31:0] _RAND_84;
-  reg [31:0] _RAND_85;
-  reg [31:0] _RAND_86;
 `endif // RANDOMIZE_REG_INIT
-  reg  readRequestBuffer_valid; // @[uart.scala 18:34]
-  reg [31:0] readRequestBuffer_address; // @[uart.scala 18:34]
-  reg [7:0] readRequestBuffer_len; // @[uart.scala 18:34]
-  reg  readRequestBuffer_id; // @[uart.scala 18:34]
-  reg  writeRequestBuffer_address_valid; // @[uart.scala 26:35]
-  reg [31:0] writeRequestBuffer_address_offset; // @[uart.scala 26:35]
-  reg  writeRequestBuffer_address_id; // @[uart.scala 26:35]
-  reg  writeRequestBuffer_data_valid; // @[uart.scala 26:35]
-  reg [31:0] writeRequestBuffer_data_data; // @[uart.scala 26:35]
-  reg  writeRequestBuffer_data_last; // @[uart.scala 26:35]
-  wire  _T = client_ARREADY & client_ARVALID; // @[uart.scala 42:23]
-  wire  _GEN_0 = client_ARREADY & client_ARVALID | readRequestBuffer_valid; // @[uart.scala 42:42 43:29 18:34]
-  wire [7:0] _readRequestBuffer_len_T_1 = readRequestBuffer_len - 8'h1; // @[uart.scala 51:52]
-  wire  _T_2 = |readRequestBuffer_len; // @[uart.scala 52:33]
-  reg [63:0] mtime; // @[uart.scala 54:22]
-  reg [63:0] mtimecmp; // @[uart.scala 55:25]
-  reg [31:0] mtimecmplowtemp; // @[uart.scala 56:28]
-  reg [3:0] couter_wrap; // @[uart.scala 57:28]
-  wire [3:0] _couter_wrap_T_1 = couter_wrap + 4'h1; // @[uart.scala 58:30]
-  wire [63:0] _GEN_3 = {{63'd0}, &couter_wrap}; // @[uart.scala 59:18]
-  wire [63:0] _mtime_T_2 = mtime + _GEN_3; // @[uart.scala 59:18]
-  reg [63:0] mtimeRead; // @[uart.scala 60:22]
-  wire [31:0] _client_RDATA_T_3 = _T_2 ? mtimeRead[31:0] : mtimeRead[63:32]; // @[uart.scala 74:44]
-  wire [31:0] _GEN_9 = 32'h4000000 == readRequestBuffer_address ? 32'h0 : 32'h8; // @[uart.scala 70:16 71:37 75:38]
-  wire [31:0] _GEN_10 = 32'h200bff8 == readRequestBuffer_address ? _client_RDATA_T_3 : _GEN_9; // @[uart.scala 71:37 74:38]
-  wire [31:0] _GEN_11 = 32'he000102c == readRequestBuffer_address ? 32'h2 : _GEN_10; // @[uart.scala 71:37 73:38]
-  wire [31:0] _GEN_12 = 32'he000002c == readRequestBuffer_address ? 32'h2 : _GEN_11; // @[uart.scala 71:37 72:38]
-  wire [31:0] _putChar_valid_T = writeRequestBuffer_address_offset & 32'hff; // @[uart.scala 86:58]
-  wire  putChar_valid = _putChar_valid_T == 32'h30 & writeRequestBuffer_address_valid & writeRequestBuffer_data_valid; // @[uart.scala 86:159]
-  wire [7:0] putChar_byte = writeRequestBuffer_data_data[7:0]; // @[uart.scala 87:47]
-  reg [7:0] lastUartChars_0; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_1; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_2; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_3; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_4; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_5; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_6; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_7; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_8; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_9; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_10; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_11; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_12; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_13; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_14; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_15; // @[uart.scala 89:30]
-  reg [7:0] lastUartChars_16; // @[uart.scala 89:30]
-  reg  terminalReady; // @[uart.scala 95:30]
-  wire  _terminalReady_T = 8'h20 == lastUartChars_0; // @[uart.scala 97:130]
-  wire  _terminalReady_T_15 = 8'h75 == lastUartChars_15; // @[uart.scala 97:130]
-  wire  _terminalReady_T_31 = 8'h20 == lastUartChars_0 & 8'h3a == lastUartChars_1 & 8'h6e == lastUartChars_2 & 8'h69 ==
-    lastUartChars_3 & 8'h67 == lastUartChars_4 & 8'h6f == lastUartChars_5 & 8'h6c == lastUartChars_6 & 8'h20 ==
-    lastUartChars_7 & 8'h74 == lastUartChars_8 & 8'h6f == lastUartChars_9 & 8'h6f == lastUartChars_10 & 8'h72 ==
-    lastUartChars_11 & 8'h64 == lastUartChars_12 & 8'h6c == lastUartChars_13 & 8'h69 == lastUartChars_14 &
-    _terminalReady_T_15; // @[uart.scala 97:151]
-  reg  afterLogin; // @[uart.scala 100:27]
-  wire  _T_10 = ~afterLogin; // @[uart.scala 101:8]
-  reg  hardInput_0_valid; // @[uart.scala 105:26]
-  reg [7:0] hardInput_0_char; // @[uart.scala 105:26]
-  reg  hardInput_1_valid; // @[uart.scala 105:26]
-  reg [7:0] hardInput_1_char; // @[uart.scala 105:26]
-  reg  hardInput_2_valid; // @[uart.scala 105:26]
-  reg [7:0] hardInput_2_char; // @[uart.scala 105:26]
-  reg  hardInput_3_valid; // @[uart.scala 105:26]
-  reg [7:0] hardInput_3_char; // @[uart.scala 105:26]
-  reg  hardInput_4_valid; // @[uart.scala 105:26]
-  reg [7:0] hardInput_4_char; // @[uart.scala 105:26]
-  reg  hardInput_5_valid; // @[uart.scala 105:26]
-  reg [7:0] hardInput_5_char; // @[uart.scala 105:26]
-  reg  hardInput_6_valid; // @[uart.scala 105:26]
-  reg [7:0] hardInput_6_char; // @[uart.scala 105:26]
-  reg  hardInput_7_valid; // @[uart.scala 105:26]
-  reg [7:0] hardInput_7_char; // @[uart.scala 105:26]
-  reg  hardInput_8_valid; // @[uart.scala 105:26]
-  reg  hardInput_9_valid; // @[uart.scala 105:26]
-  reg  command_0_valid; // @[uart.scala 110:24]
-  reg [7:0] command_0_char; // @[uart.scala 110:24]
-  reg  command_1_valid; // @[uart.scala 110:24]
-  reg [7:0] command_1_char; // @[uart.scala 110:24]
-  reg  command_2_valid; // @[uart.scala 110:24]
-  reg [7:0] command_2_char; // @[uart.scala 110:24]
-  reg  command_3_valid; // @[uart.scala 110:24]
-  reg [7:0] command_3_char; // @[uart.scala 110:24]
-  reg  command_4_valid; // @[uart.scala 110:24]
-  reg [7:0] command_4_char; // @[uart.scala 110:24]
-  reg  command_5_valid; // @[uart.scala 110:24]
-  reg [7:0] command_5_char; // @[uart.scala 110:24]
-  reg  command_6_valid; // @[uart.scala 110:24]
-  reg [7:0] command_6_char; // @[uart.scala 110:24]
-  reg  command_7_valid; // @[uart.scala 110:24]
-  reg [7:0] command_7_char; // @[uart.scala 110:24]
-  reg  command_8_valid; // @[uart.scala 110:24]
-  reg [7:0] command_8_char; // @[uart.scala 110:24]
-  reg  command_9_valid; // @[uart.scala 110:24]
-  reg [7:0] command_9_char; // @[uart.scala 110:24]
-  reg  command_10_valid; // @[uart.scala 110:24]
-  reg [7:0] command_10_char; // @[uart.scala 110:24]
-  reg  command_11_valid; // @[uart.scala 110:24]
-  reg [7:0] command_11_char; // @[uart.scala 110:24]
-  reg  command_12_valid; // @[uart.scala 110:24]
-  reg [7:0] command_12_char; // @[uart.scala 110:24]
-  reg  command_13_valid; // @[uart.scala 110:24]
-  reg [7:0] command_13_char; // @[uart.scala 110:24]
-  reg  command_14_valid; // @[uart.scala 110:24]
-  reg [7:0] command_14_char; // @[uart.scala 110:24]
-  reg  command_15_valid; // @[uart.scala 110:24]
-  reg [7:0] command_15_char; // @[uart.scala 110:24]
-  reg  command_16_valid; // @[uart.scala 110:24]
-  reg [7:0] command_16_char; // @[uart.scala 110:24]
-  reg  command_17_valid; // @[uart.scala 110:24]
-  wire [31:0] _T_11 = readRequestBuffer_address & 32'hffff0fff; // @[uart.scala 116:33]
-  wire  _T_13 = _T_11 == 32'he000002c & readRequestBuffer_valid; // @[uart.scala 116:69]
-  wire  _T_16 = _T_13 & terminalReady & _T_10; // @[uart.scala 117:46]
-  wire  _client_RDATA_T_4 = ~hardInput_0_valid; // @[uart.scala 119:38]
-  wire [1:0] _client_RDATA_T_5 = {_client_RDATA_T_4,1'h0}; // @[Cat.scala 33:92]
-  wire [31:0] _GEN_150 = {{30'd0}, _client_RDATA_T_5}; // @[uart.scala 119:32]
-  wire [31:0] _client_RDATA_T_6 = 32'h8 | _GEN_150; // @[uart.scala 119:32]
-  wire [31:0] _GEN_32 = _T_16 ? _client_RDATA_T_6 : _GEN_12; // @[uart.scala 118:5 119:18]
-  wire  _T_19 = _T_11 == 32'he0000030 & readRequestBuffer_valid; // @[uart.scala 123:69]
-  wire  _T_22 = _T_19 & terminalReady & _T_10; // @[uart.scala 124:46]
-  wire  _GEN_33 = client_RREADY ? hardInput_1_valid : hardInput_0_valid; // @[uart.scala 127:25 105:26 128:88]
-  wire  _GEN_35 = client_RREADY ? hardInput_2_valid : hardInput_1_valid; // @[uart.scala 127:25 105:26 128:88]
-  wire  _GEN_37 = client_RREADY ? hardInput_3_valid : hardInput_2_valid; // @[uart.scala 127:25 105:26 128:88]
-  wire  _GEN_39 = client_RREADY ? hardInput_4_valid : hardInput_3_valid; // @[uart.scala 127:25 105:26 128:88]
-  wire  _GEN_41 = client_RREADY ? hardInput_5_valid : hardInput_4_valid; // @[uart.scala 127:25 105:26 128:88]
-  wire  _GEN_43 = client_RREADY ? hardInput_6_valid : hardInput_5_valid; // @[uart.scala 127:25 105:26 128:88]
-  wire  _GEN_45 = client_RREADY ? hardInput_7_valid : hardInput_6_valid; // @[uart.scala 127:25 105:26 128:88]
-  wire  _GEN_47 = client_RREADY ? hardInput_8_valid : hardInput_7_valid; // @[uart.scala 127:25 105:26 128:88]
-  wire  _GEN_49 = client_RREADY ? hardInput_9_valid : hardInput_8_valid; // @[uart.scala 127:25 105:26 128:88]
-  wire  _GEN_51 = client_RREADY ? 1'h0 : hardInput_9_valid; // @[uart.scala 127:25 105:26 129:28]
-  wire [31:0] _GEN_52 = _T_22 ? {{24'd0}, hardInput_0_char} : _GEN_32; // @[uart.scala 125:5 126:18]
-  wire  _GEN_53 = _T_22 ? _GEN_33 : hardInput_0_valid; // @[uart.scala 105:26 125:5]
-  wire  _GEN_55 = _T_22 ? _GEN_35 : hardInput_1_valid; // @[uart.scala 105:26 125:5]
-  wire  _GEN_57 = _T_22 ? _GEN_37 : hardInput_2_valid; // @[uart.scala 105:26 125:5]
-  wire  _GEN_59 = _T_22 ? _GEN_39 : hardInput_3_valid; // @[uart.scala 105:26 125:5]
-  wire  _GEN_61 = _T_22 ? _GEN_41 : hardInput_4_valid; // @[uart.scala 105:26 125:5]
-  wire  _GEN_63 = _T_22 ? _GEN_43 : hardInput_5_valid; // @[uart.scala 105:26 125:5]
-  wire  _GEN_65 = _T_22 ? _GEN_45 : hardInput_6_valid; // @[uart.scala 105:26 125:5]
-  wire  _GEN_67 = _T_22 ? _GEN_47 : hardInput_7_valid; // @[uart.scala 105:26 125:5]
-  wire  _GEN_69 = _T_22 ? _GEN_49 : hardInput_8_valid; // @[uart.scala 105:26 125:5]
-  wire  _GEN_71 = _T_22 ? _GEN_51 : hardInput_9_valid; // @[uart.scala 105:26 125:5]
-  wire  _T_26 = _T_13 & afterLogin; // @[uart.scala 135:29]
-  wire  _client_RDATA_T_7 = ~command_0_valid; // @[uart.scala 137:38]
-  wire [1:0] _client_RDATA_T_8 = {_client_RDATA_T_7,1'h0}; // @[Cat.scala 33:92]
-  wire [31:0] _GEN_151 = {{30'd0}, _client_RDATA_T_8}; // @[uart.scala 137:32]
-  wire [31:0] _client_RDATA_T_9 = 32'h8 | _GEN_151; // @[uart.scala 137:32]
-  wire [31:0] _GEN_72 = _T_26 ? _client_RDATA_T_9 : _GEN_52; // @[uart.scala 136:5 137:18]
-  wire  _T_30 = _T_19 & afterLogin; // @[uart.scala 142:29]
-  wire  _GEN_73 = client_RREADY ? command_1_valid : command_0_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_75 = client_RREADY ? command_2_valid : command_1_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_77 = client_RREADY ? command_3_valid : command_2_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_79 = client_RREADY ? command_4_valid : command_3_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_81 = client_RREADY ? command_5_valid : command_4_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_83 = client_RREADY ? command_6_valid : command_5_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_85 = client_RREADY ? command_7_valid : command_6_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_87 = client_RREADY ? command_8_valid : command_7_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_89 = client_RREADY ? command_9_valid : command_8_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_91 = client_RREADY ? command_10_valid : command_9_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_93 = client_RREADY ? command_11_valid : command_10_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_95 = client_RREADY ? command_12_valid : command_11_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_97 = client_RREADY ? command_13_valid : command_12_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_99 = client_RREADY ? command_14_valid : command_13_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_101 = client_RREADY ? command_15_valid : command_14_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_103 = client_RREADY ? command_16_valid : command_15_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_105 = client_RREADY ? command_17_valid : command_16_valid; // @[uart.scala 110:24 145:25 146:84]
-  wire  _GEN_107 = client_RREADY ? 1'h0 : command_17_valid; // @[uart.scala 110:24 145:25 147:26]
-  wire  _GEN_109 = _T_30 ? _GEN_73 : command_0_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_111 = _T_30 ? _GEN_75 : command_1_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_113 = _T_30 ? _GEN_77 : command_2_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_115 = _T_30 ? _GEN_79 : command_3_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_117 = _T_30 ? _GEN_81 : command_4_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_119 = _T_30 ? _GEN_83 : command_5_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_121 = _T_30 ? _GEN_85 : command_6_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_123 = _T_30 ? _GEN_87 : command_7_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_125 = _T_30 ? _GEN_89 : command_8_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_127 = _T_30 ? _GEN_91 : command_9_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_129 = _T_30 ? _GEN_93 : command_10_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_131 = _T_30 ? _GEN_95 : command_11_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_133 = _T_30 ? _GEN_97 : command_12_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_135 = _T_30 ? _GEN_99 : command_13_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_137 = _T_30 ? _GEN_101 : command_14_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_139 = _T_30 ? _GEN_103 : command_15_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_141 = _T_30 ? _GEN_105 : command_16_valid; // @[uart.scala 110:24 143:5]
-  wire  _GEN_143 = _T_30 ? _GEN_107 : command_17_valid; // @[uart.scala 110:24 143:5]
-  wire  _T_31 = writeRequestBuffer_address_valid & writeRequestBuffer_data_valid; // @[uart.scala 151:41]
-  wire  _GEN_144 = writeRequestBuffer_data_last ? 1'h0 : writeRequestBuffer_address_valid; // @[uart.scala 153:40 154:40 26:35]
-  wire  _GEN_145 = writeRequestBuffer_address_valid & writeRequestBuffer_data_valid ? 1'h0 :
-    writeRequestBuffer_data_valid; // @[uart.scala 151:75 152:35 26:35]
-  wire  _GEN_146 = writeRequestBuffer_address_valid & writeRequestBuffer_data_valid ? _GEN_144 :
-    writeRequestBuffer_address_valid; // @[uart.scala 151:75 26:35]
-  wire  _GEN_147 = client_AWREADY & client_AWVALID | _GEN_146; // @[uart.scala 158:42 159:38]
-  wire  _GEN_152 = client_WREADY & client_WVALID | _GEN_145; // @[uart.scala 166:40 167:35]
-  wire  _T_36 = writeRequestBuffer_address_offset == 32'h2004000; // @[uart.scala 176:40]
-  wire  _T_37 = writeRequestBuffer_address_valid & _T_36; // @[uart.scala 175:38]
-  wire  _T_38 = _T_37 & writeRequestBuffer_data_valid; // @[uart.scala 176:59]
-  wire  _T_39 = _T_38 & writeRequestBuffer_data_last; // @[uart.scala 177:35]
+  reg  readRequestBuffer_valid; // @[multi_uart.scala 18:34]
+  reg [31:0] readRequestBuffer_address; // @[multi_uart.scala 18:34]
+  reg [7:0] readRequestBuffer_len; // @[multi_uart.scala 18:34]
+  reg  readRequestBuffer_id; // @[multi_uart.scala 18:34]
+  reg  writeRequestBuffer_address_valid; // @[multi_uart.scala 26:35]
+  reg [31:0] writeRequestBuffer_address_offset; // @[multi_uart.scala 26:35]
+  reg  writeRequestBuffer_address_id; // @[multi_uart.scala 26:35]
+  reg  writeRequestBuffer_data_valid; // @[multi_uart.scala 26:35]
+  reg [31:0] writeRequestBuffer_data_data; // @[multi_uart.scala 26:35]
+  reg  writeRequestBuffer_data_last; // @[multi_uart.scala 26:35]
+  wire  _T = client_ARREADY & client_ARVALID; // @[multi_uart.scala 42:23]
+  wire  _GEN_0 = client_ARREADY & client_ARVALID | readRequestBuffer_valid; // @[multi_uart.scala 42:42 43:29 18:34]
+  wire [7:0] _readRequestBuffer_len_T_1 = readRequestBuffer_len - 8'h1; // @[multi_uart.scala 51:52]
+  wire  _T_2 = |readRequestBuffer_len; // @[multi_uart.scala 52:33]
+  reg [63:0] mtime; // @[multi_uart.scala 54:22]
+  reg [63:0] mtimecmp; // @[multi_uart.scala 55:25]
+  reg [31:0] mtimecmplowtemp; // @[multi_uart.scala 56:28]
+  reg [3:0] couter_wrap; // @[multi_uart.scala 57:28]
+  wire [3:0] _couter_wrap_T_1 = couter_wrap + 4'h1; // @[multi_uart.scala 58:30]
+  wire [63:0] _GEN_3 = {{63'd0}, &couter_wrap}; // @[multi_uart.scala 59:18]
+  wire [63:0] _mtime_T_2 = mtime + _GEN_3; // @[multi_uart.scala 59:18]
+  reg [63:0] mtimeRead; // @[multi_uart.scala 60:22]
+  wire [31:0] _client_RDATA_T_3 = _T_2 ? mtimeRead[31:0] : mtimeRead[63:32]; // @[multi_uart.scala 74:44]
+  wire [31:0] _GEN_9 = 32'h4000000 == readRequestBuffer_address ? 32'h0 : 32'h8; // @[multi_uart.scala 70:16 71:37 75:38]
+  wire [31:0] _GEN_10 = 32'h200bff8 == readRequestBuffer_address ? _client_RDATA_T_3 : _GEN_9; // @[multi_uart.scala 71:37 74:38]
+  wire [31:0] _GEN_11 = 32'he000102c == readRequestBuffer_address ? 32'h2 : _GEN_10; // @[multi_uart.scala 71:37 73:38]
+  wire [31:0] _putChar_valid_T = writeRequestBuffer_address_offset & 32'hff; // @[multi_uart.scala 86:58]
+  wire  _T_9 = writeRequestBuffer_address_valid & writeRequestBuffer_data_valid; // @[multi_uart.scala 151:41]
+  wire  _GEN_30 = writeRequestBuffer_data_last ? 1'h0 : writeRequestBuffer_address_valid; // @[multi_uart.scala 153:40 154:40 26:35]
+  wire  _GEN_31 = writeRequestBuffer_address_valid & writeRequestBuffer_data_valid ? 1'h0 :
+    writeRequestBuffer_data_valid; // @[multi_uart.scala 151:75 152:35 26:35]
+  wire  _GEN_32 = writeRequestBuffer_address_valid & writeRequestBuffer_data_valid ? _GEN_30 :
+    writeRequestBuffer_address_valid; // @[multi_uart.scala 151:75 26:35]
+  wire  _GEN_33 = client_AWREADY & client_AWVALID | _GEN_32; // @[multi_uart.scala 158:42 159:38]
+  wire  _GEN_38 = client_WREADY & client_WVALID | _GEN_31; // @[multi_uart.scala 166:40 167:35]
+  wire  _T_14 = writeRequestBuffer_address_offset == 32'h2004000; // @[multi_uart.scala 176:40]
+  wire  _T_15 = writeRequestBuffer_address_valid & _T_14; // @[multi_uart.scala 175:38]
+  wire  _T_16 = _T_15 & writeRequestBuffer_data_valid; // @[multi_uart.scala 176:59]
+  wire  _T_17 = _T_16 & writeRequestBuffer_data_last; // @[multi_uart.scala 177:35]
   wire [63:0] _mtimecmp_T = {writeRequestBuffer_data_data,mtimecmplowtemp}; // @[Cat.scala 33:92]
-  assign client_AWREADY = ~writeRequestBuffer_address_valid; // @[uart.scala 185:21]
-  assign client_WREADY = ~writeRequestBuffer_data_valid | writeRequestBuffer_address_valid; // @[uart.scala 186:51]
-  assign client_BID = writeRequestBuffer_address_id; // @[uart.scala 188:14]
-  assign client_BVALID = _T_31 & writeRequestBuffer_data_last; // @[uart.scala 190:86]
-  assign client_ARREADY = ~readRequestBuffer_valid; // @[uart.scala 183:21]
-  assign client_RID = readRequestBuffer_id; // @[uart.scala 77:14]
-  assign client_RDATA = _T_30 ? {{24'd0}, command_0_char} : _GEN_72; // @[uart.scala 143:5 144:18]
-  assign client_RLAST = ~_T_2; // @[uart.scala 78:19]
-  assign client_RVALID = readRequestBuffer_valid; // @[uart.scala 80:17]
-  assign MTIP = mtime > mtimecmp; // @[uart.scala 193:18]
-  assign putCharOut_valid = _putChar_valid_T == 32'h30 & writeRequestBuffer_address_valid &
-    writeRequestBuffer_data_valid; // @[uart.scala 86:159]
-  assign putCharOut_byte = writeRequestBuffer_data_data[7:0]; // @[uart.scala 87:47]
+  assign client_AWREADY = ~writeRequestBuffer_address_valid; // @[multi_uart.scala 185:21]
+  assign client_WREADY = ~writeRequestBuffer_data_valid | writeRequestBuffer_address_valid; // @[multi_uart.scala 186:51]
+  assign client_BID = writeRequestBuffer_address_id; // @[multi_uart.scala 188:14]
+  assign client_BVALID = _T_9 & writeRequestBuffer_data_last; // @[multi_uart.scala 190:86]
+  assign client_ARREADY = ~readRequestBuffer_valid; // @[multi_uart.scala 183:21]
+  assign client_RID = readRequestBuffer_id; // @[multi_uart.scala 77:14]
+  assign client_RDATA = 32'he000002c == readRequestBuffer_address ? 32'h2 : _GEN_11; // @[multi_uart.scala 71:37 72:38]
+  assign client_RLAST = ~_T_2; // @[multi_uart.scala 78:19]
+  assign client_RVALID = readRequestBuffer_valid; // @[multi_uart.scala 80:17]
+  assign MTIP = mtime > mtimecmp; // @[multi_uart.scala 193:18]
+  assign putCharOut0_valid = _putChar_valid_T == 32'h30 & writeRequestBuffer_address_valid &
+    writeRequestBuffer_data_valid; // @[multi_uart.scala 86:159]
+  assign putCharOut0_byte = writeRequestBuffer_data_data[7:0]; // @[multi_uart.scala 87:47]
   always @(posedge clock) begin
-    if (reset) begin // @[uart.scala 18:34]
-      readRequestBuffer_valid <= 1'h0; // @[uart.scala 18:34]
-    end else if (readRequestBuffer_valid & client_RREADY) begin // @[uart.scala 50:50]
-      if (~(|readRequestBuffer_len)) begin // @[uart.scala 52:38]
-        readRequestBuffer_valid <= 1'h0; // @[uart.scala 52:64]
+    if (reset) begin // @[multi_uart.scala 18:34]
+      readRequestBuffer_valid <= 1'h0; // @[multi_uart.scala 18:34]
+    end else if (readRequestBuffer_valid & client_RREADY) begin // @[multi_uart.scala 50:50]
+      if (~(|readRequestBuffer_len)) begin // @[multi_uart.scala 52:38]
+        readRequestBuffer_valid <= 1'h0; // @[multi_uart.scala 52:64]
       end else begin
         readRequestBuffer_valid <= _GEN_0;
       end
     end else begin
       readRequestBuffer_valid <= _GEN_0;
     end
-    if (client_ARREADY & client_ARVALID) begin // @[uart.scala 42:42]
-      readRequestBuffer_address <= client_ARADDR; // @[uart.scala 44:31]
+    if (client_ARREADY & client_ARVALID) begin // @[multi_uart.scala 42:42]
+      readRequestBuffer_address <= client_ARADDR; // @[multi_uart.scala 44:31]
     end
-    if (readRequestBuffer_valid & client_RREADY) begin // @[uart.scala 50:50]
-      readRequestBuffer_len <= _readRequestBuffer_len_T_1; // @[uart.scala 51:27]
-    end else if (client_ARREADY & client_ARVALID) begin // @[uart.scala 42:42]
-      readRequestBuffer_len <= client_ARLEN; // @[uart.scala 45:27]
+    if (readRequestBuffer_valid & client_RREADY) begin // @[multi_uart.scala 50:50]
+      readRequestBuffer_len <= _readRequestBuffer_len_T_1; // @[multi_uart.scala 51:27]
+    end else if (client_ARREADY & client_ARVALID) begin // @[multi_uart.scala 42:42]
+      readRequestBuffer_len <= client_ARLEN; // @[multi_uart.scala 45:27]
     end
-    if (client_ARREADY & client_ARVALID) begin // @[uart.scala 42:42]
-      readRequestBuffer_id <= client_ARID; // @[uart.scala 47:26]
+    if (client_ARREADY & client_ARVALID) begin // @[multi_uart.scala 42:42]
+      readRequestBuffer_id <= client_ARID; // @[multi_uart.scala 47:26]
     end
-    if (reset) begin // @[uart.scala 26:35]
-      writeRequestBuffer_address_valid <= 1'h0; // @[uart.scala 26:35]
+    if (reset) begin // @[multi_uart.scala 26:35]
+      writeRequestBuffer_address_valid <= 1'h0; // @[multi_uart.scala 26:35]
     end else begin
-      writeRequestBuffer_address_valid <= _GEN_147;
+      writeRequestBuffer_address_valid <= _GEN_33;
     end
-    if (client_AWREADY & client_AWVALID) begin // @[uart.scala 158:42]
-      writeRequestBuffer_address_offset <= client_AWADDR; // @[uart.scala 160:39]
+    if (client_AWREADY & client_AWVALID) begin // @[multi_uart.scala 158:42]
+      writeRequestBuffer_address_offset <= client_AWADDR; // @[multi_uart.scala 160:39]
     end
-    if (client_AWREADY & client_AWVALID) begin // @[uart.scala 158:42]
-      writeRequestBuffer_address_id <= client_AWID; // @[uart.scala 161:35]
+    if (client_AWREADY & client_AWVALID) begin // @[multi_uart.scala 158:42]
+      writeRequestBuffer_address_id <= client_AWID; // @[multi_uart.scala 161:35]
     end
-    if (reset) begin // @[uart.scala 26:35]
-      writeRequestBuffer_data_valid <= 1'h0; // @[uart.scala 26:35]
+    if (reset) begin // @[multi_uart.scala 26:35]
+      writeRequestBuffer_data_valid <= 1'h0; // @[multi_uart.scala 26:35]
     end else begin
-      writeRequestBuffer_data_valid <= _GEN_152;
+      writeRequestBuffer_data_valid <= _GEN_38;
     end
-    if (client_WREADY & client_WVALID) begin // @[uart.scala 166:40]
-      writeRequestBuffer_data_data <= client_WDATA; // @[uart.scala 168:34]
+    if (client_WREADY & client_WVALID) begin // @[multi_uart.scala 166:40]
+      writeRequestBuffer_data_data <= client_WDATA; // @[multi_uart.scala 168:34]
     end
-    if (client_WREADY & client_WVALID) begin // @[uart.scala 166:40]
-      writeRequestBuffer_data_last <= client_WLAST; // @[uart.scala 169:34]
+    if (client_WREADY & client_WVALID) begin // @[multi_uart.scala 166:40]
+      writeRequestBuffer_data_last <= client_WLAST; // @[multi_uart.scala 169:34]
     end
-    if (reset) begin // @[uart.scala 54:22]
-      mtime <= 64'h0; // @[uart.scala 54:22]
+    if (reset) begin // @[multi_uart.scala 54:22]
+      mtime <= 64'h0; // @[multi_uart.scala 54:22]
     end else begin
-      mtime <= _mtime_T_2; // @[uart.scala 59:9]
+      mtime <= _mtime_T_2; // @[multi_uart.scala 59:9]
     end
-    if (reset) begin // @[uart.scala 55:25]
-      mtimecmp <= 64'h0; // @[uart.scala 55:25]
-    end else if (_T_39) begin // @[uart.scala 179:5]
-      mtimecmp <= _mtimecmp_T; // @[uart.scala 180:14]
+    if (reset) begin // @[multi_uart.scala 55:25]
+      mtimecmp <= 64'h0; // @[multi_uart.scala 55:25]
+    end else if (_T_17) begin // @[multi_uart.scala 179:5]
+      mtimecmp <= _mtimecmp_T; // @[multi_uart.scala 180:14]
     end
-    if (writeRequestBuffer_data_valid & ~writeRequestBuffer_data_last) begin // @[uart.scala 173:72]
-      mtimecmplowtemp <= writeRequestBuffer_data_data; // @[uart.scala 173:90]
+    if (writeRequestBuffer_data_valid & ~writeRequestBuffer_data_last) begin // @[multi_uart.scala 173:72]
+      mtimecmplowtemp <= writeRequestBuffer_data_data; // @[multi_uart.scala 173:90]
     end
-    if (reset) begin // @[uart.scala 57:28]
-      couter_wrap <= 4'h0; // @[uart.scala 57:28]
+    if (reset) begin // @[multi_uart.scala 57:28]
+      couter_wrap <= 4'h0; // @[multi_uart.scala 57:28]
     end else begin
-      couter_wrap <= _couter_wrap_T_1; // @[uart.scala 58:15]
+      couter_wrap <= _couter_wrap_T_1; // @[multi_uart.scala 58:15]
     end
-    if (_T) begin // @[uart.scala 61:42]
-      mtimeRead <= mtime; // @[uart.scala 62:15]
+    if (_T) begin // @[multi_uart.scala 61:42]
+      mtimeRead <= mtime; // @[multi_uart.scala 62:15]
     end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_0 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_0 <= putChar_byte; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_1 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_1 <= lastUartChars_0; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_2 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_2 <= lastUartChars_1; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_3 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_3 <= lastUartChars_2; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_4 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_4 <= lastUartChars_3; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_5 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_5 <= lastUartChars_4; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_6 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_6 <= lastUartChars_5; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_7 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_7 <= lastUartChars_6; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_8 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_8 <= lastUartChars_7; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_9 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_9 <= lastUartChars_8; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_10 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_10 <= lastUartChars_9; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_11 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_11 <= lastUartChars_10; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_12 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_12 <= lastUartChars_11; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_13 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_13 <= lastUartChars_12; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_14 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_14 <= lastUartChars_13; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_15 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_15 <= lastUartChars_14; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 89:30]
-      lastUartChars_16 <= 8'h0; // @[uart.scala 89:30]
-    end else if (putChar_valid) begin // @[uart.scala 90:23]
-      lastUartChars_16 <= lastUartChars_15; // @[uart.scala 92:47]
-    end
-    if (reset) begin // @[uart.scala 95:30]
-      terminalReady <= 1'h0; // @[uart.scala 95:30]
-    end else if (~terminalReady) begin // @[uart.scala 96:24]
-      terminalReady <= _terminalReady_T_31 & 8'h62 == lastUartChars_16; // @[uart.scala 97:19]
-    end
-    if (reset) begin // @[uart.scala 100:27]
-      afterLogin <= 1'h0; // @[uart.scala 100:27]
-    end else if (~afterLogin) begin // @[uart.scala 101:21]
-      afterLogin <= _terminalReady_T & 8'h23 == lastUartChars_1 & 8'h20 == lastUartChars_2 & 8'h7e == lastUartChars_3; // @[uart.scala 102:16]
-    end
-    hardInput_0_valid <= reset | _GEN_53; // @[uart.scala 105:{26,26}]
-    if (reset) begin // @[uart.scala 105:26]
-      hardInput_0_char <= 8'h72; // @[uart.scala 105:26]
-    end else if (_T_22) begin // @[uart.scala 125:5]
-      if (client_RREADY) begin // @[uart.scala 127:25]
-        hardInput_0_char <= hardInput_1_char; // @[uart.scala 128:88]
-      end
-    end
-    hardInput_1_valid <= reset | _GEN_55; // @[uart.scala 105:{26,26}]
-    if (reset) begin // @[uart.scala 105:26]
-      hardInput_1_char <= 8'h6f; // @[uart.scala 105:26]
-    end else if (_T_22) begin // @[uart.scala 125:5]
-      if (client_RREADY) begin // @[uart.scala 127:25]
-        hardInput_1_char <= hardInput_2_char; // @[uart.scala 128:88]
-      end
-    end
-    hardInput_2_valid <= reset | _GEN_57; // @[uart.scala 105:{26,26}]
-    if (reset) begin // @[uart.scala 105:26]
-      hardInput_2_char <= 8'h6f; // @[uart.scala 105:26]
-    end else if (_T_22) begin // @[uart.scala 125:5]
-      if (client_RREADY) begin // @[uart.scala 127:25]
-        hardInput_2_char <= hardInput_3_char; // @[uart.scala 128:88]
-      end
-    end
-    hardInput_3_valid <= reset | _GEN_59; // @[uart.scala 105:{26,26}]
-    if (reset) begin // @[uart.scala 105:26]
-      hardInput_3_char <= 8'h74; // @[uart.scala 105:26]
-    end else if (_T_22) begin // @[uart.scala 125:5]
-      if (client_RREADY) begin // @[uart.scala 127:25]
-        hardInput_3_char <= hardInput_4_char; // @[uart.scala 128:88]
-      end
-    end
-    hardInput_4_valid <= reset | _GEN_61; // @[uart.scala 105:{26,26}]
-    if (reset) begin // @[uart.scala 105:26]
-      hardInput_4_char <= 8'ha; // @[uart.scala 105:26]
-    end else if (_T_22) begin // @[uart.scala 125:5]
-      if (client_RREADY) begin // @[uart.scala 127:25]
-        hardInput_4_char <= hardInput_5_char; // @[uart.scala 128:88]
-      end
-    end
-    hardInput_5_valid <= reset | _GEN_63; // @[uart.scala 105:{26,26}]
-    if (reset) begin // @[uart.scala 105:26]
-      hardInput_5_char <= 8'h6c; // @[uart.scala 105:26]
-    end else if (_T_22) begin // @[uart.scala 125:5]
-      if (client_RREADY) begin // @[uart.scala 127:25]
-        hardInput_5_char <= hardInput_6_char; // @[uart.scala 128:88]
-      end
-    end
-    hardInput_6_valid <= reset | _GEN_65; // @[uart.scala 105:{26,26}]
-    if (reset) begin // @[uart.scala 105:26]
-      hardInput_6_char <= 8'h73; // @[uart.scala 105:26]
-    end else if (_T_22) begin // @[uart.scala 125:5]
-      if (client_RREADY) begin // @[uart.scala 127:25]
-        hardInput_6_char <= hardInput_7_char; // @[uart.scala 128:88]
-      end
-    end
-    hardInput_7_valid <= reset | _GEN_67; // @[uart.scala 105:{26,26}]
-    if (reset) begin // @[uart.scala 105:26]
-      hardInput_7_char <= 8'h20; // @[uart.scala 105:26]
-    end else if (_T_22) begin // @[uart.scala 125:5]
-      if (client_RREADY) begin // @[uart.scala 127:25]
-        hardInput_7_char <= 8'h2e; // @[uart.scala 128:88]
-      end
-    end
-    hardInput_8_valid <= reset | _GEN_69; // @[uart.scala 105:{26,26}]
-    hardInput_9_valid <= reset | _GEN_71; // @[uart.scala 105:{26,26}]
-    command_0_valid <= reset | _GEN_109; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_0_char <= 8'h6c; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_0_char <= command_1_char; // @[uart.scala 146:84]
-      end
-    end
-    command_1_valid <= reset | _GEN_111; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_1_char <= 8'h73; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_1_char <= command_2_char; // @[uart.scala 146:84]
-      end
-    end
-    command_2_valid <= reset | _GEN_113; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_2_char <= 8'h20; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_2_char <= command_3_char; // @[uart.scala 146:84]
-      end
-    end
-    command_3_valid <= reset | _GEN_115; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_3_char <= 8'h2e; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_3_char <= command_4_char; // @[uart.scala 146:84]
-      end
-    end
-    command_4_valid <= reset | _GEN_117; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_4_char <= 8'h2e; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_4_char <= command_5_char; // @[uart.scala 146:84]
-      end
-    end
-    command_5_valid <= reset | _GEN_119; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_5_char <= 8'h20; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_5_char <= command_6_char; // @[uart.scala 146:84]
-      end
-    end
-    command_6_valid <= reset | _GEN_121; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_6_char <= 8'h26; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_6_char <= command_7_char; // @[uart.scala 146:84]
-      end
-    end
-    command_7_valid <= reset | _GEN_123; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_7_char <= 8'h26; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_7_char <= command_8_char; // @[uart.scala 146:84]
-      end
-    end
-    command_8_valid <= reset | _GEN_125; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_8_char <= 8'h20; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_8_char <= command_9_char; // @[uart.scala 146:84]
-      end
-    end
-    command_9_valid <= reset | _GEN_127; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_9_char <= 8'h70; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_9_char <= command_10_char; // @[uart.scala 146:84]
-      end
-    end
-    command_10_valid <= reset | _GEN_129; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_10_char <= 8'h6f; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_10_char <= command_11_char; // @[uart.scala 146:84]
-      end
-    end
-    command_11_valid <= reset | _GEN_131; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_11_char <= 8'h77; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_11_char <= command_12_char; // @[uart.scala 146:84]
-      end
-    end
-    command_12_valid <= reset | _GEN_133; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_12_char <= 8'h65; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_12_char <= command_13_char; // @[uart.scala 146:84]
-      end
-    end
-    command_13_valid <= reset | _GEN_135; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_13_char <= 8'h72; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_13_char <= command_14_char; // @[uart.scala 146:84]
-      end
-    end
-    command_14_valid <= reset | _GEN_137; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_14_char <= 8'h6f; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_14_char <= command_15_char; // @[uart.scala 146:84]
-      end
-    end
-    command_15_valid <= reset | _GEN_139; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_15_char <= 8'h66; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_15_char <= command_16_char; // @[uart.scala 146:84]
-      end
-    end
-    command_16_valid <= reset | _GEN_141; // @[uart.scala 110:{24,24}]
-    if (reset) begin // @[uart.scala 110:24]
-      command_16_char <= 8'h66; // @[uart.scala 110:24]
-    end else if (_T_30) begin // @[uart.scala 143:5]
-      if (client_RREADY) begin // @[uart.scala 145:25]
-        command_16_char <= 8'ha; // @[uart.scala 146:84]
-      end
-    end
-    command_17_valid <= reset | _GEN_143; // @[uart.scala 110:{24,24}]
   end
 // Register and memory initialization
 `ifdef RANDOMIZE_GARBAGE_ASSIGN
@@ -46036,150 +45509,6 @@ initial begin
   couter_wrap = _RAND_13[3:0];
   _RAND_14 = {2{`RANDOM}};
   mtimeRead = _RAND_14[63:0];
-  _RAND_15 = {1{`RANDOM}};
-  lastUartChars_0 = _RAND_15[7:0];
-  _RAND_16 = {1{`RANDOM}};
-  lastUartChars_1 = _RAND_16[7:0];
-  _RAND_17 = {1{`RANDOM}};
-  lastUartChars_2 = _RAND_17[7:0];
-  _RAND_18 = {1{`RANDOM}};
-  lastUartChars_3 = _RAND_18[7:0];
-  _RAND_19 = {1{`RANDOM}};
-  lastUartChars_4 = _RAND_19[7:0];
-  _RAND_20 = {1{`RANDOM}};
-  lastUartChars_5 = _RAND_20[7:0];
-  _RAND_21 = {1{`RANDOM}};
-  lastUartChars_6 = _RAND_21[7:0];
-  _RAND_22 = {1{`RANDOM}};
-  lastUartChars_7 = _RAND_22[7:0];
-  _RAND_23 = {1{`RANDOM}};
-  lastUartChars_8 = _RAND_23[7:0];
-  _RAND_24 = {1{`RANDOM}};
-  lastUartChars_9 = _RAND_24[7:0];
-  _RAND_25 = {1{`RANDOM}};
-  lastUartChars_10 = _RAND_25[7:0];
-  _RAND_26 = {1{`RANDOM}};
-  lastUartChars_11 = _RAND_26[7:0];
-  _RAND_27 = {1{`RANDOM}};
-  lastUartChars_12 = _RAND_27[7:0];
-  _RAND_28 = {1{`RANDOM}};
-  lastUartChars_13 = _RAND_28[7:0];
-  _RAND_29 = {1{`RANDOM}};
-  lastUartChars_14 = _RAND_29[7:0];
-  _RAND_30 = {1{`RANDOM}};
-  lastUartChars_15 = _RAND_30[7:0];
-  _RAND_31 = {1{`RANDOM}};
-  lastUartChars_16 = _RAND_31[7:0];
-  _RAND_32 = {1{`RANDOM}};
-  terminalReady = _RAND_32[0:0];
-  _RAND_33 = {1{`RANDOM}};
-  afterLogin = _RAND_33[0:0];
-  _RAND_34 = {1{`RANDOM}};
-  hardInput_0_valid = _RAND_34[0:0];
-  _RAND_35 = {1{`RANDOM}};
-  hardInput_0_char = _RAND_35[7:0];
-  _RAND_36 = {1{`RANDOM}};
-  hardInput_1_valid = _RAND_36[0:0];
-  _RAND_37 = {1{`RANDOM}};
-  hardInput_1_char = _RAND_37[7:0];
-  _RAND_38 = {1{`RANDOM}};
-  hardInput_2_valid = _RAND_38[0:0];
-  _RAND_39 = {1{`RANDOM}};
-  hardInput_2_char = _RAND_39[7:0];
-  _RAND_40 = {1{`RANDOM}};
-  hardInput_3_valid = _RAND_40[0:0];
-  _RAND_41 = {1{`RANDOM}};
-  hardInput_3_char = _RAND_41[7:0];
-  _RAND_42 = {1{`RANDOM}};
-  hardInput_4_valid = _RAND_42[0:0];
-  _RAND_43 = {1{`RANDOM}};
-  hardInput_4_char = _RAND_43[7:0];
-  _RAND_44 = {1{`RANDOM}};
-  hardInput_5_valid = _RAND_44[0:0];
-  _RAND_45 = {1{`RANDOM}};
-  hardInput_5_char = _RAND_45[7:0];
-  _RAND_46 = {1{`RANDOM}};
-  hardInput_6_valid = _RAND_46[0:0];
-  _RAND_47 = {1{`RANDOM}};
-  hardInput_6_char = _RAND_47[7:0];
-  _RAND_48 = {1{`RANDOM}};
-  hardInput_7_valid = _RAND_48[0:0];
-  _RAND_49 = {1{`RANDOM}};
-  hardInput_7_char = _RAND_49[7:0];
-  _RAND_50 = {1{`RANDOM}};
-  hardInput_8_valid = _RAND_50[0:0];
-  _RAND_51 = {1{`RANDOM}};
-  hardInput_9_valid = _RAND_51[0:0];
-  _RAND_52 = {1{`RANDOM}};
-  command_0_valid = _RAND_52[0:0];
-  _RAND_53 = {1{`RANDOM}};
-  command_0_char = _RAND_53[7:0];
-  _RAND_54 = {1{`RANDOM}};
-  command_1_valid = _RAND_54[0:0];
-  _RAND_55 = {1{`RANDOM}};
-  command_1_char = _RAND_55[7:0];
-  _RAND_56 = {1{`RANDOM}};
-  command_2_valid = _RAND_56[0:0];
-  _RAND_57 = {1{`RANDOM}};
-  command_2_char = _RAND_57[7:0];
-  _RAND_58 = {1{`RANDOM}};
-  command_3_valid = _RAND_58[0:0];
-  _RAND_59 = {1{`RANDOM}};
-  command_3_char = _RAND_59[7:0];
-  _RAND_60 = {1{`RANDOM}};
-  command_4_valid = _RAND_60[0:0];
-  _RAND_61 = {1{`RANDOM}};
-  command_4_char = _RAND_61[7:0];
-  _RAND_62 = {1{`RANDOM}};
-  command_5_valid = _RAND_62[0:0];
-  _RAND_63 = {1{`RANDOM}};
-  command_5_char = _RAND_63[7:0];
-  _RAND_64 = {1{`RANDOM}};
-  command_6_valid = _RAND_64[0:0];
-  _RAND_65 = {1{`RANDOM}};
-  command_6_char = _RAND_65[7:0];
-  _RAND_66 = {1{`RANDOM}};
-  command_7_valid = _RAND_66[0:0];
-  _RAND_67 = {1{`RANDOM}};
-  command_7_char = _RAND_67[7:0];
-  _RAND_68 = {1{`RANDOM}};
-  command_8_valid = _RAND_68[0:0];
-  _RAND_69 = {1{`RANDOM}};
-  command_8_char = _RAND_69[7:0];
-  _RAND_70 = {1{`RANDOM}};
-  command_9_valid = _RAND_70[0:0];
-  _RAND_71 = {1{`RANDOM}};
-  command_9_char = _RAND_71[7:0];
-  _RAND_72 = {1{`RANDOM}};
-  command_10_valid = _RAND_72[0:0];
-  _RAND_73 = {1{`RANDOM}};
-  command_10_char = _RAND_73[7:0];
-  _RAND_74 = {1{`RANDOM}};
-  command_11_valid = _RAND_74[0:0];
-  _RAND_75 = {1{`RANDOM}};
-  command_11_char = _RAND_75[7:0];
-  _RAND_76 = {1{`RANDOM}};
-  command_12_valid = _RAND_76[0:0];
-  _RAND_77 = {1{`RANDOM}};
-  command_12_char = _RAND_77[7:0];
-  _RAND_78 = {1{`RANDOM}};
-  command_13_valid = _RAND_78[0:0];
-  _RAND_79 = {1{`RANDOM}};
-  command_13_char = _RAND_79[7:0];
-  _RAND_80 = {1{`RANDOM}};
-  command_14_valid = _RAND_80[0:0];
-  _RAND_81 = {1{`RANDOM}};
-  command_14_char = _RAND_81[7:0];
-  _RAND_82 = {1{`RANDOM}};
-  command_15_valid = _RAND_82[0:0];
-  _RAND_83 = {1{`RANDOM}};
-  command_15_char = _RAND_83[7:0];
-  _RAND_84 = {1{`RANDOM}};
-  command_16_valid = _RAND_84[0:0];
-  _RAND_85 = {1{`RANDOM}};
-  command_16_char = _RAND_85[7:0];
-  _RAND_86 = {1{`RANDOM}};
-  command_17_valid = _RAND_86[0:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -46187,6 +45516,445 @@ end // initial
 `FIRRTL_AFTER_INITIAL
 `endif
 `endif // SYNTHESIS
+endmodule
+module MultiUart_Anon_1(
+  input         clock,
+  input         reset,
+  input         client_AWID,
+  input  [31:0] client_AWADDR,
+  input         client_AWVALID,
+  output        client_AWREADY,
+  input  [31:0] client_WDATA,
+  input         client_WLAST,
+  input         client_WVALID,
+  output        client_WREADY,
+  output        client_BID,
+  output        client_BVALID,
+  input         client_ARID,
+  input  [31:0] client_ARADDR,
+  input  [7:0]  client_ARLEN,
+  input         client_ARVALID,
+  output        client_ARREADY,
+  output        client_RID,
+  output [31:0] client_RDATA,
+  output        client_RLAST,
+  output        client_RVALID,
+  input         client_RREADY,
+  output        MTIP,
+  output        putCharOut1_valid,
+  output [7:0]  putCharOut1_byte
+);
+`ifdef RANDOMIZE_REG_INIT
+  reg [31:0] _RAND_0;
+  reg [31:0] _RAND_1;
+  reg [31:0] _RAND_2;
+  reg [31:0] _RAND_3;
+  reg [31:0] _RAND_4;
+  reg [31:0] _RAND_5;
+  reg [31:0] _RAND_6;
+  reg [31:0] _RAND_7;
+  reg [31:0] _RAND_8;
+  reg [31:0] _RAND_9;
+  reg [63:0] _RAND_10;
+  reg [63:0] _RAND_11;
+  reg [31:0] _RAND_12;
+  reg [31:0] _RAND_13;
+  reg [63:0] _RAND_14;
+`endif // RANDOMIZE_REG_INIT
+  reg  readRequestBuffer_valid; // @[multi_uart.scala 18:34]
+  reg [31:0] readRequestBuffer_address; // @[multi_uart.scala 18:34]
+  reg [7:0] readRequestBuffer_len; // @[multi_uart.scala 18:34]
+  reg  readRequestBuffer_id; // @[multi_uart.scala 18:34]
+  reg  writeRequestBuffer_address_valid; // @[multi_uart.scala 26:35]
+  reg [31:0] writeRequestBuffer_address_offset; // @[multi_uart.scala 26:35]
+  reg  writeRequestBuffer_address_id; // @[multi_uart.scala 26:35]
+  reg  writeRequestBuffer_data_valid; // @[multi_uart.scala 26:35]
+  reg [31:0] writeRequestBuffer_data_data; // @[multi_uart.scala 26:35]
+  reg  writeRequestBuffer_data_last; // @[multi_uart.scala 26:35]
+  wire  _T = client_ARREADY & client_ARVALID; // @[multi_uart.scala 42:23]
+  wire  _GEN_0 = client_ARREADY & client_ARVALID | readRequestBuffer_valid; // @[multi_uart.scala 42:42 43:29 18:34]
+  wire [7:0] _readRequestBuffer_len_T_1 = readRequestBuffer_len - 8'h1; // @[multi_uart.scala 51:52]
+  wire  _T_2 = |readRequestBuffer_len; // @[multi_uart.scala 52:33]
+  reg [63:0] mtime; // @[multi_uart.scala 54:22]
+  reg [63:0] mtimecmp; // @[multi_uart.scala 55:25]
+  reg [31:0] mtimecmplowtemp; // @[multi_uart.scala 56:28]
+  reg [3:0] couter_wrap; // @[multi_uart.scala 57:28]
+  wire [3:0] _couter_wrap_T_1 = couter_wrap + 4'h1; // @[multi_uart.scala 58:30]
+  wire [63:0] _GEN_3 = {{63'd0}, &couter_wrap}; // @[multi_uart.scala 59:18]
+  wire [63:0] _mtime_T_2 = mtime + _GEN_3; // @[multi_uart.scala 59:18]
+  reg [63:0] mtimeRead; // @[multi_uart.scala 60:22]
+  wire [31:0] _client_RDATA_T_3 = _T_2 ? mtimeRead[31:0] : mtimeRead[63:32]; // @[multi_uart.scala 74:44]
+  wire [31:0] _GEN_9 = 32'h4000000 == readRequestBuffer_address ? 32'h0 : 32'h8; // @[multi_uart.scala 70:16 71:37 75:38]
+  wire [31:0] _GEN_10 = 32'h200bff8 == readRequestBuffer_address ? _client_RDATA_T_3 : _GEN_9; // @[multi_uart.scala 71:37 74:38]
+  wire [31:0] _GEN_11 = 32'he000102c == readRequestBuffer_address ? 32'h2 : _GEN_10; // @[multi_uart.scala 71:37 73:38]
+  wire [31:0] _putChar_valid_T = writeRequestBuffer_address_offset & 32'hff; // @[multi_uart.scala 86:58]
+  wire  _T_9 = writeRequestBuffer_address_valid & writeRequestBuffer_data_valid; // @[multi_uart.scala 151:41]
+  wire  _GEN_30 = writeRequestBuffer_data_last ? 1'h0 : writeRequestBuffer_address_valid; // @[multi_uart.scala 153:40 154:40 26:35]
+  wire  _GEN_31 = writeRequestBuffer_address_valid & writeRequestBuffer_data_valid ? 1'h0 :
+    writeRequestBuffer_data_valid; // @[multi_uart.scala 151:75 152:35 26:35]
+  wire  _GEN_32 = writeRequestBuffer_address_valid & writeRequestBuffer_data_valid ? _GEN_30 :
+    writeRequestBuffer_address_valid; // @[multi_uart.scala 151:75 26:35]
+  wire  _GEN_33 = client_AWREADY & client_AWVALID | _GEN_32; // @[multi_uart.scala 158:42 159:38]
+  wire  _GEN_38 = client_WREADY & client_WVALID | _GEN_31; // @[multi_uart.scala 166:40 167:35]
+  wire  _T_14 = writeRequestBuffer_address_offset == 32'h2004000; // @[multi_uart.scala 176:40]
+  wire  _T_15 = writeRequestBuffer_address_valid & _T_14; // @[multi_uart.scala 175:38]
+  wire  _T_16 = _T_15 & writeRequestBuffer_data_valid; // @[multi_uart.scala 176:59]
+  wire  _T_17 = _T_16 & writeRequestBuffer_data_last; // @[multi_uart.scala 177:35]
+  wire [63:0] _mtimecmp_T = {writeRequestBuffer_data_data,mtimecmplowtemp}; // @[Cat.scala 33:92]
+  assign client_AWREADY = ~writeRequestBuffer_address_valid; // @[multi_uart.scala 185:21]
+  assign client_WREADY = ~writeRequestBuffer_data_valid | writeRequestBuffer_address_valid; // @[multi_uart.scala 186:51]
+  assign client_BID = writeRequestBuffer_address_id; // @[multi_uart.scala 188:14]
+  assign client_BVALID = _T_9 & writeRequestBuffer_data_last; // @[multi_uart.scala 190:86]
+  assign client_ARREADY = ~readRequestBuffer_valid; // @[multi_uart.scala 183:21]
+  assign client_RID = readRequestBuffer_id; // @[multi_uart.scala 77:14]
+  assign client_RDATA = 32'he000002c == readRequestBuffer_address ? 32'h2 : _GEN_11; // @[multi_uart.scala 71:37 72:38]
+  assign client_RLAST = ~_T_2; // @[multi_uart.scala 78:19]
+  assign client_RVALID = readRequestBuffer_valid; // @[multi_uart.scala 80:17]
+  assign MTIP = mtime > mtimecmp; // @[multi_uart.scala 193:18]
+  assign putCharOut1_valid = _putChar_valid_T == 32'h30 & writeRequestBuffer_address_valid &
+    writeRequestBuffer_data_valid; // @[multi_uart.scala 86:159]
+  assign putCharOut1_byte = writeRequestBuffer_data_data[7:0]; // @[multi_uart.scala 87:47]
+  always @(posedge clock) begin
+    if (reset) begin // @[multi_uart.scala 18:34]
+      readRequestBuffer_valid <= 1'h0; // @[multi_uart.scala 18:34]
+    end else if (readRequestBuffer_valid & client_RREADY) begin // @[multi_uart.scala 50:50]
+      if (~(|readRequestBuffer_len)) begin // @[multi_uart.scala 52:38]
+        readRequestBuffer_valid <= 1'h0; // @[multi_uart.scala 52:64]
+      end else begin
+        readRequestBuffer_valid <= _GEN_0;
+      end
+    end else begin
+      readRequestBuffer_valid <= _GEN_0;
+    end
+    if (client_ARREADY & client_ARVALID) begin // @[multi_uart.scala 42:42]
+      readRequestBuffer_address <= client_ARADDR; // @[multi_uart.scala 44:31]
+    end
+    if (readRequestBuffer_valid & client_RREADY) begin // @[multi_uart.scala 50:50]
+      readRequestBuffer_len <= _readRequestBuffer_len_T_1; // @[multi_uart.scala 51:27]
+    end else if (client_ARREADY & client_ARVALID) begin // @[multi_uart.scala 42:42]
+      readRequestBuffer_len <= client_ARLEN; // @[multi_uart.scala 45:27]
+    end
+    if (client_ARREADY & client_ARVALID) begin // @[multi_uart.scala 42:42]
+      readRequestBuffer_id <= client_ARID; // @[multi_uart.scala 47:26]
+    end
+    if (reset) begin // @[multi_uart.scala 26:35]
+      writeRequestBuffer_address_valid <= 1'h0; // @[multi_uart.scala 26:35]
+    end else begin
+      writeRequestBuffer_address_valid <= _GEN_33;
+    end
+    if (client_AWREADY & client_AWVALID) begin // @[multi_uart.scala 158:42]
+      writeRequestBuffer_address_offset <= client_AWADDR; // @[multi_uart.scala 160:39]
+    end
+    if (client_AWREADY & client_AWVALID) begin // @[multi_uart.scala 158:42]
+      writeRequestBuffer_address_id <= client_AWID; // @[multi_uart.scala 161:35]
+    end
+    if (reset) begin // @[multi_uart.scala 26:35]
+      writeRequestBuffer_data_valid <= 1'h0; // @[multi_uart.scala 26:35]
+    end else begin
+      writeRequestBuffer_data_valid <= _GEN_38;
+    end
+    if (client_WREADY & client_WVALID) begin // @[multi_uart.scala 166:40]
+      writeRequestBuffer_data_data <= client_WDATA; // @[multi_uart.scala 168:34]
+    end
+    if (client_WREADY & client_WVALID) begin // @[multi_uart.scala 166:40]
+      writeRequestBuffer_data_last <= client_WLAST; // @[multi_uart.scala 169:34]
+    end
+    if (reset) begin // @[multi_uart.scala 54:22]
+      mtime <= 64'h0; // @[multi_uart.scala 54:22]
+    end else begin
+      mtime <= _mtime_T_2; // @[multi_uart.scala 59:9]
+    end
+    if (reset) begin // @[multi_uart.scala 55:25]
+      mtimecmp <= 64'h0; // @[multi_uart.scala 55:25]
+    end else if (_T_17) begin // @[multi_uart.scala 179:5]
+      mtimecmp <= _mtimecmp_T; // @[multi_uart.scala 180:14]
+    end
+    if (writeRequestBuffer_data_valid & ~writeRequestBuffer_data_last) begin // @[multi_uart.scala 173:72]
+      mtimecmplowtemp <= writeRequestBuffer_data_data; // @[multi_uart.scala 173:90]
+    end
+    if (reset) begin // @[multi_uart.scala 57:28]
+      couter_wrap <= 4'h0; // @[multi_uart.scala 57:28]
+    end else begin
+      couter_wrap <= _couter_wrap_T_1; // @[multi_uart.scala 58:15]
+    end
+    if (_T) begin // @[multi_uart.scala 61:42]
+      mtimeRead <= mtime; // @[multi_uart.scala 62:15]
+    end
+  end
+// Register and memory initialization
+`ifdef RANDOMIZE_GARBAGE_ASSIGN
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_INVALID_ASSIGN
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_REG_INIT
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_MEM_INIT
+`define RANDOMIZE
+`endif
+`ifndef RANDOM
+`define RANDOM $random
+`endif
+`ifdef RANDOMIZE_MEM_INIT
+  integer initvar;
+`endif
+`ifndef SYNTHESIS
+`ifdef FIRRTL_BEFORE_INITIAL
+`FIRRTL_BEFORE_INITIAL
+`endif
+initial begin
+  `ifdef RANDOMIZE
+    `ifdef INIT_RANDOM
+      `INIT_RANDOM
+    `endif
+    `ifndef VERILATOR
+      `ifdef RANDOMIZE_DELAY
+        #`RANDOMIZE_DELAY begin end
+      `else
+        #0.002 begin end
+      `endif
+    `endif
+`ifdef RANDOMIZE_REG_INIT
+  _RAND_0 = {1{`RANDOM}};
+  readRequestBuffer_valid = _RAND_0[0:0];
+  _RAND_1 = {1{`RANDOM}};
+  readRequestBuffer_address = _RAND_1[31:0];
+  _RAND_2 = {1{`RANDOM}};
+  readRequestBuffer_len = _RAND_2[7:0];
+  _RAND_3 = {1{`RANDOM}};
+  readRequestBuffer_id = _RAND_3[0:0];
+  _RAND_4 = {1{`RANDOM}};
+  writeRequestBuffer_address_valid = _RAND_4[0:0];
+  _RAND_5 = {1{`RANDOM}};
+  writeRequestBuffer_address_offset = _RAND_5[31:0];
+  _RAND_6 = {1{`RANDOM}};
+  writeRequestBuffer_address_id = _RAND_6[0:0];
+  _RAND_7 = {1{`RANDOM}};
+  writeRequestBuffer_data_valid = _RAND_7[0:0];
+  _RAND_8 = {1{`RANDOM}};
+  writeRequestBuffer_data_data = _RAND_8[31:0];
+  _RAND_9 = {1{`RANDOM}};
+  writeRequestBuffer_data_last = _RAND_9[0:0];
+  _RAND_10 = {2{`RANDOM}};
+  mtime = _RAND_10[63:0];
+  _RAND_11 = {2{`RANDOM}};
+  mtimecmp = _RAND_11[63:0];
+  _RAND_12 = {1{`RANDOM}};
+  mtimecmplowtemp = _RAND_12[31:0];
+  _RAND_13 = {1{`RANDOM}};
+  couter_wrap = _RAND_13[3:0];
+  _RAND_14 = {2{`RANDOM}};
+  mtimeRead = _RAND_14[63:0];
+`endif // RANDOMIZE_REG_INIT
+  `endif // RANDOMIZE
+end // initial
+`ifdef FIRRTL_AFTER_INITIAL
+`FIRRTL_AFTER_INITIAL
+`endif
+`endif // SYNTHESIS
+endmodule
+module MultiUart(
+  input         clock,
+  input         reset,
+  input         client0_AWID,
+  input  [31:0] client0_AWADDR,
+  input         client0_AWVALID,
+  input  [31:0] client0_WDATA,
+  input         client0_WLAST,
+  input         client0_WVALID,
+  output        client0_WREADY,
+  output        client0_BID,
+  output        client0_BVALID,
+  input         client0_ARID,
+  input  [31:0] client0_ARADDR,
+  input  [7:0]  client0_ARLEN,
+  input         client0_ARVALID,
+  output        client0_ARREADY,
+  output        client0_RID,
+  output [31:0] client0_RDATA,
+  output        client0_RLAST,
+  output        client0_RVALID,
+  input         client0_RREADY,
+  input         client1_AWID,
+  input  [31:0] client1_AWADDR,
+  input         client1_AWVALID,
+  input  [31:0] client1_WDATA,
+  input         client1_WLAST,
+  input         client1_WVALID,
+  output        client1_WREADY,
+  output        client1_BID,
+  output        client1_BVALID,
+  input         client1_ARID,
+  input  [31:0] client1_ARADDR,
+  input  [7:0]  client1_ARLEN,
+  input         client1_ARVALID,
+  output        client1_ARREADY,
+  output        client1_RID,
+  output [31:0] client1_RDATA,
+  output        client1_RLAST,
+  output        client1_RVALID,
+  input         client1_RREADY,
+  output        putChar0_valid,
+  output [7:0]  putChar0_byte,
+  output        putChar1_valid,
+  output [7:0]  putChar1_byte,
+  output        MTIP0,
+  output        MTIP1
+);
+  wire  uart0_clock; // @[multi_uart.scala 201:21]
+  wire  uart0_reset; // @[multi_uart.scala 201:21]
+  wire  uart0_client_AWID; // @[multi_uart.scala 201:21]
+  wire [31:0] uart0_client_AWADDR; // @[multi_uart.scala 201:21]
+  wire  uart0_client_AWVALID; // @[multi_uart.scala 201:21]
+  wire  uart0_client_AWREADY; // @[multi_uart.scala 201:21]
+  wire [31:0] uart0_client_WDATA; // @[multi_uart.scala 201:21]
+  wire  uart0_client_WLAST; // @[multi_uart.scala 201:21]
+  wire  uart0_client_WVALID; // @[multi_uart.scala 201:21]
+  wire  uart0_client_WREADY; // @[multi_uart.scala 201:21]
+  wire  uart0_client_BID; // @[multi_uart.scala 201:21]
+  wire  uart0_client_BVALID; // @[multi_uart.scala 201:21]
+  wire  uart0_client_ARID; // @[multi_uart.scala 201:21]
+  wire [31:0] uart0_client_ARADDR; // @[multi_uart.scala 201:21]
+  wire [7:0] uart0_client_ARLEN; // @[multi_uart.scala 201:21]
+  wire  uart0_client_ARVALID; // @[multi_uart.scala 201:21]
+  wire  uart0_client_ARREADY; // @[multi_uart.scala 201:21]
+  wire  uart0_client_RID; // @[multi_uart.scala 201:21]
+  wire [31:0] uart0_client_RDATA; // @[multi_uart.scala 201:21]
+  wire  uart0_client_RLAST; // @[multi_uart.scala 201:21]
+  wire  uart0_client_RVALID; // @[multi_uart.scala 201:21]
+  wire  uart0_client_RREADY; // @[multi_uart.scala 201:21]
+  wire  uart0_MTIP; // @[multi_uart.scala 201:21]
+  wire  uart0_putCharOut0_valid; // @[multi_uart.scala 201:21]
+  wire [7:0] uart0_putCharOut0_byte; // @[multi_uart.scala 201:21]
+  wire  uart1_clock; // @[multi_uart.scala 205:21]
+  wire  uart1_reset; // @[multi_uart.scala 205:21]
+  wire  uart1_client_AWID; // @[multi_uart.scala 205:21]
+  wire [31:0] uart1_client_AWADDR; // @[multi_uart.scala 205:21]
+  wire  uart1_client_AWVALID; // @[multi_uart.scala 205:21]
+  wire  uart1_client_AWREADY; // @[multi_uart.scala 205:21]
+  wire [31:0] uart1_client_WDATA; // @[multi_uart.scala 205:21]
+  wire  uart1_client_WLAST; // @[multi_uart.scala 205:21]
+  wire  uart1_client_WVALID; // @[multi_uart.scala 205:21]
+  wire  uart1_client_WREADY; // @[multi_uart.scala 205:21]
+  wire  uart1_client_BID; // @[multi_uart.scala 205:21]
+  wire  uart1_client_BVALID; // @[multi_uart.scala 205:21]
+  wire  uart1_client_ARID; // @[multi_uart.scala 205:21]
+  wire [31:0] uart1_client_ARADDR; // @[multi_uart.scala 205:21]
+  wire [7:0] uart1_client_ARLEN; // @[multi_uart.scala 205:21]
+  wire  uart1_client_ARVALID; // @[multi_uart.scala 205:21]
+  wire  uart1_client_ARREADY; // @[multi_uart.scala 205:21]
+  wire  uart1_client_RID; // @[multi_uart.scala 205:21]
+  wire [31:0] uart1_client_RDATA; // @[multi_uart.scala 205:21]
+  wire  uart1_client_RLAST; // @[multi_uart.scala 205:21]
+  wire  uart1_client_RVALID; // @[multi_uart.scala 205:21]
+  wire  uart1_client_RREADY; // @[multi_uart.scala 205:21]
+  wire  uart1_MTIP; // @[multi_uart.scala 205:21]
+  wire  uart1_putCharOut1_valid; // @[multi_uart.scala 205:21]
+  wire [7:0] uart1_putCharOut1_byte; // @[multi_uart.scala 205:21]
+  MultiUart_Anon uart0 ( // @[multi_uart.scala 201:21]
+    .clock(uart0_clock),
+    .reset(uart0_reset),
+    .client_AWID(uart0_client_AWID),
+    .client_AWADDR(uart0_client_AWADDR),
+    .client_AWVALID(uart0_client_AWVALID),
+    .client_AWREADY(uart0_client_AWREADY),
+    .client_WDATA(uart0_client_WDATA),
+    .client_WLAST(uart0_client_WLAST),
+    .client_WVALID(uart0_client_WVALID),
+    .client_WREADY(uart0_client_WREADY),
+    .client_BID(uart0_client_BID),
+    .client_BVALID(uart0_client_BVALID),
+    .client_ARID(uart0_client_ARID),
+    .client_ARADDR(uart0_client_ARADDR),
+    .client_ARLEN(uart0_client_ARLEN),
+    .client_ARVALID(uart0_client_ARVALID),
+    .client_ARREADY(uart0_client_ARREADY),
+    .client_RID(uart0_client_RID),
+    .client_RDATA(uart0_client_RDATA),
+    .client_RLAST(uart0_client_RLAST),
+    .client_RVALID(uart0_client_RVALID),
+    .client_RREADY(uart0_client_RREADY),
+    .MTIP(uart0_MTIP),
+    .putCharOut0_valid(uart0_putCharOut0_valid),
+    .putCharOut0_byte(uart0_putCharOut0_byte)
+  );
+  MultiUart_Anon_1 uart1 ( // @[multi_uart.scala 205:21]
+    .clock(uart1_clock),
+    .reset(uart1_reset),
+    .client_AWID(uart1_client_AWID),
+    .client_AWADDR(uart1_client_AWADDR),
+    .client_AWVALID(uart1_client_AWVALID),
+    .client_AWREADY(uart1_client_AWREADY),
+    .client_WDATA(uart1_client_WDATA),
+    .client_WLAST(uart1_client_WLAST),
+    .client_WVALID(uart1_client_WVALID),
+    .client_WREADY(uart1_client_WREADY),
+    .client_BID(uart1_client_BID),
+    .client_BVALID(uart1_client_BVALID),
+    .client_ARID(uart1_client_ARID),
+    .client_ARADDR(uart1_client_ARADDR),
+    .client_ARLEN(uart1_client_ARLEN),
+    .client_ARVALID(uart1_client_ARVALID),
+    .client_ARREADY(uart1_client_ARREADY),
+    .client_RID(uart1_client_RID),
+    .client_RDATA(uart1_client_RDATA),
+    .client_RLAST(uart1_client_RLAST),
+    .client_RVALID(uart1_client_RVALID),
+    .client_RREADY(uart1_client_RREADY),
+    .MTIP(uart1_MTIP),
+    .putCharOut1_valid(uart1_putCharOut1_valid),
+    .putCharOut1_byte(uart1_putCharOut1_byte)
+  );
+  assign client0_WREADY = uart0_client_WREADY; // @[multi_uart.scala 210:16]
+  assign client0_BID = uart0_client_BID; // @[multi_uart.scala 210:16]
+  assign client0_BVALID = uart0_client_BVALID; // @[multi_uart.scala 210:16]
+  assign client0_ARREADY = uart0_client_ARREADY; // @[multi_uart.scala 210:16]
+  assign client0_RID = uart0_client_RID; // @[multi_uart.scala 210:16]
+  assign client0_RDATA = uart0_client_RDATA; // @[multi_uart.scala 210:16]
+  assign client0_RLAST = uart0_client_RLAST; // @[multi_uart.scala 210:16]
+  assign client0_RVALID = uart0_client_RVALID; // @[multi_uart.scala 210:16]
+  assign client1_WREADY = uart1_client_WREADY; // @[multi_uart.scala 211:16]
+  assign client1_BID = uart1_client_BID; // @[multi_uart.scala 211:16]
+  assign client1_BVALID = uart1_client_BVALID; // @[multi_uart.scala 211:16]
+  assign client1_ARREADY = uart1_client_ARREADY; // @[multi_uart.scala 211:16]
+  assign client1_RID = uart1_client_RID; // @[multi_uart.scala 211:16]
+  assign client1_RDATA = uart1_client_RDATA; // @[multi_uart.scala 211:16]
+  assign client1_RLAST = uart1_client_RLAST; // @[multi_uart.scala 211:16]
+  assign client1_RVALID = uart1_client_RVALID; // @[multi_uart.scala 211:16]
+  assign putChar0_valid = uart0_putCharOut0_valid; // @[multi_uart.scala 215:12]
+  assign putChar0_byte = uart0_putCharOut0_byte; // @[multi_uart.scala 215:12]
+  assign putChar1_valid = uart1_putCharOut1_valid; // @[multi_uart.scala 218:12]
+  assign putChar1_byte = uart1_putCharOut1_byte; // @[multi_uart.scala 218:12]
+  assign MTIP0 = uart0_MTIP; // @[multi_uart.scala 223:9]
+  assign MTIP1 = uart1_MTIP; // @[multi_uart.scala 224:9]
+  assign uart0_clock = clock;
+  assign uart0_reset = reset;
+  assign uart0_client_AWID = client0_AWID; // @[multi_uart.scala 210:16]
+  assign uart0_client_AWADDR = client0_AWADDR; // @[multi_uart.scala 210:16]
+  assign uart0_client_AWVALID = client0_AWVALID; // @[multi_uart.scala 210:16]
+  assign uart0_client_WDATA = client0_WDATA; // @[multi_uart.scala 210:16]
+  assign uart0_client_WLAST = client0_WLAST; // @[multi_uart.scala 210:16]
+  assign uart0_client_WVALID = client0_WVALID; // @[multi_uart.scala 210:16]
+  assign uart0_client_ARID = client0_ARID; // @[multi_uart.scala 210:16]
+  assign uart0_client_ARADDR = client0_ARADDR; // @[multi_uart.scala 210:16]
+  assign uart0_client_ARLEN = client0_ARLEN; // @[multi_uart.scala 210:16]
+  assign uart0_client_ARVALID = client0_ARVALID; // @[multi_uart.scala 210:16]
+  assign uart0_client_RREADY = client0_RREADY; // @[multi_uart.scala 210:16]
+  assign uart1_clock = clock;
+  assign uart1_reset = reset;
+  assign uart1_client_AWID = client1_AWID; // @[multi_uart.scala 211:16]
+  assign uart1_client_AWADDR = client1_AWADDR; // @[multi_uart.scala 211:16]
+  assign uart1_client_AWVALID = client1_AWVALID; // @[multi_uart.scala 211:16]
+  assign uart1_client_WDATA = client1_WDATA; // @[multi_uart.scala 211:16]
+  assign uart1_client_WLAST = client1_WLAST; // @[multi_uart.scala 211:16]
+  assign uart1_client_WVALID = client1_WVALID; // @[multi_uart.scala 211:16]
+  assign uart1_client_ARID = client1_ARID; // @[multi_uart.scala 211:16]
+  assign uart1_client_ARADDR = client1_ARADDR; // @[multi_uart.scala 211:16]
+  assign uart1_client_ARLEN = client1_ARLEN; // @[multi_uart.scala 211:16]
+  assign uart1_client_ARVALID = client1_ARVALID; // @[multi_uart.scala 211:16]
+  assign uart1_client_RREADY = client1_RREADY; // @[multi_uart.scala 211:16]
 endmodule
 module system(
   input         clock,
@@ -46197,8 +45965,10 @@ module system(
   input         finishedProgramming,
   input  [27:0] prober_offset,
   output [63:0] prober_accessLong,
-  output        putChar0_valid,
-  output [7:0]  putChar0_byte,
+  output        core0OutChar_valid,
+  output [7:0]  core0OutChar_byte,
+  output        core1OutChar_valid,
+  output [7:0]  core1OutChar_byte,
   output [63:0] registersOut0_0,
   output [63:0] registersOut0_1,
   output [63:0] registersOut0_2,
@@ -46235,8 +46005,6 @@ module system(
   output        robOut0_commitFired,
   output [63:0] robOut0_pc,
   output        robOut0_interrupt,
-  output        putChar1_valid,
-  output [7:0]  putChar1_byte,
   output [63:0] registersOut1_0,
   output [63:0] registersOut1_1,
   output [63:0] registersOut1_2,
@@ -46658,124 +46426,120 @@ module system(
   wire  interconnect__io_L2_BVALID; // @[system.scala 62:28]
   wire  interconnect__io_L2_BREADY; // @[system.scala 62:28]
   wire [1:0] interconnect__io_L2_BID; // @[system.scala 62:28]
-  wire  peripheralUart0_clock; // @[system.scala 420:31]
-  wire  peripheralUart0_reset; // @[system.scala 420:31]
-  wire  peripheralUart0_client_AWID; // @[system.scala 420:31]
-  wire [31:0] peripheralUart0_client_AWADDR; // @[system.scala 420:31]
-  wire  peripheralUart0_client_AWVALID; // @[system.scala 420:31]
-  wire  peripheralUart0_client_AWREADY; // @[system.scala 420:31]
-  wire [31:0] peripheralUart0_client_WDATA; // @[system.scala 420:31]
-  wire  peripheralUart0_client_WLAST; // @[system.scala 420:31]
-  wire  peripheralUart0_client_WVALID; // @[system.scala 420:31]
-  wire  peripheralUart0_client_WREADY; // @[system.scala 420:31]
-  wire  peripheralUart0_client_BID; // @[system.scala 420:31]
-  wire  peripheralUart0_client_BVALID; // @[system.scala 420:31]
-  wire  peripheralUart0_client_ARID; // @[system.scala 420:31]
-  wire [31:0] peripheralUart0_client_ARADDR; // @[system.scala 420:31]
-  wire [7:0] peripheralUart0_client_ARLEN; // @[system.scala 420:31]
-  wire  peripheralUart0_client_ARVALID; // @[system.scala 420:31]
-  wire  peripheralUart0_client_ARREADY; // @[system.scala 420:31]
-  wire  peripheralUart0_client_RID; // @[system.scala 420:31]
-  wire [31:0] peripheralUart0_client_RDATA; // @[system.scala 420:31]
-  wire  peripheralUart0_client_RLAST; // @[system.scala 420:31]
-  wire  peripheralUart0_client_RVALID; // @[system.scala 420:31]
-  wire  peripheralUart0_client_RREADY; // @[system.scala 420:31]
-  wire  peripheralUart0_MTIP; // @[system.scala 420:31]
-  wire  peripheralUart0_putCharOut_valid; // @[system.scala 420:31]
-  wire [7:0] peripheralUart0_putCharOut_byte; // @[system.scala 420:31]
-  wire  peripheralUart1_clock; // @[system.scala 445:31]
-  wire  peripheralUart1_reset; // @[system.scala 445:31]
-  wire  peripheralUart1_client_AWID; // @[system.scala 445:31]
-  wire [31:0] peripheralUart1_client_AWADDR; // @[system.scala 445:31]
-  wire  peripheralUart1_client_AWVALID; // @[system.scala 445:31]
-  wire  peripheralUart1_client_AWREADY; // @[system.scala 445:31]
-  wire [31:0] peripheralUart1_client_WDATA; // @[system.scala 445:31]
-  wire  peripheralUart1_client_WLAST; // @[system.scala 445:31]
-  wire  peripheralUart1_client_WVALID; // @[system.scala 445:31]
-  wire  peripheralUart1_client_WREADY; // @[system.scala 445:31]
-  wire  peripheralUart1_client_BID; // @[system.scala 445:31]
-  wire  peripheralUart1_client_BVALID; // @[system.scala 445:31]
-  wire  peripheralUart1_client_ARID; // @[system.scala 445:31]
-  wire [31:0] peripheralUart1_client_ARADDR; // @[system.scala 445:31]
-  wire [7:0] peripheralUart1_client_ARLEN; // @[system.scala 445:31]
-  wire  peripheralUart1_client_ARVALID; // @[system.scala 445:31]
-  wire  peripheralUart1_client_ARREADY; // @[system.scala 445:31]
-  wire  peripheralUart1_client_RID; // @[system.scala 445:31]
-  wire [31:0] peripheralUart1_client_RDATA; // @[system.scala 445:31]
-  wire  peripheralUart1_client_RLAST; // @[system.scala 445:31]
-  wire  peripheralUart1_client_RVALID; // @[system.scala 445:31]
-  wire  peripheralUart1_client_RREADY; // @[system.scala 445:31]
-  wire  peripheralUart1_MTIP; // @[system.scala 445:31]
-  wire  peripheralUart1_putCharOut_valid; // @[system.scala 445:31]
-  wire [7:0] peripheralUart1_putCharOut_byte; // @[system.scala 445:31]
-  reg [63:0] registersOutBuffer0_0; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_1; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_2; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_3; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_4; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_5; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_6; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_7; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_8; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_9; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_10; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_11; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_12; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_13; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_14; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_15; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_16; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_17; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_18; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_19; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_20; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_21; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_22; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_23; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_24; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_25; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_26; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_27; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_28; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_29; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_30; // @[system.scala 433:32]
-  reg [63:0] registersOutBuffer0_31; // @[system.scala 433:32]
-  reg  REG; // @[system.scala 434:59]
-  reg  REG_1; // @[system.scala 439:15]
-  reg [63:0] registersOutBuffer1_0; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_1; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_2; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_3; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_4; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_5; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_6; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_7; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_8; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_9; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_10; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_11; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_12; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_13; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_14; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_15; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_16; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_17; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_18; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_19; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_20; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_21; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_22; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_23; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_24; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_25; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_26; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_27; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_28; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_29; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_30; // @[system.scala 458:32]
-  reg [63:0] registersOutBuffer1_31; // @[system.scala 458:32]
-  reg  REG_2; // @[system.scala 459:59]
-  reg  REG_3; // @[system.scala 464:15]
+  wire  peripherals_clock; // @[system.scala 420:27]
+  wire  peripherals_reset; // @[system.scala 420:27]
+  wire  peripherals_client0_AWID; // @[system.scala 420:27]
+  wire [31:0] peripherals_client0_AWADDR; // @[system.scala 420:27]
+  wire  peripherals_client0_AWVALID; // @[system.scala 420:27]
+  wire [31:0] peripherals_client0_WDATA; // @[system.scala 420:27]
+  wire  peripherals_client0_WLAST; // @[system.scala 420:27]
+  wire  peripherals_client0_WVALID; // @[system.scala 420:27]
+  wire  peripherals_client0_WREADY; // @[system.scala 420:27]
+  wire  peripherals_client0_BID; // @[system.scala 420:27]
+  wire  peripherals_client0_BVALID; // @[system.scala 420:27]
+  wire  peripherals_client0_ARID; // @[system.scala 420:27]
+  wire [31:0] peripherals_client0_ARADDR; // @[system.scala 420:27]
+  wire [7:0] peripherals_client0_ARLEN; // @[system.scala 420:27]
+  wire  peripherals_client0_ARVALID; // @[system.scala 420:27]
+  wire  peripherals_client0_ARREADY; // @[system.scala 420:27]
+  wire  peripherals_client0_RID; // @[system.scala 420:27]
+  wire [31:0] peripherals_client0_RDATA; // @[system.scala 420:27]
+  wire  peripherals_client0_RLAST; // @[system.scala 420:27]
+  wire  peripherals_client0_RVALID; // @[system.scala 420:27]
+  wire  peripherals_client0_RREADY; // @[system.scala 420:27]
+  wire  peripherals_client1_AWID; // @[system.scala 420:27]
+  wire [31:0] peripherals_client1_AWADDR; // @[system.scala 420:27]
+  wire  peripherals_client1_AWVALID; // @[system.scala 420:27]
+  wire [31:0] peripherals_client1_WDATA; // @[system.scala 420:27]
+  wire  peripherals_client1_WLAST; // @[system.scala 420:27]
+  wire  peripherals_client1_WVALID; // @[system.scala 420:27]
+  wire  peripherals_client1_WREADY; // @[system.scala 420:27]
+  wire  peripherals_client1_BID; // @[system.scala 420:27]
+  wire  peripherals_client1_BVALID; // @[system.scala 420:27]
+  wire  peripherals_client1_ARID; // @[system.scala 420:27]
+  wire [31:0] peripherals_client1_ARADDR; // @[system.scala 420:27]
+  wire [7:0] peripherals_client1_ARLEN; // @[system.scala 420:27]
+  wire  peripherals_client1_ARVALID; // @[system.scala 420:27]
+  wire  peripherals_client1_ARREADY; // @[system.scala 420:27]
+  wire  peripherals_client1_RID; // @[system.scala 420:27]
+  wire [31:0] peripherals_client1_RDATA; // @[system.scala 420:27]
+  wire  peripherals_client1_RLAST; // @[system.scala 420:27]
+  wire  peripherals_client1_RVALID; // @[system.scala 420:27]
+  wire  peripherals_client1_RREADY; // @[system.scala 420:27]
+  wire  peripherals_putChar0_valid; // @[system.scala 420:27]
+  wire [7:0] peripherals_putChar0_byte; // @[system.scala 420:27]
+  wire  peripherals_putChar1_valid; // @[system.scala 420:27]
+  wire [7:0] peripherals_putChar1_byte; // @[system.scala 420:27]
+  wire  peripherals_MTIP0; // @[system.scala 420:27]
+  wire  peripherals_MTIP1; // @[system.scala 420:27]
+  reg [63:0] registersOutBuffer0_0; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_1; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_2; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_3; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_4; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_5; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_6; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_7; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_8; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_9; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_10; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_11; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_12; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_13; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_14; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_15; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_16; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_17; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_18; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_19; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_20; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_21; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_22; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_23; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_24; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_25; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_26; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_27; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_28; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_29; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_30; // @[system.scala 436:32]
+  reg [63:0] registersOutBuffer0_31; // @[system.scala 436:32]
+  reg  REG; // @[system.scala 437:59]
+  reg  REG_1; // @[system.scala 442:15]
+  reg [63:0] registersOutBuffer1_0; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_1; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_2; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_3; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_4; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_5; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_6; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_7; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_8; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_9; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_10; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_11; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_12; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_13; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_14; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_15; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_16; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_17; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_18; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_19; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_20; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_21; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_22; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_23; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_24; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_25; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_26; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_27; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_28; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_29; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_30; // @[system.scala 445:32]
+  reg [63:0] registersOutBuffer1_31; // @[system.scala 445:32]
+  reg  REG_2; // @[system.scala 446:59]
+  reg  REG_3; // @[system.scala 451:15]
   system_Anon core0 ( // @[system.scala 22:21]
     .clock(core0_clock),
     .reset(core0_reset),
@@ -47098,137 +46862,131 @@ module system(
     .io_L2_BREADY(interconnect__io_L2_BREADY),
     .io_L2_BID(interconnect__io_L2_BID)
   );
-  system_Anon_2 peripheralUart0 ( // @[system.scala 420:31]
-    .clock(peripheralUart0_clock),
-    .reset(peripheralUart0_reset),
-    .client_AWID(peripheralUart0_client_AWID),
-    .client_AWADDR(peripheralUart0_client_AWADDR),
-    .client_AWVALID(peripheralUart0_client_AWVALID),
-    .client_AWREADY(peripheralUart0_client_AWREADY),
-    .client_WDATA(peripheralUart0_client_WDATA),
-    .client_WLAST(peripheralUart0_client_WLAST),
-    .client_WVALID(peripheralUart0_client_WVALID),
-    .client_WREADY(peripheralUart0_client_WREADY),
-    .client_BID(peripheralUart0_client_BID),
-    .client_BVALID(peripheralUart0_client_BVALID),
-    .client_ARID(peripheralUart0_client_ARID),
-    .client_ARADDR(peripheralUart0_client_ARADDR),
-    .client_ARLEN(peripheralUart0_client_ARLEN),
-    .client_ARVALID(peripheralUart0_client_ARVALID),
-    .client_ARREADY(peripheralUart0_client_ARREADY),
-    .client_RID(peripheralUart0_client_RID),
-    .client_RDATA(peripheralUart0_client_RDATA),
-    .client_RLAST(peripheralUart0_client_RLAST),
-    .client_RVALID(peripheralUart0_client_RVALID),
-    .client_RREADY(peripheralUart0_client_RREADY),
-    .MTIP(peripheralUart0_MTIP),
-    .putCharOut_valid(peripheralUart0_putCharOut_valid),
-    .putCharOut_byte(peripheralUart0_putCharOut_byte)
-  );
-  system_Anon_2 peripheralUart1 ( // @[system.scala 445:31]
-    .clock(peripheralUart1_clock),
-    .reset(peripheralUart1_reset),
-    .client_AWID(peripheralUart1_client_AWID),
-    .client_AWADDR(peripheralUart1_client_AWADDR),
-    .client_AWVALID(peripheralUart1_client_AWVALID),
-    .client_AWREADY(peripheralUart1_client_AWREADY),
-    .client_WDATA(peripheralUart1_client_WDATA),
-    .client_WLAST(peripheralUart1_client_WLAST),
-    .client_WVALID(peripheralUart1_client_WVALID),
-    .client_WREADY(peripheralUart1_client_WREADY),
-    .client_BID(peripheralUart1_client_BID),
-    .client_BVALID(peripheralUart1_client_BVALID),
-    .client_ARID(peripheralUart1_client_ARID),
-    .client_ARADDR(peripheralUart1_client_ARADDR),
-    .client_ARLEN(peripheralUart1_client_ARLEN),
-    .client_ARVALID(peripheralUart1_client_ARVALID),
-    .client_ARREADY(peripheralUart1_client_ARREADY),
-    .client_RID(peripheralUart1_client_RID),
-    .client_RDATA(peripheralUart1_client_RDATA),
-    .client_RLAST(peripheralUart1_client_RLAST),
-    .client_RVALID(peripheralUart1_client_RVALID),
-    .client_RREADY(peripheralUart1_client_RREADY),
-    .MTIP(peripheralUart1_MTIP),
-    .putCharOut_valid(peripheralUart1_putCharOut_valid),
-    .putCharOut_byte(peripheralUart1_putCharOut_byte)
+  MultiUart peripherals ( // @[system.scala 420:27]
+    .clock(peripherals_clock),
+    .reset(peripherals_reset),
+    .client0_AWID(peripherals_client0_AWID),
+    .client0_AWADDR(peripherals_client0_AWADDR),
+    .client0_AWVALID(peripherals_client0_AWVALID),
+    .client0_WDATA(peripherals_client0_WDATA),
+    .client0_WLAST(peripherals_client0_WLAST),
+    .client0_WVALID(peripherals_client0_WVALID),
+    .client0_WREADY(peripherals_client0_WREADY),
+    .client0_BID(peripherals_client0_BID),
+    .client0_BVALID(peripherals_client0_BVALID),
+    .client0_ARID(peripherals_client0_ARID),
+    .client0_ARADDR(peripherals_client0_ARADDR),
+    .client0_ARLEN(peripherals_client0_ARLEN),
+    .client0_ARVALID(peripherals_client0_ARVALID),
+    .client0_ARREADY(peripherals_client0_ARREADY),
+    .client0_RID(peripherals_client0_RID),
+    .client0_RDATA(peripherals_client0_RDATA),
+    .client0_RLAST(peripherals_client0_RLAST),
+    .client0_RVALID(peripherals_client0_RVALID),
+    .client0_RREADY(peripherals_client0_RREADY),
+    .client1_AWID(peripherals_client1_AWID),
+    .client1_AWADDR(peripherals_client1_AWADDR),
+    .client1_AWVALID(peripherals_client1_AWVALID),
+    .client1_WDATA(peripherals_client1_WDATA),
+    .client1_WLAST(peripherals_client1_WLAST),
+    .client1_WVALID(peripherals_client1_WVALID),
+    .client1_WREADY(peripherals_client1_WREADY),
+    .client1_BID(peripherals_client1_BID),
+    .client1_BVALID(peripherals_client1_BVALID),
+    .client1_ARID(peripherals_client1_ARID),
+    .client1_ARADDR(peripherals_client1_ARADDR),
+    .client1_ARLEN(peripherals_client1_ARLEN),
+    .client1_ARVALID(peripherals_client1_ARVALID),
+    .client1_ARREADY(peripherals_client1_ARREADY),
+    .client1_RID(peripherals_client1_RID),
+    .client1_RDATA(peripherals_client1_RDATA),
+    .client1_RLAST(peripherals_client1_RLAST),
+    .client1_RVALID(peripherals_client1_RVALID),
+    .client1_RREADY(peripherals_client1_RREADY),
+    .putChar0_valid(peripherals_putChar0_valid),
+    .putChar0_byte(peripherals_putChar0_byte),
+    .putChar1_valid(peripherals_putChar1_valid),
+    .putChar1_byte(peripherals_putChar1_byte),
+    .MTIP0(peripherals_MTIP0),
+    .MTIP1(peripherals_MTIP1)
   );
   assign prober_accessLong = memory_externalProbe_accessLong; // @[system.scala 416:10]
-  assign putChar0_valid = peripheralUart0_putCharOut_valid; // @[system.scala 426:12]
-  assign putChar0_byte = peripheralUart0_putCharOut_byte; // @[system.scala 426:12]
-  assign registersOut0_0 = core0_robOut_commitFired & REG ? core0_registersOut_0 : registersOutBuffer0_0; // @[system.scala 434:23]
-  assign registersOut0_1 = core0_robOut_commitFired & REG ? core0_registersOut_1 : registersOutBuffer0_1; // @[system.scala 434:23]
-  assign registersOut0_2 = core0_robOut_commitFired & REG ? core0_registersOut_2 : registersOutBuffer0_2; // @[system.scala 434:23]
-  assign registersOut0_3 = core0_robOut_commitFired & REG ? core0_registersOut_3 : registersOutBuffer0_3; // @[system.scala 434:23]
-  assign registersOut0_4 = core0_robOut_commitFired & REG ? core0_registersOut_4 : registersOutBuffer0_4; // @[system.scala 434:23]
-  assign registersOut0_5 = core0_robOut_commitFired & REG ? core0_registersOut_5 : registersOutBuffer0_5; // @[system.scala 434:23]
-  assign registersOut0_6 = core0_robOut_commitFired & REG ? core0_registersOut_6 : registersOutBuffer0_6; // @[system.scala 434:23]
-  assign registersOut0_7 = core0_robOut_commitFired & REG ? core0_registersOut_7 : registersOutBuffer0_7; // @[system.scala 434:23]
-  assign registersOut0_8 = core0_robOut_commitFired & REG ? core0_registersOut_8 : registersOutBuffer0_8; // @[system.scala 434:23]
-  assign registersOut0_9 = core0_robOut_commitFired & REG ? core0_registersOut_9 : registersOutBuffer0_9; // @[system.scala 434:23]
-  assign registersOut0_10 = core0_robOut_commitFired & REG ? core0_registersOut_10 : registersOutBuffer0_10; // @[system.scala 434:23]
-  assign registersOut0_11 = core0_robOut_commitFired & REG ? core0_registersOut_11 : registersOutBuffer0_11; // @[system.scala 434:23]
-  assign registersOut0_12 = core0_robOut_commitFired & REG ? core0_registersOut_12 : registersOutBuffer0_12; // @[system.scala 434:23]
-  assign registersOut0_13 = core0_robOut_commitFired & REG ? core0_registersOut_13 : registersOutBuffer0_13; // @[system.scala 434:23]
-  assign registersOut0_14 = core0_robOut_commitFired & REG ? core0_registersOut_14 : registersOutBuffer0_14; // @[system.scala 434:23]
-  assign registersOut0_15 = core0_robOut_commitFired & REG ? core0_registersOut_15 : registersOutBuffer0_15; // @[system.scala 434:23]
-  assign registersOut0_16 = core0_robOut_commitFired & REG ? core0_registersOut_16 : registersOutBuffer0_16; // @[system.scala 434:23]
-  assign registersOut0_17 = core0_robOut_commitFired & REG ? core0_registersOut_17 : registersOutBuffer0_17; // @[system.scala 434:23]
-  assign registersOut0_18 = core0_robOut_commitFired & REG ? core0_registersOut_18 : registersOutBuffer0_18; // @[system.scala 434:23]
-  assign registersOut0_19 = core0_robOut_commitFired & REG ? core0_registersOut_19 : registersOutBuffer0_19; // @[system.scala 434:23]
-  assign registersOut0_20 = core0_robOut_commitFired & REG ? core0_registersOut_20 : registersOutBuffer0_20; // @[system.scala 434:23]
-  assign registersOut0_21 = core0_robOut_commitFired & REG ? core0_registersOut_21 : registersOutBuffer0_21; // @[system.scala 434:23]
-  assign registersOut0_22 = core0_robOut_commitFired & REG ? core0_registersOut_22 : registersOutBuffer0_22; // @[system.scala 434:23]
-  assign registersOut0_23 = core0_robOut_commitFired & REG ? core0_registersOut_23 : registersOutBuffer0_23; // @[system.scala 434:23]
-  assign registersOut0_24 = core0_robOut_commitFired & REG ? core0_registersOut_24 : registersOutBuffer0_24; // @[system.scala 434:23]
-  assign registersOut0_25 = core0_robOut_commitFired & REG ? core0_registersOut_25 : registersOutBuffer0_25; // @[system.scala 434:23]
-  assign registersOut0_26 = core0_robOut_commitFired & REG ? core0_registersOut_26 : registersOutBuffer0_26; // @[system.scala 434:23]
-  assign registersOut0_27 = core0_robOut_commitFired & REG ? core0_registersOut_27 : registersOutBuffer0_27; // @[system.scala 434:23]
-  assign registersOut0_28 = core0_robOut_commitFired & REG ? core0_registersOut_28 : registersOutBuffer0_28; // @[system.scala 434:23]
-  assign registersOut0_29 = core0_robOut_commitFired & REG ? core0_registersOut_29 : registersOutBuffer0_29; // @[system.scala 434:23]
-  assign registersOut0_30 = core0_robOut_commitFired & REG ? core0_registersOut_30 : registersOutBuffer0_30; // @[system.scala 434:23]
-  assign registersOut0_31 = core0_robOut_commitFired & REG ? core0_registersOut_31 : registersOutBuffer0_31; // @[system.scala 434:23]
-  assign registersOut0_32 = core0_registersOut_32; // @[system.scala 435:21]
-  assign robOut0_commitFired = core0_robOut_commitFired; // @[system.scala 438:11]
-  assign robOut0_pc = core0_robOut_pc; // @[system.scala 438:11]
-  assign robOut0_interrupt = core0_robOut_interrupt; // @[system.scala 438:11]
-  assign putChar1_valid = peripheralUart1_putCharOut_valid; // @[system.scala 451:12]
-  assign putChar1_byte = peripheralUart1_putCharOut_byte; // @[system.scala 451:12]
-  assign registersOut1_0 = core1_robOut_commitFired & REG_2 ? core1_registersOut_0 : registersOutBuffer1_0; // @[system.scala 459:23]
-  assign registersOut1_1 = core1_robOut_commitFired & REG_2 ? core1_registersOut_1 : registersOutBuffer1_1; // @[system.scala 459:23]
-  assign registersOut1_2 = core1_robOut_commitFired & REG_2 ? core1_registersOut_2 : registersOutBuffer1_2; // @[system.scala 459:23]
-  assign registersOut1_3 = core1_robOut_commitFired & REG_2 ? core1_registersOut_3 : registersOutBuffer1_3; // @[system.scala 459:23]
-  assign registersOut1_4 = core1_robOut_commitFired & REG_2 ? core1_registersOut_4 : registersOutBuffer1_4; // @[system.scala 459:23]
-  assign registersOut1_5 = core1_robOut_commitFired & REG_2 ? core1_registersOut_5 : registersOutBuffer1_5; // @[system.scala 459:23]
-  assign registersOut1_6 = core1_robOut_commitFired & REG_2 ? core1_registersOut_6 : registersOutBuffer1_6; // @[system.scala 459:23]
-  assign registersOut1_7 = core1_robOut_commitFired & REG_2 ? core1_registersOut_7 : registersOutBuffer1_7; // @[system.scala 459:23]
-  assign registersOut1_8 = core1_robOut_commitFired & REG_2 ? core1_registersOut_8 : registersOutBuffer1_8; // @[system.scala 459:23]
-  assign registersOut1_9 = core1_robOut_commitFired & REG_2 ? core1_registersOut_9 : registersOutBuffer1_9; // @[system.scala 459:23]
-  assign registersOut1_10 = core1_robOut_commitFired & REG_2 ? core1_registersOut_10 : registersOutBuffer1_10; // @[system.scala 459:23]
-  assign registersOut1_11 = core1_robOut_commitFired & REG_2 ? core1_registersOut_11 : registersOutBuffer1_11; // @[system.scala 459:23]
-  assign registersOut1_12 = core1_robOut_commitFired & REG_2 ? core1_registersOut_12 : registersOutBuffer1_12; // @[system.scala 459:23]
-  assign registersOut1_13 = core1_robOut_commitFired & REG_2 ? core1_registersOut_13 : registersOutBuffer1_13; // @[system.scala 459:23]
-  assign registersOut1_14 = core1_robOut_commitFired & REG_2 ? core1_registersOut_14 : registersOutBuffer1_14; // @[system.scala 459:23]
-  assign registersOut1_15 = core1_robOut_commitFired & REG_2 ? core1_registersOut_15 : registersOutBuffer1_15; // @[system.scala 459:23]
-  assign registersOut1_16 = core1_robOut_commitFired & REG_2 ? core1_registersOut_16 : registersOutBuffer1_16; // @[system.scala 459:23]
-  assign registersOut1_17 = core1_robOut_commitFired & REG_2 ? core1_registersOut_17 : registersOutBuffer1_17; // @[system.scala 459:23]
-  assign registersOut1_18 = core1_robOut_commitFired & REG_2 ? core1_registersOut_18 : registersOutBuffer1_18; // @[system.scala 459:23]
-  assign registersOut1_19 = core1_robOut_commitFired & REG_2 ? core1_registersOut_19 : registersOutBuffer1_19; // @[system.scala 459:23]
-  assign registersOut1_20 = core1_robOut_commitFired & REG_2 ? core1_registersOut_20 : registersOutBuffer1_20; // @[system.scala 459:23]
-  assign registersOut1_21 = core1_robOut_commitFired & REG_2 ? core1_registersOut_21 : registersOutBuffer1_21; // @[system.scala 459:23]
-  assign registersOut1_22 = core1_robOut_commitFired & REG_2 ? core1_registersOut_22 : registersOutBuffer1_22; // @[system.scala 459:23]
-  assign registersOut1_23 = core1_robOut_commitFired & REG_2 ? core1_registersOut_23 : registersOutBuffer1_23; // @[system.scala 459:23]
-  assign registersOut1_24 = core1_robOut_commitFired & REG_2 ? core1_registersOut_24 : registersOutBuffer1_24; // @[system.scala 459:23]
-  assign registersOut1_25 = core1_robOut_commitFired & REG_2 ? core1_registersOut_25 : registersOutBuffer1_25; // @[system.scala 459:23]
-  assign registersOut1_26 = core1_robOut_commitFired & REG_2 ? core1_registersOut_26 : registersOutBuffer1_26; // @[system.scala 459:23]
-  assign registersOut1_27 = core1_robOut_commitFired & REG_2 ? core1_registersOut_27 : registersOutBuffer1_27; // @[system.scala 459:23]
-  assign registersOut1_28 = core1_robOut_commitFired & REG_2 ? core1_registersOut_28 : registersOutBuffer1_28; // @[system.scala 459:23]
-  assign registersOut1_29 = core1_robOut_commitFired & REG_2 ? core1_registersOut_29 : registersOutBuffer1_29; // @[system.scala 459:23]
-  assign registersOut1_30 = core1_robOut_commitFired & REG_2 ? core1_registersOut_30 : registersOutBuffer1_30; // @[system.scala 459:23]
-  assign registersOut1_31 = core1_robOut_commitFired & REG_2 ? core1_registersOut_31 : registersOutBuffer1_31; // @[system.scala 459:23]
-  assign registersOut1_32 = core1_registersOut_32; // @[system.scala 460:21]
-  assign robOut1_commitFired = core1_robOut_commitFired; // @[system.scala 463:11]
-  assign robOut1_pc = core1_robOut_pc; // @[system.scala 463:11]
-  assign robOut1_interrupt = core1_robOut_interrupt; // @[system.scala 463:11]
+  assign core0OutChar_valid = peripherals_putChar0_valid; // @[system.scala 425:16]
+  assign core0OutChar_byte = peripherals_putChar0_byte; // @[system.scala 425:16]
+  assign core1OutChar_valid = peripherals_putChar1_valid; // @[system.scala 426:16]
+  assign core1OutChar_byte = peripherals_putChar1_byte; // @[system.scala 426:16]
+  assign registersOut0_0 = core0_robOut_commitFired & REG ? core0_registersOut_0 : registersOutBuffer0_0; // @[system.scala 437:23]
+  assign registersOut0_1 = core0_robOut_commitFired & REG ? core0_registersOut_1 : registersOutBuffer0_1; // @[system.scala 437:23]
+  assign registersOut0_2 = core0_robOut_commitFired & REG ? core0_registersOut_2 : registersOutBuffer0_2; // @[system.scala 437:23]
+  assign registersOut0_3 = core0_robOut_commitFired & REG ? core0_registersOut_3 : registersOutBuffer0_3; // @[system.scala 437:23]
+  assign registersOut0_4 = core0_robOut_commitFired & REG ? core0_registersOut_4 : registersOutBuffer0_4; // @[system.scala 437:23]
+  assign registersOut0_5 = core0_robOut_commitFired & REG ? core0_registersOut_5 : registersOutBuffer0_5; // @[system.scala 437:23]
+  assign registersOut0_6 = core0_robOut_commitFired & REG ? core0_registersOut_6 : registersOutBuffer0_6; // @[system.scala 437:23]
+  assign registersOut0_7 = core0_robOut_commitFired & REG ? core0_registersOut_7 : registersOutBuffer0_7; // @[system.scala 437:23]
+  assign registersOut0_8 = core0_robOut_commitFired & REG ? core0_registersOut_8 : registersOutBuffer0_8; // @[system.scala 437:23]
+  assign registersOut0_9 = core0_robOut_commitFired & REG ? core0_registersOut_9 : registersOutBuffer0_9; // @[system.scala 437:23]
+  assign registersOut0_10 = core0_robOut_commitFired & REG ? core0_registersOut_10 : registersOutBuffer0_10; // @[system.scala 437:23]
+  assign registersOut0_11 = core0_robOut_commitFired & REG ? core0_registersOut_11 : registersOutBuffer0_11; // @[system.scala 437:23]
+  assign registersOut0_12 = core0_robOut_commitFired & REG ? core0_registersOut_12 : registersOutBuffer0_12; // @[system.scala 437:23]
+  assign registersOut0_13 = core0_robOut_commitFired & REG ? core0_registersOut_13 : registersOutBuffer0_13; // @[system.scala 437:23]
+  assign registersOut0_14 = core0_robOut_commitFired & REG ? core0_registersOut_14 : registersOutBuffer0_14; // @[system.scala 437:23]
+  assign registersOut0_15 = core0_robOut_commitFired & REG ? core0_registersOut_15 : registersOutBuffer0_15; // @[system.scala 437:23]
+  assign registersOut0_16 = core0_robOut_commitFired & REG ? core0_registersOut_16 : registersOutBuffer0_16; // @[system.scala 437:23]
+  assign registersOut0_17 = core0_robOut_commitFired & REG ? core0_registersOut_17 : registersOutBuffer0_17; // @[system.scala 437:23]
+  assign registersOut0_18 = core0_robOut_commitFired & REG ? core0_registersOut_18 : registersOutBuffer0_18; // @[system.scala 437:23]
+  assign registersOut0_19 = core0_robOut_commitFired & REG ? core0_registersOut_19 : registersOutBuffer0_19; // @[system.scala 437:23]
+  assign registersOut0_20 = core0_robOut_commitFired & REG ? core0_registersOut_20 : registersOutBuffer0_20; // @[system.scala 437:23]
+  assign registersOut0_21 = core0_robOut_commitFired & REG ? core0_registersOut_21 : registersOutBuffer0_21; // @[system.scala 437:23]
+  assign registersOut0_22 = core0_robOut_commitFired & REG ? core0_registersOut_22 : registersOutBuffer0_22; // @[system.scala 437:23]
+  assign registersOut0_23 = core0_robOut_commitFired & REG ? core0_registersOut_23 : registersOutBuffer0_23; // @[system.scala 437:23]
+  assign registersOut0_24 = core0_robOut_commitFired & REG ? core0_registersOut_24 : registersOutBuffer0_24; // @[system.scala 437:23]
+  assign registersOut0_25 = core0_robOut_commitFired & REG ? core0_registersOut_25 : registersOutBuffer0_25; // @[system.scala 437:23]
+  assign registersOut0_26 = core0_robOut_commitFired & REG ? core0_registersOut_26 : registersOutBuffer0_26; // @[system.scala 437:23]
+  assign registersOut0_27 = core0_robOut_commitFired & REG ? core0_registersOut_27 : registersOutBuffer0_27; // @[system.scala 437:23]
+  assign registersOut0_28 = core0_robOut_commitFired & REG ? core0_registersOut_28 : registersOutBuffer0_28; // @[system.scala 437:23]
+  assign registersOut0_29 = core0_robOut_commitFired & REG ? core0_registersOut_29 : registersOutBuffer0_29; // @[system.scala 437:23]
+  assign registersOut0_30 = core0_robOut_commitFired & REG ? core0_registersOut_30 : registersOutBuffer0_30; // @[system.scala 437:23]
+  assign registersOut0_31 = core0_robOut_commitFired & REG ? core0_registersOut_31 : registersOutBuffer0_31; // @[system.scala 437:23]
+  assign registersOut0_32 = core0_registersOut_32; // @[system.scala 438:21]
+  assign robOut0_commitFired = core0_robOut_commitFired; // @[system.scala 441:11]
+  assign robOut0_pc = core0_robOut_pc; // @[system.scala 441:11]
+  assign robOut0_interrupt = core0_robOut_interrupt; // @[system.scala 441:11]
+  assign registersOut1_0 = core1_robOut_commitFired & REG_2 ? core1_registersOut_0 : registersOutBuffer1_0; // @[system.scala 446:23]
+  assign registersOut1_1 = core1_robOut_commitFired & REG_2 ? core1_registersOut_1 : registersOutBuffer1_1; // @[system.scala 446:23]
+  assign registersOut1_2 = core1_robOut_commitFired & REG_2 ? core1_registersOut_2 : registersOutBuffer1_2; // @[system.scala 446:23]
+  assign registersOut1_3 = core1_robOut_commitFired & REG_2 ? core1_registersOut_3 : registersOutBuffer1_3; // @[system.scala 446:23]
+  assign registersOut1_4 = core1_robOut_commitFired & REG_2 ? core1_registersOut_4 : registersOutBuffer1_4; // @[system.scala 446:23]
+  assign registersOut1_5 = core1_robOut_commitFired & REG_2 ? core1_registersOut_5 : registersOutBuffer1_5; // @[system.scala 446:23]
+  assign registersOut1_6 = core1_robOut_commitFired & REG_2 ? core1_registersOut_6 : registersOutBuffer1_6; // @[system.scala 446:23]
+  assign registersOut1_7 = core1_robOut_commitFired & REG_2 ? core1_registersOut_7 : registersOutBuffer1_7; // @[system.scala 446:23]
+  assign registersOut1_8 = core1_robOut_commitFired & REG_2 ? core1_registersOut_8 : registersOutBuffer1_8; // @[system.scala 446:23]
+  assign registersOut1_9 = core1_robOut_commitFired & REG_2 ? core1_registersOut_9 : registersOutBuffer1_9; // @[system.scala 446:23]
+  assign registersOut1_10 = core1_robOut_commitFired & REG_2 ? core1_registersOut_10 : registersOutBuffer1_10; // @[system.scala 446:23]
+  assign registersOut1_11 = core1_robOut_commitFired & REG_2 ? core1_registersOut_11 : registersOutBuffer1_11; // @[system.scala 446:23]
+  assign registersOut1_12 = core1_robOut_commitFired & REG_2 ? core1_registersOut_12 : registersOutBuffer1_12; // @[system.scala 446:23]
+  assign registersOut1_13 = core1_robOut_commitFired & REG_2 ? core1_registersOut_13 : registersOutBuffer1_13; // @[system.scala 446:23]
+  assign registersOut1_14 = core1_robOut_commitFired & REG_2 ? core1_registersOut_14 : registersOutBuffer1_14; // @[system.scala 446:23]
+  assign registersOut1_15 = core1_robOut_commitFired & REG_2 ? core1_registersOut_15 : registersOutBuffer1_15; // @[system.scala 446:23]
+  assign registersOut1_16 = core1_robOut_commitFired & REG_2 ? core1_registersOut_16 : registersOutBuffer1_16; // @[system.scala 446:23]
+  assign registersOut1_17 = core1_robOut_commitFired & REG_2 ? core1_registersOut_17 : registersOutBuffer1_17; // @[system.scala 446:23]
+  assign registersOut1_18 = core1_robOut_commitFired & REG_2 ? core1_registersOut_18 : registersOutBuffer1_18; // @[system.scala 446:23]
+  assign registersOut1_19 = core1_robOut_commitFired & REG_2 ? core1_registersOut_19 : registersOutBuffer1_19; // @[system.scala 446:23]
+  assign registersOut1_20 = core1_robOut_commitFired & REG_2 ? core1_registersOut_20 : registersOutBuffer1_20; // @[system.scala 446:23]
+  assign registersOut1_21 = core1_robOut_commitFired & REG_2 ? core1_registersOut_21 : registersOutBuffer1_21; // @[system.scala 446:23]
+  assign registersOut1_22 = core1_robOut_commitFired & REG_2 ? core1_registersOut_22 : registersOutBuffer1_22; // @[system.scala 446:23]
+  assign registersOut1_23 = core1_robOut_commitFired & REG_2 ? core1_registersOut_23 : registersOutBuffer1_23; // @[system.scala 446:23]
+  assign registersOut1_24 = core1_robOut_commitFired & REG_2 ? core1_registersOut_24 : registersOutBuffer1_24; // @[system.scala 446:23]
+  assign registersOut1_25 = core1_robOut_commitFired & REG_2 ? core1_registersOut_25 : registersOutBuffer1_25; // @[system.scala 446:23]
+  assign registersOut1_26 = core1_robOut_commitFired & REG_2 ? core1_registersOut_26 : registersOutBuffer1_26; // @[system.scala 446:23]
+  assign registersOut1_27 = core1_robOut_commitFired & REG_2 ? core1_registersOut_27 : registersOutBuffer1_27; // @[system.scala 446:23]
+  assign registersOut1_28 = core1_robOut_commitFired & REG_2 ? core1_registersOut_28 : registersOutBuffer1_28; // @[system.scala 446:23]
+  assign registersOut1_29 = core1_robOut_commitFired & REG_2 ? core1_registersOut_29 : registersOutBuffer1_29; // @[system.scala 446:23]
+  assign registersOut1_30 = core1_robOut_commitFired & REG_2 ? core1_registersOut_30 : registersOutBuffer1_30; // @[system.scala 446:23]
+  assign registersOut1_31 = core1_robOut_commitFired & REG_2 ? core1_registersOut_31 : registersOutBuffer1_31; // @[system.scala 446:23]
+  assign registersOut1_32 = core1_registersOut_32; // @[system.scala 447:21]
+  assign robOut1_commitFired = core1_robOut_commitFired; // @[system.scala 450:11]
+  assign robOut1_pc = core1_robOut_pc; // @[system.scala 450:11]
+  assign robOut1_interrupt = core1_robOut_interrupt; // @[system.scala 450:11]
   assign core0_clock = clock;
   assign core0_reset = reset;
   assign core0_iPort_ARREADY = interconnect__io_acePort1_ARREADY; // @[system.scala 145:23]
@@ -47245,15 +47003,15 @@ module system(
   assign core0_dPort_ACVALID = interconnect__io_acePort0_ACVALID; // @[system.scala 105:23]
   assign core0_dPort_CRREADY = interconnect__io_acePort0_CRREADY; // @[system.scala 114:23]
   assign core0_dPort_CDREADY = interconnect__io_acePort0_CDREADY; // @[system.scala 118:23]
-  assign core0_peripheral_WREADY = peripheralUart0_client_WREADY; // @[system.scala 428:20]
-  assign core0_peripheral_BID = peripheralUart0_client_BID; // @[system.scala 428:20]
-  assign core0_peripheral_BVALID = peripheralUart0_client_BVALID; // @[system.scala 428:20]
-  assign core0_peripheral_ARREADY = peripheralUart0_client_ARREADY; // @[system.scala 428:20]
-  assign core0_peripheral_RID = peripheralUart0_client_RID; // @[system.scala 428:20]
-  assign core0_peripheral_RDATA = peripheralUart0_client_RDATA; // @[system.scala 428:20]
-  assign core0_peripheral_RLAST = peripheralUart0_client_RLAST; // @[system.scala 428:20]
-  assign core0_peripheral_RVALID = peripheralUart0_client_RVALID; // @[system.scala 428:20]
-  assign core0_MTIP = peripheralUart0_MTIP; // @[system.scala 442:14]
+  assign core0_peripheral_WREADY = peripherals_client0_WREADY; // @[system.scala 428:20]
+  assign core0_peripheral_BID = peripherals_client0_BID; // @[system.scala 428:20]
+  assign core0_peripheral_BVALID = peripherals_client0_BVALID; // @[system.scala 428:20]
+  assign core0_peripheral_ARREADY = peripherals_client0_ARREADY; // @[system.scala 428:20]
+  assign core0_peripheral_RID = peripherals_client0_RID; // @[system.scala 428:20]
+  assign core0_peripheral_RDATA = peripherals_client0_RDATA; // @[system.scala 428:20]
+  assign core0_peripheral_RLAST = peripherals_client0_RLAST; // @[system.scala 428:20]
+  assign core0_peripheral_RVALID = peripherals_client0_RVALID; // @[system.scala 428:20]
+  assign core0_MTIP = peripherals_MTIP0; // @[system.scala 431:14]
   assign core1_clock = clock;
   assign core1_reset = reset;
   assign core1_iPort_ARREADY = interconnect__io_acePort3_ARREADY; // @[system.scala 255:23]
@@ -47270,15 +47028,15 @@ module system(
   assign core1_dPort_ACVALID = interconnect__io_acePort2_ACVALID; // @[system.scala 215:23]
   assign core1_dPort_CRREADY = interconnect__io_acePort2_CRREADY; // @[system.scala 224:23]
   assign core1_dPort_CDREADY = interconnect__io_acePort2_CDREADY; // @[system.scala 228:23]
-  assign core1_peripheral_WREADY = peripheralUart1_client_WREADY; // @[system.scala 453:20]
-  assign core1_peripheral_BID = peripheralUart1_client_BID; // @[system.scala 453:20]
-  assign core1_peripheral_BVALID = peripheralUart1_client_BVALID; // @[system.scala 453:20]
-  assign core1_peripheral_ARREADY = peripheralUart1_client_ARREADY; // @[system.scala 453:20]
-  assign core1_peripheral_RID = peripheralUart1_client_RID; // @[system.scala 453:20]
-  assign core1_peripheral_RDATA = peripheralUart1_client_RDATA; // @[system.scala 453:20]
-  assign core1_peripheral_RLAST = peripheralUart1_client_RLAST; // @[system.scala 453:20]
-  assign core1_peripheral_RVALID = peripheralUart1_client_RVALID; // @[system.scala 453:20]
-  assign core1_MTIP = peripheralUart1_MTIP; // @[system.scala 467:14]
+  assign core1_peripheral_WREADY = peripherals_client1_WREADY; // @[system.scala 429:20]
+  assign core1_peripheral_BID = peripherals_client1_BID; // @[system.scala 429:20]
+  assign core1_peripheral_BVALID = peripherals_client1_BVALID; // @[system.scala 429:20]
+  assign core1_peripheral_ARREADY = peripherals_client1_ARREADY; // @[system.scala 429:20]
+  assign core1_peripheral_RID = peripherals_client1_RID; // @[system.scala 429:20]
+  assign core1_peripheral_RDATA = peripherals_client1_RDATA; // @[system.scala 429:20]
+  assign core1_peripheral_RLAST = peripherals_client1_RLAST; // @[system.scala 429:20]
+  assign core1_peripheral_RVALID = peripherals_client1_RVALID; // @[system.scala 429:20]
+  assign core1_MTIP = peripherals_MTIP1; // @[system.scala 432:14]
   assign memory_clock = clock;
   assign memory_reset = reset;
   assign memory_finishedProgramming = finishedProgramming; // @[system.scala 412:30]
@@ -47354,244 +47112,242 @@ module system(
   assign interconnect__io_L2_RLAST = memory_clients_1_RLAST; // @[system.scala 332:28]
   assign interconnect__io_L2_BVALID = memory_clients_1_BVALID; // @[system.scala 336:29]
   assign interconnect__io_L2_BID = memory_clients_1_BID; // @[system.scala 338:26]
-  assign peripheralUart0_clock = clock;
-  assign peripheralUart0_reset = reset;
-  assign peripheralUart0_client_AWID = core0_peripheral_AWID; // @[system.scala 428:20]
-  assign peripheralUart0_client_AWADDR = core0_peripheral_AWADDR; // @[system.scala 428:20]
-  assign peripheralUart0_client_AWVALID = core0_peripheral_AWVALID; // @[system.scala 428:20]
-  assign peripheralUart0_client_WDATA = core0_peripheral_WDATA; // @[system.scala 428:20]
-  assign peripheralUart0_client_WLAST = core0_peripheral_WLAST; // @[system.scala 428:20]
-  assign peripheralUart0_client_WVALID = core0_peripheral_WVALID; // @[system.scala 428:20]
-  assign peripheralUart0_client_ARID = core0_peripheral_ARID; // @[system.scala 428:20]
-  assign peripheralUart0_client_ARADDR = core0_peripheral_ARADDR; // @[system.scala 428:20]
-  assign peripheralUart0_client_ARLEN = core0_peripheral_ARLEN; // @[system.scala 428:20]
-  assign peripheralUart0_client_ARVALID = core0_peripheral_ARVALID; // @[system.scala 428:20]
-  assign peripheralUart0_client_RREADY = core0_peripheral_RREADY; // @[system.scala 428:20]
-  assign peripheralUart1_clock = clock;
-  assign peripheralUart1_reset = reset;
-  assign peripheralUart1_client_AWID = core1_peripheral_AWID; // @[system.scala 453:20]
-  assign peripheralUart1_client_AWADDR = core1_peripheral_AWADDR; // @[system.scala 453:20]
-  assign peripheralUart1_client_AWVALID = core1_peripheral_AWVALID; // @[system.scala 453:20]
-  assign peripheralUart1_client_WDATA = core1_peripheral_WDATA; // @[system.scala 453:20]
-  assign peripheralUart1_client_WLAST = core1_peripheral_WLAST; // @[system.scala 453:20]
-  assign peripheralUart1_client_WVALID = core1_peripheral_WVALID; // @[system.scala 453:20]
-  assign peripheralUart1_client_ARID = core1_peripheral_ARID; // @[system.scala 453:20]
-  assign peripheralUart1_client_ARADDR = core1_peripheral_ARADDR; // @[system.scala 453:20]
-  assign peripheralUart1_client_ARLEN = core1_peripheral_ARLEN; // @[system.scala 453:20]
-  assign peripheralUart1_client_ARVALID = core1_peripheral_ARVALID; // @[system.scala 453:20]
-  assign peripheralUart1_client_RREADY = core1_peripheral_RREADY; // @[system.scala 453:20]
+  assign peripherals_clock = clock;
+  assign peripherals_reset = reset;
+  assign peripherals_client0_AWID = core0_peripheral_AWID; // @[system.scala 428:20]
+  assign peripherals_client0_AWADDR = core0_peripheral_AWADDR; // @[system.scala 428:20]
+  assign peripherals_client0_AWVALID = core0_peripheral_AWVALID; // @[system.scala 428:20]
+  assign peripherals_client0_WDATA = core0_peripheral_WDATA; // @[system.scala 428:20]
+  assign peripherals_client0_WLAST = core0_peripheral_WLAST; // @[system.scala 428:20]
+  assign peripherals_client0_WVALID = core0_peripheral_WVALID; // @[system.scala 428:20]
+  assign peripherals_client0_ARID = core0_peripheral_ARID; // @[system.scala 428:20]
+  assign peripherals_client0_ARADDR = core0_peripheral_ARADDR; // @[system.scala 428:20]
+  assign peripherals_client0_ARLEN = core0_peripheral_ARLEN; // @[system.scala 428:20]
+  assign peripherals_client0_ARVALID = core0_peripheral_ARVALID; // @[system.scala 428:20]
+  assign peripherals_client0_RREADY = core0_peripheral_RREADY; // @[system.scala 428:20]
+  assign peripherals_client1_AWID = core1_peripheral_AWID; // @[system.scala 429:20]
+  assign peripherals_client1_AWADDR = core1_peripheral_AWADDR; // @[system.scala 429:20]
+  assign peripherals_client1_AWVALID = core1_peripheral_AWVALID; // @[system.scala 429:20]
+  assign peripherals_client1_WDATA = core1_peripheral_WDATA; // @[system.scala 429:20]
+  assign peripherals_client1_WLAST = core1_peripheral_WLAST; // @[system.scala 429:20]
+  assign peripherals_client1_WVALID = core1_peripheral_WVALID; // @[system.scala 429:20]
+  assign peripherals_client1_ARID = core1_peripheral_ARID; // @[system.scala 429:20]
+  assign peripherals_client1_ARADDR = core1_peripheral_ARADDR; // @[system.scala 429:20]
+  assign peripherals_client1_ARLEN = core1_peripheral_ARLEN; // @[system.scala 429:20]
+  assign peripherals_client1_ARVALID = core1_peripheral_ARVALID; // @[system.scala 429:20]
+  assign peripherals_client1_RREADY = core1_peripheral_RREADY; // @[system.scala 429:20]
   always @(posedge clock) begin
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_0 <= core0_registersOut_0; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_0 <= core0_registersOut_0; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_1 <= core0_registersOut_1; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_1 <= core0_registersOut_1; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_2 <= core0_registersOut_2; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_2 <= core0_registersOut_2; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_3 <= core0_registersOut_3; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_3 <= core0_registersOut_3; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_4 <= core0_registersOut_4; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_4 <= core0_registersOut_4; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_5 <= core0_registersOut_5; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_5 <= core0_registersOut_5; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_6 <= core0_registersOut_6; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_6 <= core0_registersOut_6; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_7 <= core0_registersOut_7; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_7 <= core0_registersOut_7; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_8 <= core0_registersOut_8; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_8 <= core0_registersOut_8; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_9 <= core0_registersOut_9; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_9 <= core0_registersOut_9; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_10 <= core0_registersOut_10; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_10 <= core0_registersOut_10; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_11 <= core0_registersOut_11; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_11 <= core0_registersOut_11; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_12 <= core0_registersOut_12; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_12 <= core0_registersOut_12; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_13 <= core0_registersOut_13; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_13 <= core0_registersOut_13; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_14 <= core0_registersOut_14; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_14 <= core0_registersOut_14; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_15 <= core0_registersOut_15; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_15 <= core0_registersOut_15; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_16 <= core0_registersOut_16; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_16 <= core0_registersOut_16; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_17 <= core0_registersOut_17; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_17 <= core0_registersOut_17; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_18 <= core0_registersOut_18; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_18 <= core0_registersOut_18; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_19 <= core0_registersOut_19; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_19 <= core0_registersOut_19; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_20 <= core0_registersOut_20; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_20 <= core0_registersOut_20; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_21 <= core0_registersOut_21; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_21 <= core0_registersOut_21; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_22 <= core0_registersOut_22; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_22 <= core0_registersOut_22; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_23 <= core0_registersOut_23; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_23 <= core0_registersOut_23; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_24 <= core0_registersOut_24; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_24 <= core0_registersOut_24; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_25 <= core0_registersOut_25; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_25 <= core0_registersOut_25; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_26 <= core0_registersOut_26; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_26 <= core0_registersOut_26; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_27 <= core0_registersOut_27; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_27 <= core0_registersOut_27; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_28 <= core0_registersOut_28; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_28 <= core0_registersOut_28; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_29 <= core0_registersOut_29; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_29 <= core0_registersOut_29; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_30 <= core0_registersOut_30; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_30 <= core0_registersOut_30; // @[system.scala 442:70]
     end
-    if (REG_1) begin // @[system.scala 439:48]
-      registersOutBuffer0_31 <= core0_registersOut_31; // @[system.scala 439:70]
+    if (REG_1) begin // @[system.scala 442:48]
+      registersOutBuffer0_31 <= core0_registersOut_31; // @[system.scala 442:70]
     end
-    if (reset) begin // @[system.scala 434:59]
-      REG <= 1'h0; // @[system.scala 434:59]
+    if (reset) begin // @[system.scala 437:59]
+      REG <= 1'h0; // @[system.scala 437:59]
     end else begin
-      REG <= core0_robOut_commitFired; // @[system.scala 434:59]
+      REG <= core0_robOut_commitFired; // @[system.scala 437:59]
     end
-    if (reset) begin // @[system.scala 439:15]
-      REG_1 <= 1'h0; // @[system.scala 439:15]
+    if (reset) begin // @[system.scala 442:15]
+      REG_1 <= 1'h0; // @[system.scala 442:15]
     end else begin
-      REG_1 <= core0_allRobFiresOut; // @[system.scala 439:15]
+      REG_1 <= core0_allRobFiresOut; // @[system.scala 442:15]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_0 <= core1_registersOut_0; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_0 <= core1_registersOut_0; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_1 <= core1_registersOut_1; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_1 <= core1_registersOut_1; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_2 <= core1_registersOut_2; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_2 <= core1_registersOut_2; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_3 <= core1_registersOut_3; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_3 <= core1_registersOut_3; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_4 <= core1_registersOut_4; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_4 <= core1_registersOut_4; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_5 <= core1_registersOut_5; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_5 <= core1_registersOut_5; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_6 <= core1_registersOut_6; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_6 <= core1_registersOut_6; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_7 <= core1_registersOut_7; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_7 <= core1_registersOut_7; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_8 <= core1_registersOut_8; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_8 <= core1_registersOut_8; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_9 <= core1_registersOut_9; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_9 <= core1_registersOut_9; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_10 <= core1_registersOut_10; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_10 <= core1_registersOut_10; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_11 <= core1_registersOut_11; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_11 <= core1_registersOut_11; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_12 <= core1_registersOut_12; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_12 <= core1_registersOut_12; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_13 <= core1_registersOut_13; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_13 <= core1_registersOut_13; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_14 <= core1_registersOut_14; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_14 <= core1_registersOut_14; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_15 <= core1_registersOut_15; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_15 <= core1_registersOut_15; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_16 <= core1_registersOut_16; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_16 <= core1_registersOut_16; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_17 <= core1_registersOut_17; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_17 <= core1_registersOut_17; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_18 <= core1_registersOut_18; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_18 <= core1_registersOut_18; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_19 <= core1_registersOut_19; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_19 <= core1_registersOut_19; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_20 <= core1_registersOut_20; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_20 <= core1_registersOut_20; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_21 <= core1_registersOut_21; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_21 <= core1_registersOut_21; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_22 <= core1_registersOut_22; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_22 <= core1_registersOut_22; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_23 <= core1_registersOut_23; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_23 <= core1_registersOut_23; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_24 <= core1_registersOut_24; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_24 <= core1_registersOut_24; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_25 <= core1_registersOut_25; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_25 <= core1_registersOut_25; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_26 <= core1_registersOut_26; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_26 <= core1_registersOut_26; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_27 <= core1_registersOut_27; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_27 <= core1_registersOut_27; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_28 <= core1_registersOut_28; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_28 <= core1_registersOut_28; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_29 <= core1_registersOut_29; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_29 <= core1_registersOut_29; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_30 <= core1_registersOut_30; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_30 <= core1_registersOut_30; // @[system.scala 451:70]
     end
-    if (REG_3) begin // @[system.scala 464:48]
-      registersOutBuffer1_31 <= core1_registersOut_31; // @[system.scala 464:70]
+    if (REG_3) begin // @[system.scala 451:48]
+      registersOutBuffer1_31 <= core1_registersOut_31; // @[system.scala 451:70]
     end
-    if (reset) begin // @[system.scala 459:59]
-      REG_2 <= 1'h0; // @[system.scala 459:59]
+    if (reset) begin // @[system.scala 446:59]
+      REG_2 <= 1'h0; // @[system.scala 446:59]
     end else begin
-      REG_2 <= core1_robOut_commitFired; // @[system.scala 459:59]
+      REG_2 <= core1_robOut_commitFired; // @[system.scala 446:59]
     end
-    if (reset) begin // @[system.scala 464:15]
-      REG_3 <= 1'h0; // @[system.scala 464:15]
+    if (reset) begin // @[system.scala 451:15]
+      REG_3 <= 1'h0; // @[system.scala 451:15]
     end else begin
-      REG_3 <= core1_allRobFiresOut; // @[system.scala 464:15]
+      REG_3 <= core1_allRobFiresOut; // @[system.scala 451:15]
     end
   end
 // Register and memory initialization
