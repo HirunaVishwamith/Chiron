@@ -4415,3 +4415,7 @@ INFO: Unsupported notification method: $/setTrace
 2025.01.20 01:48:45 INFO  shutting down Metals[0m
 2025.01.20 01:48:45 INFO  Exiting server[0m
 2025.01.20 01:50:18 INFO  Started: Metals version 1.4.2 in folders '/media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor' for client Visual Studio Code 1.90.1.[0m
+2025.01.20 01:51:16 INFO  Shutting down server[0m
+2025.01.20 01:51:16 INFO  shutting down Metals[0m
+2025.01.20 01:51:16 INFO  Exiting server[0m
+2025.01.20 02:12:40 INFO  Started: Metals version 1.4.2 in folders '/media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor' for client Visual Studio Code 1.90.1.[0m

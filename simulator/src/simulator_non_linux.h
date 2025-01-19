@@ -156,11 +156,11 @@ class simulator {
 
     tb -> reset = 1;
     for(int i = 0; i < 20; i++){
-      tick(++tickcount, tb, tfp); //here it is tick_nodump
+      tick(++dump_tick, tb, tfp); //here it is tick_nodump
     }
     tb -> reset = 0;
     for(int i = 0; i < 20; i++){
-      tick(++tickcount, tb, tfp); //here it is tick_nodump
+      tick(++dump_tick, tb, tfp); //here it is tick_nodump
     }
 
     printf("*********************************Loading kernel image*********************************\n");
@@ -178,7 +178,7 @@ class simulator {
 			tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&buffer.at(i));
       tb -> programmer_offset = i;
 			//cout << buffer.at(i)&255 << endl;
-			tick(++tickcount, tb, tfp);	//here it is tick_nodump
+			tick(++dump_tick, tb, tfp);	//here it is tick_nodump
       // if (progress != (i*100)/buffer.size()) 
       printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
 		}
@@ -186,10 +186,10 @@ class simulator {
 
 		tb ->finishedProgramming = 1;
     tb ->programmer_valid = 0;
-    tick(++tickcount, tb, tfp);//here it is tick_nodump
+    tick(++dump_tick, tb, tfp);//here it is tick_nodump
 		tb ->finishedProgramming = 0;
     tb ->programmer_valid = 0;
-    tick(++tickcount, tb, tfp); //here it is tick_nodump
+    tick(++dump_tick, tb, tfp); //here it is tick_nodump
     prev_pc = 0x10000000UL; // this default is set to 0x80000000UL
   }
 
@@ -241,7 +241,7 @@ class simulator {
 
       if (tb ->putChar_valid) { cout << (char)(tb -> putChar_byte) << flush; }
     } */
-    tick(++tickcount, tb, tfp); //this tick_nodump
+    tick(++dump_tick, tb, tfp); //this tick_nodump
     #ifndef STEP_TIMEOUT
     while (!(tb -> robOut0_commitFired)) {
     #else
@@ -250,7 +250,7 @@ class simulator {
     #ifdef SHOW_TERMINAL
       //if (tb ->putChar_valid) { cout << tb -> putChar_byte << flush; }
     #endif
-      tick(++tickcount, tb, tfp); //here it tick_nodump
+      tick(++dump_tick, tb, tfp); //here it tick_nodump
           }
     
     #ifdef SHOW_TERMINAL
