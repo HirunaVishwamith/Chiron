@@ -10,6 +10,7 @@ import _root_.os.read.lines
 class ACEUnit(
 	dataWidth: Int,
   addrWidth: Int,
+  id: Int,
   // busWidth: Int,
   length: Int,
   size: Int,
@@ -168,7 +169,7 @@ class ACEUnit(
       inputBufferState := Mux(coherentComplete, emptyState, coherentState)
     }
     is(fenceState){
-      bus.AWID := dPort_ID.U
+      bus.AWID := id.U
       bus.AWADDR := 0.U
       bus.AWLEN := 0.U
       bus.AWSIZE := size.U
@@ -182,7 +183,7 @@ class ACEUnit(
       bus.AWDOMAIN := "b10".U
       bus.AWBAR := "b01".U
 
-      bus.ARID := dPort_ID.U
+      bus.ARID := id.U
       bus.ARADDR := 0.U
       bus.ARLEN := 0.U
       bus.ARSIZE := size.U
@@ -233,7 +234,7 @@ class ACEUnit(
     }
     is(requestState){
       bus.ARVALID := true.B
-      bus.ARID := dPort_ID.U
+      bus.ARID := id.U
       bus.ARADDR := inputBuffer.address
       bus.ARLEN := length.U
       bus.ARSIZE := size.U
@@ -263,7 +264,7 @@ class ACEUnit(
         responseReg := bus.RRESP(3,2)
         responseValid := Mux(bus.RRESP(1,0) === "b00".U, responseValid, false.B)
       } .otherwise{
-        when(bus.RVALID & bus.RID === dPort_ID.U){
+        when(bus.RVALID & bus.RID === id.U){
           readCounter.incrm := true.B
           readDataVec(readCounter.count) := bus.RDATA 
           responseValid := Mux(bus.RRESP(1,0) === "b00".U, responseValid, false.B)
@@ -271,7 +272,7 @@ class ACEUnit(
         }
       }
       when(isCleanUniqueWire){
-        readAXIState := Mux(bus.RVALID & bus.RID === dPort_ID.U, 
+        readAXIState := Mux(bus.RVALID & bus.RID === id.U, 
                           Mux(responseValid, dataOutState, requestState),
                             responseState)
       } .otherwise{
@@ -306,7 +307,7 @@ class ACEUnit(
     }
     is(requestState){
       bus.AWVALID := true.B
-      bus.AWID := dPort_ID.U
+      bus.AWID := id.U
       bus.AWADDR := inputBuffer.address
       bus.AWLEN := length.U
       bus.AWSIZE := size.U
@@ -336,9 +337,9 @@ class ACEUnit(
     }
     is(responseState){
       bus.BREADY := true.B
-      writeComplete := bus.BVALID && bus.BID === dPort_ID.U && bus.BRESP === "b00".U
+      writeComplete := bus.BVALID && bus.BID === id.U && bus.BRESP === "b00".U
 
-      writeAXIState := Mux(bus.BVALID && (bus.BID === dPort_ID.U), 
+      writeAXIState := Mux(bus.BVALID && (bus.BID === id.U), 
                         Mux(bus.BRESP === "b00".U, idleState, requestState),
                           responseState)
     }

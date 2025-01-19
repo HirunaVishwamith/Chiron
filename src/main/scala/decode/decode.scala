@@ -88,7 +88,9 @@ class RetiredRenamedTable extends Bundle {
   * Details about the IO can be found on common/ports.scala
   *
   */
-class decode extends Module {
+class decode (
+  mhart_id : Int
+) extends Module {
   /**
    * Inputs and Outputs of the module
    */
@@ -515,7 +517,7 @@ class decode extends Module {
   val mvendorid   = RegInit(0.U(dataWidth.W))
   val marchid     = RegInit(0.U(dataWidth.W))
   val mimpid      = RegInit(0.U(dataWidth.W))
-  val mhartid     = RegInit(0.U(dataWidth.W))
+  val mhartid     = RegInit(mhart_id.U(dataWidth.W))
 
   mstatus := (mstatus & "h0000000000001888".U) | "h0000000a00000000".U // FIX ME: deasserting illegal bits should be blocked when bit calculating
   misa := "h101101".U | (1.U(64.W) << 63)
@@ -908,5 +910,5 @@ class decode extends Module {
 }
 
 object DecodeUnit extends App{
-  emitVerilog(new decode())
+  emitVerilog(new decode(mhart_id = 0))
 }

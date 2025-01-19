@@ -10,6 +10,7 @@ import _root_.os.read.lines
 class AXIUnit(
 	dataWidth: Int,
   addrWidth: Int,
+  id: Int,
   // busWidth: Int,
   length: Int,
   size: Int,
@@ -126,7 +127,7 @@ class AXIUnit(
         val sizePerBeat = (1.U << sizeByIns) * 8.U
 
         bus.ARVALID := true.B
-        bus.ARID := peripheral_ID.U
+        bus.ARID := id.U
         bus.ARADDR := inputBuffer.address
         bus.ARLEN := ((sizePerBeat + busWidth.U - 1.U) / busWidth.U) - 1.U
         bus.ARSIZE := Mux(sizePerBeat <= busWidth.U, sizeByIns, Log2(busWidth.U / 8.U) )
@@ -142,7 +143,7 @@ class AXIUnit(
       }
       is(responseState){
         bus.RREADY := true.B
-        when(bus.RVALID & bus.RID === peripheral_ID.U){
+        when(bus.RVALID & bus.RID === id.U){
           readCounter.incrm := true.B
           readDataVec(readCounter.count) := bus.RDATA
           responseValid := Mux(bus.RRESP === "b00".U, responseValid, false.B)
@@ -193,7 +194,7 @@ class AXIUnit(
         val sizePerBeat = (1.U << sizeByIns) * 8.U
 
         bus.AWVALID := true.B
-        bus.AWID := peripheral_ID.U
+        bus.AWID := id.U
         bus.AWADDR := inputBuffer.address
         bus.ARLEN := ((sizePerBeat + busWidth.U - 1.U) / busWidth.U) - 1.U
         bus.ARSIZE := Mux(sizePerBeat <= busWidth.U, sizeByIns, Log2(busWidth.U / 8.U) )
@@ -220,9 +221,9 @@ class AXIUnit(
       }
       is(responseState){
         bus.BREADY := true.B
-        writeComplete := bus.BVALID && bus.BID === peripheral_ID.U && bus.BRESP === "b00".U
+        writeComplete := bus.BVALID && bus.BID === id.U && bus.BRESP === "b00".U
 
-        writeAXIState := Mux(bus.BVALID && (bus.BID === peripheral_ID.U), 
+        writeAXIState := Mux(bus.BVALID && (bus.BID === id.U), 
                           Mux(bus.BRESP === "b00".U, idleState, requestState),
                             responseState)
       }

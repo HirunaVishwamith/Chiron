@@ -30,7 +30,12 @@ class testbench extends Module {
   val inst :: data :: Nil = Enum(2)
   val servicing = RegInit(inst)
 
-  val dut = Module(new core {
+  val dut = Module(new core (
+    dPort_id = 0,
+    peripheral_id = 0,
+    iPort_id = 0,
+    mhart_id = 0
+  ) {
     val debugIO = IO(Output(new Bundle {
       val pc = UInt(32.W)
       val instruction = UInt(32.W)

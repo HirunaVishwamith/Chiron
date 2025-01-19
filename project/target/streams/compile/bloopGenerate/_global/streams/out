@@ -1,0 +1,4 @@
+[debug] [multicore_processor-build] Classpath dependencies List()
+[debug] [multicore_processor-build] Dependencies from configurations List()
+[debug] Bloop wrote the configuration of project 'multicore_processor-build' to '/mnt/Uni/FYP/mid-testing/Multicore_Processor/project/.bloop/multicore_processor-build.json'
+[success] Generated .bloop/multicore_processor-build.json
