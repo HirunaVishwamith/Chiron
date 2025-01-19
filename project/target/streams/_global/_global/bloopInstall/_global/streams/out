@@ -1,0 +1,43 @@
+[0m[[0m[31merror[0m] [0m[0mCouldn't run bloopGenerate. The issue could be caused by failing to compile the project.[0m
+[0m[[0m[31merror[0m] [0m[0mjava.lang.UnsupportedClassVersionError: com/github/plokhotnyuk/jsoniter_scala/core/ByteArrayAccess has been compiled by a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.lang.ClassLoader.defineClass1(Native Method)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.lang.ClassLoader.defineClass(ClassLoader.java:756)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.security.SecureClassLoader.defineClass(SecureClassLoader.java:142)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.net.URLClassLoader.defineClass(URLClassLoader.java:473)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.net.URLClassLoader.access$100(URLClassLoader.java:74)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.net.URLClassLoader$1.run(URLClassLoader.java:369)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.net.URLClassLoader$1.run(URLClassLoader.java:363)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.security.AccessController.doPrivileged(Native Method)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.net.URLClassLoader.findClass(URLClassLoader.java:362)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.lang.ClassLoader.loadClass(ClassLoader.java:418)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.lang.ClassLoader.loadClass(ClassLoader.java:351)[0m
+[0m[[0m[31merror[0m] [0m[0m	at com.github.plokhotnyuk.jsoniter_scala.core.JsonWriter.writeIndention(JsonWriter.scala:1090)[0m
+[0m[[0m[31merror[0m] [0m[0m	at com.github.plokhotnyuk.jsoniter_scala.core.JsonWriter.writeIndention(JsonWriter.scala:1081)[0m
+[0m[[0m[31merror[0m] [0m[0m	at com.github.plokhotnyuk.jsoniter_scala.core.JsonWriter.writeNestedStart(JsonWriter.scala:1052)[0m
+[0m[[0m[31merror[0m] [0m[0m	at com.github.plokhotnyuk.jsoniter_scala.core.JsonWriter.writeObjectStart(JsonWriter.scala:881)[0m
+[0m[[0m[31merror[0m] [0m[0m	at bloop.config.ConfigCodecs$$anon$16.e0(ConfigCodecs.scala:319)[0m
+[0m[[0m[31merror[0m] [0m[0m	at bloop.config.ConfigCodecs$$anon$16.encodeValue(ConfigCodecs.scala:319)[0m
+[0m[[0m[31merror[0m] [0m[0m	at bloop.config.ConfigCodecs$$anon$16.encodeValue(ConfigCodecs.scala:319)[0m
+[0m[[0m[31merror[0m] [0m[0m	at com.github.plokhotnyuk.jsoniter_scala.core.JsonWriter.write(JsonWriter.scala:927)[0m
+[0m[[0m[31merror[0m] [0m[0m	at com.github.plokhotnyuk.jsoniter_scala.core.package$.writeToArray(package.scala:411)[0m
+[0m[[0m[31merror[0m] [0m[0m	at bloop.config.ConfigCodecs$.toStr(ConfigCodecs.scala:335)[0m
+[0m[[0m[31merror[0m] [0m[0m	at bloop.config.package$.write(package.scala:9)[0m
+[0m[[0m[31merror[0m] [0m[0m	at bloop.config.package$.write(package.scala:11)[0m
+[0m[[0m[31merror[0m] [0m[0m	at bloop.integrations.sbt.BloopDefaults$.writeConfigAtomically(SbtBloop.scala:1119)[0m
+[0m[[0m[31merror[0m] [0m[0m	at bloop.integrations.sbt.BloopDefaults$.$anonfun$bloopGenerate$4(SbtBloop.scala:1083)[0m
+[0m[[0m[31merror[0m] [0m[0m	at scala.Function1.$anonfun$compose$1(Function1.scala:49)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sbt.internal.util.$tilde$greater.$anonfun$$u2219$1(TypeFunctions.scala:63)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sbt.std.Transform$$anon$4.work(Transform.scala:69)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sbt.Execute.$anonfun$submit$2(Execute.scala:283)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sbt.internal.util.ErrorHandling$.wideConvert(ErrorHandling.scala:24)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sbt.Execute.work(Execute.scala:292)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sbt.Execute.$anonfun$submit$1(Execute.scala:283)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sbt.ConcurrentRestrictions$$anon$4.$anonfun$submitValid$1(ConcurrentRestrictions.scala:265)[0m
+[0m[[0m[31merror[0m] [0m[0m	at sbt.CompletionService$$anon$2.call(CompletionService.scala:65)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.util.concurrent.FutureTask.run(FutureTask.java:266)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.util.concurrent.FutureTask.run(FutureTask.java:266)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)[0m
+[0m[[0m[31merror[0m] [0m[0m	at java.lang.Thread.run(Thread.java:750)[0m
+[0m[[0m[31merror[0m] [0m[0m(Global / [31mbloopInstall[0m) java.lang.UnsupportedClassVersionError: com/github/plokhotnyuk/jsoniter_scala/core/ByteArrayAccess has been compiled by a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0[0m

@@ -12,7 +12,7 @@ import os.read
 import os.readLink
 import os.write
 
-class MultiUart extends Module {
+class uartPort extends Module {
   val client = IO(Flipped(new AXI))
 
   val readRequestBuffer = RegInit(new Bundle {
@@ -52,8 +52,7 @@ class MultiUart extends Module {
     when(!readRequestBuffer.len.orR) { readRequestBuffer.valid := false.B }
   }
   val mtime = RegInit(0.U(64.W))
-  val mtimecmp0 = RegInit(0.U(64.W))
-  val mtimecmp1 = RegInit(0.U(64.W))
+  val mtimecmp = RegInit(0.U(64.W))
   val mtimecmplowtemp = Reg(UInt(32.W))
   val couter_wrap = RegInit(0.U(4.W))
   couter_wrap := couter_wrap + 1.U
@@ -93,61 +92,61 @@ class MultiUart extends Module {
     .foreach { case(buffer, next) => { buffer := next } }  
   }
 
-  val terminalReady = RegInit(false.B)
-  when(!terminalReady) {
-    terminalReady := "buildroot login: ".reverse.toCharArray().toSeq.zip(lastUartChars.toSeq) map { case(char, uchar) => (char.U === uchar)} reduce(_ && _)
-  }
+  // val terminalReady = RegInit(false.B)
+  // when(!terminalReady) {
+  //   terminalReady := "buildroot login: ".reverse.toCharArray().toSeq.zip(lastUartChars.toSeq) map { case(char, uchar) => (char.U === uchar)} reduce(_ && _)
+  // }
 
-  val afterLogin = RegInit(false.B)
-  when(!afterLogin) {
-    afterLogin := "~ # ".reverse.toCharArray().toSeq.zip(lastUartChars.toSeq) map { case(char, uchar) => (char.U === uchar)} reduce(_ && _)
-  }
+  // val afterLogin = RegInit(false.B)
+  // when(!afterLogin) {
+  //   afterLogin := "~ # ".reverse.toCharArray().toSeq.zip(lastUartChars.toSeq) map { case(char, uchar) => (char.U === uchar)} reduce(_ && _)
+  // }
 
-  val hardInput = RegInit(VecInit("root\nls ..".map(c => new Bundle {
-    val valid = Bool()
-    val char = UInt(8.W)
-  } Lit(_.valid -> true.B, _.char -> c.U))))
+  // val hardInput = RegInit(VecInit("root\nls ..".map(c => new Bundle {
+  //   val valid = Bool()
+  //   val char = UInt(8.W)
+  // } Lit(_.valid -> true.B, _.char -> c.U))))
 
-  val command = RegInit(VecInit("ls .. && poweroff\n".map(c => new Bundle {
-    val valid = Bool()
-    val char = UInt(8.W)
-  } Lit(_.valid -> true.B, _.char -> c.U))))
+  // val command = RegInit(VecInit("ls .. && poweroff\n".map(c => new Bundle {
+  //   val valid = Bool()
+  //   val char = UInt(8.W)
+  // } Lit(_.valid -> true.B, _.char -> c.U))))
 
-  when(
-    ((readRequestBuffer.address & "hffff0fff".U) === "he000002c".U) && 
-    readRequestBuffer.valid && terminalReady && !afterLogin
-  ) {
-    client.RDATA := (8.U(32.W) | Cat(!(hardInput(0).valid.asUInt),0.U(1.W)))
-  }
+  // when(
+  //   ((readRequestBuffer.address & "hffff0fff".U) === "he000002c".U) && 
+  //   readRequestBuffer.valid && terminalReady && !afterLogin
+  // ) {
+  //   client.RDATA := (8.U(32.W) | Cat(!(hardInput(0).valid.asUInt),0.U(1.W)))
+  // }
 
-  when(
-    ((readRequestBuffer.address & "hffff0fff".U) === "he0000030".U) && 
-    readRequestBuffer.valid && terminalReady && !afterLogin
-  ) {
-    client.RDATA := hardInput(0).char
-    when(client.RREADY) {
-      hardInput.dropRight(1).zip(hardInput.drop(1)).foreach { case(curr, next) => curr := next }
-      hardInput.last.valid := false.B
-    }
-  }
+  // when(
+  //   ((readRequestBuffer.address & "hffff0fff".U) === "he0000030".U) && 
+  //   readRequestBuffer.valid && terminalReady && !afterLogin
+  // ) {
+  //   client.RDATA := hardInput(0).char
+  //   when(client.RREADY) {
+  //     hardInput.dropRight(1).zip(hardInput.drop(1)).foreach { case(curr, next) => curr := next }
+  //     hardInput.last.valid := false.B
+  //   }
+  // }
 
-  when(
-    ((readRequestBuffer.address & "hffff0fff".U) === "he000002c".U) && 
-    readRequestBuffer.valid && afterLogin
-  ) {
-    client.RDATA := (8.U(32.W) | Cat(!(command(0).valid.asUInt),0.U(1.W)))
-  }
+  // when(
+  //   ((readRequestBuffer.address & "hffff0fff".U) === "he000002c".U) && 
+  //   readRequestBuffer.valid && afterLogin
+  // ) {
+  //   client.RDATA := (8.U(32.W) | Cat(!(command(0).valid.asUInt),0.U(1.W)))
+  // }
 
-  when(
-    ((readRequestBuffer.address & "hffff0fff".U) === "he0000030".U) && 
-    readRequestBuffer.valid && afterLogin
-  ) {
-    client.RDATA := command(0).char
-    when(client.RREADY) {
-      command.dropRight(1).zip(command.drop(1)).foreach { case(curr, next) => curr := next }
-      command.last.valid := false.B
-    }
-  }
+  // when(
+  //   ((readRequestBuffer.address & "hffff0fff".U) === "he0000030".U) && 
+  //   readRequestBuffer.valid && afterLogin
+  // ) {
+  //   client.RDATA := command(0).char
+  //   when(client.RREADY) {
+  //     command.dropRight(1).zip(command.drop(1)).foreach { case(curr, next) => curr := next }
+  //     command.last.valid := false.B
+  //   }
+  // }
 
   when(writeRequestBuffer.address.valid && writeRequestBuffer.data.valid) {
     writeRequestBuffer.data.valid := false.B
@@ -171,15 +170,14 @@ class MultiUart extends Module {
     writeRequestBuffer.data.strb := client.WSTRB
   }
 
-  when(writeRequestBuffer.data.valid && !writeRequestBuffer.data.last) {
-    mtimecmplowtemp := writeRequestBuffer.data.data 
-  }
-
-
-  when(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h02004000".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) {
-    mtimecmp0 := Cat(writeRequestBuffer.data.data, mtimecmplowtemp)
-  }.elsewhen(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h02004008".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) {
-    mtimecmp1 := Cat(writeRequestBuffer.data.data, mtimecmplowtemp)
+  when(writeRequestBuffer.data.valid && !writeRequestBuffer.data.last) { mtimecmplowtemp := writeRequestBuffer.data.data }
+  when(
+    writeRequestBuffer.address.valid && 
+    (writeRequestBuffer.address.offset === "h02004000".U) &&
+    writeRequestBuffer.data.valid &&
+    writeRequestBuffer.data.last
+  ) {
+    mtimecmp := Cat(writeRequestBuffer.data.data, mtimecmplowtemp)
   }
 
   client.ARREADY := !readRequestBuffer.valid
@@ -191,54 +189,42 @@ class MultiUart extends Module {
   client.BRESP := 0.U
   client.BVALID := writeRequestBuffer.address.valid && writeRequestBuffer.data.valid && writeRequestBuffer.data.last
 
+  val MTIP = IO(Output(Bool()))
+  MTIP := (mtime > mtimecmp)
+}
+
+
+class MultiUart extends Module {
+  val client0 = IO(Flipped(new AXI))
+  val client1 = IO(Flipped(new AXI))
+
+  val uart0 = Module(new uartPort{
+    val putCharOut0 = IO(Output(putChar.cloneType))
+    putCharOut0 := putChar
+  })
+  val uart1 = Module(new uartPort{
+    val putCharOut1 = IO(Output(putChar.cloneType))
+    putCharOut1 := putChar
+  })
+
+  uart0.client <> client0
+  uart1.client <> client1
+
+
+  val putChar0 = IO(Output(uart0.putCharOut0.cloneType))
+  putChar0 := uart0.putCharOut0
+
+  val putChar1 = IO(Output(uart1.putCharOut1.cloneType))
+  putChar1 := uart1.putCharOut1
+
   val MTIP0 = IO(Output(Bool()))
   val MTIP1 = IO(Output(Bool()))
-  MTIP0 := (mtime > mtimecmp0)
-  MTIP1 := (mtime > mtimecmp1)
+
+  MTIP0 := uart0.MTIP
+  MTIP1 := uart1.MTIP
+
 }
 
 object MultiUart extends App {
   emitVerilog(new MultiUart)
-}
-
-class MultiPSClint extends MultiUart {
-  val psMaster = IO(Flipped(new AXI))
-
-  val awFired, wFired, bValid, finished = RegInit(false.B)
-  psMaster.AWREADY := !awFired
-  psMaster.WREADY := !wFired
-  psMaster.BVALID := awFired && wFired
-
-  when(psMaster.AWVALID && psMaster.AWREADY) { awFired := true.B }
-  when(psMaster.WVALID && psMaster.WREADY) { wFired := true.B }
-  when(psMaster.BVALID && psMaster.BREADY) { finished := true.B }
-
-  when(finished) {
-    psMaster.AWREADY := false.B
-    psMaster.WREADY := false.B
-    psMaster.BVALID := false.B
-  }
-  val bid = Reg(psMaster.AWID.cloneType)
-  when(psMaster.AWREADY && psMaster.AWVALID) { bid := psMaster.AWID }
-  psMaster.BID := bid
-  psMaster.BRESP := 0.U
-
-  psMaster.ARREADY := false.B
-
-  psMaster.RVALID := false.B
-  psMaster.RDATA := 0.U
-  psMaster.RID := 0.U
-  psMaster.RLAST := false.B
-  psMaster.RRESP := 0.U
-  when(psMaster.WREADY && psMaster.WVALID) { ps_stat := psMaster.WDATA } 
-
-  val STANDBY, RUNNING = IO(Output(Bool()))
-  STANDBY := !ps_stat.orR
-  RUNNING := ps_stat.orR
-}
-
-// clint should be connected to peripheral ports 0, 1 through axi interconect
-
-object MultiPSClint extends App {
-  emitVerilog(new MultiPSClint)
 }

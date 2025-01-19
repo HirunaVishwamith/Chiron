@@ -10,7 +10,7 @@ import pipeline.ports._
 import common.coreConfiguration._
 import cache.AXI
 import _root_.testbench.mainMemory
-import _root_.testbench.uart
+import _root_.testbench.MultiUart
 import decode.constants
 import dataclass.data
 import _root_.testbench.simulatedMemory
@@ -22,7 +22,7 @@ class system extends Module {
   val core0 = Module(new core(
     dPort_id = 0,
     peripheral_id = 0,
-    iPort_id = 0,
+    iPort_id = 1,
     mhart_id = 0
   ){
     val registersOut = IO(Output(decode.registersOut.cloneType))
@@ -44,9 +44,9 @@ class system extends Module {
     allRobFiresOut := rob.commit.fired
   })
   val core1 = Module(new core(
-    dPort_id = 1,
+    dPort_id = 2,
     peripheral_id = 1,
-    iPort_id = 1,
+    iPort_id = 3,
     mhart_id = 1
   ){
     val registersOut = IO(Output(decode.registersOut.cloneType))
@@ -425,18 +425,21 @@ class system extends Module {
   val prober = IO(memory.externalProbe.cloneType)
   prober <> memory.externalProbe
 
-  //Peripherals & MTIP
-  //core0 Peripheral
-  val peripheralUart0 = Module(new uart{
-    val putCharOut = IO(Output(putChar.cloneType))
-    putCharOut := putChar
-  })
+  //Peripherals & MTIPs
 
-  val putChar0 = IO(Output(peripheralUart0.putCharOut.cloneType))
-  putChar0 := peripheralUart0.putCharOut
+  val peripherals = Module(new MultiUart())
 
-  core0.peripheral <> peripheralUart0.client
+  val core0OutChar = IO(Output(peripherals.putChar0.cloneType))
+  val core1OutChar = IO(Output(peripherals.putChar1.cloneType))
 
+  core0OutChar := peripherals.putChar0
+  core1OutChar := peripherals.putChar1
+
+  core0.peripheral <> peripherals.client0
+  core1.peripheral <> peripherals.client1
+
+  core0.MTIP := peripherals.MTIP0
+  core1.MTIP := peripherals.MTIP1
 
 
   val registersOut0 = IO(Output(core0.registersOut.cloneType))
@@ -448,22 +451,6 @@ class system extends Module {
   robOut0 := core0.robOut
   when(RegNext(core0.allRobFiresOut, false.B)) { registersOutBuffer0 := core0.registersOut }
 
-
-  core0.MTIP := peripheralUart0.MTIP
-
-  //core1 Peripheral
-  val peripheralUart1 = Module(new uart{
-    val putCharOut = IO(Output(putChar.cloneType))
-    putCharOut := putChar
-  })
-
-  val putChar1 = IO(Output(peripheralUart1.putCharOut.cloneType))
-  putChar1 := peripheralUart1.putCharOut
-
-  core1.peripheral <> peripheralUart1.client
-
-
-
   val registersOut1 = IO(Output(core1.registersOut.cloneType))
   val registersOutBuffer1 = Reg(registersOut1.cloneType)
   registersOut1 := Mux(core1.robOut.commitFired && RegNext(core1.robOut.commitFired, false.B), core1.registersOut ,registersOutBuffer1)
@@ -474,7 +461,7 @@ class system extends Module {
   when(RegNext(core1.allRobFiresOut, false.B)) { registersOutBuffer1 := core1.registersOut }
 
 
-  core1.MTIP := peripheralUart1.MTIP
+
 
 
 
