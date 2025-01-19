@@ -1,3 +1,125 @@
 2025.01.19 18:27:57 INFO  Started: Metals version 1.4.2 in folders '/media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor' for client Visual Studio Code 1.90.1.[0m
 Jan 19, 2025 6:28:08 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
 INFO: Unsupported notification method: $/setTrace
+2025.01.19 08:18:18 INFO  Started: Metals version 1.4.2 in folders '/mnt/Uni/FYP/mid-testing/Multicore_Processor' for client VSCodium 1.96.2.[0m
+2025.01.19 08:18:23 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/cacheLookup.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:18:23 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/cacheLookup.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:18:23 INFO  skipping build import with status 'Dismissed'[0m
+2025.01.19 08:18:23 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/cacheLookup.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:18:25 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/cacheLookup.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:18:28 INFO  time: code lens generation in 2.63s[0m
+2025.01.19 08:18:28 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/cacheLookup.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:18 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/cacheLookup.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:22 INFO  sbt 1.10.6 found for workspace.[0m
+2025.01.19 08:19:25 INFO  [info] welcome to sbt 1.10.6 (Eclipse Adoptium Java 17.0.13)[0m
+2025.01.19 08:19:28 INFO  [info] loading project definition from /mnt/Uni/FYP/mid-testing/Multicore_Processor/project[0m
+2025.01.19 08:19:29 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/cacheLookup.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:29 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:29 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:30 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:31 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:31 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:32 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:32 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:33 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:33 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:34 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:34 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:36 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:36 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:36 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:36 WARN  no build target for: /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala[0m
+2025.01.19 08:19:37 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:39 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:19:43 INFO  [info] loading settings for project root from build.sbt...[0m
+2025.01.19 08:19:43 INFO  [info] set current project to %NAME% (in build file:/mnt/Uni/FYP/mid-testing/Multicore_Processor/)[0m
+2025.01.19 08:19:43 ERROR java.io.IOException: User limit of inotify instances reached or too many open files[0m
+2025.01.19 08:19:43 ERROR 	at java.base/sun.nio.fs.LinuxWatchService.<init>(LinuxWatchService.java:62)[0m
+2025.01.19 08:19:43 ERROR 	at java.base/sun.nio.fs.LinuxFileSystem.newWatchService(LinuxFileSystem.java:47)[0m
+2025.01.19 08:19:43 ERROR 	at com.swoval.files.RegisterableWatchServices$RegisterableWatchServiceImpl.<init>(RegisterableWatchServices.java:34)[0m
+2025.01.19 08:19:43 ERROR 	at com.swoval.files.RegisterableWatchServices.get(RegisterableWatchServices.java:21)[0m
+2025.01.19 08:19:43 ERROR 	at com.swoval.files.PlatformWatcher.make(PlatformWatcher.java:11)[0m
+2025.01.19 08:19:43 ERROR 	at com.swoval.files.PathWatchers.get(PathWatchers.java:85)[0m
+2025.01.19 08:19:43 ERROR 	at com.swoval.files.FileTreeRepositories.get(FileTreeRepositories.java:117)[0m
+2025.01.19 08:19:43 ERROR 	at com.swoval.files.FileTreeRepositories.get(FileTreeRepositories.java:83)[0m
+2025.01.19 08:19:43 ERROR 	at com.swoval.files.FileTreeRepositories.get(FileTreeRepositories.java:33)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.internal.nio.FileTreeRepositoryImpl.<init>(FileTreeRepositoryImpl.scala:48)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.internal.nio.FileTreeRepository$.default(FileTreeRepository.scala:41)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.BuiltinCommands$.$anonfun$setupGlobalFileTreeRepository$1(Main.scala:987)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.BuiltinCommands$.$anonfun$doLoadProject$5(Main.scala:979)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.Project$.setProject(Project.scala:502)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.BuiltinCommands$.doLoadProject(Main.scala:979)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.BuiltinCommands$.$anonfun$loadProjectImpl$2(Main.scala:917)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.Command$.$anonfun$applyEffect$4(Command.scala:151)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.Command$.$anonfun$applyEffect$2(Command.scala:146)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.Command$.process(Command.scala:194)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.$anonfun$processCommand$7(MainLoop.scala:267)[0m
+2025.01.19 08:19:43 ERROR 	at scala.Option.getOrElse(Option.scala:189)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.process$1(MainLoop.scala:267)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.processCommand(MainLoop.scala:314)[0m
+2025.01.19 08:19:43 INFO  [error] java.io.IOException: User limit of inotify instances reached or too many open files[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.$anonfun$next$5(MainLoop.scala:171)[0m
+2025.01.19 08:19:43 INFO  [error] Use 'last' for the full log.[0m
+2025.01.19 08:19:43 ERROR 	at sbt.State$StateOpsImpl$.runCmd$1(State.scala:290)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.State$StateOpsImpl$.process$extension(State.scala:326)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.$anonfun$next$4(MainLoop.scala:171)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.internal.util.ErrorHandling$.wideConvert(ErrorHandling.scala:24)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.next(MainLoop.scala:171)[0m
+2025.01.19 08:19:43 INFO  [warn] Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore? (default: r)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.run(MainLoop.scala:152)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.$anonfun$runWithNewLog$1(MainLoop.scala:127)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.io.Using.apply(Using.scala:41)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.runWithNewLog(MainLoop.scala:120)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.runAndClearLast(MainLoop.scala:74)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.runLoggedLoop(MainLoop.scala:59)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.MainLoop$.runLogged(MainLoop.scala:50)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.StandardMain$.runManaged(Main.scala:225)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.xMain$.$anonfun$run$11(Main.scala:136)[0m
+2025.01.19 08:19:43 ERROR 	at scala.util.DynamicVariable.withValue(DynamicVariable.scala:62)[0m
+2025.01.19 08:19:43 ERROR 	at scala.Console$.withIn(Console.scala:230)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.internal.util.Terminal$.withIn(Terminal.scala:620)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.internal.util.Terminal$.$anonfun$withStreams$1(Terminal.scala:400)[0m
+2025.01.19 08:19:43 ERROR 	at scala.util.DynamicVariable.withValue(DynamicVariable.scala:62)[0m
+2025.01.19 08:19:43 ERROR 	at scala.Console$.withOut(Console.scala:167)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.internal.util.Terminal$.$anonfun$withOut$2(Terminal.scala:610)[0m
+2025.01.19 08:19:43 ERROR 	at scala.util.DynamicVariable.withValue(DynamicVariable.scala:62)[0m
+2025.01.19 08:19:43 ERROR 	at scala.Console$.withErr(Console.scala:196)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.internal.util.Terminal$.withOut(Terminal.scala:610)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.internal.util.Terminal$.withStreams(Terminal.scala:400)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.xMain$.withStreams$1(Main.scala:89)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.xMain$.run(Main.scala:124)[0m
+2025.01.19 08:19:43 ERROR 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)[0m
+2025.01.19 08:19:43 ERROR 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)[0m
+2025.01.19 08:19:43 ERROR 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)[0m
+2025.01.19 08:19:43 ERROR 	at java.base/java.lang.reflect.Method.invoke(Method.java:569)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.internal.XMainConfiguration.run(XMainConfiguration.java:59)[0m
+2025.01.19 08:19:43 ERROR 	at sbt.xMain.run(Main.scala:48)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Launch$.$anonfun$run$1(Launch.scala:149)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Launch$.withContextLoader(Launch.scala:176)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Launch$.run(Launch.scala:149)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Launch$.$anonfun$apply$1(Launch.scala:44)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Launch$.launch(Launch.scala:159)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Launch$.apply(Launch.scala:44)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Launch$.apply(Launch.scala:21)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Boot$.runImpl(Boot.scala:78)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Boot$.run(Boot.scala:73)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Boot$.main(Boot.scala:21)[0m
+2025.01.19 08:19:43 ERROR 	at xsbt.boot.Boot.main(Boot.scala)[0m
+2025.01.19 08:19:44 INFO  time: ran 'sbt bspConfig' in 21s[0m
+2025.01.19 08:19:44 ERROR Creation of .bsp/sbt failed with exit code: 1[0m
+2025.01.19 08:19:48 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:21:59 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:21:59 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:21:59 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:21:59 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:21:59 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:22:04 INFO  running '/usr/local/bin/sbt -Dbloop.export-jar-classifiers=sources bloopInstall'[0m
+2025.01.19 08:22:05 WARN  no build target for: /mnt/Uni/FYP/mid-testing/Multicore_Processor/project/metals.sbt[0m
+2025.01.19 08:22:05 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/project/metals.sbt. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:22:05 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:22:08 INFO  [info] welcome to sbt 1.10.6 (Eclipse Adoptium Java 17.0.13)[0m
+2025.01.19 08:22:14 INFO  [info] loading settings for project multicore_processor-build-build from metals.sbt...[0m
+2025.01.19 08:22:15 INFO  [info] loading project definition from /mnt/Uni/FYP/mid-testing/Multicore_Processor/project/project[0m
+2025.01.19 08:22:20 INFO  [info] loading settings for project multicore_processor-build from metals.sbt...[0m
+2025.01.19 08:22:20 INFO  no build target found for /mnt/Uni/FYP/mid-testing/Multicore_Processor/src/main/scala/cache_phase2/constants.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.19 08:22:20 INFO  [info] loading project definition from /mnt/Uni/FYP/mid-testing/Multicore_Processor/project[0m
