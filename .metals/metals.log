@@ -4404,3 +4404,14 @@ WARNING: Unmatched cancel notification for request id 1023
 2025.01.20 00:59:46 INFO  no build target found for /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/src/main/scala/testbench/system.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
 Jan 20, 2025 12:59:47 AM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
 INFO: Unsupported notification method: $/setTrace
+2025.01.20 01:00:03 INFO  no build target found for /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/src/main/scala/testbench/system.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.20 01:00:07 INFO  no build target found for /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/src/main/scala/testbench/system.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.20 01:39:45 INFO  no build target found for /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/src/main/scala/testbench/system.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.20 01:39:48 INFO  no build target found for /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/src/main/scala/testbench/system.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.20 01:39:50 INFO  no build target found for /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/src/main/scala/testbench/system.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.20 01:39:50 INFO  no build target found for /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/src/main/scala/testbench/system.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.20 01:39:59 INFO  no build target found for /media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/src/main/scala/testbench/system.scala. Using presentation compiler with project's scala-library version: 3.3.4[0m
+2025.01.20 01:48:45 INFO  Shutting down server[0m
+2025.01.20 01:48:45 INFO  shutting down Metals[0m
+2025.01.20 01:48:45 INFO  Exiting server[0m
+2025.01.20 01:50:18 INFO  Started: Metals version 1.4.2 in folders '/media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor' for client Visual Studio Code 1.90.1.[0m

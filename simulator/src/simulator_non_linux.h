@@ -190,7 +190,7 @@ class simulator {
 		tb ->finishedProgramming = 0;
     tb ->programmer_valid = 0;
     tick(++tickcount, tb, tfp); //here it is tick_nodump
-    prev_pc = 0x80000000UL;
+    prev_pc = 0x10000000UL; // this default is set to 0x80000000UL
   }
 
   int step() {
