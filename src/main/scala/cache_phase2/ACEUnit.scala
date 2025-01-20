@@ -46,7 +46,7 @@ class ACEUnit(
   coherencyRequest.invalidateReq := false.B
 
   //AXI initializing
-  bus.AWID := 0.U
+  bus.AWID := id.U
   bus.AWADDR := 0.U
   bus.AWLEN := 0.U
   bus.AWSIZE := 0.U
@@ -64,7 +64,7 @@ class ACEUnit(
 
   bus.BREADY := false.B
 
-  bus.ARID := 0.U
+  bus.ARID := id.U
   bus.ARADDR := 0.U
   bus.ARLEN := 0.U
   bus.ARSIZE := 0.U
