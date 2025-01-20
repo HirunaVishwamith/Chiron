@@ -883,19 +883,19 @@ class ccu extends Module {
 	core0.RRESP := rsp_buff
 
 	core1.RVALID := false.B
-	core1.RID := 0.U(2.W)
+	core1.RID := 1.U(2.W)
 	core1.RDATA := beat_buff
 	core1.RLAST := last_buff
 	core1.RRESP := rsp_buff
 
 	core2.RVALID := false.B
-	core2.RID := 0.U(2.W)
+	core2.RID := 2.U(2.W)
 	core2.RDATA := beat_buff
 	core2.RLAST := last_buff
 	core2.RRESP := rsp_buff
 
 	core3.RVALID := false.B
-	core3.RID := 0.U(2.W)
+	core3.RID := 3.U(2.W)
 	core3.RDATA := beat_buff
 	core3.RLAST := last_buff
 	core3.RRESP := rsp_buff
