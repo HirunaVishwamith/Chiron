@@ -1,0 +1,6 @@
+[0m[[0m[33mwarn[0m] [0m[0msbt-bloop_2.12_1.0-2.0.6-sources.jar no longer exists at /home/mcrparadox/.cache/coursier/v1/https/repo1.maven.org/maven2/ch/epfl/scala/sbt-bloop_2.12_1.0/2.0.6/sbt-bloop_2.12_1.0-2.0.6-sources.jar[0m
+[0m[[0m[0mdebug[0m] [0m[0mnot up to date. inChanged = false, force = false[0m
+[0m[[0m[0mdebug[0m] [0m[0mUpdating ProjectRef(uri("file:/home/yasiru/Desktop/Multicore_Processor/project/"), "multicore_processor-build")...[0m
+[0m[[0m[0minfo[0m] [0m[0mFetching artifacts of multicore_processor-build[0m
+[0m[[0m[0minfo[0m] [0m[0mFetched artifacts of multicore_processor-build[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone updating ProjectRef(uri("file:/home/yasiru/Desktop/Multicore_Processor/project/"), "multicore_processor-build")[0m
