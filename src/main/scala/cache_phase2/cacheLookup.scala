@@ -255,7 +255,7 @@ class cacheLookup extends Module{
 
   val matchFoundReg = RegInit(VecInit(Seq.fill(nway)(false.B)))
 
-  val resultWire = WireInit(0.U(dataWidth.W))
+  val resultWire = WireDefault(0.U(dataWidth.W))
 
   val receivedCacheLine = RegInit(0.U(dataDataWidth.W))
   val receivedResponse = RegInit(0.U(2.W))
@@ -342,8 +342,8 @@ class cacheLookup extends Module{
       })
       val byteChoosed     = byteChunks(inputBuffer.address(2,0))
       val halfwordChoosed = Cat(byteChunks(2.U * inputBuffer.address(2,1) + 1.U),byteChunks(2.U * inputBuffer.address(2,1)))
-      val wordChoosed     = Cat(byteChunks(2.U * inputBuffer.address(2) + 3.U),byteChunks(2.U * inputBuffer.address(2) + 2.U), 
-                                byteChunks(2.U * inputBuffer.address(2) + 1.U),byteChunks(2.U * inputBuffer.address(2)))
+      val wordChoosed     = Cat(byteChunks(4.U * inputBuffer.address(2) + 3.U),byteChunks(4.U * inputBuffer.address(2) + 2.U), 
+                                byteChunks(4.U * inputBuffer.address(2) + 1.U),byteChunks(4.U * inputBuffer.address(2)))
       
       switch(inputBuffer.instruction(13, 12)){
         is("b00".U){resultWire := Mux(inputBuffer.instruction(14),byteChoosed,
@@ -471,10 +471,10 @@ class cacheLookup extends Module{
         } .otherwise {
           when(!permissionMiss){
             switch(inputBuffer.instruction(13,12)){
-              is("b00".U){for (i <- 0 until 1) {storeByteChunks(inputBuffer.address(2, 0) + i.U) := storeDataBuffer.data(8 * (i + 1) - 1, 8 * i)}}
-              is("b01".U){for (i <- 0 until 2) {storeByteChunks(inputBuffer.address(2, 0) + i.U) := storeDataBuffer.data(8 * (i + 1) - 1, 8 * i)}}
-              is("b10".U){for (i <- 0 until 4) {storeByteChunks(inputBuffer.address(2, 0) + i.U) := storeDataBuffer.data(8 * (i + 1) - 1, 8 * i)}}
-              is("b11".U){for (i <- 0 until 8) {storeByteChunks(inputBuffer.address(2, 0) + i.U) := storeDataBuffer.data(8 * (i + 1) - 1, 8 * i)}}
+              is("b00".U){for (i <- 0 until 1) {storeByteChunks(i.U) := storeDataBuffer.data(8 * (i + 1) - 1, 8 * i)}}
+              is("b01".U){for (i <- 0 until 2) {storeByteChunks(i.U) := storeDataBuffer.data(8 * (i + 1) - 1, 8 * i)}}
+              is("b10".U){for (i <- 0 until 4) {storeByteChunks(i.U) := storeDataBuffer.data(8 * (i + 1) - 1, 8 * i)}}
+              is("b11".U){for (i <- 0 until 8) {storeByteChunks(i.U) := storeDataBuffer.data(8 * (i + 1) - 1, 8 * i)}}
             }
             newstoreChunks(inputBuffer.address(5, 2)) := Cat(storeByteChunks.slice(0, 4).reverse)
             newstoreChunks(inputBuffer.address(5, 2) + 1.U) := Cat(storeByteChunks.slice(4, 8).reverse)

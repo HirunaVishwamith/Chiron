@@ -150,6 +150,10 @@ class CacheModule (
   when(inputBufferState =/= awaitWrite){
     coherencyInterrupted := false.B
   }
+  val gotFired = RegInit(false.B)
+  when(inputBufferState =/= awaitWrite){
+  gotFired := false.B
+  }
   val storeDataReg = RegInit(0.U(dataWidth.W))
 
   when(inputBufferState =/= empty){
@@ -202,7 +206,7 @@ class CacheModule (
 
       when(peripheralRead){
         peripheralAXIUnit.loadData.ready := true.B
-        when(peripheralAXIUnit.request.ready && !inputBuffer.branchMask.orR){
+        when(peripheralAXIUnit.request.ready && !inputBuffer.branchMask(3,0).orR){
           peripheralAXIUnit.request.valid := true.B
           peripheralAXIUnit.request.writeEn := false.B
           peripheralAXIUnit.request.address := inputBuffer.address
@@ -211,7 +215,7 @@ class CacheModule (
         }
       } otherwise{
         //Cache will take data when ready, can wait as next state is when data is ready 
-        when((!isAtomicsWire || (isAtomicsWire && !inputBuffer.branchMask.orR))){
+        when((!isAtomicsWire || (isAtomicsWire && !inputBuffer.branchMask(3,0).orR))){
           cacheLookup.responseOut.ready := true.B
 
           cacheLookup.cacheRequest.valid := true.B
@@ -251,7 +255,8 @@ class CacheModule (
       val peripheralWrite = WireInit(inputBuffer.address === FIFO_ADDR_RX.U)
       when(peripheralWrite){
         writeDataInFifo.canAccept := !requestAccepted
-        when(peripheralAXIUnit.request.ready  && !inputBuffer.branchMask.orR && writeDataInFifo.dataOut.valid && !requestAccepted){
+        //Wait till branch is resolved for peripheral write
+        when(peripheralAXIUnit.request.ready  && !inputBuffer.branchMask(3,0).orR && writeDataInFifo.dataOut.valid && !requestAccepted){
           
           peripheralAXIUnit.request.valid := true.B
           peripheralAXIUnit.request.writeEn := true.B
@@ -261,18 +266,7 @@ class CacheModule (
 
           requestAccepted := Mux(peripheralAXIUnit.request.ready && !requestAccepted, true.B, requestAccepted)
         } 
-      }
-      //Wait till branch is resolved for peripheral write
-      when(peripheralWrite && peripheralAXIUnit.request.ready  && !inputBuffer.branchMask.orR && writeDataInFifo.dataOut.valid && !requestAccepted){
-
-        peripheralAXIUnit.request.valid := true.B
-        peripheralAXIUnit.request.writeEn := true.B
-        peripheralAXIUnit.request.address := inputBuffer.address
-        peripheralAXIUnit.request.data :=  writeDataInFifo.dataOut.data
-        peripheralAXIUnit.request.instruction := inputBuffer.instruction
-
-        requestAccepted := Mux(peripheralAXIUnit.request.ready && !requestAccepted, true.B, requestAccepted)
-      } otherwise{
+      } .otherwise{
         //Wait till branch is resolved for memory store
         when(!coherencyInterrupted){
           coherencyInterrupted := memoryAXIUnit.coherencyReceived
@@ -280,7 +274,7 @@ class CacheModule (
         when(memoryAXIUnit.coherencyReceived){
           requestAccepted := false.B
         }
-        when(!inputBuffer.branchMask.orR  && memoryAXIUnit.request.ready && writeDataInFifo.dataOut.valid && !requestAccepted){
+        when(!inputBuffer.branchMask(3,0).orR  && memoryAXIUnit.request.ready && writeDataInFifo.dataOut.valid && !requestAccepted){
           cacheLookup.responseOut.ready := isStoreConditionalWire
 
           writeDataInFifo.canAccept := Mux(coherencyInterrupted, false.B, !cacheLookup.cacheRequest.accepted)
@@ -300,14 +294,16 @@ class CacheModule (
           when(memoryAXIUnit.coherencyReceived){
             requestAccepted := false.B
           } .otherwise{
-            requestAccepted := Mux(cacheLookup.cacheRequest.accepted && !requestAccepted, true.B, requestAccepted)
+            requestAccepted := Mux(cacheLookup.cacheRequest.valid && !requestAccepted, true.B, requestAccepted)
           }
         }
       }
       when(peripheralWrite){
-        writeCommit.ready := requestAccepted & peripheralAXIUnit.request.ready
+        writeCommit.ready := !gotFired//requestAccepted & peripheralAXIUnit.request.ready
+        gotFired := Mux(writeCommit.fired && !gotFired, true.B, gotFired)
       } .otherwise{
-        writeCommit.ready := requestAccepted & cacheLookup.cacheRequest.ready
+        writeCommit.ready := !gotFired//requestAccepted & cacheLookup.cacheRequest.ready
+        gotFired := Mux(writeCommit.fired && !gotFired, true.B, gotFired)
       }
 
       when(isStoreConditionalWire){
@@ -325,9 +321,18 @@ class CacheModule (
       when(isFlushedWire){
         inputBufferState := empty
       } .otherwise{
-        when(writeCommit.fired){
-          when(requestAccepted && (peripheralAXIUnit.request.ready || cacheLookup.cacheRequest.ready)){
-            inputBufferState:= Mux(isStoreConditionalWire, full, empty)
+        when(gotFired){//writeCommit.fired){
+          when(requestAccepted){ //&& (peripheralAXIUnit.request.ready || cacheLookup.cacheRequest.ready)){
+            when(peripheralWrite){
+              when(peripheralAXIUnit.request.ready){
+                inputBufferState:= Mux(isStoreConditionalWire, full, empty)
+              }
+            } .otherwise{
+              when(cacheLookup.cacheRequest.ready){
+                inputBufferState:= Mux(isStoreConditionalWire, full, empty)
+              }
+            }
+            // inputBufferState:= Mux(isStoreConditionalWire, full, empty)
           }
         } .otherwise{
           inputBufferState := awaitWrite
