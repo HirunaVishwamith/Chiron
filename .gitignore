@@ -1,4 +1,5 @@
 obj_dir/
 .metals/
+.bloop/
 .vscode/
 target/
