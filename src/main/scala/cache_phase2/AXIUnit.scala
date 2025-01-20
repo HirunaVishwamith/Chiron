@@ -37,7 +37,7 @@ class AXIUnit(
   loadData.response := 0.U    //Not required for peripherals
 
   //AXI initializing
-  bus.AWID := 0.U
+  bus.AWID := id.U
   bus.AWADDR := 0.U
   bus.AWLEN := 0.U
   bus.AWSIZE := 0.U
@@ -55,7 +55,7 @@ class AXIUnit(
 
   bus.BREADY := false.B
 
-  bus.ARID := 0.U
+  bus.ARID := id.U
   bus.ARADDR := 0.U
   bus.ARLEN := 0.U
   bus.ARSIZE := 0.U
