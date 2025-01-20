@@ -1,3 +1,4 @@
+
 package DataCache
 //Use namespaces if required
 
@@ -202,7 +203,7 @@ class CacheModule (
                              
     }
     is(awaitRead){
-      val peripheralRead = WireInit(inputBuffer.address === FIFO_ADDR_TX.U)
+      val peripheralRead = WireInit(inputBuffer.address === FIFO_ADDR_RX.U)
 
       when(peripheralRead){
         peripheralAXIUnit.loadData.ready := true.B
@@ -252,7 +253,7 @@ class CacheModule (
       }
     }
     is(awaitWrite){
-      val peripheralWrite = WireInit(inputBuffer.address === FIFO_ADDR_RX.U)
+      val peripheralWrite = WireInit(inputBuffer.address === FIFO_ADDR_TX.U)
       when(peripheralWrite){
         writeDataInFifo.canAccept := !requestAccepted
         //Wait till branch is resolved for peripheral write
