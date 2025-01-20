@@ -13,7 +13,7 @@ int main() {
   cout <<  flush;
 
   while(step<1000) {
-    cout<<std::hex<<bench.prev_pc<<endl;
+    // cout<<std::hex<<bench.prev_pc<<endl;
     bench.step();
     step++;
   }

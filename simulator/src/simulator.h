@@ -245,16 +245,20 @@ class simulator {
     for (int i = 0; !(tb -> robOut0_commitFired) && i < STEP_TIMEOUT; i++) {
     #endif
     #ifdef SHOW_TERMINAL
-     if (tb ->core0OutChar_valid) { cout << tb -> core0OutChar_byte << flush; }
-     if (tb ->core1OutChar_valid) { cout << tb -> core1OutChar_byte << flush; }
+    //  if (tb ->core0OutChar_valid) { printf("Hi %d",tb -> core0OutChar_byte);}
+    //  if (tb ->core1OutChar_valid) { printf("Hi %d",tb -> core1OutChar_byte);}
+
+    if (tb ->core0OutChar_valid) { cout<< (char)(tb -> core0OutChar_byte)<<flush;}
+    if (tb ->core1OutChar_valid) { cout<< (char)(tb -> core1OutChar_byte)<<flush;}
+
     #endif
       tick(++dump_tick, tb, tfp);
           }
     
-    #ifdef SHOW_TERMINAL
-     if (tb ->core0OutChar_valid) { cout << tb -> core0OutChar_byte << flush; }
-     if (tb ->core1OutChar_valid) { cout << tb -> core1OutChar_byte << flush; }
-    #endif
+    // #ifdef SHOW_TERMINAL
+    //  if (tb ->core0OutChar_valid) { cout<< (char)(tb -> core0OutChar_byte+98); cout.flush();}
+    //  if (tb ->core1OutChar_valid) { cout<< (char)(tb -> core1OutChar_byte+98); cout.flush();}
+    // #endif
     // return 1 indicate timeout
     prev_pc = tb -> robOut0_pc;
     if ((tb -> robOut0_interrupt) && (tb -> robOut0_commitFired)) { return 2; }
