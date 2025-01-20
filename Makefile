@@ -48,7 +48,7 @@ sim:
 	cd obj_dir/; \
 	make -f Vsystem.mk; \
 
-simulator/src/bench.out: simulator/src/obj_dir simulator/src/simulator_non_linux.h simulator/src/bench.cpp
+simulator/src/bench.out: simulator/src/obj_dir simulator/src/simulator.h simulator/src/bench.cpp
 	cd simulator/src; \
 	g++ -O3 -I /usr/share/verilator/include -I obj_dir /usr/share/verilator/include/verilated.cpp /usr/share/verilator/include/verilated_vcd_c.cpp bench.cpp obj_dir/Vsystem__ALL.a -o bench.out
 

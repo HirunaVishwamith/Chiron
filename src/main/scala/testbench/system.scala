@@ -19,7 +19,12 @@ import Interconnect._
 
 class system extends Module {
 
-  val core0 = Module(new core{
+  val core0 = Module(new core(
+    dPort_id = 0,
+    peripheral_id = 0,
+    iPort_id = 1,
+    mhart_id = 0
+  ){
     val registersOut = IO(Output(decode.registersOut.cloneType))
     val architecturalRegisterFile = VecInit(decode.retiredRenamedTable.table.map(i => prf.registerFileOutput(i)))
     registersOut zip architecturalRegisterFile foreach { case(x, y) => x := y }
@@ -38,7 +43,12 @@ class system extends Module {
     val allRobFiresOut = IO(Output(Bool()))
     allRobFiresOut := rob.commit.fired
   })
-  val core1 = Module(new core{
+  val core1 = Module(new core(
+    dPort_id = 2,
+    peripheral_id = 1,
+    iPort_id = 3,
+    mhart_id = 1
+  ){
     val registersOut = IO(Output(decode.registersOut.cloneType))
     val architecturalRegisterFile = VecInit(decode.retiredRenamedTable.table.map(i => prf.registerFileOutput(i)))
     registersOut zip architecturalRegisterFile foreach { case(x, y) => x := y }
@@ -449,6 +459,10 @@ class system extends Module {
   val robOut1 = IO(Output(core1.robOut.cloneType))
   robOut1 := core1.robOut
   when(RegNext(core1.allRobFiresOut, false.B)) { registersOutBuffer1 := core1.registersOut }
+
+
+
+
 
 
 }

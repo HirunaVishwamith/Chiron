@@ -42,6 +42,7 @@ class iCacheRegisters extends BlackBox(
 
 class iCache(
   val blockSize:Int = 16, // 4 instructions per block
+  iPort_id: Int
 ) extends Module {
   /**
     * Inputs and Outputs of the module
@@ -190,7 +191,7 @@ class iCache(
   lowLevelMem.ARADDR := Cat(results(next).address(31, 2+iCacheOffsetWidth), 0.U((2+iCacheOffsetWidth).W))
   lowLevelMem.ARBURST := 1.U
   lowLevelMem.ARCACHE := 2.U
-  lowLevelMem.ARID := 0.U
+  lowLevelMem.ARID := iPort_id.U
   lowLevelMem.ARLEN := 7.U
   lowLevelMem.ARLOCK := 0.U
   lowLevelMem.ARPROT := 0.U
@@ -206,7 +207,7 @@ class iCache(
   lowLevelMem.AWADDR := 0.U
   lowLevelMem.AWBURST := 1.U
   lowLevelMem.AWCACHE := 2.U
-  lowLevelMem.AWID := 0.U
+  lowLevelMem.AWID := iPort_id.U
   lowLevelMem.AWLEN := 0.U
   lowLevelMem.AWLOCK := 0.U
   lowLevelMem.AWPROT := 0.U
@@ -233,5 +234,5 @@ class iCache(
 }
 
 object iCache extends App {
-  emitVerilog(new iCache)
+  emitVerilog(new iCache(iPort_id = 0))
 }

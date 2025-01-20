@@ -1,7 +1,6 @@
 #define SHOW_TERMINAL
 
-// #include "simulator.h"
-#include "simulator_non_linux.h"
+#include "simulator.h"
 
 int main() {
   simulator bench;

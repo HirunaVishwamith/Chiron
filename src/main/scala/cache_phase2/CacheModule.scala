@@ -8,7 +8,10 @@ import DataCache.constantsDCache._
 
 
 // Change the module name
-class CacheModule extends Module {
+class CacheModule (
+  peripheral_id : Int,
+  dPort_id : Int
+)extends Module {
   val request = IO(new request)
   val dPort = IO(new ACE(
     busWidth = dPort_WIDTH
@@ -42,6 +45,7 @@ class CacheModule extends Module {
   val peripheralAXIUnit = Module(new AXIUnit(
     dataWidth = dataWidth,
     addrWidth = addrWidth,
+    id = peripheral_id,
     // busWidth = peripheral_WIDTH,
     length = peripheral_LEN,
     size = peripheral_SIZE
@@ -50,6 +54,7 @@ class CacheModule extends Module {
   val memoryAXIUnit = Module(new ACEUnit(
     dataWidth = dataWidth,
     addrWidth = addrWidth,
+    id = dPort_id,
     // busWidth = dPort_WIDTH,
     length = dPort_LEN,
     size = dPort_SIZE
@@ -376,5 +381,5 @@ class CacheModule extends Module {
 object CacheModuleMain extends App {
   println("Generating the CacheModule hardware")
   //Hardware files will be out into generated
-  emitVerilog(new CacheModule(), Array("--target-dir", "generated"))
+  emitVerilog(new CacheModule(peripheral_id = 0, dPort_id = 0), Array("--target-dir", "generated"))
 }

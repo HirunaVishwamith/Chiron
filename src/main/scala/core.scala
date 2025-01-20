@@ -18,8 +18,13 @@ import DataCache._
 import DataCache.constantsDCache._
 
 
-class core extends Module {
-  val icache = Module(new cache.iCache)
+class core (
+  peripheral_id: Int,
+  dPort_id: Int,
+  iPort_id: Int,
+  mhart_id: Int
+)extends Module {
+  val icache = Module(new cache.iCache(iPort_id = iPort_id))
 
   val iPort = IO(new ACE(busWidth = 64))
   iPort <> icache.lowLevelMem
@@ -38,7 +43,9 @@ class core extends Module {
   fetch.updateAllCachelines.fired := false.B
   fetch.carryOutFence.fired := false.B
   
-  val decode = Module(new decode {
+  val decode = Module(new decode (
+    mhart_id = mhart_id
+  ) {
     val registersOut = IO(Output(Vec(33, UInt(64.W))))
     registersOut.foreach(_ := 0.U)
     registersOut.head := mstatus
@@ -55,7 +62,10 @@ class core extends Module {
   val dataQueue = Module(new storeDataIssue)
   val rob = Module(new rob(common.configuration.robAddrWidth, 4))
   val scheduler = Module(new scheduler)
-  val memAccess = Module(new CacheModule{
+  val memAccess = Module(new CacheModule(
+    dPort_id = dPort_id,
+    peripheral_id = peripheral_id
+  ){
     val decrCounter = IO(Output(Bool()))
     decrCounter := false.B//dequeueData
 
@@ -1111,8 +1121,8 @@ class soc extends Module {
   })
 
   // Instantiate two cores
-  val core0 = Module(new core)
-  val core1 = Module(new core)
+  val core0 = Module(new core(dPort_id = 0, peripheral_id = 0, mhart_id = 0, iPort_id = 0))
+  val core1 = Module(new core(dPort_id = 1, peripheral_id = 1, mhart_id = 1, iPort_id = 1))
 
   // Connect core0 signals to SoC IO
   core0.iPort <> io.core0_iPort
@@ -1131,7 +1141,7 @@ class soc extends Module {
 
 
 object core extends App {
-  emitVerilog(new core)
+  emitVerilog(new core(dPort_id = 0, peripheral_id =0, mhart_id = 0, iPort_id =0))
 }
 
 
