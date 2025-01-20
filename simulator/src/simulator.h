@@ -183,45 +183,46 @@ class simulator {
       printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
 		}
     printf("done\n");
-    printf("loading dtb\n");
-    ifstream dtb_input(dtb_name, ios::binary);
-		//printf("Running test for : ");
+    // printf("loading dtb\n");
+    // ifstream dtb_input(dtb_name, ios::binary);
+		// //printf("Running test for : ");
 
-		vector<unsigned char> dtb_buffer(istreambuf_iterator<char>(dtb_input), {});
-    // int next_step = buffer.size()/20;
-		//printf("Loading kernel image|                    |");
-		for (int i = 0; i < dtb_buffer.size(); i=i+8) {
-			tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&dtb_buffer.at(i));
-      tb -> programmer_offset = (i+0x07e00000UL);
-			//cout << buffer.at(i)&255 << endl;
-			tick(++dump_tick, tb, tfp);	//here it is tick_nodump
-      // if (progress != (i*100)/buffer.size()) 
-      printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
-		}
-    printf("done\n");
-    printf("loading boot rom\n");
-    ifstream boot_input(boot_rom, ios::binary);
-		//printf("Running test for : ");
+		// vector<unsigned char> dtb_buffer(istreambuf_iterator<char>(dtb_input), {});
+    // // int next_step = buffer.size()/20;
+		// //printf("Loading kernel image|                    |");
+		// for (int i = 0; i < dtb_buffer.size(); i=i+8) {
+		// 	tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&dtb_buffer.at(i));
+    //   tb -> programmer_offset = (i+0x07e00000UL);
+		// 	//cout << buffer.at(i)&255 << endl;
+		// 	tick(++dump_tick, tb, tfp);	//here it is tick_nodump
+    //   // if (progress != (i*100)/buffer.size()) 
+    //   printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
+		// }
+    // printf("done\n");
+    // printf("loading boot rom\n");
+    // ifstream boot_input(boot_rom, ios::binary);
+		// //printf("Running test for : ");
 
-		vector<unsigned char> boot_buffer(istreambuf_iterator<char>(boot_input), {});
-    // int next_step = buffer.size()/20;
-		//printf("Loading kernel image|                    |");
-		for (int i = 0; i < boot_buffer.size(); i=i+8) {
-			tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&boot_buffer.at(i));
-      tb -> programmer_offset = (i+0x07ffff00UL);
-			//cout << buffer.at(i)&255 << endl;
-			tick(++dump_tick, tb, tfp);	//here it is tick_nodump
-      // if (progress != (i*100)/buffer.size()) 
-      printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
-		}
-    printf("done\n");
+		// vector<unsigned char> boot_buffer(istreambuf_iterator<char>(boot_input), {});
+    // // int next_step = buffer.size()/20;
+		// //printf("Loading kernel image|                    |");
+		// for (int i = 0; i < boot_buffer.size(); i=i+8) {
+		// 	tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&boot_buffer.at(i));
+    //   tb -> programmer_offset = (i+0x07ffff00UL);
+		// 	//cout << buffer.at(i)&255 << endl;
+		// 	tick(++dump_tick, tb, tfp);	//here it is tick_nodump
+    //   // if (progress != (i*100)/buffer.size()) 
+    //   printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
+		// }
+    // printf("done\n");
 		tb ->finishedProgramming = 1;
     tb ->programmer_valid = 0;
     tick(++dump_tick, tb, tfp);//here it is tick_nodump
 		tb ->finishedProgramming = 0;
     tb ->programmer_valid = 0;
     tick(++dump_tick, tb, tfp); //here it is tick_nodump
-    prev_pc = 0x80000000UL;
+    // prev_pc = 0x80000000UL;
+    prev_pc = 0x10000000UL;
   }
 
   int step() {
@@ -244,13 +245,15 @@ class simulator {
     for (int i = 0; !(tb -> robOut0_commitFired) && i < STEP_TIMEOUT; i++) {
     #endif
     #ifdef SHOW_TERMINAL
-     // if (tb ->putChar_valid) { cout << tb -> putChar_byte << flush; }
+     if (tb ->core0OutChar_valid) { cout << tb -> core0OutChar_byte << flush; }
+     if (tb ->core1OutChar_valid) { cout << tb -> core1OutChar_byte << flush; }
     #endif
       tick(++dump_tick, tb, tfp);
           }
     
     #ifdef SHOW_TERMINAL
-    //if (tb ->putChar_valid) { cout << tb -> putChar_byte << flush; }
+     if (tb ->core0OutChar_valid) { cout << tb -> core0OutChar_byte << flush; }
+     if (tb ->core1OutChar_valid) { cout << tb -> core1OutChar_byte << flush; }
     #endif
     // return 1 indicate timeout
     prev_pc = tb -> robOut0_pc;
