@@ -981,11 +981,23 @@ class ccu extends Module {
 			L2.RREADY := true.B
 		}
 		is(5.U){//RSP
+
+			/*
 			when(last_buff){
 				stateReg_8 := 0.U
 			}.otherwise{
 				stateReg_8 := 2.U
 			}
+			*/
+			when(!(((core_id_pbuf_3 === "b00".U(2.W)) && core0.RREADY) || ((core_id_pbuf_3 === "b01".U(2.W)) && core1.RREADY) || ((core_id_pbuf_3 === "b10".U(2.W)) && core2.RREADY) || ((core_id_pbuf_3 === "b11".U(2.W)) && core3.RREADY))){
+				stateReg_8 := 5.U
+			}.elsewhen(last_buff){
+				stateReg_8 := 0.U
+			}.otherwise{
+				stateReg_8 := 2.U
+			}
+
+
 			when(core_id_pbuf_3 === "b00".U(2.W)){
 				core0.RVALID := true.B
 			}.elsewhen(core_id_pbuf_3 === "b01".U(2.W)){

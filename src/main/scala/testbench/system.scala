@@ -115,7 +115,7 @@ class system extends Module {
   core0.dPort.ACVALID := interconnect.io.acePort0.ACVALID
   core0.dPort.ACADDR := interconnect.io.acePort0.ACADDR
   core0.dPort.ACSNOOP := interconnect.io.acePort0.ACSNOOP
-  core0.dPort.ACPROT := 0.U
+  core0.dPort.ACPROT := 2.U
   interconnect.io.acePort0.ACREADY := core0.dPort.ACREADY
 
   //CR
@@ -170,7 +170,7 @@ class system extends Module {
   core0.iPort.ACVALID := interconnect.io.acePort1.ACVALID
   core0.iPort.ACADDR := interconnect.io.acePort1.ACADDR
   core0.iPort.ACSNOOP := interconnect.io.acePort1.ACSNOOP
-  core0.iPort.ACPROT := 0.U
+  core0.iPort.ACPROT := 2.U
   interconnect.io.acePort1.ACREADY := core0.iPort.ACREADY
 
   //CR
@@ -225,7 +225,7 @@ class system extends Module {
   core1.dPort.ACVALID := interconnect.io.acePort2.ACVALID
   core1.dPort.ACADDR := interconnect.io.acePort2.ACADDR
   core1.dPort.ACSNOOP := interconnect.io.acePort2.ACSNOOP
-  core1.dPort.ACPROT := 0.U
+  core1.dPort.ACPROT := 2.U
   interconnect.io.acePort2.ACREADY := core1.dPort.ACREADY
 
   //CR
@@ -280,7 +280,7 @@ class system extends Module {
   core1.iPort.ACVALID := interconnect.io.acePort3.ACVALID
   core1.iPort.ACADDR := interconnect.io.acePort3.ACADDR
   core1.iPort.ACSNOOP := interconnect.io.acePort3.ACSNOOP
-  core1.iPort.ACPROT := 0.U
+  core1.iPort.ACPROT := 2.U
   interconnect.io.acePort3.ACREADY := core1.iPort.ACREADY
 
   //CR

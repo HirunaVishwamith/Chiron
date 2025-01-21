@@ -254,8 +254,11 @@ class ACEUnit(
       bus.ARBAR := "b00".U
 
       readCounter.reset := true.B
-
-      readAXIState := Mux(bus.ARREADY, responseState, requestState)
+      when(coherencyReceivedWire){
+        readAXIState := idleState
+      } .otherwise{
+        readAXIState := Mux(bus.ARREADY, responseState, requestState)
+      }
     }
     is(responseState){
       bus.RREADY := true.B
@@ -272,13 +275,23 @@ class ACEUnit(
         }
       }
       when(isCleanUniqueWire){
-        readAXIState := Mux(bus.RVALID & bus.RID === id.U, 
+        when(coherencyReceivedWire){
+          readAXIState := idleState
+        } .otherwise {
+          readAXIState := Mux(bus.RVALID & bus.RID === id.U, 
                           Mux(responseValid, dataOutState, requestState),
                             responseState)
+        }
+        
       } .otherwise{
-        readAXIState := Mux(bus.RLAST, 
+        when(coherencyReceivedWire){
+          readAXIState := idleState
+        } .otherwise {
+          readAXIState := Mux(bus.RLAST && bus.RVALID,
                           Mux(responseValid, dataOutState, requestState),
                             responseState)
+        }
+        
       }
       
     }
@@ -397,9 +410,9 @@ class ACEUnit(
       }
       bus.CDLAST := coherentCounter.count === length.U
 
-      coherentComplete := bus.CDLAST
+      coherentComplete := bus.CDLAST && bus.CDREADY
 
-      coherentAXIState := Mux(bus.CDLAST, idleState, dataOutState)
+      coherentAXIState := Mux(bus.CDLAST && bus.CDREADY, idleState, dataOutState)
     }
   }
 

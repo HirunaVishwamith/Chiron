@@ -149,7 +149,7 @@ class AXIUnit(
           responseValid := Mux(bus.RRESP === "b00".U, responseValid, false.B)
         }
 
-        readAXIState := Mux(bus.RLAST, 
+        readAXIState := Mux(bus.RLAST && bus.RVALID,
                       Mux(responseValid, dataOutState, requestState),
                         responseState)
       }

@@ -17,4 +17,7 @@ int main() {
     bench.step();
     step++;
   }
+
+  cout<<bench.accumulatedChars0<<endl;
+  cout<<bench.accumulatedChars1<<endl;
 }

@@ -10,6 +10,7 @@
 #include <string>
 #include <stdint.h>
 #include <typeinfo>
+#include <string>
 
 #define STEP_TIMEOUT 1000
 
@@ -51,6 +52,8 @@ class simulator {
   uint64_t  prev_pc;
   unsigned long        tickcount;
   unsigned dump_tick;
+  std::string accumulatedChars0;
+  std::string accumulatedChars1;
 
   __uint64_t get_register_value(__uint8_t rd) {
     switch (rd) {
@@ -245,11 +248,11 @@ class simulator {
     for (int i = 0; !(tb -> robOut0_commitFired) && i < STEP_TIMEOUT; i++) {
     #endif
     #ifdef SHOW_TERMINAL
-    //  if (tb ->core0OutChar_valid) { printf("Hi %d",tb -> core0OutChar_byte);}
-    //  if (tb ->core1OutChar_valid) { printf("Hi %d",tb -> core1OutChar_byte);}
+    // if (tb ->core0OutChar_valid) { cout<<(char)(tb -> core0OutChar_byte)<<flush;}
+    // if (tb ->core1OutChar_valid) { cout<< (char)(tb -> core1OutChar_byte)<<flush;}
 
-    if (tb ->core0OutChar_valid) { cout<<"Core : " <<(char)(tb -> core0OutChar_byte)<<endl<<flush;}
-    if (tb ->core1OutChar_valid) { cout<<"Core : "  << (char)(tb -> core1OutChar_byte)<<endl<<flush;}
+    if (tb ->core0OutChar_valid) { accumulatedChars0 += (char)(tb -> core0OutChar_byte);}
+    if (tb ->core1OutChar_valid) { accumulatedChars1 += (char)(tb -> core1OutChar_byte);}
 
     #endif
       tick(++dump_tick, tb, tfp);
