@@ -248,8 +248,8 @@ class simulator {
     //  if (tb ->core0OutChar_valid) { printf("Hi %d",tb -> core0OutChar_byte);}
     //  if (tb ->core1OutChar_valid) { printf("Hi %d",tb -> core1OutChar_byte);}
 
-    if (tb ->core0OutChar_valid) { cout<< (char)(tb -> core0OutChar_byte)<<flush;}
-    if (tb ->core1OutChar_valid) { cout<< (char)(tb -> core1OutChar_byte)<<flush;}
+    if (tb ->core0OutChar_valid) { cout<<"Core : " <<(char)(tb -> core0OutChar_byte)<<endl<<flush;}
+    if (tb ->core1OutChar_valid) { cout<<"Core : "  << (char)(tb -> core1OutChar_byte)<<endl<<flush;}
 
     #endif
       tick(++dump_tick, tb, tfp);
