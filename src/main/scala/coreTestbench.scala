@@ -7,9 +7,6 @@ import cache.AXI
 import common.coreConfiguration
 import java.io.ObjectOutputStream.PutField
 import decode._
-import DataCache.CacheModule
-import DataCache._
-import DataCache.ACE
 
 class testbench extends Module {
   // once reset programLoader will send data from the lowest byte address

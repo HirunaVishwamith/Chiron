@@ -8,10 +8,8 @@ import chisel3.experimental.IO
 
 class Interconnect extends Module {
   val io = IO(new Bundle {
-    val acePort0 = new ace()  //core_0
-    val acePort1 = new ace()  //core_1
-    val acePort2 = new ace()  //core_2
-    val acePort3 = new ace()  //core_3
+    val acePort0 = new ace()  //D$
+    val acePort1 = new ace()  //I$
     val L2 = new Bundle{
 		//AW
 		val AWVALID = Output(Bool())
@@ -91,6 +89,7 @@ class Interconnect extends Module {
 
   //Arbiter connecting
   Arbiter.io.AWVALID_0 := io.acePort0.AWVALID
+  Arbiter.io.AWBAR_0 := io.acePort0.AWBAR(0)
   io.acePort0.AWREADY := Arbiter.io.AWREADY_0
   Arbiter.io.WVALID_0 := io.acePort0.WVALID
   Arbiter.io.WLAST_0 := io.acePort0.WLAST
@@ -106,21 +105,7 @@ class Interconnect extends Module {
   Arbiter.io.ARVALID_1 := io.acePort1.ARVALID
   io.acePort1.ARREADY := Arbiter.io.ARREADY_1
 
-  Arbiter.io.AWVALID_2 := io.acePort2.AWVALID
-  io.acePort2.AWREADY := Arbiter.io.AWREADY_2
-  Arbiter.io.WVALID_2 := io.acePort2.WVALID
-  Arbiter.io.WLAST_2 := io.acePort2.WLAST
-  io.acePort2.WREADY := Arbiter.io.WREADY_2
-  Arbiter.io.ARVALID_2 := io.acePort2.ARVALID
-  io.acePort2.ARREADY := Arbiter.io.ARREADY_2
 
-  Arbiter.io.AWVALID_3 := io.acePort3.AWVALID
-  io.acePort3.AWREADY := Arbiter.io.AWREADY_3
-  Arbiter.io.WVALID_3 := io.acePort3.WVALID
-  Arbiter.io.WLAST_3 := io.acePort3.WLAST
-  io.acePort3.WREADY := Arbiter.io.WREADY_3
-  Arbiter.io.ARVALID_3 := io.acePort3.ARVALID
-  io.acePort3.ARREADY := Arbiter.io.ARREADY_3
 
 
   // Instantiate RingBuffer with a given depth
@@ -141,30 +126,18 @@ class Interconnect extends Module {
   //1000 WriteMemoryBarrier (ACE spec encoding)
 
 
-  when(Arbiter.io.select === "b0000".U){        //0.U AR_0
+  when(Arbiter.io.select === "b000".U){        //0.U AR_0
     FIFO.io.enq.bits := Cat(io.acePort0.ARID, io.acePort0.ARADDR,Mux(io.acePort0.ARBAR(0),"b0100".U(4.W),io.acePort0.ARSNOOP))
-  }.elsewhen(Arbiter.io.select === "b0001".U){  //1.U AW_0
+  }.elsewhen(Arbiter.io.select === "b001".U){  //1.U AW_0
     FIFO.io.enq.bits := Cat(io.acePort0.AWID, io.acePort0.AWADDR, io.acePort0.AWBAR(0),io.acePort0.AWSNOOP)
-  }.elsewhen(Arbiter.io.select === "b0010".U){  //2.U W_0
+  }.elsewhen(Arbiter.io.select === "b010".U){  //2.U W_0
     FIFO.io.enq.bits := Cat("b00".U(2.W), io.acePort0.WDATA, "b000".U(3.W), io.acePort0.WLAST)
-  }.elsewhen(Arbiter.io.select === "b0100".U){  //4.U AR_1
+  }.elsewhen(Arbiter.io.select === "b100".U){  //4.U AR_1
     FIFO.io.enq.bits := Cat(io.acePort1.ARID, io.acePort1.ARADDR,Mux(io.acePort1.ARBAR(0),"b0100".U(4.W),io.acePort1.ARSNOOP))
-  }.elsewhen(Arbiter.io.select === "b0101".U){  //5.U AW_1
+  }.elsewhen(Arbiter.io.select === "b101".U){  //5.U AW_1
     FIFO.io.enq.bits := Cat(io.acePort1.AWID, io.acePort1.AWADDR, io.acePort1.AWBAR(0),io.acePort1.AWSNOOP)
-  }.elsewhen(Arbiter.io.select === "b0110".U){  //6.U W_1
+  }.elsewhen(Arbiter.io.select === "b110".U){  //6.U W_1
     FIFO.io.enq.bits := Cat("b00".U(2.W), io.acePort1.WDATA, "b000".U(3.W), io.acePort1.WLAST)
-  }.elsewhen(Arbiter.io.select === "b1000".U){  //8.U AR_2
-    FIFO.io.enq.bits := Cat(io.acePort2.ARID, io.acePort2.ARADDR,Mux(io.acePort2.ARBAR(0),"b0100".U(4.W),io.acePort2.ARSNOOP))
-  }.elsewhen(Arbiter.io.select === "b1001".U){  //9.U AW_2
-    FIFO.io.enq.bits := Cat(io.acePort2.AWID, io.acePort2.AWADDR, io.acePort2.AWBAR(0),io.acePort2.AWSNOOP)
-  }.elsewhen(Arbiter.io.select === "b1010".U){  //10.U W_2
-    FIFO.io.enq.bits := Cat("b00".U(2.W), io.acePort2.WDATA, "b000".U(3.W), io.acePort2.WLAST)
-  }.elsewhen(Arbiter.io.select === "b1100".U){  //12.U AR_3
-    FIFO.io.enq.bits := Cat(io.acePort3.ARID, io.acePort3.ARADDR,Mux(io.acePort3.ARBAR(0),"b0100".U(4.W),io.acePort3.ARSNOOP))
-  }.elsewhen(Arbiter.io.select === "b1101".U){  //13.U AW_3
-    FIFO.io.enq.bits := Cat(io.acePort3.AWID, io.acePort3.AWADDR, io.acePort3.AWBAR(0),io.acePort3.AWSNOOP)
-  }.elsewhen(Arbiter.io.select === "b1110".U){  //14.U W_3
-    FIFO.io.enq.bits := Cat("b00".U(2.W), io.acePort3.WDATA, "b000".U(3.W), io.acePort3.WLAST)
   }.otherwise{
     FIFO.io.enq.bits := 0.U(70.W)
   }
@@ -210,7 +183,7 @@ class Interconnect extends Module {
   CCU.L2.RDATA := io.L2.RDATA
   CCU.L2.RLAST := io.L2.RLAST
 
-  //core_0
+  //D$
   //CA channel
   io.acePort0.ACVALID := CCU.core0.ACVALID
   CCU.core0.ACREADY := io.acePort0.ACREADY
@@ -242,7 +215,7 @@ class Interconnect extends Module {
   io.acePort0.BID := CCU.core0.BID
   io.acePort0.BRESP := CCU.core0.BRESP
 
-  //core_1
+  //I$
   //CA channel
   io.acePort1.ACVALID := CCU.core1.ACVALID
   CCU.core1.ACREADY := io.acePort1.ACREADY
@@ -274,69 +247,7 @@ class Interconnect extends Module {
   io.acePort1.BID := CCU.core1.BID
   io.acePort1.BRESP := CCU.core1.BRESP
 
-  //core_2
-  //CA channel
-  io.acePort2.ACVALID := CCU.core2.ACVALID
-  CCU.core2.ACREADY := io.acePort2.ACREADY
-  io.acePort2.ACADDR := CCU.core2.ACADDR
-  io.acePort2.ACSNOOP := CCU.core2.ACSNOOP
-
-  //CR channel
-  CCU.core2.CRVALID := io.acePort2.CRVALID
-  io.acePort2.CRREADY := CCU.core2.CRREADY
-  CCU.core2.CRRESP := io.acePort2.CRRESP
-
-  //CD channel
-  CCU.core2.CDVALID := io.acePort2.CDVALID
-  io.acePort2.CDREADY := CCU.core2.CDREADY
-  CCU.core2.CDDATA := io.acePort2.CDDATA
-  CCU.core2.CDLAST := io.acePort2.CDLAST
-
-  //R channel
-  io.acePort2.RVALID := CCU.core2.RVALID
-  CCU.core2.RREADY := io.acePort2.RREADY
-  io.acePort2.RID := CCU.core2.RID
-  io.acePort2.RRESP := CCU.core2.RRESP
-  io.acePort2.RDATA := CCU.core2.RDATA
-  io.acePort2.RLAST := CCU.core2.RLAST
-
-  //B channel
-  io.acePort2.BVALID := CCU.core2.BVALID
-  CCU.core2.BREADY := io.acePort2.BREADY
-  io.acePort2.BID := CCU.core2.BID
-  io.acePort2.BRESP := CCU.core2.BRESP
-
-  //core_3
-  //CA channel
-  io.acePort3.ACVALID := CCU.core3.ACVALID
-  CCU.core3.ACREADY := io.acePort3.ACREADY
-  io.acePort3.ACADDR := CCU.core3.ACADDR
-  io.acePort3.ACSNOOP := CCU.core3.ACSNOOP
-
-  //CR channel
-  CCU.core3.CRVALID := io.acePort3.CRVALID
-  io.acePort3.CRREADY := CCU.core3.CRREADY
-  CCU.core3.CRRESP := io.acePort3.CRRESP
-
-  //CD channel
-  CCU.core3.CDVALID := io.acePort3.CDVALID
-  io.acePort3.CDREADY := CCU.core3.CDREADY
-  CCU.core3.CDDATA := io.acePort3.CDDATA
-  CCU.core3.CDLAST := io.acePort3.CDLAST
-
-  //R channel
-  io.acePort3.RVALID := CCU.core3.RVALID
-  CCU.core3.RREADY := io.acePort3.RREADY
-  io.acePort3.RID := CCU.core3.RID
-  io.acePort3.RRESP := CCU.core3.RRESP
-  io.acePort3.RDATA := CCU.core3.RDATA
-  io.acePort3.RLAST := CCU.core3.RLAST
-
-  //B channel
-  io.acePort3.BVALID := CCU.core3.BVALID
-  CCU.core3.BREADY := io.acePort3.BREADY
-  io.acePort3.BID := CCU.core3.BID
-  io.acePort3.BRESP := CCU.core3.BRESP
+  Arbiter.io.nstall := (CCU.core0.BVALID && CCU.core0.BREADY) || (CCU.core1.BVALID && CCU.core1.BREADY) || (CCU.core0.RVALID && CCU.core0.RREADY && CCU.core0.RLAST) || (CCU.core1.RVALID && CCU.core1.RREADY && CCU.core1.RLAST)
 
   /**
   //debug signals

@@ -12,7 +12,7 @@ import os.write
 import decode.constants
 import os.read
 import dataclass.data
-import DataCache.ACE
+
 
 class mainMemory(
   addressBitSize:Int = 28,
@@ -39,15 +39,8 @@ class mainMemory(
   // (0 to 7).foreach { i => memory.write(programmer.offset + i.U, programmer.byte(8*i + 7, 8*i)) }
 
   // connection with core pipeline
-  val clients = IO(Flipped(Vec(2, (new ACE(busWidth = 64)))))
-  for (i <- 0 until 2) {
-  clients(i).CRREADY := 0.U
-  clients(i).ACPROT := 0.U
-  clients(i).ACVALID := 0.U
-  clients(i).ACSNOOP := 0.U
-  clients(i).ACADDR := 0.U
-  clients(i).CDREADY := 0.U
-}
+  val clients = IO(Flipped(Vec(2, (new AXI(1,32,256)))))
+
 
   val instruction :: data :: Nil = Enum(2)
 

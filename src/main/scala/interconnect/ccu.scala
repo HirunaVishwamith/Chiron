@@ -7,8 +7,6 @@ FIFO IOs
 L2 AXI Port IOs
 core 0 CA,CR,CD,R,B IOs
 core 1 CA,CR,CD,R,B IOs
-core 2 CA,CR,CD,R,B IOs
-core 3 CA,CR,CD,R,B IOs
 
 */
 
@@ -188,90 +186,6 @@ class ccu extends Module {
 		//val BUSER = Input(UInt())
 	})
 
-	//core2
-	val core2 = IO(new Bundle {
-		//AC
-		val ACVALID = Output(Bool())
-		val ACREADY = Input(Bool())
-		//metadata
-		val ACADDR = Output(UInt(64.W))
-		val ACSNOOP = Output(UInt(4.W))
-		//val ACPROT = Output(UInt(3.W))
-
-		//CR
-		val CRVALID = Input(Bool())
-		val CRREADY = Output(Bool())
-		//metadata
-		val CRRESP = Input(UInt(5.W))
-
-		//CD
-		val CDVALID = Input(Bool())
-		val CDREADY = Output(Bool())
-		//metadata
-		val CDDATA = Input(UInt(64.W))
-		val CDLAST = Input(Bool())
-
-		//R
-		val RVALID = Output(Bool())
-		val RREADY = Input(Bool())
-		//metadata
-		val RID = Output(UInt(2.W))
-		val RDATA = Output(UInt(64.W))
-		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
-		val RLAST = Output(Bool())
-		//val RUSER = Output(UInt())
-
-		//B
-		val BVALID = Output(Bool())
-		val BREADY = Input(Bool())
-		//metadata
-		val BID = Output(UInt(2.W))
-		val BRESP = Output(UInt(2.W))
-		//val BUSER = Input(UInt())
-	})
-
-	//core3
-	val core3 = IO(new Bundle {
-		//AC
-		val ACVALID = Output(Bool())
-		val ACREADY = Input(Bool())
-		//metadata
-		val ACADDR = Output(UInt(64.W))
-		val ACSNOOP = Output(UInt(4.W))
-		//val ACPROT = Output(UInt(3.W))
-
-		//CR
-		val CRVALID = Input(Bool())
-		val CRREADY = Output(Bool())
-		//metadata
-		val CRRESP = Input(UInt(5.W))
-
-		//CD
-		val CDVALID = Input(Bool())
-		val CDREADY = Output(Bool())
-		//metadata
-		val CDDATA = Input(UInt(64.W))
-		val CDLAST = Input(Bool())
-
-		//R
-		val RVALID = Output(Bool())
-		val RREADY = Input(Bool())
-		//metadata
-		val RID = Output(UInt(2.W))
-		val RDATA = Output(UInt(64.W))
-		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
-		val RLAST = Output(Bool())
-		//val RUSER = Output(UInt())
-
-		//B
-		val BVALID = Output(Bool())
-		val BREADY = Input(Bool())
-		//metadata
-		val BID = Output(UInt(2.W))
-		val BRESP = Output(UInt(2.W))
-		//val BUSER = Input(UInt())
-	})
-
 	//Default values for L2 AW and W channels
 	L2.AWVALID := false.B
 	L2.AWID := deq.data(69,68)
@@ -307,17 +221,6 @@ class ccu extends Module {
 	core1.RVALID := false.B
 	core1.CDREADY := false.B
 
-	core2.BVALID := false.B
-	core2.BRESP := L2.BRESP
-	core2.BID := 2.U
-	core2.RVALID := false.B
-	core2.CDREADY := false.B
-
-	core3.BVALID := false.B
-	core3.BRESP := L2.BRESP
-	core3.BID := 3.U
-	core3.RVALID := false.B
-	core3.CDREADY := false.B
 
 	deq.ready := false.B
 
@@ -333,16 +236,23 @@ class ccu extends Module {
 	val stateReg_1 = RegInit(0.U(3.W))
 	val stateReg_2 = RegInit(0.U(3.W))
 
+	val coreid_reg = RegInit(0.U(2.W))
+
 	//FSM_1
 	switch(stateReg_1){
 		is(0.U){//IDLE
-			when(deq.valid && (deq.data(3,0) === "b0011".U(4.W))){ //writeback
-				stateReg_1 := 1.U
-			}.elsewhen(deq.valid && (deq.data(3,0) === "b1000".U(4.W))){ //write barrier
-				stateReg_1 := 7.U
+			when(stateReg_2 === "b000".U(3.W)){
+				when(deq.valid && (deq.data(3,0) === "b0011".U(4.W))){ //writeback
+					stateReg_1 := 1.U
+				}.elsewhen(deq.valid && (deq.data(3,0) === "b1000".U(4.W))){ //write barrier
+					stateReg_1 := 7.U
+				}.otherwise{
+					stateReg_1 := 0.U
+				}
 			}.otherwise{
 				stateReg_1 := 0.U
 			}
+
 		}
 		is(1.U){//AW
 			when(L2.AWREADY){
@@ -380,18 +290,16 @@ class ccu extends Module {
 			deq_1 := true.B
 		}
 		is(6.U){//SYNC
-			when(stateReg_2 === "b000".U(3.W)){
-				stateReg_1 := 0.U
-			}.otherwise{
-				stateReg_1 := 6.U
-			}
+			stateReg_1 := 0.U
 		}
 		is(7.U){//AWBAR
-			when(stateReg_2 === "b000".U(3.W)){
+			when(stateReg_2 === "b111".U(3.W)){
 				stateReg_1 := 0.U
 			}.otherwise{
 				stateReg_1 := 7.U
 			}
+			deq_1 := true.B
+			coreid_reg := deq.data(69,68)
 		}
 	}
 
@@ -411,12 +319,8 @@ class ccu extends Module {
 				stateReg_2 := 1.U
 			}.elsewhen(L2.BID === "b00".U(2.W)){
 				stateReg_2 := 2.U
-			}.elsewhen(L2.BID === "b01".U(2.W)){
-				stateReg_2 := 3.U
-			}.elsewhen(L2.BID === "b10".U(2.W)){
-				stateReg_2 := 4.U
 			}.otherwise{
-				stateReg_2 := 5.U
+				stateReg_2 := 3.U
 			}
 			L2.BREADY := true.B
 		}
@@ -436,47 +340,22 @@ class ccu extends Module {
 			}
 			core1.BVALID := true.B
 		}
-		is(4.U){//B2
-			when(core2.BREADY){
-				stateReg_2 := 0.U
-			}.otherwise{
-				stateReg_2 := 4.U
-			}
-			core2.BVALID := true.B
-		}
-		is(5.U){//B3
-			when(core3.BREADY){
-				stateReg_2 := 0.U
-			}.otherwise{
-				stateReg_2 := 5.U
-			}
-			core3.BVALID := true.B
-		}
 		is(6.U){//AWBAR
-			when(deq.data(69,68) === "b00".U(2.W) && core0.BREADY){
+			when(coreid_reg === "b00".U(2.W) && core0.BREADY){
 				stateReg_2 := 7.U
-			}.elsewhen(deq.data(69,68) === "b01".U(2.W) && core1.BREADY){
-				stateReg_2 := 7.U
-			}.elsewhen(deq.data(69,68) === "b10".U(2.W) && core2.BREADY){
-				stateReg_2 := 7.U
-			}.elsewhen(deq.data(69,68) === "b11".U(2.W) && core3.BREADY){
+			}.elsewhen(coreid_reg === "b01".U(2.W) && core1.BREADY){
 				stateReg_2 := 7.U
 			}.otherwise{
 				stateReg_2 := 6.U
 			}
 
-			when(deq.data(69,68) === "b00".U(2.W)){
+			when(coreid_reg === "b00".U(2.W)){
 				core0.BVALID := true.B
-			}.elsewhen(deq.data(69,68) === "b01".U(2.W)){
-				core1.BVALID := true.B
-			}.elsewhen(deq.data(69,68) === "b01".U(2.W)){
-				core2.BVALID := true.B
 			}.otherwise{
-				core3.BVALID := true.B
+				core1.BVALID := true.B
 			}
 		}
-		is(7.U){//DEQ
-			deq_2 := true.B
+		is(7.U){
 			stateReg_2 := 0.U
 		}
 	}
@@ -498,8 +377,6 @@ class ccu extends Module {
     val addr_pbuf_2 = RegInit(0.U(64.W))
     val crpbuf_2_0 = Reg(UInt(5.W))
     val crpbuf_2_1 = Reg(UInt(5.W))
-    val crpbuf_2_2 = Reg(UInt(5.W))
-    val crpbuf_2_3 = Reg(UInt(5.W))
 
 
     //FSM_8 pipeline bufferes(pbuf_3)
@@ -507,8 +384,6 @@ class ccu extends Module {
     val tran_pbuf_3 = RegInit(0.U(4.W))
     val crpbuf_3_0 = Reg(UInt(5.W))
     val crpbuf_3_1 = Reg(UInt(5.W))
-    val crpbuf_3_2 = Reg(UInt(5.W))
-    val crpbuf_3_3 = Reg(UInt(5.W))
 
 
 
@@ -523,13 +398,18 @@ class ccu extends Module {
 	//FSM_3, 0000 : readNoSnoop, 0100 : read memory barrier, 0001: readshared, 0111: read unique, 1011 : clean unique
     switch(stateReg_3){
 		is(0.U){//IDLE
-			when(deq.valid && ((deq.data(3,0) === "b0001".U(4.W)) || (deq.data(3,0) === "b0111".U(4.W)) || (deq.data(3,0) === "b0000".U(4.W)))){
-				stateReg_3 := 1.U
-			}.elsewhen(deq.valid && ((deq.data(3,0) === "b0100".U(4.W)) || (deq.data(3,0) === "b1011".U(4.W)))){
-				stateReg_3 := 2.U
+			when(stateReg_1 === "b000".U(3.W)){
+				when(deq.valid && ((deq.data(3,0) === "b0001".U(4.W)) || (deq.data(3,0) === "b0111".U(4.W)) || (deq.data(3,0) === "b0000".U(4.W)))){
+					stateReg_3 := 1.U
+				}.elsewhen(deq.valid && ((deq.data(3,0) === "b0100".U(4.W)) || (deq.data(3,0) === "b1011".U(4.W)))){
+					stateReg_3 := 2.U
+				}.otherwise{
+					stateReg_3 := 0.U
+				}
 			}.otherwise{
 				stateReg_3 := 0.U
 			}
+
 		}
 		is(1.U){//AR
 			when(!L2.ARREADY){
@@ -550,7 +430,7 @@ class ccu extends Module {
 			stateReg_3 := 4.U
 		}
 		is(4.U){//SYNC
-			when(stateReg_4 === "b000".U(3.W) && stateReg_5 === "b000".U(3.W) && stateReg_6 === "b000".U(3.W) && stateReg_7 === "b000".U(3.W)){
+			when(stateReg_4 === "b000".U(3.W) && stateReg_5 === "b000".U(3.W)){
 				stateReg_3 := 5.U
 			}.otherwise{
 				stateReg_3 := 4.U
@@ -563,11 +443,15 @@ class ccu extends Module {
 			stateReg_3 := 6.U
 		}
 		is(6.U){//SNOOP
-			stateReg_3 := 0.U
+			when(stateReg_8 === "b111".U(3.W)){
+				stateReg_3 := 0.U
+			}.otherwise{
+				stateReg_3 := 6.U
+			}
 		}
 	}
 
-	deq.ready := deq_1 || deq_2 || deq_3
+	deq.ready := deq_1 || deq_3
 
 	//FSM_4
 	core0.ACVALID := false.B
@@ -621,7 +505,7 @@ class ccu extends Module {
 			stateReg_4 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
-			when((stateReg_4 === "b100".U(3.W)) && (stateReg_5 === "b100".U(3.W)) && (stateReg_6 === "b100".U(3.W)) && (stateReg_7 === "b100".U(3.W))){
+			when((stateReg_4 === "b100".U(3.W)) && (stateReg_5 === "b100".U(3.W))){
 				stateReg_4 := 5.U
 			}.otherwise{
 				stateReg_4 := 4.U
@@ -641,7 +525,11 @@ class ccu extends Module {
 			stateReg_4 := 7.U
 		}
 		is(7.U){//RSP
-			stateReg_4 := 0.U
+			when(stateReg_8 === "b111".U(3.W)){
+				stateReg_4 := 0.U
+			}.otherwise{
+				stateReg_4 := 7.U
+			}
 		}
 	}
 
@@ -699,7 +587,7 @@ class ccu extends Module {
 			stateReg_5 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
-			when((stateReg_4 === "b100".U(3.W)) && (stateReg_5 === "b100".U(3.W)) && (stateReg_6 === "b100".U(3.W)) && (stateReg_7 === "b100".U(3.W))){
+			when((stateReg_4 === "b100".U(3.W)) && (stateReg_5 === "b100".U(3.W))){
 				stateReg_5 := 5.U
 			}.otherwise{
 				stateReg_5 := 4.U
@@ -717,162 +605,17 @@ class ccu extends Module {
 			stateReg_5 := 7.U
 		}
 		is(7.U){//RSP
-			stateReg_5 := 0.U
-		}
-	}
-
-	//FSM_6
-	core2.ACVALID := false.B
-	core2.ACADDR := addr_pbuf_2
-	core2.ACSNOOP := 0.U
-
-	core2.CRREADY := false.B
-
-	switch(stateReg_6){
-		is(0.U){//IDLE
-			when((stateReg_3 === "b110".U(3.W)) && ((tran_pbuf_2 === "b0100".U(4.W)) || (tran_pbuf_2 === "b0000".U(4.W)))){
-				stateReg_6 := 4.U
-			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b10".U(2.W))){
-				stateReg_6 := 4.U
-			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b10".U(2.W))){
-				stateReg_6 := 1.U
+			when(stateReg_8 === "b111".U(3.W)){
+				stateReg_5 := 0.U
 			}.otherwise{
-				stateReg_6 := 0.U
+				stateReg_5 := 7.U
 			}
-			crpbuf_2_2 := 0.U
-		}
-		is(1.U){//CA
-			when(!core2.ACREADY){
-				stateReg_6 := 1.U
-			}.otherwise{
-				stateReg_6 := 2.U
-			}
-
-			core2.ACVALID := true.B
-			when(tran_pbuf_2 === "b0001".U(4.W)){
-				core2.ACSNOOP := 1.U
-			}.elsewhen(tran_pbuf_2 === "b0111".U(4.W)){
-				core2.ACSNOOP := 7.U
-			}.elsewhen(tran_pbuf_2 === "b1011".U(4.W)){
-				core2.ACSNOOP := 9.U
-			}.otherwise{
-				core2.ACSNOOP := 0.U
-			}
-
-		}
-		is(2.U){//CR_BUFF
-			when(!core2.CRVALID){
-				stateReg_6 := 2.U
-			}.otherwise{
-				stateReg_6 := 3.U
-			}
-			crpbuf_2_2 := core2.CRRESP
-		}
-		is(3.U){//CR
-			core2.CRREADY := true.B
-			stateReg_6 := 4.U
-		}
-		is(4.U){//FINISH after this state all 4 controllers synchronized
-			when((stateReg_4 === "b100".U(3.W)) && (stateReg_5 === "b100".U(3.W)) && (stateReg_6 === "b100".U(3.W)) && (stateReg_7 === "b100".U(3.W))){
-				stateReg_6 := 5.U
-			}.otherwise{
-				stateReg_6 := 4.U
-			}
-		}
-		is(5.U){//SYNC
-			when(stateReg_8 === "b000".U(3.W)){
-				stateReg_6 := 6.U
-			}.otherwise{
-				stateReg_6 := 5.U
-			}
-		}
-		is(6.U){//BUF
-			crpbuf_3_2 := crpbuf_2_2
-			stateReg_6 := 7.U
-		}
-		is(7.U){//RSP
-			stateReg_6 := 0.U
-		}
-	}
-
-
-	//FSM_7
-	core3.ACVALID := false.B
-	core3.ACADDR := addr_pbuf_2
-	core3.ACSNOOP := 0.U
-
-	core3.CRREADY := false.B
-
-	switch(stateReg_7){
-		is(0.U){//IDLE
-			when((stateReg_3 === "b110".U(3.W)) && ((tran_pbuf_2 === "b0100".U(4.W)) || (tran_pbuf_2 === "b0000".U(4.W)))){
-				stateReg_7 := 4.U
-			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b11".U(2.W))){
-				stateReg_7 := 4.U
-			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b11".U(2.W))){
-				stateReg_7 := 1.U
-			}.otherwise{
-				stateReg_7 := 0.U
-			}
-			crpbuf_2_3 := 0.U
-		}
-		is(1.U){//CA
-			when(!core3.ACREADY){
-				stateReg_7 := 1.U
-			}.otherwise{
-				stateReg_7 := 2.U
-			}
-
-			core3.ACVALID := true.B
-			when(tran_pbuf_2 === "b0001".U(4.W)){
-				core3.ACSNOOP := 1.U
-			}.elsewhen(tran_pbuf_2 === "b0111".U(4.W)){
-				core3.ACSNOOP := 7.U
-			}.elsewhen(tran_pbuf_2 === "b1011".U(4.W)){
-				core3.ACSNOOP := 9.U
-			}.otherwise{
-				core3.ACSNOOP := 0.U
-			}
-
-		}
-		is(2.U){//CR_BUFF
-			when(!core3.CRVALID){
-				stateReg_7 := 2.U
-			}.otherwise{
-				stateReg_7 := 3.U
-			}
-			crpbuf_2_3 := core3.CRRESP
-		}
-		is(3.U){//CR
-			core3.CRREADY := true.B
-			stateReg_7 := 4.U
-		}
-		is(4.U){//FINISH after this state all 4 controllers synchronized
-			when((stateReg_4 === "b100".U(3.W)) && (stateReg_5 === "b100".U(3.W)) && (stateReg_6 === "b100".U(3.W)) && (stateReg_7 === "b100".U(3.W))){
-				stateReg_7 := 5.U
-			}.otherwise{
-				stateReg_7 := 4.U
-			}
-		}
-		is(5.U){//SYNC
-			when(stateReg_8 === "b000".U(3.W)){
-				stateReg_7 := 6.U
-			}.otherwise{
-				stateReg_7 := 5.U
-			}
-		}
-		is(6.U){//BUF
-			crpbuf_3_3 := crpbuf_2_3
-			stateReg_7 := 7.U
-		}
-		is(7.U){//RSP
-			stateReg_7 := 0.U
 		}
 	}
 
 
 	//FSM_8
-	val	select_buff = RegInit(0.U(3.W))  //000:CD0, 001:CD1, 010:CD2, 011:CD3, 100:L2
+	val	select_buff = RegInit(0.U(3.W))  //000:CD0, 001:CD1, 100:L2
 	val	beat_buff = RegInit(0.U(64.W))	//buffer to store a one beat
 	val	last_buff = RegInit(false.B)	//buffer to store last signal
 	val rsp_buff = RegInit(0.U(4.W))	//buffer to store RRSP
@@ -888,22 +631,11 @@ class ccu extends Module {
 	core1.RLAST := last_buff
 	core1.RRESP := rsp_buff
 
-	core2.RVALID := false.B
-	core2.RID := 2.U(2.W)
-	core2.RDATA := beat_buff
-	core2.RLAST := last_buff
-	core2.RRESP := rsp_buff
-
-	core3.RVALID := false.B
-	core3.RID := 3.U(2.W)
-	core3.RDATA := beat_buff
-	core3.RLAST := last_buff
-	core3.RRESP := rsp_buff
 	switch(stateReg_8){
 		is(0.U){//IDLE
 			when(stateReg_4 === "b111".U(3.W) && ((tran_pbuf_3 === "b0001".U(4.W)) || (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b0000".U(4.W)))){
 				stateReg_8 := 1.U
-			}.elsewhen(stateReg_4 === "b100".U(3.W) && ((tran_pbuf_3 === "b0100".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W)))){
+			}.elsewhen(stateReg_4 === "b111".U(3.W) && ((tran_pbuf_3 === "b0100".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W)))){
 				stateReg_8 := 6.U
 			}.otherwise{
 				stateReg_8 := 0.U
@@ -915,16 +647,12 @@ class ccu extends Module {
 				select_buff := "b000".U(3.W)
 			}.elsewhen(crpbuf_3_1(3)){
 				select_buff := "b001".U(3.W)
-			}.elsewhen(crpbuf_3_1(3)){
-				select_buff := "b010".U(3.W)
-			}.elsewhen(crpbuf_3_1(3)){
-				select_buff := "b011".U(3.W)
 			}.otherwise{          //if it is data is not shared even if it is in the other local caches i take from L2
 				select_buff := "b100".U(3.W)
 			}
 		}
 		is(2.U){//SYNC wait untill all the data available channels asserted its valid signal
-			when((!crpbuf_3_0(0) || core0.CDVALID) && (!crpbuf_3_1(0) || core1.CDVALID) && (!crpbuf_3_2(0) || core2.CDVALID) && (!crpbuf_3_3(0) || core3.CDVALID) && L2.RVALID){
+			when((!crpbuf_3_0(0) || core0.CDVALID) && (!crpbuf_3_1(0) || core1.CDVALID) && L2.RVALID){
 				stateReg_8 := 3.U
 			}.otherwise{
 				stateReg_8 := 2.U
@@ -941,14 +669,6 @@ class ccu extends Module {
 				beat_buff := core1.CDDATA
 				last_buff := core1.CDLAST
 				rsp_buff := Cat(crpbuf_3_1(3),crpbuf_3_1(2),"b00".U(2.W))
-			}.elsewhen(select_buff === "b010".U(3.W)){
-				beat_buff := core2.CDDATA
-				last_buff := core2.CDLAST
-				rsp_buff := Cat(crpbuf_3_2(3),crpbuf_3_2(2),"b00".U(2.W))
-			}.elsewhen(select_buff === "b011".U(3.W)){
-				beat_buff := core3.CDDATA
-				last_buff := core3.CDLAST
-				rsp_buff := Cat(crpbuf_3_3(3),crpbuf_3_3(2),"b00".U(2.W))
 			}.otherwise{
 				beat_buff := L2.RDATA
 				last_buff := L2.RLAST
@@ -968,31 +688,14 @@ class ccu extends Module {
 			}.otherwise{
 				core1.CDREADY := false.B
 			}
-			when(crpbuf_3_2(0)){
-				core2.CDREADY := true.B
-			}.otherwise{
-				core2.CDREADY := false.B
-			}
-			when(crpbuf_3_3(0)){
-				core3.CDREADY := true.B
-			}.otherwise{
-				core3.CDREADY := false.B
-			}
 			L2.RREADY := true.B
 		}
 		is(5.U){//RSP
 
-			/*
-			when(last_buff){
-				stateReg_8 := 0.U
-			}.otherwise{
-				stateReg_8 := 2.U
-			}
-			*/
-			when(!(((core_id_pbuf_3 === "b00".U(2.W)) && core0.RREADY) || ((core_id_pbuf_3 === "b01".U(2.W)) && core1.RREADY) || ((core_id_pbuf_3 === "b10".U(2.W)) && core2.RREADY) || ((core_id_pbuf_3 === "b11".U(2.W)) && core3.RREADY))){
+			when(!(((core_id_pbuf_3 === "b00".U(2.W)) && core0.RREADY) || ((core_id_pbuf_3 === "b01".U(2.W)) && core1.RREADY))){
 				stateReg_8 := 5.U
 			}.elsewhen(last_buff){
-				stateReg_8 := 0.U
+				stateReg_8 := 7.U
 			}.otherwise{
 				stateReg_8 := 2.U
 			}
@@ -1000,35 +703,30 @@ class ccu extends Module {
 
 			when(core_id_pbuf_3 === "b00".U(2.W)){
 				core0.RVALID := true.B
-			}.elsewhen(core_id_pbuf_3 === "b01".U(2.W)){
-				core1.RVALID := true.B
-			}.elsewhen(core_id_pbuf_3 === "b10".U(2.W)){
-				core2.RVALID := true.B
 			}.otherwise{
-				core3.RVALID := true.B
+				core1.RVALID := true.B
 			}
 		}
 		is(6.U){//RSP_ARBAR
-			when((core_id_pbuf_3 === "b00".U(2.W)) && core0.RREADY){
-				stateReg_8 := 0.U
-				core0.RVALID := true.B
-			}.elsewhen((core_id_pbuf_3 === "b01".U(2.W)) && core1.RREADY){
-				stateReg_8 := 0.U
-				core1.RVALID := true.B
-			}.elsewhen((core_id_pbuf_3 === "b10".U(2.W)) && core2.RREADY){
-				stateReg_8 := 0.U
-				core2.RVALID := true.B
-			}.elsewhen((core_id_pbuf_3 === "b11".U(2.W)) && core3.RREADY){
-				stateReg_8 := 0.U
-				core3.RVALID := true.B
+			when(((core_id_pbuf_3 === "b00".U(2.W)) && core0.RREADY) || ((core_id_pbuf_3 === "b01".U(2.W)) && core1.RREADY)){
+				stateReg_8 := 7.U
 			}.otherwise{
 				stateReg_8 := 6.U
 			}
 
+			when(core_id_pbuf_3 === "b00".U(2.W)){
+				core0.RVALID := true.B
+			}.otherwise{
+				core1.RVALID := true.B
+			}
+
+
+
 			core0.RRESP := "b0000".U(4.W)
 			core1.RRESP := "b0000".U(4.W)
-			core2.RRESP := "b0000".U(4.W)
-			core3.RRESP := "b0000".U(4.W)
+		}
+		is(7.U){//FINISH
+			stateReg_8 := 0.U
 		}
 	}
 	/**

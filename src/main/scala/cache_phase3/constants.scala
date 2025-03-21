@@ -1,8 +1,8 @@
-package DataCache
+package cache_phase3
 
 //AXI port ID is hard-coded
 
-object constantsDCache{
+object constants{
   val lineSize : Int = 64 //8   //in bytes
   val cacheSize : Int = 32    //in KB
   val delay : Int = 2         //BRAM delay

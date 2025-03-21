@@ -1,18 +1,41 @@
 VPATH = ../scala:../cache:../common:../decode:../exec:../fetch:./memAccess:../rob:../testbench
 
+.PHONY: test_all_images
+
+test_all_images:
+	@rm -f test_results.txt
+	@for img in fyp18-riscv-emulator/riscv-tests/images/*; do \
+		echo "Processing $$img..."; \
+		cp $$img fyp18-riscv-emulator/src/Image; \
+		$(MAKE) runLockStep; \
+		STATUS=$$?; \
+		if [ $$STATUS -eq 0 ]; then \
+			echo "$$img: test pass" >> test_results.txt; \
+		else \
+			echo "$$img: test fail" >> test_results.txt; \
+		fi; \
+		rm fyp18-riscv-emulator/src/Image; \
+	done
+USER := $(shell whoami)
+
+ifeq ($(USER), mcrparadox)
+    VERILATOR_INCLUDE = /home/mcrparadox/verilator/include
+else
+    VERILATOR_INCLUDE = /usr/share/verilator/include
+endif
+
 runLockStep: lock_step_run.out fyp18-riscv-emulator/src/Image
 	./lock_step_run.out
 
 lock_step_run.out: lock_step_run.cpp fyp18-riscv-emulator/src/emulator.h fyp18-riscv-emulator/src/constants.h simulator/src/simulator.h simulator/src/obj_dir
-	g++ -O3 -I /usr/share/verilator/include -I simulator/src/obj_dir /usr/share/verilator/include/verilated.cpp /usr/share/verilator/include/verilated_vcd_c.cpp lock_step_run.cpp simulator/src/obj_dir/Vsystem__ALL.a -o lock_step_run.out
+	g++ -O3 -I $(VERILATOR_INCLUDE) -I simulator/src/obj_dir \
+		$(VERILATOR_INCLUDE)/verilated.cpp $(VERILATOR_INCLUDE)/verilated_vcd_c.cpp \
+		lock_step_run.cpp simulator/src/obj_dir/Vsystem__ALL.a -o lock_step_run.out
 
 simulator/src/obj_dir: simulator/src/system.v simulator/src/iCacheRegisters.v
 	cd simulator/src/; \
 	echo '/* verilator lint_off UNUSED */' | cat - system.v > temp && mv temp system.v; \
 	echo '/* verilator lint_off DECLFILENAME */' | cat - system.v > temp && mv temp system.v; \
-	echo '/* verilator lint_off UNUSED */' | cat - dCacheRegisters.v > temp && mv temp dCacheRegisters.v; \
-	echo '/* verilator lint_off DECLFILENAME */' | cat - dCacheRegisters.v > temp && mv temp dCacheRegisters.v; \
-	echo '/* verilator lint_off VARHIDDEN */' | cat - dCacheRegisters.v > temp && mv temp dCacheRegisters.v; \
 	echo '/* verilator lint_off UNUSED */' | cat - iCacheRegisters.v > temp && mv temp iCacheRegisters.v; \
 	echo '/* verilator lint_off DECLFILENAME */' | cat - iCacheRegisters.v > temp && mv temp iCacheRegisters.v; \
 	echo '/* verilator lint_off VARHIDDEN */' | cat - iCacheRegisters.v > temp && mv temp iCacheRegisters.v; \
@@ -23,22 +46,18 @@ simulator/src/obj_dir: simulator/src/system.v simulator/src/iCacheRegisters.v
 	make -f Vsystem.mk; \
 
 targets := $(wildcard src/*.scala)
-sim:
+sim:$(targets)
 	# Change instructionBase in configuration file
 	mv src/main/scala/common/configuration.scala configuration.txt
 	sed 's/instructionBase/instructionBase = 0x0000000010000000L\/\//' configuration.txt > src/main/scala/common/configuration.scala
-	sbt "runMain system"
+	sbt "clean; compile; runMain system"
 	# Restoring the original configuration
 	mv configuration.txt src/main/scala/common/configuration.scala
 	cp system.v simulator/src/
 	cd simulator/src/; \
-	cp ../../dCacheRegisters.v .; \
 	cp ../../iCacheRegisters.v .; \
 	echo '/* verilator lint_off UNUSED */' | cat - system.v > temp && mv temp system.v; \
 	echo '/* verilator lint_off DECLFILENAME */' | cat - system.v > temp && mv temp system.v; \
-	echo '/* verilator lint_off UNUSED */' | cat - dCacheRegisters.v > temp && mv temp dCacheRegisters.v; \
-	echo '/* verilator lint_off DECLFILENAME */' | cat - dCacheRegisters.v > temp && mv temp dCacheRegisters.v; \
-	echo '/* verilator lint_off VARHIDDEN */' | cat - dCacheRegisters.v > temp && mv temp dCacheRegisters.v; \
 	echo '/* verilator lint_off UNUSED */' | cat - iCacheRegisters.v > temp && mv temp iCacheRegisters.v; \
 	echo '/* verilator lint_off DECLFILENAME */' | cat - iCacheRegisters.v > temp && mv temp iCacheRegisters.v; \
 	echo '/* verilator lint_off VARHIDDEN */' | cat - iCacheRegisters.v > temp && mv temp iCacheRegisters.v; \
@@ -83,3 +102,7 @@ make zynq:
 fix_inotify_instances_reached:
 	# java.io.IOException: User limit of inotify instances reached or too many open files
 	echo 512 | sudo tee /proc/sys/fs/inotify/max_user_instances
+
+.PHONY: clean
+clean:
+	rm -rf ./simulator/src/obj_dir

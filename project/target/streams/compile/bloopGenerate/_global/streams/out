@@ -1,4 +1,4 @@
-[0m[[0m[0mdebug[0m] [0m[0m[multicore_processor-build] Classpath dependencies List()[0m
-[0m[[0m[0mdebug[0m] [0m[0m[multicore_processor-build] Dependencies from configurations List()[0m
-[0m[[0m[0mdebug[0m] [0m[0mBloop wrote the configuration of project 'multicore_processor-build' to '/media/hv/D1/OOO_Processor/Mid_Evaluation/Multicore_Processor/project/.bloop/multicore_processor-build.json'[0m
-[0m[[0m[32msuccess[0m] [0m[0mGenerated .bloop/multicore_processor-build.json[0m
+[debug] [main-core-build] Classpath dependencies List()
+[debug] [main-core-build] Dependencies from configurations List()
+[debug] Bloop wrote the configuration of project 'main-core-build' to '/mnt/Uni/FYP/Cache/Phase3/Main core/project/.bloop/main-core-build.json'
+[success] Generated .bloop/main-core-build.json

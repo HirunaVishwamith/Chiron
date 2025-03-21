@@ -10,9 +10,10 @@ import chisel3.util._
 import chisel3.util.HasBlackBoxResource
 import chisel3.experimental.BundleLiterals._
 import chisel3.experimental.IO
-import DataCache.ACE
+import cache_phase3.constants._
+import cache_phase3._
 
-import pipeline.ports._
+//import pipeline.ports._
 import common.coreConfiguration._
 import os.write
 
@@ -199,7 +200,7 @@ class iCache(
   lowLevelMem.ARSIZE := 3.U
   lowLevelMem.ARVALID := arvalid
   lowLevelMem.ARDOMAIN := 0.U
-  lowLevelMem.ARSNOOP := 0.U
+  lowLevelMem.ARSNOOP := 3.U
   lowLevelMem.ARBAR := 0.U
 
   lowLevelMem.RREADY := rready

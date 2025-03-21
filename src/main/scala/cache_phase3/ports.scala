@@ -1,8 +1,9 @@
-package DataCache
+package cache_phase3
 
 import chisel3._
-import DataCache.constantsDCache._
+import cache_phase3.constants._
 import java.util.ResourceBundle
+import dataclass.data
 
 class branchOps extends Bundle {
   val valid = Input(Bool())
@@ -122,72 +123,6 @@ class ACE(
 	val CDREADY = Input(Bool())
 	val CDDATA = Output(UInt(busWidth.W))
 	val CDLAST = Output(Bool())
-}
-
-//Written for AXIUnit
-//The port to put out the memory read data
-class loadData(
-	dataWidth: Int 
-) extends Bundle {
-	val ready = Input(Bool())
-	val valid = Output(Bool())
-	val data = Output(UInt((dataWidth).W))
-	val response = Output(UInt(2.W))
-}
-
-class storeData(
-	dataWidth: Int 
-) extends Bundle {
-	val ready = Output(Bool())
-	val valid = Input(Bool())
-	val data = Input(UInt((dataWidth).W))
-}
-
-class requestAXI(		//Defined as seen from AXI unit
-	dataWidth: Int, 
-	addrWidth: Int,
-	hasInstruction: Boolean = true // Parameter to control inclusion
-) extends Bundle {
-  val ready = Output(Bool())
-  val valid = Input(Bool())
-  val writeEn = Input(Bool())      // To signal a store (memory write)
-  val address = Input(UInt(addrWidth.W))
-  val data = Input(UInt(dataWidth.W)) // Configurable data width
-	val instruction = Input(UInt(insWidth.W))
-}
-
-class requestACE(       //Defined as seen from ACE unit
-  dataWidth: Int, 
-  addrWidth: Int
-) extends requestAXI(dataWidth, addrWidth) {  
-  val isUnique = Input(Bool())     // ReadUnique or CleanUnique
-  val isClean = Input(Bool())      // WriteClean or WriteBack
-}
-
-class cacheRequest extends Bundle {
-  val instruction = Input(UInt(insWidth.W)) 
-	val ready = Output(Bool())
-  val valid = Input(Bool())
-	val accepted = Output(Bool())
-  val writeEn = Input(Bool())      // To signal a store (memory write)
-  val address = Input(UInt(addrWidth.W))
-}
-
-
-//Written to cacheLookup
-class storeDataIn extends writeDataIn {
-  val ready = Output(Bool())
-}
-
-class coherencyRequest(
-	addrWidth: Int = addrWidth,
-) extends Bundle{ //Defined as seen from AXI unit
-	val ready = Input(Bool())
-	val valid = Output(Bool())
-	val accepted = Input(Bool())
-	val address = Output(UInt(addrWidth.W))
-	val dataReq = Output(Bool())
-	val invalidateReq = Output(Bool())
 }
 
 class loadCommit extends Bundle{
