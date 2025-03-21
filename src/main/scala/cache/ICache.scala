@@ -200,7 +200,7 @@ class iCache(
   lowLevelMem.ARSIZE := 3.U
   lowLevelMem.ARVALID := arvalid
   lowLevelMem.ARDOMAIN := 0.U
-  lowLevelMem.ARSNOOP := 3.U
+  lowLevelMem.ARSNOOP := 1.U
   lowLevelMem.ARBAR := 0.U
 
   lowLevelMem.RREADY := rready

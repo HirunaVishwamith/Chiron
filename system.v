@@ -52771,7 +52771,7 @@ module Interconnect(
   wire [69:0] _FIFO_io_enq_bits_T_2 = {2'h0,io_acePort0_ARADDR,io_acePort0_ARSNOOP}; // @[Cat.scala 33:92]
   wire [69:0] _FIFO_io_enq_bits_T_4 = {2'h0,io_acePort0_AWADDR,1'h0,io_acePort0_AWSNOOP}; // @[Cat.scala 33:92]
   wire [69:0] _FIFO_io_enq_bits_T_5 = {2'h0,io_acePort0_WDATA,3'h0,io_acePort0_WLAST}; // @[Cat.scala 33:92]
-  wire [69:0] _FIFO_io_enq_bits_T_8 = {2'h1,io_acePort1_ARADDR,4'h3}; // @[Cat.scala 33:92]
+  wire [69:0] _FIFO_io_enq_bits_T_8 = {2'h1,io_acePort1_ARADDR,4'h1}; // @[Cat.scala 33:92]
   wire [69:0] _GEN_1 = Arbiter_io_select == 3'h5 ? 70'h100000000000000000 : 70'h0; // @[Interconnect.scala 137:45 138:22]
   wire [69:0] _GEN_2 = Arbiter_io_select == 3'h4 ? _FIFO_io_enq_bits_T_8 : _GEN_1; // @[Interconnect.scala 135:45 136:22]
   wire [69:0] _GEN_3 = Arbiter_io_select == 3'h2 ? _FIFO_io_enq_bits_T_5 : _GEN_2; // @[Interconnect.scala 133:45 134:22]

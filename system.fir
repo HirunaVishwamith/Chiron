@@ -329,7 +329,7 @@ circuit system :
     lowLevelMem.ARSIZE <= UInt<2>("h3") @[ICache.scala 200:22]
     lowLevelMem.ARVALID <= arvalid @[ICache.scala 201:23]
     lowLevelMem.ARDOMAIN <= UInt<1>("h0") @[ICache.scala 202:24]
-    lowLevelMem.ARSNOOP <= UInt<2>("h3") @[ICache.scala 203:23]
+    lowLevelMem.ARSNOOP <= UInt<1>("h1") @[ICache.scala 203:23]
     lowLevelMem.ARBAR <= UInt<1>("h0") @[ICache.scala 204:21]
     lowLevelMem.RREADY <= rready @[ICache.scala 206:22]
     lowLevelMem.AWADDR <= UInt<1>("h0") @[ICache.scala 208:22]
