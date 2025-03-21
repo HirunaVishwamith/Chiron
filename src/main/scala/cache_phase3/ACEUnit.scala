@@ -281,8 +281,8 @@ class ACEUnit(
       
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }
-  }
-
+  } 
+  //See this
   //--------------------Coherent state----------------------------//
   //* Since a new coherent request comes after the previous request's response is released-
   //* -the request and response are kept in the same state machine without pipelining
