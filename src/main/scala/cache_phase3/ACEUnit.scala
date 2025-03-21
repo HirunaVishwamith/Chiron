@@ -294,11 +294,13 @@ class ACEUnit(
   coherentCounter.reset := false.B
   switch(coherentAXIState){
     is(coherentIdleState){
-      coherencyRequestBuffer.valid := bus.ACVALID && bus.ACPROT === dPort_PROT.U
+      bus.ACREADY := true.B
+      val coherencyReceived = bus.ACVALID && bus.ACPROT === dPort_PROT.U
+      coherencyRequestBuffer.valid := coherencyReceived
       coherencyRequestBuffer.address := bus.ACADDR
       coherencyRequestBuffer.response := Cat(((bus.ACSNOOP === "b1001".U) || (bus.ACSNOOP === "b0111".U)), 
                                               ((bus.ACSNOOP === "b0001".U) || (bus.ACSNOOP === "b0111".U)))
-      coherentAXIState := Mux(coherencyRequestBuffer.valid , coherentRequestState, coherentIdleState)
+      coherentAXIState := Mux(coherencyReceived , coherentRequestState, coherentIdleState)
     }
     is(coherentRequestState){
       coherencyResponse.ready := true.B

@@ -41243,6 +41243,7 @@ module ACEUnit(
   output [3:0]   bus_ARSNOOP,
   input  [3:0]   bus_RRESP,
   input          bus_ACVALID,
+  output         bus_ACREADY,
   input  [31:0]  bus_ACADDR,
   input  [3:0]   bus_ACSNOOP,
   output         bus_CRVALID,
@@ -41418,46 +41419,46 @@ module ACEUnit(
   wire  _GEN_137 = 2'h1 == readACEResponseState ? _GEN_122 : readResponseValid; // @[ACEUnit.scala 252:32 248:34]
   wire  _GEN_162 = 2'h0 == readACEResponseState ? readResponseValid : _GEN_137; // @[ACEUnit.scala 252:32 248:34]
   reg [1:0] coherentAXIState; // @[ACEUnit.scala 291:33]
-  wire  _coherencyRequestBuffer_response_T_1 = bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 299:91]
-  wire  _coherencyRequestBuffer_response_T_2 = bus_ACSNOOP == 4'h9 | bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 299:75]
-  wire  _coherencyRequestBuffer_response_T_5 = bus_ACSNOOP == 4'h1 | _coherencyRequestBuffer_response_T_1; // @[ACEUnit.scala 300:76]
+  wire  _coherencyRequestBuffer_response_T_1 = bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 301:91]
+  wire  _coherencyRequestBuffer_response_T_2 = bus_ACSNOOP == 4'h9 | bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 301:75]
+  wire  _coherencyRequestBuffer_response_T_5 = bus_ACSNOOP == 4'h1 | _coherencyRequestBuffer_response_T_1; // @[ACEUnit.scala 302:76]
   wire [1:0] _coherencyRequestBuffer_response_T_6 = {_coherencyRequestBuffer_response_T_2,
     _coherencyRequestBuffer_response_T_5}; // @[Cat.scala 33:92]
-  wire [1:0] _coherentAXIState_T_1 = coherencyResponse_request_valid ? 2'h2 : 2'h1; // @[ACEUnit.scala 308:32]
-  wire  _bus_CRRESP_T_1 = ~coherencyResponseBuffer_response[0]; // @[ACEUnit.scala 316:70]
-  wire  _bus_CRRESP_T_3 = ~coherencyResponseBuffer_response[1]; // @[ACEUnit.scala 316:108]
+  wire [1:0] _coherentAXIState_T_1 = coherencyResponse_request_valid ? 2'h2 : 2'h1; // @[ACEUnit.scala 310:32]
+  wire  _bus_CRRESP_T_1 = ~coherencyResponseBuffer_response[0]; // @[ACEUnit.scala 318:70]
+  wire  _bus_CRRESP_T_3 = ~coherencyResponseBuffer_response[1]; // @[ACEUnit.scala 318:108]
   wire [4:0] _bus_CRRESP_T_4 = {1'h0,_bus_CRRESP_T_1,_bus_CRRESP_T_3,2'h0}; // @[Cat.scala 33:92]
-  wire [4:0] _bus_CRRESP_T_5 = coherencyResponseBuffer_valid ? _bus_CRRESP_T_4 : 5'h0; // @[ACEUnit.scala 316:24]
-  wire [1:0] _coherentAXIState_T_2 = coherencyResponseBuffer_valid ? 2'h3 : 2'h0; // @[ACEUnit.scala 319:32]
-  wire [1:0] _GEN_169 = bus_CRREADY ? _coherentAXIState_T_2 : 2'h2; // @[ACEUnit.scala 318:24 319:26 321:26]
-  wire [63:0] writeChunks_1_0 = coherencyResponseBuffer_data[63:0]; // @[ACEUnit.scala 329:37]
-  wire [63:0] writeChunks_1_1 = coherencyResponseBuffer_data[127:64]; // @[ACEUnit.scala 329:37]
-  wire [63:0] writeChunks_1_2 = coherencyResponseBuffer_data[191:128]; // @[ACEUnit.scala 329:37]
-  wire [63:0] writeChunks_1_3 = coherencyResponseBuffer_data[255:192]; // @[ACEUnit.scala 329:37]
-  wire [63:0] writeChunks_1_4 = coherencyResponseBuffer_data[319:256]; // @[ACEUnit.scala 329:37]
-  wire [63:0] writeChunks_1_5 = coherencyResponseBuffer_data[383:320]; // @[ACEUnit.scala 329:37]
-  wire [63:0] writeChunks_1_6 = coherencyResponseBuffer_data[447:384]; // @[ACEUnit.scala 329:37]
-  wire [63:0] writeChunks_1_7 = coherencyResponseBuffer_data[511:448]; // @[ACEUnit.scala 329:37]
-  wire [63:0] _GEN_171 = 3'h1 == coherentCounter_count ? writeChunks_1_1 : writeChunks_1_0; // @[ACEUnit.scala 332:{20,20}]
-  wire [63:0] _GEN_172 = 3'h2 == coherentCounter_count ? writeChunks_1_2 : _GEN_171; // @[ACEUnit.scala 332:{20,20}]
-  wire [63:0] _GEN_173 = 3'h3 == coherentCounter_count ? writeChunks_1_3 : _GEN_172; // @[ACEUnit.scala 332:{20,20}]
-  wire [63:0] _GEN_174 = 3'h4 == coherentCounter_count ? writeChunks_1_4 : _GEN_173; // @[ACEUnit.scala 332:{20,20}]
-  wire [63:0] _GEN_175 = 3'h5 == coherentCounter_count ? writeChunks_1_5 : _GEN_174; // @[ACEUnit.scala 332:{20,20}]
-  wire [63:0] _GEN_176 = 3'h6 == coherentCounter_count ? writeChunks_1_6 : _GEN_175; // @[ACEUnit.scala 332:{20,20}]
-  wire [63:0] _GEN_177 = 3'h7 == coherentCounter_count ? writeChunks_1_7 : _GEN_176; // @[ACEUnit.scala 332:{20,20}]
-  wire [63:0] _GEN_178 = bus_CDREADY ? _GEN_177 : 64'h0; // @[ACEUnit.scala 104:14 331:24 332:20]
-  wire  _coherencyResponseBuffer_valid_T = bus_CDLAST & bus_CDREADY; // @[ACEUnit.scala 336:53]
-  wire [1:0] _coherentAXIState_T_4 = _coherencyResponseBuffer_valid_T ? 2'h0 : 2'h3; // @[ACEUnit.scala 338:30]
+  wire [4:0] _bus_CRRESP_T_5 = coherencyResponseBuffer_valid ? _bus_CRRESP_T_4 : 5'h0; // @[ACEUnit.scala 318:24]
+  wire [1:0] _coherentAXIState_T_2 = coherencyResponseBuffer_valid ? 2'h3 : 2'h0; // @[ACEUnit.scala 321:32]
+  wire [1:0] _GEN_169 = bus_CRREADY ? _coherentAXIState_T_2 : 2'h2; // @[ACEUnit.scala 320:24 321:26 323:26]
+  wire [63:0] writeChunks_1_0 = coherencyResponseBuffer_data[63:0]; // @[ACEUnit.scala 331:37]
+  wire [63:0] writeChunks_1_1 = coherencyResponseBuffer_data[127:64]; // @[ACEUnit.scala 331:37]
+  wire [63:0] writeChunks_1_2 = coherencyResponseBuffer_data[191:128]; // @[ACEUnit.scala 331:37]
+  wire [63:0] writeChunks_1_3 = coherencyResponseBuffer_data[255:192]; // @[ACEUnit.scala 331:37]
+  wire [63:0] writeChunks_1_4 = coherencyResponseBuffer_data[319:256]; // @[ACEUnit.scala 331:37]
+  wire [63:0] writeChunks_1_5 = coherencyResponseBuffer_data[383:320]; // @[ACEUnit.scala 331:37]
+  wire [63:0] writeChunks_1_6 = coherencyResponseBuffer_data[447:384]; // @[ACEUnit.scala 331:37]
+  wire [63:0] writeChunks_1_7 = coherencyResponseBuffer_data[511:448]; // @[ACEUnit.scala 331:37]
+  wire [63:0] _GEN_171 = 3'h1 == coherentCounter_count ? writeChunks_1_1 : writeChunks_1_0; // @[ACEUnit.scala 334:{20,20}]
+  wire [63:0] _GEN_172 = 3'h2 == coherentCounter_count ? writeChunks_1_2 : _GEN_171; // @[ACEUnit.scala 334:{20,20}]
+  wire [63:0] _GEN_173 = 3'h3 == coherentCounter_count ? writeChunks_1_3 : _GEN_172; // @[ACEUnit.scala 334:{20,20}]
+  wire [63:0] _GEN_174 = 3'h4 == coherentCounter_count ? writeChunks_1_4 : _GEN_173; // @[ACEUnit.scala 334:{20,20}]
+  wire [63:0] _GEN_175 = 3'h5 == coherentCounter_count ? writeChunks_1_5 : _GEN_174; // @[ACEUnit.scala 334:{20,20}]
+  wire [63:0] _GEN_176 = 3'h6 == coherentCounter_count ? writeChunks_1_6 : _GEN_175; // @[ACEUnit.scala 334:{20,20}]
+  wire [63:0] _GEN_177 = 3'h7 == coherentCounter_count ? writeChunks_1_7 : _GEN_176; // @[ACEUnit.scala 334:{20,20}]
+  wire [63:0] _GEN_178 = bus_CDREADY ? _GEN_177 : 64'h0; // @[ACEUnit.scala 104:14 333:24 334:20]
+  wire  _coherencyResponseBuffer_valid_T = bus_CDLAST & bus_CDREADY; // @[ACEUnit.scala 338:53]
+  wire [1:0] _coherentAXIState_T_4 = _coherencyResponseBuffer_valid_T ? 2'h0 : 2'h3; // @[ACEUnit.scala 340:30]
   wire [63:0] _GEN_181 = 2'h3 == coherentAXIState ? _GEN_178 : 64'h0; // @[ACEUnit.scala 104:14 295:27]
-  wire  _GEN_183 = 2'h3 == coherentAXIState & coherentCounter_count == 3'h7; // @[ACEUnit.scala 105:14 295:27 335:18]
-  wire  _GEN_184 = 2'h3 == coherentAXIState ? ~(bus_CDLAST & bus_CDREADY) : coherencyResponse_request_valid; // @[ACEUnit.scala 151:27 295:27 336:37]
-  wire [1:0] _GEN_185 = 2'h3 == coherentAXIState ? _coherentAXIState_T_4 : coherentAXIState; // @[ACEUnit.scala 295:27 338:24 291:33]
-  wire [4:0] _GEN_187 = 2'h2 == coherentAXIState ? _bus_CRRESP_T_5 : 5'h0; // @[ACEUnit.scala 101:14 295:27 316:18]
+  wire  _GEN_183 = 2'h3 == coherentAXIState & coherentCounter_count == 3'h7; // @[ACEUnit.scala 105:14 295:27 337:18]
+  wire  _GEN_184 = 2'h3 == coherentAXIState ? ~(bus_CDLAST & bus_CDREADY) : coherencyResponse_request_valid; // @[ACEUnit.scala 151:27 295:27 338:37]
+  wire [1:0] _GEN_185 = 2'h3 == coherentAXIState ? _coherentAXIState_T_4 : coherentAXIState; // @[ACEUnit.scala 295:27 340:24 291:33]
+  wire [4:0] _GEN_187 = 2'h2 == coherentAXIState ? _bus_CRRESP_T_5 : 5'h0; // @[ACEUnit.scala 101:14 295:27 318:18]
   wire  _GEN_189 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState; // @[ACEUnit.scala 103:15 295:27]
   wire [63:0] _GEN_190 = 2'h2 == coherentAXIState ? 64'h0 : _GEN_181; // @[ACEUnit.scala 104:14 295:27]
   wire  _GEN_191 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState & bus_CDREADY; // @[ACEUnit.scala 293:25 295:27]
   wire  _GEN_192 = 2'h2 == coherentAXIState ? 1'h0 : _GEN_183; // @[ACEUnit.scala 105:14 295:27]
-  wire  _GEN_194 = 2'h1 == coherentAXIState | ~coherencyResponseBuffer_valid; // @[ACEUnit.scala 150:27 295:27 304:31]
+  wire  _GEN_194 = 2'h1 == coherentAXIState | ~coherencyResponseBuffer_valid; // @[ACEUnit.scala 150:27 295:27 306:31]
   wire  _GEN_200 = 2'h1 == coherentAXIState ? 1'h0 : 2'h2 == coherentAXIState; // @[ACEUnit.scala 100:15 295:27]
   wire [4:0] _GEN_201 = 2'h1 == coherentAXIState ? 5'h0 : _GEN_187; // @[ACEUnit.scala 101:14 295:27]
   wire  _GEN_202 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_189; // @[ACEUnit.scala 103:15 295:27]
@@ -41518,7 +41519,7 @@ module ACEUnit(
   assign coherencyRequest_request_address = coherencyRequestBuffer_address; // @[ACEUnit.scala 147:28]
   assign coherencyRequest_request_response = coherencyRequestBuffer_response; // @[ACEUnit.scala 147:28]
   assign coherencyResponse_ready = 2'h0 == coherentAXIState ? ~coherencyResponseBuffer_valid : _GEN_194; // @[ACEUnit.scala 150:27 295:27]
-  assign fenceReady = _readRequest_ready_T & ~responseBuffer_valid & ACEMSHR_isEmpty; // @[ACEUnit.scala 341:60]
+  assign fenceReady = _readRequest_ready_T & ~responseBuffer_valid & ACEMSHR_isEmpty; // @[ACEUnit.scala 343:60]
   assign bus_AWADDR = {{6'd0}, _GEN_39};
   assign bus_AWVALID = 2'h0 == writeACEState ? 1'h0 : 2'h1 == writeACEState; // @[ACEUnit.scala 160:25 67:15]
   assign bus_WDATA = 2'h0 == writeACEState ? 64'h0 : _GEN_30; // @[ACEUnit.scala 160:25 69:13]
@@ -41530,6 +41531,7 @@ module ACEUnit(
   assign bus_RREADY = 2'h0 == readACEResponseState ? 1'h0 : 2'h1 == readACEResponseState; // @[ACEUnit.scala 252:32 87:14]
   assign bus_AWSNOOP = {{1'd0}, _GEN_41};
   assign bus_ARSNOOP = {{1'd0}, _GEN_89};
+  assign bus_ACREADY = 2'h0 == coherentAXIState; // @[ACEUnit.scala 295:27]
   assign bus_CRVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_200; // @[ACEUnit.scala 100:15 295:27]
   assign bus_CRRESP = 2'h0 == coherentAXIState ? 5'h0 : _GEN_201; // @[ACEUnit.scala 101:14 295:27]
   assign bus_CDVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_202; // @[ACEUnit.scala 103:15 295:27]
@@ -41674,17 +41676,17 @@ module ACEUnit(
     if (reset) begin // @[ACEUnit.scala 146:39]
       coherencyRequestBuffer_valid <= 1'h0; // @[ACEUnit.scala 146:39]
     end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      coherencyRequestBuffer_valid <= bus_ACVALID; // @[ACEUnit.scala 297:36]
+      coherencyRequestBuffer_valid <= bus_ACVALID; // @[ACEUnit.scala 299:36]
     end
     if (reset) begin // @[ACEUnit.scala 146:39]
       coherencyRequestBuffer_address <= 32'h0; // @[ACEUnit.scala 146:39]
     end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      coherencyRequestBuffer_address <= bus_ACADDR; // @[ACEUnit.scala 298:38]
+      coherencyRequestBuffer_address <= bus_ACADDR; // @[ACEUnit.scala 300:38]
     end
     if (reset) begin // @[ACEUnit.scala 146:39]
       coherencyRequestBuffer_response <= 2'h0; // @[ACEUnit.scala 146:39]
     end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      coherencyRequestBuffer_response <= _coherencyRequestBuffer_response_T_6; // @[ACEUnit.scala 299:39]
+      coherencyRequestBuffer_response <= _coherencyRequestBuffer_response_T_6; // @[ACEUnit.scala 301:39]
     end
     if (reset) begin // @[ACEUnit.scala 149:40]
       coherencyResponseBuffer_valid <= 1'h0; // @[ACEUnit.scala 149:40]
@@ -41828,14 +41830,14 @@ module ACEUnit(
     if (reset) begin // @[ACEUnit.scala 291:33]
       coherentAXIState <= 2'h0; // @[ACEUnit.scala 291:33]
     end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      if (coherencyRequestBuffer_valid) begin // @[ACEUnit.scala 301:30]
+      if (bus_ACVALID) begin // @[ACEUnit.scala 303:30]
         coherentAXIState <= 2'h1;
       end else begin
         coherentAXIState <= 2'h0;
       end
     end else if (2'h1 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      if (coherencyResponse_request_valid) begin // @[ACEUnit.scala 305:45]
-        coherentAXIState <= _coherentAXIState_T_1; // @[ACEUnit.scala 308:26]
+      if (coherencyResponse_request_valid) begin // @[ACEUnit.scala 307:45]
+        coherentAXIState <= _coherentAXIState_T_1; // @[ACEUnit.scala 310:26]
       end
     end else if (2'h2 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
       coherentAXIState <= _GEN_169;
@@ -43051,6 +43053,7 @@ module core_Anon_1(
   output [3:0]  dPort_ARSNOOP,
   input  [3:0]  dPort_RRESP,
   input         dPort_ACVALID,
+  output        dPort_ACREADY,
   input  [31:0] dPort_ACADDR,
   input  [3:0]  dPort_ACSNOOP,
   output        dPort_CRVALID,
@@ -43354,6 +43357,7 @@ module core_Anon_1(
   wire [3:0] aceUnit_bus_ARSNOOP; // @[cacheModule.scala 56:23]
   wire [3:0] aceUnit_bus_RRESP; // @[cacheModule.scala 56:23]
   wire  aceUnit_bus_ACVALID; // @[cacheModule.scala 56:23]
+  wire  aceUnit_bus_ACREADY; // @[cacheModule.scala 56:23]
   wire [31:0] aceUnit_bus_ACADDR; // @[cacheModule.scala 56:23]
   wire [3:0] aceUnit_bus_ACSNOOP; // @[cacheModule.scala 56:23]
   wire  aceUnit_bus_CRVALID; // @[cacheModule.scala 56:23]
@@ -43644,6 +43648,7 @@ module core_Anon_1(
     .bus_ARSNOOP(aceUnit_bus_ARSNOOP),
     .bus_RRESP(aceUnit_bus_RRESP),
     .bus_ACVALID(aceUnit_bus_ACVALID),
+    .bus_ACREADY(aceUnit_bus_ACREADY),
     .bus_ACADDR(aceUnit_bus_ACADDR),
     .bus_ACSNOOP(aceUnit_bus_ACSNOOP),
     .bus_CRVALID(aceUnit_bus_CRVALID),
@@ -43676,6 +43681,7 @@ module core_Anon_1(
   assign dPort_RREADY = aceUnit_bus_RREADY; // @[cacheModule.scala 103:15]
   assign dPort_AWSNOOP = aceUnit_bus_AWSNOOP; // @[cacheModule.scala 103:15]
   assign dPort_ARSNOOP = aceUnit_bus_ARSNOOP; // @[cacheModule.scala 103:15]
+  assign dPort_ACREADY = aceUnit_bus_ACREADY; // @[cacheModule.scala 103:15]
   assign dPort_CRVALID = aceUnit_bus_CRVALID; // @[cacheModule.scala 103:15]
   assign dPort_CRRESP = aceUnit_bus_CRRESP; // @[cacheModule.scala 103:15]
   assign dPort_CDVALID = aceUnit_bus_CDVALID; // @[cacheModule.scala 103:15]
@@ -46071,6 +46077,7 @@ module system_Anon(
   output [3:0]  dPort_ARSNOOP,
   input  [3:0]  dPort_RRESP,
   input         dPort_ACVALID,
+  output        dPort_ACREADY,
   input  [31:0] dPort_ACADDR,
   input  [3:0]  dPort_ACSNOOP,
   output        dPort_CRVALID,
@@ -46489,6 +46496,7 @@ module system_Anon(
   wire [3:0] memAccess_dPort_ARSNOOP; // @[core.scala 65:25]
   wire [3:0] memAccess_dPort_RRESP; // @[core.scala 65:25]
   wire  memAccess_dPort_ACVALID; // @[core.scala 65:25]
+  wire  memAccess_dPort_ACREADY; // @[core.scala 65:25]
   wire [31:0] memAccess_dPort_ACADDR; // @[core.scala 65:25]
   wire [3:0] memAccess_dPort_ACSNOOP; // @[core.scala 65:25]
   wire  memAccess_dPort_CRVALID; // @[core.scala 65:25]
@@ -49391,6 +49399,7 @@ module system_Anon(
     .dPort_ARSNOOP(memAccess_dPort_ARSNOOP),
     .dPort_RRESP(memAccess_dPort_RRESP),
     .dPort_ACVALID(memAccess_dPort_ACVALID),
+    .dPort_ACREADY(memAccess_dPort_ACREADY),
     .dPort_ACADDR(memAccess_dPort_ACADDR),
     .dPort_ACSNOOP(memAccess_dPort_ACSNOOP),
     .dPort_CRVALID(memAccess_dPort_CRVALID),
@@ -49553,6 +49562,7 @@ module system_Anon(
   assign dPort_RREADY = memAccess_dPort_RREADY; // @[core.scala 833:9]
   assign dPort_AWSNOOP = memAccess_dPort_AWSNOOP; // @[core.scala 833:9]
   assign dPort_ARSNOOP = memAccess_dPort_ARSNOOP; // @[core.scala 833:9]
+  assign dPort_ACREADY = memAccess_dPort_ACREADY; // @[core.scala 833:9]
   assign dPort_CRVALID = memAccess_dPort_CRVALID; // @[core.scala 833:9]
   assign dPort_CRRESP = memAccess_dPort_CRRESP; // @[core.scala 833:9]
   assign dPort_CDVALID = memAccess_dPort_CDVALID; // @[core.scala 833:9]
@@ -52064,6 +52074,7 @@ module ccu(
   output        L2_BREADY,
   input  [1:0]  L2_BID,
   output        core0_ACVALID,
+  input         core0_ACREADY,
   output [63:0] core0_ACADDR,
   output [3:0]  core0_ACSNOOP,
   input         core0_CRVALID,
@@ -52197,6 +52208,7 @@ module ccu(
   wire  _T_65 = stateReg_3 == 3'h6 & (tran_pbuf_2 == 4'h4 | tran_pbuf_2 == 4'h0); // @[ccu.scala 465:61]
   wire  _T_67 = core_id_pbuf_2 == 2'h0; // @[ccu.scala 467:86]
   wire  _T_72 = _T_61 & ~_T_67; // @[ccu.scala 469:67]
+  wire [1:0] _GEN_116 = ~core0_ACREADY ? 2'h1 : 2'h2; // @[ccu.scala 477:45 478:44 480:44]
   wire [3:0] _GEN_117 = tran_pbuf_2 == 4'hb ? 4'h9 : 4'h0; // @[ccu.scala 488:67 489:47 491:47]
   wire [3:0] _GEN_118 = tran_pbuf_2 == 4'h7 ? 4'h7 : _GEN_117; // @[ccu.scala 486:67 487:47]
   wire [3:0] _GEN_119 = tran_pbuf_2 == 4'h1 ? 4'h1 : _GEN_118; // @[ccu.scala 484:61 485:47]
@@ -52462,7 +52474,7 @@ module ccu(
         stateReg_4 <= {{2'd0}, _T_72};
       end
     end else if (3'h1 == stateReg_4) begin // @[ccu.scala 463:27]
-      stateReg_4 <= 3'h1;
+      stateReg_4 <= {{1'd0}, _GEN_116};
     end else if (3'h2 == stateReg_4) begin // @[ccu.scala 463:27]
       stateReg_4 <= {{1'd0}, _GEN_120};
     end else begin
@@ -52650,6 +52662,7 @@ module Interconnect(
   output [3:0]  io_acePort0_RRESP,
   output        io_acePort0_RLAST,
   output        io_acePort0_ACVALID,
+  input         io_acePort0_ACREADY,
   output [63:0] io_acePort0_ACADDR,
   output [3:0]  io_acePort0_ACSNOOP,
   input         io_acePort0_CRVALID,
@@ -52732,6 +52745,7 @@ module Interconnect(
   wire  CCU_L2_BREADY; // @[Interconnect.scala 146:19]
   wire [1:0] CCU_L2_BID; // @[Interconnect.scala 146:19]
   wire  CCU_core0_ACVALID; // @[Interconnect.scala 146:19]
+  wire  CCU_core0_ACREADY; // @[Interconnect.scala 146:19]
   wire [63:0] CCU_core0_ACADDR; // @[Interconnect.scala 146:19]
   wire [3:0] CCU_core0_ACSNOOP; // @[Interconnect.scala 146:19]
   wire  CCU_core0_CRVALID; // @[Interconnect.scala 146:19]
@@ -52814,6 +52828,7 @@ module Interconnect(
     .L2_BREADY(CCU_L2_BREADY),
     .L2_BID(CCU_L2_BID),
     .core0_ACVALID(CCU_core0_ACVALID),
+    .core0_ACREADY(CCU_core0_ACREADY),
     .core0_ACADDR(CCU_core0_ACADDR),
     .core0_ACSNOOP(CCU_core0_ACSNOOP),
     .core0_CRVALID(CCU_core0_CRVALID),
@@ -52891,6 +52906,7 @@ module Interconnect(
   assign CCU_L2_RLAST = io_L2_RLAST; // @[Interconnect.scala 184:16]
   assign CCU_L2_BVALID = io_L2_BVALID; // @[Interconnect.scala 167:17]
   assign CCU_L2_BID = io_L2_BID; // @[Interconnect.scala 169:14]
+  assign CCU_core0_ACREADY = io_acePort0_ACREADY; // @[Interconnect.scala 189:21]
   assign CCU_core0_CRVALID = io_acePort0_CRVALID; // @[Interconnect.scala 194:21]
   assign CCU_core0_CRRESP = io_acePort0_CRRESP; // @[Interconnect.scala 196:20]
   assign CCU_core0_CDVALID = io_acePort0_CDVALID; // @[Interconnect.scala 199:21]
@@ -53903,6 +53919,7 @@ module system(
   wire [3:0] core0_dPort_ARSNOOP; // @[system.scala 22:21]
   wire [3:0] core0_dPort_RRESP; // @[system.scala 22:21]
   wire  core0_dPort_ACVALID; // @[system.scala 22:21]
+  wire  core0_dPort_ACREADY; // @[system.scala 22:21]
   wire [31:0] core0_dPort_ACADDR; // @[system.scala 22:21]
   wire [3:0] core0_dPort_ACSNOOP; // @[system.scala 22:21]
   wire  core0_dPort_CRVALID; // @[system.scala 22:21]
@@ -54014,6 +54031,7 @@ module system(
   wire [3:0] interconnect__io_acePort0_RRESP; // @[system.scala 48:28]
   wire  interconnect__io_acePort0_RLAST; // @[system.scala 48:28]
   wire  interconnect__io_acePort0_ACVALID; // @[system.scala 48:28]
+  wire  interconnect__io_acePort0_ACREADY; // @[system.scala 48:28]
   wire [63:0] interconnect__io_acePort0_ACADDR; // @[system.scala 48:28]
   wire [3:0] interconnect__io_acePort0_ACSNOOP; // @[system.scala 48:28]
   wire  interconnect__io_acePort0_CRVALID; // @[system.scala 48:28]
@@ -54133,6 +54151,7 @@ module system(
     .dPort_ARSNOOP(core0_dPort_ARSNOOP),
     .dPort_RRESP(core0_dPort_RRESP),
     .dPort_ACVALID(core0_dPort_ACVALID),
+    .dPort_ACREADY(core0_dPort_ACREADY),
     .dPort_ACADDR(core0_dPort_ACADDR),
     .dPort_ACSNOOP(core0_dPort_ACSNOOP),
     .dPort_CRVALID(core0_dPort_CRVALID),
@@ -54248,6 +54267,7 @@ module system(
     .io_acePort0_RRESP(interconnect__io_acePort0_RRESP),
     .io_acePort0_RLAST(interconnect__io_acePort0_RLAST),
     .io_acePort0_ACVALID(interconnect__io_acePort0_ACVALID),
+    .io_acePort0_ACREADY(interconnect__io_acePort0_ACREADY),
     .io_acePort0_ACADDR(interconnect__io_acePort0_ACADDR),
     .io_acePort0_ACSNOOP(interconnect__io_acePort0_ACSNOOP),
     .io_acePort0_CRVALID(interconnect__io_acePort0_CRVALID),
@@ -54402,6 +54422,7 @@ module system(
   assign interconnect__io_acePort0_ARADDR = {{32'd0}, core0_dPort_ARADDR}; // @[system.scala 79:35]
   assign interconnect__io_acePort0_ARSNOOP = core0_dPort_ARSNOOP; // @[system.scala 80:36]
   assign interconnect__io_acePort0_RREADY = core0_dPort_RREADY; // @[system.scala 85:35]
+  assign interconnect__io_acePort0_ACREADY = core0_dPort_ACREADY; // @[system.scala 96:36]
   assign interconnect__io_acePort0_CRVALID = core0_dPort_CRVALID; // @[system.scala 99:36]
   assign interconnect__io_acePort0_CRRESP = core0_dPort_CRRESP; // @[system.scala 100:35]
   assign interconnect__io_acePort0_CDVALID = core0_dPort_CDVALID; // @[system.scala 104:36]
