@@ -191,6 +191,7 @@ class cacheLookupUnit extends Module{
     readBuffer := request.request
   }
   when(operationValid){
+    readBuffer.valid := false.B
     //Setting control wires for request types
     val isReadWire = WireDefault(readBuffer.instruction(6,0) === "b0000011".U)
     val isWriteWire = WireDefault(readBuffer.instruction(6,0) === "b0100011".U)
@@ -224,7 +225,6 @@ class cacheLookupUnit extends Module{
     val newtagChunks = VecInit(Seq.tabulate(nway) { i =>
       tagBRAM.rdData((i + 1) * (tagSection) - 1, i * (tagSection))
     })
-
     val newAddrWire =  WireDefault(tagChunks(hitTagWire)(tagSize - 1,0))
     val newValidBitWire =  WireDefault(tagChunks(hitTagWire)(tagSize))
     val newDirtyBitWire =  WireDefault(tagChunks(hitTagWire)(tagSize + 1))
@@ -232,7 +232,7 @@ class cacheLookupUnit extends Module{
     val newPLRUBitWire =  WireDefault(tagChunks(hitTagWire)(tagSize + 3))
 
     //DataBRAMs
-    val cacheLineChoosen = Mux(readBuffer.valid, readBuffer.cacheLine, dataBRAMVec(PriorityEncoder(matchFoundVec)).rdData )
+    val cacheLineChoosen = Mux(isMissWire, readBuffer.cacheLine, dataBRAMVec(PriorityEncoder(matchFoundVec)).rdData )
     val writeChunks = VecInit(Seq.tabulate(lineSize * 8 * 2 / dataWidth) { i =>
       cacheLineChoosen((i + 1) * (32) - 1, i * (32))
     })
@@ -370,6 +370,7 @@ class cacheLookupUnit extends Module{
       when(isReadWire || isAtmoicReadWire){
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
+        dataBRAMUpdateWire := isMissWire && (readBuffer.requestType === "b10".U)
       }
       when(isCoherentWire){
         toCoherencyResponseValidWire := true.B
@@ -386,6 +387,7 @@ class cacheLookupUnit extends Module{
         toReservationRegisterWire := true.B
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
+        dataBRAMUpdateWire := true.B
       }
       when(isSCReadWire){toMemoryResponseValidWire := true.B}
       when(isSCWriteWire){

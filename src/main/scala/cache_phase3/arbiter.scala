@@ -5,15 +5,12 @@ import chisel3.util._
 import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import cache_phase3.ChiselUtils._
-import cache_phase3.ChiselUtils.branchUpdateWithinReg
-import cache_phase3.ChiselUtils.outgoingBranchUpdateInvalidate
 
 //* A hollow load signal is sent to cacheLookup unit as a SC with writeDataValue.valid deasserted 
 //* -To satisfy requirements of atomics
 //* The rAtmoics situation cannot be optmizied with simple redesign with current work breakdown-
 //* -First read response must come for write data to be released, hence core request pipeline stop
 //* -Is the best way to follow
-
 //? After testing
 //TODO : Pipeline the module
 
@@ -178,7 +175,6 @@ class arbiter extends Module {
   //*    3.  Inorder
   //*    4.  Speculative
   val rAtmoicsWritePending = RegInit(false.B)
-
   when(toCacheLookup.ready) {
     when(rAtmoicsWritePending){
       when(!toCacheLookup.holdInOrder){
@@ -195,7 +191,6 @@ class arbiter extends Module {
         when(branchOps.valid){
           outgoingBranchUpdateInvalidate(inorderBuffer, branchOps, toCacheLookup.request)
         }
-
         rAtmoicsWritePending := false.B
       } .otherwise{
         coherencyRequestBuffer.valid := false.B
@@ -212,7 +207,7 @@ class arbiter extends Module {
       toCacheLookup.request.address := coherencyRequestBuffer.address
       toCacheLookup.request.response := coherencyRequestBuffer.response
       toCacheLookup.request.requestType := "b11".U
-    }.elsewhen(replayRequestBuffer.valid && !branchOps.valid) {
+    }.elsewhen(replayRequestBuffer.valid) {
       replayRequestBuffer.valid := false.B
       
       toCacheLookup.request.valid := replayRequestBuffer.valid
@@ -245,13 +240,12 @@ class arbiter extends Module {
       when(branchOps.valid){
           outgoingBranchUpdateInvalidate(inorderBuffer, branchOps, toCacheLookup.request)
       }
-
       val isSCWire = WireDefault(toCacheLookup.request.instruction(31,27) === "b00011".U && (toCacheLookup.request.instruction(6,0) === "b0101111".U))
       val isSCReadWire = WireDefault(isSCWire && !toCacheLookup.request.writeEn)
       when(isSCReadWire){
         rAtmoicsWritePending := true.B
       }
-    }.elsewhen(speculativeBuffer.valid && !branchOps.valid) {
+    }.elsewhen(speculativeBuffer.valid) {
       speculativeBuffer.valid := false.B
 
       toCacheLookup.request.valid := speculativeBuffer.valid
@@ -270,7 +264,6 @@ class arbiter extends Module {
       toCacheLookup.request.valid := false.B
     }
   }
-
   when(toPeripheral.ready) {
     toPeripheral.request := inorderBuffer
     when(branchOps.valid){

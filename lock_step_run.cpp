@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -19,8 +20,8 @@ using namespace std;
 using namespace std::chrono;
 
 #define LOGGING
-#define DUMP_CONDITION 1 //&& (bench.tickcount > 15878305144UL)
-#define PROBE_DOUBLE (0x2004000UL+0x0UL) & (~7UL)
+#define DUMP_CONDITION 1 //&& (bench.tickcount > 533771995UL)
+#define PROBE_DOUBLE ((0xCA3BF0UL+(-136)) & (~7UL))
 
 emulator golden_model;
 
@@ -295,7 +296,24 @@ int main(int argc, char* argv[]) {
         golden_model.step();
       }
     }
-    
+
+    // Check for test completion
+    if (bench.read_register(3) == 1 && bench.read_register(17) == 93) {
+      printf("Test complete \n");
+      #ifdef LOGGING
+            outFile.close();
+      #endif
+      tcflush(0, TCIFLUSH); 
+      return 0; // Exit the program here with success.
+    }
+    if (bench.read_register(17) == 93) {
+      printf("Test Failed \n");
+      #ifdef LOGGING
+            outFile.close();
+      #endif
+      tcflush(0, TCIFLUSH); 
+      return 1; // Exit the program here with success.
+    }
     
   }
   #ifdef LOGGING
