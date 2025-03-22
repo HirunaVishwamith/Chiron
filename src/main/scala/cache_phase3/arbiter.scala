@@ -64,7 +64,7 @@ class arbiter extends Module {
   val replayRequestBuffer = RegInit(0.U.asTypeOf(new replayWithCacheLineWire))
 
   request.speculativeReady := !speculativeBuffer.valid
-  request.inorderReady := !operationBuffer.valid
+  request.inorderReady := !(operationBuffer.valid || inorderBuffer.valid)
 
   //---------------------Request Enqueue---------------------//
   when(request.request.valid){
@@ -152,13 +152,13 @@ class arbiter extends Module {
       inorderBuffer <> operationBuffer
       inorderBuffer.writeEn := false.B
       operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
-                                commitReadyState, idleState)
+                                commitReadyState, hollowState)
     }
     is(waitState){
       inorderBuffer <> operationBuffer
       inorderBuffer.writeEn := false.B
       operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
-                                commitReadyState, idleState)
+                                commitReadyState, waitState)
     }
 
   }
