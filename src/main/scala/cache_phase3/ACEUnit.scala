@@ -166,7 +166,7 @@ class ACEUnit(
     is(writeRequestState){
       bus.AWVALID := true.B
       bus.AWID := id.U
-      bus.AWADDR := writeBuffer.address(addrWidth - 1, log2Ceil(lineSize))
+      bus.AWADDR := Cat(writeBuffer.address(addrWidth - 1, log2Ceil(lineSize*8)), 0.U(log2Ceil(lineSize*8).W))
       bus.AWLEN := length.U
       bus.AWSIZE := size.U
       bus.AWBURST := "b01".U
@@ -272,7 +272,7 @@ class ACEUnit(
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }
   } 
-  //See this
+
   //--------------------Coherent state----------------------------//
   //* Since a new coherent request comes after the previous request's response is released-
   //* -the request and response are kept in the same state machine without pipelining

@@ -371,6 +371,7 @@ class cacheLookupUnit extends Module{
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
         toReservationRegisterWire := isLRWire
+        toWriteBackValidWire := dirtyBitWire && isMissWire
         dataBRAMUpdateWire := isMissWire && isReplayValid
       } .otherwise {
         toReplayValidWire := true.B
@@ -383,7 +384,7 @@ class cacheLookupUnit extends Module{
     }
     when(isWriteWire || isAtmoicWriteWire){
       when(isReplayValid || (!isPermissionMiss && !isMissWire)){
-        toWriteBackValidWire := dirtyBitWire
+        toWriteBackValidWire := dirtyBitWire && isMissWire
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
       } .otherwise {
@@ -396,7 +397,7 @@ class cacheLookupUnit extends Module{
       toMemoryResponseValidWire := true.B
       reservationRegister.reserved := false.B
       when(reservationRegister.reserved && isReservationMatch){
-        toWriteBackValidWire := dirtyBitWire
+        toWriteBackValidWire := dirtyBitWire && isMissWire
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
       }
