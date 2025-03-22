@@ -118,19 +118,19 @@ class arbiter extends Module {
         when(operationWires.isRead){
           inorderBuffer := operationBuffer
           operationBuffer.valid := false.B
-        }
-        when(operationWires.isWrite){
+        } .elsewhen(operationWires.isWrite){
           operationState := commitReadyState
-        }
-        when(operationWires.isLR){
+        } .elsewhen(operationWires.isLR){
           inorderBuffer := operationBuffer
           operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
                                 commitReadyState, idleState)
-        }
-        when(operationWires.isSC){
+        } .elsewhen(operationWires.isSC){
           operationState := hollowState
+        } .elsewhen(operationWires.rAtomics){
+          operationState := waitState
+        } .otherwise{
+          operationBuffer.valid := false.B
         }
-        when(operationWires.rAtomics){}
       }
     }
     is(commitReadyState){

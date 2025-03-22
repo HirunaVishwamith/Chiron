@@ -33276,98 +33276,87 @@ module Scheduler(
   wire [31:0] _GEN_21 = speculativeEntryWire & inorderQueue_matchFound ? 32'h0 : _GEN_3; // @[scheduler.scala 47:58 utils.scala 48:41]
   wire [31:0] _GEN_22 = speculativeEntryWire & inorderQueue_matchFound ? 32'h0 : _GEN_4; // @[scheduler.scala 47:58 utils.scala 48:41]
   wire  _GEN_23 = speculativeEntryWire & inorderQueue_matchFound ? 1'h0 : _GEN_5; // @[scheduler.scala 47:58 utils.scala 47:41]
-  wire [1:0] _T_2 = {controlSignal_inorderReady,controlSignal_speculativeReady}; // @[scheduler.scala 67:39]
-  wire  _speculativeQueue_read_ready_T = ~speculativeQueue_isEmpty; // @[scheduler.scala 70:39]
-  wire  _inorderQueue_read_ready_T = ~inorderQueue_isEmpty; // @[scheduler.scala 75:36]
-  wire  _inorderQueue_read_ready_T_2 = |inorderQueue_read_data_branchMask[3:0]; // @[scheduler.scala 75:101]
-  wire  _inorderQueue_read_ready_T_3 = ~(|inorderQueue_read_data_branchMask[3:0]); // @[scheduler.scala 75:61]
-  wire  _T_15 = ~speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0]; // @[scheduler.scala 80:128]
-  wire  _T_32 = _speculativeQueue_read_ready_T | _T_15; // @[scheduler.scala 88:47]
-  wire  _GEN_36 = (_speculativeQueue_read_ready_T | _T_15) & _speculativeQueue_read_ready_T; // @[scheduler.scala 88:134 89:38 94:39]
-  wire [5:0] _GEN_38 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_prfDest : 6'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
-  wire [3:0] _GEN_39 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_robAddr : 4'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
-  wire [4:0] _GEN_40 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_branchMask : 5'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
-  wire [31:0] _GEN_41 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_instruction : 32'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
-  wire [31:0] _GEN_42 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_address : 32'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
-  wire  _GEN_43 = (_speculativeQueue_read_ready_T | _T_15) & speculativeQueue_read_data_valid; // @[scheduler.scala 88:134 91:22 utils.scala 47:41]
-  wire  _GEN_45 = (_inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
-    _inorderQueue_read_ready_T_2) & _inorderQueue_read_ready_T; // @[scheduler.scala 84:169 85:35]
-  wire  _GEN_46 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
-    _inorderQueue_read_ready_T_2 ? 1'h0 : _T_32; // @[scheduler.scala 84:169 86:40]
-  wire [5:0] _GEN_47 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
-    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_prfDest : _GEN_38; // @[scheduler.scala 84:169 87:22]
-  wire [3:0] _GEN_48 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
-    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_robAddr : _GEN_39; // @[scheduler.scala 84:169 87:22]
-  wire [4:0] _GEN_49 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
-    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_branchMask : _GEN_40; // @[scheduler.scala 84:169 87:22]
-  wire [31:0] _GEN_50 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
-    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_instruction : _GEN_41; // @[scheduler.scala 84:169 87:22]
-  wire [31:0] _GEN_51 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
-    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_address : _GEN_42; // @[scheduler.scala 84:169 87:22]
-  wire  _GEN_52 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
-    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_valid : _GEN_43; // @[scheduler.scala 84:169 87:22]
-  wire  _GEN_53 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
-    _inorderQueue_read_ready_T_2 ? 1'h0 : _GEN_36; // @[scheduler.scala 84:169 40:31]
-  wire  _GEN_54 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
-    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? _speculativeQueue_read_ready_T :
-    _GEN_53; // @[scheduler.scala 80:178 81:38]
-  wire  _GEN_55 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
-    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] | _GEN_46; // @[scheduler.scala 80:178 82:40]
-  wire [5:0] _GEN_56 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
-    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? speculativeQueue_read_data_prfDest
-     : _GEN_47; // @[scheduler.scala 80:178 83:22]
-  wire [3:0] _GEN_57 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
-    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? speculativeQueue_read_data_robAddr
-     : _GEN_48; // @[scheduler.scala 80:178 83:22]
-  wire [4:0] _GEN_58 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
-    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ?
-    speculativeQueue_read_data_branchMask : _GEN_49; // @[scheduler.scala 80:178 83:22]
-  wire [31:0] _GEN_59 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
-    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ?
-    speculativeQueue_read_data_instruction : _GEN_50; // @[scheduler.scala 80:178 83:22]
-  wire [31:0] _GEN_60 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
-    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? speculativeQueue_read_data_address
-     : _GEN_51; // @[scheduler.scala 80:178 83:22]
-  wire  _GEN_61 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
-    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? speculativeQueue_read_data_valid :
-    _GEN_52; // @[scheduler.scala 80:178 83:22]
-  wire  _GEN_62 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
-    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? 1'h0 : _GEN_45; // @[scheduler.scala 80:178 37:27]
-  wire  _GEN_64 = 2'h3 == _T_2 & _GEN_55; // @[scheduler.scala 24:31 67:73]
-  wire [5:0] _GEN_65 = 2'h3 == _T_2 ? _GEN_56 : 6'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire [3:0] _GEN_66 = 2'h3 == _T_2 ? _GEN_57 : 4'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire [4:0] _GEN_67 = 2'h3 == _T_2 ? _GEN_58 : 5'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire [31:0] _GEN_68 = 2'h3 == _T_2 ? _GEN_59 : 32'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire [31:0] _GEN_69 = 2'h3 == _T_2 ? _GEN_60 : 32'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire  _GEN_70 = 2'h3 == _T_2 & _GEN_61; // @[scheduler.scala 67:73 utils.scala 47:41]
-  wire  _GEN_71 = 2'h3 == _T_2 & _GEN_62; // @[scheduler.scala 37:27 67:73]
-  wire  _GEN_72 = 2'h2 == _T_2 ? ~inorderQueue_isEmpty & ~(|inorderQueue_read_data_branchMask[3:0]) : _GEN_71; // @[scheduler.scala 67:73 75:33]
-  wire  _GEN_73 = 2'h2 == _T_2 ? 1'h0 : _GEN_64; // @[scheduler.scala 67:73 76:38]
-  wire [5:0] _GEN_74 = 2'h2 == _T_2 ? inorderQueue_read_data_prfDest : _GEN_65; // @[scheduler.scala 67:73 77:20]
-  wire [3:0] _GEN_75 = 2'h2 == _T_2 ? inorderQueue_read_data_robAddr : _GEN_66; // @[scheduler.scala 67:73 77:20]
-  wire [4:0] _GEN_76 = 2'h2 == _T_2 ? inorderQueue_read_data_branchMask : _GEN_67; // @[scheduler.scala 67:73 77:20]
-  wire [31:0] _GEN_77 = 2'h2 == _T_2 ? inorderQueue_read_data_instruction : _GEN_68; // @[scheduler.scala 67:73 77:20]
-  wire [31:0] _GEN_78 = 2'h2 == _T_2 ? inorderQueue_read_data_address : _GEN_69; // @[scheduler.scala 67:73 77:20]
-  wire  _GEN_79 = 2'h2 == _T_2 ? inorderQueue_read_data_valid : _GEN_70; // @[scheduler.scala 67:73 77:20]
-  wire  _GEN_80 = 2'h2 == _T_2 ? 1'h0 : 2'h3 == _T_2 & _GEN_54; // @[scheduler.scala 40:31 67:73]
-  wire  _GEN_81 = 2'h1 == _T_2 ? ~speculativeQueue_isEmpty : _GEN_80; // @[scheduler.scala 67:73 70:36]
-  wire  _GEN_82 = 2'h1 == _T_2 | _GEN_73; // @[scheduler.scala 67:73 71:37]
-  wire [5:0] _GEN_83 = 2'h1 == _T_2 ? speculativeQueue_read_data_prfDest : _GEN_74; // @[scheduler.scala 67:73 72:20]
-  wire [3:0] _GEN_84 = 2'h1 == _T_2 ? speculativeQueue_read_data_robAddr : _GEN_75; // @[scheduler.scala 67:73 72:20]
-  wire [4:0] _GEN_85 = 2'h1 == _T_2 ? speculativeQueue_read_data_branchMask : _GEN_76; // @[scheduler.scala 67:73 72:20]
-  wire [31:0] _GEN_86 = 2'h1 == _T_2 ? speculativeQueue_read_data_instruction : _GEN_77; // @[scheduler.scala 67:73 72:20]
-  wire [31:0] _GEN_87 = 2'h1 == _T_2 ? speculativeQueue_read_data_address : _GEN_78; // @[scheduler.scala 67:73 72:20]
-  wire  _GEN_88 = 2'h1 == _T_2 ? speculativeQueue_read_data_valid : _GEN_79; // @[scheduler.scala 67:73 72:20]
-  wire  _GEN_89 = 2'h1 == _T_2 ? 1'h0 : _GEN_72; // @[scheduler.scala 37:27 67:73]
-  wire  _GEN_90 = 2'h0 == _T_2 ? 1'h0 : _GEN_81; // @[scheduler.scala 40:31 67:73]
-  wire  _GEN_91 = 2'h0 == _T_2 ? 1'h0 : _GEN_82; // @[scheduler.scala 24:31 67:73]
-  wire [5:0] _GEN_92 = 2'h0 == _T_2 ? 6'h0 : _GEN_83; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire [3:0] _GEN_93 = 2'h0 == _T_2 ? 4'h0 : _GEN_84; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire [4:0] _GEN_94 = 2'h0 == _T_2 ? 5'h0 : _GEN_85; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire [31:0] _GEN_95 = 2'h0 == _T_2 ? 32'h0 : _GEN_86; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire [31:0] _GEN_96 = 2'h0 == _T_2 ? 32'h0 : _GEN_87; // @[scheduler.scala 67:73 utils.scala 48:41]
-  wire  _GEN_97 = 2'h0 == _T_2 ? 1'h0 : _GEN_88; // @[scheduler.scala 67:73 utils.scala 47:41]
-  wire  _GEN_98 = 2'h0 == _T_2 ? 1'h0 : _GEN_89; // @[scheduler.scala 37:27 67:73]
+  wire  _speculativeBranchResolved_T_1 = |speculativeQueue_read_data_branchMask[3:0]; // @[scheduler.scala 66:91]
+  wire  _speculativeBranchResolved_T_3 = ~speculativeQueue_isEmpty; // @[scheduler.scala 66:98]
+  wire  speculativeBranchResolved = ~(|speculativeQueue_read_data_branchMask[3:0]) & ~speculativeQueue_isEmpty; // @[scheduler.scala 66:95]
+  wire  speculativeBranchInvalidated = ~speculativeQueue_read_data_valid & _speculativeBranchResolved_T_1; // @[scheduler.scala 67:84]
+  wire  _inorderBranchResolved_T_1 = |inorderQueue_read_data_branchMask[3:0]; // @[scheduler.scala 68:83]
+  wire  _inorderBranchResolved_T_2 = ~(|inorderQueue_read_data_branchMask[3:0]); // @[scheduler.scala 68:43]
+  wire  _inorderBranchResolved_T_3 = ~inorderQueue_isEmpty; // @[scheduler.scala 68:90]
+  wire  inorderBranchResolved = ~(|inorderQueue_read_data_branchMask[3:0]) & ~inorderQueue_isEmpty; // @[scheduler.scala 68:87]
+  wire  inorderBranchInvalidated = ~inorderQueue_read_data_valid & _inorderBranchResolved_T_1; // @[scheduler.scala 69:76]
+  wire [1:0] _T_2 = {controlSignal_inorderReady,controlSignal_speculativeReady}; // @[scheduler.scala 72:39]
+  wire  _T_10 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated; // @[scheduler.scala 93:47]
+  wire  _GEN_36 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) & _speculativeBranchResolved_T_3; // @[scheduler.scala 93:79 94:38 99:39]
+  wire [5:0] _GEN_38 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_prfDest : 6'h0; // @[scheduler.scala 93:79 96:22 utils.scala 48:41]
+  wire [3:0] _GEN_39 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_robAddr : 4'h0; // @[scheduler.scala 93:79 96:22 utils.scala 48:41]
+  wire [4:0] _GEN_40 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_branchMask : 5'h0; // @[scheduler.scala 93:79 96:22 utils.scala 48:41]
+  wire [31:0] _GEN_41 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_instruction : 32'h0; // @[scheduler.scala 93:79 96:22 utils.scala 48:41]
+  wire [31:0] _GEN_42 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_address : 32'h0; // @[scheduler.scala 93:79 96:22 utils.scala 48:41]
+  wire  _GEN_43 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) & speculativeQueue_read_data_valid; // @[scheduler.scala 93:79 96:22 utils.scala 47:41]
+  wire  _GEN_45 = (inorderBranchResolved | inorderBranchInvalidated) & _inorderBranchResolved_T_3; // @[scheduler.scala 89:71 90:35]
+  wire  _GEN_46 = inorderBranchResolved | inorderBranchInvalidated ? 1'h0 : _T_10; // @[scheduler.scala 89:71 91:40]
+  wire [5:0] _GEN_47 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_prfDest : _GEN_38; // @[scheduler.scala 89:71 92:22]
+  wire [3:0] _GEN_48 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_robAddr : _GEN_39; // @[scheduler.scala 89:71 92:22]
+  wire [4:0] _GEN_49 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_branchMask : _GEN_40; // @[scheduler.scala 89:71 92:22]
+  wire [31:0] _GEN_50 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_instruction : _GEN_41; // @[scheduler.scala 89:71 92:22]
+  wire [31:0] _GEN_51 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_address : _GEN_42; // @[scheduler.scala 89:71 92:22]
+  wire  _GEN_52 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_valid : _GEN_43; // @[scheduler.scala 89:71 92:22]
+  wire  _GEN_53 = inorderBranchResolved | inorderBranchInvalidated ? 1'h0 : _GEN_36; // @[scheduler.scala 40:31 89:71]
+  wire  _GEN_54 = speculativeBranchResolved | speculativeBranchInvalidated ? _speculativeBranchResolved_T_3 : _GEN_53; // @[scheduler.scala 85:71 86:38]
+  wire  _GEN_55 = speculativeBranchResolved | speculativeBranchInvalidated | _GEN_46; // @[scheduler.scala 85:71 87:40]
+  wire [5:0] _GEN_56 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_prfDest :
+    _GEN_47; // @[scheduler.scala 85:71 88:22]
+  wire [3:0] _GEN_57 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_robAddr :
+    _GEN_48; // @[scheduler.scala 85:71 88:22]
+  wire [4:0] _GEN_58 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_branchMask
+     : _GEN_49; // @[scheduler.scala 85:71 88:22]
+  wire [31:0] _GEN_59 = speculativeBranchResolved | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_instruction : _GEN_50; // @[scheduler.scala 85:71 88:22]
+  wire [31:0] _GEN_60 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_address :
+    _GEN_51; // @[scheduler.scala 85:71 88:22]
+  wire  _GEN_61 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_valid : _GEN_52; // @[scheduler.scala 85:71 88:22]
+  wire  _GEN_62 = speculativeBranchResolved | speculativeBranchInvalidated ? 1'h0 : _GEN_45; // @[scheduler.scala 37:27 85:71]
+  wire  _GEN_64 = 2'h3 == _T_2 & _GEN_55; // @[scheduler.scala 24:31 72:73]
+  wire [5:0] _GEN_65 = 2'h3 == _T_2 ? _GEN_56 : 6'h0; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire [3:0] _GEN_66 = 2'h3 == _T_2 ? _GEN_57 : 4'h0; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire [4:0] _GEN_67 = 2'h3 == _T_2 ? _GEN_58 : 5'h0; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire [31:0] _GEN_68 = 2'h3 == _T_2 ? _GEN_59 : 32'h0; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire [31:0] _GEN_69 = 2'h3 == _T_2 ? _GEN_60 : 32'h0; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire  _GEN_70 = 2'h3 == _T_2 & _GEN_61; // @[scheduler.scala 72:73 utils.scala 47:41]
+  wire  _GEN_71 = 2'h3 == _T_2 & _GEN_62; // @[scheduler.scala 37:27 72:73]
+  wire  _GEN_72 = 2'h2 == _T_2 ? _inorderBranchResolved_T_3 & _inorderBranchResolved_T_2 : _GEN_71; // @[scheduler.scala 72:73 80:33]
+  wire  _GEN_73 = 2'h2 == _T_2 ? 1'h0 : _GEN_64; // @[scheduler.scala 72:73 81:38]
+  wire [5:0] _GEN_74 = 2'h2 == _T_2 ? inorderQueue_read_data_prfDest : _GEN_65; // @[scheduler.scala 72:73 82:20]
+  wire [3:0] _GEN_75 = 2'h2 == _T_2 ? inorderQueue_read_data_robAddr : _GEN_66; // @[scheduler.scala 72:73 82:20]
+  wire [4:0] _GEN_76 = 2'h2 == _T_2 ? inorderQueue_read_data_branchMask : _GEN_67; // @[scheduler.scala 72:73 82:20]
+  wire [31:0] _GEN_77 = 2'h2 == _T_2 ? inorderQueue_read_data_instruction : _GEN_68; // @[scheduler.scala 72:73 82:20]
+  wire [31:0] _GEN_78 = 2'h2 == _T_2 ? inorderQueue_read_data_address : _GEN_69; // @[scheduler.scala 72:73 82:20]
+  wire  _GEN_79 = 2'h2 == _T_2 ? inorderQueue_read_data_valid : _GEN_70; // @[scheduler.scala 72:73 82:20]
+  wire  _GEN_80 = 2'h2 == _T_2 ? 1'h0 : 2'h3 == _T_2 & _GEN_54; // @[scheduler.scala 40:31 72:73]
+  wire  _GEN_81 = 2'h1 == _T_2 ? _speculativeBranchResolved_T_3 : _GEN_80; // @[scheduler.scala 72:73 75:36]
+  wire  _GEN_82 = 2'h1 == _T_2 | _GEN_73; // @[scheduler.scala 72:73 76:37]
+  wire [5:0] _GEN_83 = 2'h1 == _T_2 ? speculativeQueue_read_data_prfDest : _GEN_74; // @[scheduler.scala 72:73 77:20]
+  wire [3:0] _GEN_84 = 2'h1 == _T_2 ? speculativeQueue_read_data_robAddr : _GEN_75; // @[scheduler.scala 72:73 77:20]
+  wire [4:0] _GEN_85 = 2'h1 == _T_2 ? speculativeQueue_read_data_branchMask : _GEN_76; // @[scheduler.scala 72:73 77:20]
+  wire [31:0] _GEN_86 = 2'h1 == _T_2 ? speculativeQueue_read_data_instruction : _GEN_77; // @[scheduler.scala 72:73 77:20]
+  wire [31:0] _GEN_87 = 2'h1 == _T_2 ? speculativeQueue_read_data_address : _GEN_78; // @[scheduler.scala 72:73 77:20]
+  wire  _GEN_88 = 2'h1 == _T_2 ? speculativeQueue_read_data_valid : _GEN_79; // @[scheduler.scala 72:73 77:20]
+  wire  _GEN_89 = 2'h1 == _T_2 ? 1'h0 : _GEN_72; // @[scheduler.scala 37:27 72:73]
+  wire  _GEN_90 = 2'h0 == _T_2 ? 1'h0 : _GEN_81; // @[scheduler.scala 40:31 72:73]
+  wire  _GEN_91 = 2'h0 == _T_2 ? 1'h0 : _GEN_82; // @[scheduler.scala 24:31 72:73]
+  wire [5:0] _GEN_92 = 2'h0 == _T_2 ? 6'h0 : _GEN_83; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire [3:0] _GEN_93 = 2'h0 == _T_2 ? 4'h0 : _GEN_84; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire [4:0] _GEN_94 = 2'h0 == _T_2 ? 5'h0 : _GEN_85; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire [31:0] _GEN_95 = 2'h0 == _T_2 ? 32'h0 : _GEN_86; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire [31:0] _GEN_96 = 2'h0 == _T_2 ? 32'h0 : _GEN_87; // @[scheduler.scala 72:73 utils.scala 48:41]
+  wire  _GEN_97 = 2'h0 == _T_2 ? 1'h0 : _GEN_88; // @[scheduler.scala 72:73 utils.scala 47:41]
+  wire  _GEN_98 = 2'h0 == _T_2 ? 1'h0 : _GEN_89; // @[scheduler.scala 37:27 72:73]
   fifoWithAddrCheck inorderQueue ( // @[scheduler.scala 27:28]
     .clock(inorderQueue_clock),
     .reset(inorderQueue_reset),
@@ -33414,15 +33403,15 @@ module Scheduler(
     .branchOps_branchMask(speculativeQueue_branchOps_branchMask),
     .branchOps_passed(speculativeQueue_branchOps_passed)
   );
-  assign canAllocate = inorderQueue_write_ready & speculativeQueue_write_ready; // @[scheduler.scala 100:43]
-  assign requestOut_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_97; // @[scheduler.scala 66:69 utils.scala 47:41]
-  assign requestOut_address = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_96 : 32'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
-  assign requestOut_instruction = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_95 : 32'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
-  assign requestOut_branchMask = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_94 : 5'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
-  assign requestOut_robAddr = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_93 : 4'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
-  assign requestOut_prfDest = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_92 : 6'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
-  assign controlSignal_isSpeculative = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_91; // @[scheduler.scala 24:31 66:69]
-  assign fenceReady = inorderQueue_isEmpty & speculativeQueue_isEmpty; // @[scheduler.scala 101:38]
+  assign canAllocate = inorderQueue_write_ready & speculativeQueue_write_ready; // @[scheduler.scala 105:43]
+  assign requestOut_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_97; // @[scheduler.scala 71:69 utils.scala 47:41]
+  assign requestOut_address = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_96 : 32'h0; // @[scheduler.scala 71:69 utils.scala 48:41]
+  assign requestOut_instruction = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_95 : 32'h0; // @[scheduler.scala 71:69 utils.scala 48:41]
+  assign requestOut_branchMask = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_94 : 5'h0; // @[scheduler.scala 71:69 utils.scala 48:41]
+  assign requestOut_robAddr = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_93 : 4'h0; // @[scheduler.scala 71:69 utils.scala 48:41]
+  assign requestOut_prfDest = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_92 : 6'h0; // @[scheduler.scala 71:69 utils.scala 48:41]
+  assign controlSignal_isSpeculative = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_91; // @[scheduler.scala 24:31 71:69]
+  assign fenceReady = inorderQueue_isEmpty & speculativeQueue_isEmpty; // @[scheduler.scala 106:38]
   assign inorderQueue_clock = clock;
   assign inorderQueue_reset = reset;
   assign inorderQueue_write_data_valid = requestIn_valid & _GEN_17; // @[scheduler.scala 46:24 55:35]
@@ -33431,7 +33420,7 @@ module Scheduler(
   assign inorderQueue_write_data_branchMask = requestIn_valid ? _GEN_14 : 5'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
   assign inorderQueue_write_data_robAddr = requestIn_valid ? _GEN_13 : 4'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
   assign inorderQueue_write_data_prfDest = requestIn_valid ? _GEN_12 : 6'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
-  assign inorderQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_98; // @[scheduler.scala 37:27 66:69]
+  assign inorderQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_98; // @[scheduler.scala 37:27 71:69]
   assign inorderQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 58:26]
   assign inorderQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 58:26]
   assign inorderQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 58:26]
@@ -33444,7 +33433,7 @@ module Scheduler(
   assign speculativeQueue_write_data_branchMask = requestIn_valid ? _GEN_20 : 5'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
   assign speculativeQueue_write_data_robAddr = requestIn_valid ? _GEN_19 : 4'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
   assign speculativeQueue_write_data_prfDest = requestIn_valid ? _GEN_18 : 6'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
-  assign speculativeQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_90; // @[scheduler.scala 40:31 66:69]
+  assign speculativeQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_90; // @[scheduler.scala 40:31 71:69]
   assign speculativeQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 59:30]
   assign speculativeQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 59:30]
   assign speculativeQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 59:30]
@@ -33601,77 +33590,91 @@ module arbiter(
   wire  operationWires_rAtomics = operationBuffer_instruction[6:0] == 7'h2f; // @[arbiter.scala 110:63]
   wire  operationWires_isLR = operationBuffer_instruction[31:27] == 5'h2 & operationWires_rAtomics; // @[arbiter.scala 111:76]
   wire  operationWires_isSC = operationBuffer_instruction[31:27] == 5'h3 & operationWires_rAtomics; // @[arbiter.scala 112:76]
-  wire  _GEN_43 = operationWires_isRead ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [31:0] _GEN_44 = operationWires_isRead ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [31:0] _GEN_45 = operationWires_isRead ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [4:0] _GEN_46 = operationWires_isRead ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [3:0] _GEN_47 = operationWires_isRead ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [5:0] _GEN_48 = operationWires_isRead ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 118:36 119:25 58:30]
-  wire  _GEN_49 = operationWires_isRead ? 1'h0 : inorderBuffer_writeEn; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [63:0] _GEN_50 = operationWires_isRead ? 64'h0 : inorderBuffer_writeData; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [2:0] _GEN_53 = operationWires_isWrite ? 3'h1 : operationState; // @[arbiter.scala 122:37 123:26 96:31]
-  wire  _operationState_T_1 = responseOut_valid & responseOut_instruction == operationBuffer_instruction; // @[arbiter.scala 127:51]
+  wire  _operationState_T_1 = responseOut_valid & responseOut_instruction == operationBuffer_instruction; // @[arbiter.scala 125:51]
   wire [2:0] _operationState_T_2 = responseOut_valid & responseOut_instruction == operationBuffer_instruction ? 3'h1 : 3'h0
-    ; // @[arbiter.scala 127:32]
-  wire  _GEN_54 = operationWires_isLR ? operationBuffer_valid : _GEN_43; // @[arbiter.scala 125:34 126:25]
-  wire [4:0] _GEN_57 = operationWires_isLR ? operationBuffer_branchMask : _GEN_46; // @[arbiter.scala 125:34 126:25]
-  wire [2:0] _GEN_63 = operationWires_isLR ? _operationState_T_2 : _GEN_53; // @[arbiter.scala 125:34 127:26]
-  wire  _GEN_65 = operationBuffer_valid ? _GEN_54 : inorderBuffer_valid; // @[arbiter.scala 117:33 58:30]
-  wire [4:0] _GEN_68 = operationBuffer_valid ? _GEN_57 : inorderBuffer_branchMask; // @[arbiter.scala 117:33 58:30]
-  wire  _GEN_76 = ~operationWires_isLR ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 142:35 143:25 58:30]
-  wire [31:0] _GEN_77 = ~operationWires_isLR ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 142:35 143:25 58:30]
-  wire [31:0] _GEN_78 = ~operationWires_isLR ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 142:35 143:25 58:30]
-  wire [4:0] _GEN_79 = ~operationWires_isLR ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 142:35 143:25 58:30]
-  wire [3:0] _GEN_80 = ~operationWires_isLR ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 142:35 143:25 58:30]
-  wire [5:0] _GEN_81 = ~operationWires_isLR ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 142:35 143:25 58:30]
-  wire  _GEN_85 = writeDataIn_valid ? _GEN_76 : inorderBuffer_valid; // @[arbiter.scala 141:30 58:30]
-  wire [31:0] _GEN_86 = writeDataIn_valid ? _GEN_77 : inorderBuffer_address; // @[arbiter.scala 141:30 58:30]
-  wire [31:0] _GEN_87 = writeDataIn_valid ? _GEN_78 : inorderBuffer_instruction; // @[arbiter.scala 141:30 58:30]
-  wire [4:0] _GEN_88 = writeDataIn_valid ? _GEN_79 : inorderBuffer_branchMask; // @[arbiter.scala 141:30 58:30]
-  wire [3:0] _GEN_89 = writeDataIn_valid ? _GEN_80 : inorderBuffer_robAddr; // @[arbiter.scala 141:30 58:30]
-  wire [5:0] _GEN_90 = writeDataIn_valid ? _GEN_81 : inorderBuffer_prfDest; // @[arbiter.scala 141:30 58:30]
-  wire  _GEN_91 = writeDataIn_valid ? writeDataIn_valid : inorderBuffer_writeEn; // @[arbiter.scala 141:30 146:31 58:30]
-  wire [63:0] _GEN_92 = writeDataIn_valid ? writeDataIn_data : inorderBuffer_writeData; // @[arbiter.scala 141:30 145:33 58:30]
-  wire  _GEN_94 = writeDataIn_valid ? 1'h0 : _GEN_21; // @[arbiter.scala 141:30 147:31]
-  wire [2:0] _GEN_95 = writeDataIn_valid ? 3'h0 : operationState; // @[arbiter.scala 141:30 148:24 96:31]
+    ; // @[arbiter.scala 125:32]
+  wire [2:0] _GEN_43 = operationWires_rAtomics ? 3'h3 : operationState; // @[arbiter.scala 129:45 130:26 96:31]
+  wire  _GEN_44 = operationWires_rAtomics & _GEN_21; // @[arbiter.scala 129:45 132:33]
+  wire [2:0] _GEN_45 = operationWires_isSC ? 3'h4 : _GEN_43; // @[arbiter.scala 127:41 128:26]
+  wire  _GEN_46 = operationWires_isSC ? _GEN_21 : _GEN_44; // @[arbiter.scala 127:41]
+  wire  _GEN_47 = operationWires_isLR ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 123:41 124:25 58:30]
+  wire [31:0] _GEN_48 = operationWires_isLR ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 123:41 124:25 58:30]
+  wire [31:0] _GEN_49 = operationWires_isLR ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 123:41 124:25 58:30]
+  wire [4:0] _GEN_50 = operationWires_isLR ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 123:41 124:25 58:30]
+  wire [3:0] _GEN_51 = operationWires_isLR ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 123:41 124:25 58:30]
+  wire [5:0] _GEN_52 = operationWires_isLR ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 123:41 124:25 58:30]
+  wire  _GEN_53 = operationWires_isLR ? 1'h0 : inorderBuffer_writeEn; // @[arbiter.scala 123:41 124:25 58:30]
+  wire [63:0] _GEN_54 = operationWires_isLR ? 64'h0 : inorderBuffer_writeData; // @[arbiter.scala 123:41 124:25 58:30]
+  wire [2:0] _GEN_56 = operationWires_isLR ? _operationState_T_2 : _GEN_45; // @[arbiter.scala 123:41 125:26]
+  wire  _GEN_57 = operationWires_isLR ? _GEN_21 : _GEN_46; // @[arbiter.scala 123:41]
+  wire [2:0] _GEN_58 = operationWires_isWrite ? 3'h1 : _GEN_56; // @[arbiter.scala 121:44 122:26]
+  wire  _GEN_59 = operationWires_isWrite ? inorderBuffer_valid : _GEN_47; // @[arbiter.scala 121:44 58:30]
+  wire [31:0] _GEN_60 = operationWires_isWrite ? inorderBuffer_address : _GEN_48; // @[arbiter.scala 121:44 58:30]
+  wire [31:0] _GEN_61 = operationWires_isWrite ? inorderBuffer_instruction : _GEN_49; // @[arbiter.scala 121:44 58:30]
+  wire [4:0] _GEN_62 = operationWires_isWrite ? inorderBuffer_branchMask : _GEN_50; // @[arbiter.scala 121:44 58:30]
+  wire [3:0] _GEN_63 = operationWires_isWrite ? inorderBuffer_robAddr : _GEN_51; // @[arbiter.scala 121:44 58:30]
+  wire [5:0] _GEN_64 = operationWires_isWrite ? inorderBuffer_prfDest : _GEN_52; // @[arbiter.scala 121:44 58:30]
+  wire  _GEN_65 = operationWires_isWrite ? inorderBuffer_writeEn : _GEN_53; // @[arbiter.scala 121:44 58:30]
+  wire [63:0] _GEN_66 = operationWires_isWrite ? inorderBuffer_writeData : _GEN_54; // @[arbiter.scala 121:44 58:30]
+  wire  _GEN_68 = operationWires_isWrite ? _GEN_21 : _GEN_57; // @[arbiter.scala 121:44]
+  wire  _GEN_69 = operationWires_isRead ? operationBuffer_valid : _GEN_59; // @[arbiter.scala 118:36 119:25]
+  wire [4:0] _GEN_72 = operationWires_isRead ? operationBuffer_branchMask : _GEN_62; // @[arbiter.scala 118:36 119:25]
+  wire  _GEN_80 = operationBuffer_valid ? _GEN_69 : inorderBuffer_valid; // @[arbiter.scala 117:33 58:30]
+  wire [4:0] _GEN_83 = operationBuffer_valid ? _GEN_72 : inorderBuffer_branchMask; // @[arbiter.scala 117:33 58:30]
+  wire  _GEN_91 = ~operationWires_isLR ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [31:0] _GEN_92 = ~operationWires_isLR ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [31:0] _GEN_93 = ~operationWires_isLR ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [4:0] _GEN_94 = ~operationWires_isLR ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [3:0] _GEN_95 = ~operationWires_isLR ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [5:0] _GEN_96 = ~operationWires_isLR ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 142:35 143:25 58:30]
+  wire  _GEN_100 = writeDataIn_valid ? _GEN_91 : inorderBuffer_valid; // @[arbiter.scala 141:30 58:30]
+  wire [31:0] _GEN_101 = writeDataIn_valid ? _GEN_92 : inorderBuffer_address; // @[arbiter.scala 141:30 58:30]
+  wire [31:0] _GEN_102 = writeDataIn_valid ? _GEN_93 : inorderBuffer_instruction; // @[arbiter.scala 141:30 58:30]
+  wire [4:0] _GEN_103 = writeDataIn_valid ? _GEN_94 : inorderBuffer_branchMask; // @[arbiter.scala 141:30 58:30]
+  wire [3:0] _GEN_104 = writeDataIn_valid ? _GEN_95 : inorderBuffer_robAddr; // @[arbiter.scala 141:30 58:30]
+  wire [5:0] _GEN_105 = writeDataIn_valid ? _GEN_96 : inorderBuffer_prfDest; // @[arbiter.scala 141:30 58:30]
+  wire  _GEN_106 = writeDataIn_valid ? writeDataIn_valid : inorderBuffer_writeEn; // @[arbiter.scala 141:30 146:31 58:30]
+  wire [63:0] _GEN_107 = writeDataIn_valid ? writeDataIn_data : inorderBuffer_writeData; // @[arbiter.scala 141:30 145:33 58:30]
+  wire  _GEN_109 = writeDataIn_valid ? 1'h0 : _GEN_21; // @[arbiter.scala 141:30 147:31]
+  wire [2:0] _GEN_110 = writeDataIn_valid ? 3'h0 : operationState; // @[arbiter.scala 141:30 148:24 96:31]
   wire [2:0] _operationState_T_6 = _operationState_T_1 ? 3'h1 : 3'h4; // @[arbiter.scala 154:28]
   wire [2:0] _operationState_T_9 = _operationState_T_1 ? 3'h1 : 3'h3; // @[arbiter.scala 160:28]
-  wire  _GEN_96 = 3'h3 == operationState ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 114:25 158:21 58:30]
-  wire [31:0] _GEN_97 = 3'h3 == operationState ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 114:25 158:21 58:30]
-  wire [31:0] _GEN_98 = 3'h3 == operationState ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 114:25 158:21 58:30]
-  wire [4:0] _GEN_99 = 3'h3 == operationState ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 114:25 158:21 58:30]
-  wire [3:0] _GEN_100 = 3'h3 == operationState ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 114:25 158:21 58:30]
-  wire [5:0] _GEN_101 = 3'h3 == operationState ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 114:25 158:21 58:30]
-  wire  _GEN_102 = 3'h3 == operationState ? 1'h0 : inorderBuffer_writeEn; // @[arbiter.scala 114:25 159:29 58:30]
-  wire [63:0] _GEN_103 = 3'h3 == operationState ? 64'h0 : inorderBuffer_writeData; // @[arbiter.scala 114:25 158:21 58:30]
-  wire [2:0] _GEN_105 = 3'h3 == operationState ? _operationState_T_9 : operationState; // @[arbiter.scala 114:25 160:22 96:31]
-  wire  _GEN_106 = 3'h4 == operationState ? operationBuffer_valid : _GEN_96; // @[arbiter.scala 114:25 152:21]
-  wire [31:0] _GEN_107 = 3'h4 == operationState ? operationBuffer_address : _GEN_97; // @[arbiter.scala 114:25 152:21]
-  wire [31:0] _GEN_108 = 3'h4 == operationState ? operationBuffer_instruction : _GEN_98; // @[arbiter.scala 114:25 152:21]
-  wire [4:0] _GEN_109 = 3'h4 == operationState ? operationBuffer_branchMask : _GEN_99; // @[arbiter.scala 114:25 152:21]
-  wire [3:0] _GEN_110 = 3'h4 == operationState ? operationBuffer_robAddr : _GEN_100; // @[arbiter.scala 114:25 152:21]
-  wire [5:0] _GEN_111 = 3'h4 == operationState ? operationBuffer_prfDest : _GEN_101; // @[arbiter.scala 114:25 152:21]
-  wire  _GEN_112 = 3'h4 == operationState ? 1'h0 : _GEN_102; // @[arbiter.scala 114:25 153:29]
-  wire [63:0] _GEN_113 = 3'h4 == operationState ? 64'h0 : _GEN_103; // @[arbiter.scala 114:25 152:21]
-  wire [2:0] _GEN_115 = 3'h4 == operationState ? _operationState_T_6 : _GEN_105; // @[arbiter.scala 114:25 154:22]
-  wire  _GEN_116 = 3'h2 == operationState ? _GEN_85 : _GEN_106; // @[arbiter.scala 114:25]
-  wire [4:0] _GEN_119 = 3'h2 == operationState ? _GEN_88 : _GEN_109; // @[arbiter.scala 114:25]
-  wire  _GEN_129 = 3'h1 == operationState ? inorderBuffer_valid : _GEN_116; // @[arbiter.scala 114:25 58:30]
-  wire [4:0] _GEN_132 = 3'h1 == operationState ? inorderBuffer_branchMask : _GEN_119; // @[arbiter.scala 114:25 58:30]
-  wire  _GEN_140 = 3'h0 == operationState ? _GEN_65 : _GEN_129; // @[arbiter.scala 114:25]
-  wire [4:0] _GEN_143 = 3'h0 == operationState ? _GEN_68 : _GEN_132; // @[arbiter.scala 114:25]
+  wire  _GEN_111 = 3'h3 == operationState ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 114:25 158:21 58:30]
+  wire [31:0] _GEN_112 = 3'h3 == operationState ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 114:25 158:21 58:30]
+  wire [31:0] _GEN_113 = 3'h3 == operationState ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 114:25 158:21 58:30]
+  wire [4:0] _GEN_114 = 3'h3 == operationState ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 114:25 158:21 58:30]
+  wire [3:0] _GEN_115 = 3'h3 == operationState ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 114:25 158:21 58:30]
+  wire [5:0] _GEN_116 = 3'h3 == operationState ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 114:25 158:21 58:30]
+  wire  _GEN_117 = 3'h3 == operationState ? 1'h0 : inorderBuffer_writeEn; // @[arbiter.scala 114:25 159:29 58:30]
+  wire [63:0] _GEN_118 = 3'h3 == operationState ? 64'h0 : inorderBuffer_writeData; // @[arbiter.scala 114:25 158:21 58:30]
+  wire [2:0] _GEN_120 = 3'h3 == operationState ? _operationState_T_9 : operationState; // @[arbiter.scala 114:25 160:22 96:31]
+  wire  _GEN_121 = 3'h4 == operationState ? operationBuffer_valid : _GEN_111; // @[arbiter.scala 114:25 152:21]
+  wire [31:0] _GEN_122 = 3'h4 == operationState ? operationBuffer_address : _GEN_112; // @[arbiter.scala 114:25 152:21]
+  wire [31:0] _GEN_123 = 3'h4 == operationState ? operationBuffer_instruction : _GEN_113; // @[arbiter.scala 114:25 152:21]
+  wire [4:0] _GEN_124 = 3'h4 == operationState ? operationBuffer_branchMask : _GEN_114; // @[arbiter.scala 114:25 152:21]
+  wire [3:0] _GEN_125 = 3'h4 == operationState ? operationBuffer_robAddr : _GEN_115; // @[arbiter.scala 114:25 152:21]
+  wire [5:0] _GEN_126 = 3'h4 == operationState ? operationBuffer_prfDest : _GEN_116; // @[arbiter.scala 114:25 152:21]
+  wire  _GEN_127 = 3'h4 == operationState ? 1'h0 : _GEN_117; // @[arbiter.scala 114:25 153:29]
+  wire [63:0] _GEN_128 = 3'h4 == operationState ? 64'h0 : _GEN_118; // @[arbiter.scala 114:25 152:21]
+  wire [2:0] _GEN_130 = 3'h4 == operationState ? _operationState_T_6 : _GEN_120; // @[arbiter.scala 114:25 154:22]
+  wire  _GEN_131 = 3'h2 == operationState ? _GEN_100 : _GEN_121; // @[arbiter.scala 114:25]
+  wire [4:0] _GEN_134 = 3'h2 == operationState ? _GEN_103 : _GEN_124; // @[arbiter.scala 114:25]
+  wire  _GEN_144 = 3'h1 == operationState ? inorderBuffer_valid : _GEN_131; // @[arbiter.scala 114:25 58:30]
+  wire [4:0] _GEN_147 = 3'h1 == operationState ? inorderBuffer_branchMask : _GEN_134; // @[arbiter.scala 114:25 58:30]
+  wire  _GEN_155 = 3'h0 == operationState ? _GEN_80 : _GEN_144; // @[arbiter.scala 114:25]
+  wire [4:0] _GEN_158 = 3'h0 == operationState ? _GEN_83 : _GEN_147; // @[arbiter.scala 114:25]
   wire [4:0] _T_11 = speculativeBuffer_branchMask & branchOps_branchMask; // @[utils.scala 110:33]
   wire  _T_12 = |_T_11; // @[utils.scala 110:57]
   wire [4:0] _speculativeBuffer_branchMask_T = speculativeBuffer_branchMask ^ branchOps_branchMask; // @[utils.scala 111:50]
-  wire  _GEN_153 = _T_12 ? 1'h0 : _GEN_20; // @[utils.scala 114:62 117:49]
-  wire  _GEN_155 = branchOps_passed ? _GEN_20 : _GEN_153; // @[utils.scala 109:30]
-  wire  _GEN_157 = speculativeBuffer_valid & branchOps_valid ? _GEN_155 : _GEN_20; // @[utils.scala 108:43]
+  wire  _GEN_168 = _T_12 ? 1'h0 : _GEN_20; // @[utils.scala 114:62 117:49]
+  wire  _GEN_170 = branchOps_passed ? _GEN_20 : _GEN_168; // @[utils.scala 109:30]
+  wire  _GEN_172 = speculativeBuffer_valid & branchOps_valid ? _GEN_170 : _GEN_20; // @[utils.scala 108:43]
   wire [4:0] _T_16 = replayRequestBuffer_branchMask & branchOps_branchMask; // @[utils.scala 110:33]
   wire  _T_17 = |_T_16; // @[utils.scala 110:57]
   wire [4:0] _replayRequestBuffer_branchMask_T = replayRequestBuffer_branchMask ^ branchOps_branchMask; // @[utils.scala 111:50]
-  wire  _GEN_159 = _T_17 ? 1'h0 : _GEN_33; // @[utils.scala 114:62 117:49]
-  wire  _GEN_161 = branchOps_passed ? _GEN_33 : _GEN_159; // @[utils.scala 109:30]
-  wire  _GEN_163 = replayRequestBuffer_valid & branchOps_valid ? _GEN_161 : _GEN_33; // @[utils.scala 108:43]
+  wire  _GEN_174 = _T_17 ? 1'h0 : _GEN_33; // @[utils.scala 114:62 117:49]
+  wire  _GEN_176 = branchOps_passed ? _GEN_33 : _GEN_174; // @[utils.scala 109:30]
+  wire  _GEN_178 = replayRequestBuffer_valid & branchOps_valid ? _GEN_176 : _GEN_33; // @[utils.scala 108:43]
   wire [4:0] _T_21 = operationBuffer_branchMask & branchOps_branchMask; // @[utils.scala 110:33]
   wire [4:0] _operationBuffer_branchMask_T = operationBuffer_branchMask ^ branchOps_branchMask; // @[utils.scala 111:50]
   wire [4:0] _T_26 = inorderBuffer_branchMask & branchOps_branchMask; // @[utils.scala 110:33]
@@ -33679,99 +33682,99 @@ module arbiter(
   wire [4:0] _inorderBuffer_branchMask_T = inorderBuffer_branchMask ^ branchOps_branchMask; // @[utils.scala 111:50]
   reg  rAtmoicsWritePending; // @[arbiter.scala 177:37]
   wire  _T_32 = ~toCacheLookup_holdInOrder; // @[arbiter.scala 180:12]
-  wire [4:0] _GEN_176 = _T_27 ? _inorderBuffer_branchMask_T : inorderBuffer_branchMask; // @[utils.scala 130:60 131:28 133:28]
-  wire  _GEN_177 = _T_27 ? 1'h0 : inorderBuffer_valid; // @[utils.scala 138:60 139:23 141:23]
-  wire [4:0] _GEN_178 = branchOps_passed ? _GEN_176 : inorderBuffer_branchMask; // @[utils.scala 128:28 143:26]
-  wire  _GEN_179 = branchOps_passed ? inorderBuffer_valid : _GEN_177; // @[utils.scala 128:28 135:21]
-  wire [4:0] _GEN_180 = branchOps_valid ? _GEN_178 : inorderBuffer_branchMask; // @[arbiter.scala 191:30 184:42]
-  wire  _GEN_181 = branchOps_valid & _GEN_179; // @[arbiter.scala 191:30 181:37]
-  wire  _GEN_182 = ~toCacheLookup_holdInOrder ? _GEN_181 : coherencyRequestBuffer_valid; // @[arbiter.scala 180:39 198:37]
-  wire [31:0] _GEN_183 = ~toCacheLookup_holdInOrder ? inorderBuffer_address : coherencyRequestBuffer_address; // @[arbiter.scala 180:39 182:39 199:39]
-  wire [31:0] _GEN_184 = ~toCacheLookup_holdInOrder ? inorderBuffer_instruction : 32'h0; // @[arbiter.scala 180:39 183:43 utils.scala 48:41]
-  wire [4:0] _GEN_185 = ~toCacheLookup_holdInOrder ? _GEN_180 : 5'h0; // @[arbiter.scala 180:39 utils.scala 48:41]
-  wire [3:0] _GEN_186 = ~toCacheLookup_holdInOrder ? inorderBuffer_robAddr : 4'h0; // @[arbiter.scala 180:39 185:39 utils.scala 48:41]
-  wire [5:0] _GEN_187 = ~toCacheLookup_holdInOrder ? inorderBuffer_prfDest : 6'h0; // @[arbiter.scala 180:39 186:39 utils.scala 48:41]
-  wire  _GEN_188 = ~toCacheLookup_holdInOrder & inorderBuffer_writeEn; // @[arbiter.scala 180:39 187:39 utils.scala 47:41]
-  wire [63:0] _GEN_189 = ~toCacheLookup_holdInOrder ? inorderBuffer_writeData : 64'h0; // @[arbiter.scala 180:39 188:41 utils.scala 48:41]
-  wire [1:0] _GEN_190 = ~toCacheLookup_holdInOrder ? 2'h1 : 2'h3; // @[arbiter.scala 180:39 189:43 201:43]
-  wire  _GEN_192 = ~toCacheLookup_holdInOrder & _GEN_30; // @[arbiter.scala 180:39 196:38]
-  wire [1:0] _GEN_193 = ~toCacheLookup_holdInOrder ? 2'h0 : coherencyRequestBuffer_response; // @[arbiter.scala 180:39 200:40 utils.scala 48:41]
-  wire [4:0] _GEN_194 = _T_17 ? _replayRequestBuffer_branchMask_T : replayRequestBuffer_branchMask; // @[utils.scala 153:60 154:28 156:28]
-  wire  _GEN_195 = _T_17 ? 1'h0 : replayRequestBuffer_valid; // @[utils.scala 161:60 162:23 164:23]
-  wire [4:0] _GEN_196 = branchOps_passed ? _GEN_194 : replayRequestBuffer_branchMask; // @[utils.scala 151:28 166:26]
-  wire  _GEN_197 = branchOps_passed ? replayRequestBuffer_valid : _GEN_195; // @[utils.scala 151:28 158:21]
-  wire [4:0] _GEN_198 = branchOps_valid ? _GEN_196 : 5'h0; // @[arbiter.scala 224:28 utils.scala 48:41]
-  wire  _GEN_199 = branchOps_valid ? _GEN_197 : replayRequestBuffer_valid; // @[arbiter.scala 224:28 213:35]
-  wire  _GEN_205 = branchOps_valid ? _GEN_179 : inorderBuffer_valid; // @[arbiter.scala 240:28 230:35]
+  wire [4:0] _GEN_191 = _T_27 ? _inorderBuffer_branchMask_T : inorderBuffer_branchMask; // @[utils.scala 130:60 131:28 133:28]
+  wire  _GEN_192 = _T_27 ? 1'h0 : inorderBuffer_valid; // @[utils.scala 138:60 139:23 141:23]
+  wire [4:0] _GEN_193 = branchOps_passed ? _GEN_191 : inorderBuffer_branchMask; // @[utils.scala 128:28 143:26]
+  wire  _GEN_194 = branchOps_passed ? inorderBuffer_valid : _GEN_192; // @[utils.scala 128:28 135:21]
+  wire [4:0] _GEN_195 = branchOps_valid ? _GEN_193 : inorderBuffer_branchMask; // @[arbiter.scala 191:30 184:42]
+  wire  _GEN_196 = branchOps_valid & _GEN_194; // @[arbiter.scala 191:30 181:37]
+  wire  _GEN_197 = ~toCacheLookup_holdInOrder ? _GEN_196 : coherencyRequestBuffer_valid; // @[arbiter.scala 180:39 198:37]
+  wire [31:0] _GEN_198 = ~toCacheLookup_holdInOrder ? inorderBuffer_address : coherencyRequestBuffer_address; // @[arbiter.scala 180:39 182:39 199:39]
+  wire [31:0] _GEN_199 = ~toCacheLookup_holdInOrder ? inorderBuffer_instruction : 32'h0; // @[arbiter.scala 180:39 183:43 utils.scala 48:41]
+  wire [4:0] _GEN_200 = ~toCacheLookup_holdInOrder ? _GEN_195 : 5'h0; // @[arbiter.scala 180:39 utils.scala 48:41]
+  wire [3:0] _GEN_201 = ~toCacheLookup_holdInOrder ? inorderBuffer_robAddr : 4'h0; // @[arbiter.scala 180:39 185:39 utils.scala 48:41]
+  wire [5:0] _GEN_202 = ~toCacheLookup_holdInOrder ? inorderBuffer_prfDest : 6'h0; // @[arbiter.scala 180:39 186:39 utils.scala 48:41]
+  wire  _GEN_203 = ~toCacheLookup_holdInOrder & inorderBuffer_writeEn; // @[arbiter.scala 180:39 187:39 utils.scala 47:41]
+  wire [63:0] _GEN_204 = ~toCacheLookup_holdInOrder ? inorderBuffer_writeData : 64'h0; // @[arbiter.scala 180:39 188:41 utils.scala 48:41]
+  wire [1:0] _GEN_205 = ~toCacheLookup_holdInOrder ? 2'h1 : 2'h3; // @[arbiter.scala 180:39 189:43 201:43]
+  wire  _GEN_207 = ~toCacheLookup_holdInOrder & _GEN_30; // @[arbiter.scala 180:39 196:38]
+  wire [1:0] _GEN_208 = ~toCacheLookup_holdInOrder ? 2'h0 : coherencyRequestBuffer_response; // @[arbiter.scala 180:39 200:40 utils.scala 48:41]
+  wire [4:0] _GEN_209 = _T_17 ? _replayRequestBuffer_branchMask_T : replayRequestBuffer_branchMask; // @[utils.scala 153:60 154:28 156:28]
+  wire  _GEN_210 = _T_17 ? 1'h0 : replayRequestBuffer_valid; // @[utils.scala 161:60 162:23 164:23]
+  wire [4:0] _GEN_211 = branchOps_passed ? _GEN_209 : replayRequestBuffer_branchMask; // @[utils.scala 151:28 166:26]
+  wire  _GEN_212 = branchOps_passed ? replayRequestBuffer_valid : _GEN_210; // @[utils.scala 151:28 158:21]
+  wire [4:0] _GEN_213 = branchOps_valid ? _GEN_211 : 5'h0; // @[arbiter.scala 224:28 utils.scala 48:41]
+  wire  _GEN_214 = branchOps_valid ? _GEN_212 : replayRequestBuffer_valid; // @[arbiter.scala 224:28 213:35]
+  wire  _GEN_220 = branchOps_valid ? _GEN_194 : inorderBuffer_valid; // @[arbiter.scala 240:28 230:35]
   wire  isSCWire = toCacheLookup_request_instruction[31:27] == 5'h3 & toCacheLookup_request_instruction[6:0] == 7'h2f; // @[arbiter.scala 243:90]
   wire  isSCReadWire = isSCWire & ~toCacheLookup_request_writeEn; // @[arbiter.scala 244:47]
-  wire  _GEN_206 = isSCReadWire | rAtmoicsWritePending; // @[arbiter.scala 245:25 246:30 177:37]
-  wire [4:0] _GEN_207 = _T_12 ? _speculativeBuffer_branchMask_T : speculativeBuffer_branchMask; // @[utils.scala 153:60 154:28 156:28]
-  wire  _GEN_208 = _T_12 ? 1'h0 : speculativeBuffer_valid; // @[utils.scala 161:60 162:23 164:23]
-  wire [4:0] _GEN_209 = branchOps_passed ? _GEN_207 : speculativeBuffer_branchMask; // @[utils.scala 151:28 166:26]
-  wire  _GEN_210 = branchOps_passed ? speculativeBuffer_valid : _GEN_208; // @[utils.scala 151:28 158:21]
-  wire [4:0] _GEN_211 = branchOps_valid ? _GEN_209 : 5'h0; // @[arbiter.scala 260:28 utils.scala 48:41]
-  wire  _GEN_212 = branchOps_valid ? _GEN_210 : speculativeBuffer_valid; // @[arbiter.scala 260:28 251:35]
-  wire  _GEN_213 = speculativeBuffer_valid ? 1'h0 : _GEN_157; // @[arbiter.scala 248:41 249:31]
-  wire  _GEN_214 = speculativeBuffer_valid & _GEN_212; // @[arbiter.scala 248:41 264:35]
-  wire [31:0] _GEN_215 = speculativeBuffer_valid ? speculativeBuffer_address : 32'h0; // @[arbiter.scala 248:41 252:37 utils.scala 48:41]
-  wire [31:0] _GEN_216 = speculativeBuffer_valid ? speculativeBuffer_instruction : 32'h0; // @[arbiter.scala 248:41 253:41 utils.scala 48:41]
-  wire [3:0] _GEN_217 = speculativeBuffer_valid ? speculativeBuffer_robAddr : 4'h0; // @[arbiter.scala 248:41 254:37 utils.scala 48:41]
-  wire [5:0] _GEN_218 = speculativeBuffer_valid ? speculativeBuffer_prfDest : 6'h0; // @[arbiter.scala 248:41 255:37 utils.scala 48:41]
-  wire [4:0] _GEN_221 = speculativeBuffer_valid ? _GEN_211 : 5'h0; // @[arbiter.scala 248:41 utils.scala 48:41]
-  wire  _GEN_222 = inorderBuffer_valid & _T_32 ? 1'h0 : _GEN_140; // @[arbiter.scala 227:67 228:27]
-  wire  _GEN_223 = inorderBuffer_valid & _T_32 ? _GEN_205 : _GEN_214; // @[arbiter.scala 227:67]
-  wire [31:0] _GEN_224 = inorderBuffer_valid & _T_32 ? inorderBuffer_address : _GEN_215; // @[arbiter.scala 227:67 231:37]
-  wire [31:0] _GEN_225 = inorderBuffer_valid & _T_32 ? inorderBuffer_instruction : _GEN_216; // @[arbiter.scala 227:67 232:41]
-  wire [4:0] _GEN_226 = inorderBuffer_valid & _T_32 ? _GEN_180 : _GEN_221; // @[arbiter.scala 227:67]
-  wire [3:0] _GEN_227 = inorderBuffer_valid & _T_32 ? inorderBuffer_robAddr : _GEN_217; // @[arbiter.scala 227:67 234:37]
-  wire [5:0] _GEN_228 = inorderBuffer_valid & _T_32 ? inorderBuffer_prfDest : _GEN_218; // @[arbiter.scala 227:67 235:37]
-  wire  _GEN_229 = inorderBuffer_valid & _T_32 & inorderBuffer_writeEn; // @[arbiter.scala 227:67 236:37]
-  wire [63:0] _GEN_230 = inorderBuffer_valid & _T_32 ? inorderBuffer_writeData : 64'h0; // @[arbiter.scala 227:67 237:39]
-  wire  _GEN_231 = inorderBuffer_valid & _T_32 | speculativeBuffer_valid; // @[arbiter.scala 227:67 238:41]
-  wire  _GEN_232 = inorderBuffer_valid & _T_32 ? _GEN_206 : rAtmoicsWritePending; // @[arbiter.scala 177:37 227:67]
-  wire  _GEN_233 = inorderBuffer_valid & _T_32 ? _GEN_157 : _GEN_213; // @[arbiter.scala 227:67]
-  wire  _GEN_234 = replayRequestBuffer_valid ? 1'h0 : _GEN_163; // @[arbiter.scala 210:43 211:33]
-  wire  _GEN_235 = replayRequestBuffer_valid ? _GEN_199 : _GEN_223; // @[arbiter.scala 210:43]
-  wire [31:0] _GEN_236 = replayRequestBuffer_valid ? replayRequestBuffer_address : _GEN_224; // @[arbiter.scala 210:43 214:37]
-  wire [31:0] _GEN_237 = replayRequestBuffer_valid ? replayRequestBuffer_instruction : _GEN_225; // @[arbiter.scala 210:43 215:41]
-  wire [3:0] _GEN_238 = replayRequestBuffer_valid ? replayRequestBuffer_robAddr : _GEN_227; // @[arbiter.scala 210:43 216:37]
-  wire [5:0] _GEN_239 = replayRequestBuffer_valid ? replayRequestBuffer_prfDest : _GEN_228; // @[arbiter.scala 210:43 217:37]
-  wire [511:0] _GEN_240 = replayRequestBuffer_valid ? replayRequestBuffer_cacheLine : 512'h0; // @[arbiter.scala 210:43 218:39 utils.scala 48:41]
-  wire [1:0] _GEN_241 = replayRequestBuffer_valid ? replayRequestBuffer_response : 2'h0; // @[arbiter.scala 210:43 219:38 utils.scala 48:41]
-  wire  _GEN_242 = replayRequestBuffer_valid ? replayRequestBuffer_writeEn : _GEN_229; // @[arbiter.scala 210:43 220:37]
-  wire [63:0] _GEN_243 = replayRequestBuffer_valid ? replayRequestBuffer_writeData : _GEN_230; // @[arbiter.scala 210:43 221:39]
-  wire [1:0] _GEN_244 = replayRequestBuffer_valid ? 2'h2 : {{1'd0}, _GEN_231}; // @[arbiter.scala 210:43 222:41]
-  wire [4:0] _GEN_245 = replayRequestBuffer_valid ? _GEN_198 : _GEN_226; // @[arbiter.scala 210:43]
-  wire  _GEN_246 = replayRequestBuffer_valid ? _GEN_140 : _GEN_222; // @[arbiter.scala 210:43]
-  wire  _GEN_247 = replayRequestBuffer_valid ? rAtmoicsWritePending : _GEN_232; // @[arbiter.scala 177:37 210:43]
-  wire  _GEN_248 = replayRequestBuffer_valid ? _GEN_157 : _GEN_233; // @[arbiter.scala 210:43]
-  wire  _GEN_250 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_valid : _GEN_235; // @[arbiter.scala 203:46 206:35]
-  wire [31:0] _GEN_251 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_address : _GEN_236; // @[arbiter.scala 203:46 207:37]
-  wire [1:0] _GEN_252 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_response : _GEN_241; // @[arbiter.scala 203:46 208:38]
-  wire [1:0] _GEN_253 = coherencyRequestBuffer_valid ? 2'h3 : _GEN_244; // @[arbiter.scala 203:46 209:41]
-  wire [31:0] _GEN_255 = coherencyRequestBuffer_valid ? 32'h0 : _GEN_237; // @[arbiter.scala 203:46 utils.scala 48:41]
-  wire [3:0] _GEN_256 = coherencyRequestBuffer_valid ? 4'h0 : _GEN_238; // @[arbiter.scala 203:46 utils.scala 48:41]
-  wire [5:0] _GEN_257 = coherencyRequestBuffer_valid ? 6'h0 : _GEN_239; // @[arbiter.scala 203:46 utils.scala 48:41]
-  wire [511:0] _GEN_258 = coherencyRequestBuffer_valid ? 512'h0 : _GEN_240; // @[arbiter.scala 203:46 utils.scala 48:41]
-  wire  _GEN_259 = coherencyRequestBuffer_valid ? 1'h0 : _GEN_242; // @[arbiter.scala 203:46 utils.scala 47:41]
-  wire [63:0] _GEN_260 = coherencyRequestBuffer_valid ? 64'h0 : _GEN_243; // @[arbiter.scala 203:46 utils.scala 48:41]
-  wire [4:0] _GEN_261 = coherencyRequestBuffer_valid ? 5'h0 : _GEN_245; // @[arbiter.scala 203:46 utils.scala 48:41]
-  wire  _GEN_265 = rAtmoicsWritePending ? _GEN_182 : _GEN_250; // @[arbiter.scala 179:31]
-  wire [31:0] _GEN_266 = rAtmoicsWritePending ? _GEN_183 : _GEN_251; // @[arbiter.scala 179:31]
-  wire [31:0] _GEN_267 = rAtmoicsWritePending ? _GEN_184 : _GEN_255; // @[arbiter.scala 179:31]
-  wire [4:0] _GEN_268 = rAtmoicsWritePending ? _GEN_185 : _GEN_261; // @[arbiter.scala 179:31]
-  wire [3:0] _GEN_269 = rAtmoicsWritePending ? _GEN_186 : _GEN_256; // @[arbiter.scala 179:31]
-  wire [5:0] _GEN_270 = rAtmoicsWritePending ? _GEN_187 : _GEN_257; // @[arbiter.scala 179:31]
-  wire  _GEN_271 = rAtmoicsWritePending ? _GEN_188 : _GEN_259; // @[arbiter.scala 179:31]
-  wire [63:0] _GEN_272 = rAtmoicsWritePending ? _GEN_189 : _GEN_260; // @[arbiter.scala 179:31]
-  wire [1:0] _GEN_273 = rAtmoicsWritePending ? _GEN_190 : _GEN_253; // @[arbiter.scala 179:31]
-  wire [1:0] _GEN_276 = rAtmoicsWritePending ? _GEN_193 : _GEN_252; // @[arbiter.scala 179:31]
-  wire [511:0] _GEN_278 = rAtmoicsWritePending ? 512'h0 : _GEN_258; // @[arbiter.scala 179:31 utils.scala 48:41]
-  wire  _GEN_281 = toCacheLookup_ready & ~branchOps_valid & _GEN_265; // @[arbiter.scala 178:49 utils.scala 47:41]
-  wire [4:0] _GEN_284 = toCacheLookup_ready & ~branchOps_valid ? _GEN_268 : 5'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
-  wire [4:0] _GEN_301 = branchOps_valid ? _GEN_178 : _GEN_284; // @[arbiter.scala 269:26]
-  wire  _GEN_302 = branchOps_valid ? _GEN_179 : _GEN_281; // @[arbiter.scala 269:26]
+  wire  _GEN_221 = isSCReadWire | rAtmoicsWritePending; // @[arbiter.scala 245:25 246:30 177:37]
+  wire [4:0] _GEN_222 = _T_12 ? _speculativeBuffer_branchMask_T : speculativeBuffer_branchMask; // @[utils.scala 153:60 154:28 156:28]
+  wire  _GEN_223 = _T_12 ? 1'h0 : speculativeBuffer_valid; // @[utils.scala 161:60 162:23 164:23]
+  wire [4:0] _GEN_224 = branchOps_passed ? _GEN_222 : speculativeBuffer_branchMask; // @[utils.scala 151:28 166:26]
+  wire  _GEN_225 = branchOps_passed ? speculativeBuffer_valid : _GEN_223; // @[utils.scala 151:28 158:21]
+  wire [4:0] _GEN_226 = branchOps_valid ? _GEN_224 : 5'h0; // @[arbiter.scala 260:28 utils.scala 48:41]
+  wire  _GEN_227 = branchOps_valid ? _GEN_225 : speculativeBuffer_valid; // @[arbiter.scala 260:28 251:35]
+  wire  _GEN_228 = speculativeBuffer_valid ? 1'h0 : _GEN_172; // @[arbiter.scala 248:41 249:31]
+  wire  _GEN_229 = speculativeBuffer_valid & _GEN_227; // @[arbiter.scala 248:41 264:35]
+  wire [31:0] _GEN_230 = speculativeBuffer_valid ? speculativeBuffer_address : 32'h0; // @[arbiter.scala 248:41 252:37 utils.scala 48:41]
+  wire [31:0] _GEN_231 = speculativeBuffer_valid ? speculativeBuffer_instruction : 32'h0; // @[arbiter.scala 248:41 253:41 utils.scala 48:41]
+  wire [3:0] _GEN_232 = speculativeBuffer_valid ? speculativeBuffer_robAddr : 4'h0; // @[arbiter.scala 248:41 254:37 utils.scala 48:41]
+  wire [5:0] _GEN_233 = speculativeBuffer_valid ? speculativeBuffer_prfDest : 6'h0; // @[arbiter.scala 248:41 255:37 utils.scala 48:41]
+  wire [4:0] _GEN_236 = speculativeBuffer_valid ? _GEN_226 : 5'h0; // @[arbiter.scala 248:41 utils.scala 48:41]
+  wire  _GEN_237 = inorderBuffer_valid & _T_32 ? 1'h0 : _GEN_155; // @[arbiter.scala 227:67 228:27]
+  wire  _GEN_238 = inorderBuffer_valid & _T_32 ? _GEN_220 : _GEN_229; // @[arbiter.scala 227:67]
+  wire [31:0] _GEN_239 = inorderBuffer_valid & _T_32 ? inorderBuffer_address : _GEN_230; // @[arbiter.scala 227:67 231:37]
+  wire [31:0] _GEN_240 = inorderBuffer_valid & _T_32 ? inorderBuffer_instruction : _GEN_231; // @[arbiter.scala 227:67 232:41]
+  wire [4:0] _GEN_241 = inorderBuffer_valid & _T_32 ? _GEN_195 : _GEN_236; // @[arbiter.scala 227:67]
+  wire [3:0] _GEN_242 = inorderBuffer_valid & _T_32 ? inorderBuffer_robAddr : _GEN_232; // @[arbiter.scala 227:67 234:37]
+  wire [5:0] _GEN_243 = inorderBuffer_valid & _T_32 ? inorderBuffer_prfDest : _GEN_233; // @[arbiter.scala 227:67 235:37]
+  wire  _GEN_244 = inorderBuffer_valid & _T_32 & inorderBuffer_writeEn; // @[arbiter.scala 227:67 236:37]
+  wire [63:0] _GEN_245 = inorderBuffer_valid & _T_32 ? inorderBuffer_writeData : 64'h0; // @[arbiter.scala 227:67 237:39]
+  wire  _GEN_246 = inorderBuffer_valid & _T_32 | speculativeBuffer_valid; // @[arbiter.scala 227:67 238:41]
+  wire  _GEN_247 = inorderBuffer_valid & _T_32 ? _GEN_221 : rAtmoicsWritePending; // @[arbiter.scala 177:37 227:67]
+  wire  _GEN_248 = inorderBuffer_valid & _T_32 ? _GEN_172 : _GEN_228; // @[arbiter.scala 227:67]
+  wire  _GEN_249 = replayRequestBuffer_valid ? 1'h0 : _GEN_178; // @[arbiter.scala 210:43 211:33]
+  wire  _GEN_250 = replayRequestBuffer_valid ? _GEN_214 : _GEN_238; // @[arbiter.scala 210:43]
+  wire [31:0] _GEN_251 = replayRequestBuffer_valid ? replayRequestBuffer_address : _GEN_239; // @[arbiter.scala 210:43 214:37]
+  wire [31:0] _GEN_252 = replayRequestBuffer_valid ? replayRequestBuffer_instruction : _GEN_240; // @[arbiter.scala 210:43 215:41]
+  wire [3:0] _GEN_253 = replayRequestBuffer_valid ? replayRequestBuffer_robAddr : _GEN_242; // @[arbiter.scala 210:43 216:37]
+  wire [5:0] _GEN_254 = replayRequestBuffer_valid ? replayRequestBuffer_prfDest : _GEN_243; // @[arbiter.scala 210:43 217:37]
+  wire [511:0] _GEN_255 = replayRequestBuffer_valid ? replayRequestBuffer_cacheLine : 512'h0; // @[arbiter.scala 210:43 218:39 utils.scala 48:41]
+  wire [1:0] _GEN_256 = replayRequestBuffer_valid ? replayRequestBuffer_response : 2'h0; // @[arbiter.scala 210:43 219:38 utils.scala 48:41]
+  wire  _GEN_257 = replayRequestBuffer_valid ? replayRequestBuffer_writeEn : _GEN_244; // @[arbiter.scala 210:43 220:37]
+  wire [63:0] _GEN_258 = replayRequestBuffer_valid ? replayRequestBuffer_writeData : _GEN_245; // @[arbiter.scala 210:43 221:39]
+  wire [1:0] _GEN_259 = replayRequestBuffer_valid ? 2'h2 : {{1'd0}, _GEN_246}; // @[arbiter.scala 210:43 222:41]
+  wire [4:0] _GEN_260 = replayRequestBuffer_valid ? _GEN_213 : _GEN_241; // @[arbiter.scala 210:43]
+  wire  _GEN_261 = replayRequestBuffer_valid ? _GEN_155 : _GEN_237; // @[arbiter.scala 210:43]
+  wire  _GEN_262 = replayRequestBuffer_valid ? rAtmoicsWritePending : _GEN_247; // @[arbiter.scala 177:37 210:43]
+  wire  _GEN_263 = replayRequestBuffer_valid ? _GEN_172 : _GEN_248; // @[arbiter.scala 210:43]
+  wire  _GEN_265 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_valid : _GEN_250; // @[arbiter.scala 203:46 206:35]
+  wire [31:0] _GEN_266 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_address : _GEN_251; // @[arbiter.scala 203:46 207:37]
+  wire [1:0] _GEN_267 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_response : _GEN_256; // @[arbiter.scala 203:46 208:38]
+  wire [1:0] _GEN_268 = coherencyRequestBuffer_valid ? 2'h3 : _GEN_259; // @[arbiter.scala 203:46 209:41]
+  wire [31:0] _GEN_270 = coherencyRequestBuffer_valid ? 32'h0 : _GEN_252; // @[arbiter.scala 203:46 utils.scala 48:41]
+  wire [3:0] _GEN_271 = coherencyRequestBuffer_valid ? 4'h0 : _GEN_253; // @[arbiter.scala 203:46 utils.scala 48:41]
+  wire [5:0] _GEN_272 = coherencyRequestBuffer_valid ? 6'h0 : _GEN_254; // @[arbiter.scala 203:46 utils.scala 48:41]
+  wire [511:0] _GEN_273 = coherencyRequestBuffer_valid ? 512'h0 : _GEN_255; // @[arbiter.scala 203:46 utils.scala 48:41]
+  wire  _GEN_274 = coherencyRequestBuffer_valid ? 1'h0 : _GEN_257; // @[arbiter.scala 203:46 utils.scala 47:41]
+  wire [63:0] _GEN_275 = coherencyRequestBuffer_valid ? 64'h0 : _GEN_258; // @[arbiter.scala 203:46 utils.scala 48:41]
+  wire [4:0] _GEN_276 = coherencyRequestBuffer_valid ? 5'h0 : _GEN_260; // @[arbiter.scala 203:46 utils.scala 48:41]
+  wire  _GEN_280 = rAtmoicsWritePending ? _GEN_197 : _GEN_265; // @[arbiter.scala 179:31]
+  wire [31:0] _GEN_281 = rAtmoicsWritePending ? _GEN_198 : _GEN_266; // @[arbiter.scala 179:31]
+  wire [31:0] _GEN_282 = rAtmoicsWritePending ? _GEN_199 : _GEN_270; // @[arbiter.scala 179:31]
+  wire [4:0] _GEN_283 = rAtmoicsWritePending ? _GEN_200 : _GEN_276; // @[arbiter.scala 179:31]
+  wire [3:0] _GEN_284 = rAtmoicsWritePending ? _GEN_201 : _GEN_271; // @[arbiter.scala 179:31]
+  wire [5:0] _GEN_285 = rAtmoicsWritePending ? _GEN_202 : _GEN_272; // @[arbiter.scala 179:31]
+  wire  _GEN_286 = rAtmoicsWritePending ? _GEN_203 : _GEN_274; // @[arbiter.scala 179:31]
+  wire [63:0] _GEN_287 = rAtmoicsWritePending ? _GEN_204 : _GEN_275; // @[arbiter.scala 179:31]
+  wire [1:0] _GEN_288 = rAtmoicsWritePending ? _GEN_205 : _GEN_268; // @[arbiter.scala 179:31]
+  wire [1:0] _GEN_291 = rAtmoicsWritePending ? _GEN_208 : _GEN_267; // @[arbiter.scala 179:31]
+  wire [511:0] _GEN_293 = rAtmoicsWritePending ? 512'h0 : _GEN_273; // @[arbiter.scala 179:31 utils.scala 48:41]
+  wire  _GEN_296 = toCacheLookup_ready & ~branchOps_valid & _GEN_280; // @[arbiter.scala 178:49 utils.scala 47:41]
+  wire [4:0] _GEN_299 = toCacheLookup_ready & ~branchOps_valid ? _GEN_283 : 5'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
+  wire [4:0] _GEN_316 = branchOps_valid ? _GEN_193 : _GEN_299; // @[arbiter.scala 269:26]
+  wire  _GEN_317 = branchOps_valid ? _GEN_194 : _GEN_296; // @[arbiter.scala 269:26]
   wire  _fenceReady_T_4 = _request_speculativeReady_T & ~inorderBuffer_valid & ~operationBuffer_valid; // @[arbiter.scala 273:67]
   assign request_inorderReady = ~(operationBuffer_valid | inorderBuffer_valid); // @[arbiter.scala 67:27]
   assign request_speculativeReady = ~speculativeBuffer_valid; // @[arbiter.scala 66:31]
@@ -33783,17 +33786,17 @@ module arbiter(
   assign toPeripheral_request_prfDest = toPeripheral_ready ? inorderBuffer_prfDest : 6'h0; // @[arbiter.scala 267:28 268:26 utils.scala 48:41]
   assign toPeripheral_request_writeEn = toPeripheral_ready & inorderBuffer_writeEn; // @[arbiter.scala 267:28 268:26 utils.scala 47:41]
   assign toPeripheral_request_writeData = toPeripheral_ready ? inorderBuffer_writeData : 64'h0; // @[arbiter.scala 267:28 268:26 utils.scala 48:41]
-  assign toCacheLookup_request_valid = toPeripheral_ready ? _GEN_302 : _GEN_281; // @[arbiter.scala 267:28]
-  assign toCacheLookup_request_address = toCacheLookup_ready & ~branchOps_valid ? _GEN_266 : 32'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
-  assign toCacheLookup_request_instruction = toCacheLookup_ready & ~branchOps_valid ? _GEN_267 : 32'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
-  assign toCacheLookup_request_branchMask = toPeripheral_ready ? _GEN_301 : _GEN_284; // @[arbiter.scala 267:28]
-  assign toCacheLookup_request_robAddr = toCacheLookup_ready & ~branchOps_valid ? _GEN_269 : 4'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
-  assign toCacheLookup_request_prfDest = toCacheLookup_ready & ~branchOps_valid ? _GEN_270 : 6'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
-  assign toCacheLookup_request_writeEn = toCacheLookup_ready & ~branchOps_valid & _GEN_271; // @[arbiter.scala 178:49 utils.scala 47:41]
-  assign toCacheLookup_request_writeData = toCacheLookup_ready & ~branchOps_valid ? _GEN_272 : 64'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
-  assign toCacheLookup_request_cacheLine = toCacheLookup_ready & ~branchOps_valid ? _GEN_278 : 512'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
-  assign toCacheLookup_request_response = toCacheLookup_ready & ~branchOps_valid ? _GEN_276 : 2'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
-  assign toCacheLookup_request_requestType = toCacheLookup_ready & ~branchOps_valid ? _GEN_273 : 2'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
+  assign toCacheLookup_request_valid = toPeripheral_ready ? _GEN_317 : _GEN_296; // @[arbiter.scala 267:28]
+  assign toCacheLookup_request_address = toCacheLookup_ready & ~branchOps_valid ? _GEN_281 : 32'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
+  assign toCacheLookup_request_instruction = toCacheLookup_ready & ~branchOps_valid ? _GEN_282 : 32'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
+  assign toCacheLookup_request_branchMask = toPeripheral_ready ? _GEN_316 : _GEN_299; // @[arbiter.scala 267:28]
+  assign toCacheLookup_request_robAddr = toCacheLookup_ready & ~branchOps_valid ? _GEN_284 : 4'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
+  assign toCacheLookup_request_prfDest = toCacheLookup_ready & ~branchOps_valid ? _GEN_285 : 6'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
+  assign toCacheLookup_request_writeEn = toCacheLookup_ready & ~branchOps_valid & _GEN_286; // @[arbiter.scala 178:49 utils.scala 47:41]
+  assign toCacheLookup_request_writeData = toCacheLookup_ready & ~branchOps_valid ? _GEN_287 : 64'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
+  assign toCacheLookup_request_cacheLine = toCacheLookup_ready & ~branchOps_valid ? _GEN_293 : 512'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
+  assign toCacheLookup_request_response = toCacheLookup_ready & ~branchOps_valid ? _GEN_291 : 2'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
+  assign toCacheLookup_request_requestType = toCacheLookup_ready & ~branchOps_valid ? _GEN_288 : 2'h0; // @[arbiter.scala 178:49 utils.scala 48:41]
   assign replayRequest_ready = ~replayRequestBuffer_valid; // @[arbiter.scala 92:26]
   assign coherencyRequest_ready = ~coherencyRequestBuffer_valid; // @[arbiter.scala 88:29]
   assign writeCommit_ready = 3'h0 == operationState ? 1'h0 : 3'h1 == operationState; // @[arbiter.scala 114:25 53:21]
@@ -33803,14 +33806,14 @@ module arbiter(
       speculativeBuffer_valid <= 1'h0; // @[arbiter.scala 56:34]
     end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 178:49]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 179:31]
-        speculativeBuffer_valid <= _GEN_157;
+        speculativeBuffer_valid <= _GEN_172;
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 203:46]
-        speculativeBuffer_valid <= _GEN_157;
+        speculativeBuffer_valid <= _GEN_172;
       end else begin
-        speculativeBuffer_valid <= _GEN_248;
+        speculativeBuffer_valid <= _GEN_263;
       end
     end else begin
-      speculativeBuffer_valid <= _GEN_157;
+      speculativeBuffer_valid <= _GEN_172;
     end
     if (reset) begin // @[arbiter.scala 56:34]
       speculativeBuffer_address <= 32'h0; // @[arbiter.scala 56:34]
@@ -33859,47 +33862,47 @@ module arbiter(
       inorderBuffer_valid <= 1'h0; // @[arbiter.scala 58:30]
     end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 178:49]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 179:31]
-        inorderBuffer_valid <= _GEN_140;
+        inorderBuffer_valid <= _GEN_155;
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 203:46]
-        inorderBuffer_valid <= _GEN_140;
+        inorderBuffer_valid <= _GEN_155;
       end else begin
-        inorderBuffer_valid <= _GEN_246;
+        inorderBuffer_valid <= _GEN_261;
       end
     end else begin
-      inorderBuffer_valid <= _GEN_140;
+      inorderBuffer_valid <= _GEN_155;
     end
     if (reset) begin // @[arbiter.scala 58:30]
       inorderBuffer_address <= 32'h0; // @[arbiter.scala 58:30]
     end else if (3'h0 == operationState) begin // @[arbiter.scala 114:25]
       if (operationBuffer_valid) begin // @[arbiter.scala 117:33]
-        if (operationWires_isLR) begin // @[arbiter.scala 125:34]
-          inorderBuffer_address <= operationBuffer_address; // @[arbiter.scala 126:25]
+        if (operationWires_isRead) begin // @[arbiter.scala 118:36]
+          inorderBuffer_address <= operationBuffer_address; // @[arbiter.scala 119:25]
         end else begin
-          inorderBuffer_address <= _GEN_44;
+          inorderBuffer_address <= _GEN_60;
         end
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_address <= _GEN_86;
+        inorderBuffer_address <= _GEN_101;
       end else begin
-        inorderBuffer_address <= _GEN_107;
+        inorderBuffer_address <= _GEN_122;
       end
     end
     if (reset) begin // @[arbiter.scala 58:30]
       inorderBuffer_instruction <= 32'h0; // @[arbiter.scala 58:30]
     end else if (3'h0 == operationState) begin // @[arbiter.scala 114:25]
       if (operationBuffer_valid) begin // @[arbiter.scala 117:33]
-        if (operationWires_isLR) begin // @[arbiter.scala 125:34]
-          inorderBuffer_instruction <= operationBuffer_instruction; // @[arbiter.scala 126:25]
+        if (operationWires_isRead) begin // @[arbiter.scala 118:36]
+          inorderBuffer_instruction <= operationBuffer_instruction; // @[arbiter.scala 119:25]
         end else begin
-          inorderBuffer_instruction <= _GEN_45;
+          inorderBuffer_instruction <= _GEN_61;
         end
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_instruction <= _GEN_87;
+        inorderBuffer_instruction <= _GEN_102;
       end else begin
-        inorderBuffer_instruction <= _GEN_108;
+        inorderBuffer_instruction <= _GEN_123;
       end
     end
     if (reset) begin // @[arbiter.scala 58:30]
@@ -33909,80 +33912,80 @@ module arbiter(
         if (|_T_26) begin // @[utils.scala 110:62]
           inorderBuffer_branchMask <= _inorderBuffer_branchMask_T; // @[utils.scala 111:29]
         end else begin
-          inorderBuffer_branchMask <= _GEN_143;
+          inorderBuffer_branchMask <= _GEN_158;
         end
       end else begin
-        inorderBuffer_branchMask <= _GEN_143;
+        inorderBuffer_branchMask <= _GEN_158;
       end
     end else begin
-      inorderBuffer_branchMask <= _GEN_143;
+      inorderBuffer_branchMask <= _GEN_158;
     end
     if (reset) begin // @[arbiter.scala 58:30]
       inorderBuffer_robAddr <= 4'h0; // @[arbiter.scala 58:30]
     end else if (3'h0 == operationState) begin // @[arbiter.scala 114:25]
       if (operationBuffer_valid) begin // @[arbiter.scala 117:33]
-        if (operationWires_isLR) begin // @[arbiter.scala 125:34]
-          inorderBuffer_robAddr <= operationBuffer_robAddr; // @[arbiter.scala 126:25]
+        if (operationWires_isRead) begin // @[arbiter.scala 118:36]
+          inorderBuffer_robAddr <= operationBuffer_robAddr; // @[arbiter.scala 119:25]
         end else begin
-          inorderBuffer_robAddr <= _GEN_47;
+          inorderBuffer_robAddr <= _GEN_63;
         end
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_robAddr <= _GEN_89;
+        inorderBuffer_robAddr <= _GEN_104;
       end else begin
-        inorderBuffer_robAddr <= _GEN_110;
+        inorderBuffer_robAddr <= _GEN_125;
       end
     end
     if (reset) begin // @[arbiter.scala 58:30]
       inorderBuffer_prfDest <= 6'h0; // @[arbiter.scala 58:30]
     end else if (3'h0 == operationState) begin // @[arbiter.scala 114:25]
       if (operationBuffer_valid) begin // @[arbiter.scala 117:33]
-        if (operationWires_isLR) begin // @[arbiter.scala 125:34]
-          inorderBuffer_prfDest <= operationBuffer_prfDest; // @[arbiter.scala 126:25]
+        if (operationWires_isRead) begin // @[arbiter.scala 118:36]
+          inorderBuffer_prfDest <= operationBuffer_prfDest; // @[arbiter.scala 119:25]
         end else begin
-          inorderBuffer_prfDest <= _GEN_48;
+          inorderBuffer_prfDest <= _GEN_64;
         end
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_prfDest <= _GEN_90;
+        inorderBuffer_prfDest <= _GEN_105;
       end else begin
-        inorderBuffer_prfDest <= _GEN_111;
+        inorderBuffer_prfDest <= _GEN_126;
       end
     end
     if (reset) begin // @[arbiter.scala 58:30]
       inorderBuffer_writeEn <= 1'h0; // @[arbiter.scala 58:30]
     end else if (3'h0 == operationState) begin // @[arbiter.scala 114:25]
       if (operationBuffer_valid) begin // @[arbiter.scala 117:33]
-        if (operationWires_isLR) begin // @[arbiter.scala 125:34]
-          inorderBuffer_writeEn <= 1'h0; // @[arbiter.scala 126:25]
+        if (operationWires_isRead) begin // @[arbiter.scala 118:36]
+          inorderBuffer_writeEn <= 1'h0; // @[arbiter.scala 119:25]
         end else begin
-          inorderBuffer_writeEn <= _GEN_49;
+          inorderBuffer_writeEn <= _GEN_65;
         end
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_writeEn <= _GEN_91;
+        inorderBuffer_writeEn <= _GEN_106;
       end else begin
-        inorderBuffer_writeEn <= _GEN_112;
+        inorderBuffer_writeEn <= _GEN_127;
       end
     end
     if (reset) begin // @[arbiter.scala 58:30]
       inorderBuffer_writeData <= 64'h0; // @[arbiter.scala 58:30]
     end else if (3'h0 == operationState) begin // @[arbiter.scala 114:25]
       if (operationBuffer_valid) begin // @[arbiter.scala 117:33]
-        if (operationWires_isLR) begin // @[arbiter.scala 125:34]
-          inorderBuffer_writeData <= 64'h0; // @[arbiter.scala 126:25]
+        if (operationWires_isRead) begin // @[arbiter.scala 118:36]
+          inorderBuffer_writeData <= 64'h0; // @[arbiter.scala 119:25]
         end else begin
-          inorderBuffer_writeData <= _GEN_50;
+          inorderBuffer_writeData <= _GEN_66;
         end
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_writeData <= _GEN_92;
+        inorderBuffer_writeData <= _GEN_107;
       end else begin
-        inorderBuffer_writeData <= _GEN_113;
+        inorderBuffer_writeData <= _GEN_128;
       end
     end
     if (reset) begin // @[arbiter.scala 60:32]
@@ -33992,7 +33995,7 @@ module arbiter(
         if (operationWires_isRead) begin // @[arbiter.scala 118:36]
           operationBuffer_valid <= 1'h0; // @[arbiter.scala 120:33]
         end else begin
-          operationBuffer_valid <= _GEN_21;
+          operationBuffer_valid <= _GEN_68;
         end
       end else begin
         operationBuffer_valid <= _GEN_21;
@@ -34000,7 +34003,7 @@ module arbiter(
     end else if (3'h1 == operationState) begin // @[arbiter.scala 114:25]
       operationBuffer_valid <= _GEN_21;
     end else if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-      operationBuffer_valid <= _GEN_94;
+      operationBuffer_valid <= _GEN_109;
     end else begin
       operationBuffer_valid <= _GEN_21;
     end
@@ -34051,7 +34054,7 @@ module arbiter(
       coherencyRequestBuffer_valid <= 1'h0; // @[arbiter.scala 62:39]
     end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 178:49]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 179:31]
-        coherencyRequestBuffer_valid <= _GEN_192;
+        coherencyRequestBuffer_valid <= _GEN_207;
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 203:46]
         coherencyRequestBuffer_valid <= 1'h0; // @[arbiter.scala 204:36]
       end else begin
@@ -34074,14 +34077,14 @@ module arbiter(
       replayRequestBuffer_valid <= 1'h0; // @[arbiter.scala 64:36]
     end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 178:49]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 179:31]
-        replayRequestBuffer_valid <= _GEN_163;
+        replayRequestBuffer_valid <= _GEN_178;
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 203:46]
-        replayRequestBuffer_valid <= _GEN_163;
+        replayRequestBuffer_valid <= _GEN_178;
       end else begin
-        replayRequestBuffer_valid <= _GEN_234;
+        replayRequestBuffer_valid <= _GEN_249;
       end
     end else begin
-      replayRequestBuffer_valid <= _GEN_163;
+      replayRequestBuffer_valid <= _GEN_178;
     end
     if (reset) begin // @[arbiter.scala 64:36]
       replayRequestBuffer_address <= 32'h0; // @[arbiter.scala 64:36]
@@ -34142,10 +34145,8 @@ module arbiter(
       operationState <= 3'h0; // @[arbiter.scala 96:31]
     end else if (3'h0 == operationState) begin // @[arbiter.scala 114:25]
       if (operationBuffer_valid) begin // @[arbiter.scala 117:33]
-        if (operationWires_isSC) begin // @[arbiter.scala 130:34]
-          operationState <= 3'h4; // @[arbiter.scala 131:26]
-        end else begin
-          operationState <= _GEN_63;
+        if (!(operationWires_isRead)) begin // @[arbiter.scala 118:36]
+          operationState <= _GEN_58;
         end
       end
     end else if (3'h1 == operationState) begin // @[arbiter.scala 114:25]
@@ -34155,9 +34156,9 @@ module arbiter(
         operationState <= 3'h1;
       end
     end else if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-      operationState <= _GEN_95;
+      operationState <= _GEN_110;
     end else begin
-      operationState <= _GEN_115;
+      operationState <= _GEN_130;
     end
     if (reset) begin // @[arbiter.scala 177:37]
       rAtmoicsWritePending <= 1'h0; // @[arbiter.scala 177:37]
@@ -34167,7 +34168,7 @@ module arbiter(
           rAtmoicsWritePending <= 1'h0; // @[arbiter.scala 194:30]
         end
       end else if (!(coherencyRequestBuffer_valid)) begin // @[arbiter.scala 203:46]
-        rAtmoicsWritePending <= _GEN_247;
+        rAtmoicsWritePending <= _GEN_262;
       end
     end
   end

@@ -63,6 +63,11 @@ class Scheduler extends Module{
   //*    1.  Branch resolved speculative
   //*    2.  Branch resolved inorder
   //*    3.  Branch unresolved speculative
+  val speculativeBranchResolved = WireDefault(!speculativeQueue.read.data.branchMask(3,0).orR && !speculativeQueue.isEmpty)
+  val speculativeBranchInvalidated = WireDefault(!speculativeQueue.read.data.valid && speculativeQueue.read.data.branchMask(3,0).orR)
+  val inorderBranchResolved = WireDefault(!inorderQueue.read.data.branchMask(3,0).orR && !inorderQueue.isEmpty)
+  val inorderBranchInvalidated = WireDefault(!inorderQueue.read.data.valid && inorderQueue.read.data.branchMask(3,0).orR)
+
   when(controlSignal.inorderReady || controlSignal.speculativeReady){
     switch(controlSignal.inorderReady ## controlSignal.speculativeReady){
       is("b00".U){}
@@ -77,15 +82,15 @@ class Scheduler extends Module{
         requestOut := inorderQueue.read.data
       }
       is("b11".U){
-        when(!speculativeQueue.read.data.branchMask(3,0).orR && !speculativeQueue.isEmpty || !speculativeQueue.read.data.valid && speculativeQueue.read.data.branchMask(3,0).orR){
+        when(speculativeBranchResolved|| speculativeBranchInvalidated){
           speculativeQueue.read.ready:= !speculativeQueue.isEmpty
           controlSignal.isSpeculative  := true.B
           requestOut := speculativeQueue.read.data
-        } .elsewhen(!inorderQueue.read.data.branchMask(3,0).orR && !inorderQueue.isEmpty || !inorderQueue.read.data.valid && inorderQueue.read.data.branchMask(3,0).orR){
+        } .elsewhen(inorderBranchResolved || inorderBranchInvalidated){
           inorderQueue.read.ready := !inorderQueue.isEmpty
           controlSignal.isSpeculative  := false.B
           requestOut := inorderQueue.read.data
-        } .elsewhen(!speculativeQueue.isEmpty || !speculativeQueue.read.data.valid && speculativeQueue.read.data.branchMask(3,0).orR){
+        } .elsewhen(!speculativeQueue.isEmpty || speculativeBranchInvalidated){
           speculativeQueue.read.ready:= !speculativeQueue.isEmpty
           controlSignal.isSpeculative  := true.B
           requestOut := speculativeQueue.read.data
