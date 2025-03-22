@@ -220,7 +220,7 @@ class cacheLookupUnit extends Module{
     val dirtyBitWire = WireDefault(tagChunks(hitTagWire)(tagSize + 1))
     val isMissWire = !(matchFoundVec.reduce(_ | _) && validBitWire)
     val PLRUBitWire = WireDefault(tagChunks(hitTagWire)(tagSize + 3))
-    val isPermissionMiss = !isMissWire && shareBitWire || isMissWire
+    val isPermissionMiss = !isMissWire && shareBitWire
 
     val newtagChunks = VecInit(Seq.tabulate(nway) { i =>
       tagBRAM.rdData((i + 1) * (tagSection) - 1, i * (tagSection))
@@ -269,7 +269,7 @@ class cacheLookupUnit extends Module{
     when(isWriteWire ||  isAtmoicWriteWire || isSCWriteWire){
       newDirtyBitWire := 1.U
       newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
-      when(isPermissionMiss){
+      when(isMissWire){
         newValidBitWire := 1.U
         newShareBitWire := readBuffer.response(1)       
         newAddrWire := readBuffer.address(addrWidth - 1, dataAddrWidth + log2Ceil(lineSize))
@@ -324,13 +324,6 @@ class cacheLookupUnit extends Module{
         }
         //If permission miss, CleanUnique
       }  
-      //If SC, the reservation is already removed, so no need to check
-      when(reservationRegister.reserved){
-        switch(reservationRegister.size){
-          is(0.U){reservationRegister.reserved := !((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))}
-          is(1.U){reservationRegister.reserved := !((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))}
-        }
-      }
     }
     when(isCoherentWire){
       when(readBuffer.response(1)){
@@ -341,16 +334,19 @@ class cacheLookupUnit extends Module{
       } .otherwise{
         newShareBitWire := Mux(readBuffer.response(0), 1.U, tagChunks(hitTagWire)(tagSize + 2))
       }
-      when(reservationRegister.reserved){
-        switch(reservationRegister.size){
-          is(0.U){reservationRegister.reserved := !((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))}
-          is(1.U){reservationRegister.reserved := !((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))}
-        }
+    }
+    val isReservationMatch = WireDefault(false.B)
+    when(reservationRegister.reserved && (isCoherentWire || isWriteWire ||  isAtmoicWriteWire || isSCWriteWire)){
+      switch(reservationRegister.size){
+        is(0.U){reservationRegister.reserved := !((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))
+                    isReservationMatch := ((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))}
+        is(1.U){reservationRegister.reserved := !((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))
+                    isReservationMatch := ((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))}
       }
     }
 
     //BRAM update
-    val updatingSet = Mux(isPermissionMiss, replacingset, hitTagWire)
+    val updatingSet = Mux(isMissWire, replacingset, hitTagWire)
     when(PLRUSetWire.reduce(_ & _)){
       for (i <- 0 until nway) {
         newtagChunks(i) := tagChunks(i) & ~(1.U << (tagSize + 3))
@@ -369,48 +365,42 @@ class cacheLookupUnit extends Module{
     dataBRAMVec(updatingSet).wrAddr := readBuffer.address(addrEnd, addrBeg)
 
     //Setting control signals on deciding which buffer should data flow
-    when(!isMissWire || (isPermissionMiss && (readBuffer.requestType === "b10".U))) { //Hit or miss but replay
-      when(isReadWire || isAtmoicReadWire){
+    val isReplayValid = (readBuffer.requestType === "b10".U)
+    when(isReadWire || isLRWire || isAtmoicReadWire){
+      when(isMissWire && isReplayValid || !isMissWire){ //Hit
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
-        dataBRAMUpdateWire := isMissWire && (readBuffer.requestType === "b10".U)
+        toReservationRegisterWire := isLRWire
+        dataBRAMUpdateWire := isMissWire && isReplayValid
+      } .otherwise {
+        toReplayValidWire := true.B
+        toLastMissRecordRegister := !isReadWire
       }
-      when(isCoherentWire){
-        toCoherencyResponseValidWire := true.B
+    }
+    when(isCoherentWire){
+      toCoherencyResponseValidWire := true.B
+      tagBRAMUpdateWire:= !isMissWire
+    }
+    when(isWriteWire || isAtmoicWriteWire){
+      when(isReplayValid || (!isPermissionMiss && !isMissWire)){
+        toWriteBackValidWire := dirtyBitWire
         tagBRAMUpdateWire:= true.B
-      }
-      when(isWriteWire || isAtmoicWriteWire){
+        dataBRAMUpdateWire := true.B
+      } .otherwise {
+        toReplayValidWire := true.B
         toLastMissRecordRegister := true.B
+      }
+    }
+    when(isSCReadWire){toMemoryResponseValidWire := true.B}
+    when(isSCWriteWire){
+      toMemoryResponseValidWire := true.B
+      reservationRegister.reserved := false.B
+      when(reservationRegister.reserved && isReservationMatch){
         toWriteBackValidWire := dirtyBitWire
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
       }
-      when(isLRWire){
-        toReservationRegisterWire := true.B
-        toMemoryResponseValidWire := true.B
-        tagBRAMUpdateWire:= true.B
-        dataBRAMUpdateWire := true.B
-      }
-      when(isSCReadWire){toMemoryResponseValidWire := true.B}
-      when(isSCWriteWire){
-        when(reservationRegister.reserved){ //reservation is still hold
-          reservationRegister.reserved := false.B //Removing reservation
-          toMemoryResponseValidWire := true.B
-          toWriteBackValidWire := isPermissionMiss && dirtyBitWire
-          tagBRAMUpdateWire:= true.B
-          dataBRAMUpdateWire := true.B
-        }.otherwise {
-          toMemoryResponseValidWire := true.B
-        }
-      }
-    } .otherwise{ //Miss
-      when(isReadWire || isAtmoicReadWire || isWriteWire || isAtmoicWriteWire || isLRWire){
-        toReplayValidWire := true.B
-        toLastMissRecordRegister := !isReadWire
-      }
-      when(isCoherentWire){toCoherencyResponseValidWire := true.B}
-      when(isSCWire){toMemoryResponseValidWire := true.B}
-    } 
+    }
 
     //Setting the dataOut
     val responseResultWire = WireDefault(0.U(dataWidth.W))
@@ -441,14 +431,13 @@ class cacheLookupUnit extends Module{
                                     doubleWordChoosen)}
     }
     when(isSCWriteWire){
-      responseResultWire := Mux(reservationRegister.reserved, 0.U, 1.U)
+      responseResultWire := Mux(reservationRegister.reserved && isReservationMatch, 0.U, 1.U)
     } 
     when(isSCReadWire){
       responseResultWire := 0.U
     }
     
     //____________________Output Buffer update___________________//
-
     //Replay
     replayBuffer.valid := toReplayValidWire
     replayBuffer.address := readBuffer.address
@@ -495,7 +484,6 @@ class cacheLookupUnit extends Module{
     reservationRegister.address := readBuffer.address
     reservationRegister.size := readBuffer.instruction(12)
   }
-
   when(branchOps.valid){
     //If pipeline is running, Only need to update the output buffers when getting updated
     when(operationValid){
