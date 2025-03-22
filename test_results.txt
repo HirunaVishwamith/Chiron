@@ -15,13 +15,13 @@ fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-bne.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-fence_i.bin: test fail
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-jal.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-jalr.bin: test pass
-fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lb.bin: test fail
-fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lbu.bin: test fail
+fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lb.bin: test pass
+fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lbu.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-ld.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lh.bin: test pass
-fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lhu.bin: test fail
+fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lhu.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lui.bin: test pass
-fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lw.bin: test fail
+fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lw.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lwu.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-or.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-ori.bin: test pass

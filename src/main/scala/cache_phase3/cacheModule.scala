@@ -60,7 +60,6 @@ class CacheModule (
     length = dPort_LEN,
     size = dPort_SIZE
   ))
-    //TODO : Create appropriate trait and pass
   val commitFifo = Module(new fifoRecordInvalidate(
     depth = schedulerDepth*4,
     traitType = new baseWire
@@ -112,7 +111,7 @@ class CacheModule (
 
   peripheralUnit.request <>arbiter.toPeripheral 
   peripheralUnit.responseOut.ready := !cacheLookup.toResponse.request.valid
-  // responseOut := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request, peripheralUnit.responseOut.request)
+
   responseOut.valid := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.valid, peripheralUnit.responseOut.request.valid)
   responseOut.prfDest := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.prfDest, peripheralUnit.responseOut.request.prfDest)
   responseOut.robAddr := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.robAddr, peripheralUnit.responseOut.request.robAddr)
@@ -120,7 +119,6 @@ class CacheModule (
   responseOut.instruction := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.instruction, peripheralUnit.responseOut.request.instruction)
 
   //-----------------------Commit FIFO-----------------------------//
-  
   zeroInit(commitFifo.write.data)
   commitFifo.read.ready := false.B
   commitFifo.invalidateAddr := 0.U
@@ -154,15 +152,12 @@ class CacheModule (
     RegNext(RegNext(!cacheLookup.request.holdInOrder))
     //* inorder signal is delayed by two clock cycles so all operations are done
   )
-
   when(!canInititatedFenceReg){
     canInititatedFenceReg := initiateFence
   }
-
   when(canInititatedFenceReg && subModulesReady){
     fenceInititatedReg := true.B
   }
-
   when(fenceInititatedReg){
     fenceInstructions.ready := true.B
     canAllocate := false.B

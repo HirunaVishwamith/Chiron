@@ -1,24 +1,24 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Sat Mar 22 06:52:38 2025
+[*] Sat Mar 22 09:45:06 2025
 [*]
 [dumpfile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/system_trace.vcd"
-[dumpfile_mtime] "Sat Mar 22 06:42:41 2025"
-[dumpfile_size] 24826960
+[dumpfile_mtime] "Sat Mar 22 09:27:52 2025"
+[dumpfile_size] 23544073
 [savefile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/sw.gtkw"
-[timestart] 18407
+[timestart] 19462
 [size] 1920 998
 [pos] -1 -1
-*-4.200000 18450 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-4.200000 19486 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.system.
 [treeopen] TOP.system.core0.
 [treeopen] TOP.system.core0.memAccess.
+[treeopen] TOP.system.core0.memAccess.aceUnit.
 [treeopen] TOP.system.core0.memAccess.arbiter.
 [treeopen] TOP.system.core0.memAccess.cacheLookup.
-[treeopen] TOP.system.core0.memAccess.scheduler.
-[sst_width] 209
-[signals_width] 475
+[sst_width] 295
+[signals_width] 346
 [sst_expanded] 1
 [sst_vpaned_height] 293
 @28
@@ -130,6 +130,10 @@ TOP.system.core0.memAccess.cacheLookup.toReplay_request_address[31:0]
 TOP.system.core0.memAccess.cacheLookup.toReplay_request_instruction[31:0]
 TOP.system.core0.memAccess.cacheLookup.toReplay_request_branchMask[4:0]
 @28
+TOP.system.core0.memAccess.cacheLookup.toReplay_request_writeEn
+@22
+TOP.system.core0.memAccess.cacheLookup.toReplay_request_writeData[63:0]
+@28
 TOP.system.core0.memAccess.cacheLookup.toResponse_request_valid
 @22
 TOP.system.core0.memAccess.cacheLookup.toResponse_request_address[31:0]
@@ -145,21 +149,68 @@ TOP.system.core0.memAccess.aceUnit.readRequest_request_address[31:0]
 TOP.system.core0.memAccess.aceUnit.readRequest_request_instruction[31:0]
 TOP.system.core0.memAccess.aceUnit.readRequest_request_branchMask[4:0]
 @28
+TOP.system.core0.memAccess.aceUnit.readRequest_request_writeEn
+@22
+TOP.system.core0.memAccess.aceUnit.readRequest_request_writeData[63:0]
+@28
 TOP.system.core0.memAccess.aceUnit.readACERequestState
-@29
 TOP.system.core0.memAccess.aceUnit.bus_ARREADY
 @200
 -
 @28
+TOP.system.core0.memAccess.aceUnit.readACEResponseState[1:0]
 TOP.system.core0.memAccess.aceUnit.readResponse_ready
+TOP.system.core0.memAccess.aceUnit.readResponse_request_valid
+@22
+TOP.system.core0.memAccess.aceUnit.readResponse_request_address[31:0]
+TOP.system.core0.memAccess.aceUnit.readResponse_request_instruction[31:0]
+TOP.system.core0.memAccess.aceUnit.readResponse_request_cacheLine[511:0]
+@28
+TOP.system.core0.memAccess.aceUnit.readResponse_request_response[1:0]
+@200
+-
+@28
 TOP.system.core0.memAccess.responseOut_valid
 @22
 TOP.system.core0.memAccess.responseOut_instruction[31:0]
-TOP.system.core0.memAccess.aceUnit.readResponse_request_address[31:0]
-TOP.system.core0.memAccess.aceUnit.readResponse_request_instruction[31:0]
-@28
-TOP.system.core0.memAccess.aceUnit.readResponse_request_response[1:0]
-@22
 TOP.system.core0.memAccess.responseOut_result[63:0]
+@200
+-
+@28
+TOP.system.core0.memAccess.aceUnit.coherencyRequest_ready
+TOP.system.core0.memAccess.aceUnit.coherencyRequest_request_valid
+@22
+TOP.system.core0.memAccess.aceUnit.coherencyRequest_request_address[31:0]
+@28
+TOP.system.core0.memAccess.aceUnit.coherencyRequest_request_response[1:0]
+@200
+-
+@28
+TOP.system.core0.memAccess.arbiter.coherencyRequestBuffer_valid
+@22
+TOP.system.core0.memAccess.arbiter.coherencyRequestBuffer_address[31:0]
+@28
+TOP.system.core0.memAccess.arbiter.coherencyRequestBuffer_response[1:0]
+@200
+-
+@28
+TOP.system.core0.memAccess.arbiter.rAtmoicsWritePending
+TOP.system.core0.memAccess.arbiter.toCacheLookup_holdInOrder
+TOP.system.core0.memAccess.arbiter.toCacheLookup_ready
+TOP.system.core0.memAccess.arbiter.toCacheLookup_request_valid
+@22
+TOP.system.core0.memAccess.arbiter.toCacheLookup_request_address[31:0]
+@28
+TOP.system.core0.memAccess.arbiter.toCacheLookup_request_requestType[1:0]
+@200
+-
+@28
+TOP.system.core0.memAccess.aceUnit.coherencyResponse_ready
+TOP.system.core0.memAccess.aceUnit.coherencyResponse_request_valid
+TOP.system.core0.memAccess.aceUnit.coherencyResponse_request_dataValid
+@22
+TOP.system.core0.memAccess.aceUnit.coherencyResponse_request_data[511:0]
+@28
+TOP.system.core0.memAccess.aceUnit.coherencyResponse_request_response[1:0]
 [pattern_trace] 1
 [pattern_trace] 0

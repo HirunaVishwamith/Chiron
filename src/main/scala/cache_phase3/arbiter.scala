@@ -175,7 +175,7 @@ class arbiter extends Module {
   //*    3.  Inorder
   //*    4.  Speculative
   val rAtmoicsWritePending = RegInit(false.B)
-  when(toCacheLookup.ready) {
+  when(toCacheLookup.ready && !branchOps.valid) {
     when(rAtmoicsWritePending){
       when(!toCacheLookup.holdInOrder){
         toCacheLookup.request.valid := inorderBuffer.valid && inorderBuffer.branchInvalid
