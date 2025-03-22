@@ -97,16 +97,16 @@ class arbiter extends Module {
 
   val operationWires = Wire(new Bundle{
     val valid = Bool()
-    val isLoad = Bool()
-    val isStore = Bool()
+    val isRead = Bool()
+    val isWrite = Bool()
     val isLR = Bool()
     val isSC = Bool()
     val rAtomics = Bool()
   })
   operationWires := 0.U.asTypeOf(operationWires) 
   operationWires.valid := operationBuffer.valid
-  operationWires.isLoad := operationBuffer.instruction(6,0) === "b0000011".U
-  operationWires.isStore := operationBuffer.instruction(6,0) === "b0100011".U
+  operationWires.isRead := operationBuffer.instruction(6,0) === "b0000011".U
+  operationWires.isWrite := operationBuffer.instruction(6,0) === "b0100011".U
   operationWires.rAtomics := operationBuffer.instruction(6,0) === "b0101111".U
   operationWires.isLR := operationBuffer.instruction(31,27) === "b00010".U && operationWires.rAtomics
   operationWires.isSC := operationBuffer.instruction(31,27) === "b00011".U && operationWires.rAtomics
@@ -115,15 +115,15 @@ class arbiter extends Module {
     is(idleState){
       operationBuffer.writeEn:= false.B
       when(operationWires.valid){
-        when(operationWires.isLoad){
-          inorderBuffer <> operationBuffer
+        when(operationWires.isRead){
+          inorderBuffer := operationBuffer
           operationBuffer.valid := false.B
         }
-        when(operationWires.isStore){
+        when(operationWires.isWrite){
           operationState := commitReadyState
         }
         when(operationWires.isLR){
-          inorderBuffer <> operationBuffer
+          inorderBuffer := operationBuffer
           operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
                                 commitReadyState, idleState)
         }
@@ -139,11 +139,11 @@ class arbiter extends Module {
     }
     is(commitFiredState){
       when(writeDataIn.valid){
+        when(!operationWires.isLR){
+          inorderBuffer := operationBuffer
+        }
         inorderBuffer.writeData := writeDataIn.data
         inorderBuffer.writeEn := writeDataIn.valid
-        when(!operationWires.isLR){
-          inorderBuffer <> operationBuffer
-        }
         operationBuffer.valid := false.B
         operationState := idleState
       }

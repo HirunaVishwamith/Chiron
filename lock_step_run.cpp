@@ -15,6 +15,7 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <iomanip>
+#include <time.h>
 using namespace std;
 
 using namespace std::chrono;
@@ -62,6 +63,11 @@ void signal_callback_handler(int signum) {
 // emulator emu;
 
 int main(int argc, char* argv[]) {
+  struct tm current_time;
+  time_t now = time(NULL);
+    
+  localtime_r(&now, &current_time);
+    
   // Name of kernel image must be provided at run time
   /* if (argc == 1) {
     printf("Name of kerenl image must be provided at run time\n");
@@ -139,7 +145,13 @@ int main(int argc, char* argv[]) {
   bench.set_probe(PROBE_DOUBLE);
   bench.step_nodump();
   unsigned long sim_prev = 0x80100000UL;
-	printf("Simulation start time: %s %s\n", __DATE__, __TIME__);
+	printf("Runtime: %04d-%02d-%02d %02d:%02d:%02d\n",
+    current_time.tm_year + 1900,
+    current_time.tm_mon + 1,
+    current_time.tm_mday,
+    current_time.tm_hour,
+    current_time.tm_min,
+    current_time.tm_sec);
   while (1 || (bench.tickcount + bench.dump_tick) < 800351768UL) {
     // golden_model.show_state();
     //cin >> x;

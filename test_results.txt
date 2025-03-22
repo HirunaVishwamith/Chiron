@@ -1,3 +1,4 @@
 fyp18-riscv-emulator/riscv-tests/images/rv64mi-p-ld-misaligned.bin: test fail
 fyp18-riscv-emulator/riscv-tests/images/rv64mi-p-lh-misaligned.bin: test fail
 fyp18-riscv-emulator/riscv-tests/images/rv64mi-p-lw-misaligned.bin: test fail
+fyp18-riscv-emulator/riscv-tests/images/rv64mi-p-mcsr.bin: test pass

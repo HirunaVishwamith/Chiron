@@ -55,7 +55,6 @@ class Scheduler extends Module{
     inorderQueue.write.data.valid := false.B
     speculativeQueue.write.data.valid := false.B
   }
-
   inorderQueue.branchOps := branchOps
   speculativeQueue.branchOps := branchOps
 
@@ -78,11 +77,11 @@ class Scheduler extends Module{
         requestOut := inorderQueue.read.data
       }
       is("b11".U){
-        when(!speculativeQueue.read.data.branchMask(3,0).orR){
+        when(!speculativeQueue.read.data.branchMask(3,0).orR && !speculativeQueue.isEmpty){
           speculativeQueue.read.ready:= !speculativeQueue.isEmpty
           controlSignal.isSpeculative  := true.B
           requestOut := speculativeQueue.read.data
-        } .elsewhen(!inorderQueue.read.data.branchMask(3,0).orR){
+        } .elsewhen(!inorderQueue.read.data.branchMask(3,0).orR && !inorderQueue.isEmpty){
           inorderQueue.read.ready := !inorderQueue.isEmpty
           controlSignal.isSpeculative  := false.B
           requestOut := inorderQueue.read.data
@@ -97,7 +96,6 @@ class Scheduler extends Module{
       }
     }
   }
-
   // Output connections
   canAllocate := inorderQueue.write.ready && speculativeQueue.write.ready
   fenceReady := inorderQueue.isEmpty && speculativeQueue.isEmpty

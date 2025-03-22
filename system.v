@@ -33276,71 +33276,82 @@ module Scheduler(
   wire [31:0] _GEN_21 = speculativeEntryWire & inorderQueue_matchFound ? 32'h0 : _GEN_3; // @[scheduler.scala 47:58 utils.scala 48:41]
   wire [31:0] _GEN_22 = speculativeEntryWire & inorderQueue_matchFound ? 32'h0 : _GEN_4; // @[scheduler.scala 47:58 utils.scala 48:41]
   wire  _GEN_23 = speculativeEntryWire & inorderQueue_matchFound ? 1'h0 : _GEN_5; // @[scheduler.scala 47:58 utils.scala 47:41]
-  wire [1:0] _T_2 = {controlSignal_inorderReady,controlSignal_speculativeReady}; // @[scheduler.scala 68:39]
-  wire  _speculativeQueue_read_ready_T = ~speculativeQueue_isEmpty; // @[scheduler.scala 71:39]
-  wire  _inorderQueue_read_ready_T = ~inorderQueue_isEmpty; // @[scheduler.scala 76:36]
-  wire  _inorderQueue_read_ready_T_3 = ~(|inorderQueue_read_data_branchMask[3:0]); // @[scheduler.scala 76:61]
-  wire  _GEN_36 = _speculativeQueue_read_ready_T & _speculativeQueue_read_ready_T; // @[scheduler.scala 89:47 90:38 95:39]
-  wire [5:0] _GEN_38 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_prfDest : 6'h0; // @[scheduler.scala 89:47 92:22 utils.scala 48:41]
-  wire [3:0] _GEN_39 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_robAddr : 4'h0; // @[scheduler.scala 89:47 92:22 utils.scala 48:41]
-  wire [4:0] _GEN_40 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_branchMask : 5'h0; // @[scheduler.scala 89:47 92:22 utils.scala 48:41]
-  wire [31:0] _GEN_41 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_instruction : 32'h0; // @[scheduler.scala 89:47 92:22 utils.scala 48:41]
-  wire [31:0] _GEN_42 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_address : 32'h0; // @[scheduler.scala 89:47 92:22 utils.scala 48:41]
-  wire  _GEN_43 = _speculativeQueue_read_ready_T & speculativeQueue_read_data_valid; // @[scheduler.scala 89:47 92:22 utils.scala 47:41]
-  wire  _GEN_45 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T; // @[scheduler.scala 85:65 86:35]
-  wire  _GEN_46 = _inorderQueue_read_ready_T_3 ? 1'h0 : _speculativeQueue_read_ready_T; // @[scheduler.scala 85:65 87:40]
-  wire [5:0] _GEN_47 = _inorderQueue_read_ready_T_3 ? inorderQueue_read_data_prfDest : _GEN_38; // @[scheduler.scala 85:65 88:22]
-  wire [3:0] _GEN_48 = _inorderQueue_read_ready_T_3 ? inorderQueue_read_data_robAddr : _GEN_39; // @[scheduler.scala 85:65 88:22]
-  wire [4:0] _GEN_49 = _inorderQueue_read_ready_T_3 ? inorderQueue_read_data_branchMask : _GEN_40; // @[scheduler.scala 85:65 88:22]
-  wire [31:0] _GEN_50 = _inorderQueue_read_ready_T_3 ? inorderQueue_read_data_instruction : _GEN_41; // @[scheduler.scala 85:65 88:22]
-  wire [31:0] _GEN_51 = _inorderQueue_read_ready_T_3 ? inorderQueue_read_data_address : _GEN_42; // @[scheduler.scala 85:65 88:22]
-  wire  _GEN_52 = _inorderQueue_read_ready_T_3 ? inorderQueue_read_data_valid : _GEN_43; // @[scheduler.scala 85:65 88:22]
-  wire  _GEN_53 = _inorderQueue_read_ready_T_3 ? 1'h0 : _GEN_36; // @[scheduler.scala 40:31 85:65]
-  wire  _GEN_54 = ~(|speculativeQueue_read_data_branchMask[3:0]) ? _speculativeQueue_read_ready_T : _GEN_53; // @[scheduler.scala 81:62 82:38]
-  wire  _GEN_55 = ~(|speculativeQueue_read_data_branchMask[3:0]) | _GEN_46; // @[scheduler.scala 81:62 83:40]
-  wire [5:0] _GEN_56 = ~(|speculativeQueue_read_data_branchMask[3:0]) ? speculativeQueue_read_data_prfDest : _GEN_47; // @[scheduler.scala 81:62 84:22]
-  wire [3:0] _GEN_57 = ~(|speculativeQueue_read_data_branchMask[3:0]) ? speculativeQueue_read_data_robAddr : _GEN_48; // @[scheduler.scala 81:62 84:22]
-  wire [4:0] _GEN_58 = ~(|speculativeQueue_read_data_branchMask[3:0]) ? speculativeQueue_read_data_branchMask : _GEN_49; // @[scheduler.scala 81:62 84:22]
-  wire [31:0] _GEN_59 = ~(|speculativeQueue_read_data_branchMask[3:0]) ? speculativeQueue_read_data_instruction :
-    _GEN_50; // @[scheduler.scala 81:62 84:22]
-  wire [31:0] _GEN_60 = ~(|speculativeQueue_read_data_branchMask[3:0]) ? speculativeQueue_read_data_address : _GEN_51; // @[scheduler.scala 81:62 84:22]
-  wire  _GEN_61 = ~(|speculativeQueue_read_data_branchMask[3:0]) ? speculativeQueue_read_data_valid : _GEN_52; // @[scheduler.scala 81:62 84:22]
-  wire  _GEN_62 = ~(|speculativeQueue_read_data_branchMask[3:0]) ? 1'h0 : _GEN_45; // @[scheduler.scala 37:27 81:62]
-  wire  _GEN_64 = 2'h3 == _T_2 & _GEN_55; // @[scheduler.scala 24:31 68:73]
-  wire [5:0] _GEN_65 = 2'h3 == _T_2 ? _GEN_56 : 6'h0; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire [3:0] _GEN_66 = 2'h3 == _T_2 ? _GEN_57 : 4'h0; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire [4:0] _GEN_67 = 2'h3 == _T_2 ? _GEN_58 : 5'h0; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire [31:0] _GEN_68 = 2'h3 == _T_2 ? _GEN_59 : 32'h0; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire [31:0] _GEN_69 = 2'h3 == _T_2 ? _GEN_60 : 32'h0; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire  _GEN_70 = 2'h3 == _T_2 & _GEN_61; // @[scheduler.scala 68:73 utils.scala 47:41]
-  wire  _GEN_71 = 2'h3 == _T_2 & _GEN_62; // @[scheduler.scala 37:27 68:73]
-  wire  _GEN_72 = 2'h2 == _T_2 ? ~inorderQueue_isEmpty & ~(|inorderQueue_read_data_branchMask[3:0]) : _GEN_71; // @[scheduler.scala 68:73 76:33]
-  wire  _GEN_73 = 2'h2 == _T_2 ? 1'h0 : _GEN_64; // @[scheduler.scala 68:73 77:38]
-  wire [5:0] _GEN_74 = 2'h2 == _T_2 ? inorderQueue_read_data_prfDest : _GEN_65; // @[scheduler.scala 68:73 78:20]
-  wire [3:0] _GEN_75 = 2'h2 == _T_2 ? inorderQueue_read_data_robAddr : _GEN_66; // @[scheduler.scala 68:73 78:20]
-  wire [4:0] _GEN_76 = 2'h2 == _T_2 ? inorderQueue_read_data_branchMask : _GEN_67; // @[scheduler.scala 68:73 78:20]
-  wire [31:0] _GEN_77 = 2'h2 == _T_2 ? inorderQueue_read_data_instruction : _GEN_68; // @[scheduler.scala 68:73 78:20]
-  wire [31:0] _GEN_78 = 2'h2 == _T_2 ? inorderQueue_read_data_address : _GEN_69; // @[scheduler.scala 68:73 78:20]
-  wire  _GEN_79 = 2'h2 == _T_2 ? inorderQueue_read_data_valid : _GEN_70; // @[scheduler.scala 68:73 78:20]
-  wire  _GEN_80 = 2'h2 == _T_2 ? 1'h0 : 2'h3 == _T_2 & _GEN_54; // @[scheduler.scala 40:31 68:73]
-  wire  _GEN_81 = 2'h1 == _T_2 ? ~speculativeQueue_isEmpty : _GEN_80; // @[scheduler.scala 68:73 71:36]
-  wire  _GEN_82 = 2'h1 == _T_2 | _GEN_73; // @[scheduler.scala 68:73 72:37]
-  wire [5:0] _GEN_83 = 2'h1 == _T_2 ? speculativeQueue_read_data_prfDest : _GEN_74; // @[scheduler.scala 68:73 73:20]
-  wire [3:0] _GEN_84 = 2'h1 == _T_2 ? speculativeQueue_read_data_robAddr : _GEN_75; // @[scheduler.scala 68:73 73:20]
-  wire [4:0] _GEN_85 = 2'h1 == _T_2 ? speculativeQueue_read_data_branchMask : _GEN_76; // @[scheduler.scala 68:73 73:20]
-  wire [31:0] _GEN_86 = 2'h1 == _T_2 ? speculativeQueue_read_data_instruction : _GEN_77; // @[scheduler.scala 68:73 73:20]
-  wire [31:0] _GEN_87 = 2'h1 == _T_2 ? speculativeQueue_read_data_address : _GEN_78; // @[scheduler.scala 68:73 73:20]
-  wire  _GEN_88 = 2'h1 == _T_2 ? speculativeQueue_read_data_valid : _GEN_79; // @[scheduler.scala 68:73 73:20]
-  wire  _GEN_89 = 2'h1 == _T_2 ? 1'h0 : _GEN_72; // @[scheduler.scala 37:27 68:73]
-  wire  _GEN_90 = 2'h0 == _T_2 ? 1'h0 : _GEN_81; // @[scheduler.scala 40:31 68:73]
-  wire  _GEN_91 = 2'h0 == _T_2 ? 1'h0 : _GEN_82; // @[scheduler.scala 24:31 68:73]
-  wire [5:0] _GEN_92 = 2'h0 == _T_2 ? 6'h0 : _GEN_83; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire [3:0] _GEN_93 = 2'h0 == _T_2 ? 4'h0 : _GEN_84; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire [4:0] _GEN_94 = 2'h0 == _T_2 ? 5'h0 : _GEN_85; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire [31:0] _GEN_95 = 2'h0 == _T_2 ? 32'h0 : _GEN_86; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire [31:0] _GEN_96 = 2'h0 == _T_2 ? 32'h0 : _GEN_87; // @[scheduler.scala 68:73 utils.scala 48:41]
-  wire  _GEN_97 = 2'h0 == _T_2 ? 1'h0 : _GEN_88; // @[scheduler.scala 68:73 utils.scala 47:41]
-  wire  _GEN_98 = 2'h0 == _T_2 ? 1'h0 : _GEN_89; // @[scheduler.scala 37:27 68:73]
+  wire [1:0] _T_2 = {controlSignal_inorderReady,controlSignal_speculativeReady}; // @[scheduler.scala 67:39]
+  wire  _speculativeQueue_read_ready_T = ~speculativeQueue_isEmpty; // @[scheduler.scala 70:39]
+  wire  _inorderQueue_read_ready_T = ~inorderQueue_isEmpty; // @[scheduler.scala 75:36]
+  wire  _inorderQueue_read_ready_T_3 = ~(|inorderQueue_read_data_branchMask[3:0]); // @[scheduler.scala 75:61]
+  wire  _GEN_36 = _speculativeQueue_read_ready_T & _speculativeQueue_read_ready_T; // @[scheduler.scala 88:47 89:38 94:39]
+  wire [5:0] _GEN_38 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_prfDest : 6'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
+  wire [3:0] _GEN_39 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_robAddr : 4'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
+  wire [4:0] _GEN_40 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_branchMask : 5'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
+  wire [31:0] _GEN_41 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_instruction : 32'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
+  wire [31:0] _GEN_42 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_address : 32'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
+  wire  _GEN_43 = _speculativeQueue_read_ready_T & speculativeQueue_read_data_valid; // @[scheduler.scala 88:47 91:22 utils.scala 47:41]
+  wire  _GEN_45 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T & _inorderQueue_read_ready_T; // @[scheduler.scala 84:90 85:35]
+  wire  _GEN_46 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? 1'h0 : _speculativeQueue_read_ready_T; // @[scheduler.scala 84:90 86:40]
+  wire [5:0] _GEN_47 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_prfDest :
+    _GEN_38; // @[scheduler.scala 84:90 87:22]
+  wire [3:0] _GEN_48 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_robAddr :
+    _GEN_39; // @[scheduler.scala 84:90 87:22]
+  wire [4:0] _GEN_49 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_branchMask :
+    _GEN_40; // @[scheduler.scala 84:90 87:22]
+  wire [31:0] _GEN_50 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_instruction
+     : _GEN_41; // @[scheduler.scala 84:90 87:22]
+  wire [31:0] _GEN_51 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_address :
+    _GEN_42; // @[scheduler.scala 84:90 87:22]
+  wire  _GEN_52 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_valid : _GEN_43; // @[scheduler.scala 84:90 87:22]
+  wire  _GEN_53 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? 1'h0 : _GEN_36; // @[scheduler.scala 40:31 84:90]
+  wire  _GEN_54 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
+    _speculativeQueue_read_ready_T : _GEN_53; // @[scheduler.scala 80:91 81:38]
+  wire  _GEN_55 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | _GEN_46; // @[scheduler.scala 80:91 82:40]
+  wire [5:0] _GEN_56 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
+    speculativeQueue_read_data_prfDest : _GEN_47; // @[scheduler.scala 80:91 83:22]
+  wire [3:0] _GEN_57 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
+    speculativeQueue_read_data_robAddr : _GEN_48; // @[scheduler.scala 80:91 83:22]
+  wire [4:0] _GEN_58 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
+    speculativeQueue_read_data_branchMask : _GEN_49; // @[scheduler.scala 80:91 83:22]
+  wire [31:0] _GEN_59 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
+    speculativeQueue_read_data_instruction : _GEN_50; // @[scheduler.scala 80:91 83:22]
+  wire [31:0] _GEN_60 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
+    speculativeQueue_read_data_address : _GEN_51; // @[scheduler.scala 80:91 83:22]
+  wire  _GEN_61 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
+    speculativeQueue_read_data_valid : _GEN_52; // @[scheduler.scala 80:91 83:22]
+  wire  _GEN_62 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ? 1'h0 : _GEN_45; // @[scheduler.scala 37:27 80:91]
+  wire  _GEN_64 = 2'h3 == _T_2 & _GEN_55; // @[scheduler.scala 24:31 67:73]
+  wire [5:0] _GEN_65 = 2'h3 == _T_2 ? _GEN_56 : 6'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire [3:0] _GEN_66 = 2'h3 == _T_2 ? _GEN_57 : 4'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire [4:0] _GEN_67 = 2'h3 == _T_2 ? _GEN_58 : 5'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire [31:0] _GEN_68 = 2'h3 == _T_2 ? _GEN_59 : 32'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire [31:0] _GEN_69 = 2'h3 == _T_2 ? _GEN_60 : 32'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire  _GEN_70 = 2'h3 == _T_2 & _GEN_61; // @[scheduler.scala 67:73 utils.scala 47:41]
+  wire  _GEN_71 = 2'h3 == _T_2 & _GEN_62; // @[scheduler.scala 37:27 67:73]
+  wire  _GEN_72 = 2'h2 == _T_2 ? ~inorderQueue_isEmpty & ~(|inorderQueue_read_data_branchMask[3:0]) : _GEN_71; // @[scheduler.scala 67:73 75:33]
+  wire  _GEN_73 = 2'h2 == _T_2 ? 1'h0 : _GEN_64; // @[scheduler.scala 67:73 76:38]
+  wire [5:0] _GEN_74 = 2'h2 == _T_2 ? inorderQueue_read_data_prfDest : _GEN_65; // @[scheduler.scala 67:73 77:20]
+  wire [3:0] _GEN_75 = 2'h2 == _T_2 ? inorderQueue_read_data_robAddr : _GEN_66; // @[scheduler.scala 67:73 77:20]
+  wire [4:0] _GEN_76 = 2'h2 == _T_2 ? inorderQueue_read_data_branchMask : _GEN_67; // @[scheduler.scala 67:73 77:20]
+  wire [31:0] _GEN_77 = 2'h2 == _T_2 ? inorderQueue_read_data_instruction : _GEN_68; // @[scheduler.scala 67:73 77:20]
+  wire [31:0] _GEN_78 = 2'h2 == _T_2 ? inorderQueue_read_data_address : _GEN_69; // @[scheduler.scala 67:73 77:20]
+  wire  _GEN_79 = 2'h2 == _T_2 ? inorderQueue_read_data_valid : _GEN_70; // @[scheduler.scala 67:73 77:20]
+  wire  _GEN_80 = 2'h2 == _T_2 ? 1'h0 : 2'h3 == _T_2 & _GEN_54; // @[scheduler.scala 40:31 67:73]
+  wire  _GEN_81 = 2'h1 == _T_2 ? ~speculativeQueue_isEmpty : _GEN_80; // @[scheduler.scala 67:73 70:36]
+  wire  _GEN_82 = 2'h1 == _T_2 | _GEN_73; // @[scheduler.scala 67:73 71:37]
+  wire [5:0] _GEN_83 = 2'h1 == _T_2 ? speculativeQueue_read_data_prfDest : _GEN_74; // @[scheduler.scala 67:73 72:20]
+  wire [3:0] _GEN_84 = 2'h1 == _T_2 ? speculativeQueue_read_data_robAddr : _GEN_75; // @[scheduler.scala 67:73 72:20]
+  wire [4:0] _GEN_85 = 2'h1 == _T_2 ? speculativeQueue_read_data_branchMask : _GEN_76; // @[scheduler.scala 67:73 72:20]
+  wire [31:0] _GEN_86 = 2'h1 == _T_2 ? speculativeQueue_read_data_instruction : _GEN_77; // @[scheduler.scala 67:73 72:20]
+  wire [31:0] _GEN_87 = 2'h1 == _T_2 ? speculativeQueue_read_data_address : _GEN_78; // @[scheduler.scala 67:73 72:20]
+  wire  _GEN_88 = 2'h1 == _T_2 ? speculativeQueue_read_data_valid : _GEN_79; // @[scheduler.scala 67:73 72:20]
+  wire  _GEN_89 = 2'h1 == _T_2 ? 1'h0 : _GEN_72; // @[scheduler.scala 37:27 67:73]
+  wire  _GEN_90 = 2'h0 == _T_2 ? 1'h0 : _GEN_81; // @[scheduler.scala 40:31 67:73]
+  wire  _GEN_91 = 2'h0 == _T_2 ? 1'h0 : _GEN_82; // @[scheduler.scala 24:31 67:73]
+  wire [5:0] _GEN_92 = 2'h0 == _T_2 ? 6'h0 : _GEN_83; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire [3:0] _GEN_93 = 2'h0 == _T_2 ? 4'h0 : _GEN_84; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire [4:0] _GEN_94 = 2'h0 == _T_2 ? 5'h0 : _GEN_85; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire [31:0] _GEN_95 = 2'h0 == _T_2 ? 32'h0 : _GEN_86; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire [31:0] _GEN_96 = 2'h0 == _T_2 ? 32'h0 : _GEN_87; // @[scheduler.scala 67:73 utils.scala 48:41]
+  wire  _GEN_97 = 2'h0 == _T_2 ? 1'h0 : _GEN_88; // @[scheduler.scala 67:73 utils.scala 47:41]
+  wire  _GEN_98 = 2'h0 == _T_2 ? 1'h0 : _GEN_89; // @[scheduler.scala 37:27 67:73]
   fifoWithAddrCheck inorderQueue ( // @[scheduler.scala 27:28]
     .clock(inorderQueue_clock),
     .reset(inorderQueue_reset),
@@ -33387,15 +33398,15 @@ module Scheduler(
     .branchOps_branchMask(speculativeQueue_branchOps_branchMask),
     .branchOps_passed(speculativeQueue_branchOps_passed)
   );
-  assign canAllocate = inorderQueue_write_ready & speculativeQueue_write_ready; // @[scheduler.scala 102:43]
-  assign requestOut_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_97; // @[scheduler.scala 67:69 utils.scala 47:41]
-  assign requestOut_address = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_96 : 32'h0; // @[scheduler.scala 67:69 utils.scala 48:41]
-  assign requestOut_instruction = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_95 : 32'h0; // @[scheduler.scala 67:69 utils.scala 48:41]
-  assign requestOut_branchMask = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_94 : 5'h0; // @[scheduler.scala 67:69 utils.scala 48:41]
-  assign requestOut_robAddr = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_93 : 4'h0; // @[scheduler.scala 67:69 utils.scala 48:41]
-  assign requestOut_prfDest = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_92 : 6'h0; // @[scheduler.scala 67:69 utils.scala 48:41]
-  assign controlSignal_isSpeculative = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_91; // @[scheduler.scala 24:31 67:69]
-  assign fenceReady = inorderQueue_isEmpty & speculativeQueue_isEmpty; // @[scheduler.scala 103:38]
+  assign canAllocate = inorderQueue_write_ready & speculativeQueue_write_ready; // @[scheduler.scala 100:43]
+  assign requestOut_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_97; // @[scheduler.scala 66:69 utils.scala 47:41]
+  assign requestOut_address = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_96 : 32'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
+  assign requestOut_instruction = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_95 : 32'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
+  assign requestOut_branchMask = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_94 : 5'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
+  assign requestOut_robAddr = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_93 : 4'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
+  assign requestOut_prfDest = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_92 : 6'h0; // @[scheduler.scala 66:69 utils.scala 48:41]
+  assign controlSignal_isSpeculative = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_91; // @[scheduler.scala 24:31 66:69]
+  assign fenceReady = inorderQueue_isEmpty & speculativeQueue_isEmpty; // @[scheduler.scala 101:38]
   assign inorderQueue_clock = clock;
   assign inorderQueue_reset = reset;
   assign inorderQueue_write_data_valid = requestIn_valid & _GEN_17; // @[scheduler.scala 46:24 55:35]
@@ -33404,10 +33415,10 @@ module Scheduler(
   assign inorderQueue_write_data_branchMask = requestIn_valid ? _GEN_14 : 5'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
   assign inorderQueue_write_data_robAddr = requestIn_valid ? _GEN_13 : 4'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
   assign inorderQueue_write_data_prfDest = requestIn_valid ? _GEN_12 : 6'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
-  assign inorderQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_98; // @[scheduler.scala 37:27 67:69]
-  assign inorderQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 59:26]
-  assign inorderQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 59:26]
-  assign inorderQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 59:26]
+  assign inorderQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_98; // @[scheduler.scala 37:27 66:69]
+  assign inorderQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 58:26]
+  assign inorderQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 58:26]
+  assign inorderQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 58:26]
   assign inorderQueue_checkAddress = requestIn_address; // @[scheduler.scala 36:29]
   assign speculativeQueue_clock = clock;
   assign speculativeQueue_reset = reset;
@@ -33417,10 +33428,10 @@ module Scheduler(
   assign speculativeQueue_write_data_branchMask = requestIn_valid ? _GEN_20 : 5'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
   assign speculativeQueue_write_data_robAddr = requestIn_valid ? _GEN_19 : 4'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
   assign speculativeQueue_write_data_prfDest = requestIn_valid ? _GEN_18 : 6'h0; // @[scheduler.scala 46:24 utils.scala 48:41]
-  assign speculativeQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_90; // @[scheduler.scala 40:31 67:69]
-  assign speculativeQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 60:30]
-  assign speculativeQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 60:30]
-  assign speculativeQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 60:30]
+  assign speculativeQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_90; // @[scheduler.scala 40:31 66:69]
+  assign speculativeQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 59:30]
+  assign speculativeQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 59:30]
+  assign speculativeQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 59:30]
 endmodule
 module arbiter(
   input          clock,
@@ -33463,8 +33474,11 @@ module arbiter(
   input  [4:0]   replayRequest_request_branchMask,
   input  [3:0]   replayRequest_request_robAddr,
   input  [5:0]   replayRequest_request_prfDest,
+  input          replayRequest_request_writeEn,
+  input  [63:0]  replayRequest_request_writeData,
   input  [511:0] replayRequest_request_cacheLine,
   input  [1:0]   replayRequest_request_response,
+  output         coherencyRequest_ready,
   input          coherencyRequest_request_valid,
   input  [31:0]  coherencyRequest_request_address,
   input  [1:0]   coherencyRequest_request_response,
@@ -33509,10 +33523,12 @@ module arbiter(
   reg [31:0] _RAND_26;
   reg [31:0] _RAND_27;
   reg [31:0] _RAND_28;
-  reg [511:0] _RAND_29;
-  reg [31:0] _RAND_30;
-  reg [31:0] _RAND_31;
+  reg [31:0] _RAND_29;
+  reg [63:0] _RAND_30;
+  reg [511:0] _RAND_31;
   reg [31:0] _RAND_32;
+  reg [31:0] _RAND_33;
+  reg [31:0] _RAND_34;
 `endif // RANDOMIZE_REG_INIT
   reg  speculativeBuffer_valid; // @[arbiter.scala 56:34]
   reg [31:0] speculativeBuffer_address; // @[arbiter.scala 56:34]
@@ -33543,6 +33559,8 @@ module arbiter(
   reg [4:0] replayRequestBuffer_branchMask; // @[arbiter.scala 64:36]
   reg [3:0] replayRequestBuffer_robAddr; // @[arbiter.scala 64:36]
   reg [5:0] replayRequestBuffer_prfDest; // @[arbiter.scala 64:36]
+  reg  replayRequestBuffer_writeEn; // @[arbiter.scala 64:36]
+  reg [63:0] replayRequestBuffer_writeData; // @[arbiter.scala 64:36]
   reg [511:0] replayRequestBuffer_cacheLine; // @[arbiter.scala 64:36]
   reg [1:0] replayRequestBuffer_response; // @[arbiter.scala 64:36]
   wire  _request_speculativeReady_T = ~speculativeBuffer_valid; // @[arbiter.scala 66:31]
@@ -33563,20 +33581,20 @@ module arbiter(
   wire [4:0] _GEN_36 = ~replayRequestBuffer_valid & replayRequest_request_valid ? replayRequest_request_branchMask :
     replayRequestBuffer_branchMask; // @[arbiter.scala 89:66 90:25 64:36]
   reg [2:0] operationState; // @[arbiter.scala 96:31]
-  wire  operationWires_isLoad = operationBuffer_instruction[6:0] == 7'h3; // @[arbiter.scala 108:61]
-  wire  operationWires_isStore = operationBuffer_instruction[6:0] == 7'h23; // @[arbiter.scala 109:62]
+  wire  operationWires_isRead = operationBuffer_instruction[6:0] == 7'h3; // @[arbiter.scala 108:61]
+  wire  operationWires_isWrite = operationBuffer_instruction[6:0] == 7'h23; // @[arbiter.scala 109:62]
   wire  operationWires_rAtomics = operationBuffer_instruction[6:0] == 7'h2f; // @[arbiter.scala 110:63]
   wire  operationWires_isLR = operationBuffer_instruction[31:27] == 5'h2 & operationWires_rAtomics; // @[arbiter.scala 111:76]
   wire  operationWires_isSC = operationBuffer_instruction[31:27] == 5'h3 & operationWires_rAtomics; // @[arbiter.scala 112:76]
-  wire  _GEN_43 = operationWires_isLoad ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [31:0] _GEN_44 = operationWires_isLoad ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [31:0] _GEN_45 = operationWires_isLoad ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [4:0] _GEN_46 = operationWires_isLoad ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [3:0] _GEN_47 = operationWires_isLoad ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [5:0] _GEN_48 = operationWires_isLoad ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 118:36 119:25 58:30]
-  wire  _GEN_49 = operationWires_isLoad ? 1'h0 : inorderBuffer_writeEn; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [63:0] _GEN_50 = operationWires_isLoad ? 64'h0 : inorderBuffer_writeData; // @[arbiter.scala 118:36 119:25 58:30]
-  wire [2:0] _GEN_53 = operationWires_isStore ? 3'h1 : operationState; // @[arbiter.scala 122:37 123:26 96:31]
+  wire  _GEN_43 = operationWires_isRead ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 118:36 119:25 58:30]
+  wire [31:0] _GEN_44 = operationWires_isRead ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 118:36 119:25 58:30]
+  wire [31:0] _GEN_45 = operationWires_isRead ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 118:36 119:25 58:30]
+  wire [4:0] _GEN_46 = operationWires_isRead ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 118:36 119:25 58:30]
+  wire [3:0] _GEN_47 = operationWires_isRead ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 118:36 119:25 58:30]
+  wire [5:0] _GEN_48 = operationWires_isRead ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 118:36 119:25 58:30]
+  wire  _GEN_49 = operationWires_isRead ? 1'h0 : inorderBuffer_writeEn; // @[arbiter.scala 118:36 119:25 58:30]
+  wire [63:0] _GEN_50 = operationWires_isRead ? 64'h0 : inorderBuffer_writeData; // @[arbiter.scala 118:36 119:25 58:30]
+  wire [2:0] _GEN_53 = operationWires_isWrite ? 3'h1 : operationState; // @[arbiter.scala 122:37 123:26 96:31]
   wire [2:0] _operationState_T_2 = responseOut_valid & responseOut_instruction == operationBuffer_instruction ? 3'h1 : 3'h0
     ; // @[arbiter.scala 127:32]
   wire  _GEN_54 = operationWires_isLR ? operationBuffer_valid : _GEN_43; // @[arbiter.scala 125:34 126:25]
@@ -33584,22 +33602,20 @@ module arbiter(
   wire [2:0] _GEN_63 = operationWires_isLR ? _operationState_T_2 : _GEN_53; // @[arbiter.scala 125:34 127:26]
   wire  _GEN_65 = operationBuffer_valid ? _GEN_54 : inorderBuffer_valid; // @[arbiter.scala 117:33 58:30]
   wire [4:0] _GEN_68 = operationBuffer_valid ? _GEN_57 : inorderBuffer_branchMask; // @[arbiter.scala 117:33 58:30]
-  wire  _GEN_76 = ~operationWires_isLR ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 144:35 145:25 58:30]
-  wire [31:0] _GEN_77 = ~operationWires_isLR ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 144:35 145:25 58:30]
-  wire [31:0] _GEN_78 = ~operationWires_isLR ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 144:35 145:25 58:30]
-  wire [4:0] _GEN_79 = ~operationWires_isLR ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 144:35 145:25 58:30]
-  wire [3:0] _GEN_80 = ~operationWires_isLR ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 144:35 145:25 58:30]
-  wire [5:0] _GEN_81 = ~operationWires_isLR ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 144:35 145:25 58:30]
-  wire  _GEN_82 = ~operationWires_isLR ? 1'h0 : writeDataIn_valid; // @[arbiter.scala 144:35 145:25 143:31]
-  wire [63:0] _GEN_83 = ~operationWires_isLR ? 64'h0 : writeDataIn_data; // @[arbiter.scala 144:35 145:25 142:33]
-  wire [63:0] _GEN_85 = writeDataIn_valid ? _GEN_83 : inorderBuffer_writeData; // @[arbiter.scala 141:30 58:30]
-  wire  _GEN_86 = writeDataIn_valid ? _GEN_82 : inorderBuffer_writeEn; // @[arbiter.scala 141:30 58:30]
-  wire  _GEN_87 = writeDataIn_valid ? _GEN_76 : inorderBuffer_valid; // @[arbiter.scala 141:30 58:30]
-  wire [31:0] _GEN_88 = writeDataIn_valid ? _GEN_77 : inorderBuffer_address; // @[arbiter.scala 141:30 58:30]
-  wire [31:0] _GEN_89 = writeDataIn_valid ? _GEN_78 : inorderBuffer_instruction; // @[arbiter.scala 141:30 58:30]
-  wire [4:0] _GEN_90 = writeDataIn_valid ? _GEN_79 : inorderBuffer_branchMask; // @[arbiter.scala 141:30 58:30]
-  wire [3:0] _GEN_91 = writeDataIn_valid ? _GEN_80 : inorderBuffer_robAddr; // @[arbiter.scala 141:30 58:30]
-  wire [5:0] _GEN_92 = writeDataIn_valid ? _GEN_81 : inorderBuffer_prfDest; // @[arbiter.scala 141:30 58:30]
+  wire  _GEN_76 = ~operationWires_isLR ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [31:0] _GEN_77 = ~operationWires_isLR ? operationBuffer_address : inorderBuffer_address; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [31:0] _GEN_78 = ~operationWires_isLR ? operationBuffer_instruction : inorderBuffer_instruction; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [4:0] _GEN_79 = ~operationWires_isLR ? operationBuffer_branchMask : inorderBuffer_branchMask; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [3:0] _GEN_80 = ~operationWires_isLR ? operationBuffer_robAddr : inorderBuffer_robAddr; // @[arbiter.scala 142:35 143:25 58:30]
+  wire [5:0] _GEN_81 = ~operationWires_isLR ? operationBuffer_prfDest : inorderBuffer_prfDest; // @[arbiter.scala 142:35 143:25 58:30]
+  wire  _GEN_85 = writeDataIn_valid ? _GEN_76 : inorderBuffer_valid; // @[arbiter.scala 141:30 58:30]
+  wire [31:0] _GEN_86 = writeDataIn_valid ? _GEN_77 : inorderBuffer_address; // @[arbiter.scala 141:30 58:30]
+  wire [31:0] _GEN_87 = writeDataIn_valid ? _GEN_78 : inorderBuffer_instruction; // @[arbiter.scala 141:30 58:30]
+  wire [4:0] _GEN_88 = writeDataIn_valid ? _GEN_79 : inorderBuffer_branchMask; // @[arbiter.scala 141:30 58:30]
+  wire [3:0] _GEN_89 = writeDataIn_valid ? _GEN_80 : inorderBuffer_robAddr; // @[arbiter.scala 141:30 58:30]
+  wire [5:0] _GEN_90 = writeDataIn_valid ? _GEN_81 : inorderBuffer_prfDest; // @[arbiter.scala 141:30 58:30]
+  wire  _GEN_91 = writeDataIn_valid ? writeDataIn_valid : inorderBuffer_writeEn; // @[arbiter.scala 141:30 146:31 58:30]
+  wire [63:0] _GEN_92 = writeDataIn_valid ? writeDataIn_data : inorderBuffer_writeData; // @[arbiter.scala 141:30 145:33 58:30]
   wire  _GEN_94 = writeDataIn_valid ? 1'h0 : _GEN_21; // @[arbiter.scala 141:30 147:31]
   wire [2:0] _GEN_95 = writeDataIn_valid ? 3'h0 : operationState; // @[arbiter.scala 141:30 148:24 96:31]
   wire  _GEN_96 = 3'h3 == operationState ? operationBuffer_valid : inorderBuffer_valid; // @[arbiter.scala 114:25 158:21 58:30]
@@ -33620,12 +33636,12 @@ module arbiter(
   wire  _GEN_112 = 3'h4 == operationState ? 1'h0 : _GEN_102; // @[arbiter.scala 114:25 153:29]
   wire [63:0] _GEN_113 = 3'h4 == operationState ? 64'h0 : _GEN_103; // @[arbiter.scala 114:25 152:21]
   wire [2:0] _GEN_115 = 3'h4 == operationState ? _operationState_T_2 : _GEN_105; // @[arbiter.scala 114:25 154:22]
-  wire  _GEN_118 = 3'h2 == operationState ? _GEN_87 : _GEN_106; // @[arbiter.scala 114:25]
-  wire [4:0] _GEN_121 = 3'h2 == operationState ? _GEN_90 : _GEN_109; // @[arbiter.scala 114:25]
-  wire  _GEN_131 = 3'h1 == operationState ? inorderBuffer_valid : _GEN_118; // @[arbiter.scala 114:25 58:30]
-  wire [4:0] _GEN_134 = 3'h1 == operationState ? inorderBuffer_branchMask : _GEN_121; // @[arbiter.scala 114:25 58:30]
-  wire  _GEN_140 = 3'h0 == operationState ? _GEN_65 : _GEN_131; // @[arbiter.scala 114:25]
-  wire [4:0] _GEN_143 = 3'h0 == operationState ? _GEN_68 : _GEN_134; // @[arbiter.scala 114:25]
+  wire  _GEN_116 = 3'h2 == operationState ? _GEN_85 : _GEN_106; // @[arbiter.scala 114:25]
+  wire [4:0] _GEN_119 = 3'h2 == operationState ? _GEN_88 : _GEN_109; // @[arbiter.scala 114:25]
+  wire  _GEN_129 = 3'h1 == operationState ? inorderBuffer_valid : _GEN_116; // @[arbiter.scala 114:25 58:30]
+  wire [4:0] _GEN_132 = 3'h1 == operationState ? inorderBuffer_branchMask : _GEN_119; // @[arbiter.scala 114:25 58:30]
+  wire  _GEN_140 = 3'h0 == operationState ? _GEN_65 : _GEN_129; // @[arbiter.scala 114:25]
+  wire [4:0] _GEN_143 = 3'h0 == operationState ? _GEN_68 : _GEN_132; // @[arbiter.scala 114:25]
   wire [4:0] _T_11 = speculativeBuffer_branchMask & branchOps_branchMask; // @[utils.scala 110:33]
   wire  _T_12 = |_T_11; // @[utils.scala 110:57]
   wire [4:0] _speculativeBuffer_branchMask_T = speculativeBuffer_branchMask ^ branchOps_branchMask; // @[utils.scala 111:50]
@@ -33705,8 +33721,8 @@ module arbiter(
   wire [5:0] _GEN_239 = replayRequestBuffer_valid ? replayRequestBuffer_prfDest : _GEN_228; // @[arbiter.scala 210:43 217:37]
   wire [511:0] _GEN_240 = replayRequestBuffer_valid ? replayRequestBuffer_cacheLine : 512'h0; // @[arbiter.scala 210:43 218:39 utils.scala 48:41]
   wire [1:0] _GEN_241 = replayRequestBuffer_valid ? replayRequestBuffer_response : 2'h0; // @[arbiter.scala 210:43 219:38 utils.scala 48:41]
-  wire  _GEN_242 = replayRequestBuffer_valid ? 1'h0 : _GEN_229; // @[arbiter.scala 210:43 220:37]
-  wire [63:0] _GEN_243 = replayRequestBuffer_valid ? 64'h0 : _GEN_230; // @[arbiter.scala 210:43 221:39]
+  wire  _GEN_242 = replayRequestBuffer_valid ? replayRequestBuffer_writeEn : _GEN_229; // @[arbiter.scala 210:43 220:37]
+  wire [63:0] _GEN_243 = replayRequestBuffer_valid ? replayRequestBuffer_writeData : _GEN_230; // @[arbiter.scala 210:43 221:39]
   wire [1:0] _GEN_244 = replayRequestBuffer_valid ? 2'h2 : {{1'd0}, _GEN_231}; // @[arbiter.scala 210:43 222:41]
   wire [4:0] _GEN_245 = replayRequestBuffer_valid ? _GEN_198 : _GEN_226; // @[arbiter.scala 210:43]
   wire  _GEN_246 = replayRequestBuffer_valid ? _GEN_140 : _GEN_222; // @[arbiter.scala 210:43]
@@ -33761,6 +33777,7 @@ module arbiter(
   assign toCacheLookup_request_response = toCacheLookup_ready ? _GEN_276 : 2'h0; // @[arbiter.scala 178:29 utils.scala 48:41]
   assign toCacheLookup_request_requestType = toCacheLookup_ready ? _GEN_273 : 2'h0; // @[arbiter.scala 178:29 utils.scala 48:41]
   assign replayRequest_ready = ~replayRequestBuffer_valid; // @[arbiter.scala 92:26]
+  assign coherencyRequest_ready = ~coherencyRequestBuffer_valid; // @[arbiter.scala 88:29]
   assign writeCommit_ready = 3'h0 == operationState ? 1'h0 : 3'h1 == operationState; // @[arbiter.scala 114:25 53:21]
   assign fenceReady = _fenceReady_T_4 & _T_2; // @[arbiter.scala 274:19]
   always @(posedge clock) begin
@@ -33845,7 +33862,7 @@ module arbiter(
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_address <= _GEN_88;
+        inorderBuffer_address <= _GEN_86;
       end else begin
         inorderBuffer_address <= _GEN_107;
       end
@@ -33862,7 +33879,7 @@ module arbiter(
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_instruction <= _GEN_89;
+        inorderBuffer_instruction <= _GEN_87;
       end else begin
         inorderBuffer_instruction <= _GEN_108;
       end
@@ -33894,7 +33911,7 @@ module arbiter(
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_robAddr <= _GEN_91;
+        inorderBuffer_robAddr <= _GEN_89;
       end else begin
         inorderBuffer_robAddr <= _GEN_110;
       end
@@ -33911,7 +33928,7 @@ module arbiter(
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_prfDest <= _GEN_92;
+        inorderBuffer_prfDest <= _GEN_90;
       end else begin
         inorderBuffer_prfDest <= _GEN_111;
       end
@@ -33928,7 +33945,7 @@ module arbiter(
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_writeEn <= _GEN_86;
+        inorderBuffer_writeEn <= _GEN_91;
       end else begin
         inorderBuffer_writeEn <= _GEN_112;
       end
@@ -33945,7 +33962,7 @@ module arbiter(
       end
     end else if (!(3'h1 == operationState)) begin // @[arbiter.scala 114:25]
       if (3'h2 == operationState) begin // @[arbiter.scala 114:25]
-        inorderBuffer_writeData <= _GEN_85;
+        inorderBuffer_writeData <= _GEN_92;
       end else begin
         inorderBuffer_writeData <= _GEN_113;
       end
@@ -33954,7 +33971,7 @@ module arbiter(
       operationBuffer_valid <= 1'h0; // @[arbiter.scala 60:32]
     end else if (3'h0 == operationState) begin // @[arbiter.scala 114:25]
       if (operationBuffer_valid) begin // @[arbiter.scala 117:33]
-        if (operationWires_isLoad) begin // @[arbiter.scala 118:36]
+        if (operationWires_isRead) begin // @[arbiter.scala 118:36]
           operationBuffer_valid <= 1'h0; // @[arbiter.scala 120:33]
         end else begin
           operationBuffer_valid <= _GEN_21;
@@ -34082,6 +34099,16 @@ module arbiter(
       replayRequestBuffer_prfDest <= 6'h0; // @[arbiter.scala 64:36]
     end else if (~replayRequestBuffer_valid & replayRequest_request_valid) begin // @[arbiter.scala 89:66]
       replayRequestBuffer_prfDest <= replayRequest_request_prfDest; // @[arbiter.scala 90:25]
+    end
+    if (reset) begin // @[arbiter.scala 64:36]
+      replayRequestBuffer_writeEn <= 1'h0; // @[arbiter.scala 64:36]
+    end else if (~replayRequestBuffer_valid & replayRequest_request_valid) begin // @[arbiter.scala 89:66]
+      replayRequestBuffer_writeEn <= replayRequest_request_writeEn; // @[arbiter.scala 90:25]
+    end
+    if (reset) begin // @[arbiter.scala 64:36]
+      replayRequestBuffer_writeData <= 64'h0; // @[arbiter.scala 64:36]
+    end else if (~replayRequestBuffer_valid & replayRequest_request_valid) begin // @[arbiter.scala 89:66]
+      replayRequestBuffer_writeData <= replayRequest_request_writeData; // @[arbiter.scala 90:25]
     end
     if (reset) begin // @[arbiter.scala 64:36]
       replayRequestBuffer_cacheLine <= 512'h0; // @[arbiter.scala 64:36]
@@ -34220,14 +34247,18 @@ initial begin
   replayRequestBuffer_robAddr = _RAND_27[3:0];
   _RAND_28 = {1{`RANDOM}};
   replayRequestBuffer_prfDest = _RAND_28[5:0];
-  _RAND_29 = {16{`RANDOM}};
-  replayRequestBuffer_cacheLine = _RAND_29[511:0];
-  _RAND_30 = {1{`RANDOM}};
-  replayRequestBuffer_response = _RAND_30[1:0];
-  _RAND_31 = {1{`RANDOM}};
-  operationState = _RAND_31[2:0];
+  _RAND_29 = {1{`RANDOM}};
+  replayRequestBuffer_writeEn = _RAND_29[0:0];
+  _RAND_30 = {2{`RANDOM}};
+  replayRequestBuffer_writeData = _RAND_30[63:0];
+  _RAND_31 = {16{`RANDOM}};
+  replayRequestBuffer_cacheLine = _RAND_31[511:0];
   _RAND_32 = {1{`RANDOM}};
-  rAtmoicsWritePending = _RAND_32[0:0];
+  replayRequestBuffer_response = _RAND_32[1:0];
+  _RAND_33 = {1{`RANDOM}};
+  operationState = _RAND_33[2:0];
+  _RAND_34 = {1{`RANDOM}};
+  rAtmoicsWritePending = _RAND_34[0:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -34469,6 +34500,8 @@ module cacheLookupUnit(
   output [4:0]   toReplay_request_branchMask,
   output [3:0]   toReplay_request_robAddr,
   output [5:0]   toReplay_request_prfDest,
+  output         toReplay_request_writeEn,
+  output [63:0]  toReplay_request_writeData,
   input          toWriteBack_ready,
   output         toWriteBack_request_valid,
   output [31:0]  toWriteBack_request_address,
@@ -34476,6 +34509,7 @@ module cacheLookupUnit(
   input          toCoherency_ready,
   output         toCoherency_request_valid,
   output [511:0] toCoherency_request_data,
+  output         toCoherency_request_dataValid,
   output [1:0]   toCoherency_request_response,
   output         toResponse_request_valid,
   output [31:0]  toResponse_request_address,
@@ -34515,18 +34549,21 @@ module cacheLookupUnit(
   reg [31:0] _RAND_23;
   reg [31:0] _RAND_24;
   reg [31:0] _RAND_25;
-  reg [31:0] _RAND_26;
+  reg [63:0] _RAND_26;
   reg [31:0] _RAND_27;
   reg [31:0] _RAND_28;
   reg [31:0] _RAND_29;
   reg [31:0] _RAND_30;
-  reg [63:0] _RAND_31;
+  reg [31:0] _RAND_31;
   reg [31:0] _RAND_32;
-  reg [511:0] _RAND_33;
+  reg [63:0] _RAND_33;
   reg [31:0] _RAND_34;
-  reg [31:0] _RAND_35;
+  reg [511:0] _RAND_35;
   reg [31:0] _RAND_36;
-  reg [511:0] _RAND_37;
+  reg [31:0] _RAND_37;
+  reg [31:0] _RAND_38;
+  reg [31:0] _RAND_39;
+  reg [511:0] _RAND_40;
 `endif // RANDOMIZE_REG_INIT
   wire  dataBRAM_0_clock; // @[cacheLookupUnit.scala 53:39]
   wire [6:0] dataBRAM_0_rdAddr; // @[cacheLookupUnit.scala 53:39]
@@ -34592,6 +34629,8 @@ module cacheLookupUnit(
   reg [4:0] replayBuffer_branchMask; // @[cacheLookupUnit.scala 145:29]
   reg [3:0] replayBuffer_robAddr; // @[cacheLookupUnit.scala 145:29]
   reg [5:0] replayBuffer_prfDest; // @[cacheLookupUnit.scala 145:29]
+  reg  replayBuffer_writeEn; // @[cacheLookupUnit.scala 145:29]
+  reg [63:0] replayBuffer_writeData; // @[cacheLookupUnit.scala 145:29]
   wire  _GEN_10 = toReplay_ready ? 1'h0 : replayBuffer_valid; // @[cacheLookupUnit.scala 147:23 149:24 145:29]
   reg  memoryResponseBuffer_valid; // @[cacheLookupUnit.scala 152:37]
   reg [31:0] memoryResponseBuffer_address; // @[cacheLookupUnit.scala 152:37]
@@ -34608,6 +34647,7 @@ module cacheLookupUnit(
   wire  _memoryResponseBuffer_valid_T = memoryResponseBuffer_valid ? 1'h0 : memoryResponseBuffer_valid; // @[cacheLookupUnit.scala 158:36]
   reg  coherencyResponseBuffer_valid; // @[cacheLookupUnit.scala 160:40]
   reg [511:0] coherencyResponseBuffer_data; // @[cacheLookupUnit.scala 160:40]
+  reg  coherencyResponseBuffer_dataValid; // @[cacheLookupUnit.scala 160:40]
   reg [1:0] coherencyResponseBuffer_response; // @[cacheLookupUnit.scala 160:40]
   reg  writeBackBuffer_valid; // @[cacheLookupUnit.scala 167:32]
   reg [31:0] writeBackBuffer_address; // @[cacheLookupUnit.scala 167:32]
@@ -34644,8 +34684,8 @@ module cacheLookupUnit(
   wire  shareBitWire = _GEN_52[21]; // @[cacheLookupUnit.scala 219:57]
   wire  dirtyBitWire = _GEN_52[20]; // @[cacheLookupUnit.scala 220:57]
   wire  isMissWire = ~((matchFoundVec_0 | matchFoundVec_1 | matchFoundVec_2 | matchFoundVec_3) & validBitWire); // @[cacheLookupUnit.scala 221:22]
-  wire  _permissionMiss_T = ~isMissWire; // @[cacheLookupUnit.scala 223:26]
-  wire  permissionMiss = ~isMissWire & shareBitWire; // @[cacheLookupUnit.scala 223:38]
+  wire  _isPermissionMiss_T = ~isMissWire; // @[cacheLookupUnit.scala 223:28]
+  wire  isPermissionMiss = ~isMissWire & shareBitWire | isMissWire; // @[cacheLookupUnit.scala 223:56]
   wire [511:0] dataBRAMVec_0_rdData = dataBRAM_0_rdData; // @[cacheLookupUnit.scala 68:28 86:16]
   wire [511:0] dataBRAMVec_1_rdData = dataBRAM_1_rdData; // @[cacheLookupUnit.scala 68:28 86:16]
   wire [511:0] _GEN_86 = 2'h1 == hitTagWire ? dataBRAMVec_1_rdData : dataBRAMVec_0_rdData; // @[cacheLookupUnit.scala 235:{31,31}]
@@ -34657,83 +34697,83 @@ module cacheLookupUnit(
   wire [3:0] _doubleWordWrite_T_1 = {readBuffer_address[5:3],1'h1}; // @[cacheLookupUnit.scala 244:68]
   wire [3:0] _doubleWordWrite_T_3 = {readBuffer_address[5:3],1'h0}; // @[cacheLookupUnit.scala 244:114]
   wire  _T_8 = isWriteWire | isAtmoicWriteWire; // @[cacheLookupUnit.scala 269:22]
-  wire [31:0] _GEN_125 = readBuffer_valid ? readBuffer_cacheLine[31:0] : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_125 = isMissWire ? readBuffer_cacheLine[31:0] : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_146 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_125 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_165 = readBuffer_valid ? readBuffer_cacheLine[31:0] : _GEN_146; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_165 = isPermissionMiss ? readBuffer_cacheLine[31:0] : _GEN_146; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_0 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_165 : _GEN_146; // @[cacheLookupUnit.scala 269:61]
-  wire [31:0] _GEN_126 = readBuffer_valid ? readBuffer_cacheLine[63:32] : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_126 = isMissWire ? readBuffer_cacheLine[63:32] : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_147 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_126 : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_166 = readBuffer_valid ? readBuffer_cacheLine[63:32] : _GEN_147; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_166 = isPermissionMiss ? readBuffer_cacheLine[63:32] : _GEN_147; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_1 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_166 : _GEN_147; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_90 = 4'h1 == _doubleWordWrite_T_1 ? writeChunks_1 : writeChunks_0; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_127 = readBuffer_valid ? readBuffer_cacheLine[95:64] : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_127 = isMissWire ? readBuffer_cacheLine[95:64] : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_148 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_127 : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_167 = readBuffer_valid ? readBuffer_cacheLine[95:64] : _GEN_148; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_167 = isPermissionMiss ? readBuffer_cacheLine[95:64] : _GEN_148; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_2 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_167 : _GEN_148; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_91 = 4'h2 == _doubleWordWrite_T_1 ? writeChunks_2 : _GEN_90; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_128 = readBuffer_valid ? readBuffer_cacheLine[127:96] : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_128 = isMissWire ? readBuffer_cacheLine[127:96] : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_149 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_128 : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_168 = readBuffer_valid ? readBuffer_cacheLine[127:96] : _GEN_149; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_168 = isPermissionMiss ? readBuffer_cacheLine[127:96] : _GEN_149; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_3 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_168 : _GEN_149; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_92 = 4'h3 == _doubleWordWrite_T_1 ? writeChunks_3 : _GEN_91; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_129 = readBuffer_valid ? readBuffer_cacheLine[159:128] : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_129 = isMissWire ? readBuffer_cacheLine[159:128] : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_150 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_129 : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_169 = readBuffer_valid ? readBuffer_cacheLine[159:128] : _GEN_150; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_169 = isPermissionMiss ? readBuffer_cacheLine[159:128] : _GEN_150; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_4 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_169 : _GEN_150; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_93 = 4'h4 == _doubleWordWrite_T_1 ? writeChunks_4 : _GEN_92; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_130 = readBuffer_valid ? readBuffer_cacheLine[191:160] : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_130 = isMissWire ? readBuffer_cacheLine[191:160] : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_151 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_130 : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_170 = readBuffer_valid ? readBuffer_cacheLine[191:160] : _GEN_151; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_170 = isPermissionMiss ? readBuffer_cacheLine[191:160] : _GEN_151; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_5 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_170 : _GEN_151; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_94 = 4'h5 == _doubleWordWrite_T_1 ? writeChunks_5 : _GEN_93; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_131 = readBuffer_valid ? readBuffer_cacheLine[223:192] : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_131 = isMissWire ? readBuffer_cacheLine[223:192] : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_152 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_131 : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_171 = readBuffer_valid ? readBuffer_cacheLine[223:192] : _GEN_152; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_171 = isPermissionMiss ? readBuffer_cacheLine[223:192] : _GEN_152; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_6 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_171 : _GEN_152; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_95 = 4'h6 == _doubleWordWrite_T_1 ? writeChunks_6 : _GEN_94; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_132 = readBuffer_valid ? readBuffer_cacheLine[255:224] : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_132 = isMissWire ? readBuffer_cacheLine[255:224] : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_153 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_132 : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_172 = readBuffer_valid ? readBuffer_cacheLine[255:224] : _GEN_153; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_172 = isPermissionMiss ? readBuffer_cacheLine[255:224] : _GEN_153; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_7 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_172 : _GEN_153; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_96 = 4'h7 == _doubleWordWrite_T_1 ? writeChunks_7 : _GEN_95; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_133 = readBuffer_valid ? readBuffer_cacheLine[287:256] : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_133 = isMissWire ? readBuffer_cacheLine[287:256] : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_154 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_133 : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_173 = readBuffer_valid ? readBuffer_cacheLine[287:256] : _GEN_154; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_173 = isPermissionMiss ? readBuffer_cacheLine[287:256] : _GEN_154; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_8 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_173 : _GEN_154; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_97 = 4'h8 == _doubleWordWrite_T_1 ? writeChunks_8 : _GEN_96; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_134 = readBuffer_valid ? readBuffer_cacheLine[319:288] : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_134 = isMissWire ? readBuffer_cacheLine[319:288] : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_155 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_134 : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_174 = readBuffer_valid ? readBuffer_cacheLine[319:288] : _GEN_155; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_174 = isPermissionMiss ? readBuffer_cacheLine[319:288] : _GEN_155; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_9 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_174 : _GEN_155; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_98 = 4'h9 == _doubleWordWrite_T_1 ? writeChunks_9 : _GEN_97; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_135 = readBuffer_valid ? readBuffer_cacheLine[351:320] : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_135 = isMissWire ? readBuffer_cacheLine[351:320] : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_156 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_135 : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_175 = readBuffer_valid ? readBuffer_cacheLine[351:320] : _GEN_156; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_175 = isPermissionMiss ? readBuffer_cacheLine[351:320] : _GEN_156; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_10 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_175 : _GEN_156; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_99 = 4'ha == _doubleWordWrite_T_1 ? writeChunks_10 : _GEN_98; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_136 = readBuffer_valid ? readBuffer_cacheLine[383:352] : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_136 = isMissWire ? readBuffer_cacheLine[383:352] : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_157 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_136 : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_176 = readBuffer_valid ? readBuffer_cacheLine[383:352] : _GEN_157; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_176 = isPermissionMiss ? readBuffer_cacheLine[383:352] : _GEN_157; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_11 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_176 : _GEN_157; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_100 = 4'hb == _doubleWordWrite_T_1 ? writeChunks_11 : _GEN_99; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_137 = readBuffer_valid ? readBuffer_cacheLine[415:384] : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_137 = isMissWire ? readBuffer_cacheLine[415:384] : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_158 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_137 : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_177 = readBuffer_valid ? readBuffer_cacheLine[415:384] : _GEN_158; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_177 = isPermissionMiss ? readBuffer_cacheLine[415:384] : _GEN_158; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_12 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_177 : _GEN_158; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_101 = 4'hc == _doubleWordWrite_T_1 ? writeChunks_12 : _GEN_100; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_138 = readBuffer_valid ? readBuffer_cacheLine[447:416] : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_138 = isMissWire ? readBuffer_cacheLine[447:416] : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_159 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_138 : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_178 = readBuffer_valid ? readBuffer_cacheLine[447:416] : _GEN_159; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_178 = isPermissionMiss ? readBuffer_cacheLine[447:416] : _GEN_159; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_13 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_178 : _GEN_159; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_102 = 4'hd == _doubleWordWrite_T_1 ? writeChunks_13 : _GEN_101; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_139 = readBuffer_valid ? readBuffer_cacheLine[479:448] : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_139 = isMissWire ? readBuffer_cacheLine[479:448] : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_160 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_139 : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_179 = readBuffer_valid ? readBuffer_cacheLine[479:448] : _GEN_160; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_179 = isPermissionMiss ? readBuffer_cacheLine[479:448] : _GEN_160; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_14 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_179 : _GEN_160; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_103 = 4'he == _doubleWordWrite_T_1 ? writeChunks_14 : _GEN_102; // @[Cat.scala 33:{92,92}]
-  wire [31:0] _GEN_140 = readBuffer_valid ? readBuffer_cacheLine[511:480] : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 255:29 261:26 236:30]
+  wire [31:0] _GEN_140 = isMissWire ? readBuffer_cacheLine[511:480] : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 255:23 261:26 236:30]
   wire [31:0] _GEN_161 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_140 : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 236:30 253:53]
-  wire [31:0] _GEN_180 = readBuffer_valid ? readBuffer_cacheLine[511:480] : _GEN_161; // @[cacheLookupUnit.scala 272:29 277:26]
+  wire [31:0] _GEN_180 = isPermissionMiss ? readBuffer_cacheLine[511:480] : _GEN_161; // @[cacheLookupUnit.scala 272:29 277:26]
   wire [31:0] writeChunks_15 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_180 : _GEN_161; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] _GEN_104 = 4'hf == _doubleWordWrite_T_1 ? writeChunks_15 : _GEN_103; // @[Cat.scala 33:{92,92}]
   wire [31:0] _GEN_106 = 4'h1 == _doubleWordWrite_T_3 ? writeChunks_1 : writeChunks_0; // @[Cat.scala 33:{92,92}]
@@ -34764,367 +34804,365 @@ module cacheLookupUnit(
   wire [1:0] replacingset = flippedPLRUSetWire_0 ? 2'h0 : _replacingset_T_1; // @[Mux.scala 47:70]
   wire  _newPLRUBitWire_T_5 = PLRUSetWire_0 & PLRUSetWire_1 & PLRUSetWire_2 & PLRUSetWire_3; // @[cacheLookupUnit.scala 254:50]
   wire  _newPLRUBitWire_T_6 = PLRUSetWire_0 & PLRUSetWire_1 & PLRUSetWire_2 & PLRUSetWire_3 ? 1'h0 : 1'h1; // @[cacheLookupUnit.scala 254:28]
-  wire  _GEN_121 = readBuffer_valid | validBitWire; // @[cacheLookupUnit.scala 255:29 256:25]
-  wire  _GEN_122 = readBuffer_valid ? readBuffer_response[1] : shareBitWire; // @[cacheLookupUnit.scala 255:29 257:25]
-  wire  _GEN_123 = readBuffer_valid ? readBuffer_response[0] : dirtyBitWire; // @[cacheLookupUnit.scala 255:29 258:25]
-  wire [18:0] _GEN_124 = readBuffer_valid ? readBuffer_address[31:13] : _GEN_52[18:0]; // @[cacheLookupUnit.scala 255:29 259:21]
+  wire  _GEN_121 = isMissWire | validBitWire; // @[cacheLookupUnit.scala 255:23 256:25]
+  wire  _GEN_122 = isMissWire ? readBuffer_response[1] : shareBitWire; // @[cacheLookupUnit.scala 255:23 257:25]
+  wire  _GEN_123 = isMissWire ? readBuffer_response[0] : dirtyBitWire; // @[cacheLookupUnit.scala 255:23 258:25]
+  wire [18:0] _GEN_124 = isMissWire ? readBuffer_address[31:13] : _GEN_52[18:0]; // @[cacheLookupUnit.scala 255:23 259:21]
   wire  _GEN_141 = isReadWire | isLRWire | isAtmoicReadWire ? _newPLRUBitWire_T_6 : _GEN_52[22]; // @[cacheLookupUnit.scala 253:53 254:22]
   wire  _GEN_142 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_121 : validBitWire; // @[cacheLookupUnit.scala 253:53]
   wire  _GEN_143 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_122 : shareBitWire; // @[cacheLookupUnit.scala 253:53]
   wire  _GEN_144 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_123 : dirtyBitWire; // @[cacheLookupUnit.scala 253:53]
   wire [18:0] _GEN_145 = isReadWire | isLRWire | isAtmoicReadWire ? _GEN_124 : _GEN_52[18:0]; // @[cacheLookupUnit.scala 253:53]
-  wire  _GEN_162 = readBuffer_valid | _GEN_142; // @[cacheLookupUnit.scala 272:29 273:25]
-  wire  _GEN_163 = readBuffer_valid ? readBuffer_response[1] : _GEN_143; // @[cacheLookupUnit.scala 272:29 274:25]
-  wire [18:0] _GEN_164 = readBuffer_valid ? readBuffer_address[31:13] : _GEN_145; // @[cacheLookupUnit.scala 272:29 275:21]
-  wire  _T_13 = 5'h1 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 282:48]
-  wire  _T_14 = 5'h0 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 282:48]
-  wire [31:0] _GEN_182 = 4'h1 == readBuffer_address[5:2] ? writeChunks_1 : writeChunks_0; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_183 = 4'h2 == readBuffer_address[5:2] ? writeChunks_2 : _GEN_182; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_184 = 4'h3 == readBuffer_address[5:2] ? writeChunks_3 : _GEN_183; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_185 = 4'h4 == readBuffer_address[5:2] ? writeChunks_4 : _GEN_184; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_186 = 4'h5 == readBuffer_address[5:2] ? writeChunks_5 : _GEN_185; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_187 = 4'h6 == readBuffer_address[5:2] ? writeChunks_6 : _GEN_186; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_188 = 4'h7 == readBuffer_address[5:2] ? writeChunks_7 : _GEN_187; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_189 = 4'h8 == readBuffer_address[5:2] ? writeChunks_8 : _GEN_188; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_190 = 4'h9 == readBuffer_address[5:2] ? writeChunks_9 : _GEN_189; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_191 = 4'ha == readBuffer_address[5:2] ? writeChunks_10 : _GEN_190; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_192 = 4'hb == readBuffer_address[5:2] ? writeChunks_11 : _GEN_191; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_193 = 4'hc == readBuffer_address[5:2] ? writeChunks_12 : _GEN_192; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_194 = 4'hd == readBuffer_address[5:2] ? writeChunks_13 : _GEN_193; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_195 = 4'he == readBuffer_address[5:2] ? writeChunks_14 : _GEN_194; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _GEN_196 = 4'hf == readBuffer_address[5:2] ? writeChunks_15 : _GEN_195; // @[cacheLookupUnit.scala 284:{50,50}]
-  wire [31:0] _result32_T_3 = _GEN_196 + readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 284:50]
-  wire  _T_15 = 5'h4 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 282:48]
-  wire [31:0] _result32_T_5 = _GEN_196 ^ readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 285:50]
-  wire  _T_16 = 5'hc == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 282:48]
-  wire [31:0] _result32_T_7 = _GEN_196 & readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 286:50]
-  wire  _T_17 = 5'h8 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 282:48]
-  wire [31:0] _result32_T_9 = _GEN_196 | readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 287:50]
-  wire  _T_18 = 5'h10 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 282:48]
-  wire [31:0] _result32_T_10 = 4'hf == readBuffer_address[5:2] ? writeChunks_15 : _GEN_195; // @[cacheLookupUnit.scala 288:54]
-  wire [31:0] _result32_T_12 = readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 288:90]
+  wire  _GEN_163 = isPermissionMiss ? readBuffer_response[1] : readBuffer_response[1]; // @[cacheLookupUnit.scala 272:29 274:25 281:25]
+  wire [18:0] _GEN_164 = isPermissionMiss ? readBuffer_address[31:13] : readBuffer_address[31:13]; // @[cacheLookupUnit.scala 272:29 275:21 282:21]
+  wire  _T_13 = 5'h1 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 286:48]
+  wire  _T_14 = 5'h0 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 286:48]
+  wire [31:0] _GEN_182 = 4'h1 == readBuffer_address[5:2] ? writeChunks_1 : writeChunks_0; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_183 = 4'h2 == readBuffer_address[5:2] ? writeChunks_2 : _GEN_182; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_184 = 4'h3 == readBuffer_address[5:2] ? writeChunks_3 : _GEN_183; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_185 = 4'h4 == readBuffer_address[5:2] ? writeChunks_4 : _GEN_184; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_186 = 4'h5 == readBuffer_address[5:2] ? writeChunks_5 : _GEN_185; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_187 = 4'h6 == readBuffer_address[5:2] ? writeChunks_6 : _GEN_186; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_188 = 4'h7 == readBuffer_address[5:2] ? writeChunks_7 : _GEN_187; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_189 = 4'h8 == readBuffer_address[5:2] ? writeChunks_8 : _GEN_188; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_190 = 4'h9 == readBuffer_address[5:2] ? writeChunks_9 : _GEN_189; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_191 = 4'ha == readBuffer_address[5:2] ? writeChunks_10 : _GEN_190; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_192 = 4'hb == readBuffer_address[5:2] ? writeChunks_11 : _GEN_191; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_193 = 4'hc == readBuffer_address[5:2] ? writeChunks_12 : _GEN_192; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_194 = 4'hd == readBuffer_address[5:2] ? writeChunks_13 : _GEN_193; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_195 = 4'he == readBuffer_address[5:2] ? writeChunks_14 : _GEN_194; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _GEN_196 = 4'hf == readBuffer_address[5:2] ? writeChunks_15 : _GEN_195; // @[cacheLookupUnit.scala 288:{50,50}]
+  wire [31:0] _result32_T_3 = _GEN_196 + readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 288:50]
+  wire  _T_15 = 5'h4 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 286:48]
+  wire [31:0] _result32_T_5 = _GEN_196 ^ readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 289:50]
+  wire  _T_16 = 5'hc == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 286:48]
+  wire [31:0] _result32_T_7 = _GEN_196 & readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 290:50]
+  wire  _T_17 = 5'h8 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 286:48]
+  wire [31:0] _result32_T_9 = _GEN_196 | readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 291:50]
+  wire  _T_18 = 5'h10 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 286:48]
+  wire [31:0] _result32_T_10 = 4'hf == readBuffer_address[5:2] ? writeChunks_15 : _GEN_195; // @[cacheLookupUnit.scala 292:54]
+  wire [31:0] _result32_T_12 = readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 292:90]
   wire [31:0] _result32_T_15 = $signed(_result32_T_10) < $signed(_result32_T_12) ? _GEN_196 : readBuffer_writeData[31:0]
-    ; // @[cacheLookupUnit.scala 288:43]
-  wire  _T_19 = 5'h14 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 282:48]
+    ; // @[cacheLookupUnit.scala 292:43]
+  wire  _T_19 = 5'h14 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 286:48]
   wire [31:0] _result32_T_21 = $signed(_result32_T_10) > $signed(_result32_T_12) ? _GEN_196 : readBuffer_writeData[31:0]
-    ; // @[cacheLookupUnit.scala 289:43]
-  wire  _T_20 = 5'h18 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 282:48]
-  wire [31:0] _result32_T_25 = _GEN_196 < readBuffer_writeData[31:0] ? _GEN_196 : readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 290:43]
-  wire  _T_21 = 5'h1c == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 282:48]
-  wire [31:0] _result32_T_29 = _GEN_196 > readBuffer_writeData[31:0] ? _GEN_196 : readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 291:43]
-  wire [31:0] _GEN_197 = 5'h1c == readBuffer_instruction[31:27] ? _result32_T_29 : 32'h0; // @[cacheLookupUnit.scala 282:48 291:37]
-  wire [31:0] _GEN_198 = 5'h18 == readBuffer_instruction[31:27] ? _result32_T_25 : _GEN_197; // @[cacheLookupUnit.scala 282:48 290:37]
-  wire [31:0] _GEN_199 = 5'h14 == readBuffer_instruction[31:27] ? _result32_T_21 : _GEN_198; // @[cacheLookupUnit.scala 282:48 289:37]
-  wire [31:0] _GEN_200 = 5'h10 == readBuffer_instruction[31:27] ? _result32_T_15 : _GEN_199; // @[cacheLookupUnit.scala 282:48 288:37]
-  wire [31:0] _GEN_201 = 5'h8 == readBuffer_instruction[31:27] ? _result32_T_9 : _GEN_200; // @[cacheLookupUnit.scala 282:48 287:37]
-  wire [31:0] _GEN_202 = 5'hc == readBuffer_instruction[31:27] ? _result32_T_7 : _GEN_201; // @[cacheLookupUnit.scala 282:48 286:37]
-  wire [31:0] _GEN_203 = 5'h4 == readBuffer_instruction[31:27] ? _result32_T_5 : _GEN_202; // @[cacheLookupUnit.scala 282:48 285:37]
-  wire [31:0] _GEN_204 = 5'h0 == readBuffer_instruction[31:27] ? _result32_T_3 : _GEN_203; // @[cacheLookupUnit.scala 282:48 284:37]
-  wire [31:0] _GEN_205 = 5'h1 == readBuffer_instruction[31:27] ? readBuffer_writeData[31:0] : _GEN_204; // @[cacheLookupUnit.scala 282:48 283:37]
-  wire [31:0] _GEN_222 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_205 : 32'h0; // @[cacheLookupUnit.scala 281:57]
-  wire [31:0] _GEN_441 = isAtmoicWriteWire ? _GEN_222 : 32'h0; // @[cacheLookupUnit.scala 280:30]
+    ; // @[cacheLookupUnit.scala 293:43]
+  wire  _T_20 = 5'h18 == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 286:48]
+  wire [31:0] _result32_T_25 = _GEN_196 < readBuffer_writeData[31:0] ? _GEN_196 : readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 294:43]
+  wire  _T_21 = 5'h1c == readBuffer_instruction[31:27]; // @[cacheLookupUnit.scala 286:48]
+  wire [31:0] _result32_T_29 = _GEN_196 > readBuffer_writeData[31:0] ? _GEN_196 : readBuffer_writeData[31:0]; // @[cacheLookupUnit.scala 295:43]
+  wire [31:0] _GEN_197 = 5'h1c == readBuffer_instruction[31:27] ? _result32_T_29 : 32'h0; // @[cacheLookupUnit.scala 286:48 295:37]
+  wire [31:0] _GEN_198 = 5'h18 == readBuffer_instruction[31:27] ? _result32_T_25 : _GEN_197; // @[cacheLookupUnit.scala 286:48 294:37]
+  wire [31:0] _GEN_199 = 5'h14 == readBuffer_instruction[31:27] ? _result32_T_21 : _GEN_198; // @[cacheLookupUnit.scala 286:48 293:37]
+  wire [31:0] _GEN_200 = 5'h10 == readBuffer_instruction[31:27] ? _result32_T_15 : _GEN_199; // @[cacheLookupUnit.scala 286:48 292:37]
+  wire [31:0] _GEN_201 = 5'h8 == readBuffer_instruction[31:27] ? _result32_T_9 : _GEN_200; // @[cacheLookupUnit.scala 286:48 291:37]
+  wire [31:0] _GEN_202 = 5'hc == readBuffer_instruction[31:27] ? _result32_T_7 : _GEN_201; // @[cacheLookupUnit.scala 286:48 290:37]
+  wire [31:0] _GEN_203 = 5'h4 == readBuffer_instruction[31:27] ? _result32_T_5 : _GEN_202; // @[cacheLookupUnit.scala 286:48 289:37]
+  wire [31:0] _GEN_204 = 5'h0 == readBuffer_instruction[31:27] ? _result32_T_3 : _GEN_203; // @[cacheLookupUnit.scala 286:48 288:37]
+  wire [31:0] _GEN_205 = 5'h1 == readBuffer_instruction[31:27] ? readBuffer_writeData[31:0] : _GEN_204; // @[cacheLookupUnit.scala 286:48 287:37]
+  wire [31:0] _GEN_222 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_205 : 32'h0; // @[cacheLookupUnit.scala 285:57]
+  wire [31:0] _GEN_441 = isAtmoicWriteWire ? _GEN_222 : 32'h0; // @[cacheLookupUnit.scala 284:30]
   wire [31:0] result32 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_441 : 32'h0; // @[cacheLookupUnit.scala 269:61]
-  wire [31:0] _GEN_206 = 4'h0 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_207 = 4'h1 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_208 = 4'h2 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_209 = 4'h3 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_210 = 4'h4 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_211 = 4'h5 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_212 = 4'h6 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_213 = 4'h7 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_214 = 4'h8 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_215 = 4'h9 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_216 = 4'ha == readBuffer_address[5:2] ? result32 : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_217 = 4'hb == readBuffer_address[5:2] ? result32 : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_218 = 4'hc == readBuffer_address[5:2] ? result32 : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_219 = 4'hd == readBuffer_address[5:2] ? result32 : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_220 = 4'he == readBuffer_address[5:2] ? result32 : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_221 = 4'hf == readBuffer_address[5:2] ? result32 : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 239:33 293:{51,51}]
-  wire [31:0] _GEN_223 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_206 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_224 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_207 : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_225 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_208 : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_226 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_209 : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_227 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_210 : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_228 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_211 : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_229 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_212 : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_230 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_213 : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_231 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_214 : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_232 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_215 : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_233 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_216 : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_234 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_217 : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_235 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_218 : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_236 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_219 : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_237 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_220 : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [31:0] _GEN_238 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_221 : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 239:33 281:57]
-  wire [63:0] _result64_T_1 = doubleWordWrite + readBuffer_writeData; // @[cacheLookupUnit.scala 298:56]
-  wire [63:0] _result64_T_2 = doubleWordWrite ^ readBuffer_writeData; // @[cacheLookupUnit.scala 299:56]
-  wire [63:0] _result64_T_3 = doubleWordWrite & readBuffer_writeData; // @[cacheLookupUnit.scala 300:56]
-  wire [63:0] _result64_T_4 = doubleWordWrite | readBuffer_writeData; // @[cacheLookupUnit.scala 301:56]
-  wire [63:0] _result64_T_5 = {_GEN_104,_GEN_120}; // @[cacheLookupUnit.scala 302:60]
+  wire [31:0] _GEN_206 = 4'h0 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_207 = 4'h1 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_208 = 4'h2 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_209 = 4'h3 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_210 = 4'h4 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_211 = 4'h5 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_212 = 4'h6 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_213 = 4'h7 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_214 = 4'h8 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_215 = 4'h9 == readBuffer_address[5:2] ? result32 : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_216 = 4'ha == readBuffer_address[5:2] ? result32 : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_217 = 4'hb == readBuffer_address[5:2] ? result32 : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_218 = 4'hc == readBuffer_address[5:2] ? result32 : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_219 = 4'hd == readBuffer_address[5:2] ? result32 : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_220 = 4'he == readBuffer_address[5:2] ? result32 : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_221 = 4'hf == readBuffer_address[5:2] ? result32 : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 239:33 297:{51,51}]
+  wire [31:0] _GEN_223 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_206 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_224 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_207 : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_225 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_208 : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_226 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_209 : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_227 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_210 : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_228 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_211 : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_229 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_212 : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_230 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_213 : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_231 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_214 : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_232 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_215 : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_233 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_216 : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_234 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_217 : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_235 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_218 : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_236 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_219 : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_237 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_220 : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [31:0] _GEN_238 = readBuffer_instruction[14:12] == 3'h2 ? _GEN_221 : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 239:33 285:57]
+  wire [63:0] _result64_T_1 = doubleWordWrite + readBuffer_writeData; // @[cacheLookupUnit.scala 302:56]
+  wire [63:0] _result64_T_2 = doubleWordWrite ^ readBuffer_writeData; // @[cacheLookupUnit.scala 303:56]
+  wire [63:0] _result64_T_3 = doubleWordWrite & readBuffer_writeData; // @[cacheLookupUnit.scala 304:56]
+  wire [63:0] _result64_T_4 = doubleWordWrite | readBuffer_writeData; // @[cacheLookupUnit.scala 305:56]
+  wire [63:0] _result64_T_5 = {_GEN_104,_GEN_120}; // @[cacheLookupUnit.scala 306:60]
   wire [63:0] _result64_T_8 = $signed(_result64_T_5) < $signed(readBuffer_writeData) ? doubleWordWrite :
-    readBuffer_writeData; // @[cacheLookupUnit.scala 302:43]
+    readBuffer_writeData; // @[cacheLookupUnit.scala 306:43]
   wire [63:0] _result64_T_12 = $signed(_result64_T_5) > $signed(readBuffer_writeData) ? doubleWordWrite :
-    readBuffer_writeData; // @[cacheLookupUnit.scala 303:43]
-  wire [63:0] _result64_T_14 = doubleWordWrite < readBuffer_writeData ? doubleWordWrite : readBuffer_writeData; // @[cacheLookupUnit.scala 304:43]
-  wire [63:0] _result64_T_16 = doubleWordWrite > readBuffer_writeData ? doubleWordWrite : readBuffer_writeData; // @[cacheLookupUnit.scala 305:43]
-  wire [63:0] _GEN_239 = _T_21 ? _result64_T_16 : 64'h0; // @[cacheLookupUnit.scala 296:48 305:37]
-  wire [63:0] _GEN_240 = _T_20 ? _result64_T_14 : _GEN_239; // @[cacheLookupUnit.scala 296:48 304:37]
-  wire [63:0] _GEN_241 = _T_19 ? _result64_T_12 : _GEN_240; // @[cacheLookupUnit.scala 296:48 303:37]
-  wire [63:0] _GEN_242 = _T_18 ? _result64_T_8 : _GEN_241; // @[cacheLookupUnit.scala 296:48 302:37]
-  wire [63:0] _GEN_243 = _T_17 ? _result64_T_4 : _GEN_242; // @[cacheLookupUnit.scala 296:48 301:37]
-  wire [63:0] _GEN_244 = _T_16 ? _result64_T_3 : _GEN_243; // @[cacheLookupUnit.scala 296:48 300:37]
-  wire [63:0] _GEN_245 = _T_15 ? _result64_T_2 : _GEN_244; // @[cacheLookupUnit.scala 296:48 299:37]
-  wire [63:0] _GEN_246 = _T_14 ? _result64_T_1 : _GEN_245; // @[cacheLookupUnit.scala 296:48 298:37]
-  wire [63:0] _GEN_247 = _T_13 ? readBuffer_writeData : _GEN_246; // @[cacheLookupUnit.scala 296:48 297:37]
-  wire [63:0] _GEN_280 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_247 : 64'h0; // @[cacheLookupUnit.scala 295:57]
-  wire [63:0] _GEN_458 = isAtmoicWriteWire ? _GEN_280 : 64'h0; // @[cacheLookupUnit.scala 280:30]
+    readBuffer_writeData; // @[cacheLookupUnit.scala 307:43]
+  wire [63:0] _result64_T_14 = doubleWordWrite < readBuffer_writeData ? doubleWordWrite : readBuffer_writeData; // @[cacheLookupUnit.scala 308:43]
+  wire [63:0] _result64_T_16 = doubleWordWrite > readBuffer_writeData ? doubleWordWrite : readBuffer_writeData; // @[cacheLookupUnit.scala 309:43]
+  wire [63:0] _GEN_239 = _T_21 ? _result64_T_16 : 64'h0; // @[cacheLookupUnit.scala 300:48 309:37]
+  wire [63:0] _GEN_240 = _T_20 ? _result64_T_14 : _GEN_239; // @[cacheLookupUnit.scala 300:48 308:37]
+  wire [63:0] _GEN_241 = _T_19 ? _result64_T_12 : _GEN_240; // @[cacheLookupUnit.scala 300:48 307:37]
+  wire [63:0] _GEN_242 = _T_18 ? _result64_T_8 : _GEN_241; // @[cacheLookupUnit.scala 300:48 306:37]
+  wire [63:0] _GEN_243 = _T_17 ? _result64_T_4 : _GEN_242; // @[cacheLookupUnit.scala 300:48 305:37]
+  wire [63:0] _GEN_244 = _T_16 ? _result64_T_3 : _GEN_243; // @[cacheLookupUnit.scala 300:48 304:37]
+  wire [63:0] _GEN_245 = _T_15 ? _result64_T_2 : _GEN_244; // @[cacheLookupUnit.scala 300:48 303:37]
+  wire [63:0] _GEN_246 = _T_14 ? _result64_T_1 : _GEN_245; // @[cacheLookupUnit.scala 300:48 302:37]
+  wire [63:0] _GEN_247 = _T_13 ? readBuffer_writeData : _GEN_246; // @[cacheLookupUnit.scala 300:48 301:37]
+  wire [63:0] _GEN_280 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_247 : 64'h0; // @[cacheLookupUnit.scala 299:57]
+  wire [63:0] _GEN_458 = isAtmoicWriteWire ? _GEN_280 : 64'h0; // @[cacheLookupUnit.scala 284:30]
   wire [63:0] result64 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_458 : 64'h0; // @[cacheLookupUnit.scala 269:61]
-  wire [31:0] _GEN_248 = 4'h0 == readBuffer_address[5:2] ? result64[31:0] : _GEN_223; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_249 = 4'h1 == readBuffer_address[5:2] ? result64[31:0] : _GEN_224; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_250 = 4'h2 == readBuffer_address[5:2] ? result64[31:0] : _GEN_225; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_251 = 4'h3 == readBuffer_address[5:2] ? result64[31:0] : _GEN_226; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_252 = 4'h4 == readBuffer_address[5:2] ? result64[31:0] : _GEN_227; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_253 = 4'h5 == readBuffer_address[5:2] ? result64[31:0] : _GEN_228; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_254 = 4'h6 == readBuffer_address[5:2] ? result64[31:0] : _GEN_229; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_255 = 4'h7 == readBuffer_address[5:2] ? result64[31:0] : _GEN_230; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_256 = 4'h8 == readBuffer_address[5:2] ? result64[31:0] : _GEN_231; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_257 = 4'h9 == readBuffer_address[5:2] ? result64[31:0] : _GEN_232; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_258 = 4'ha == readBuffer_address[5:2] ? result64[31:0] : _GEN_233; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_259 = 4'hb == readBuffer_address[5:2] ? result64[31:0] : _GEN_234; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_260 = 4'hc == readBuffer_address[5:2] ? result64[31:0] : _GEN_235; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_261 = 4'hd == readBuffer_address[5:2] ? result64[31:0] : _GEN_236; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_262 = 4'he == readBuffer_address[5:2] ? result64[31:0] : _GEN_237; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [31:0] _GEN_263 = 4'hf == readBuffer_address[5:2] ? result64[31:0] : _GEN_238; // @[cacheLookupUnit.scala 307:{51,51}]
-  wire [3:0] _T_38 = readBuffer_address[5:2] + 4'h1; // @[cacheLookupUnit.scala 308:50]
-  wire [31:0] _GEN_264 = 4'h0 == _T_38 ? result64[63:32] : _GEN_248; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_265 = 4'h1 == _T_38 ? result64[63:32] : _GEN_249; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_266 = 4'h2 == _T_38 ? result64[63:32] : _GEN_250; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_267 = 4'h3 == _T_38 ? result64[63:32] : _GEN_251; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_268 = 4'h4 == _T_38 ? result64[63:32] : _GEN_252; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_269 = 4'h5 == _T_38 ? result64[63:32] : _GEN_253; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_270 = 4'h6 == _T_38 ? result64[63:32] : _GEN_254; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_271 = 4'h7 == _T_38 ? result64[63:32] : _GEN_255; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_272 = 4'h8 == _T_38 ? result64[63:32] : _GEN_256; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_273 = 4'h9 == _T_38 ? result64[63:32] : _GEN_257; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_274 = 4'ha == _T_38 ? result64[63:32] : _GEN_258; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_275 = 4'hb == _T_38 ? result64[63:32] : _GEN_259; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_276 = 4'hc == _T_38 ? result64[63:32] : _GEN_260; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_277 = 4'hd == _T_38 ? result64[63:32] : _GEN_261; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_278 = 4'he == _T_38 ? result64[63:32] : _GEN_262; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_279 = 4'hf == _T_38 ? result64[63:32] : _GEN_263; // @[cacheLookupUnit.scala 308:{57,57}]
-  wire [31:0] _GEN_281 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_264 : _GEN_223; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_282 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_265 : _GEN_224; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_283 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_266 : _GEN_225; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_284 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_267 : _GEN_226; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_285 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_268 : _GEN_227; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_286 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_269 : _GEN_228; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_287 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_270 : _GEN_229; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_288 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_271 : _GEN_230; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_289 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_272 : _GEN_231; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_290 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_273 : _GEN_232; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_291 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_274 : _GEN_233; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_292 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_275 : _GEN_234; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_293 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_276 : _GEN_235; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_294 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_277 : _GEN_236; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_295 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_278 : _GEN_237; // @[cacheLookupUnit.scala 295:57]
-  wire [31:0] _GEN_296 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_279 : _GEN_238; // @[cacheLookupUnit.scala 295:57]
-  wire  _T_39 = ~permissionMiss; // @[cacheLookupUnit.scala 311:14]
-  wire  _T_41 = 2'h0 == readBuffer_instruction[13:12]; // @[cacheLookupUnit.scala 312:48]
-  wire [3:0] _T_43 = {{1'd0}, readBuffer_address[2:0]}; // @[cacheLookupUnit.scala 313:88]
-  wire [7:0] _GEN_297 = 3'h0 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 245:46 313:{95,95}]
-  wire [7:0] _GEN_298 = 3'h1 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 245:46 313:{95,95}]
-  wire [7:0] _GEN_299 = 3'h2 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 245:46 313:{95,95}]
-  wire [7:0] _GEN_300 = 3'h3 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 245:46 313:{95,95}]
-  wire [7:0] _GEN_301 = 3'h4 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 245:46 313:{95,95}]
-  wire [7:0] _GEN_302 = 3'h5 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 245:46 313:{95,95}]
-  wire [7:0] _GEN_303 = 3'h6 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 245:46 313:{95,95}]
-  wire [7:0] _GEN_304 = 3'h7 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 245:46 313:{95,95}]
-  wire  _T_45 = 2'h1 == readBuffer_instruction[13:12]; // @[cacheLookupUnit.scala 312:48]
-  wire [3:0] _T_47 = readBuffer_address[2:1] * 2'h2; // @[cacheLookupUnit.scala 314:87]
-  wire [4:0] _T_48 = {{1'd0}, _T_47}; // @[cacheLookupUnit.scala 314:92]
-  wire [7:0] _GEN_305 = 3'h0 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 245:46 314:{99,99}]
-  wire [7:0] _GEN_306 = 3'h1 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 245:46 314:{99,99}]
-  wire [7:0] _GEN_307 = 3'h2 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 245:46 314:{99,99}]
-  wire [7:0] _GEN_308 = 3'h3 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 245:46 314:{99,99}]
-  wire [7:0] _GEN_309 = 3'h4 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 245:46 314:{99,99}]
-  wire [7:0] _GEN_310 = 3'h5 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 245:46 314:{99,99}]
-  wire [7:0] _GEN_311 = 3'h6 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 245:46 314:{99,99}]
-  wire [7:0] _GEN_312 = 3'h7 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 245:46 314:{99,99}]
-  wire [3:0] _T_54 = _T_47 + 4'h1; // @[cacheLookupUnit.scala 314:92]
-  wire [7:0] _GEN_313 = 3'h0 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_305; // @[cacheLookupUnit.scala 314:{99,99}]
-  wire [7:0] _GEN_314 = 3'h1 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_306; // @[cacheLookupUnit.scala 314:{99,99}]
-  wire [7:0] _GEN_315 = 3'h2 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_307; // @[cacheLookupUnit.scala 314:{99,99}]
-  wire [7:0] _GEN_316 = 3'h3 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_308; // @[cacheLookupUnit.scala 314:{99,99}]
-  wire [7:0] _GEN_317 = 3'h4 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_309; // @[cacheLookupUnit.scala 314:{99,99}]
-  wire [7:0] _GEN_318 = 3'h5 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_310; // @[cacheLookupUnit.scala 314:{99,99}]
-  wire [7:0] _GEN_319 = 3'h6 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_311; // @[cacheLookupUnit.scala 314:{99,99}]
-  wire [7:0] _GEN_320 = 3'h7 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_312; // @[cacheLookupUnit.scala 314:{99,99}]
-  wire  _T_56 = 2'h2 == readBuffer_instruction[13:12]; // @[cacheLookupUnit.scala 312:48]
-  wire [3:0] _T_58 = readBuffer_address[2] * 3'h4; // @[cacheLookupUnit.scala 315:84]
-  wire [4:0] _T_59 = {{1'd0}, _T_58}; // @[cacheLookupUnit.scala 315:89]
-  wire [7:0] _GEN_321 = 3'h0 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 245:46 315:{96,96}]
-  wire [7:0] _GEN_322 = 3'h1 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 245:46 315:{96,96}]
-  wire [7:0] _GEN_323 = 3'h2 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 245:46 315:{96,96}]
-  wire [7:0] _GEN_324 = 3'h3 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 245:46 315:{96,96}]
-  wire [7:0] _GEN_325 = 3'h4 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 245:46 315:{96,96}]
-  wire [7:0] _GEN_326 = 3'h5 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 245:46 315:{96,96}]
-  wire [7:0] _GEN_327 = 3'h6 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 245:46 315:{96,96}]
-  wire [7:0] _GEN_328 = 3'h7 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 245:46 315:{96,96}]
-  wire [3:0] _T_65 = _T_58 + 4'h1; // @[cacheLookupUnit.scala 315:89]
-  wire [7:0] _GEN_329 = 3'h0 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_321; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_330 = 3'h1 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_322; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_331 = 3'h2 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_323; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_332 = 3'h3 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_324; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_333 = 3'h4 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_325; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_334 = 3'h5 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_326; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_335 = 3'h6 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_327; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_336 = 3'h7 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_328; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [3:0] _T_70 = _T_58 + 4'h2; // @[cacheLookupUnit.scala 315:89]
-  wire [7:0] _GEN_337 = 3'h0 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_329; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_338 = 3'h1 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_330; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_339 = 3'h2 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_331; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_340 = 3'h3 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_332; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_341 = 3'h4 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_333; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_342 = 3'h5 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_334; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_343 = 3'h6 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_335; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_344 = 3'h7 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_336; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [3:0] _T_75 = _T_58 + 4'h3; // @[cacheLookupUnit.scala 315:89]
-  wire [7:0] _GEN_345 = 3'h0 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_337; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_346 = 3'h1 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_338; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_347 = 3'h2 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_339; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_348 = 3'h3 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_340; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_349 = 3'h4 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_341; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_350 = 3'h5 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_342; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_351 = 3'h6 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_343; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire [7:0] _GEN_352 = 3'h7 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_344; // @[cacheLookupUnit.scala 315:{96,96}]
-  wire  _T_77 = 2'h3 == readBuffer_instruction[13:12]; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_353 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[7:0] : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 245:46 312:48 316:68]
-  wire [7:0] _GEN_354 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[15:8] : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 245:46 312:48 316:68]
-  wire [7:0] _GEN_355 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[23:16] : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 245:46 312:48 316:68]
-  wire [7:0] _GEN_356 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[31:24] : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 245:46 312:48 316:68]
-  wire [7:0] _GEN_357 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[39:32] : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 245:46 312:48 316:68]
-  wire [7:0] _GEN_358 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[47:40] : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 245:46 312:48 316:68]
-  wire [7:0] _GEN_359 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[55:48] : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 245:46 312:48 316:68]
-  wire [7:0] _GEN_360 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[63:56] : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 245:46 312:48 316:68]
-  wire [7:0] _GEN_361 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_345 : _GEN_353; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_362 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_346 : _GEN_354; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_363 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_347 : _GEN_355; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_364 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_348 : _GEN_356; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_365 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_349 : _GEN_357; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_366 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_350 : _GEN_358; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_367 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_351 : _GEN_359; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_368 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_352 : _GEN_360; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_369 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_313 : _GEN_361; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_370 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_314 : _GEN_362; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_371 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_315 : _GEN_363; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_372 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_316 : _GEN_364; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_373 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_317 : _GEN_365; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_374 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_318 : _GEN_366; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_375 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_319 : _GEN_367; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_376 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_320 : _GEN_368; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_377 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_297 : _GEN_369; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_378 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_298 : _GEN_370; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_379 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_299 : _GEN_371; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_380 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_300 : _GEN_372; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_381 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_301 : _GEN_373; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_382 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_302 : _GEN_374; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_383 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_303 : _GEN_375; // @[cacheLookupUnit.scala 312:48]
-  wire [7:0] _GEN_384 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_304 : _GEN_376; // @[cacheLookupUnit.scala 312:48]
-  wire [4:0] _T_79 = readBuffer_address[5:3] * 2'h2; // @[cacheLookupUnit.scala 318:50]
-  wire [7:0] _GEN_418 = ~permissionMiss ? _GEN_378 : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 311:30 245:46]
-  wire [7:0] _GEN_460 = isAtmoicWriteWire ? doubleWordWrite[15:8] : _GEN_418; // @[cacheLookupUnit.scala 280:30 245:46]
+  wire [31:0] _GEN_248 = 4'h0 == readBuffer_address[5:2] ? result64[31:0] : _GEN_223; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_249 = 4'h1 == readBuffer_address[5:2] ? result64[31:0] : _GEN_224; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_250 = 4'h2 == readBuffer_address[5:2] ? result64[31:0] : _GEN_225; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_251 = 4'h3 == readBuffer_address[5:2] ? result64[31:0] : _GEN_226; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_252 = 4'h4 == readBuffer_address[5:2] ? result64[31:0] : _GEN_227; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_253 = 4'h5 == readBuffer_address[5:2] ? result64[31:0] : _GEN_228; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_254 = 4'h6 == readBuffer_address[5:2] ? result64[31:0] : _GEN_229; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_255 = 4'h7 == readBuffer_address[5:2] ? result64[31:0] : _GEN_230; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_256 = 4'h8 == readBuffer_address[5:2] ? result64[31:0] : _GEN_231; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_257 = 4'h9 == readBuffer_address[5:2] ? result64[31:0] : _GEN_232; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_258 = 4'ha == readBuffer_address[5:2] ? result64[31:0] : _GEN_233; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_259 = 4'hb == readBuffer_address[5:2] ? result64[31:0] : _GEN_234; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_260 = 4'hc == readBuffer_address[5:2] ? result64[31:0] : _GEN_235; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_261 = 4'hd == readBuffer_address[5:2] ? result64[31:0] : _GEN_236; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_262 = 4'he == readBuffer_address[5:2] ? result64[31:0] : _GEN_237; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [31:0] _GEN_263 = 4'hf == readBuffer_address[5:2] ? result64[31:0] : _GEN_238; // @[cacheLookupUnit.scala 311:{51,51}]
+  wire [3:0] _T_38 = readBuffer_address[5:2] + 4'h1; // @[cacheLookupUnit.scala 312:50]
+  wire [31:0] _GEN_264 = 4'h0 == _T_38 ? result64[63:32] : _GEN_248; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_265 = 4'h1 == _T_38 ? result64[63:32] : _GEN_249; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_266 = 4'h2 == _T_38 ? result64[63:32] : _GEN_250; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_267 = 4'h3 == _T_38 ? result64[63:32] : _GEN_251; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_268 = 4'h4 == _T_38 ? result64[63:32] : _GEN_252; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_269 = 4'h5 == _T_38 ? result64[63:32] : _GEN_253; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_270 = 4'h6 == _T_38 ? result64[63:32] : _GEN_254; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_271 = 4'h7 == _T_38 ? result64[63:32] : _GEN_255; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_272 = 4'h8 == _T_38 ? result64[63:32] : _GEN_256; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_273 = 4'h9 == _T_38 ? result64[63:32] : _GEN_257; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_274 = 4'ha == _T_38 ? result64[63:32] : _GEN_258; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_275 = 4'hb == _T_38 ? result64[63:32] : _GEN_259; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_276 = 4'hc == _T_38 ? result64[63:32] : _GEN_260; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_277 = 4'hd == _T_38 ? result64[63:32] : _GEN_261; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_278 = 4'he == _T_38 ? result64[63:32] : _GEN_262; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_279 = 4'hf == _T_38 ? result64[63:32] : _GEN_263; // @[cacheLookupUnit.scala 312:{57,57}]
+  wire [31:0] _GEN_281 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_264 : _GEN_223; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_282 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_265 : _GEN_224; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_283 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_266 : _GEN_225; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_284 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_267 : _GEN_226; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_285 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_268 : _GEN_227; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_286 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_269 : _GEN_228; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_287 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_270 : _GEN_229; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_288 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_271 : _GEN_230; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_289 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_272 : _GEN_231; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_290 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_273 : _GEN_232; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_291 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_274 : _GEN_233; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_292 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_275 : _GEN_234; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_293 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_276 : _GEN_235; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_294 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_277 : _GEN_236; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_295 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_278 : _GEN_237; // @[cacheLookupUnit.scala 299:57]
+  wire [31:0] _GEN_296 = readBuffer_instruction[14:12] == 3'h3 ? _GEN_279 : _GEN_238; // @[cacheLookupUnit.scala 299:57]
+  wire  _T_41 = 2'h0 == readBuffer_instruction[13:12]; // @[cacheLookupUnit.scala 316:48]
+  wire [3:0] _T_43 = {{1'd0}, readBuffer_address[2:0]}; // @[cacheLookupUnit.scala 317:88]
+  wire [7:0] _GEN_297 = 3'h0 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 245:46 317:{95,95}]
+  wire [7:0] _GEN_298 = 3'h1 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 245:46 317:{95,95}]
+  wire [7:0] _GEN_299 = 3'h2 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 245:46 317:{95,95}]
+  wire [7:0] _GEN_300 = 3'h3 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 245:46 317:{95,95}]
+  wire [7:0] _GEN_301 = 3'h4 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 245:46 317:{95,95}]
+  wire [7:0] _GEN_302 = 3'h5 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 245:46 317:{95,95}]
+  wire [7:0] _GEN_303 = 3'h6 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 245:46 317:{95,95}]
+  wire [7:0] _GEN_304 = 3'h7 == _T_43[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 245:46 317:{95,95}]
+  wire  _T_45 = 2'h1 == readBuffer_instruction[13:12]; // @[cacheLookupUnit.scala 316:48]
+  wire [3:0] _T_47 = readBuffer_address[2:1] * 2'h2; // @[cacheLookupUnit.scala 318:87]
+  wire [4:0] _T_48 = {{1'd0}, _T_47}; // @[cacheLookupUnit.scala 318:92]
+  wire [7:0] _GEN_305 = 3'h0 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 245:46 318:{99,99}]
+  wire [7:0] _GEN_306 = 3'h1 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 245:46 318:{99,99}]
+  wire [7:0] _GEN_307 = 3'h2 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 245:46 318:{99,99}]
+  wire [7:0] _GEN_308 = 3'h3 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 245:46 318:{99,99}]
+  wire [7:0] _GEN_309 = 3'h4 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 245:46 318:{99,99}]
+  wire [7:0] _GEN_310 = 3'h5 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 245:46 318:{99,99}]
+  wire [7:0] _GEN_311 = 3'h6 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 245:46 318:{99,99}]
+  wire [7:0] _GEN_312 = 3'h7 == _T_48[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 245:46 318:{99,99}]
+  wire [3:0] _T_54 = _T_47 + 4'h1; // @[cacheLookupUnit.scala 318:92]
+  wire [7:0] _GEN_313 = 3'h0 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_305; // @[cacheLookupUnit.scala 318:{99,99}]
+  wire [7:0] _GEN_314 = 3'h1 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_306; // @[cacheLookupUnit.scala 318:{99,99}]
+  wire [7:0] _GEN_315 = 3'h2 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_307; // @[cacheLookupUnit.scala 318:{99,99}]
+  wire [7:0] _GEN_316 = 3'h3 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_308; // @[cacheLookupUnit.scala 318:{99,99}]
+  wire [7:0] _GEN_317 = 3'h4 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_309; // @[cacheLookupUnit.scala 318:{99,99}]
+  wire [7:0] _GEN_318 = 3'h5 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_310; // @[cacheLookupUnit.scala 318:{99,99}]
+  wire [7:0] _GEN_319 = 3'h6 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_311; // @[cacheLookupUnit.scala 318:{99,99}]
+  wire [7:0] _GEN_320 = 3'h7 == _T_54[2:0] ? readBuffer_writeData[15:8] : _GEN_312; // @[cacheLookupUnit.scala 318:{99,99}]
+  wire  _T_56 = 2'h2 == readBuffer_instruction[13:12]; // @[cacheLookupUnit.scala 316:48]
+  wire [3:0] _T_58 = readBuffer_address[2] * 3'h4; // @[cacheLookupUnit.scala 319:84]
+  wire [4:0] _T_59 = {{1'd0}, _T_58}; // @[cacheLookupUnit.scala 319:89]
+  wire [7:0] _GEN_321 = 3'h0 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 245:46 319:{96,96}]
+  wire [7:0] _GEN_322 = 3'h1 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 245:46 319:{96,96}]
+  wire [7:0] _GEN_323 = 3'h2 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 245:46 319:{96,96}]
+  wire [7:0] _GEN_324 = 3'h3 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 245:46 319:{96,96}]
+  wire [7:0] _GEN_325 = 3'h4 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 245:46 319:{96,96}]
+  wire [7:0] _GEN_326 = 3'h5 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 245:46 319:{96,96}]
+  wire [7:0] _GEN_327 = 3'h6 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 245:46 319:{96,96}]
+  wire [7:0] _GEN_328 = 3'h7 == _T_59[2:0] ? readBuffer_writeData[7:0] : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 245:46 319:{96,96}]
+  wire [3:0] _T_65 = _T_58 + 4'h1; // @[cacheLookupUnit.scala 319:89]
+  wire [7:0] _GEN_329 = 3'h0 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_321; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_330 = 3'h1 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_322; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_331 = 3'h2 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_323; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_332 = 3'h3 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_324; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_333 = 3'h4 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_325; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_334 = 3'h5 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_326; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_335 = 3'h6 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_327; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_336 = 3'h7 == _T_65[2:0] ? readBuffer_writeData[15:8] : _GEN_328; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [3:0] _T_70 = _T_58 + 4'h2; // @[cacheLookupUnit.scala 319:89]
+  wire [7:0] _GEN_337 = 3'h0 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_329; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_338 = 3'h1 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_330; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_339 = 3'h2 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_331; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_340 = 3'h3 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_332; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_341 = 3'h4 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_333; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_342 = 3'h5 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_334; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_343 = 3'h6 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_335; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_344 = 3'h7 == _T_70[2:0] ? readBuffer_writeData[23:16] : _GEN_336; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [3:0] _T_75 = _T_58 + 4'h3; // @[cacheLookupUnit.scala 319:89]
+  wire [7:0] _GEN_345 = 3'h0 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_337; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_346 = 3'h1 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_338; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_347 = 3'h2 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_339; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_348 = 3'h3 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_340; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_349 = 3'h4 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_341; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_350 = 3'h5 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_342; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_351 = 3'h6 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_343; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire [7:0] _GEN_352 = 3'h7 == _T_75[2:0] ? readBuffer_writeData[31:24] : _GEN_344; // @[cacheLookupUnit.scala 319:{96,96}]
+  wire  _T_77 = 2'h3 == readBuffer_instruction[13:12]; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_353 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[7:0] : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 245:46 316:48 320:68]
+  wire [7:0] _GEN_354 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[15:8] : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 245:46 316:48 320:68]
+  wire [7:0] _GEN_355 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[23:16] : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 245:46 316:48 320:68]
+  wire [7:0] _GEN_356 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[31:24] : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 245:46 316:48 320:68]
+  wire [7:0] _GEN_357 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[39:32] : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 245:46 316:48 320:68]
+  wire [7:0] _GEN_358 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[47:40] : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 245:46 316:48 320:68]
+  wire [7:0] _GEN_359 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[55:48] : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 245:46 316:48 320:68]
+  wire [7:0] _GEN_360 = 2'h3 == readBuffer_instruction[13:12] ? readBuffer_writeData[63:56] : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 245:46 316:48 320:68]
+  wire [7:0] _GEN_361 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_345 : _GEN_353; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_362 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_346 : _GEN_354; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_363 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_347 : _GEN_355; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_364 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_348 : _GEN_356; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_365 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_349 : _GEN_357; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_366 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_350 : _GEN_358; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_367 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_351 : _GEN_359; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_368 = 2'h2 == readBuffer_instruction[13:12] ? _GEN_352 : _GEN_360; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_369 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_313 : _GEN_361; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_370 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_314 : _GEN_362; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_371 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_315 : _GEN_363; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_372 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_316 : _GEN_364; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_373 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_317 : _GEN_365; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_374 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_318 : _GEN_366; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_375 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_319 : _GEN_367; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_376 = 2'h1 == readBuffer_instruction[13:12] ? _GEN_320 : _GEN_368; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_377 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_297 : _GEN_369; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_378 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_298 : _GEN_370; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_379 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_299 : _GEN_371; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_380 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_300 : _GEN_372; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_381 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_301 : _GEN_373; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_382 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_302 : _GEN_374; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_383 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_303 : _GEN_375; // @[cacheLookupUnit.scala 316:48]
+  wire [7:0] _GEN_384 = 2'h0 == readBuffer_instruction[13:12] ? _GEN_304 : _GEN_376; // @[cacheLookupUnit.scala 316:48]
+  wire [4:0] _T_79 = readBuffer_address[5:3] * 2'h2; // @[cacheLookupUnit.scala 322:50]
+  wire [7:0] _GEN_418 = ~isPermissionMiss ? _GEN_378 : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 315:32 245:46]
+  wire [7:0] _GEN_460 = isAtmoicWriteWire ? doubleWordWrite[15:8] : _GEN_418; // @[cacheLookupUnit.scala 284:30 245:46]
   wire [7:0] writeByteChunks_1 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_460 : doubleWordWrite[15:8]; // @[cacheLookupUnit.scala 245:46 269:61]
-  wire [7:0] _GEN_417 = ~permissionMiss ? _GEN_377 : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 311:30 245:46]
-  wire [7:0] _GEN_459 = isAtmoicWriteWire ? doubleWordWrite[7:0] : _GEN_417; // @[cacheLookupUnit.scala 280:30 245:46]
+  wire [7:0] _GEN_417 = ~isPermissionMiss ? _GEN_377 : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 315:32 245:46]
+  wire [7:0] _GEN_459 = isAtmoicWriteWire ? doubleWordWrite[7:0] : _GEN_417; // @[cacheLookupUnit.scala 284:30 245:46]
   wire [7:0] writeByteChunks_0 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_459 : doubleWordWrite[7:0]; // @[cacheLookupUnit.scala 245:46 269:61]
-  wire [7:0] _GEN_420 = ~permissionMiss ? _GEN_380 : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 311:30 245:46]
-  wire [7:0] _GEN_462 = isAtmoicWriteWire ? doubleWordWrite[31:24] : _GEN_420; // @[cacheLookupUnit.scala 280:30 245:46]
+  wire [7:0] _GEN_420 = ~isPermissionMiss ? _GEN_380 : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 315:32 245:46]
+  wire [7:0] _GEN_462 = isAtmoicWriteWire ? doubleWordWrite[31:24] : _GEN_420; // @[cacheLookupUnit.scala 284:30 245:46]
   wire [7:0] writeByteChunks_3 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_462 : doubleWordWrite[31:24]; // @[cacheLookupUnit.scala 245:46 269:61]
-  wire [7:0] _GEN_419 = ~permissionMiss ? _GEN_379 : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 311:30 245:46]
-  wire [7:0] _GEN_461 = isAtmoicWriteWire ? doubleWordWrite[23:16] : _GEN_419; // @[cacheLookupUnit.scala 280:30 245:46]
+  wire [7:0] _GEN_419 = ~isPermissionMiss ? _GEN_379 : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 315:32 245:46]
+  wire [7:0] _GEN_461 = isAtmoicWriteWire ? doubleWordWrite[23:16] : _GEN_419; // @[cacheLookupUnit.scala 284:30 245:46]
   wire [7:0] writeByteChunks_2 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_461 : doubleWordWrite[23:16]; // @[cacheLookupUnit.scala 245:46 269:61]
   wire [31:0] _newWriteChunks_T_18 = {writeByteChunks_3,writeByteChunks_2,writeByteChunks_1,writeByteChunks_0}; // @[Cat.scala 33:92]
-  wire [31:0] _GEN_385 = 4'h0 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_386 = 4'h1 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_387 = 4'h2 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_388 = 4'h3 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_389 = 4'h4 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_390 = 4'h5 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_391 = 4'h6 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_392 = 4'h7 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_393 = 4'h8 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_394 = 4'h9 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_395 = 4'ha == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_396 = 4'hb == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_397 = 4'hc == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_398 = 4'hd == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_399 = 4'he == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [31:0] _GEN_400 = 4'hf == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 239:33 318:{56,56}]
-  wire [4:0] _T_84 = _T_79 + 5'h1; // @[cacheLookupUnit.scala 319:55]
-  wire [7:0] _GEN_422 = ~permissionMiss ? _GEN_382 : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 311:30 245:46]
-  wire [7:0] _GEN_464 = isAtmoicWriteWire ? doubleWordWrite[47:40] : _GEN_422; // @[cacheLookupUnit.scala 280:30 245:46]
+  wire [31:0] _GEN_385 = 4'h0 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_386 = 4'h1 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_387 = 4'h2 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_388 = 4'h3 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_389 = 4'h4 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_390 = 4'h5 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_391 = 4'h6 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_392 = 4'h7 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_393 = 4'h8 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_394 = 4'h9 == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_395 = 4'ha == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_396 = 4'hb == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_397 = 4'hc == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_398 = 4'hd == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_399 = 4'he == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [31:0] _GEN_400 = 4'hf == _T_79[3:0] ? _newWriteChunks_T_18 : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 239:33 322:{56,56}]
+  wire [4:0] _T_84 = _T_79 + 5'h1; // @[cacheLookupUnit.scala 323:55]
+  wire [7:0] _GEN_422 = ~isPermissionMiss ? _GEN_382 : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 315:32 245:46]
+  wire [7:0] _GEN_464 = isAtmoicWriteWire ? doubleWordWrite[47:40] : _GEN_422; // @[cacheLookupUnit.scala 284:30 245:46]
   wire [7:0] writeByteChunks_5 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_464 : doubleWordWrite[47:40]; // @[cacheLookupUnit.scala 245:46 269:61]
-  wire [7:0] _GEN_421 = ~permissionMiss ? _GEN_381 : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 311:30 245:46]
-  wire [7:0] _GEN_463 = isAtmoicWriteWire ? doubleWordWrite[39:32] : _GEN_421; // @[cacheLookupUnit.scala 280:30 245:46]
+  wire [7:0] _GEN_421 = ~isPermissionMiss ? _GEN_381 : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 315:32 245:46]
+  wire [7:0] _GEN_463 = isAtmoicWriteWire ? doubleWordWrite[39:32] : _GEN_421; // @[cacheLookupUnit.scala 284:30 245:46]
   wire [7:0] writeByteChunks_4 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_463 : doubleWordWrite[39:32]; // @[cacheLookupUnit.scala 245:46 269:61]
-  wire [7:0] _GEN_424 = ~permissionMiss ? _GEN_384 : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 311:30 245:46]
-  wire [7:0] _GEN_466 = isAtmoicWriteWire ? doubleWordWrite[63:56] : _GEN_424; // @[cacheLookupUnit.scala 280:30 245:46]
+  wire [7:0] _GEN_424 = ~isPermissionMiss ? _GEN_384 : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 315:32 245:46]
+  wire [7:0] _GEN_466 = isAtmoicWriteWire ? doubleWordWrite[63:56] : _GEN_424; // @[cacheLookupUnit.scala 284:30 245:46]
   wire [7:0] writeByteChunks_7 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_466 : doubleWordWrite[63:56]; // @[cacheLookupUnit.scala 245:46 269:61]
-  wire [7:0] _GEN_423 = ~permissionMiss ? _GEN_383 : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 311:30 245:46]
-  wire [7:0] _GEN_465 = isAtmoicWriteWire ? doubleWordWrite[55:48] : _GEN_423; // @[cacheLookupUnit.scala 280:30 245:46]
+  wire [7:0] _GEN_423 = ~isPermissionMiss ? _GEN_383 : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 315:32 245:46]
+  wire [7:0] _GEN_465 = isAtmoicWriteWire ? doubleWordWrite[55:48] : _GEN_423; // @[cacheLookupUnit.scala 284:30 245:46]
   wire [7:0] writeByteChunks_6 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_465 : doubleWordWrite[55:48]; // @[cacheLookupUnit.scala 245:46 269:61]
   wire [31:0] _newWriteChunks_T_19 = {writeByteChunks_7,writeByteChunks_6,writeByteChunks_5,writeByteChunks_4}; // @[Cat.scala 33:92]
-  wire [31:0] _GEN_401 = 4'h0 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_385; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_402 = 4'h1 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_386; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_403 = 4'h2 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_387; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_404 = 4'h3 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_388; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_405 = 4'h4 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_389; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_406 = 4'h5 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_390; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_407 = 4'h6 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_391; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_408 = 4'h7 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_392; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_409 = 4'h8 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_393; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_410 = 4'h9 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_394; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_411 = 4'ha == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_395; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_412 = 4'hb == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_396; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_413 = 4'hc == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_397; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_414 = 4'hd == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_398; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_415 = 4'he == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_399; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_416 = 4'hf == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_400; // @[cacheLookupUnit.scala 319:{62,62}]
-  wire [31:0] _GEN_425 = ~permissionMiss ? _GEN_401 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_426 = ~permissionMiss ? _GEN_402 : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_427 = ~permissionMiss ? _GEN_403 : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_428 = ~permissionMiss ? _GEN_404 : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_429 = ~permissionMiss ? _GEN_405 : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_430 = ~permissionMiss ? _GEN_406 : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_431 = ~permissionMiss ? _GEN_407 : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_432 = ~permissionMiss ? _GEN_408 : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_433 = ~permissionMiss ? _GEN_409 : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_434 = ~permissionMiss ? _GEN_410 : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_435 = ~permissionMiss ? _GEN_411 : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_436 = ~permissionMiss ? _GEN_412 : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_437 = ~permissionMiss ? _GEN_413 : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_438 = ~permissionMiss ? _GEN_414 : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_439 = ~permissionMiss ? _GEN_415 : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_440 = ~permissionMiss ? _GEN_416 : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 311:30 239:33]
-  wire [31:0] _GEN_442 = isAtmoicWriteWire ? _GEN_281 : _GEN_425; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_443 = isAtmoicWriteWire ? _GEN_282 : _GEN_426; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_444 = isAtmoicWriteWire ? _GEN_283 : _GEN_427; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_445 = isAtmoicWriteWire ? _GEN_284 : _GEN_428; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_446 = isAtmoicWriteWire ? _GEN_285 : _GEN_429; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_447 = isAtmoicWriteWire ? _GEN_286 : _GEN_430; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_448 = isAtmoicWriteWire ? _GEN_287 : _GEN_431; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_449 = isAtmoicWriteWire ? _GEN_288 : _GEN_432; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_450 = isAtmoicWriteWire ? _GEN_289 : _GEN_433; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_451 = isAtmoicWriteWire ? _GEN_290 : _GEN_434; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_452 = isAtmoicWriteWire ? _GEN_291 : _GEN_435; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_453 = isAtmoicWriteWire ? _GEN_292 : _GEN_436; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_454 = isAtmoicWriteWire ? _GEN_293 : _GEN_437; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_455 = isAtmoicWriteWire ? _GEN_294 : _GEN_438; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_456 = isAtmoicWriteWire ? _GEN_295 : _GEN_439; // @[cacheLookupUnit.scala 280:30]
-  wire [31:0] _GEN_457 = isAtmoicWriteWire ? _GEN_296 : _GEN_440; // @[cacheLookupUnit.scala 280:30]
+  wire [31:0] _GEN_401 = 4'h0 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_385; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_402 = 4'h1 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_386; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_403 = 4'h2 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_387; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_404 = 4'h3 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_388; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_405 = 4'h4 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_389; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_406 = 4'h5 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_390; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_407 = 4'h6 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_391; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_408 = 4'h7 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_392; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_409 = 4'h8 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_393; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_410 = 4'h9 == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_394; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_411 = 4'ha == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_395; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_412 = 4'hb == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_396; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_413 = 4'hc == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_397; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_414 = 4'hd == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_398; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_415 = 4'he == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_399; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_416 = 4'hf == _T_84[3:0] ? _newWriteChunks_T_19 : _GEN_400; // @[cacheLookupUnit.scala 323:{62,62}]
+  wire [31:0] _GEN_425 = ~isPermissionMiss ? _GEN_401 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_426 = ~isPermissionMiss ? _GEN_402 : cacheLineChoosen[63:32]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_427 = ~isPermissionMiss ? _GEN_403 : cacheLineChoosen[95:64]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_428 = ~isPermissionMiss ? _GEN_404 : cacheLineChoosen[127:96]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_429 = ~isPermissionMiss ? _GEN_405 : cacheLineChoosen[159:128]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_430 = ~isPermissionMiss ? _GEN_406 : cacheLineChoosen[191:160]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_431 = ~isPermissionMiss ? _GEN_407 : cacheLineChoosen[223:192]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_432 = ~isPermissionMiss ? _GEN_408 : cacheLineChoosen[255:224]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_433 = ~isPermissionMiss ? _GEN_409 : cacheLineChoosen[287:256]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_434 = ~isPermissionMiss ? _GEN_410 : cacheLineChoosen[319:288]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_435 = ~isPermissionMiss ? _GEN_411 : cacheLineChoosen[351:320]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_436 = ~isPermissionMiss ? _GEN_412 : cacheLineChoosen[383:352]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_437 = ~isPermissionMiss ? _GEN_413 : cacheLineChoosen[415:384]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_438 = ~isPermissionMiss ? _GEN_414 : cacheLineChoosen[447:416]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_439 = ~isPermissionMiss ? _GEN_415 : cacheLineChoosen[479:448]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_440 = ~isPermissionMiss ? _GEN_416 : cacheLineChoosen[511:480]; // @[cacheLookupUnit.scala 315:32 239:33]
+  wire [31:0] _GEN_442 = isAtmoicWriteWire ? _GEN_281 : _GEN_425; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_443 = isAtmoicWriteWire ? _GEN_282 : _GEN_426; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_444 = isAtmoicWriteWire ? _GEN_283 : _GEN_427; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_445 = isAtmoicWriteWire ? _GEN_284 : _GEN_428; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_446 = isAtmoicWriteWire ? _GEN_285 : _GEN_429; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_447 = isAtmoicWriteWire ? _GEN_286 : _GEN_430; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_448 = isAtmoicWriteWire ? _GEN_287 : _GEN_431; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_449 = isAtmoicWriteWire ? _GEN_288 : _GEN_432; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_450 = isAtmoicWriteWire ? _GEN_289 : _GEN_433; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_451 = isAtmoicWriteWire ? _GEN_290 : _GEN_434; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_452 = isAtmoicWriteWire ? _GEN_291 : _GEN_435; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_453 = isAtmoicWriteWire ? _GEN_292 : _GEN_436; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_454 = isAtmoicWriteWire ? _GEN_293 : _GEN_437; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_455 = isAtmoicWriteWire ? _GEN_294 : _GEN_438; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_456 = isAtmoicWriteWire ? _GEN_295 : _GEN_439; // @[cacheLookupUnit.scala 284:30]
+  wire [31:0] _GEN_457 = isAtmoicWriteWire ? _GEN_296 : _GEN_440; // @[cacheLookupUnit.scala 284:30]
   wire  _GEN_470 = isWriteWire | isAtmoicWriteWire | isSCWriteWire | _GEN_144; // @[cacheLookupUnit.scala 269:61 270:23]
   wire  _GEN_471 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _newPLRUBitWire_T_6 : _GEN_141; // @[cacheLookupUnit.scala 269:61 271:22]
-  wire  _GEN_472 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_162 : _GEN_142; // @[cacheLookupUnit.scala 269:61]
+  wire  _GEN_472 = isWriteWire | isAtmoicWriteWire | isSCWriteWire | _GEN_142; // @[cacheLookupUnit.scala 269:61]
   wire  _GEN_473 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_163 : _GEN_143; // @[cacheLookupUnit.scala 269:61]
   wire [18:0] newAddrWire = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_164 : _GEN_145; // @[cacheLookupUnit.scala 269:61]
   wire [31:0] newWriteChunks_0 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_442 : cacheLineChoosen[31:0]; // @[cacheLookupUnit.scala 239:33 269:61]
@@ -35149,98 +35187,97 @@ module cacheLookupUnit(
     ; // @[cacheLookupUnit.scala 239:33 269:61]
   wire [31:0] newWriteChunks_15 = isWriteWire | isAtmoicWriteWire | isSCWriteWire ? _GEN_457 : cacheLineChoosen[511:480]
     ; // @[cacheLookupUnit.scala 239:33 269:61]
-  wire  _GEN_522 = readBuffer_response[1] ? 1'h0 : _GEN_472; // @[cacheLookupUnit.scala 333:35 334:25]
-  wire  _GEN_523 = readBuffer_response[1] ? 1'h0 : _GEN_471; // @[cacheLookupUnit.scala 333:35 335:24]
-  wire  _GEN_524 = readBuffer_response[1] ? 1'h0 : readBuffer_response[0] | shareBitWire; // @[cacheLookupUnit.scala 333:35 336:25 339:25]
-  wire  _GEN_525 = readBuffer_response[1] ? 1'h0 : _GEN_470; // @[cacheLookupUnit.scala 333:35 337:25]
-  wire  newValidBitWire = isCoherentWire ? _GEN_522 : _GEN_472; // @[cacheLookupUnit.scala 332:25]
-  wire  newPLRUBitWire = isCoherentWire ? _GEN_523 : _GEN_471; // @[cacheLookupUnit.scala 332:25]
-  wire  newShareBitWire = isCoherentWire ? _GEN_524 : _GEN_473; // @[cacheLookupUnit.scala 332:25]
-  wire  newDirtyBitWire = isCoherentWire ? _GEN_525 : _GEN_470; // @[cacheLookupUnit.scala 332:25]
-  wire [1:0] updatingSet = readBuffer_valid ? replacingset : hitTagWire; // @[cacheLookupUnit.scala 350:26]
-  wire [22:0] _newtagChunks_0_T_2 = tagChunks_0 & 23'h3fffff; // @[cacheLookupUnit.scala 353:41]
-  wire [22:0] _newtagChunks_1_T_2 = tagChunks_1 & 23'h3fffff; // @[cacheLookupUnit.scala 353:41]
-  wire [22:0] _newtagChunks_2_T_2 = tagChunks_2 & 23'h3fffff; // @[cacheLookupUnit.scala 353:41]
-  wire [22:0] _newtagChunks_3_T_2 = tagChunks_3 & 23'h3fffff; // @[cacheLookupUnit.scala 353:41]
-  wire [22:0] _GEN_534 = _newPLRUBitWire_T_5 ? _newtagChunks_0_T_2 : tagChunks_0; // @[cacheLookupUnit.scala 351:36 353:25 225:31]
-  wire [22:0] _GEN_535 = _newPLRUBitWire_T_5 ? _newtagChunks_1_T_2 : tagChunks_1; // @[cacheLookupUnit.scala 351:36 353:25 225:31]
-  wire [22:0] _GEN_536 = _newPLRUBitWire_T_5 ? _newtagChunks_2_T_2 : tagChunks_2; // @[cacheLookupUnit.scala 351:36 353:25 225:31]
-  wire [22:0] _GEN_537 = _newPLRUBitWire_T_5 ? _newtagChunks_3_T_2 : tagChunks_3; // @[cacheLookupUnit.scala 351:36 353:25 225:31]
+  wire  _GEN_522 = readBuffer_response[1] ? 1'h0 : _GEN_472; // @[cacheLookupUnit.scala 336:35 337:25]
+  wire  _GEN_523 = readBuffer_response[1] ? 1'h0 : _GEN_471; // @[cacheLookupUnit.scala 336:35 338:24]
+  wire  _GEN_524 = readBuffer_response[1] ? 1'h0 : readBuffer_response[0] | shareBitWire; // @[cacheLookupUnit.scala 336:35 339:25 342:25]
+  wire  _GEN_525 = readBuffer_response[1] ? 1'h0 : _GEN_470; // @[cacheLookupUnit.scala 336:35 340:25]
+  wire  newValidBitWire = isCoherentWire ? _GEN_522 : _GEN_472; // @[cacheLookupUnit.scala 335:25]
+  wire  newPLRUBitWire = isCoherentWire ? _GEN_523 : _GEN_471; // @[cacheLookupUnit.scala 335:25]
+  wire  newShareBitWire = isCoherentWire ? _GEN_524 : _GEN_473; // @[cacheLookupUnit.scala 335:25]
+  wire  newDirtyBitWire = isCoherentWire ? _GEN_525 : _GEN_470; // @[cacheLookupUnit.scala 335:25]
+  wire [1:0] updatingSet = isPermissionMiss ? replacingset : hitTagWire; // @[cacheLookupUnit.scala 353:26]
+  wire [22:0] _newtagChunks_0_T_2 = tagChunks_0 & 23'h3fffff; // @[cacheLookupUnit.scala 356:41]
+  wire [22:0] _newtagChunks_1_T_2 = tagChunks_1 & 23'h3fffff; // @[cacheLookupUnit.scala 356:41]
+  wire [22:0] _newtagChunks_2_T_2 = tagChunks_2 & 23'h3fffff; // @[cacheLookupUnit.scala 356:41]
+  wire [22:0] _newtagChunks_3_T_2 = tagChunks_3 & 23'h3fffff; // @[cacheLookupUnit.scala 356:41]
+  wire [22:0] _GEN_534 = _newPLRUBitWire_T_5 ? _newtagChunks_0_T_2 : tagChunks_0; // @[cacheLookupUnit.scala 354:36 356:25 225:31]
+  wire [22:0] _GEN_535 = _newPLRUBitWire_T_5 ? _newtagChunks_1_T_2 : tagChunks_1; // @[cacheLookupUnit.scala 354:36 356:25 225:31]
+  wire [22:0] _GEN_536 = _newPLRUBitWire_T_5 ? _newtagChunks_2_T_2 : tagChunks_2; // @[cacheLookupUnit.scala 354:36 356:25 225:31]
+  wire [22:0] _GEN_537 = _newPLRUBitWire_T_5 ? _newtagChunks_3_T_2 : tagChunks_3; // @[cacheLookupUnit.scala 354:36 356:25 225:31]
   wire [22:0] _newtagChunks_T_4 = {newPLRUBitWire,newShareBitWire,newDirtyBitWire,newValidBitWire,newAddrWire}; // @[Cat.scala 33:92]
-  wire [22:0] newtagChunks_0 = 2'h0 == updatingSet ? _newtagChunks_T_4 : _GEN_534; // @[cacheLookupUnit.scala 356:{31,31}]
-  wire [22:0] newtagChunks_1 = 2'h1 == updatingSet ? _newtagChunks_T_4 : _GEN_535; // @[cacheLookupUnit.scala 356:{31,31}]
-  wire [22:0] newtagChunks_2 = 2'h2 == updatingSet ? _newtagChunks_T_4 : _GEN_536; // @[cacheLookupUnit.scala 356:{31,31}]
-  wire [22:0] newtagChunks_3 = 2'h3 == updatingSet ? _newtagChunks_T_4 : _GEN_537; // @[cacheLookupUnit.scala 356:{31,31}]
+  wire [22:0] newtagChunks_0 = 2'h0 == updatingSet ? _newtagChunks_T_4 : _GEN_534; // @[cacheLookupUnit.scala 359:{31,31}]
+  wire [22:0] newtagChunks_1 = 2'h1 == updatingSet ? _newtagChunks_T_4 : _GEN_535; // @[cacheLookupUnit.scala 359:{31,31}]
+  wire [22:0] newtagChunks_2 = 2'h2 == updatingSet ? _newtagChunks_T_4 : _GEN_536; // @[cacheLookupUnit.scala 359:{31,31}]
+  wire [22:0] newtagChunks_3 = 2'h3 == updatingSet ? _newtagChunks_T_4 : _GEN_537; // @[cacheLookupUnit.scala 359:{31,31}]
   wire [91:0] _tagBRAM_wrData_T_2 = {newtagChunks_3,newtagChunks_2,newtagChunks_1,newtagChunks_0}; // @[Cat.scala 33:92]
-  wire  _T_104 = isMissWire & readBuffer_requestType == 2'h2; // @[cacheLookupUnit.scala 369:37]
-  wire  _T_106 = isReadWire | isAtmoicReadWire; // @[cacheLookupUnit.scala 370:23]
-  wire  _GEN_555 = (isReadWire | isAtmoicReadWire) & _T_104; // @[cacheLookupUnit.scala 370:43 373:28]
-  wire  _GEN_561 = _T_8 ? _T_39 : _GEN_555; // @[cacheLookupUnit.scala 379:45 384:28]
-  wire  _GEN_565 = isLRWire | _GEN_561; // @[cacheLookupUnit.scala 386:21 390:28]
-  wire  _GEN_571 = reservationRegister_reserved | _GEN_565; // @[cacheLookupUnit.scala 394:43 399:30]
-  wire  _GEN_576 = isSCWriteWire ? _GEN_571 : _GEN_565; // @[cacheLookupUnit.scala 393:26]
-  wire  dataBRAMUpdateWire = (_permissionMiss_T | isMissWire & readBuffer_requestType == 2'h2) & _GEN_576; // @[cacheLookupUnit.scala 369:79]
-  wire  _GEN_542 = 2'h0 == updatingSet & dataBRAMUpdateWire; // @[cacheLookupUnit.scala 364:{36,36} 68:28]
-  wire  _GEN_543 = 2'h1 == updatingSet & dataBRAMUpdateWire; // @[cacheLookupUnit.scala 364:{36,36} 68:28]
-  wire  _GEN_544 = 2'h2 == updatingSet & dataBRAMUpdateWire; // @[cacheLookupUnit.scala 364:{36,36} 68:28]
-  wire  _GEN_545 = 2'h3 == updatingSet & dataBRAMUpdateWire; // @[cacheLookupUnit.scala 364:{36,36} 68:28]
+  wire  _T_103 = readBuffer_requestType == 2'h2; // @[cacheLookupUnit.scala 372:70]
+  wire  _T_106 = isReadWire | isAtmoicReadWire; // @[cacheLookupUnit.scala 373:23]
+  wire  _GEN_555 = (isReadWire | isAtmoicReadWire) & (isMissWire & _T_103); // @[cacheLookupUnit.scala 373:43 376:28]
+  wire  _GEN_561 = _T_8 | _GEN_555; // @[cacheLookupUnit.scala 382:45 386:28]
+  wire  _GEN_565 = isLRWire | _GEN_561; // @[cacheLookupUnit.scala 388:21 392:28]
+  wire  _GEN_571 = reservationRegister_reserved | _GEN_565; // @[cacheLookupUnit.scala 396:43 401:30]
+  wire  _GEN_576 = isSCWriteWire ? _GEN_571 : _GEN_565; // @[cacheLookupUnit.scala 395:26]
+  wire  dataBRAMUpdateWire = (_isPermissionMiss_T | isPermissionMiss & readBuffer_requestType == 2'h2) & _GEN_576; // @[cacheLookupUnit.scala 372:85]
+  wire  _GEN_542 = 2'h0 == updatingSet & dataBRAMUpdateWire; // @[cacheLookupUnit.scala 367:{36,36} 68:28]
+  wire  _GEN_543 = 2'h1 == updatingSet & dataBRAMUpdateWire; // @[cacheLookupUnit.scala 367:{36,36} 68:28]
+  wire  _GEN_544 = 2'h2 == updatingSet & dataBRAMUpdateWire; // @[cacheLookupUnit.scala 367:{36,36} 68:28]
+  wire  _GEN_545 = 2'h3 == updatingSet & dataBRAMUpdateWire; // @[cacheLookupUnit.scala 367:{36,36} 68:28]
   wire [319:0] _dataBRAMVec_wrData_T_8 = {newWriteChunks_15,newWriteChunks_14,newWriteChunks_13,newWriteChunks_12,
     newWriteChunks_11,newWriteChunks_10,newWriteChunks_9,newWriteChunks_8,newWriteChunks_7,newWriteChunks_6}; // @[Cat.scala 33:92]
   wire [511:0] _dataBRAMVec_wrData_T_14 = {_dataBRAMVec_wrData_T_8,newWriteChunks_5,newWriteChunks_4,newWriteChunks_3,
     newWriteChunks_2,newWriteChunks_1,newWriteChunks_0}; // @[Cat.scala 33:92]
-  wire [511:0] _GEN_546 = 2'h0 == updatingSet ? _dataBRAMVec_wrData_T_14 : 512'h0; // @[cacheLookupUnit.scala 365:{37,37} 68:28]
-  wire [511:0] _GEN_547 = 2'h1 == updatingSet ? _dataBRAMVec_wrData_T_14 : 512'h0; // @[cacheLookupUnit.scala 365:{37,37} 68:28]
-  wire [511:0] _GEN_548 = 2'h2 == updatingSet ? _dataBRAMVec_wrData_T_14 : 512'h0; // @[cacheLookupUnit.scala 365:{37,37} 68:28]
-  wire [511:0] _GEN_549 = 2'h3 == updatingSet ? _dataBRAMVec_wrData_T_14 : 512'h0; // @[cacheLookupUnit.scala 365:{37,37} 68:28]
-  wire [6:0] _GEN_550 = 2'h0 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 366:{37,37} 68:28]
-  wire [6:0] _GEN_551 = 2'h1 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 366:{37,37} 68:28]
-  wire [6:0] _GEN_552 = 2'h2 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 366:{37,37} 68:28]
-  wire [6:0] _GEN_553 = 2'h3 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 366:{37,37} 68:28]
-  wire  _GEN_557 = isCoherentWire | _T_106; // @[cacheLookupUnit.scala 375:27 377:26]
-  wire  _GEN_558 = _T_8 & permissionMiss; // @[cacheLookupUnit.scala 379:45 380:27]
-  wire  _GEN_559 = _T_8 & (_T_39 & dirtyBitWire); // @[cacheLookupUnit.scala 379:45 382:30]
-  wire  _GEN_560 = _T_8 ? _T_39 : _GEN_557; // @[cacheLookupUnit.scala 379:45 383:26]
-  wire  _GEN_563 = isLRWire | _T_106; // @[cacheLookupUnit.scala 386:21 388:35]
-  wire  _GEN_564 = isLRWire | _GEN_560; // @[cacheLookupUnit.scala 386:21 389:26]
-  wire  _GEN_566 = isSCReadWire | _GEN_563; // @[cacheLookupUnit.scala 392:{25,52}]
-  wire  _GEN_569 = reservationRegister_reserved ? readBuffer_valid & dirtyBitWire : _GEN_559; // @[cacheLookupUnit.scala 394:43 397:32]
-  wire  _GEN_570 = reservationRegister_reserved | _GEN_564; // @[cacheLookupUnit.scala 394:43 398:28]
-  wire  _GEN_573 = isSCWriteWire | _GEN_566; // @[cacheLookupUnit.scala 393:26]
-  wire  _GEN_574 = isSCWriteWire ? _GEN_569 : _GEN_559; // @[cacheLookupUnit.scala 393:26]
-  wire  _GEN_575 = isSCWriteWire ? _GEN_570 : _GEN_564; // @[cacheLookupUnit.scala 393:26]
-  wire  _T_111 = _T_106 | isWriteWire | isAtmoicWriteWire | isLRWire; // @[cacheLookupUnit.scala 405:79]
-  wire  _GEN_578 = (_T_106 | isWriteWire | isAtmoicWriteWire | isLRWire) & ~isReadWire; // @[cacheLookupUnit.scala 405:91 407:34]
-  wire  _GEN_580 = _permissionMiss_T | isMissWire & readBuffer_requestType == 2'h2 ? _GEN_573 : isSCWire; // @[cacheLookupUnit.scala 369:79]
-  wire  tagBRAMUpdateWire = (_permissionMiss_T | isMissWire & readBuffer_requestType == 2'h2) & _GEN_575; // @[cacheLookupUnit.scala 369:79]
-  wire  _GEN_584 = _permissionMiss_T | isMissWire & readBuffer_requestType == 2'h2 ? _GEN_558 : _T_111; // @[cacheLookupUnit.scala 369:79]
-  wire  _GEN_585 = _permissionMiss_T | isMissWire & readBuffer_requestType == 2'h2 ? _GEN_558 : _GEN_578; // @[cacheLookupUnit.scala 369:79]
-  wire  _GEN_586 = (_permissionMiss_T | isMissWire & readBuffer_requestType == 2'h2) & _GEN_574; // @[cacheLookupUnit.scala 369:79]
-  wire  _GEN_587 = (_permissionMiss_T | isMissWire & readBuffer_requestType == 2'h2) & isLRWire; // @[cacheLookupUnit.scala 369:79]
-  wire [63:0] doubleWordChunks_0 = cacheLineChoosen[63:0]; // @[cacheLookupUnit.scala 418:23]
-  wire [63:0] doubleWordChunks_1 = cacheLineChoosen[127:64]; // @[cacheLookupUnit.scala 418:23]
-  wire [63:0] doubleWordChunks_2 = cacheLineChoosen[191:128]; // @[cacheLookupUnit.scala 418:23]
-  wire [63:0] doubleWordChunks_3 = cacheLineChoosen[255:192]; // @[cacheLookupUnit.scala 418:23]
-  wire [63:0] doubleWordChunks_4 = cacheLineChoosen[319:256]; // @[cacheLookupUnit.scala 418:23]
-  wire [63:0] doubleWordChunks_5 = cacheLineChoosen[383:320]; // @[cacheLookupUnit.scala 418:23]
-  wire [63:0] doubleWordChunks_6 = cacheLineChoosen[447:384]; // @[cacheLookupUnit.scala 418:23]
-  wire [63:0] doubleWordChunks_7 = cacheLineChoosen[511:448]; // @[cacheLookupUnit.scala 418:23]
-  wire [63:0] _GEN_590 = 3'h1 == readBuffer_address[5:3] ? doubleWordChunks_1 : doubleWordChunks_0; // @[cacheLookupUnit.scala 424:{24,24}]
-  wire [63:0] _GEN_591 = 3'h2 == readBuffer_address[5:3] ? doubleWordChunks_2 : _GEN_590; // @[cacheLookupUnit.scala 424:{24,24}]
-  wire [63:0] _GEN_592 = 3'h3 == readBuffer_address[5:3] ? doubleWordChunks_3 : _GEN_591; // @[cacheLookupUnit.scala 424:{24,24}]
-  wire [63:0] _GEN_593 = 3'h4 == readBuffer_address[5:3] ? doubleWordChunks_4 : _GEN_592; // @[cacheLookupUnit.scala 424:{24,24}]
-  wire [63:0] _GEN_594 = 3'h5 == readBuffer_address[5:3] ? doubleWordChunks_5 : _GEN_593; // @[cacheLookupUnit.scala 424:{24,24}]
-  wire [63:0] _GEN_595 = 3'h6 == readBuffer_address[5:3] ? doubleWordChunks_6 : _GEN_594; // @[cacheLookupUnit.scala 424:{24,24}]
-  wire [63:0] _GEN_596 = 3'h7 == readBuffer_address[5:3] ? doubleWordChunks_7 : _GEN_595; // @[cacheLookupUnit.scala 424:{24,24}]
-  wire [7:0] byteChunks_0 = _GEN_596[7:0]; // @[cacheLookupUnit.scala 424:24]
-  wire [7:0] byteChunks_1 = _GEN_596[15:8]; // @[cacheLookupUnit.scala 424:24]
-  wire [7:0] byteChunks_2 = _GEN_596[23:16]; // @[cacheLookupUnit.scala 424:24]
-  wire [7:0] byteChunks_3 = _GEN_596[31:24]; // @[cacheLookupUnit.scala 424:24]
-  wire [7:0] byteChunks_4 = _GEN_596[39:32]; // @[cacheLookupUnit.scala 424:24]
-  wire [7:0] byteChunks_5 = _GEN_596[47:40]; // @[cacheLookupUnit.scala 424:24]
-  wire [7:0] byteChunks_6 = _GEN_596[55:48]; // @[cacheLookupUnit.scala 424:24]
-  wire [7:0] byteChunks_7 = _GEN_596[63:56]; // @[cacheLookupUnit.scala 424:24]
-  wire [3:0] _halfwordChoosed_T_1 = 2'h2 * readBuffer_address[2:1]; // @[cacheLookupUnit.scala 427:46]
-  wire [3:0] _halfwordChoosed_T_3 = _halfwordChoosed_T_1 + 4'h1; // @[cacheLookupUnit.scala 427:72]
+  wire [511:0] _GEN_546 = 2'h0 == updatingSet ? _dataBRAMVec_wrData_T_14 : 512'h0; // @[cacheLookupUnit.scala 368:{37,37} 68:28]
+  wire [511:0] _GEN_547 = 2'h1 == updatingSet ? _dataBRAMVec_wrData_T_14 : 512'h0; // @[cacheLookupUnit.scala 368:{37,37} 68:28]
+  wire [511:0] _GEN_548 = 2'h2 == updatingSet ? _dataBRAMVec_wrData_T_14 : 512'h0; // @[cacheLookupUnit.scala 368:{37,37} 68:28]
+  wire [511:0] _GEN_549 = 2'h3 == updatingSet ? _dataBRAMVec_wrData_T_14 : 512'h0; // @[cacheLookupUnit.scala 368:{37,37} 68:28]
+  wire [6:0] _GEN_550 = 2'h0 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 369:{37,37} 68:28]
+  wire [6:0] _GEN_551 = 2'h1 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 369:{37,37} 68:28]
+  wire [6:0] _GEN_552 = 2'h2 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 369:{37,37} 68:28]
+  wire [6:0] _GEN_553 = 2'h3 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 369:{37,37} 68:28]
+  wire  _GEN_557 = isCoherentWire | _T_106; // @[cacheLookupUnit.scala 378:27 380:26]
+  wire  _GEN_559 = _T_8 & dirtyBitWire; // @[cacheLookupUnit.scala 382:45 384:30]
+  wire  _GEN_560 = _T_8 | _GEN_557; // @[cacheLookupUnit.scala 382:45 385:26]
+  wire  _GEN_563 = isLRWire | _T_106; // @[cacheLookupUnit.scala 388:21 390:35]
+  wire  _GEN_564 = isLRWire | _GEN_560; // @[cacheLookupUnit.scala 388:21 391:26]
+  wire  _GEN_566 = isSCReadWire | _GEN_563; // @[cacheLookupUnit.scala 394:{25,52}]
+  wire  _GEN_569 = reservationRegister_reserved ? isPermissionMiss & dirtyBitWire : _GEN_559; // @[cacheLookupUnit.scala 396:43 399:32]
+  wire  _GEN_570 = reservationRegister_reserved | _GEN_564; // @[cacheLookupUnit.scala 396:43 400:28]
+  wire  _GEN_573 = isSCWriteWire | _GEN_566; // @[cacheLookupUnit.scala 395:26]
+  wire  _GEN_574 = isSCWriteWire ? _GEN_569 : _GEN_559; // @[cacheLookupUnit.scala 395:26]
+  wire  _GEN_575 = isSCWriteWire ? _GEN_570 : _GEN_564; // @[cacheLookupUnit.scala 395:26]
+  wire  _T_111 = _T_106 | isWriteWire | isAtmoicWriteWire | isLRWire; // @[cacheLookupUnit.scala 407:79]
+  wire  _GEN_578 = (_T_106 | isWriteWire | isAtmoicWriteWire | isLRWire) & ~isReadWire; // @[cacheLookupUnit.scala 407:91 409:34]
+  wire  _GEN_580 = _isPermissionMiss_T | isPermissionMiss & readBuffer_requestType == 2'h2 ? _GEN_573 : isSCWire; // @[cacheLookupUnit.scala 372:85]
+  wire  tagBRAMUpdateWire = (_isPermissionMiss_T | isPermissionMiss & readBuffer_requestType == 2'h2) & _GEN_575; // @[cacheLookupUnit.scala 372:85]
+  wire  _GEN_584 = _isPermissionMiss_T | isPermissionMiss & readBuffer_requestType == 2'h2 ? _T_8 : _GEN_578; // @[cacheLookupUnit.scala 372:85]
+  wire  _GEN_585 = (_isPermissionMiss_T | isPermissionMiss & readBuffer_requestType == 2'h2) & _GEN_574; // @[cacheLookupUnit.scala 372:85]
+  wire  _GEN_586 = (_isPermissionMiss_T | isPermissionMiss & readBuffer_requestType == 2'h2) & isLRWire; // @[cacheLookupUnit.scala 372:85]
+  wire  _GEN_588 = _isPermissionMiss_T | isPermissionMiss & readBuffer_requestType == 2'h2 ? 1'h0 : _T_111; // @[cacheLookupUnit.scala 372:85]
+  wire [63:0] doubleWordChunks_0 = cacheLineChoosen[63:0]; // @[cacheLookupUnit.scala 420:23]
+  wire [63:0] doubleWordChunks_1 = cacheLineChoosen[127:64]; // @[cacheLookupUnit.scala 420:23]
+  wire [63:0] doubleWordChunks_2 = cacheLineChoosen[191:128]; // @[cacheLookupUnit.scala 420:23]
+  wire [63:0] doubleWordChunks_3 = cacheLineChoosen[255:192]; // @[cacheLookupUnit.scala 420:23]
+  wire [63:0] doubleWordChunks_4 = cacheLineChoosen[319:256]; // @[cacheLookupUnit.scala 420:23]
+  wire [63:0] doubleWordChunks_5 = cacheLineChoosen[383:320]; // @[cacheLookupUnit.scala 420:23]
+  wire [63:0] doubleWordChunks_6 = cacheLineChoosen[447:384]; // @[cacheLookupUnit.scala 420:23]
+  wire [63:0] doubleWordChunks_7 = cacheLineChoosen[511:448]; // @[cacheLookupUnit.scala 420:23]
+  wire [63:0] _GEN_590 = 3'h1 == readBuffer_address[5:3] ? doubleWordChunks_1 : doubleWordChunks_0; // @[cacheLookupUnit.scala 426:{24,24}]
+  wire [63:0] _GEN_591 = 3'h2 == readBuffer_address[5:3] ? doubleWordChunks_2 : _GEN_590; // @[cacheLookupUnit.scala 426:{24,24}]
+  wire [63:0] _GEN_592 = 3'h3 == readBuffer_address[5:3] ? doubleWordChunks_3 : _GEN_591; // @[cacheLookupUnit.scala 426:{24,24}]
+  wire [63:0] _GEN_593 = 3'h4 == readBuffer_address[5:3] ? doubleWordChunks_4 : _GEN_592; // @[cacheLookupUnit.scala 426:{24,24}]
+  wire [63:0] _GEN_594 = 3'h5 == readBuffer_address[5:3] ? doubleWordChunks_5 : _GEN_593; // @[cacheLookupUnit.scala 426:{24,24}]
+  wire [63:0] _GEN_595 = 3'h6 == readBuffer_address[5:3] ? doubleWordChunks_6 : _GEN_594; // @[cacheLookupUnit.scala 426:{24,24}]
+  wire [63:0] _GEN_596 = 3'h7 == readBuffer_address[5:3] ? doubleWordChunks_7 : _GEN_595; // @[cacheLookupUnit.scala 426:{24,24}]
+  wire [7:0] byteChunks_0 = _GEN_596[7:0]; // @[cacheLookupUnit.scala 426:24]
+  wire [7:0] byteChunks_1 = _GEN_596[15:8]; // @[cacheLookupUnit.scala 426:24]
+  wire [7:0] byteChunks_2 = _GEN_596[23:16]; // @[cacheLookupUnit.scala 426:24]
+  wire [7:0] byteChunks_3 = _GEN_596[31:24]; // @[cacheLookupUnit.scala 426:24]
+  wire [7:0] byteChunks_4 = _GEN_596[39:32]; // @[cacheLookupUnit.scala 426:24]
+  wire [7:0] byteChunks_5 = _GEN_596[47:40]; // @[cacheLookupUnit.scala 426:24]
+  wire [7:0] byteChunks_6 = _GEN_596[55:48]; // @[cacheLookupUnit.scala 426:24]
+  wire [7:0] byteChunks_7 = _GEN_596[63:56]; // @[cacheLookupUnit.scala 426:24]
+  wire [3:0] _halfwordChoosed_T_1 = 2'h2 * readBuffer_address[2:1]; // @[cacheLookupUnit.scala 429:46]
+  wire [3:0] _halfwordChoosed_T_3 = _halfwordChoosed_T_1 + 4'h1; // @[cacheLookupUnit.scala 429:72]
   wire [7:0] _GEN_598 = 3'h1 == _halfwordChoosed_T_3[2:0] ? byteChunks_1 : byteChunks_0; // @[Cat.scala 33:{92,92}]
   wire [7:0] _GEN_599 = 3'h2 == _halfwordChoosed_T_3[2:0] ? byteChunks_2 : _GEN_598; // @[Cat.scala 33:{92,92}]
   wire [7:0] _GEN_600 = 3'h3 == _halfwordChoosed_T_3[2:0] ? byteChunks_3 : _GEN_599; // @[Cat.scala 33:{92,92}]
@@ -35256,10 +35293,10 @@ module cacheLookupUnit(
   wire [7:0] _GEN_611 = 3'h6 == _halfwordChoosed_T_1[2:0] ? byteChunks_6 : _GEN_610; // @[Cat.scala 33:{92,92}]
   wire [7:0] _GEN_612 = 3'h7 == _halfwordChoosed_T_1[2:0] ? byteChunks_7 : _GEN_611; // @[Cat.scala 33:{92,92}]
   wire [15:0] halfwordChoosed = {_GEN_604,_GEN_612}; // @[Cat.scala 33:92]
-  wire [3:0] _wordChoosed_T_1 = 3'h4 * readBuffer_address[2]; // @[cacheLookupUnit.scala 428:46]
-  wire [3:0] _wordChoosed_T_3 = _wordChoosed_T_1 + 4'h3; // @[cacheLookupUnit.scala 428:70]
-  wire [3:0] _wordChoosed_T_8 = _wordChoosed_T_1 + 4'h2; // @[cacheLookupUnit.scala 428:116]
-  wire [3:0] _wordChoosed_T_13 = _wordChoosed_T_1 + 4'h1; // @[cacheLookupUnit.scala 429:70]
+  wire [3:0] _wordChoosed_T_1 = 3'h4 * readBuffer_address[2]; // @[cacheLookupUnit.scala 430:46]
+  wire [3:0] _wordChoosed_T_3 = _wordChoosed_T_1 + 4'h3; // @[cacheLookupUnit.scala 430:70]
+  wire [3:0] _wordChoosed_T_8 = _wordChoosed_T_1 + 4'h2; // @[cacheLookupUnit.scala 430:116]
+  wire [3:0] _wordChoosed_T_13 = _wordChoosed_T_1 + 4'h1; // @[cacheLookupUnit.scala 431:70]
   wire [7:0] _GEN_614 = 3'h1 == _wordChoosed_T_13[2:0] ? byteChunks_1 : byteChunks_0; // @[Cat.scala 33:{92,92}]
   wire [7:0] _GEN_615 = 3'h2 == _wordChoosed_T_13[2:0] ? byteChunks_2 : _GEN_614; // @[Cat.scala 33:{92,92}]
   wire [7:0] _GEN_616 = 3'h3 == _wordChoosed_T_13[2:0] ? byteChunks_3 : _GEN_615; // @[Cat.scala 33:{92,92}]
@@ -35289,44 +35326,45 @@ module cacheLookupUnit(
   wire [7:0] _GEN_643 = 3'h6 == _wordChoosed_T_8[2:0] ? byteChunks_6 : _GEN_642; // @[Cat.scala 33:{92,92}]
   wire [7:0] _GEN_644 = 3'h7 == _wordChoosed_T_8[2:0] ? byteChunks_7 : _GEN_643; // @[Cat.scala 33:{92,92}]
   wire [31:0] wordChoosed = {_GEN_636,_GEN_644,_GEN_620,_GEN_628}; // @[Cat.scala 33:92]
-  wire [7:0] _GEN_646 = 3'h1 == readBuffer_address[2:0] ? byteChunks_1 : byteChunks_0; // @[cacheLookupUnit.scala 433:{73,73}]
-  wire [7:0] _GEN_647 = 3'h2 == readBuffer_address[2:0] ? byteChunks_2 : _GEN_646; // @[cacheLookupUnit.scala 433:{73,73}]
-  wire [7:0] _GEN_648 = 3'h3 == readBuffer_address[2:0] ? byteChunks_3 : _GEN_647; // @[cacheLookupUnit.scala 433:{73,73}]
-  wire [7:0] _GEN_649 = 3'h4 == readBuffer_address[2:0] ? byteChunks_4 : _GEN_648; // @[cacheLookupUnit.scala 433:{73,73}]
-  wire [7:0] _GEN_650 = 3'h5 == readBuffer_address[2:0] ? byteChunks_5 : _GEN_649; // @[cacheLookupUnit.scala 433:{73,73}]
-  wire [7:0] _GEN_651 = 3'h6 == readBuffer_address[2:0] ? byteChunks_6 : _GEN_650; // @[cacheLookupUnit.scala 433:{73,73}]
-  wire [7:0] _GEN_652 = 3'h7 == readBuffer_address[2:0] ? byteChunks_7 : _GEN_651; // @[cacheLookupUnit.scala 433:{73,73}]
+  wire [7:0] _GEN_646 = 3'h1 == readBuffer_address[2:0] ? byteChunks_1 : byteChunks_0; // @[cacheLookupUnit.scala 435:{73,73}]
+  wire [7:0] _GEN_647 = 3'h2 == readBuffer_address[2:0] ? byteChunks_2 : _GEN_646; // @[cacheLookupUnit.scala 435:{73,73}]
+  wire [7:0] _GEN_648 = 3'h3 == readBuffer_address[2:0] ? byteChunks_3 : _GEN_647; // @[cacheLookupUnit.scala 435:{73,73}]
+  wire [7:0] _GEN_649 = 3'h4 == readBuffer_address[2:0] ? byteChunks_4 : _GEN_648; // @[cacheLookupUnit.scala 435:{73,73}]
+  wire [7:0] _GEN_650 = 3'h5 == readBuffer_address[2:0] ? byteChunks_5 : _GEN_649; // @[cacheLookupUnit.scala 435:{73,73}]
+  wire [7:0] _GEN_651 = 3'h6 == readBuffer_address[2:0] ? byteChunks_6 : _GEN_650; // @[cacheLookupUnit.scala 435:{73,73}]
+  wire [7:0] _GEN_652 = 3'h7 == readBuffer_address[2:0] ? byteChunks_7 : _GEN_651; // @[cacheLookupUnit.scala 435:{73,73}]
   wire [55:0] _responseResultWire_T_3 = _GEN_652[7] ? 56'hffffffffffffff : 56'h0; // @[Bitwise.scala 77:12]
   wire [63:0] _responseResultWire_T_4 = {_responseResultWire_T_3,_GEN_652}; // @[Cat.scala 33:92]
-  wire [63:0] _responseResultWire_T_5 = readBuffer_instruction[14] ? {{56'd0}, _GEN_652} : _responseResultWire_T_4; // @[cacheLookupUnit.scala 432:44]
+  wire [63:0] _responseResultWire_T_5 = readBuffer_instruction[14] ? {{56'd0}, _GEN_652} : _responseResultWire_T_4; // @[cacheLookupUnit.scala 434:44]
   wire [47:0] _responseResultWire_T_9 = halfwordChoosed[15] ? 48'hffffffffffff : 48'h0; // @[Bitwise.scala 77:12]
   wire [63:0] _responseResultWire_T_10 = {_responseResultWire_T_9,_GEN_604,_GEN_612}; // @[Cat.scala 33:92]
   wire [63:0] _responseResultWire_T_11 = readBuffer_instruction[14] ? {{48'd0}, halfwordChoosed} :
-    _responseResultWire_T_10; // @[cacheLookupUnit.scala 434:44]
+    _responseResultWire_T_10; // @[cacheLookupUnit.scala 436:44]
   wire [31:0] _responseResultWire_T_15 = wordChoosed[31] ? 32'hffffffff : 32'h0; // @[Bitwise.scala 77:12]
   wire [63:0] _responseResultWire_T_16 = {_responseResultWire_T_15,_GEN_636,_GEN_644,_GEN_620,_GEN_628}; // @[Cat.scala 33:92]
-  wire [63:0] _responseResultWire_T_17 = readBuffer_instruction[14] ? {{32'd0}, wordChoosed} : _responseResultWire_T_16; // @[cacheLookupUnit.scala 436:44]
-  wire [63:0] _responseResultWire_T_19 = readBuffer_instruction[14] ? 64'h0 : _GEN_596; // @[cacheLookupUnit.scala 438:44]
-  wire [63:0] _GEN_653 = _T_77 ? _responseResultWire_T_19 : 64'h0; // @[cacheLookupUnit.scala 431:43 438:38]
-  wire [63:0] _GEN_654 = _T_56 ? _responseResultWire_T_17 : _GEN_653; // @[cacheLookupUnit.scala 431:43 436:38]
-  wire [63:0] _GEN_655 = _T_45 ? _responseResultWire_T_11 : _GEN_654; // @[cacheLookupUnit.scala 431:43 434:38]
-  wire [63:0] _GEN_656 = _T_41 ? _responseResultWire_T_5 : _GEN_655; // @[cacheLookupUnit.scala 431:43 432:38]
-  wire  _responseResultWire_T_20 = reservationRegister_reserved ? 1'h0 : 1'h1; // @[cacheLookupUnit.scala 442:32]
-  wire  _coherencyResponseBuffer_response_T_2 = readBuffer_response[1] ? ~dirtyBitWire : 1'h1; // @[cacheLookupUnit.scala 473:46]
-  wire  _coherencyResponseBuffer_response_T_3 = ~shareBitWire; // @[cacheLookupUnit.scala 473:94]
+  wire [63:0] _responseResultWire_T_17 = readBuffer_instruction[14] ? {{32'd0}, wordChoosed} : _responseResultWire_T_16; // @[cacheLookupUnit.scala 438:44]
+  wire [63:0] _responseResultWire_T_19 = readBuffer_instruction[14] ? 64'h0 : _GEN_596; // @[cacheLookupUnit.scala 440:44]
+  wire [63:0] _GEN_653 = _T_77 ? _responseResultWire_T_19 : 64'h0; // @[cacheLookupUnit.scala 433:43 440:38]
+  wire [63:0] _GEN_654 = _T_56 ? _responseResultWire_T_17 : _GEN_653; // @[cacheLookupUnit.scala 433:43 438:38]
+  wire [63:0] _GEN_655 = _T_45 ? _responseResultWire_T_11 : _GEN_654; // @[cacheLookupUnit.scala 433:43 436:38]
+  wire [63:0] _GEN_656 = _T_41 ? _responseResultWire_T_5 : _GEN_655; // @[cacheLookupUnit.scala 433:43 434:38]
+  wire  _responseResultWire_T_20 = reservationRegister_reserved ? 1'h0 : 1'h1; // @[cacheLookupUnit.scala 444:32]
+  wire  _coherencyResponseBuffer_response_T_2 = readBuffer_response[1] ? ~dirtyBitWire : 1'h1; // @[cacheLookupUnit.scala 475:46]
+  wire  _coherencyResponseBuffer_response_T_3 = ~shareBitWire; // @[cacheLookupUnit.scala 475:94]
   wire [1:0] _coherencyResponseBuffer_response_T_4 = {_coherencyResponseBuffer_response_T_2,
-    _coherencyResponseBuffer_response_T_3}; // @[cacheLookupUnit.scala 473:91]
+    _coherencyResponseBuffer_response_T_3}; // @[cacheLookupUnit.scala 475:91]
+  wire  _GEN_664 = readBuffer_response[0] & _isPermissionMiss_T; // @[cacheLookupUnit.scala 472:33 474:41 478:41]
   wire  _GEN_670 = operationValid ? 1'h0 : _GEN_38; // @[cacheLookupUnit.scala 193:23 194:22]
-  wire  toReservationRegisterWire = operationValid & _GEN_587; // @[cacheLookupUnit.scala 193:23]
+  wire  toReservationRegisterWire = operationValid & _GEN_586; // @[cacheLookupUnit.scala 193:23]
   wire  toMemoryResponseValidWire = operationValid & _GEN_580; // @[cacheLookupUnit.scala 193:23]
   wire  toCoherencyResponseValidWire = operationValid & isCoherentWire; // @[cacheLookupUnit.scala 193:23]
-  wire  toReplayValidWire = operationValid & _GEN_584; // @[cacheLookupUnit.scala 193:23]
-  wire  toLastMissRecordRegister = operationValid & _GEN_585; // @[cacheLookupUnit.scala 193:23]
-  wire  toWriteBackValidWire = operationValid & _GEN_586; // @[cacheLookupUnit.scala 193:23]
-  wire  _GEN_693 = operationValid ? toReplayValidWire : _GEN_10; // @[cacheLookupUnit.scala 193:23 451:24]
-  wire [4:0] _GEN_696 = operationValid ? readBuffer_branchMask : replayBuffer_branchMask; // @[cacheLookupUnit.scala 193:23 145:29 454:29]
-  wire  _GEN_701 = operationValid ? toMemoryResponseValidWire : _memoryResponseBuffer_valid_T; // @[cacheLookupUnit.scala 193:23 158:30 461:32]
-  wire  _GEN_714 = operationValid ? toLastMissRecordRegister : _GEN_1; // @[cacheLookupUnit.scala 193:23 485:34]
+  wire  toLastMissRecordRegister = operationValid & _GEN_584; // @[cacheLookupUnit.scala 193:23]
+  wire  toWriteBackValidWire = operationValid & _GEN_585; // @[cacheLookupUnit.scala 193:23]
+  wire  toReplayValidWire = operationValid & _GEN_588; // @[cacheLookupUnit.scala 193:23]
+  wire  _GEN_693 = operationValid ? toReplayValidWire : _GEN_10; // @[cacheLookupUnit.scala 193:23 453:24]
+  wire [4:0] _GEN_696 = operationValid ? readBuffer_branchMask : replayBuffer_branchMask; // @[cacheLookupUnit.scala 193:23 145:29 456:29]
+  wire  _GEN_701 = operationValid ? toMemoryResponseValidWire : _memoryResponseBuffer_valid_T; // @[cacheLookupUnit.scala 193:23 158:30 463:32]
+  wire  _GEN_714 = operationValid ? toLastMissRecordRegister : _GEN_1; // @[cacheLookupUnit.scala 193:23 487:34]
   wire [4:0] _T_118 = readBuffer_branchMask & branchOps_branchMask; // @[utils.scala 176:32]
   wire  _T_119 = |_T_118; // @[utils.scala 176:56]
   wire [4:0] _replayBuffer_branchMask_T = readBuffer_branchMask ^ branchOps_branchMask; // @[utils.scala 177:49]
@@ -35335,7 +35373,7 @@ module cacheLookupUnit(
   wire [4:0] _GEN_723 = branchOps_passed ? _GEN_721 : _GEN_696; // @[utils.scala 174:28]
   wire  _GEN_724 = branchOps_passed ? _GEN_693 : _GEN_722; // @[utils.scala 174:28]
   wire [4:0] _GEN_725 = branchOps_passed ? _GEN_41 : replayBuffer_branchMask; // @[utils.scala 174:28 184:26]
-  wire [4:0] _GEN_728 = toReplayValidWire ? _GEN_725 : _GEN_41; // @[cacheLookupUnit.scala 500:30]
+  wire [4:0] _GEN_728 = toReplayValidWire ? _GEN_725 : _GEN_41; // @[cacheLookupUnit.scala 502:30]
   wire [4:0] _GEN_729 = |_T_118 ? _replayBuffer_branchMask_T : _GEN_22; // @[utils.scala 176:61 177:27]
   wire  _GEN_730 = _T_119 ? 1'h0 : _GEN_701; // @[utils.scala 181:61 182:22]
   wire [4:0] _GEN_731 = branchOps_passed ? _GEN_729 : _GEN_22; // @[utils.scala 174:28]
@@ -35407,11 +35445,14 @@ module cacheLookupUnit(
   assign toReplay_request_branchMask = toReplay_ready ? replayBuffer_branchMask : 5'h0; // @[cacheLookupUnit.scala 147:23 148:22 utils.scala 48:41]
   assign toReplay_request_robAddr = toReplay_ready ? replayBuffer_robAddr : 4'h0; // @[cacheLookupUnit.scala 147:23 148:22 utils.scala 48:41]
   assign toReplay_request_prfDest = toReplay_ready ? replayBuffer_prfDest : 6'h0; // @[cacheLookupUnit.scala 147:23 148:22 utils.scala 48:41]
+  assign toReplay_request_writeEn = toReplay_ready & replayBuffer_writeEn; // @[cacheLookupUnit.scala 147:23 148:22 utils.scala 47:41]
+  assign toReplay_request_writeData = toReplay_ready ? replayBuffer_writeData : 64'h0; // @[cacheLookupUnit.scala 147:23 148:22 utils.scala 48:41]
   assign toWriteBack_request_valid = toWriteBack_ready & writeBackBuffer_valid; // @[cacheLookupUnit.scala 169:26 170:25 utils.scala 47:41]
   assign toWriteBack_request_address = toWriteBack_ready ? writeBackBuffer_address : 32'h0; // @[cacheLookupUnit.scala 169:26 170:25 utils.scala 48:41]
   assign toWriteBack_request_data = toWriteBack_ready ? writeBackBuffer_data : 512'h0; // @[cacheLookupUnit.scala 169:26 170:25 utils.scala 48:41]
   assign toCoherency_request_valid = toCoherency_ready & coherencyResponseBuffer_valid; // @[cacheLookupUnit.scala 162:26 163:25 utils.scala 47:41]
   assign toCoherency_request_data = toCoherency_ready ? coherencyResponseBuffer_data : 512'h0; // @[cacheLookupUnit.scala 162:26 163:25 utils.scala 48:41]
+  assign toCoherency_request_dataValid = toCoherency_ready & coherencyResponseBuffer_dataValid; // @[cacheLookupUnit.scala 162:26 163:25 utils.scala 47:41]
   assign toCoherency_request_response = toCoherency_ready ? coherencyResponseBuffer_response : 2'h0; // @[cacheLookupUnit.scala 162:26 163:25 utils.scala 48:41]
   assign toResponse_request_valid = memoryResponseBuffer_valid; // @[cacheLookupUnit.scala 154:35 155:24 utils.scala 47:41]
   assign toResponse_request_address = memoryResponseBuffer_valid ? memoryResponseBuffer_address : 32'h0; // @[cacheLookupUnit.scala 154:35 155:24 utils.scala 48:41]
@@ -35442,22 +35483,22 @@ module cacheLookupUnit(
   assign dataBRAM_3_wrEna = operationValid & _GEN_545; // @[cacheLookupUnit.scala 193:23 68:28]
   assign tagBRAM_clock = clock;
   assign tagBRAM_rdAddr = request_request_valid ? request_request_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 184:18 187:30 189:20]
-  assign tagBRAM_wrAddr = operationValid ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 111:18 193:23 362:20]
-  assign tagBRAM_wrData = operationValid ? _tagBRAM_wrData_T_2 : 92'h0; // @[cacheLookupUnit.scala 109:18 193:23 361:20]
-  assign tagBRAM_wrEna = operationValid & tagBRAMUpdateWire; // @[cacheLookupUnit.scala 110:18 193:23 360:19]
+  assign tagBRAM_wrAddr = operationValid ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 111:18 193:23 365:20]
+  assign tagBRAM_wrData = operationValid ? _tagBRAM_wrData_T_2 : 92'h0; // @[cacheLookupUnit.scala 109:18 193:23 364:20]
+  assign tagBRAM_wrEna = operationValid & tagBRAMUpdateWire; // @[cacheLookupUnit.scala 110:18 193:23 363:19]
   always @(posedge clock) begin
     operationValid <= request_ready & request_request_valid; // @[cacheLookupUnit.scala 45:46]
     if (reset) begin // @[cacheLookupUnit.scala 114:36]
       reservationRegister_reserved <= 1'h0; // @[cacheLookupUnit.scala 114:36]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      reservationRegister_reserved <= toReservationRegisterWire; // @[cacheLookupUnit.scala 492:34]
+      reservationRegister_reserved <= toReservationRegisterWire; // @[cacheLookupUnit.scala 494:34]
     end
     if (reset) begin // @[cacheLookupUnit.scala 123:39]
       lastMissRecordRegister_valid <= 1'h0; // @[cacheLookupUnit.scala 123:39]
-    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 497:24]
-      if (operationValid) begin // @[cacheLookupUnit.scala 499:25]
+    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
+      if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
         lastMissRecordRegister_valid <= _GEN_714;
-      end else if (lastMissRecordRegister_valid) begin // @[cacheLookupUnit.scala 517:41]
+      end else if (lastMissRecordRegister_valid) begin // @[cacheLookupUnit.scala 519:41]
         lastMissRecordRegister_valid <= _GEN_752;
       end else begin
         lastMissRecordRegister_valid <= _GEN_714;
@@ -35468,18 +35509,18 @@ module cacheLookupUnit(
     if (reset) begin // @[cacheLookupUnit.scala 123:39]
       lastMissRecordRegister_address <= 32'h0; // @[cacheLookupUnit.scala 123:39]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      lastMissRecordRegister_address <= readBuffer_address; // @[cacheLookupUnit.scala 486:36]
+      lastMissRecordRegister_address <= readBuffer_address; // @[cacheLookupUnit.scala 488:36]
     end
     if (reset) begin // @[cacheLookupUnit.scala 123:39]
       lastMissRecordRegister_instruction <= 32'h0; // @[cacheLookupUnit.scala 123:39]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      lastMissRecordRegister_instruction <= readBuffer_instruction; // @[cacheLookupUnit.scala 487:40]
+      lastMissRecordRegister_instruction <= readBuffer_instruction; // @[cacheLookupUnit.scala 489:40]
     end
     if (reset) begin // @[cacheLookupUnit.scala 123:39]
       lastMissRecordRegister_branchMask <= 5'h0; // @[cacheLookupUnit.scala 123:39]
-    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 497:24]
-      if (!(operationValid)) begin // @[cacheLookupUnit.scala 499:25]
-        if (lastMissRecordRegister_valid) begin // @[cacheLookupUnit.scala 517:41]
+    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
+      if (!(operationValid)) begin // @[cacheLookupUnit.scala 501:25]
+        if (lastMissRecordRegister_valid) begin // @[cacheLookupUnit.scala 519:41]
           lastMissRecordRegister_branchMask <= _GEN_751;
         end
       end
@@ -35487,19 +35528,19 @@ module cacheLookupUnit(
     if (reset) begin // @[cacheLookupUnit.scala 123:39]
       lastMissRecordRegister_robAddr <= 4'h0; // @[cacheLookupUnit.scala 123:39]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      lastMissRecordRegister_robAddr <= readBuffer_robAddr; // @[cacheLookupUnit.scala 488:36]
+      lastMissRecordRegister_robAddr <= readBuffer_robAddr; // @[cacheLookupUnit.scala 490:36]
     end
     if (reset) begin // @[cacheLookupUnit.scala 123:39]
       lastMissRecordRegister_prfDest <= 6'h0; // @[cacheLookupUnit.scala 123:39]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      lastMissRecordRegister_prfDest <= readBuffer_prfDest; // @[cacheLookupUnit.scala 489:36]
+      lastMissRecordRegister_prfDest <= readBuffer_prfDest; // @[cacheLookupUnit.scala 491:36]
     end
     if (reset) begin // @[cacheLookupUnit.scala 139:27]
       readBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 139:27]
-    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 497:24]
-      if (operationValid) begin // @[cacheLookupUnit.scala 499:25]
+    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
+      if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
         readBuffer_valid <= _GEN_670;
-      end else if (readBuffer_valid) begin // @[cacheLookupUnit.scala 514:29]
+      end else if (readBuffer_valid) begin // @[cacheLookupUnit.scala 516:29]
         readBuffer_valid <= _GEN_746;
       end else begin
         readBuffer_valid <= _GEN_670;
@@ -35519,14 +35560,14 @@ module cacheLookupUnit(
     end
     if (reset) begin // @[cacheLookupUnit.scala 139:27]
       readBuffer_branchMask <= 5'h0; // @[cacheLookupUnit.scala 139:27]
-    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 497:24]
-      if (operationValid) begin // @[cacheLookupUnit.scala 499:25]
-        if (toMemoryResponseValidWire) begin // @[cacheLookupUnit.scala 503:38]
+    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
+      if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
+        if (toMemoryResponseValidWire) begin // @[cacheLookupUnit.scala 505:38]
           readBuffer_branchMask <= _GEN_733;
         end else begin
           readBuffer_branchMask <= _GEN_728;
         end
-      end else if (readBuffer_valid) begin // @[cacheLookupUnit.scala 514:29]
+      end else if (readBuffer_valid) begin // @[cacheLookupUnit.scala 516:29]
         readBuffer_branchMask <= _GEN_745;
       end else begin
         readBuffer_branchMask <= _GEN_41;
@@ -35571,14 +35612,14 @@ module cacheLookupUnit(
     end
     if (reset) begin // @[cacheLookupUnit.scala 145:29]
       replayBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 145:29]
-    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 497:24]
-      if (operationValid) begin // @[cacheLookupUnit.scala 499:25]
-        if (toReplayValidWire) begin // @[cacheLookupUnit.scala 500:30]
+    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
+      if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
+        if (toReplayValidWire) begin // @[cacheLookupUnit.scala 502:30]
           replayBuffer_valid <= _GEN_724;
         end else begin
           replayBuffer_valid <= _GEN_693;
         end
-      end else if (replayBuffer_valid & ~toReplay_request_valid) begin // @[cacheLookupUnit.scala 509:58]
+      end else if (replayBuffer_valid & ~toReplay_request_valid) begin // @[cacheLookupUnit.scala 511:58]
         replayBuffer_valid <= _GEN_740;
       end else begin
         replayBuffer_valid <= _GEN_693;
@@ -35589,23 +35630,23 @@ module cacheLookupUnit(
     if (reset) begin // @[cacheLookupUnit.scala 145:29]
       replayBuffer_address <= 32'h0; // @[cacheLookupUnit.scala 145:29]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      replayBuffer_address <= readBuffer_address; // @[cacheLookupUnit.scala 452:26]
+      replayBuffer_address <= readBuffer_address; // @[cacheLookupUnit.scala 454:26]
     end
     if (reset) begin // @[cacheLookupUnit.scala 145:29]
       replayBuffer_instruction <= 32'h0; // @[cacheLookupUnit.scala 145:29]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      replayBuffer_instruction <= readBuffer_instruction; // @[cacheLookupUnit.scala 453:30]
+      replayBuffer_instruction <= readBuffer_instruction; // @[cacheLookupUnit.scala 455:30]
     end
     if (reset) begin // @[cacheLookupUnit.scala 145:29]
       replayBuffer_branchMask <= 5'h0; // @[cacheLookupUnit.scala 145:29]
-    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 497:24]
-      if (operationValid) begin // @[cacheLookupUnit.scala 499:25]
-        if (toReplayValidWire) begin // @[cacheLookupUnit.scala 500:30]
+    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
+      if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
+        if (toReplayValidWire) begin // @[cacheLookupUnit.scala 502:30]
           replayBuffer_branchMask <= _GEN_723;
         end else begin
           replayBuffer_branchMask <= _GEN_696;
         end
-      end else if (replayBuffer_valid & ~toReplay_request_valid) begin // @[cacheLookupUnit.scala 509:58]
+      end else if (replayBuffer_valid & ~toReplay_request_valid) begin // @[cacheLookupUnit.scala 511:58]
         replayBuffer_branchMask <= _GEN_739;
       end else begin
         replayBuffer_branchMask <= _GEN_696;
@@ -35616,18 +35657,28 @@ module cacheLookupUnit(
     if (reset) begin // @[cacheLookupUnit.scala 145:29]
       replayBuffer_robAddr <= 4'h0; // @[cacheLookupUnit.scala 145:29]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      replayBuffer_robAddr <= readBuffer_robAddr; // @[cacheLookupUnit.scala 455:26]
+      replayBuffer_robAddr <= readBuffer_robAddr; // @[cacheLookupUnit.scala 457:26]
     end
     if (reset) begin // @[cacheLookupUnit.scala 145:29]
       replayBuffer_prfDest <= 6'h0; // @[cacheLookupUnit.scala 145:29]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      replayBuffer_prfDest <= readBuffer_prfDest; // @[cacheLookupUnit.scala 456:27]
+      replayBuffer_prfDest <= readBuffer_prfDest; // @[cacheLookupUnit.scala 458:27]
+    end
+    if (reset) begin // @[cacheLookupUnit.scala 145:29]
+      replayBuffer_writeEn <= 1'h0; // @[cacheLookupUnit.scala 145:29]
+    end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
+      replayBuffer_writeEn <= readBuffer_writeEn; // @[cacheLookupUnit.scala 459:26]
+    end
+    if (reset) begin // @[cacheLookupUnit.scala 145:29]
+      replayBuffer_writeData <= 64'h0; // @[cacheLookupUnit.scala 145:29]
+    end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
+      replayBuffer_writeData <= readBuffer_writeData; // @[cacheLookupUnit.scala 460:28]
     end
     if (reset) begin // @[cacheLookupUnit.scala 152:37]
       memoryResponseBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 152:37]
-    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 497:24]
-      if (operationValid) begin // @[cacheLookupUnit.scala 499:25]
-        if (toMemoryResponseValidWire) begin // @[cacheLookupUnit.scala 503:38]
+    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
+      if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
+        if (toMemoryResponseValidWire) begin // @[cacheLookupUnit.scala 505:38]
           memoryResponseBuffer_valid <= _GEN_732;
         end else begin
           memoryResponseBuffer_valid <= _GEN_701;
@@ -35641,18 +35692,18 @@ module cacheLookupUnit(
     if (reset) begin // @[cacheLookupUnit.scala 152:37]
       memoryResponseBuffer_address <= 32'h0; // @[cacheLookupUnit.scala 152:37]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      memoryResponseBuffer_address <= readBuffer_address; // @[cacheLookupUnit.scala 466:34]
+      memoryResponseBuffer_address <= readBuffer_address; // @[cacheLookupUnit.scala 468:34]
     end
     if (reset) begin // @[cacheLookupUnit.scala 152:37]
       memoryResponseBuffer_instruction <= 32'h0; // @[cacheLookupUnit.scala 152:37]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      memoryResponseBuffer_instruction <= readBuffer_instruction; // @[cacheLookupUnit.scala 465:38]
+      memoryResponseBuffer_instruction <= readBuffer_instruction; // @[cacheLookupUnit.scala 467:38]
     end
     if (reset) begin // @[cacheLookupUnit.scala 152:37]
       memoryResponseBuffer_branchMask <= 5'h0; // @[cacheLookupUnit.scala 152:37]
-    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 497:24]
-      if (operationValid) begin // @[cacheLookupUnit.scala 499:25]
-        if (toMemoryResponseValidWire) begin // @[cacheLookupUnit.scala 503:38]
+    end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
+      if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
+        if (toMemoryResponseValidWire) begin // @[cacheLookupUnit.scala 505:38]
           memoryResponseBuffer_branchMask <= _GEN_731;
         end else begin
           memoryResponseBuffer_branchMask <= _GEN_22;
@@ -35666,20 +35717,20 @@ module cacheLookupUnit(
     if (reset) begin // @[cacheLookupUnit.scala 152:37]
       memoryResponseBuffer_robAddr <= 4'h0; // @[cacheLookupUnit.scala 152:37]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      memoryResponseBuffer_robAddr <= readBuffer_robAddr; // @[cacheLookupUnit.scala 463:34]
+      memoryResponseBuffer_robAddr <= readBuffer_robAddr; // @[cacheLookupUnit.scala 465:34]
     end
     if (reset) begin // @[cacheLookupUnit.scala 152:37]
       memoryResponseBuffer_prfDest <= 6'h0; // @[cacheLookupUnit.scala 152:37]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      memoryResponseBuffer_prfDest <= readBuffer_prfDest; // @[cacheLookupUnit.scala 462:34]
+      memoryResponseBuffer_prfDest <= readBuffer_prfDest; // @[cacheLookupUnit.scala 464:34]
     end
     if (reset) begin // @[cacheLookupUnit.scala 152:37]
       memoryResponseBuffer_result <= 64'h0; // @[cacheLookupUnit.scala 152:37]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      if (isSCReadWire) begin // @[cacheLookupUnit.scala 444:23]
-        memoryResponseBuffer_result <= 64'h0; // @[cacheLookupUnit.scala 445:26]
-      end else if (isSCWriteWire) begin // @[cacheLookupUnit.scala 441:24]
-        memoryResponseBuffer_result <= {{63'd0}, _responseResultWire_T_20}; // @[cacheLookupUnit.scala 442:26]
+      if (isSCReadWire) begin // @[cacheLookupUnit.scala 446:23]
+        memoryResponseBuffer_result <= 64'h0; // @[cacheLookupUnit.scala 447:26]
+      end else if (isSCWriteWire) begin // @[cacheLookupUnit.scala 443:24]
+        memoryResponseBuffer_result <= {{63'd0}, _responseResultWire_T_20}; // @[cacheLookupUnit.scala 444:26]
       end else begin
         memoryResponseBuffer_result <= _GEN_656;
       end
@@ -35687,41 +35738,46 @@ module cacheLookupUnit(
     if (reset) begin // @[cacheLookupUnit.scala 160:40]
       coherencyResponseBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 160:40]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      coherencyResponseBuffer_valid <= toCoherencyResponseValidWire; // @[cacheLookupUnit.scala 469:35]
+      coherencyResponseBuffer_valid <= toCoherencyResponseValidWire; // @[cacheLookupUnit.scala 471:35]
     end else if (toCoherency_ready) begin // @[cacheLookupUnit.scala 162:26]
       coherencyResponseBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 164:35]
     end
     if (reset) begin // @[cacheLookupUnit.scala 160:40]
       coherencyResponseBuffer_data <= 512'h0; // @[cacheLookupUnit.scala 160:40]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      if (readBuffer_response[0]) begin // @[cacheLookupUnit.scala 470:33]
-        if (_permissionMiss_T) begin // @[cacheLookupUnit.scala 471:42]
+      if (readBuffer_response[0]) begin // @[cacheLookupUnit.scala 472:33]
+        if (_isPermissionMiss_T) begin // @[cacheLookupUnit.scala 473:42]
           coherencyResponseBuffer_data <= _GEN_88;
         end else begin
           coherencyResponseBuffer_data <= 512'h0;
         end
       end else begin
-        coherencyResponseBuffer_data <= 512'h0; // @[cacheLookupUnit.scala 475:36]
+        coherencyResponseBuffer_data <= 512'h0; // @[cacheLookupUnit.scala 477:36]
       end
+    end
+    if (reset) begin // @[cacheLookupUnit.scala 160:40]
+      coherencyResponseBuffer_dataValid <= 1'h0; // @[cacheLookupUnit.scala 160:40]
+    end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
+      coherencyResponseBuffer_dataValid <= _GEN_664;
     end
     if (reset) begin // @[cacheLookupUnit.scala 160:40]
       coherencyResponseBuffer_response <= 2'h0; // @[cacheLookupUnit.scala 160:40]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      if (readBuffer_response[0]) begin // @[cacheLookupUnit.scala 470:33]
-        coherencyResponseBuffer_response <= _coherencyResponseBuffer_response_T_4; // @[cacheLookupUnit.scala 473:40]
+      if (readBuffer_response[0]) begin // @[cacheLookupUnit.scala 472:33]
+        coherencyResponseBuffer_response <= _coherencyResponseBuffer_response_T_4; // @[cacheLookupUnit.scala 475:40]
       end
     end
     if (reset) begin // @[cacheLookupUnit.scala 167:32]
       writeBackBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 167:32]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      writeBackBuffer_valid <= toWriteBackValidWire; // @[cacheLookupUnit.scala 480:27]
+      writeBackBuffer_valid <= toWriteBackValidWire; // @[cacheLookupUnit.scala 482:27]
     end else if (toWriteBack_ready) begin // @[cacheLookupUnit.scala 169:26]
       writeBackBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 171:27]
     end
     if (reset) begin // @[cacheLookupUnit.scala 167:32]
       writeBackBuffer_address <= 32'h0; // @[cacheLookupUnit.scala 167:32]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 193:23]
-      writeBackBuffer_address <= readBuffer_address; // @[cacheLookupUnit.scala 481:29]
+      writeBackBuffer_address <= readBuffer_address; // @[cacheLookupUnit.scala 483:29]
     end
     if (reset) begin // @[cacheLookupUnit.scala 167:32]
       writeBackBuffer_data <= 512'h0; // @[cacheLookupUnit.scala 167:32]
@@ -35822,31 +35878,37 @@ initial begin
   _RAND_24 = {1{`RANDOM}};
   replayBuffer_prfDest = _RAND_24[5:0];
   _RAND_25 = {1{`RANDOM}};
-  memoryResponseBuffer_valid = _RAND_25[0:0];
-  _RAND_26 = {1{`RANDOM}};
-  memoryResponseBuffer_address = _RAND_26[31:0];
+  replayBuffer_writeEn = _RAND_25[0:0];
+  _RAND_26 = {2{`RANDOM}};
+  replayBuffer_writeData = _RAND_26[63:0];
   _RAND_27 = {1{`RANDOM}};
-  memoryResponseBuffer_instruction = _RAND_27[31:0];
+  memoryResponseBuffer_valid = _RAND_27[0:0];
   _RAND_28 = {1{`RANDOM}};
-  memoryResponseBuffer_branchMask = _RAND_28[4:0];
+  memoryResponseBuffer_address = _RAND_28[31:0];
   _RAND_29 = {1{`RANDOM}};
-  memoryResponseBuffer_robAddr = _RAND_29[3:0];
+  memoryResponseBuffer_instruction = _RAND_29[31:0];
   _RAND_30 = {1{`RANDOM}};
-  memoryResponseBuffer_prfDest = _RAND_30[5:0];
-  _RAND_31 = {2{`RANDOM}};
-  memoryResponseBuffer_result = _RAND_31[63:0];
+  memoryResponseBuffer_branchMask = _RAND_30[4:0];
+  _RAND_31 = {1{`RANDOM}};
+  memoryResponseBuffer_robAddr = _RAND_31[3:0];
   _RAND_32 = {1{`RANDOM}};
-  coherencyResponseBuffer_valid = _RAND_32[0:0];
-  _RAND_33 = {16{`RANDOM}};
-  coherencyResponseBuffer_data = _RAND_33[511:0];
+  memoryResponseBuffer_prfDest = _RAND_32[5:0];
+  _RAND_33 = {2{`RANDOM}};
+  memoryResponseBuffer_result = _RAND_33[63:0];
   _RAND_34 = {1{`RANDOM}};
-  coherencyResponseBuffer_response = _RAND_34[1:0];
-  _RAND_35 = {1{`RANDOM}};
-  writeBackBuffer_valid = _RAND_35[0:0];
+  coherencyResponseBuffer_valid = _RAND_34[0:0];
+  _RAND_35 = {16{`RANDOM}};
+  coherencyResponseBuffer_data = _RAND_35[511:0];
   _RAND_36 = {1{`RANDOM}};
-  writeBackBuffer_address = _RAND_36[31:0];
-  _RAND_37 = {16{`RANDOM}};
-  writeBackBuffer_data = _RAND_37[511:0];
+  coherencyResponseBuffer_dataValid = _RAND_36[0:0];
+  _RAND_37 = {1{`RANDOM}};
+  coherencyResponseBuffer_response = _RAND_37[1:0];
+  _RAND_38 = {1{`RANDOM}};
+  writeBackBuffer_valid = _RAND_38[0:0];
+  _RAND_39 = {1{`RANDOM}};
+  writeBackBuffer_address = _RAND_39[31:0];
+  _RAND_40 = {16{`RANDOM}};
+  writeBackBuffer_data = _RAND_40[511:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -35865,6 +35927,8 @@ module fifoWithBranchOpsI_1(
   input  [4:0]  write_data_branchMask,
   input  [3:0]  write_data_robAddr,
   input  [5:0]  write_data_prfDest,
+  input         write_data_writeEn,
+  input  [63:0] write_data_writeData,
   input         read_ready,
   output        read_data_valid,
   output [31:0] read_data_address,
@@ -35872,6 +35936,8 @@ module fifoWithBranchOpsI_1(
   output [4:0]  read_data_branchMask,
   output [3:0]  read_data_robAddr,
   output [5:0]  read_data_prfDest,
+  output        read_data_writeEn,
+  output [63:0] read_data_writeData,
   output        isEmpty,
   input         branchOps_valid,
   input  [4:0]  branchOps_branchMask,
@@ -35885,7 +35951,7 @@ module fifoWithBranchOpsI_1(
   reg [31:0] _RAND_4;
   reg [31:0] _RAND_5;
   reg [31:0] _RAND_6;
-  reg [31:0] _RAND_7;
+  reg [63:0] _RAND_7;
   reg [31:0] _RAND_8;
   reg [31:0] _RAND_9;
   reg [31:0] _RAND_10;
@@ -35893,7 +35959,7 @@ module fifoWithBranchOpsI_1(
   reg [31:0] _RAND_12;
   reg [31:0] _RAND_13;
   reg [31:0] _RAND_14;
-  reg [31:0] _RAND_15;
+  reg [63:0] _RAND_15;
   reg [31:0] _RAND_16;
   reg [31:0] _RAND_17;
   reg [31:0] _RAND_18;
@@ -35901,7 +35967,7 @@ module fifoWithBranchOpsI_1(
   reg [31:0] _RAND_20;
   reg [31:0] _RAND_21;
   reg [31:0] _RAND_22;
-  reg [31:0] _RAND_23;
+  reg [63:0] _RAND_23;
   reg [31:0] _RAND_24;
   reg [31:0] _RAND_25;
   reg [31:0] _RAND_26;
@@ -35909,7 +35975,7 @@ module fifoWithBranchOpsI_1(
   reg [31:0] _RAND_28;
   reg [31:0] _RAND_29;
   reg [31:0] _RAND_30;
-  reg [31:0] _RAND_31;
+  reg [63:0] _RAND_31;
   reg [31:0] _RAND_32;
   reg [31:0] _RAND_33;
   reg [31:0] _RAND_34;
@@ -35917,7 +35983,7 @@ module fifoWithBranchOpsI_1(
   reg [31:0] _RAND_36;
   reg [31:0] _RAND_37;
   reg [31:0] _RAND_38;
-  reg [31:0] _RAND_39;
+  reg [63:0] _RAND_39;
   reg [31:0] _RAND_40;
   reg [31:0] _RAND_41;
   reg [31:0] _RAND_42;
@@ -35925,11 +35991,27 @@ module fifoWithBranchOpsI_1(
   reg [31:0] _RAND_44;
   reg [31:0] _RAND_45;
   reg [31:0] _RAND_46;
-  reg [31:0] _RAND_47;
+  reg [63:0] _RAND_47;
   reg [31:0] _RAND_48;
   reg [31:0] _RAND_49;
   reg [31:0] _RAND_50;
   reg [31:0] _RAND_51;
+  reg [31:0] _RAND_52;
+  reg [31:0] _RAND_53;
+  reg [31:0] _RAND_54;
+  reg [63:0] _RAND_55;
+  reg [31:0] _RAND_56;
+  reg [31:0] _RAND_57;
+  reg [31:0] _RAND_58;
+  reg [31:0] _RAND_59;
+  reg [31:0] _RAND_60;
+  reg [31:0] _RAND_61;
+  reg [31:0] _RAND_62;
+  reg [63:0] _RAND_63;
+  reg [31:0] _RAND_64;
+  reg [31:0] _RAND_65;
+  reg [31:0] _RAND_66;
+  reg [31:0] _RAND_67;
 `endif // RANDOMIZE_REG_INIT
   reg  memReg_0_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_0_address; // @[fifo.scala 29:33]
@@ -35937,48 +36019,64 @@ module fifoWithBranchOpsI_1(
   reg [4:0] memReg_0_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_0_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_0_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_0_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_0_writeData; // @[fifo.scala 29:33]
   reg  memReg_1_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_1_address; // @[fifo.scala 29:33]
   reg [31:0] memReg_1_instruction; // @[fifo.scala 29:33]
   reg [4:0] memReg_1_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_1_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_1_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_1_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_1_writeData; // @[fifo.scala 29:33]
   reg  memReg_2_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_2_address; // @[fifo.scala 29:33]
   reg [31:0] memReg_2_instruction; // @[fifo.scala 29:33]
   reg [4:0] memReg_2_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_2_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_2_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_2_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_2_writeData; // @[fifo.scala 29:33]
   reg  memReg_3_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_3_address; // @[fifo.scala 29:33]
   reg [31:0] memReg_3_instruction; // @[fifo.scala 29:33]
   reg [4:0] memReg_3_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_3_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_3_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_3_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_3_writeData; // @[fifo.scala 29:33]
   reg  memReg_4_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_4_address; // @[fifo.scala 29:33]
   reg [31:0] memReg_4_instruction; // @[fifo.scala 29:33]
   reg [4:0] memReg_4_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_4_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_4_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_4_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_4_writeData; // @[fifo.scala 29:33]
   reg  memReg_5_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_5_address; // @[fifo.scala 29:33]
   reg [31:0] memReg_5_instruction; // @[fifo.scala 29:33]
   reg [4:0] memReg_5_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_5_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_5_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_5_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_5_writeData; // @[fifo.scala 29:33]
   reg  memReg_6_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_6_address; // @[fifo.scala 29:33]
   reg [31:0] memReg_6_instruction; // @[fifo.scala 29:33]
   reg [4:0] memReg_6_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_6_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_6_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_6_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_6_writeData; // @[fifo.scala 29:33]
   reg  memReg_7_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_7_address; // @[fifo.scala 29:33]
   reg [31:0] memReg_7_instruction; // @[fifo.scala 29:33]
   reg [4:0] memReg_7_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_7_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_7_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_7_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_7_writeData; // @[fifo.scala 29:33]
   reg [2:0] readPtr; // @[fifo.scala 35:25]
   wire [2:0] _nextVal_T_2 = readPtr + 3'h1; // @[fifo.scala 36:60]
   wire [2:0] nextRead = readPtr == 3'h7 ? 3'h0 : _nextVal_T_2; // @[fifo.scala 36:22]
@@ -36079,6 +36177,18 @@ module fifoWithBranchOpsI_1(
   wire [5:0] _GEN_202 = 3'h4 == readPtr ? memReg_4_prfDest : _GEN_201; // @[fifo.scala 88:{13,13}]
   wire [5:0] _GEN_203 = 3'h5 == readPtr ? memReg_5_prfDest : _GEN_202; // @[fifo.scala 88:{13,13}]
   wire [5:0] _GEN_204 = 3'h6 == readPtr ? memReg_6_prfDest : _GEN_203; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_207 = 3'h1 == readPtr ? memReg_1_writeEn : memReg_0_writeEn; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_208 = 3'h2 == readPtr ? memReg_2_writeEn : _GEN_207; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_209 = 3'h3 == readPtr ? memReg_3_writeEn : _GEN_208; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_210 = 3'h4 == readPtr ? memReg_4_writeEn : _GEN_209; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_211 = 3'h5 == readPtr ? memReg_5_writeEn : _GEN_210; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_212 = 3'h6 == readPtr ? memReg_6_writeEn : _GEN_211; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_215 = 3'h1 == readPtr ? memReg_1_writeData : memReg_0_writeData; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_216 = 3'h2 == readPtr ? memReg_2_writeData : _GEN_215; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_217 = 3'h3 == readPtr ? memReg_3_writeData : _GEN_216; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_218 = 3'h4 == readPtr ? memReg_4_writeData : _GEN_217; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_219 = 3'h5 == readPtr ? memReg_5_writeData : _GEN_218; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_220 = 3'h6 == readPtr ? memReg_6_writeData : _GEN_219; // @[fifo.scala 88:{13,13}]
   wire [4:0] _T_8 = write_data_branchMask & branchOps_branchMask; // @[utils.scala 59:32]
   wire [4:0] _memReg_branchMask_T = write_data_branchMask ^ branchOps_branchMask; // @[utils.scala 60:49]
   wire [4:0] _GEN_222 = 3'h0 == writePtr ? _memReg_branchMask_T : _GEN_118; // @[utils.scala 60:{27,27}]
@@ -36247,6 +36357,8 @@ module fifoWithBranchOpsI_1(
   assign read_data_branchMask = branchOps_valid ? _GEN_425 : _GEN_189; // @[utils.scala 103:26 81:27]
   assign read_data_robAddr = 3'h7 == readPtr ? memReg_7_robAddr : _GEN_196; // @[fifo.scala 88:{13,13}]
   assign read_data_prfDest = 3'h7 == readPtr ? memReg_7_prfDest : _GEN_204; // @[fifo.scala 88:{13,13}]
+  assign read_data_writeEn = 3'h7 == readPtr ? memReg_7_writeEn : _GEN_212; // @[fifo.scala 88:{13,13}]
+  assign read_data_writeData = 3'h7 == readPtr ? memReg_7_writeData : _GEN_220; // @[fifo.scala 88:{13,13}]
   assign isEmpty = emptyReg; // @[fifo.scala 90:11]
   always @(posedge clock) begin
     if (reset) begin // @[fifo.scala 29:33]
@@ -36301,6 +36413,20 @@ module fifoWithBranchOpsI_1(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h0 == writePtr) begin // @[fifo.scala 84:22]
         memReg_0_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_0_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h0 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_0_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_0_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h0 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_0_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -36360,6 +36486,20 @@ module fifoWithBranchOpsI_1(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_1_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h1 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_1_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_1_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h1 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_1_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_2_valid <= 1'h0; // @[fifo.scala 29:33]
     end else if (branchOps_valid) begin // @[fifo.scala 111:25]
       if (startPointer <= 3'h2 | 3'h2 <= endPointer) begin // @[fifo.scala 113:54]
@@ -36413,6 +36553,20 @@ module fifoWithBranchOpsI_1(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h2 == writePtr) begin // @[fifo.scala 84:22]
         memReg_2_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_2_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h2 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_2_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_2_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h2 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_2_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -36472,6 +36626,20 @@ module fifoWithBranchOpsI_1(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_3_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h3 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_3_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_3_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h3 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_3_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_4_valid <= 1'h0; // @[fifo.scala 29:33]
     end else if (branchOps_valid) begin // @[fifo.scala 111:25]
       if (startPointer <= 3'h4 | 3'h4 <= endPointer) begin // @[fifo.scala 113:54]
@@ -36525,6 +36693,20 @@ module fifoWithBranchOpsI_1(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h4 == writePtr) begin // @[fifo.scala 84:22]
         memReg_4_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_4_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h4 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_4_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_4_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h4 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_4_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -36584,6 +36766,20 @@ module fifoWithBranchOpsI_1(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_5_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h5 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_5_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_5_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h5 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_5_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_6_valid <= 1'h0; // @[fifo.scala 29:33]
     end else if (branchOps_valid) begin // @[fifo.scala 111:25]
       if (startPointer <= 3'h6 | 3'h6 <= endPointer) begin // @[fifo.scala 113:54]
@@ -36640,6 +36836,20 @@ module fifoWithBranchOpsI_1(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_6_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h6 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_6_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_6_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h6 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_6_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_7_valid <= 1'h0; // @[fifo.scala 29:33]
     end else if (branchOps_valid) begin // @[fifo.scala 111:25]
       if (branchOps_passed) begin // @[utils.scala 191:28]
@@ -36691,6 +36901,20 @@ module fifoWithBranchOpsI_1(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h7 == writePtr) begin // @[fifo.scala 84:22]
         memReg_7_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_7_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h7 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_7_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_7_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h7 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_7_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 35:25]
@@ -36775,97 +36999,129 @@ initial begin
   _RAND_5 = {1{`RANDOM}};
   memReg_0_prfDest = _RAND_5[5:0];
   _RAND_6 = {1{`RANDOM}};
-  memReg_1_valid = _RAND_6[0:0];
-  _RAND_7 = {1{`RANDOM}};
-  memReg_1_address = _RAND_7[31:0];
+  memReg_0_writeEn = _RAND_6[0:0];
+  _RAND_7 = {2{`RANDOM}};
+  memReg_0_writeData = _RAND_7[63:0];
   _RAND_8 = {1{`RANDOM}};
-  memReg_1_instruction = _RAND_8[31:0];
+  memReg_1_valid = _RAND_8[0:0];
   _RAND_9 = {1{`RANDOM}};
-  memReg_1_branchMask = _RAND_9[4:0];
+  memReg_1_address = _RAND_9[31:0];
   _RAND_10 = {1{`RANDOM}};
-  memReg_1_robAddr = _RAND_10[3:0];
+  memReg_1_instruction = _RAND_10[31:0];
   _RAND_11 = {1{`RANDOM}};
-  memReg_1_prfDest = _RAND_11[5:0];
+  memReg_1_branchMask = _RAND_11[4:0];
   _RAND_12 = {1{`RANDOM}};
-  memReg_2_valid = _RAND_12[0:0];
+  memReg_1_robAddr = _RAND_12[3:0];
   _RAND_13 = {1{`RANDOM}};
-  memReg_2_address = _RAND_13[31:0];
+  memReg_1_prfDest = _RAND_13[5:0];
   _RAND_14 = {1{`RANDOM}};
-  memReg_2_instruction = _RAND_14[31:0];
-  _RAND_15 = {1{`RANDOM}};
-  memReg_2_branchMask = _RAND_15[4:0];
+  memReg_1_writeEn = _RAND_14[0:0];
+  _RAND_15 = {2{`RANDOM}};
+  memReg_1_writeData = _RAND_15[63:0];
   _RAND_16 = {1{`RANDOM}};
-  memReg_2_robAddr = _RAND_16[3:0];
+  memReg_2_valid = _RAND_16[0:0];
   _RAND_17 = {1{`RANDOM}};
-  memReg_2_prfDest = _RAND_17[5:0];
+  memReg_2_address = _RAND_17[31:0];
   _RAND_18 = {1{`RANDOM}};
-  memReg_3_valid = _RAND_18[0:0];
+  memReg_2_instruction = _RAND_18[31:0];
   _RAND_19 = {1{`RANDOM}};
-  memReg_3_address = _RAND_19[31:0];
+  memReg_2_branchMask = _RAND_19[4:0];
   _RAND_20 = {1{`RANDOM}};
-  memReg_3_instruction = _RAND_20[31:0];
+  memReg_2_robAddr = _RAND_20[3:0];
   _RAND_21 = {1{`RANDOM}};
-  memReg_3_branchMask = _RAND_21[4:0];
+  memReg_2_prfDest = _RAND_21[5:0];
   _RAND_22 = {1{`RANDOM}};
-  memReg_3_robAddr = _RAND_22[3:0];
-  _RAND_23 = {1{`RANDOM}};
-  memReg_3_prfDest = _RAND_23[5:0];
+  memReg_2_writeEn = _RAND_22[0:0];
+  _RAND_23 = {2{`RANDOM}};
+  memReg_2_writeData = _RAND_23[63:0];
   _RAND_24 = {1{`RANDOM}};
-  memReg_4_valid = _RAND_24[0:0];
+  memReg_3_valid = _RAND_24[0:0];
   _RAND_25 = {1{`RANDOM}};
-  memReg_4_address = _RAND_25[31:0];
+  memReg_3_address = _RAND_25[31:0];
   _RAND_26 = {1{`RANDOM}};
-  memReg_4_instruction = _RAND_26[31:0];
+  memReg_3_instruction = _RAND_26[31:0];
   _RAND_27 = {1{`RANDOM}};
-  memReg_4_branchMask = _RAND_27[4:0];
+  memReg_3_branchMask = _RAND_27[4:0];
   _RAND_28 = {1{`RANDOM}};
-  memReg_4_robAddr = _RAND_28[3:0];
+  memReg_3_robAddr = _RAND_28[3:0];
   _RAND_29 = {1{`RANDOM}};
-  memReg_4_prfDest = _RAND_29[5:0];
+  memReg_3_prfDest = _RAND_29[5:0];
   _RAND_30 = {1{`RANDOM}};
-  memReg_5_valid = _RAND_30[0:0];
-  _RAND_31 = {1{`RANDOM}};
-  memReg_5_address = _RAND_31[31:0];
+  memReg_3_writeEn = _RAND_30[0:0];
+  _RAND_31 = {2{`RANDOM}};
+  memReg_3_writeData = _RAND_31[63:0];
   _RAND_32 = {1{`RANDOM}};
-  memReg_5_instruction = _RAND_32[31:0];
+  memReg_4_valid = _RAND_32[0:0];
   _RAND_33 = {1{`RANDOM}};
-  memReg_5_branchMask = _RAND_33[4:0];
+  memReg_4_address = _RAND_33[31:0];
   _RAND_34 = {1{`RANDOM}};
-  memReg_5_robAddr = _RAND_34[3:0];
+  memReg_4_instruction = _RAND_34[31:0];
   _RAND_35 = {1{`RANDOM}};
-  memReg_5_prfDest = _RAND_35[5:0];
+  memReg_4_branchMask = _RAND_35[4:0];
   _RAND_36 = {1{`RANDOM}};
-  memReg_6_valid = _RAND_36[0:0];
+  memReg_4_robAddr = _RAND_36[3:0];
   _RAND_37 = {1{`RANDOM}};
-  memReg_6_address = _RAND_37[31:0];
+  memReg_4_prfDest = _RAND_37[5:0];
   _RAND_38 = {1{`RANDOM}};
-  memReg_6_instruction = _RAND_38[31:0];
-  _RAND_39 = {1{`RANDOM}};
-  memReg_6_branchMask = _RAND_39[4:0];
+  memReg_4_writeEn = _RAND_38[0:0];
+  _RAND_39 = {2{`RANDOM}};
+  memReg_4_writeData = _RAND_39[63:0];
   _RAND_40 = {1{`RANDOM}};
-  memReg_6_robAddr = _RAND_40[3:0];
+  memReg_5_valid = _RAND_40[0:0];
   _RAND_41 = {1{`RANDOM}};
-  memReg_6_prfDest = _RAND_41[5:0];
+  memReg_5_address = _RAND_41[31:0];
   _RAND_42 = {1{`RANDOM}};
-  memReg_7_valid = _RAND_42[0:0];
+  memReg_5_instruction = _RAND_42[31:0];
   _RAND_43 = {1{`RANDOM}};
-  memReg_7_address = _RAND_43[31:0];
+  memReg_5_branchMask = _RAND_43[4:0];
   _RAND_44 = {1{`RANDOM}};
-  memReg_7_instruction = _RAND_44[31:0];
+  memReg_5_robAddr = _RAND_44[3:0];
   _RAND_45 = {1{`RANDOM}};
-  memReg_7_branchMask = _RAND_45[4:0];
+  memReg_5_prfDest = _RAND_45[5:0];
   _RAND_46 = {1{`RANDOM}};
-  memReg_7_robAddr = _RAND_46[3:0];
-  _RAND_47 = {1{`RANDOM}};
-  memReg_7_prfDest = _RAND_47[5:0];
+  memReg_5_writeEn = _RAND_46[0:0];
+  _RAND_47 = {2{`RANDOM}};
+  memReg_5_writeData = _RAND_47[63:0];
   _RAND_48 = {1{`RANDOM}};
-  readPtr = _RAND_48[2:0];
+  memReg_6_valid = _RAND_48[0:0];
   _RAND_49 = {1{`RANDOM}};
-  emptyReg = _RAND_49[0:0];
+  memReg_6_address = _RAND_49[31:0];
   _RAND_50 = {1{`RANDOM}};
-  writePtr = _RAND_50[2:0];
+  memReg_6_instruction = _RAND_50[31:0];
   _RAND_51 = {1{`RANDOM}};
-  fullReg = _RAND_51[0:0];
+  memReg_6_branchMask = _RAND_51[4:0];
+  _RAND_52 = {1{`RANDOM}};
+  memReg_6_robAddr = _RAND_52[3:0];
+  _RAND_53 = {1{`RANDOM}};
+  memReg_6_prfDest = _RAND_53[5:0];
+  _RAND_54 = {1{`RANDOM}};
+  memReg_6_writeEn = _RAND_54[0:0];
+  _RAND_55 = {2{`RANDOM}};
+  memReg_6_writeData = _RAND_55[63:0];
+  _RAND_56 = {1{`RANDOM}};
+  memReg_7_valid = _RAND_56[0:0];
+  _RAND_57 = {1{`RANDOM}};
+  memReg_7_address = _RAND_57[31:0];
+  _RAND_58 = {1{`RANDOM}};
+  memReg_7_instruction = _RAND_58[31:0];
+  _RAND_59 = {1{`RANDOM}};
+  memReg_7_branchMask = _RAND_59[4:0];
+  _RAND_60 = {1{`RANDOM}};
+  memReg_7_robAddr = _RAND_60[3:0];
+  _RAND_61 = {1{`RANDOM}};
+  memReg_7_prfDest = _RAND_61[5:0];
+  _RAND_62 = {1{`RANDOM}};
+  memReg_7_writeEn = _RAND_62[0:0];
+  _RAND_63 = {2{`RANDOM}};
+  memReg_7_writeData = _RAND_63[63:0];
+  _RAND_64 = {1{`RANDOM}};
+  readPtr = _RAND_64[2:0];
+  _RAND_65 = {1{`RANDOM}};
+  emptyReg = _RAND_65[0:0];
+  _RAND_66 = {1{`RANDOM}};
+  writePtr = _RAND_66[2:0];
+  _RAND_67 = {1{`RANDOM}};
+  fullReg = _RAND_67[0:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -36884,6 +37140,8 @@ module fifoWithBranchOpsI_2(
   input  [4:0]   write_data_branchMask,
   input  [3:0]   write_data_robAddr,
   input  [5:0]   write_data_prfDest,
+  input          write_data_writeEn,
+  input  [63:0]  write_data_writeData,
   input  [511:0] write_data_cacheLine,
   input  [1:0]   write_data_response,
   input          read_ready,
@@ -36893,6 +37151,8 @@ module fifoWithBranchOpsI_2(
   output [4:0]   read_data_branchMask,
   output [3:0]   read_data_robAddr,
   output [5:0]   read_data_prfDest,
+  output         read_data_writeEn,
+  output [63:0]  read_data_writeData,
   output [511:0] read_data_cacheLine,
   output [1:0]   read_data_response,
   output         isEmpty,
@@ -36907,38 +37167,38 @@ module fifoWithBranchOpsI_2(
   reg [31:0] _RAND_3;
   reg [31:0] _RAND_4;
   reg [31:0] _RAND_5;
-  reg [511:0] _RAND_6;
-  reg [31:0] _RAND_7;
-  reg [31:0] _RAND_8;
+  reg [31:0] _RAND_6;
+  reg [63:0] _RAND_7;
+  reg [511:0] _RAND_8;
   reg [31:0] _RAND_9;
   reg [31:0] _RAND_10;
   reg [31:0] _RAND_11;
   reg [31:0] _RAND_12;
   reg [31:0] _RAND_13;
-  reg [511:0] _RAND_14;
+  reg [31:0] _RAND_14;
   reg [31:0] _RAND_15;
   reg [31:0] _RAND_16;
-  reg [31:0] _RAND_17;
-  reg [31:0] _RAND_18;
+  reg [63:0] _RAND_17;
+  reg [511:0] _RAND_18;
   reg [31:0] _RAND_19;
   reg [31:0] _RAND_20;
   reg [31:0] _RAND_21;
-  reg [511:0] _RAND_22;
+  reg [31:0] _RAND_22;
   reg [31:0] _RAND_23;
   reg [31:0] _RAND_24;
   reg [31:0] _RAND_25;
   reg [31:0] _RAND_26;
-  reg [31:0] _RAND_27;
-  reg [31:0] _RAND_28;
+  reg [63:0] _RAND_27;
+  reg [511:0] _RAND_28;
   reg [31:0] _RAND_29;
-  reg [511:0] _RAND_30;
+  reg [31:0] _RAND_30;
   reg [31:0] _RAND_31;
   reg [31:0] _RAND_32;
   reg [31:0] _RAND_33;
   reg [31:0] _RAND_34;
   reg [31:0] _RAND_35;
   reg [31:0] _RAND_36;
-  reg [31:0] _RAND_37;
+  reg [63:0] _RAND_37;
   reg [511:0] _RAND_38;
   reg [31:0] _RAND_39;
   reg [31:0] _RAND_40;
@@ -36947,28 +37207,44 @@ module fifoWithBranchOpsI_2(
   reg [31:0] _RAND_43;
   reg [31:0] _RAND_44;
   reg [31:0] _RAND_45;
-  reg [511:0] _RAND_46;
-  reg [31:0] _RAND_47;
-  reg [31:0] _RAND_48;
+  reg [31:0] _RAND_46;
+  reg [63:0] _RAND_47;
+  reg [511:0] _RAND_48;
   reg [31:0] _RAND_49;
   reg [31:0] _RAND_50;
   reg [31:0] _RAND_51;
   reg [31:0] _RAND_52;
   reg [31:0] _RAND_53;
-  reg [511:0] _RAND_54;
+  reg [31:0] _RAND_54;
   reg [31:0] _RAND_55;
   reg [31:0] _RAND_56;
-  reg [31:0] _RAND_57;
-  reg [31:0] _RAND_58;
+  reg [63:0] _RAND_57;
+  reg [511:0] _RAND_58;
   reg [31:0] _RAND_59;
   reg [31:0] _RAND_60;
   reg [31:0] _RAND_61;
-  reg [511:0] _RAND_62;
+  reg [31:0] _RAND_62;
   reg [31:0] _RAND_63;
   reg [31:0] _RAND_64;
   reg [31:0] _RAND_65;
   reg [31:0] _RAND_66;
-  reg [31:0] _RAND_67;
+  reg [63:0] _RAND_67;
+  reg [511:0] _RAND_68;
+  reg [31:0] _RAND_69;
+  reg [31:0] _RAND_70;
+  reg [31:0] _RAND_71;
+  reg [31:0] _RAND_72;
+  reg [31:0] _RAND_73;
+  reg [31:0] _RAND_74;
+  reg [31:0] _RAND_75;
+  reg [31:0] _RAND_76;
+  reg [63:0] _RAND_77;
+  reg [511:0] _RAND_78;
+  reg [31:0] _RAND_79;
+  reg [31:0] _RAND_80;
+  reg [31:0] _RAND_81;
+  reg [31:0] _RAND_82;
+  reg [31:0] _RAND_83;
 `endif // RANDOMIZE_REG_INIT
   reg  memReg_0_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_0_address; // @[fifo.scala 29:33]
@@ -36976,6 +37252,8 @@ module fifoWithBranchOpsI_2(
   reg [4:0] memReg_0_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_0_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_0_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_0_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_0_writeData; // @[fifo.scala 29:33]
   reg [511:0] memReg_0_cacheLine; // @[fifo.scala 29:33]
   reg [1:0] memReg_0_response; // @[fifo.scala 29:33]
   reg  memReg_1_valid; // @[fifo.scala 29:33]
@@ -36984,6 +37262,8 @@ module fifoWithBranchOpsI_2(
   reg [4:0] memReg_1_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_1_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_1_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_1_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_1_writeData; // @[fifo.scala 29:33]
   reg [511:0] memReg_1_cacheLine; // @[fifo.scala 29:33]
   reg [1:0] memReg_1_response; // @[fifo.scala 29:33]
   reg  memReg_2_valid; // @[fifo.scala 29:33]
@@ -36992,6 +37272,8 @@ module fifoWithBranchOpsI_2(
   reg [4:0] memReg_2_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_2_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_2_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_2_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_2_writeData; // @[fifo.scala 29:33]
   reg [511:0] memReg_2_cacheLine; // @[fifo.scala 29:33]
   reg [1:0] memReg_2_response; // @[fifo.scala 29:33]
   reg  memReg_3_valid; // @[fifo.scala 29:33]
@@ -37000,6 +37282,8 @@ module fifoWithBranchOpsI_2(
   reg [4:0] memReg_3_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_3_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_3_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_3_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_3_writeData; // @[fifo.scala 29:33]
   reg [511:0] memReg_3_cacheLine; // @[fifo.scala 29:33]
   reg [1:0] memReg_3_response; // @[fifo.scala 29:33]
   reg  memReg_4_valid; // @[fifo.scala 29:33]
@@ -37008,6 +37292,8 @@ module fifoWithBranchOpsI_2(
   reg [4:0] memReg_4_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_4_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_4_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_4_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_4_writeData; // @[fifo.scala 29:33]
   reg [511:0] memReg_4_cacheLine; // @[fifo.scala 29:33]
   reg [1:0] memReg_4_response; // @[fifo.scala 29:33]
   reg  memReg_5_valid; // @[fifo.scala 29:33]
@@ -37016,6 +37302,8 @@ module fifoWithBranchOpsI_2(
   reg [4:0] memReg_5_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_5_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_5_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_5_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_5_writeData; // @[fifo.scala 29:33]
   reg [511:0] memReg_5_cacheLine; // @[fifo.scala 29:33]
   reg [1:0] memReg_5_response; // @[fifo.scala 29:33]
   reg  memReg_6_valid; // @[fifo.scala 29:33]
@@ -37024,6 +37312,8 @@ module fifoWithBranchOpsI_2(
   reg [4:0] memReg_6_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_6_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_6_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_6_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_6_writeData; // @[fifo.scala 29:33]
   reg [511:0] memReg_6_cacheLine; // @[fifo.scala 29:33]
   reg [1:0] memReg_6_response; // @[fifo.scala 29:33]
   reg  memReg_7_valid; // @[fifo.scala 29:33]
@@ -37032,6 +37322,8 @@ module fifoWithBranchOpsI_2(
   reg [4:0] memReg_7_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_7_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_7_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_7_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_7_writeData; // @[fifo.scala 29:33]
   reg [511:0] memReg_7_cacheLine; // @[fifo.scala 29:33]
   reg [1:0] memReg_7_response; // @[fifo.scala 29:33]
   reg [2:0] readPtr; // @[fifo.scala 35:25]
@@ -37134,6 +37426,18 @@ module fifoWithBranchOpsI_2(
   wire [5:0] _GEN_234 = 3'h4 == readPtr ? memReg_4_prfDest : _GEN_233; // @[fifo.scala 88:{13,13}]
   wire [5:0] _GEN_235 = 3'h5 == readPtr ? memReg_5_prfDest : _GEN_234; // @[fifo.scala 88:{13,13}]
   wire [5:0] _GEN_236 = 3'h6 == readPtr ? memReg_6_prfDest : _GEN_235; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_239 = 3'h1 == readPtr ? memReg_1_writeEn : memReg_0_writeEn; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_240 = 3'h2 == readPtr ? memReg_2_writeEn : _GEN_239; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_241 = 3'h3 == readPtr ? memReg_3_writeEn : _GEN_240; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_242 = 3'h4 == readPtr ? memReg_4_writeEn : _GEN_241; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_243 = 3'h5 == readPtr ? memReg_5_writeEn : _GEN_242; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_244 = 3'h6 == readPtr ? memReg_6_writeEn : _GEN_243; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_247 = 3'h1 == readPtr ? memReg_1_writeData : memReg_0_writeData; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_248 = 3'h2 == readPtr ? memReg_2_writeData : _GEN_247; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_249 = 3'h3 == readPtr ? memReg_3_writeData : _GEN_248; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_250 = 3'h4 == readPtr ? memReg_4_writeData : _GEN_249; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_251 = 3'h5 == readPtr ? memReg_5_writeData : _GEN_250; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_252 = 3'h6 == readPtr ? memReg_6_writeData : _GEN_251; // @[fifo.scala 88:{13,13}]
   wire [511:0] _GEN_255 = 3'h1 == readPtr ? memReg_1_cacheLine : memReg_0_cacheLine; // @[fifo.scala 88:{13,13}]
   wire [511:0] _GEN_256 = 3'h2 == readPtr ? memReg_2_cacheLine : _GEN_255; // @[fifo.scala 88:{13,13}]
   wire [511:0] _GEN_257 = 3'h3 == readPtr ? memReg_3_cacheLine : _GEN_256; // @[fifo.scala 88:{13,13}]
@@ -37314,6 +37618,8 @@ module fifoWithBranchOpsI_2(
   assign read_data_branchMask = branchOps_valid ? _GEN_473 : _GEN_221; // @[utils.scala 103:26 81:27]
   assign read_data_robAddr = 3'h7 == readPtr ? memReg_7_robAddr : _GEN_228; // @[fifo.scala 88:{13,13}]
   assign read_data_prfDest = 3'h7 == readPtr ? memReg_7_prfDest : _GEN_236; // @[fifo.scala 88:{13,13}]
+  assign read_data_writeEn = 3'h7 == readPtr ? memReg_7_writeEn : _GEN_244; // @[fifo.scala 88:{13,13}]
+  assign read_data_writeData = 3'h7 == readPtr ? memReg_7_writeData : _GEN_252; // @[fifo.scala 88:{13,13}]
   assign read_data_cacheLine = 3'h7 == readPtr ? memReg_7_cacheLine : _GEN_260; // @[fifo.scala 88:{13,13}]
   assign read_data_response = 3'h7 == readPtr ? memReg_7_response : _GEN_268; // @[fifo.scala 88:{13,13}]
   assign isEmpty = emptyReg; // @[fifo.scala 90:11]
@@ -37370,6 +37676,20 @@ module fifoWithBranchOpsI_2(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h0 == writePtr) begin // @[fifo.scala 84:22]
         memReg_0_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_0_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h0 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_0_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_0_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h0 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_0_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -37443,6 +37763,20 @@ module fifoWithBranchOpsI_2(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_1_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h1 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_1_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_1_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h1 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_1_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_1_cacheLine <= 512'h0; // @[fifo.scala 29:33]
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h1 == writePtr) begin // @[fifo.scala 84:22]
@@ -37510,6 +37844,20 @@ module fifoWithBranchOpsI_2(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h2 == writePtr) begin // @[fifo.scala 84:22]
         memReg_2_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_2_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h2 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_2_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_2_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h2 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_2_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -37583,6 +37931,20 @@ module fifoWithBranchOpsI_2(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_3_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h3 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_3_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_3_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h3 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_3_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_3_cacheLine <= 512'h0; // @[fifo.scala 29:33]
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h3 == writePtr) begin // @[fifo.scala 84:22]
@@ -37650,6 +38012,20 @@ module fifoWithBranchOpsI_2(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h4 == writePtr) begin // @[fifo.scala 84:22]
         memReg_4_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_4_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h4 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_4_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_4_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h4 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_4_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -37723,6 +38099,20 @@ module fifoWithBranchOpsI_2(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_5_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h5 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_5_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_5_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h5 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_5_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_5_cacheLine <= 512'h0; // @[fifo.scala 29:33]
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h5 == writePtr) begin // @[fifo.scala 84:22]
@@ -37793,6 +38183,20 @@ module fifoWithBranchOpsI_2(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_6_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h6 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_6_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_6_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h6 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_6_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_6_cacheLine <= 512'h0; // @[fifo.scala 29:33]
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h6 == writePtr) begin // @[fifo.scala 84:22]
@@ -37858,6 +38262,20 @@ module fifoWithBranchOpsI_2(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h7 == writePtr) begin // @[fifo.scala 84:22]
         memReg_7_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_7_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h7 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_7_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_7_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h7 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_7_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -37955,130 +38373,162 @@ initial begin
   memReg_0_robAddr = _RAND_4[3:0];
   _RAND_5 = {1{`RANDOM}};
   memReg_0_prfDest = _RAND_5[5:0];
-  _RAND_6 = {16{`RANDOM}};
-  memReg_0_cacheLine = _RAND_6[511:0];
-  _RAND_7 = {1{`RANDOM}};
-  memReg_0_response = _RAND_7[1:0];
-  _RAND_8 = {1{`RANDOM}};
-  memReg_1_valid = _RAND_8[0:0];
+  _RAND_6 = {1{`RANDOM}};
+  memReg_0_writeEn = _RAND_6[0:0];
+  _RAND_7 = {2{`RANDOM}};
+  memReg_0_writeData = _RAND_7[63:0];
+  _RAND_8 = {16{`RANDOM}};
+  memReg_0_cacheLine = _RAND_8[511:0];
   _RAND_9 = {1{`RANDOM}};
-  memReg_1_address = _RAND_9[31:0];
+  memReg_0_response = _RAND_9[1:0];
   _RAND_10 = {1{`RANDOM}};
-  memReg_1_instruction = _RAND_10[31:0];
+  memReg_1_valid = _RAND_10[0:0];
   _RAND_11 = {1{`RANDOM}};
-  memReg_1_branchMask = _RAND_11[4:0];
+  memReg_1_address = _RAND_11[31:0];
   _RAND_12 = {1{`RANDOM}};
-  memReg_1_robAddr = _RAND_12[3:0];
+  memReg_1_instruction = _RAND_12[31:0];
   _RAND_13 = {1{`RANDOM}};
-  memReg_1_prfDest = _RAND_13[5:0];
-  _RAND_14 = {16{`RANDOM}};
-  memReg_1_cacheLine = _RAND_14[511:0];
+  memReg_1_branchMask = _RAND_13[4:0];
+  _RAND_14 = {1{`RANDOM}};
+  memReg_1_robAddr = _RAND_14[3:0];
   _RAND_15 = {1{`RANDOM}};
-  memReg_1_response = _RAND_15[1:0];
+  memReg_1_prfDest = _RAND_15[5:0];
   _RAND_16 = {1{`RANDOM}};
-  memReg_2_valid = _RAND_16[0:0];
-  _RAND_17 = {1{`RANDOM}};
-  memReg_2_address = _RAND_17[31:0];
-  _RAND_18 = {1{`RANDOM}};
-  memReg_2_instruction = _RAND_18[31:0];
+  memReg_1_writeEn = _RAND_16[0:0];
+  _RAND_17 = {2{`RANDOM}};
+  memReg_1_writeData = _RAND_17[63:0];
+  _RAND_18 = {16{`RANDOM}};
+  memReg_1_cacheLine = _RAND_18[511:0];
   _RAND_19 = {1{`RANDOM}};
-  memReg_2_branchMask = _RAND_19[4:0];
+  memReg_1_response = _RAND_19[1:0];
   _RAND_20 = {1{`RANDOM}};
-  memReg_2_robAddr = _RAND_20[3:0];
+  memReg_2_valid = _RAND_20[0:0];
   _RAND_21 = {1{`RANDOM}};
-  memReg_2_prfDest = _RAND_21[5:0];
-  _RAND_22 = {16{`RANDOM}};
-  memReg_2_cacheLine = _RAND_22[511:0];
+  memReg_2_address = _RAND_21[31:0];
+  _RAND_22 = {1{`RANDOM}};
+  memReg_2_instruction = _RAND_22[31:0];
   _RAND_23 = {1{`RANDOM}};
-  memReg_2_response = _RAND_23[1:0];
+  memReg_2_branchMask = _RAND_23[4:0];
   _RAND_24 = {1{`RANDOM}};
-  memReg_3_valid = _RAND_24[0:0];
+  memReg_2_robAddr = _RAND_24[3:0];
   _RAND_25 = {1{`RANDOM}};
-  memReg_3_address = _RAND_25[31:0];
+  memReg_2_prfDest = _RAND_25[5:0];
   _RAND_26 = {1{`RANDOM}};
-  memReg_3_instruction = _RAND_26[31:0];
-  _RAND_27 = {1{`RANDOM}};
-  memReg_3_branchMask = _RAND_27[4:0];
-  _RAND_28 = {1{`RANDOM}};
-  memReg_3_robAddr = _RAND_28[3:0];
+  memReg_2_writeEn = _RAND_26[0:0];
+  _RAND_27 = {2{`RANDOM}};
+  memReg_2_writeData = _RAND_27[63:0];
+  _RAND_28 = {16{`RANDOM}};
+  memReg_2_cacheLine = _RAND_28[511:0];
   _RAND_29 = {1{`RANDOM}};
-  memReg_3_prfDest = _RAND_29[5:0];
-  _RAND_30 = {16{`RANDOM}};
-  memReg_3_cacheLine = _RAND_30[511:0];
+  memReg_2_response = _RAND_29[1:0];
+  _RAND_30 = {1{`RANDOM}};
+  memReg_3_valid = _RAND_30[0:0];
   _RAND_31 = {1{`RANDOM}};
-  memReg_3_response = _RAND_31[1:0];
+  memReg_3_address = _RAND_31[31:0];
   _RAND_32 = {1{`RANDOM}};
-  memReg_4_valid = _RAND_32[0:0];
+  memReg_3_instruction = _RAND_32[31:0];
   _RAND_33 = {1{`RANDOM}};
-  memReg_4_address = _RAND_33[31:0];
+  memReg_3_branchMask = _RAND_33[4:0];
   _RAND_34 = {1{`RANDOM}};
-  memReg_4_instruction = _RAND_34[31:0];
+  memReg_3_robAddr = _RAND_34[3:0];
   _RAND_35 = {1{`RANDOM}};
-  memReg_4_branchMask = _RAND_35[4:0];
+  memReg_3_prfDest = _RAND_35[5:0];
   _RAND_36 = {1{`RANDOM}};
-  memReg_4_robAddr = _RAND_36[3:0];
-  _RAND_37 = {1{`RANDOM}};
-  memReg_4_prfDest = _RAND_37[5:0];
+  memReg_3_writeEn = _RAND_36[0:0];
+  _RAND_37 = {2{`RANDOM}};
+  memReg_3_writeData = _RAND_37[63:0];
   _RAND_38 = {16{`RANDOM}};
-  memReg_4_cacheLine = _RAND_38[511:0];
+  memReg_3_cacheLine = _RAND_38[511:0];
   _RAND_39 = {1{`RANDOM}};
-  memReg_4_response = _RAND_39[1:0];
+  memReg_3_response = _RAND_39[1:0];
   _RAND_40 = {1{`RANDOM}};
-  memReg_5_valid = _RAND_40[0:0];
+  memReg_4_valid = _RAND_40[0:0];
   _RAND_41 = {1{`RANDOM}};
-  memReg_5_address = _RAND_41[31:0];
+  memReg_4_address = _RAND_41[31:0];
   _RAND_42 = {1{`RANDOM}};
-  memReg_5_instruction = _RAND_42[31:0];
+  memReg_4_instruction = _RAND_42[31:0];
   _RAND_43 = {1{`RANDOM}};
-  memReg_5_branchMask = _RAND_43[4:0];
+  memReg_4_branchMask = _RAND_43[4:0];
   _RAND_44 = {1{`RANDOM}};
-  memReg_5_robAddr = _RAND_44[3:0];
+  memReg_4_robAddr = _RAND_44[3:0];
   _RAND_45 = {1{`RANDOM}};
-  memReg_5_prfDest = _RAND_45[5:0];
-  _RAND_46 = {16{`RANDOM}};
-  memReg_5_cacheLine = _RAND_46[511:0];
-  _RAND_47 = {1{`RANDOM}};
-  memReg_5_response = _RAND_47[1:0];
-  _RAND_48 = {1{`RANDOM}};
-  memReg_6_valid = _RAND_48[0:0];
+  memReg_4_prfDest = _RAND_45[5:0];
+  _RAND_46 = {1{`RANDOM}};
+  memReg_4_writeEn = _RAND_46[0:0];
+  _RAND_47 = {2{`RANDOM}};
+  memReg_4_writeData = _RAND_47[63:0];
+  _RAND_48 = {16{`RANDOM}};
+  memReg_4_cacheLine = _RAND_48[511:0];
   _RAND_49 = {1{`RANDOM}};
-  memReg_6_address = _RAND_49[31:0];
+  memReg_4_response = _RAND_49[1:0];
   _RAND_50 = {1{`RANDOM}};
-  memReg_6_instruction = _RAND_50[31:0];
+  memReg_5_valid = _RAND_50[0:0];
   _RAND_51 = {1{`RANDOM}};
-  memReg_6_branchMask = _RAND_51[4:0];
+  memReg_5_address = _RAND_51[31:0];
   _RAND_52 = {1{`RANDOM}};
-  memReg_6_robAddr = _RAND_52[3:0];
+  memReg_5_instruction = _RAND_52[31:0];
   _RAND_53 = {1{`RANDOM}};
-  memReg_6_prfDest = _RAND_53[5:0];
-  _RAND_54 = {16{`RANDOM}};
-  memReg_6_cacheLine = _RAND_54[511:0];
+  memReg_5_branchMask = _RAND_53[4:0];
+  _RAND_54 = {1{`RANDOM}};
+  memReg_5_robAddr = _RAND_54[3:0];
   _RAND_55 = {1{`RANDOM}};
-  memReg_6_response = _RAND_55[1:0];
+  memReg_5_prfDest = _RAND_55[5:0];
   _RAND_56 = {1{`RANDOM}};
-  memReg_7_valid = _RAND_56[0:0];
-  _RAND_57 = {1{`RANDOM}};
-  memReg_7_address = _RAND_57[31:0];
-  _RAND_58 = {1{`RANDOM}};
-  memReg_7_instruction = _RAND_58[31:0];
+  memReg_5_writeEn = _RAND_56[0:0];
+  _RAND_57 = {2{`RANDOM}};
+  memReg_5_writeData = _RAND_57[63:0];
+  _RAND_58 = {16{`RANDOM}};
+  memReg_5_cacheLine = _RAND_58[511:0];
   _RAND_59 = {1{`RANDOM}};
-  memReg_7_branchMask = _RAND_59[4:0];
+  memReg_5_response = _RAND_59[1:0];
   _RAND_60 = {1{`RANDOM}};
-  memReg_7_robAddr = _RAND_60[3:0];
+  memReg_6_valid = _RAND_60[0:0];
   _RAND_61 = {1{`RANDOM}};
-  memReg_7_prfDest = _RAND_61[5:0];
-  _RAND_62 = {16{`RANDOM}};
-  memReg_7_cacheLine = _RAND_62[511:0];
+  memReg_6_address = _RAND_61[31:0];
+  _RAND_62 = {1{`RANDOM}};
+  memReg_6_instruction = _RAND_62[31:0];
   _RAND_63 = {1{`RANDOM}};
-  memReg_7_response = _RAND_63[1:0];
+  memReg_6_branchMask = _RAND_63[4:0];
   _RAND_64 = {1{`RANDOM}};
-  readPtr = _RAND_64[2:0];
+  memReg_6_robAddr = _RAND_64[3:0];
   _RAND_65 = {1{`RANDOM}};
-  emptyReg = _RAND_65[0:0];
+  memReg_6_prfDest = _RAND_65[5:0];
   _RAND_66 = {1{`RANDOM}};
-  writePtr = _RAND_66[2:0];
-  _RAND_67 = {1{`RANDOM}};
-  fullReg = _RAND_67[0:0];
+  memReg_6_writeEn = _RAND_66[0:0];
+  _RAND_67 = {2{`RANDOM}};
+  memReg_6_writeData = _RAND_67[63:0];
+  _RAND_68 = {16{`RANDOM}};
+  memReg_6_cacheLine = _RAND_68[511:0];
+  _RAND_69 = {1{`RANDOM}};
+  memReg_6_response = _RAND_69[1:0];
+  _RAND_70 = {1{`RANDOM}};
+  memReg_7_valid = _RAND_70[0:0];
+  _RAND_71 = {1{`RANDOM}};
+  memReg_7_address = _RAND_71[31:0];
+  _RAND_72 = {1{`RANDOM}};
+  memReg_7_instruction = _RAND_72[31:0];
+  _RAND_73 = {1{`RANDOM}};
+  memReg_7_branchMask = _RAND_73[4:0];
+  _RAND_74 = {1{`RANDOM}};
+  memReg_7_robAddr = _RAND_74[3:0];
+  _RAND_75 = {1{`RANDOM}};
+  memReg_7_prfDest = _RAND_75[5:0];
+  _RAND_76 = {1{`RANDOM}};
+  memReg_7_writeEn = _RAND_76[0:0];
+  _RAND_77 = {2{`RANDOM}};
+  memReg_7_writeData = _RAND_77[63:0];
+  _RAND_78 = {16{`RANDOM}};
+  memReg_7_cacheLine = _RAND_78[511:0];
+  _RAND_79 = {1{`RANDOM}};
+  memReg_7_response = _RAND_79[1:0];
+  _RAND_80 = {1{`RANDOM}};
+  readPtr = _RAND_80[2:0];
+  _RAND_81 = {1{`RANDOM}};
+  emptyReg = _RAND_81[0:0];
+  _RAND_82 = {1{`RANDOM}};
+  writePtr = _RAND_82[2:0];
+  _RAND_83 = {1{`RANDOM}};
+  fullReg = _RAND_83[0:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -38517,6 +38967,8 @@ module replayUnit(
   input  [4:0]   requestIn_request_branchMask,
   input  [3:0]   requestIn_request_robAddr,
   input  [5:0]   requestIn_request_prfDest,
+  input          requestIn_request_writeEn,
+  input  [63:0]  requestIn_request_writeData,
   input          requestOut_ready,
   output         requestOut_request_valid,
   output [31:0]  requestOut_request_address,
@@ -38524,6 +38976,8 @@ module replayUnit(
   output [4:0]   requestOut_request_branchMask,
   output [3:0]   requestOut_request_robAddr,
   output [5:0]   requestOut_request_prfDest,
+  output         requestOut_request_writeEn,
+  output [63:0]  requestOut_request_writeData,
   output         responseIn_ready,
   input          responseIn_request_valid,
   input  [31:0]  responseIn_request_address,
@@ -38531,6 +38985,8 @@ module replayUnit(
   input  [4:0]   responseIn_request_branchMask,
   input  [3:0]   responseIn_request_robAddr,
   input  [5:0]   responseIn_request_prfDest,
+  input          responseIn_request_writeEn,
+  input  [63:0]  responseIn_request_writeData,
   input  [511:0] responseIn_request_cacheLine,
   input  [1:0]   responseIn_request_response,
   input          responseOut_ready,
@@ -38540,6 +38996,8 @@ module replayUnit(
   output [4:0]   responseOut_request_branchMask,
   output [3:0]   responseOut_request_robAddr,
   output [5:0]   responseOut_request_prfDest,
+  output         responseOut_request_writeEn,
+  output [63:0]  responseOut_request_writeData,
   output [511:0] responseOut_request_cacheLine,
   output [1:0]   responseOut_request_response,
   output         writeBackIn_ready,
@@ -38564,6 +39022,8 @@ module replayUnit(
   wire [4:0] requestWaitFIFO_write_data_branchMask; // @[replayUnit.scala 47:31]
   wire [3:0] requestWaitFIFO_write_data_robAddr; // @[replayUnit.scala 47:31]
   wire [5:0] requestWaitFIFO_write_data_prfDest; // @[replayUnit.scala 47:31]
+  wire  requestWaitFIFO_write_data_writeEn; // @[replayUnit.scala 47:31]
+  wire [63:0] requestWaitFIFO_write_data_writeData; // @[replayUnit.scala 47:31]
   wire  requestWaitFIFO_read_ready; // @[replayUnit.scala 47:31]
   wire  requestWaitFIFO_read_data_valid; // @[replayUnit.scala 47:31]
   wire [31:0] requestWaitFIFO_read_data_address; // @[replayUnit.scala 47:31]
@@ -38571,6 +39031,8 @@ module replayUnit(
   wire [4:0] requestWaitFIFO_read_data_branchMask; // @[replayUnit.scala 47:31]
   wire [3:0] requestWaitFIFO_read_data_robAddr; // @[replayUnit.scala 47:31]
   wire [5:0] requestWaitFIFO_read_data_prfDest; // @[replayUnit.scala 47:31]
+  wire  requestWaitFIFO_read_data_writeEn; // @[replayUnit.scala 47:31]
+  wire [63:0] requestWaitFIFO_read_data_writeData; // @[replayUnit.scala 47:31]
   wire  requestWaitFIFO_isEmpty; // @[replayUnit.scala 47:31]
   wire  requestWaitFIFO_branchOps_valid; // @[replayUnit.scala 47:31]
   wire [4:0] requestWaitFIFO_branchOps_branchMask; // @[replayUnit.scala 47:31]
@@ -38584,6 +39046,8 @@ module replayUnit(
   wire [4:0] responseWaitFIFO_write_data_branchMask; // @[replayUnit.scala 57:32]
   wire [3:0] responseWaitFIFO_write_data_robAddr; // @[replayUnit.scala 57:32]
   wire [5:0] responseWaitFIFO_write_data_prfDest; // @[replayUnit.scala 57:32]
+  wire  responseWaitFIFO_write_data_writeEn; // @[replayUnit.scala 57:32]
+  wire [63:0] responseWaitFIFO_write_data_writeData; // @[replayUnit.scala 57:32]
   wire [511:0] responseWaitFIFO_write_data_cacheLine; // @[replayUnit.scala 57:32]
   wire [1:0] responseWaitFIFO_write_data_response; // @[replayUnit.scala 57:32]
   wire  responseWaitFIFO_read_ready; // @[replayUnit.scala 57:32]
@@ -38593,6 +39057,8 @@ module replayUnit(
   wire [4:0] responseWaitFIFO_read_data_branchMask; // @[replayUnit.scala 57:32]
   wire [3:0] responseWaitFIFO_read_data_robAddr; // @[replayUnit.scala 57:32]
   wire [5:0] responseWaitFIFO_read_data_prfDest; // @[replayUnit.scala 57:32]
+  wire  responseWaitFIFO_read_data_writeEn; // @[replayUnit.scala 57:32]
+  wire [63:0] responseWaitFIFO_read_data_writeData; // @[replayUnit.scala 57:32]
   wire [511:0] responseWaitFIFO_read_data_cacheLine; // @[replayUnit.scala 57:32]
   wire [1:0] responseWaitFIFO_read_data_response; // @[replayUnit.scala 57:32]
   wire  responseWaitFIFO_isEmpty; // @[replayUnit.scala 57:32]
@@ -38619,6 +39085,8 @@ module replayUnit(
     .write_data_branchMask(requestWaitFIFO_write_data_branchMask),
     .write_data_robAddr(requestWaitFIFO_write_data_robAddr),
     .write_data_prfDest(requestWaitFIFO_write_data_prfDest),
+    .write_data_writeEn(requestWaitFIFO_write_data_writeEn),
+    .write_data_writeData(requestWaitFIFO_write_data_writeData),
     .read_ready(requestWaitFIFO_read_ready),
     .read_data_valid(requestWaitFIFO_read_data_valid),
     .read_data_address(requestWaitFIFO_read_data_address),
@@ -38626,6 +39094,8 @@ module replayUnit(
     .read_data_branchMask(requestWaitFIFO_read_data_branchMask),
     .read_data_robAddr(requestWaitFIFO_read_data_robAddr),
     .read_data_prfDest(requestWaitFIFO_read_data_prfDest),
+    .read_data_writeEn(requestWaitFIFO_read_data_writeEn),
+    .read_data_writeData(requestWaitFIFO_read_data_writeData),
     .isEmpty(requestWaitFIFO_isEmpty),
     .branchOps_valid(requestWaitFIFO_branchOps_valid),
     .branchOps_branchMask(requestWaitFIFO_branchOps_branchMask),
@@ -38641,6 +39111,8 @@ module replayUnit(
     .write_data_branchMask(responseWaitFIFO_write_data_branchMask),
     .write_data_robAddr(responseWaitFIFO_write_data_robAddr),
     .write_data_prfDest(responseWaitFIFO_write_data_prfDest),
+    .write_data_writeEn(responseWaitFIFO_write_data_writeEn),
+    .write_data_writeData(responseWaitFIFO_write_data_writeData),
     .write_data_cacheLine(responseWaitFIFO_write_data_cacheLine),
     .write_data_response(responseWaitFIFO_write_data_response),
     .read_ready(responseWaitFIFO_read_ready),
@@ -38650,6 +39122,8 @@ module replayUnit(
     .read_data_branchMask(responseWaitFIFO_read_data_branchMask),
     .read_data_robAddr(responseWaitFIFO_read_data_robAddr),
     .read_data_prfDest(responseWaitFIFO_read_data_prfDest),
+    .read_data_writeEn(responseWaitFIFO_read_data_writeEn),
+    .read_data_writeData(responseWaitFIFO_read_data_writeData),
     .read_data_cacheLine(responseWaitFIFO_read_data_cacheLine),
     .read_data_response(responseWaitFIFO_read_data_response),
     .isEmpty(responseWaitFIFO_isEmpty),
@@ -38676,6 +39150,8 @@ module replayUnit(
   assign requestOut_request_branchMask = requestWaitFIFO_read_data_branchMask; // @[replayUnit.scala 54:29]
   assign requestOut_request_robAddr = requestWaitFIFO_read_data_robAddr; // @[replayUnit.scala 54:29]
   assign requestOut_request_prfDest = requestWaitFIFO_read_data_prfDest; // @[replayUnit.scala 54:29]
+  assign requestOut_request_writeEn = requestWaitFIFO_read_data_writeEn; // @[replayUnit.scala 54:29]
+  assign requestOut_request_writeData = requestWaitFIFO_read_data_writeData; // @[replayUnit.scala 54:29]
   assign responseIn_ready = responseWaitFIFO_write_ready; // @[replayUnit.scala 63:32]
   assign responseOut_request_valid = responseWaitFIFO_read_data_valid; // @[replayUnit.scala 64:30]
   assign responseOut_request_address = responseWaitFIFO_read_data_address; // @[replayUnit.scala 64:30]
@@ -38683,6 +39159,8 @@ module replayUnit(
   assign responseOut_request_branchMask = responseWaitFIFO_read_data_branchMask; // @[replayUnit.scala 64:30]
   assign responseOut_request_robAddr = responseWaitFIFO_read_data_robAddr; // @[replayUnit.scala 64:30]
   assign responseOut_request_prfDest = responseWaitFIFO_read_data_prfDest; // @[replayUnit.scala 64:30]
+  assign responseOut_request_writeEn = responseWaitFIFO_read_data_writeEn; // @[replayUnit.scala 64:30]
+  assign responseOut_request_writeData = responseWaitFIFO_read_data_writeData; // @[replayUnit.scala 64:30]
   assign responseOut_request_cacheLine = responseWaitFIFO_read_data_cacheLine; // @[replayUnit.scala 64:30]
   assign responseOut_request_response = responseWaitFIFO_read_data_response; // @[replayUnit.scala 64:30]
   assign writeBackIn_ready = writeBackFIFO_write_ready; // @[replayUnit.scala 71:29]
@@ -38698,6 +39176,8 @@ module replayUnit(
   assign requestWaitFIFO_write_data_branchMask = requestIn_request_branchMask; // @[replayUnit.scala 52:30]
   assign requestWaitFIFO_write_data_robAddr = requestIn_request_robAddr; // @[replayUnit.scala 52:30]
   assign requestWaitFIFO_write_data_prfDest = requestIn_request_prfDest; // @[replayUnit.scala 52:30]
+  assign requestWaitFIFO_write_data_writeEn = requestIn_request_writeEn; // @[replayUnit.scala 52:30]
+  assign requestWaitFIFO_write_data_writeData = requestIn_request_writeData; // @[replayUnit.scala 52:30]
   assign requestWaitFIFO_read_ready = requestOut_ready; // @[replayUnit.scala 55:30]
   assign requestWaitFIFO_branchOps_valid = branchOps_valid; // @[replayUnit.scala 51:29]
   assign requestWaitFIFO_branchOps_branchMask = branchOps_branchMask; // @[replayUnit.scala 51:29]
@@ -38710,6 +39190,8 @@ module replayUnit(
   assign responseWaitFIFO_write_data_branchMask = responseIn_request_branchMask; // @[replayUnit.scala 62:31]
   assign responseWaitFIFO_write_data_robAddr = responseIn_request_robAddr; // @[replayUnit.scala 62:31]
   assign responseWaitFIFO_write_data_prfDest = responseIn_request_prfDest; // @[replayUnit.scala 62:31]
+  assign responseWaitFIFO_write_data_writeEn = responseIn_request_writeEn; // @[replayUnit.scala 62:31]
+  assign responseWaitFIFO_write_data_writeData = responseIn_request_writeData; // @[replayUnit.scala 62:31]
   assign responseWaitFIFO_write_data_cacheLine = responseIn_request_cacheLine; // @[replayUnit.scala 62:31]
   assign responseWaitFIFO_write_data_response = responseIn_request_response; // @[replayUnit.scala 62:31]
   assign responseWaitFIFO_read_ready = responseOut_ready; // @[replayUnit.scala 65:31]
@@ -39906,6 +40388,8 @@ module fifoWithBranchOpsII(
   input  [4:0]  write_data_branchMask,
   input  [3:0]  write_data_robAddr,
   input  [5:0]  write_data_prfDest,
+  input         write_data_writeEn,
+  input  [63:0] write_data_writeData,
   input         read_ready,
   output        read_data_valid,
   output [31:0] read_data_address,
@@ -39913,6 +40397,8 @@ module fifoWithBranchOpsII(
   output [4:0]  read_data_branchMask,
   output [3:0]  read_data_robAddr,
   output [5:0]  read_data_prfDest,
+  output        read_data_writeEn,
+  output [63:0] read_data_writeData,
   output        read_data_branchInvalid,
   output        isEmpty,
   input         branchOps_valid,
@@ -39927,7 +40413,7 @@ module fifoWithBranchOpsII(
   reg [31:0] _RAND_4;
   reg [31:0] _RAND_5;
   reg [31:0] _RAND_6;
-  reg [31:0] _RAND_7;
+  reg [63:0] _RAND_7;
   reg [31:0] _RAND_8;
   reg [31:0] _RAND_9;
   reg [31:0] _RAND_10;
@@ -39936,7 +40422,7 @@ module fifoWithBranchOpsII(
   reg [31:0] _RAND_13;
   reg [31:0] _RAND_14;
   reg [31:0] _RAND_15;
-  reg [31:0] _RAND_16;
+  reg [63:0] _RAND_16;
   reg [31:0] _RAND_17;
   reg [31:0] _RAND_18;
   reg [31:0] _RAND_19;
@@ -39945,7 +40431,7 @@ module fifoWithBranchOpsII(
   reg [31:0] _RAND_22;
   reg [31:0] _RAND_23;
   reg [31:0] _RAND_24;
-  reg [31:0] _RAND_25;
+  reg [63:0] _RAND_25;
   reg [31:0] _RAND_26;
   reg [31:0] _RAND_27;
   reg [31:0] _RAND_28;
@@ -39954,7 +40440,7 @@ module fifoWithBranchOpsII(
   reg [31:0] _RAND_31;
   reg [31:0] _RAND_32;
   reg [31:0] _RAND_33;
-  reg [31:0] _RAND_34;
+  reg [63:0] _RAND_34;
   reg [31:0] _RAND_35;
   reg [31:0] _RAND_36;
   reg [31:0] _RAND_37;
@@ -39963,7 +40449,7 @@ module fifoWithBranchOpsII(
   reg [31:0] _RAND_40;
   reg [31:0] _RAND_41;
   reg [31:0] _RAND_42;
-  reg [31:0] _RAND_43;
+  reg [63:0] _RAND_43;
   reg [31:0] _RAND_44;
   reg [31:0] _RAND_45;
   reg [31:0] _RAND_46;
@@ -39972,7 +40458,7 @@ module fifoWithBranchOpsII(
   reg [31:0] _RAND_49;
   reg [31:0] _RAND_50;
   reg [31:0] _RAND_51;
-  reg [31:0] _RAND_52;
+  reg [63:0] _RAND_52;
   reg [31:0] _RAND_53;
   reg [31:0] _RAND_54;
   reg [31:0] _RAND_55;
@@ -39980,6 +40466,22 @@ module fifoWithBranchOpsII(
   reg [31:0] _RAND_57;
   reg [31:0] _RAND_58;
   reg [31:0] _RAND_59;
+  reg [31:0] _RAND_60;
+  reg [63:0] _RAND_61;
+  reg [31:0] _RAND_62;
+  reg [31:0] _RAND_63;
+  reg [31:0] _RAND_64;
+  reg [31:0] _RAND_65;
+  reg [31:0] _RAND_66;
+  reg [31:0] _RAND_67;
+  reg [31:0] _RAND_68;
+  reg [31:0] _RAND_69;
+  reg [63:0] _RAND_70;
+  reg [31:0] _RAND_71;
+  reg [31:0] _RAND_72;
+  reg [31:0] _RAND_73;
+  reg [31:0] _RAND_74;
+  reg [31:0] _RAND_75;
 `endif // RANDOMIZE_REG_INIT
   reg  memReg_0_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_0_address; // @[fifo.scala 29:33]
@@ -39987,6 +40489,8 @@ module fifoWithBranchOpsII(
   reg [4:0] memReg_0_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_0_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_0_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_0_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_0_writeData; // @[fifo.scala 29:33]
   reg  memReg_0_branchInvalid; // @[fifo.scala 29:33]
   reg  memReg_1_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_1_address; // @[fifo.scala 29:33]
@@ -39994,6 +40498,8 @@ module fifoWithBranchOpsII(
   reg [4:0] memReg_1_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_1_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_1_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_1_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_1_writeData; // @[fifo.scala 29:33]
   reg  memReg_1_branchInvalid; // @[fifo.scala 29:33]
   reg  memReg_2_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_2_address; // @[fifo.scala 29:33]
@@ -40001,6 +40507,8 @@ module fifoWithBranchOpsII(
   reg [4:0] memReg_2_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_2_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_2_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_2_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_2_writeData; // @[fifo.scala 29:33]
   reg  memReg_2_branchInvalid; // @[fifo.scala 29:33]
   reg  memReg_3_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_3_address; // @[fifo.scala 29:33]
@@ -40008,6 +40516,8 @@ module fifoWithBranchOpsII(
   reg [4:0] memReg_3_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_3_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_3_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_3_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_3_writeData; // @[fifo.scala 29:33]
   reg  memReg_3_branchInvalid; // @[fifo.scala 29:33]
   reg  memReg_4_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_4_address; // @[fifo.scala 29:33]
@@ -40015,6 +40525,8 @@ module fifoWithBranchOpsII(
   reg [4:0] memReg_4_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_4_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_4_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_4_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_4_writeData; // @[fifo.scala 29:33]
   reg  memReg_4_branchInvalid; // @[fifo.scala 29:33]
   reg  memReg_5_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_5_address; // @[fifo.scala 29:33]
@@ -40022,6 +40534,8 @@ module fifoWithBranchOpsII(
   reg [4:0] memReg_5_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_5_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_5_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_5_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_5_writeData; // @[fifo.scala 29:33]
   reg  memReg_5_branchInvalid; // @[fifo.scala 29:33]
   reg  memReg_6_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_6_address; // @[fifo.scala 29:33]
@@ -40029,6 +40543,8 @@ module fifoWithBranchOpsII(
   reg [4:0] memReg_6_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_6_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_6_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_6_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_6_writeData; // @[fifo.scala 29:33]
   reg  memReg_6_branchInvalid; // @[fifo.scala 29:33]
   reg  memReg_7_valid; // @[fifo.scala 29:33]
   reg [31:0] memReg_7_address; // @[fifo.scala 29:33]
@@ -40036,6 +40552,8 @@ module fifoWithBranchOpsII(
   reg [4:0] memReg_7_branchMask; // @[fifo.scala 29:33]
   reg [3:0] memReg_7_robAddr; // @[fifo.scala 29:33]
   reg [5:0] memReg_7_prfDest; // @[fifo.scala 29:33]
+  reg  memReg_7_writeEn; // @[fifo.scala 29:33]
+  reg [63:0] memReg_7_writeData; // @[fifo.scala 29:33]
   reg  memReg_7_branchInvalid; // @[fifo.scala 29:33]
   reg [2:0] readPtr; // @[fifo.scala 35:25]
   wire [2:0] _nextVal_T_2 = readPtr + 3'h1; // @[fifo.scala 36:60]
@@ -40153,6 +40671,18 @@ module fifoWithBranchOpsII(
   wire [5:0] _GEN_250 = 3'h4 == readPtr ? memReg_4_prfDest : _GEN_249; // @[fifo.scala 88:{13,13}]
   wire [5:0] _GEN_251 = 3'h5 == readPtr ? memReg_5_prfDest : _GEN_250; // @[fifo.scala 88:{13,13}]
   wire [5:0] _GEN_252 = 3'h6 == readPtr ? memReg_6_prfDest : _GEN_251; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_255 = 3'h1 == readPtr ? memReg_1_writeEn : memReg_0_writeEn; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_256 = 3'h2 == readPtr ? memReg_2_writeEn : _GEN_255; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_257 = 3'h3 == readPtr ? memReg_3_writeEn : _GEN_256; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_258 = 3'h4 == readPtr ? memReg_4_writeEn : _GEN_257; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_259 = 3'h5 == readPtr ? memReg_5_writeEn : _GEN_258; // @[fifo.scala 88:{13,13}]
+  wire  _GEN_260 = 3'h6 == readPtr ? memReg_6_writeEn : _GEN_259; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_263 = 3'h1 == readPtr ? memReg_1_writeData : memReg_0_writeData; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_264 = 3'h2 == readPtr ? memReg_2_writeData : _GEN_263; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_265 = 3'h3 == readPtr ? memReg_3_writeData : _GEN_264; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_266 = 3'h4 == readPtr ? memReg_4_writeData : _GEN_265; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_267 = 3'h5 == readPtr ? memReg_5_writeData : _GEN_266; // @[fifo.scala 88:{13,13}]
+  wire [63:0] _GEN_268 = 3'h6 == readPtr ? memReg_6_writeData : _GEN_267; // @[fifo.scala 88:{13,13}]
   wire  _GEN_287 = 3'h1 == readPtr ? memReg_1_branchInvalid : memReg_0_branchInvalid; // @[fifo.scala 88:{13,13}]
   wire  _GEN_288 = 3'h2 == readPtr ? memReg_2_branchInvalid : _GEN_287; // @[fifo.scala 88:{13,13}]
   wire  _GEN_289 = 3'h3 == readPtr ? memReg_3_branchInvalid : _GEN_288; // @[fifo.scala 88:{13,13}]
@@ -40187,21 +40717,21 @@ module fifoWithBranchOpsII(
   wire [4:0] _GEN_315 = |_T_8 ? _GEN_299 : _GEN_307; // @[fifo.scala 142:65]
   wire [4:0] _GEN_316 = |_T_8 ? _GEN_300 : _GEN_308; // @[fifo.scala 142:65]
   wire [4:0] _GEN_317 = |_T_8 ? _GEN_301 : _GEN_309; // @[fifo.scala 142:65]
-  wire  _GEN_78 = 3'h0 == writePtr; // @[fifo.scala 148:{32,32}]
+  wire  _GEN_536 = 3'h0 == writePtr; // @[fifo.scala 148:{32,32}]
   wire  _GEN_318 = 3'h0 == writePtr | _GEN_118; // @[fifo.scala 148:{32,32}]
-  wire  _GEN_79 = 3'h1 == writePtr; // @[fifo.scala 148:{32,32}]
+  wire  _GEN_537 = 3'h1 == writePtr; // @[fifo.scala 148:{32,32}]
   wire  _GEN_319 = 3'h1 == writePtr | _GEN_119; // @[fifo.scala 148:{32,32}]
-  wire  _GEN_80 = 3'h2 == writePtr; // @[fifo.scala 148:{32,32}]
+  wire  _GEN_538 = 3'h2 == writePtr; // @[fifo.scala 148:{32,32}]
   wire  _GEN_320 = 3'h2 == writePtr | _GEN_120; // @[fifo.scala 148:{32,32}]
-  wire  _GEN_81 = 3'h3 == writePtr; // @[fifo.scala 148:{32,32}]
+  wire  _GEN_539 = 3'h3 == writePtr; // @[fifo.scala 148:{32,32}]
   wire  _GEN_321 = 3'h3 == writePtr | _GEN_121; // @[fifo.scala 148:{32,32}]
-  wire  _GEN_82 = 3'h4 == writePtr; // @[fifo.scala 148:{32,32}]
+  wire  _GEN_540 = 3'h4 == writePtr; // @[fifo.scala 148:{32,32}]
   wire  _GEN_322 = 3'h4 == writePtr | _GEN_122; // @[fifo.scala 148:{32,32}]
-  wire  _GEN_83 = 3'h5 == writePtr; // @[fifo.scala 148:{32,32}]
+  wire  _GEN_541 = 3'h5 == writePtr; // @[fifo.scala 148:{32,32}]
   wire  _GEN_323 = 3'h5 == writePtr | _GEN_123; // @[fifo.scala 148:{32,32}]
-  wire  _GEN_84 = 3'h6 == writePtr; // @[fifo.scala 148:{32,32}]
+  wire  _GEN_542 = 3'h6 == writePtr; // @[fifo.scala 148:{32,32}]
   wire  _GEN_324 = 3'h6 == writePtr | _GEN_124; // @[fifo.scala 148:{32,32}]
-  wire  _GEN_85 = 3'h7 == writePtr; // @[fifo.scala 148:{32,32}]
+  wire  _GEN_543 = 3'h7 == writePtr; // @[fifo.scala 148:{32,32}]
   wire  _GEN_325 = 3'h7 == writePtr | _GEN_125; // @[fifo.scala 148:{32,32}]
   wire [4:0] _GEN_326 = 3'h0 == writePtr ? 5'h0 : _GEN_142; // @[fifo.scala 152:{39,39}]
   wire [4:0] _GEN_327 = 3'h1 == writePtr ? 5'h0 : _GEN_143; // @[fifo.scala 152:{39,39}]
@@ -40211,14 +40741,14 @@ module fifoWithBranchOpsII(
   wire [4:0] _GEN_331 = 3'h5 == writePtr ? 5'h0 : _GEN_147; // @[fifo.scala 152:{39,39}]
   wire [4:0] _GEN_332 = 3'h6 == writePtr ? 5'h0 : _GEN_148; // @[fifo.scala 152:{39,39}]
   wire [4:0] _GEN_333 = 3'h7 == writePtr ? 5'h0 : _GEN_149; // @[fifo.scala 152:{39,39}]
-  wire  _GEN_334 = _GEN_78 | _GEN_198; // @[fifo.scala 153:{42,42}]
-  wire  _GEN_335 = _GEN_79 | _GEN_199; // @[fifo.scala 153:{42,42}]
-  wire  _GEN_336 = _GEN_80 | _GEN_200; // @[fifo.scala 153:{42,42}]
-  wire  _GEN_337 = _GEN_81 | _GEN_201; // @[fifo.scala 153:{42,42}]
-  wire  _GEN_338 = _GEN_82 | _GEN_202; // @[fifo.scala 153:{42,42}]
-  wire  _GEN_339 = _GEN_83 | _GEN_203; // @[fifo.scala 153:{42,42}]
-  wire  _GEN_340 = _GEN_84 | _GEN_204; // @[fifo.scala 153:{42,42}]
-  wire  _GEN_341 = _GEN_85 | _GEN_205; // @[fifo.scala 153:{42,42}]
+  wire  _GEN_334 = _GEN_536 | _GEN_198; // @[fifo.scala 153:{42,42}]
+  wire  _GEN_335 = _GEN_537 | _GEN_199; // @[fifo.scala 153:{42,42}]
+  wire  _GEN_336 = _GEN_538 | _GEN_200; // @[fifo.scala 153:{42,42}]
+  wire  _GEN_337 = _GEN_539 | _GEN_201; // @[fifo.scala 153:{42,42}]
+  wire  _GEN_338 = _GEN_540 | _GEN_202; // @[fifo.scala 153:{42,42}]
+  wire  _GEN_339 = _GEN_541 | _GEN_203; // @[fifo.scala 153:{42,42}]
+  wire  _GEN_340 = _GEN_542 | _GEN_204; // @[fifo.scala 153:{42,42}]
+  wire  _GEN_341 = _GEN_543 | _GEN_205; // @[fifo.scala 153:{42,42}]
   wire  _GEN_350 = 3'h0 == writePtr ? 1'h0 : _GEN_198; // @[fifo.scala 157:{42,42}]
   wire  _GEN_351 = 3'h1 == writePtr ? 1'h0 : _GEN_199; // @[fifo.scala 157:{42,42}]
   wire  _GEN_352 = 3'h2 == writePtr ? 1'h0 : _GEN_200; // @[fifo.scala 157:{42,42}]
@@ -40348,6 +40878,8 @@ module fifoWithBranchOpsII(
   assign read_data_branchMask = branchOps_valid ? _GEN_530 : _GEN_237; // @[fifo.scala 186:25 208:26]
   assign read_data_robAddr = 3'h7 == readPtr ? memReg_7_robAddr : _GEN_244; // @[fifo.scala 88:{13,13}]
   assign read_data_prfDest = 3'h7 == readPtr ? memReg_7_prfDest : _GEN_252; // @[fifo.scala 88:{13,13}]
+  assign read_data_writeEn = 3'h7 == readPtr ? memReg_7_writeEn : _GEN_260; // @[fifo.scala 88:{13,13}]
+  assign read_data_writeData = 3'h7 == readPtr ? memReg_7_writeData : _GEN_268; // @[fifo.scala 88:{13,13}]
   assign read_data_branchInvalid = branchOps_valid ? _GEN_532 : _GEN_293; // @[fifo.scala 186:25 88:13]
   assign isEmpty = emptyReg; // @[fifo.scala 90:11]
   always @(posedge clock) begin
@@ -40407,6 +40939,20 @@ module fifoWithBranchOpsII(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h0 == writePtr) begin // @[fifo.scala 84:22]
         memReg_0_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_0_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h0 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_0_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_0_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h0 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_0_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -40476,6 +41022,20 @@ module fifoWithBranchOpsII(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h1 == writePtr) begin // @[fifo.scala 84:22]
         memReg_1_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_1_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h1 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_1_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_1_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h1 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_1_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -40552,6 +41112,20 @@ module fifoWithBranchOpsII(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_2_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h2 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_2_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_2_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h2 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_2_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_2_branchInvalid <= 1'h0; // @[fifo.scala 29:33]
     end else if (branchOps_valid) begin // @[fifo.scala 170:25]
       if (startPointer <= 3'h2 | 3'h2 <= endPointer) begin // @[fifo.scala 172:54]
@@ -40622,6 +41196,20 @@ module fifoWithBranchOpsII(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h3 == writePtr) begin // @[fifo.scala 84:22]
         memReg_3_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_3_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h3 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_3_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_3_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h3 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_3_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -40698,6 +41286,20 @@ module fifoWithBranchOpsII(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_4_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h4 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_4_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_4_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h4 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_4_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_4_branchInvalid <= 1'h0; // @[fifo.scala 29:33]
     end else if (branchOps_valid) begin // @[fifo.scala 170:25]
       if (startPointer <= 3'h4 | 3'h4 <= endPointer) begin // @[fifo.scala 172:54]
@@ -40768,6 +41370,20 @@ module fifoWithBranchOpsII(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h5 == writePtr) begin // @[fifo.scala 84:22]
         memReg_5_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_5_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h5 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_5_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_5_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h5 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_5_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -40844,6 +41460,20 @@ module fifoWithBranchOpsII(
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
+      memReg_6_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h6 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_6_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_6_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h6 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_6_writeData <= write_data_writeData; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
       memReg_6_branchInvalid <= 1'h0; // @[fifo.scala 29:33]
     end else if (branchOps_valid) begin // @[fifo.scala 170:25]
       if (startPointer <= 3'h6 | 3'h6 <= endPointer) begin // @[fifo.scala 172:54]
@@ -40914,6 +41544,20 @@ module fifoWithBranchOpsII(
     end else if (incrWrite) begin // @[fifo.scala 83:17]
       if (3'h7 == writePtr) begin // @[fifo.scala 84:22]
         memReg_7_prfDest <= write_data_prfDest; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_7_writeEn <= 1'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h7 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_7_writeEn <= write_data_writeEn; // @[fifo.scala 84:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 29:33]
+      memReg_7_writeData <= 64'h0; // @[fifo.scala 29:33]
+    end else if (incrWrite) begin // @[fifo.scala 83:17]
+      if (3'h7 == writePtr) begin // @[fifo.scala 84:22]
+        memReg_7_writeData <= write_data_writeData; // @[fifo.scala 84:22]
       end
     end
     if (reset) begin // @[fifo.scala 29:33]
@@ -41009,113 +41653,145 @@ initial begin
   _RAND_5 = {1{`RANDOM}};
   memReg_0_prfDest = _RAND_5[5:0];
   _RAND_6 = {1{`RANDOM}};
-  memReg_0_branchInvalid = _RAND_6[0:0];
-  _RAND_7 = {1{`RANDOM}};
-  memReg_1_valid = _RAND_7[0:0];
+  memReg_0_writeEn = _RAND_6[0:0];
+  _RAND_7 = {2{`RANDOM}};
+  memReg_0_writeData = _RAND_7[63:0];
   _RAND_8 = {1{`RANDOM}};
-  memReg_1_address = _RAND_8[31:0];
+  memReg_0_branchInvalid = _RAND_8[0:0];
   _RAND_9 = {1{`RANDOM}};
-  memReg_1_instruction = _RAND_9[31:0];
+  memReg_1_valid = _RAND_9[0:0];
   _RAND_10 = {1{`RANDOM}};
-  memReg_1_branchMask = _RAND_10[4:0];
+  memReg_1_address = _RAND_10[31:0];
   _RAND_11 = {1{`RANDOM}};
-  memReg_1_robAddr = _RAND_11[3:0];
+  memReg_1_instruction = _RAND_11[31:0];
   _RAND_12 = {1{`RANDOM}};
-  memReg_1_prfDest = _RAND_12[5:0];
+  memReg_1_branchMask = _RAND_12[4:0];
   _RAND_13 = {1{`RANDOM}};
-  memReg_1_branchInvalid = _RAND_13[0:0];
+  memReg_1_robAddr = _RAND_13[3:0];
   _RAND_14 = {1{`RANDOM}};
-  memReg_2_valid = _RAND_14[0:0];
+  memReg_1_prfDest = _RAND_14[5:0];
   _RAND_15 = {1{`RANDOM}};
-  memReg_2_address = _RAND_15[31:0];
-  _RAND_16 = {1{`RANDOM}};
-  memReg_2_instruction = _RAND_16[31:0];
+  memReg_1_writeEn = _RAND_15[0:0];
+  _RAND_16 = {2{`RANDOM}};
+  memReg_1_writeData = _RAND_16[63:0];
   _RAND_17 = {1{`RANDOM}};
-  memReg_2_branchMask = _RAND_17[4:0];
+  memReg_1_branchInvalid = _RAND_17[0:0];
   _RAND_18 = {1{`RANDOM}};
-  memReg_2_robAddr = _RAND_18[3:0];
+  memReg_2_valid = _RAND_18[0:0];
   _RAND_19 = {1{`RANDOM}};
-  memReg_2_prfDest = _RAND_19[5:0];
+  memReg_2_address = _RAND_19[31:0];
   _RAND_20 = {1{`RANDOM}};
-  memReg_2_branchInvalid = _RAND_20[0:0];
+  memReg_2_instruction = _RAND_20[31:0];
   _RAND_21 = {1{`RANDOM}};
-  memReg_3_valid = _RAND_21[0:0];
+  memReg_2_branchMask = _RAND_21[4:0];
   _RAND_22 = {1{`RANDOM}};
-  memReg_3_address = _RAND_22[31:0];
+  memReg_2_robAddr = _RAND_22[3:0];
   _RAND_23 = {1{`RANDOM}};
-  memReg_3_instruction = _RAND_23[31:0];
+  memReg_2_prfDest = _RAND_23[5:0];
   _RAND_24 = {1{`RANDOM}};
-  memReg_3_branchMask = _RAND_24[4:0];
-  _RAND_25 = {1{`RANDOM}};
-  memReg_3_robAddr = _RAND_25[3:0];
+  memReg_2_writeEn = _RAND_24[0:0];
+  _RAND_25 = {2{`RANDOM}};
+  memReg_2_writeData = _RAND_25[63:0];
   _RAND_26 = {1{`RANDOM}};
-  memReg_3_prfDest = _RAND_26[5:0];
+  memReg_2_branchInvalid = _RAND_26[0:0];
   _RAND_27 = {1{`RANDOM}};
-  memReg_3_branchInvalid = _RAND_27[0:0];
+  memReg_3_valid = _RAND_27[0:0];
   _RAND_28 = {1{`RANDOM}};
-  memReg_4_valid = _RAND_28[0:0];
+  memReg_3_address = _RAND_28[31:0];
   _RAND_29 = {1{`RANDOM}};
-  memReg_4_address = _RAND_29[31:0];
+  memReg_3_instruction = _RAND_29[31:0];
   _RAND_30 = {1{`RANDOM}};
-  memReg_4_instruction = _RAND_30[31:0];
+  memReg_3_branchMask = _RAND_30[4:0];
   _RAND_31 = {1{`RANDOM}};
-  memReg_4_branchMask = _RAND_31[4:0];
+  memReg_3_robAddr = _RAND_31[3:0];
   _RAND_32 = {1{`RANDOM}};
-  memReg_4_robAddr = _RAND_32[3:0];
+  memReg_3_prfDest = _RAND_32[5:0];
   _RAND_33 = {1{`RANDOM}};
-  memReg_4_prfDest = _RAND_33[5:0];
-  _RAND_34 = {1{`RANDOM}};
-  memReg_4_branchInvalid = _RAND_34[0:0];
+  memReg_3_writeEn = _RAND_33[0:0];
+  _RAND_34 = {2{`RANDOM}};
+  memReg_3_writeData = _RAND_34[63:0];
   _RAND_35 = {1{`RANDOM}};
-  memReg_5_valid = _RAND_35[0:0];
+  memReg_3_branchInvalid = _RAND_35[0:0];
   _RAND_36 = {1{`RANDOM}};
-  memReg_5_address = _RAND_36[31:0];
+  memReg_4_valid = _RAND_36[0:0];
   _RAND_37 = {1{`RANDOM}};
-  memReg_5_instruction = _RAND_37[31:0];
+  memReg_4_address = _RAND_37[31:0];
   _RAND_38 = {1{`RANDOM}};
-  memReg_5_branchMask = _RAND_38[4:0];
+  memReg_4_instruction = _RAND_38[31:0];
   _RAND_39 = {1{`RANDOM}};
-  memReg_5_robAddr = _RAND_39[3:0];
+  memReg_4_branchMask = _RAND_39[4:0];
   _RAND_40 = {1{`RANDOM}};
-  memReg_5_prfDest = _RAND_40[5:0];
+  memReg_4_robAddr = _RAND_40[3:0];
   _RAND_41 = {1{`RANDOM}};
-  memReg_5_branchInvalid = _RAND_41[0:0];
+  memReg_4_prfDest = _RAND_41[5:0];
   _RAND_42 = {1{`RANDOM}};
-  memReg_6_valid = _RAND_42[0:0];
-  _RAND_43 = {1{`RANDOM}};
-  memReg_6_address = _RAND_43[31:0];
+  memReg_4_writeEn = _RAND_42[0:0];
+  _RAND_43 = {2{`RANDOM}};
+  memReg_4_writeData = _RAND_43[63:0];
   _RAND_44 = {1{`RANDOM}};
-  memReg_6_instruction = _RAND_44[31:0];
+  memReg_4_branchInvalid = _RAND_44[0:0];
   _RAND_45 = {1{`RANDOM}};
-  memReg_6_branchMask = _RAND_45[4:0];
+  memReg_5_valid = _RAND_45[0:0];
   _RAND_46 = {1{`RANDOM}};
-  memReg_6_robAddr = _RAND_46[3:0];
+  memReg_5_address = _RAND_46[31:0];
   _RAND_47 = {1{`RANDOM}};
-  memReg_6_prfDest = _RAND_47[5:0];
+  memReg_5_instruction = _RAND_47[31:0];
   _RAND_48 = {1{`RANDOM}};
-  memReg_6_branchInvalid = _RAND_48[0:0];
+  memReg_5_branchMask = _RAND_48[4:0];
   _RAND_49 = {1{`RANDOM}};
-  memReg_7_valid = _RAND_49[0:0];
+  memReg_5_robAddr = _RAND_49[3:0];
   _RAND_50 = {1{`RANDOM}};
-  memReg_7_address = _RAND_50[31:0];
+  memReg_5_prfDest = _RAND_50[5:0];
   _RAND_51 = {1{`RANDOM}};
-  memReg_7_instruction = _RAND_51[31:0];
-  _RAND_52 = {1{`RANDOM}};
-  memReg_7_branchMask = _RAND_52[4:0];
+  memReg_5_writeEn = _RAND_51[0:0];
+  _RAND_52 = {2{`RANDOM}};
+  memReg_5_writeData = _RAND_52[63:0];
   _RAND_53 = {1{`RANDOM}};
-  memReg_7_robAddr = _RAND_53[3:0];
+  memReg_5_branchInvalid = _RAND_53[0:0];
   _RAND_54 = {1{`RANDOM}};
-  memReg_7_prfDest = _RAND_54[5:0];
+  memReg_6_valid = _RAND_54[0:0];
   _RAND_55 = {1{`RANDOM}};
-  memReg_7_branchInvalid = _RAND_55[0:0];
+  memReg_6_address = _RAND_55[31:0];
   _RAND_56 = {1{`RANDOM}};
-  readPtr = _RAND_56[2:0];
+  memReg_6_instruction = _RAND_56[31:0];
   _RAND_57 = {1{`RANDOM}};
-  emptyReg = _RAND_57[0:0];
+  memReg_6_branchMask = _RAND_57[4:0];
   _RAND_58 = {1{`RANDOM}};
-  writePtr = _RAND_58[2:0];
+  memReg_6_robAddr = _RAND_58[3:0];
   _RAND_59 = {1{`RANDOM}};
-  fullReg = _RAND_59[0:0];
+  memReg_6_prfDest = _RAND_59[5:0];
+  _RAND_60 = {1{`RANDOM}};
+  memReg_6_writeEn = _RAND_60[0:0];
+  _RAND_61 = {2{`RANDOM}};
+  memReg_6_writeData = _RAND_61[63:0];
+  _RAND_62 = {1{`RANDOM}};
+  memReg_6_branchInvalid = _RAND_62[0:0];
+  _RAND_63 = {1{`RANDOM}};
+  memReg_7_valid = _RAND_63[0:0];
+  _RAND_64 = {1{`RANDOM}};
+  memReg_7_address = _RAND_64[31:0];
+  _RAND_65 = {1{`RANDOM}};
+  memReg_7_instruction = _RAND_65[31:0];
+  _RAND_66 = {1{`RANDOM}};
+  memReg_7_branchMask = _RAND_66[4:0];
+  _RAND_67 = {1{`RANDOM}};
+  memReg_7_robAddr = _RAND_67[3:0];
+  _RAND_68 = {1{`RANDOM}};
+  memReg_7_prfDest = _RAND_68[5:0];
+  _RAND_69 = {1{`RANDOM}};
+  memReg_7_writeEn = _RAND_69[0:0];
+  _RAND_70 = {2{`RANDOM}};
+  memReg_7_writeData = _RAND_70[63:0];
+  _RAND_71 = {1{`RANDOM}};
+  memReg_7_branchInvalid = _RAND_71[0:0];
+  _RAND_72 = {1{`RANDOM}};
+  readPtr = _RAND_72[2:0];
+  _RAND_73 = {1{`RANDOM}};
+  emptyReg = _RAND_73[0:0];
+  _RAND_74 = {1{`RANDOM}};
+  writePtr = _RAND_74[2:0];
+  _RAND_75 = {1{`RANDOM}};
+  fullReg = _RAND_75[0:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -41201,6 +41877,8 @@ module ACEUnit(
   input  [4:0]   readRequest_request_branchMask,
   input  [3:0]   readRequest_request_robAddr,
   input  [5:0]   readRequest_request_prfDest,
+  input          readRequest_request_writeEn,
+  input  [63:0]  readRequest_request_writeData,
   input          readResponse_ready,
   output         readResponse_request_valid,
   output [31:0]  readResponse_request_address,
@@ -41208,18 +41886,22 @@ module ACEUnit(
   output [4:0]   readResponse_request_branchMask,
   output [3:0]   readResponse_request_robAddr,
   output [5:0]   readResponse_request_prfDest,
+  output         readResponse_request_writeEn,
+  output [63:0]  readResponse_request_writeData,
   output [511:0] readResponse_request_cacheLine,
   output [1:0]   readResponse_request_response,
   output         writeRequest_ready,
   input          writeRequest_request_valid,
   input  [31:0]  writeRequest_request_address,
   input  [511:0] writeRequest_request_data,
+  input          coherencyRequest_ready,
   output         coherencyRequest_request_valid,
   output [31:0]  coherencyRequest_request_address,
   output [1:0]   coherencyRequest_request_response,
   output         coherencyResponse_ready,
   input          coherencyResponse_request_valid,
   input  [511:0] coherencyResponse_request_data,
+  input          coherencyResponse_request_dataValid,
   input  [1:0]   coherencyResponse_request_response,
   output         fenceReady,
   input          branchOps_valid,
@@ -41264,36 +41946,41 @@ module ACEUnit(
   reg [31:0] _RAND_4;
   reg [31:0] _RAND_5;
   reg [31:0] _RAND_6;
-  reg [31:0] _RAND_7;
+  reg [63:0] _RAND_7;
   reg [31:0] _RAND_8;
   reg [31:0] _RAND_9;
   reg [31:0] _RAND_10;
   reg [31:0] _RAND_11;
-  reg [511:0] _RAND_12;
+  reg [31:0] _RAND_12;
   reg [31:0] _RAND_13;
   reg [31:0] _RAND_14;
-  reg [31:0] _RAND_15;
-  reg [31:0] _RAND_16;
-  reg [511:0] _RAND_17;
+  reg [63:0] _RAND_15;
+  reg [511:0] _RAND_16;
+  reg [31:0] _RAND_17;
   reg [31:0] _RAND_18;
   reg [31:0] _RAND_19;
   reg [31:0] _RAND_20;
-  reg [31:0] _RAND_21;
-  reg [511:0] _RAND_22;
+  reg [511:0] _RAND_21;
+  reg [31:0] _RAND_22;
   reg [31:0] _RAND_23;
   reg [31:0] _RAND_24;
   reg [31:0] _RAND_25;
-  reg [31:0] _RAND_26;
-  reg [63:0] _RAND_27;
-  reg [63:0] _RAND_28;
-  reg [63:0] _RAND_29;
-  reg [63:0] _RAND_30;
-  reg [63:0] _RAND_31;
+  reg [511:0] _RAND_26;
+  reg [31:0] _RAND_27;
+  reg [31:0] _RAND_28;
+  reg [31:0] _RAND_29;
+  reg [31:0] _RAND_30;
+  reg [31:0] _RAND_31;
   reg [63:0] _RAND_32;
   reg [63:0] _RAND_33;
   reg [63:0] _RAND_34;
-  reg [31:0] _RAND_35;
-  reg [31:0] _RAND_36;
+  reg [63:0] _RAND_35;
+  reg [63:0] _RAND_36;
+  reg [63:0] _RAND_37;
+  reg [63:0] _RAND_38;
+  reg [63:0] _RAND_39;
+  reg [31:0] _RAND_40;
+  reg [31:0] _RAND_41;
 `endif // RANDOMIZE_REG_INIT
   wire  ACEMSHR_clock; // @[ACEUnit.scala 131:23]
   wire  ACEMSHR_reset; // @[ACEUnit.scala 131:23]
@@ -41303,6 +41990,8 @@ module ACEUnit(
   wire [4:0] ACEMSHR_write_data_branchMask; // @[ACEUnit.scala 131:23]
   wire [3:0] ACEMSHR_write_data_robAddr; // @[ACEUnit.scala 131:23]
   wire [5:0] ACEMSHR_write_data_prfDest; // @[ACEUnit.scala 131:23]
+  wire  ACEMSHR_write_data_writeEn; // @[ACEUnit.scala 131:23]
+  wire [63:0] ACEMSHR_write_data_writeData; // @[ACEUnit.scala 131:23]
   wire  ACEMSHR_read_ready; // @[ACEUnit.scala 131:23]
   wire  ACEMSHR_read_data_valid; // @[ACEUnit.scala 131:23]
   wire [31:0] ACEMSHR_read_data_address; // @[ACEUnit.scala 131:23]
@@ -41310,6 +41999,8 @@ module ACEUnit(
   wire [4:0] ACEMSHR_read_data_branchMask; // @[ACEUnit.scala 131:23]
   wire [3:0] ACEMSHR_read_data_robAddr; // @[ACEUnit.scala 131:23]
   wire [5:0] ACEMSHR_read_data_prfDest; // @[ACEUnit.scala 131:23]
+  wire  ACEMSHR_read_data_writeEn; // @[ACEUnit.scala 131:23]
+  wire [63:0] ACEMSHR_read_data_writeData; // @[ACEUnit.scala 131:23]
   wire  ACEMSHR_read_data_branchInvalid; // @[ACEUnit.scala 131:23]
   wire  ACEMSHR_isEmpty; // @[ACEUnit.scala 131:23]
   wire  ACEMSHR_branchOps_valid; // @[ACEUnit.scala 131:23]
@@ -41319,20 +42010,22 @@ module ACEUnit(
   wire  writeCounter_reset; // @[ACEUnit.scala 157:28]
   wire [2:0] writeCounter_count; // @[ACEUnit.scala 157:28]
   wire  writeCounter_incrm; // @[ACEUnit.scala 157:28]
-  wire  readCounter_clock; // @[ACEUnit.scala 249:27]
-  wire  readCounter_reset; // @[ACEUnit.scala 249:27]
-  wire [2:0] readCounter_count; // @[ACEUnit.scala 249:27]
-  wire  readCounter_incrm; // @[ACEUnit.scala 249:27]
-  wire  coherentCounter_clock; // @[ACEUnit.scala 292:31]
-  wire  coherentCounter_reset; // @[ACEUnit.scala 292:31]
-  wire [2:0] coherentCounter_count; // @[ACEUnit.scala 292:31]
-  wire  coherentCounter_incrm; // @[ACEUnit.scala 292:31]
+  wire  readCounter_clock; // @[ACEUnit.scala 245:27]
+  wire  readCounter_reset; // @[ACEUnit.scala 245:27]
+  wire [2:0] readCounter_count; // @[ACEUnit.scala 245:27]
+  wire  readCounter_incrm; // @[ACEUnit.scala 245:27]
+  wire  coherentCounter_clock; // @[ACEUnit.scala 282:31]
+  wire  coherentCounter_reset; // @[ACEUnit.scala 282:31]
+  wire [2:0] coherentCounter_count; // @[ACEUnit.scala 282:31]
+  wire  coherentCounter_incrm; // @[ACEUnit.scala 282:31]
   reg  readBuffer_valid; // @[ACEUnit.scala 107:28]
   reg [31:0] readBuffer_address; // @[ACEUnit.scala 107:28]
   reg [31:0] readBuffer_instruction; // @[ACEUnit.scala 107:28]
   reg [4:0] readBuffer_branchMask; // @[ACEUnit.scala 107:28]
   reg [3:0] readBuffer_robAddr; // @[ACEUnit.scala 107:28]
   reg [5:0] readBuffer_prfDest; // @[ACEUnit.scala 107:28]
+  reg  readBuffer_writeEn; // @[ACEUnit.scala 107:28]
+  reg [63:0] readBuffer_writeData; // @[ACEUnit.scala 107:28]
   wire  _readRequest_ready_T = ~readBuffer_valid; // @[ACEUnit.scala 108:24]
   wire  _GEN_0 = _readRequest_ready_T ? readRequest_request_valid : readBuffer_valid; // @[ACEUnit.scala 109:26 110:22 107:28]
   reg  responseBuffer_valid; // @[ACEUnit.scala 119:31]
@@ -41341,6 +42034,8 @@ module ACEUnit(
   reg [4:0] responseBuffer_branchMask; // @[ACEUnit.scala 119:31]
   reg [3:0] responseBuffer_robAddr; // @[ACEUnit.scala 119:31]
   reg [5:0] responseBuffer_prfDest; // @[ACEUnit.scala 119:31]
+  reg  responseBuffer_writeEn; // @[ACEUnit.scala 119:31]
+  reg [63:0] responseBuffer_writeData; // @[ACEUnit.scala 119:31]
   reg [511:0] responseBuffer_cacheLine; // @[ACEUnit.scala 119:31]
   reg [1:0] responseBuffer_response; // @[ACEUnit.scala 119:31]
   reg  responseBuffer_branchInvalid; // @[ACEUnit.scala 119:31]
@@ -41352,6 +42047,7 @@ module ACEUnit(
   reg [1:0] coherencyRequestBuffer_response; // @[ACEUnit.scala 146:39]
   reg  coherencyResponseBuffer_valid; // @[ACEUnit.scala 149:40]
   reg [511:0] coherencyResponseBuffer_data; // @[ACEUnit.scala 149:40]
+  reg  coherencyResponseBuffer_dataValid; // @[ACEUnit.scala 149:40]
   reg [1:0] coherencyResponseBuffer_response; // @[ACEUnit.scala 149:40]
   reg [1:0] writeACEState; // @[ACEUnit.scala 156:30]
   wire [63:0] writeChunks__0 = writeBuffer_data[63:0]; // @[ACEUnit.scala 187:25]
@@ -41381,92 +42077,94 @@ module ACEUnit(
   wire [1:0] _GEN_41 = 2'h0 == writeACEState ? 2'h0 : _GEN_25; // @[ACEUnit.scala 160:25 61:14]
   reg  readACERequestState; // @[ACEUnit.scala 206:36]
   wire [31:0] _bus_ARADDR_T_1 = {readBuffer_address[31:9],9'h0}; // @[Cat.scala 33:92]
-  wire [5:0] _GEN_58 = bus_ARREADY ? readBuffer_prfDest : 6'h0; // @[ACEUnit.scala 234:24 235:28 utils.scala 48:41]
-  wire [3:0] _GEN_59 = bus_ARREADY ? readBuffer_robAddr : 4'h0; // @[ACEUnit.scala 234:24 235:28 utils.scala 48:41]
-  wire [4:0] _GEN_60 = bus_ARREADY ? readBuffer_branchMask : 5'h0; // @[ACEUnit.scala 234:24 235:28 utils.scala 48:41]
-  wire [31:0] _GEN_61 = bus_ARREADY ? readBuffer_instruction : 32'h0; // @[ACEUnit.scala 234:24 235:28 utils.scala 48:41]
-  wire [31:0] _GEN_62 = bus_ARREADY ? readBuffer_address : 32'h0; // @[ACEUnit.scala 234:24 235:28 utils.scala 48:41]
-  wire  _GEN_63 = bus_ARREADY & readBuffer_valid; // @[ACEUnit.scala 234:24 235:28 utils.scala 47:41]
-  wire [31:0] _GEN_67 = readACERequestState ? _bus_ARADDR_T_1 : 32'h0; // @[ACEUnit.scala 208:31 215:18 77:14]
-  wire [2:0] _GEN_68 = readACERequestState ? 3'h7 : 3'h0; // @[ACEUnit.scala 208:31 216:17 78:13]
-  wire [5:0] _GEN_77 = readACERequestState ? _GEN_58 : 6'h0; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  wire [3:0] _GEN_78 = readACERequestState ? _GEN_59 : 4'h0; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  wire [4:0] _GEN_79 = readACERequestState ? _GEN_60 : 5'h0; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  wire [31:0] _GEN_80 = readACERequestState ? _GEN_61 : 32'h0; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  wire [31:0] _GEN_81 = readACERequestState ? _GEN_62 : 32'h0; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  wire [2:0] _GEN_89 = ~readACERequestState ? 3'h0 : _GEN_68; // @[ACEUnit.scala 208:31 78:13]
-  reg [1:0] readACEResponseState; // @[ACEUnit.scala 246:37]
-  reg [63:0] readDataVec_0; // @[ACEUnit.scala 247:28]
-  reg [63:0] readDataVec_1; // @[ACEUnit.scala 247:28]
-  reg [63:0] readDataVec_2; // @[ACEUnit.scala 247:28]
-  reg [63:0] readDataVec_3; // @[ACEUnit.scala 247:28]
-  reg [63:0] readDataVec_4; // @[ACEUnit.scala 247:28]
-  reg [63:0] readDataVec_5; // @[ACEUnit.scala 247:28]
-  reg [63:0] readDataVec_6; // @[ACEUnit.scala 247:28]
-  reg [63:0] readDataVec_7; // @[ACEUnit.scala 247:28]
-  reg  readResponseValid; // @[ACEUnit.scala 248:34]
-  wire [63:0] _GEN_105 = 3'h0 == readCounter_count ? bus_RDATA : readDataVec_0; // @[ACEUnit.scala 247:28 272:{40,40}]
-  wire [63:0] _GEN_106 = 3'h1 == readCounter_count ? bus_RDATA : readDataVec_1; // @[ACEUnit.scala 247:28 272:{40,40}]
-  wire [63:0] _GEN_107 = 3'h2 == readCounter_count ? bus_RDATA : readDataVec_2; // @[ACEUnit.scala 247:28 272:{40,40}]
-  wire [63:0] _GEN_108 = 3'h3 == readCounter_count ? bus_RDATA : readDataVec_3; // @[ACEUnit.scala 247:28 272:{40,40}]
-  wire [63:0] _GEN_109 = 3'h4 == readCounter_count ? bus_RDATA : readDataVec_4; // @[ACEUnit.scala 247:28 272:{40,40}]
-  wire [63:0] _GEN_110 = 3'h5 == readCounter_count ? bus_RDATA : readDataVec_5; // @[ACEUnit.scala 247:28 272:{40,40}]
-  wire [63:0] _GEN_111 = 3'h6 == readCounter_count ? bus_RDATA : readDataVec_6; // @[ACEUnit.scala 247:28 272:{40,40}]
-  wire [63:0] _GEN_112 = 3'h7 == readCounter_count ? bus_RDATA : readDataVec_7; // @[ACEUnit.scala 247:28 272:{40,40}]
-  wire  _GEN_122 = bus_RVALID ? bus_RRESP[1:0] == 2'h0 & readResponseValid : readResponseValid; // @[ACEUnit.scala 270:42 273:27 248:34]
+  wire [63:0] _GEN_56 = bus_ARREADY ? readBuffer_writeData : 64'h0; // @[ACEUnit.scala 233:24 234:28 utils.scala 48:41]
+  wire  _GEN_57 = bus_ARREADY & readBuffer_writeEn; // @[ACEUnit.scala 233:24 234:28 utils.scala 47:41]
+  wire [5:0] _GEN_58 = bus_ARREADY ? readBuffer_prfDest : 6'h0; // @[ACEUnit.scala 233:24 234:28 utils.scala 48:41]
+  wire [3:0] _GEN_59 = bus_ARREADY ? readBuffer_robAddr : 4'h0; // @[ACEUnit.scala 233:24 234:28 utils.scala 48:41]
+  wire [4:0] _GEN_60 = bus_ARREADY ? readBuffer_branchMask : 5'h0; // @[ACEUnit.scala 233:24 234:28 utils.scala 48:41]
+  wire [31:0] _GEN_61 = bus_ARREADY ? readBuffer_instruction : 32'h0; // @[ACEUnit.scala 233:24 234:28 utils.scala 48:41]
+  wire [31:0] _GEN_62 = bus_ARREADY ? readBuffer_address : 32'h0; // @[ACEUnit.scala 233:24 234:28 utils.scala 48:41]
+  wire  _GEN_63 = bus_ARREADY & readBuffer_valid; // @[ACEUnit.scala 233:24 234:28 utils.scala 47:41]
+  wire [31:0] _GEN_67 = readACERequestState ? _bus_ARADDR_T_1 : 32'h0; // @[ACEUnit.scala 207:31 214:18 77:14]
+  wire [2:0] _GEN_68 = readACERequestState ? 3'h7 : 3'h0; // @[ACEUnit.scala 207:31 215:17 78:13]
+  wire [63:0] _GEN_75 = readACERequestState ? _GEN_56 : 64'h0; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  wire [5:0] _GEN_77 = readACERequestState ? _GEN_58 : 6'h0; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  wire [3:0] _GEN_78 = readACERequestState ? _GEN_59 : 4'h0; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  wire [4:0] _GEN_79 = readACERequestState ? _GEN_60 : 5'h0; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  wire [31:0] _GEN_80 = readACERequestState ? _GEN_61 : 32'h0; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  wire [31:0] _GEN_81 = readACERequestState ? _GEN_62 : 32'h0; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  wire [2:0] _GEN_89 = ~readACERequestState ? 3'h0 : _GEN_68; // @[ACEUnit.scala 207:31 78:13]
+  reg [1:0] readACEResponseState; // @[ACEUnit.scala 242:37]
+  reg [63:0] readDataVec_0; // @[ACEUnit.scala 243:28]
+  reg [63:0] readDataVec_1; // @[ACEUnit.scala 243:28]
+  reg [63:0] readDataVec_2; // @[ACEUnit.scala 243:28]
+  reg [63:0] readDataVec_3; // @[ACEUnit.scala 243:28]
+  reg [63:0] readDataVec_4; // @[ACEUnit.scala 243:28]
+  reg [63:0] readDataVec_5; // @[ACEUnit.scala 243:28]
+  reg [63:0] readDataVec_6; // @[ACEUnit.scala 243:28]
+  reg [63:0] readDataVec_7; // @[ACEUnit.scala 243:28]
+  reg  readResponseValid; // @[ACEUnit.scala 244:34]
+  wire [63:0] _GEN_105 = 3'h0 == readCounter_count ? bus_RDATA : readDataVec_0; // @[ACEUnit.scala 243:28 262:{40,40}]
+  wire [63:0] _GEN_106 = 3'h1 == readCounter_count ? bus_RDATA : readDataVec_1; // @[ACEUnit.scala 243:28 262:{40,40}]
+  wire [63:0] _GEN_107 = 3'h2 == readCounter_count ? bus_RDATA : readDataVec_2; // @[ACEUnit.scala 243:28 262:{40,40}]
+  wire [63:0] _GEN_108 = 3'h3 == readCounter_count ? bus_RDATA : readDataVec_3; // @[ACEUnit.scala 243:28 262:{40,40}]
+  wire [63:0] _GEN_109 = 3'h4 == readCounter_count ? bus_RDATA : readDataVec_4; // @[ACEUnit.scala 243:28 262:{40,40}]
+  wire [63:0] _GEN_110 = 3'h5 == readCounter_count ? bus_RDATA : readDataVec_5; // @[ACEUnit.scala 243:28 262:{40,40}]
+  wire [63:0] _GEN_111 = 3'h6 == readCounter_count ? bus_RDATA : readDataVec_6; // @[ACEUnit.scala 243:28 262:{40,40}]
+  wire [63:0] _GEN_112 = 3'h7 == readCounter_count ? bus_RDATA : readDataVec_7; // @[ACEUnit.scala 243:28 262:{40,40}]
+  wire  _GEN_122 = bus_RVALID ? bus_RRESP[1:0] == 2'h0 & readResponseValid : readResponseValid; // @[ACEUnit.scala 260:42 263:27 244:34]
   wire [511:0] _responseBuffer_cacheLine_T = {readDataVec_7,readDataVec_6,readDataVec_5,readDataVec_4,readDataVec_3,
     readDataVec_2,readDataVec_1,readDataVec_0}; // @[Cat.scala 33:92]
-  wire [1:0] _readACEResponseState_T_4 = readResponse_ready ? 2'h0 : 2'h2; // @[ACEUnit.scala 282:34]
-  wire  _GEN_124 = 2'h2 == readACEResponseState | responseBuffer_valid; // @[ACEUnit.scala 252:32 279:28 119:31]
-  wire  _GEN_137 = 2'h1 == readACEResponseState ? _GEN_122 : readResponseValid; // @[ACEUnit.scala 252:32 248:34]
-  wire  _GEN_162 = 2'h0 == readACEResponseState ? readResponseValid : _GEN_137; // @[ACEUnit.scala 252:32 248:34]
-  reg [1:0] coherentAXIState; // @[ACEUnit.scala 291:33]
-  wire  _coherencyRequestBuffer_response_T_1 = bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 301:91]
-  wire  _coherencyRequestBuffer_response_T_2 = bus_ACSNOOP == 4'h9 | bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 301:75]
-  wire  _coherencyRequestBuffer_response_T_5 = bus_ACSNOOP == 4'h1 | _coherencyRequestBuffer_response_T_1; // @[ACEUnit.scala 302:76]
+  wire [1:0] _readACEResponseState_T_4 = readResponse_ready ? 2'h0 : 2'h2; // @[ACEUnit.scala 272:34]
+  wire  _GEN_124 = 2'h2 == readACEResponseState | responseBuffer_valid; // @[ACEUnit.scala 248:32 269:28 119:31]
+  wire  _GEN_137 = 2'h1 == readACEResponseState ? _GEN_122 : readResponseValid; // @[ACEUnit.scala 248:32 244:34]
+  wire  _GEN_165 = 2'h0 == readACEResponseState ? readResponseValid : _GEN_137; // @[ACEUnit.scala 248:32 244:34]
+  reg [1:0] coherentAXIState; // @[ACEUnit.scala 281:33]
+  wire  _coherencyRequestBuffer_response_T_1 = bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 291:91]
+  wire  _coherencyRequestBuffer_response_T_2 = bus_ACSNOOP == 4'h9 | bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 291:75]
+  wire  _coherencyRequestBuffer_response_T_5 = bus_ACSNOOP == 4'h1 | _coherencyRequestBuffer_response_T_1; // @[ACEUnit.scala 292:76]
   wire [1:0] _coherencyRequestBuffer_response_T_6 = {_coherencyRequestBuffer_response_T_2,
     _coherencyRequestBuffer_response_T_5}; // @[Cat.scala 33:92]
-  wire [1:0] _coherentAXIState_T_1 = coherencyResponse_request_valid ? 2'h2 : 2'h1; // @[ACEUnit.scala 310:32]
-  wire  _bus_CRRESP_T_1 = ~coherencyResponseBuffer_response[0]; // @[ACEUnit.scala 318:70]
-  wire  _bus_CRRESP_T_3 = ~coherencyResponseBuffer_response[1]; // @[ACEUnit.scala 318:108]
+  wire  _bus_CRRESP_T_1 = ~coherencyResponseBuffer_response[0]; // @[ACEUnit.scala 310:70]
+  wire  _bus_CRRESP_T_3 = ~coherencyResponseBuffer_response[1]; // @[ACEUnit.scala 310:108]
   wire [4:0] _bus_CRRESP_T_4 = {1'h0,_bus_CRRESP_T_1,_bus_CRRESP_T_3,2'h0}; // @[Cat.scala 33:92]
-  wire [4:0] _bus_CRRESP_T_5 = coherencyResponseBuffer_valid ? _bus_CRRESP_T_4 : 5'h0; // @[ACEUnit.scala 318:24]
-  wire [1:0] _coherentAXIState_T_2 = coherencyResponseBuffer_valid ? 2'h3 : 2'h0; // @[ACEUnit.scala 321:32]
-  wire [1:0] _GEN_169 = bus_CRREADY ? _coherentAXIState_T_2 : 2'h2; // @[ACEUnit.scala 320:24 321:26 323:26]
-  wire [63:0] writeChunks_1_0 = coherencyResponseBuffer_data[63:0]; // @[ACEUnit.scala 331:37]
-  wire [63:0] writeChunks_1_1 = coherencyResponseBuffer_data[127:64]; // @[ACEUnit.scala 331:37]
-  wire [63:0] writeChunks_1_2 = coherencyResponseBuffer_data[191:128]; // @[ACEUnit.scala 331:37]
-  wire [63:0] writeChunks_1_3 = coherencyResponseBuffer_data[255:192]; // @[ACEUnit.scala 331:37]
-  wire [63:0] writeChunks_1_4 = coherencyResponseBuffer_data[319:256]; // @[ACEUnit.scala 331:37]
-  wire [63:0] writeChunks_1_5 = coherencyResponseBuffer_data[383:320]; // @[ACEUnit.scala 331:37]
-  wire [63:0] writeChunks_1_6 = coherencyResponseBuffer_data[447:384]; // @[ACEUnit.scala 331:37]
-  wire [63:0] writeChunks_1_7 = coherencyResponseBuffer_data[511:448]; // @[ACEUnit.scala 331:37]
-  wire [63:0] _GEN_171 = 3'h1 == coherentCounter_count ? writeChunks_1_1 : writeChunks_1_0; // @[ACEUnit.scala 334:{20,20}]
-  wire [63:0] _GEN_172 = 3'h2 == coherentCounter_count ? writeChunks_1_2 : _GEN_171; // @[ACEUnit.scala 334:{20,20}]
-  wire [63:0] _GEN_173 = 3'h3 == coherentCounter_count ? writeChunks_1_3 : _GEN_172; // @[ACEUnit.scala 334:{20,20}]
-  wire [63:0] _GEN_174 = 3'h4 == coherentCounter_count ? writeChunks_1_4 : _GEN_173; // @[ACEUnit.scala 334:{20,20}]
-  wire [63:0] _GEN_175 = 3'h5 == coherentCounter_count ? writeChunks_1_5 : _GEN_174; // @[ACEUnit.scala 334:{20,20}]
-  wire [63:0] _GEN_176 = 3'h6 == coherentCounter_count ? writeChunks_1_6 : _GEN_175; // @[ACEUnit.scala 334:{20,20}]
-  wire [63:0] _GEN_177 = 3'h7 == coherentCounter_count ? writeChunks_1_7 : _GEN_176; // @[ACEUnit.scala 334:{20,20}]
-  wire [63:0] _GEN_178 = bus_CDREADY ? _GEN_177 : 64'h0; // @[ACEUnit.scala 104:14 333:24 334:20]
-  wire  _coherencyResponseBuffer_valid_T = bus_CDLAST & bus_CDREADY; // @[ACEUnit.scala 338:53]
-  wire [1:0] _coherentAXIState_T_4 = _coherencyResponseBuffer_valid_T ? 2'h0 : 2'h3; // @[ACEUnit.scala 340:30]
-  wire [63:0] _GEN_181 = 2'h3 == coherentAXIState ? _GEN_178 : 64'h0; // @[ACEUnit.scala 104:14 295:27]
-  wire  _GEN_183 = 2'h3 == coherentAXIState & coherentCounter_count == 3'h7; // @[ACEUnit.scala 105:14 295:27 337:18]
-  wire  _GEN_184 = 2'h3 == coherentAXIState ? ~(bus_CDLAST & bus_CDREADY) : coherencyResponse_request_valid; // @[ACEUnit.scala 151:27 295:27 338:37]
-  wire [1:0] _GEN_185 = 2'h3 == coherentAXIState ? _coherentAXIState_T_4 : coherentAXIState; // @[ACEUnit.scala 295:27 340:24 291:33]
-  wire [4:0] _GEN_187 = 2'h2 == coherentAXIState ? _bus_CRRESP_T_5 : 5'h0; // @[ACEUnit.scala 101:14 295:27 318:18]
-  wire  _GEN_189 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState; // @[ACEUnit.scala 103:15 295:27]
-  wire [63:0] _GEN_190 = 2'h2 == coherentAXIState ? 64'h0 : _GEN_181; // @[ACEUnit.scala 104:14 295:27]
-  wire  _GEN_191 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState & bus_CDREADY; // @[ACEUnit.scala 293:25 295:27]
-  wire  _GEN_192 = 2'h2 == coherentAXIState ? 1'h0 : _GEN_183; // @[ACEUnit.scala 105:14 295:27]
-  wire  _GEN_194 = 2'h1 == coherentAXIState | ~coherencyResponseBuffer_valid; // @[ACEUnit.scala 150:27 295:27 306:31]
-  wire  _GEN_200 = 2'h1 == coherentAXIState ? 1'h0 : 2'h2 == coherentAXIState; // @[ACEUnit.scala 100:15 295:27]
-  wire [4:0] _GEN_201 = 2'h1 == coherentAXIState ? 5'h0 : _GEN_187; // @[ACEUnit.scala 101:14 295:27]
-  wire  _GEN_202 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_189; // @[ACEUnit.scala 103:15 295:27]
-  wire [63:0] _GEN_203 = 2'h1 == coherentAXIState ? 64'h0 : _GEN_190; // @[ACEUnit.scala 104:14 295:27]
-  wire  _GEN_204 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_191; // @[ACEUnit.scala 293:25 295:27]
-  wire  _GEN_205 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_192; // @[ACEUnit.scala 105:14 295:27]
+  wire [4:0] _bus_CRRESP_T_5 = coherencyResponseBuffer_valid ? _bus_CRRESP_T_4 : 5'h0; // @[ACEUnit.scala 310:24]
+  wire [1:0] _coherentAXIState_T_2 = coherencyResponseBuffer_dataValid ? 2'h3 : 2'h0; // @[ACEUnit.scala 313:32]
+  wire [1:0] _GEN_171 = bus_CRREADY ? _coherentAXIState_T_2 : 2'h2; // @[ACEUnit.scala 312:24 313:26 315:26]
+  wire [63:0] writeChunks_1_0 = coherencyResponseBuffer_data[63:0]; // @[ACEUnit.scala 323:37]
+  wire [63:0] writeChunks_1_1 = coherencyResponseBuffer_data[127:64]; // @[ACEUnit.scala 323:37]
+  wire [63:0] writeChunks_1_2 = coherencyResponseBuffer_data[191:128]; // @[ACEUnit.scala 323:37]
+  wire [63:0] writeChunks_1_3 = coherencyResponseBuffer_data[255:192]; // @[ACEUnit.scala 323:37]
+  wire [63:0] writeChunks_1_4 = coherencyResponseBuffer_data[319:256]; // @[ACEUnit.scala 323:37]
+  wire [63:0] writeChunks_1_5 = coherencyResponseBuffer_data[383:320]; // @[ACEUnit.scala 323:37]
+  wire [63:0] writeChunks_1_6 = coherencyResponseBuffer_data[447:384]; // @[ACEUnit.scala 323:37]
+  wire [63:0] writeChunks_1_7 = coherencyResponseBuffer_data[511:448]; // @[ACEUnit.scala 323:37]
+  wire [63:0] _GEN_173 = 3'h1 == coherentCounter_count ? writeChunks_1_1 : writeChunks_1_0; // @[ACEUnit.scala 326:{20,20}]
+  wire [63:0] _GEN_174 = 3'h2 == coherentCounter_count ? writeChunks_1_2 : _GEN_173; // @[ACEUnit.scala 326:{20,20}]
+  wire [63:0] _GEN_175 = 3'h3 == coherentCounter_count ? writeChunks_1_3 : _GEN_174; // @[ACEUnit.scala 326:{20,20}]
+  wire [63:0] _GEN_176 = 3'h4 == coherentCounter_count ? writeChunks_1_4 : _GEN_175; // @[ACEUnit.scala 326:{20,20}]
+  wire [63:0] _GEN_177 = 3'h5 == coherentCounter_count ? writeChunks_1_5 : _GEN_176; // @[ACEUnit.scala 326:{20,20}]
+  wire [63:0] _GEN_178 = 3'h6 == coherentCounter_count ? writeChunks_1_6 : _GEN_177; // @[ACEUnit.scala 326:{20,20}]
+  wire [63:0] _GEN_179 = 3'h7 == coherentCounter_count ? writeChunks_1_7 : _GEN_178; // @[ACEUnit.scala 326:{20,20}]
+  wire [63:0] _GEN_180 = bus_CDREADY ? _GEN_179 : 64'h0; // @[ACEUnit.scala 104:14 325:24 326:20]
+  wire  _coherencyResponseBuffer_valid_T = bus_CDLAST & bus_CDREADY; // @[ACEUnit.scala 330:53]
+  wire [1:0] _coherentAXIState_T_4 = _coherencyResponseBuffer_valid_T ? 2'h0 : 2'h3; // @[ACEUnit.scala 332:30]
+  wire [63:0] _GEN_183 = 2'h3 == coherentAXIState ? _GEN_180 : 64'h0; // @[ACEUnit.scala 104:14 285:27]
+  wire  _GEN_185 = 2'h3 == coherentAXIState & coherentCounter_count == 3'h7; // @[ACEUnit.scala 105:14 285:27 329:18]
+  wire  _GEN_186 = 2'h3 == coherentAXIState ? ~(bus_CDLAST & bus_CDREADY) : coherencyResponse_request_valid; // @[ACEUnit.scala 151:27 285:27 330:37]
+  wire [1:0] _GEN_187 = 2'h3 == coherentAXIState ? _coherentAXIState_T_4 : coherentAXIState; // @[ACEUnit.scala 285:27 332:24 281:33]
+  wire [4:0] _GEN_189 = 2'h2 == coherentAXIState ? _bus_CRRESP_T_5 : 5'h0; // @[ACEUnit.scala 101:14 285:27 310:18]
+  wire  _GEN_191 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState; // @[ACEUnit.scala 103:15 285:27]
+  wire [63:0] _GEN_192 = 2'h2 == coherentAXIState ? 64'h0 : _GEN_183; // @[ACEUnit.scala 104:14 285:27]
+  wire  _GEN_193 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState & bus_CDREADY; // @[ACEUnit.scala 283:25 285:27]
+  wire  _GEN_194 = 2'h2 == coherentAXIState ? 1'h0 : _GEN_185; // @[ACEUnit.scala 105:14 285:27]
+  wire  _GEN_197 = 2'h1 == coherentAXIState | ~coherencyResponseBuffer_valid; // @[ACEUnit.scala 150:27 285:27 299:31]
+  wire  _GEN_203 = 2'h1 == coherentAXIState ? 1'h0 : 2'h2 == coherentAXIState; // @[ACEUnit.scala 100:15 285:27]
+  wire [4:0] _GEN_204 = 2'h1 == coherentAXIState ? 5'h0 : _GEN_189; // @[ACEUnit.scala 101:14 285:27]
+  wire  _GEN_205 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_191; // @[ACEUnit.scala 103:15 285:27]
+  wire [63:0] _GEN_206 = 2'h1 == coherentAXIState ? 64'h0 : _GEN_192; // @[ACEUnit.scala 104:14 285:27]
+  wire  _GEN_207 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_193; // @[ACEUnit.scala 283:25 285:27]
+  wire  _GEN_208 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_194; // @[ACEUnit.scala 105:14 285:27]
   fifoWithBranchOpsII ACEMSHR ( // @[ACEUnit.scala 131:23]
     .clock(ACEMSHR_clock),
     .reset(ACEMSHR_reset),
@@ -41476,6 +42174,8 @@ module ACEUnit(
     .write_data_branchMask(ACEMSHR_write_data_branchMask),
     .write_data_robAddr(ACEMSHR_write_data_robAddr),
     .write_data_prfDest(ACEMSHR_write_data_prfDest),
+    .write_data_writeEn(ACEMSHR_write_data_writeEn),
+    .write_data_writeData(ACEMSHR_write_data_writeData),
     .read_ready(ACEMSHR_read_ready),
     .read_data_valid(ACEMSHR_read_data_valid),
     .read_data_address(ACEMSHR_read_data_address),
@@ -41483,6 +42183,8 @@ module ACEUnit(
     .read_data_branchMask(ACEMSHR_read_data_branchMask),
     .read_data_robAddr(ACEMSHR_read_data_robAddr),
     .read_data_prfDest(ACEMSHR_read_data_prfDest),
+    .read_data_writeEn(ACEMSHR_read_data_writeEn),
+    .read_data_writeData(ACEMSHR_read_data_writeData),
     .read_data_branchInvalid(ACEMSHR_read_data_branchInvalid),
     .isEmpty(ACEMSHR_isEmpty),
     .branchOps_valid(ACEMSHR_branchOps_valid),
@@ -41495,13 +42197,13 @@ module ACEUnit(
     .count(writeCounter_count),
     .incrm(writeCounter_incrm)
   );
-  moduleCounter_2 readCounter ( // @[ACEUnit.scala 249:27]
+  moduleCounter_2 readCounter ( // @[ACEUnit.scala 245:27]
     .clock(readCounter_clock),
     .reset(readCounter_reset),
     .count(readCounter_count),
     .incrm(readCounter_incrm)
   );
-  moduleCounter_2 coherentCounter ( // @[ACEUnit.scala 292:31]
+  moduleCounter_2 coherentCounter ( // @[ACEUnit.scala 282:31]
     .clock(coherentCounter_clock),
     .reset(coherentCounter_reset),
     .count(coherentCounter_count),
@@ -41514,40 +42216,44 @@ module ACEUnit(
   assign readResponse_request_branchMask = responseBuffer_branchMask; // @[ACEUnit.scala 123:35]
   assign readResponse_request_robAddr = responseBuffer_robAddr; // @[ACEUnit.scala 124:32]
   assign readResponse_request_prfDest = responseBuffer_prfDest; // @[ACEUnit.scala 125:32]
+  assign readResponse_request_writeEn = responseBuffer_writeEn; // @[ACEUnit.scala 128:32]
+  assign readResponse_request_writeData = responseBuffer_writeData; // @[ACEUnit.scala 129:34]
   assign readResponse_request_cacheLine = responseBuffer_cacheLine; // @[ACEUnit.scala 126:34]
   assign readResponse_request_response = responseBuffer_response; // @[ACEUnit.scala 127:33]
   assign writeRequest_ready = ~writeBuffer_valid; // @[ACEUnit.scala 141:25]
   assign coherencyRequest_request_valid = coherencyRequestBuffer_valid; // @[ACEUnit.scala 147:28]
   assign coherencyRequest_request_address = coherencyRequestBuffer_address; // @[ACEUnit.scala 147:28]
   assign coherencyRequest_request_response = coherencyRequestBuffer_response; // @[ACEUnit.scala 147:28]
-  assign coherencyResponse_ready = 2'h0 == coherentAXIState ? ~coherencyResponseBuffer_valid : _GEN_194; // @[ACEUnit.scala 150:27 295:27]
-  assign fenceReady = _readRequest_ready_T & ~responseBuffer_valid & ACEMSHR_isEmpty; // @[ACEUnit.scala 343:60]
+  assign coherencyResponse_ready = 2'h0 == coherentAXIState ? ~coherencyResponseBuffer_valid : _GEN_197; // @[ACEUnit.scala 150:27 285:27]
+  assign fenceReady = _readRequest_ready_T & ~responseBuffer_valid & ACEMSHR_isEmpty; // @[ACEUnit.scala 335:60]
   assign bus_AWADDR = {{6'd0}, _GEN_39};
   assign bus_AWVALID = 2'h0 == writeACEState ? 1'h0 : 2'h1 == writeACEState; // @[ACEUnit.scala 160:25 67:15]
   assign bus_WDATA = 2'h0 == writeACEState ? 64'h0 : _GEN_30; // @[ACEUnit.scala 160:25 69:13]
   assign bus_WLAST = 2'h0 == writeACEState ? 1'h0 : _GEN_29; // @[ACEUnit.scala 160:25 71:13]
   assign bus_WVALID = 2'h0 == writeACEState ? 1'h0 : 2'h1 == writeACEState; // @[ACEUnit.scala 160:25 67:15]
   assign bus_BREADY = 2'h0 == writeACEState ? 1'h0 : _GEN_33; // @[ACEUnit.scala 160:25 74:14]
-  assign bus_ARADDR = ~readACERequestState ? 32'h0 : _GEN_67; // @[ACEUnit.scala 208:31 77:14]
-  assign bus_ARVALID = ~readACERequestState ? 1'h0 : readACERequestState; // @[ACEUnit.scala 208:31 85:15]
-  assign bus_RREADY = 2'h0 == readACEResponseState ? 1'h0 : 2'h1 == readACEResponseState; // @[ACEUnit.scala 252:32 87:14]
+  assign bus_ARADDR = ~readACERequestState ? 32'h0 : _GEN_67; // @[ACEUnit.scala 207:31 77:14]
+  assign bus_ARVALID = ~readACERequestState ? 1'h0 : readACERequestState; // @[ACEUnit.scala 207:31 85:15]
+  assign bus_RREADY = 2'h0 == readACEResponseState ? 1'h0 : 2'h1 == readACEResponseState; // @[ACEUnit.scala 248:32 87:14]
   assign bus_AWSNOOP = {{1'd0}, _GEN_41};
   assign bus_ARSNOOP = {{1'd0}, _GEN_89};
-  assign bus_ACREADY = 2'h0 == coherentAXIState; // @[ACEUnit.scala 295:27]
-  assign bus_CRVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_200; // @[ACEUnit.scala 100:15 295:27]
-  assign bus_CRRESP = 2'h0 == coherentAXIState ? 5'h0 : _GEN_201; // @[ACEUnit.scala 101:14 295:27]
-  assign bus_CDVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_202; // @[ACEUnit.scala 103:15 295:27]
-  assign bus_CDDATA = 2'h0 == coherentAXIState ? 64'h0 : _GEN_203; // @[ACEUnit.scala 104:14 295:27]
-  assign bus_CDLAST = 2'h0 == coherentAXIState ? 1'h0 : _GEN_205; // @[ACEUnit.scala 105:14 295:27]
+  assign bus_ACREADY = 2'h0 == coherentAXIState; // @[ACEUnit.scala 285:27]
+  assign bus_CRVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_203; // @[ACEUnit.scala 100:15 285:27]
+  assign bus_CRRESP = 2'h0 == coherentAXIState ? 5'h0 : _GEN_204; // @[ACEUnit.scala 101:14 285:27]
+  assign bus_CDVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_205; // @[ACEUnit.scala 103:15 285:27]
+  assign bus_CDDATA = 2'h0 == coherentAXIState ? 64'h0 : _GEN_206; // @[ACEUnit.scala 104:14 285:27]
+  assign bus_CDLAST = 2'h0 == coherentAXIState ? 1'h0 : _GEN_208; // @[ACEUnit.scala 105:14 285:27]
   assign ACEMSHR_clock = clock;
   assign ACEMSHR_reset = reset;
-  assign ACEMSHR_write_data_valid = ~readACERequestState ? 1'h0 : readACERequestState & _GEN_63; // @[ACEUnit.scala 208:31 utils.scala 47:41]
-  assign ACEMSHR_write_data_address = ~readACERequestState ? 32'h0 : _GEN_81; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  assign ACEMSHR_write_data_instruction = ~readACERequestState ? 32'h0 : _GEN_80; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  assign ACEMSHR_write_data_branchMask = ~readACERequestState ? 5'h0 : _GEN_79; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  assign ACEMSHR_write_data_robAddr = ~readACERequestState ? 4'h0 : _GEN_78; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  assign ACEMSHR_write_data_prfDest = ~readACERequestState ? 6'h0 : _GEN_77; // @[ACEUnit.scala 208:31 utils.scala 48:41]
-  assign ACEMSHR_read_ready = 2'h0 == readACEResponseState; // @[ACEUnit.scala 252:32]
+  assign ACEMSHR_write_data_valid = ~readACERequestState ? 1'h0 : readACERequestState & _GEN_63; // @[ACEUnit.scala 207:31 utils.scala 47:41]
+  assign ACEMSHR_write_data_address = ~readACERequestState ? 32'h0 : _GEN_81; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  assign ACEMSHR_write_data_instruction = ~readACERequestState ? 32'h0 : _GEN_80; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  assign ACEMSHR_write_data_branchMask = ~readACERequestState ? 5'h0 : _GEN_79; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  assign ACEMSHR_write_data_robAddr = ~readACERequestState ? 4'h0 : _GEN_78; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  assign ACEMSHR_write_data_prfDest = ~readACERequestState ? 6'h0 : _GEN_77; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  assign ACEMSHR_write_data_writeEn = ~readACERequestState ? 1'h0 : readACERequestState & _GEN_57; // @[ACEUnit.scala 207:31 utils.scala 47:41]
+  assign ACEMSHR_write_data_writeData = ~readACERequestState ? 64'h0 : _GEN_75; // @[ACEUnit.scala 207:31 utils.scala 48:41]
+  assign ACEMSHR_read_ready = 2'h0 == readACEResponseState; // @[ACEUnit.scala 248:32]
   assign ACEMSHR_branchOps_valid = branchOps_valid; // @[ACEUnit.scala 137:21]
   assign ACEMSHR_branchOps_branchMask = branchOps_branchMask; // @[ACEUnit.scala 137:21]
   assign ACEMSHR_branchOps_passed = branchOps_passed; // @[ACEUnit.scala 137:21]
@@ -41555,19 +42261,19 @@ module ACEUnit(
   assign writeCounter_reset = 2'h0 == writeACEState; // @[ACEUnit.scala 160:25]
   assign writeCounter_incrm = 2'h0 == writeACEState ? 1'h0 : 2'h1 == writeACEState & _T_3; // @[ACEUnit.scala 158:22 160:25]
   assign readCounter_clock = clock;
-  assign readCounter_reset = 2'h0 == readACEResponseState; // @[ACEUnit.scala 252:32]
-  assign readCounter_incrm = 2'h0 == readACEResponseState ? 1'h0 : 2'h1 == readACEResponseState & bus_RVALID; // @[ACEUnit.scala 250:21 252:32]
+  assign readCounter_reset = 2'h0 == readACEResponseState; // @[ACEUnit.scala 248:32]
+  assign readCounter_incrm = 2'h0 == readACEResponseState ? 1'h0 : 2'h1 == readACEResponseState & bus_RVALID; // @[ACEUnit.scala 246:21 248:32]
   assign coherentCounter_clock = clock;
-  assign coherentCounter_reset = 2'h0 == coherentAXIState ? 1'h0 : _GEN_200; // @[ACEUnit.scala 100:15 295:27]
-  assign coherentCounter_incrm = 2'h0 == coherentAXIState ? 1'h0 : _GEN_204; // @[ACEUnit.scala 293:25 295:27]
+  assign coherentCounter_reset = 2'h0 == coherentAXIState ? 1'h0 : _GEN_203; // @[ACEUnit.scala 100:15 285:27]
+  assign coherentCounter_incrm = 2'h0 == coherentAXIState ? 1'h0 : _GEN_207; // @[ACEUnit.scala 283:25 285:27]
   always @(posedge clock) begin
     if (reset) begin // @[ACEUnit.scala 107:28]
       readBuffer_valid <= 1'h0; // @[ACEUnit.scala 107:28]
-    end else if (~readACERequestState) begin // @[ACEUnit.scala 208:31]
+    end else if (~readACERequestState) begin // @[ACEUnit.scala 207:31]
       readBuffer_valid <= _GEN_0;
-    end else if (readACERequestState) begin // @[ACEUnit.scala 208:31]
-      if (bus_ARREADY) begin // @[ACEUnit.scala 234:24]
-        readBuffer_valid <= 1'h0; // @[ACEUnit.scala 236:26]
+    end else if (readACERequestState) begin // @[ACEUnit.scala 207:31]
+      if (bus_ARREADY) begin // @[ACEUnit.scala 233:24]
+        readBuffer_valid <= 1'h0; // @[ACEUnit.scala 235:26]
       end else begin
         readBuffer_valid <= _GEN_0;
       end
@@ -41599,60 +42305,80 @@ module ACEUnit(
     end else if (_readRequest_ready_T) begin // @[ACEUnit.scala 109:26]
       readBuffer_prfDest <= readRequest_request_prfDest; // @[ACEUnit.scala 115:24]
     end
+    if (reset) begin // @[ACEUnit.scala 107:28]
+      readBuffer_writeEn <= 1'h0; // @[ACEUnit.scala 107:28]
+    end else if (_readRequest_ready_T) begin // @[ACEUnit.scala 109:26]
+      readBuffer_writeEn <= readRequest_request_writeEn; // @[ACEUnit.scala 116:24]
+    end
+    if (reset) begin // @[ACEUnit.scala 107:28]
+      readBuffer_writeData <= 64'h0; // @[ACEUnit.scala 107:28]
+    end else if (_readRequest_ready_T) begin // @[ACEUnit.scala 109:26]
+      readBuffer_writeData <= readRequest_request_writeData; // @[ACEUnit.scala 117:26]
+    end
     if (reset) begin // @[ACEUnit.scala 119:31]
       responseBuffer_valid <= 1'h0; // @[ACEUnit.scala 119:31]
-    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      responseBuffer_valid <= 1'h0; // @[ACEUnit.scala 257:28]
-    end else if (!(2'h1 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_valid <= 1'h0; // @[ACEUnit.scala 254:28]
+    end else if (!(2'h1 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
       responseBuffer_valid <= _GEN_124;
     end
     if (reset) begin // @[ACEUnit.scala 119:31]
       responseBuffer_address <= 32'h0; // @[ACEUnit.scala 119:31]
-    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      responseBuffer_address <= ACEMSHR_read_data_address; // @[ACEUnit.scala 262:30]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_address <= ACEMSHR_read_data_address; // @[ACEUnit.scala 253:22]
     end
     if (reset) begin // @[ACEUnit.scala 119:31]
       responseBuffer_instruction <= 32'h0; // @[ACEUnit.scala 119:31]
-    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      responseBuffer_instruction <= ACEMSHR_read_data_instruction; // @[ACEUnit.scala 261:34]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_instruction <= ACEMSHR_read_data_instruction; // @[ACEUnit.scala 253:22]
     end
     if (reset) begin // @[ACEUnit.scala 119:31]
       responseBuffer_branchMask <= 5'h0; // @[ACEUnit.scala 119:31]
-    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      responseBuffer_branchMask <= ACEMSHR_read_data_branchMask; // @[ACEUnit.scala 263:33]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_branchMask <= ACEMSHR_read_data_branchMask; // @[ACEUnit.scala 253:22]
     end
     if (reset) begin // @[ACEUnit.scala 119:31]
       responseBuffer_robAddr <= 4'h0; // @[ACEUnit.scala 119:31]
-    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      responseBuffer_robAddr <= ACEMSHR_read_data_robAddr; // @[ACEUnit.scala 259:30]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_robAddr <= ACEMSHR_read_data_robAddr; // @[ACEUnit.scala 253:22]
     end
     if (reset) begin // @[ACEUnit.scala 119:31]
       responseBuffer_prfDest <= 6'h0; // @[ACEUnit.scala 119:31]
-    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      responseBuffer_prfDest <= ACEMSHR_read_data_prfDest; // @[ACEUnit.scala 258:30]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_prfDest <= ACEMSHR_read_data_prfDest; // @[ACEUnit.scala 253:22]
+    end
+    if (reset) begin // @[ACEUnit.scala 119:31]
+      responseBuffer_writeEn <= 1'h0; // @[ACEUnit.scala 119:31]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_writeEn <= ACEMSHR_read_data_writeEn; // @[ACEUnit.scala 253:22]
+    end
+    if (reset) begin // @[ACEUnit.scala 119:31]
+      responseBuffer_writeData <= 64'h0; // @[ACEUnit.scala 119:31]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_writeData <= ACEMSHR_read_data_writeData; // @[ACEUnit.scala 253:22]
     end
     if (reset) begin // @[ACEUnit.scala 119:31]
       responseBuffer_cacheLine <= 512'h0; // @[ACEUnit.scala 119:31]
-    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      responseBuffer_cacheLine <= 512'h0; // @[ACEUnit.scala 260:32]
-    end else if (!(2'h1 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h2 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        responseBuffer_cacheLine <= _responseBuffer_cacheLine_T; // @[ACEUnit.scala 280:32]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_cacheLine <= 512'h0; // @[ACEUnit.scala 253:22]
+    end else if (!(2'h1 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
+      if (2'h2 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+        responseBuffer_cacheLine <= _responseBuffer_cacheLine_T; // @[ACEUnit.scala 270:32]
       end
     end
     if (reset) begin // @[ACEUnit.scala 119:31]
       responseBuffer_response <= 2'h0; // @[ACEUnit.scala 119:31]
-    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        if (bus_RVALID) begin // @[ACEUnit.scala 270:42]
-          responseBuffer_response <= bus_RRESP[3:2]; // @[ACEUnit.scala 274:33]
-        end
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_response <= 2'h0; // @[ACEUnit.scala 253:22]
+    end else if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      if (bus_RVALID) begin // @[ACEUnit.scala 260:42]
+        responseBuffer_response <= bus_RRESP[3:2]; // @[ACEUnit.scala 264:33]
       end
     end
     if (reset) begin // @[ACEUnit.scala 119:31]
       responseBuffer_branchInvalid <= 1'h0; // @[ACEUnit.scala 119:31]
-    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      responseBuffer_branchInvalid <= ACEMSHR_read_data_branchInvalid; // @[ACEUnit.scala 264:36]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      responseBuffer_branchInvalid <= ACEMSHR_read_data_branchInvalid; // @[ACEUnit.scala 253:22]
     end
     if (reset) begin // @[ACEUnit.scala 140:28]
       writeBuffer_valid <= 1'h0; // @[ACEUnit.scala 140:28]
@@ -41677,34 +42403,43 @@ module ACEUnit(
     end
     if (reset) begin // @[ACEUnit.scala 146:39]
       coherencyRequestBuffer_valid <= 1'h0; // @[ACEUnit.scala 146:39]
-    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      coherencyRequestBuffer_valid <= bus_ACVALID; // @[ACEUnit.scala 299:36]
+    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
+      coherencyRequestBuffer_valid <= bus_ACVALID; // @[ACEUnit.scala 289:36]
+    end else if (2'h1 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
+      if (coherencyRequest_ready) begin // @[ACEUnit.scala 296:35]
+        coherencyRequestBuffer_valid <= 1'h0; // @[ACEUnit.scala 297:37]
+      end
     end
     if (reset) begin // @[ACEUnit.scala 146:39]
       coherencyRequestBuffer_address <= 32'h0; // @[ACEUnit.scala 146:39]
-    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      coherencyRequestBuffer_address <= bus_ACADDR; // @[ACEUnit.scala 300:38]
+    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
+      coherencyRequestBuffer_address <= bus_ACADDR; // @[ACEUnit.scala 290:38]
     end
     if (reset) begin // @[ACEUnit.scala 146:39]
       coherencyRequestBuffer_response <= 2'h0; // @[ACEUnit.scala 146:39]
-    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      coherencyRequestBuffer_response <= _coherencyRequestBuffer_response_T_6; // @[ACEUnit.scala 301:39]
+    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
+      coherencyRequestBuffer_response <= _coherencyRequestBuffer_response_T_6; // @[ACEUnit.scala 291:39]
     end
     if (reset) begin // @[ACEUnit.scala 149:40]
       coherencyResponseBuffer_valid <= 1'h0; // @[ACEUnit.scala 149:40]
-    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
+    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
       coherencyResponseBuffer_valid <= coherencyResponse_request_valid; // @[ACEUnit.scala 151:27]
-    end else if (2'h1 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
+    end else if (2'h1 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
       coherencyResponseBuffer_valid <= coherencyResponse_request_valid;
-    end else if (2'h2 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
+    end else if (2'h2 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
       coherencyResponseBuffer_valid <= coherencyResponse_request_valid; // @[ACEUnit.scala 151:27]
     end else begin
-      coherencyResponseBuffer_valid <= _GEN_184;
+      coherencyResponseBuffer_valid <= _GEN_186;
     end
     if (reset) begin // @[ACEUnit.scala 149:40]
       coherencyResponseBuffer_data <= 512'h0; // @[ACEUnit.scala 149:40]
     end else begin
       coherencyResponseBuffer_data <= coherencyResponse_request_data;
+    end
+    if (reset) begin // @[ACEUnit.scala 149:40]
+      coherencyResponseBuffer_dataValid <= 1'h0; // @[ACEUnit.scala 149:40]
+    end else begin
+      coherencyResponseBuffer_dataValid <= coherencyResponse_request_dataValid;
     end
     if (reset) begin // @[ACEUnit.scala 149:40]
       coherencyResponseBuffer_response <= 2'h0; // @[ACEUnit.scala 149:40]
@@ -41730,121 +42465,123 @@ module ACEUnit(
     end
     if (reset) begin // @[ACEUnit.scala 206:36]
       readACERequestState <= 1'h0; // @[ACEUnit.scala 206:36]
-    end else if (~readACERequestState) begin // @[ACEUnit.scala 208:31]
-      readACERequestState <= readBuffer_valid; // @[ACEUnit.scala 210:27]
-    end else if (readACERequestState) begin // @[ACEUnit.scala 208:31]
-      if (bus_ARREADY) begin // @[ACEUnit.scala 238:33]
+    end else if (~readACERequestState) begin // @[ACEUnit.scala 207:31]
+      readACERequestState <= readBuffer_valid; // @[ACEUnit.scala 209:27]
+    end else if (readACERequestState) begin // @[ACEUnit.scala 207:31]
+      if (bus_ARREADY) begin // @[ACEUnit.scala 237:33]
         readACERequestState <= 1'h0;
       end else begin
         readACERequestState <= 1'h1;
       end
     end
-    if (reset) begin // @[ACEUnit.scala 246:37]
-      readACEResponseState <= 2'h0; // @[ACEUnit.scala 246:37]
-    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      if (ACEMSHR_read_data_valid) begin // @[ACEUnit.scala 266:34]
+    if (reset) begin // @[ACEUnit.scala 242:37]
+      readACEResponseState <= 2'h0; // @[ACEUnit.scala 242:37]
+    end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      if (ACEMSHR_read_data_valid) begin // @[ACEUnit.scala 256:34]
         readACEResponseState <= 2'h1;
       end else begin
         readACEResponseState <= 2'h0;
       end
-    end else if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      if (bus_RLAST & bus_RVALID & readResponseValid) begin // @[ACEUnit.scala 276:34]
+    end else if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      if (bus_RLAST & bus_RVALID & readResponseValid) begin // @[ACEUnit.scala 266:34]
         readACEResponseState <= 2'h2;
       end else begin
         readACEResponseState <= 2'h1;
       end
-    end else if (2'h2 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-      readACEResponseState <= _readACEResponseState_T_4; // @[ACEUnit.scala 282:28]
+    end else if (2'h2 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+      readACEResponseState <= _readACEResponseState_T_4; // @[ACEUnit.scala 272:28]
     end
-    if (reset) begin // @[ACEUnit.scala 247:28]
-      readDataVec_0 <= 64'h0; // @[ACEUnit.scala 247:28]
-    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        if (bus_RVALID) begin // @[ACEUnit.scala 270:42]
+    if (reset) begin // @[ACEUnit.scala 243:28]
+      readDataVec_0 <= 64'h0; // @[ACEUnit.scala 243:28]
+    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
+      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+        if (bus_RVALID) begin // @[ACEUnit.scala 260:42]
           readDataVec_0 <= _GEN_105;
         end
       end
     end
-    if (reset) begin // @[ACEUnit.scala 247:28]
-      readDataVec_1 <= 64'h0; // @[ACEUnit.scala 247:28]
-    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        if (bus_RVALID) begin // @[ACEUnit.scala 270:42]
+    if (reset) begin // @[ACEUnit.scala 243:28]
+      readDataVec_1 <= 64'h0; // @[ACEUnit.scala 243:28]
+    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
+      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+        if (bus_RVALID) begin // @[ACEUnit.scala 260:42]
           readDataVec_1 <= _GEN_106;
         end
       end
     end
-    if (reset) begin // @[ACEUnit.scala 247:28]
-      readDataVec_2 <= 64'h0; // @[ACEUnit.scala 247:28]
-    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        if (bus_RVALID) begin // @[ACEUnit.scala 270:42]
+    if (reset) begin // @[ACEUnit.scala 243:28]
+      readDataVec_2 <= 64'h0; // @[ACEUnit.scala 243:28]
+    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
+      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+        if (bus_RVALID) begin // @[ACEUnit.scala 260:42]
           readDataVec_2 <= _GEN_107;
         end
       end
     end
-    if (reset) begin // @[ACEUnit.scala 247:28]
-      readDataVec_3 <= 64'h0; // @[ACEUnit.scala 247:28]
-    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        if (bus_RVALID) begin // @[ACEUnit.scala 270:42]
+    if (reset) begin // @[ACEUnit.scala 243:28]
+      readDataVec_3 <= 64'h0; // @[ACEUnit.scala 243:28]
+    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
+      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+        if (bus_RVALID) begin // @[ACEUnit.scala 260:42]
           readDataVec_3 <= _GEN_108;
         end
       end
     end
-    if (reset) begin // @[ACEUnit.scala 247:28]
-      readDataVec_4 <= 64'h0; // @[ACEUnit.scala 247:28]
-    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        if (bus_RVALID) begin // @[ACEUnit.scala 270:42]
+    if (reset) begin // @[ACEUnit.scala 243:28]
+      readDataVec_4 <= 64'h0; // @[ACEUnit.scala 243:28]
+    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
+      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+        if (bus_RVALID) begin // @[ACEUnit.scala 260:42]
           readDataVec_4 <= _GEN_109;
         end
       end
     end
-    if (reset) begin // @[ACEUnit.scala 247:28]
-      readDataVec_5 <= 64'h0; // @[ACEUnit.scala 247:28]
-    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        if (bus_RVALID) begin // @[ACEUnit.scala 270:42]
+    if (reset) begin // @[ACEUnit.scala 243:28]
+      readDataVec_5 <= 64'h0; // @[ACEUnit.scala 243:28]
+    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
+      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+        if (bus_RVALID) begin // @[ACEUnit.scala 260:42]
           readDataVec_5 <= _GEN_110;
         end
       end
     end
-    if (reset) begin // @[ACEUnit.scala 247:28]
-      readDataVec_6 <= 64'h0; // @[ACEUnit.scala 247:28]
-    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        if (bus_RVALID) begin // @[ACEUnit.scala 270:42]
+    if (reset) begin // @[ACEUnit.scala 243:28]
+      readDataVec_6 <= 64'h0; // @[ACEUnit.scala 243:28]
+    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
+      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+        if (bus_RVALID) begin // @[ACEUnit.scala 260:42]
           readDataVec_6 <= _GEN_111;
         end
       end
     end
-    if (reset) begin // @[ACEUnit.scala 247:28]
-      readDataVec_7 <= 64'h0; // @[ACEUnit.scala 247:28]
-    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 252:32]
-      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 252:32]
-        if (bus_RVALID) begin // @[ACEUnit.scala 270:42]
+    if (reset) begin // @[ACEUnit.scala 243:28]
+      readDataVec_7 <= 64'h0; // @[ACEUnit.scala 243:28]
+    end else if (!(2'h0 == readACEResponseState)) begin // @[ACEUnit.scala 248:32]
+      if (2'h1 == readACEResponseState) begin // @[ACEUnit.scala 248:32]
+        if (bus_RVALID) begin // @[ACEUnit.scala 260:42]
           readDataVec_7 <= _GEN_112;
         end
       end
     end
-    readResponseValid <= reset | _GEN_162; // @[ACEUnit.scala 248:{34,34}]
-    if (reset) begin // @[ACEUnit.scala 291:33]
-      coherentAXIState <= 2'h0; // @[ACEUnit.scala 291:33]
-    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      if (bus_ACVALID) begin // @[ACEUnit.scala 303:30]
+    readResponseValid <= reset | _GEN_165; // @[ACEUnit.scala 244:{34,34}]
+    if (reset) begin // @[ACEUnit.scala 281:33]
+      coherentAXIState <= 2'h0; // @[ACEUnit.scala 281:33]
+    end else if (2'h0 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
+      if (bus_ACVALID) begin // @[ACEUnit.scala 293:30]
         coherentAXIState <= 2'h1;
       end else begin
         coherentAXIState <= 2'h0;
       end
-    end else if (2'h1 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      if (coherencyResponse_request_valid) begin // @[ACEUnit.scala 307:45]
-        coherentAXIState <= _coherentAXIState_T_1; // @[ACEUnit.scala 310:26]
+    end else if (2'h1 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
+      if (coherencyResponse_request_valid) begin // @[ACEUnit.scala 303:30]
+        coherentAXIState <= 2'h2;
+      end else begin
+        coherentAXIState <= 2'h1;
       end
-    end else if (2'h2 == coherentAXIState) begin // @[ACEUnit.scala 295:27]
-      coherentAXIState <= _GEN_169;
+    end else if (2'h2 == coherentAXIState) begin // @[ACEUnit.scala 285:27]
+      coherentAXIState <= _GEN_171;
     end else begin
-      coherentAXIState <= _GEN_185;
+      coherentAXIState <= _GEN_187;
     end
   end
 // Register and memory initialization
@@ -41896,67 +42633,77 @@ initial begin
   _RAND_5 = {1{`RANDOM}};
   readBuffer_prfDest = _RAND_5[5:0];
   _RAND_6 = {1{`RANDOM}};
-  responseBuffer_valid = _RAND_6[0:0];
-  _RAND_7 = {1{`RANDOM}};
-  responseBuffer_address = _RAND_7[31:0];
+  readBuffer_writeEn = _RAND_6[0:0];
+  _RAND_7 = {2{`RANDOM}};
+  readBuffer_writeData = _RAND_7[63:0];
   _RAND_8 = {1{`RANDOM}};
-  responseBuffer_instruction = _RAND_8[31:0];
+  responseBuffer_valid = _RAND_8[0:0];
   _RAND_9 = {1{`RANDOM}};
-  responseBuffer_branchMask = _RAND_9[4:0];
+  responseBuffer_address = _RAND_9[31:0];
   _RAND_10 = {1{`RANDOM}};
-  responseBuffer_robAddr = _RAND_10[3:0];
+  responseBuffer_instruction = _RAND_10[31:0];
   _RAND_11 = {1{`RANDOM}};
-  responseBuffer_prfDest = _RAND_11[5:0];
-  _RAND_12 = {16{`RANDOM}};
-  responseBuffer_cacheLine = _RAND_12[511:0];
+  responseBuffer_branchMask = _RAND_11[4:0];
+  _RAND_12 = {1{`RANDOM}};
+  responseBuffer_robAddr = _RAND_12[3:0];
   _RAND_13 = {1{`RANDOM}};
-  responseBuffer_response = _RAND_13[1:0];
+  responseBuffer_prfDest = _RAND_13[5:0];
   _RAND_14 = {1{`RANDOM}};
-  responseBuffer_branchInvalid = _RAND_14[0:0];
-  _RAND_15 = {1{`RANDOM}};
-  writeBuffer_valid = _RAND_15[0:0];
-  _RAND_16 = {1{`RANDOM}};
-  writeBuffer_address = _RAND_16[31:0];
-  _RAND_17 = {16{`RANDOM}};
-  writeBuffer_data = _RAND_17[511:0];
+  responseBuffer_writeEn = _RAND_14[0:0];
+  _RAND_15 = {2{`RANDOM}};
+  responseBuffer_writeData = _RAND_15[63:0];
+  _RAND_16 = {16{`RANDOM}};
+  responseBuffer_cacheLine = _RAND_16[511:0];
+  _RAND_17 = {1{`RANDOM}};
+  responseBuffer_response = _RAND_17[1:0];
   _RAND_18 = {1{`RANDOM}};
-  coherencyRequestBuffer_valid = _RAND_18[0:0];
+  responseBuffer_branchInvalid = _RAND_18[0:0];
   _RAND_19 = {1{`RANDOM}};
-  coherencyRequestBuffer_address = _RAND_19[31:0];
+  writeBuffer_valid = _RAND_19[0:0];
   _RAND_20 = {1{`RANDOM}};
-  coherencyRequestBuffer_response = _RAND_20[1:0];
-  _RAND_21 = {1{`RANDOM}};
-  coherencyResponseBuffer_valid = _RAND_21[0:0];
-  _RAND_22 = {16{`RANDOM}};
-  coherencyResponseBuffer_data = _RAND_22[511:0];
+  writeBuffer_address = _RAND_20[31:0];
+  _RAND_21 = {16{`RANDOM}};
+  writeBuffer_data = _RAND_21[511:0];
+  _RAND_22 = {1{`RANDOM}};
+  coherencyRequestBuffer_valid = _RAND_22[0:0];
   _RAND_23 = {1{`RANDOM}};
-  coherencyResponseBuffer_response = _RAND_23[1:0];
+  coherencyRequestBuffer_address = _RAND_23[31:0];
   _RAND_24 = {1{`RANDOM}};
-  writeACEState = _RAND_24[1:0];
+  coherencyRequestBuffer_response = _RAND_24[1:0];
   _RAND_25 = {1{`RANDOM}};
-  readACERequestState = _RAND_25[0:0];
-  _RAND_26 = {1{`RANDOM}};
-  readACEResponseState = _RAND_26[1:0];
-  _RAND_27 = {2{`RANDOM}};
-  readDataVec_0 = _RAND_27[63:0];
-  _RAND_28 = {2{`RANDOM}};
-  readDataVec_1 = _RAND_28[63:0];
-  _RAND_29 = {2{`RANDOM}};
-  readDataVec_2 = _RAND_29[63:0];
-  _RAND_30 = {2{`RANDOM}};
-  readDataVec_3 = _RAND_30[63:0];
-  _RAND_31 = {2{`RANDOM}};
-  readDataVec_4 = _RAND_31[63:0];
+  coherencyResponseBuffer_valid = _RAND_25[0:0];
+  _RAND_26 = {16{`RANDOM}};
+  coherencyResponseBuffer_data = _RAND_26[511:0];
+  _RAND_27 = {1{`RANDOM}};
+  coherencyResponseBuffer_dataValid = _RAND_27[0:0];
+  _RAND_28 = {1{`RANDOM}};
+  coherencyResponseBuffer_response = _RAND_28[1:0];
+  _RAND_29 = {1{`RANDOM}};
+  writeACEState = _RAND_29[1:0];
+  _RAND_30 = {1{`RANDOM}};
+  readACERequestState = _RAND_30[0:0];
+  _RAND_31 = {1{`RANDOM}};
+  readACEResponseState = _RAND_31[1:0];
   _RAND_32 = {2{`RANDOM}};
-  readDataVec_5 = _RAND_32[63:0];
+  readDataVec_0 = _RAND_32[63:0];
   _RAND_33 = {2{`RANDOM}};
-  readDataVec_6 = _RAND_33[63:0];
+  readDataVec_1 = _RAND_33[63:0];
   _RAND_34 = {2{`RANDOM}};
-  readDataVec_7 = _RAND_34[63:0];
-  _RAND_35 = {1{`RANDOM}};
-  readResponseValid = _RAND_35[0:0];
-  _RAND_36 = {1{`RANDOM}};
-  coherentAXIState = _RAND_36[1:0];
+  readDataVec_2 = _RAND_34[63:0];
+  _RAND_35 = {2{`RANDOM}};
+  readDataVec_3 = _RAND_35[63:0];
+  _RAND_36 = {2{`RANDOM}};
+  readDataVec_4 = _RAND_36[63:0];
+  _RAND_37 = {2{`RANDOM}};
+  readDataVec_5 = _RAND_37[63:0];
+  _RAND_38 = {2{`RANDOM}};
+  readDataVec_6 = _RAND_38[63:0];
+  _RAND_39 = {2{`RANDOM}};
+  readDataVec_7 = _RAND_39[63:0];
+  _RAND_40 = {1{`RANDOM}};
+  readResponseValid = _RAND_40[0:0];
+  _RAND_41 = {1{`RANDOM}};
+  coherentAXIState = _RAND_41[1:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -43169,8 +43916,11 @@ module core_Anon_1(
   wire [4:0] arbiter_replayRequest_request_branchMask; // @[cacheModule.scala 46:23]
   wire [3:0] arbiter_replayRequest_request_robAddr; // @[cacheModule.scala 46:23]
   wire [5:0] arbiter_replayRequest_request_prfDest; // @[cacheModule.scala 46:23]
+  wire  arbiter_replayRequest_request_writeEn; // @[cacheModule.scala 46:23]
+  wire [63:0] arbiter_replayRequest_request_writeData; // @[cacheModule.scala 46:23]
   wire [511:0] arbiter_replayRequest_request_cacheLine; // @[cacheModule.scala 46:23]
   wire [1:0] arbiter_replayRequest_request_response; // @[cacheModule.scala 46:23]
+  wire  arbiter_coherencyRequest_ready; // @[cacheModule.scala 46:23]
   wire  arbiter_coherencyRequest_request_valid; // @[cacheModule.scala 46:23]
   wire [31:0] arbiter_coherencyRequest_request_address; // @[cacheModule.scala 46:23]
   wire [1:0] arbiter_coherencyRequest_request_response; // @[cacheModule.scala 46:23]
@@ -43206,6 +43956,8 @@ module core_Anon_1(
   wire [4:0] cacheLookup_toReplay_request_branchMask; // @[cacheModule.scala 47:27]
   wire [3:0] cacheLookup_toReplay_request_robAddr; // @[cacheModule.scala 47:27]
   wire [5:0] cacheLookup_toReplay_request_prfDest; // @[cacheModule.scala 47:27]
+  wire  cacheLookup_toReplay_request_writeEn; // @[cacheModule.scala 47:27]
+  wire [63:0] cacheLookup_toReplay_request_writeData; // @[cacheModule.scala 47:27]
   wire  cacheLookup_toWriteBack_ready; // @[cacheModule.scala 47:27]
   wire  cacheLookup_toWriteBack_request_valid; // @[cacheModule.scala 47:27]
   wire [31:0] cacheLookup_toWriteBack_request_address; // @[cacheModule.scala 47:27]
@@ -43213,6 +43965,7 @@ module core_Anon_1(
   wire  cacheLookup_toCoherency_ready; // @[cacheModule.scala 47:27]
   wire  cacheLookup_toCoherency_request_valid; // @[cacheModule.scala 47:27]
   wire [511:0] cacheLookup_toCoherency_request_data; // @[cacheModule.scala 47:27]
+  wire  cacheLookup_toCoherency_request_dataValid; // @[cacheModule.scala 47:27]
   wire [1:0] cacheLookup_toCoherency_request_response; // @[cacheModule.scala 47:27]
   wire  cacheLookup_toResponse_request_valid; // @[cacheModule.scala 47:27]
   wire [31:0] cacheLookup_toResponse_request_address; // @[cacheModule.scala 47:27]
@@ -43233,6 +43986,8 @@ module core_Anon_1(
   wire [4:0] replayUnit_requestIn_request_branchMask; // @[cacheModule.scala 48:26]
   wire [3:0] replayUnit_requestIn_request_robAddr; // @[cacheModule.scala 48:26]
   wire [5:0] replayUnit_requestIn_request_prfDest; // @[cacheModule.scala 48:26]
+  wire  replayUnit_requestIn_request_writeEn; // @[cacheModule.scala 48:26]
+  wire [63:0] replayUnit_requestIn_request_writeData; // @[cacheModule.scala 48:26]
   wire  replayUnit_requestOut_ready; // @[cacheModule.scala 48:26]
   wire  replayUnit_requestOut_request_valid; // @[cacheModule.scala 48:26]
   wire [31:0] replayUnit_requestOut_request_address; // @[cacheModule.scala 48:26]
@@ -43240,6 +43995,8 @@ module core_Anon_1(
   wire [4:0] replayUnit_requestOut_request_branchMask; // @[cacheModule.scala 48:26]
   wire [3:0] replayUnit_requestOut_request_robAddr; // @[cacheModule.scala 48:26]
   wire [5:0] replayUnit_requestOut_request_prfDest; // @[cacheModule.scala 48:26]
+  wire  replayUnit_requestOut_request_writeEn; // @[cacheModule.scala 48:26]
+  wire [63:0] replayUnit_requestOut_request_writeData; // @[cacheModule.scala 48:26]
   wire  replayUnit_responseIn_ready; // @[cacheModule.scala 48:26]
   wire  replayUnit_responseIn_request_valid; // @[cacheModule.scala 48:26]
   wire [31:0] replayUnit_responseIn_request_address; // @[cacheModule.scala 48:26]
@@ -43247,6 +44004,8 @@ module core_Anon_1(
   wire [4:0] replayUnit_responseIn_request_branchMask; // @[cacheModule.scala 48:26]
   wire [3:0] replayUnit_responseIn_request_robAddr; // @[cacheModule.scala 48:26]
   wire [5:0] replayUnit_responseIn_request_prfDest; // @[cacheModule.scala 48:26]
+  wire  replayUnit_responseIn_request_writeEn; // @[cacheModule.scala 48:26]
+  wire [63:0] replayUnit_responseIn_request_writeData; // @[cacheModule.scala 48:26]
   wire [511:0] replayUnit_responseIn_request_cacheLine; // @[cacheModule.scala 48:26]
   wire [1:0] replayUnit_responseIn_request_response; // @[cacheModule.scala 48:26]
   wire  replayUnit_responseOut_ready; // @[cacheModule.scala 48:26]
@@ -43256,6 +44015,8 @@ module core_Anon_1(
   wire [4:0] replayUnit_responseOut_request_branchMask; // @[cacheModule.scala 48:26]
   wire [3:0] replayUnit_responseOut_request_robAddr; // @[cacheModule.scala 48:26]
   wire [5:0] replayUnit_responseOut_request_prfDest; // @[cacheModule.scala 48:26]
+  wire  replayUnit_responseOut_request_writeEn; // @[cacheModule.scala 48:26]
+  wire [63:0] replayUnit_responseOut_request_writeData; // @[cacheModule.scala 48:26]
   wire [511:0] replayUnit_responseOut_request_cacheLine; // @[cacheModule.scala 48:26]
   wire [1:0] replayUnit_responseOut_request_response; // @[cacheModule.scala 48:26]
   wire  replayUnit_writeBackIn_ready; // @[cacheModule.scala 48:26]
@@ -43315,6 +44076,8 @@ module core_Anon_1(
   wire [4:0] aceUnit_readRequest_request_branchMask; // @[cacheModule.scala 56:23]
   wire [3:0] aceUnit_readRequest_request_robAddr; // @[cacheModule.scala 56:23]
   wire [5:0] aceUnit_readRequest_request_prfDest; // @[cacheModule.scala 56:23]
+  wire  aceUnit_readRequest_request_writeEn; // @[cacheModule.scala 56:23]
+  wire [63:0] aceUnit_readRequest_request_writeData; // @[cacheModule.scala 56:23]
   wire  aceUnit_readResponse_ready; // @[cacheModule.scala 56:23]
   wire  aceUnit_readResponse_request_valid; // @[cacheModule.scala 56:23]
   wire [31:0] aceUnit_readResponse_request_address; // @[cacheModule.scala 56:23]
@@ -43322,18 +44085,22 @@ module core_Anon_1(
   wire [4:0] aceUnit_readResponse_request_branchMask; // @[cacheModule.scala 56:23]
   wire [3:0] aceUnit_readResponse_request_robAddr; // @[cacheModule.scala 56:23]
   wire [5:0] aceUnit_readResponse_request_prfDest; // @[cacheModule.scala 56:23]
+  wire  aceUnit_readResponse_request_writeEn; // @[cacheModule.scala 56:23]
+  wire [63:0] aceUnit_readResponse_request_writeData; // @[cacheModule.scala 56:23]
   wire [511:0] aceUnit_readResponse_request_cacheLine; // @[cacheModule.scala 56:23]
   wire [1:0] aceUnit_readResponse_request_response; // @[cacheModule.scala 56:23]
   wire  aceUnit_writeRequest_ready; // @[cacheModule.scala 56:23]
   wire  aceUnit_writeRequest_request_valid; // @[cacheModule.scala 56:23]
   wire [31:0] aceUnit_writeRequest_request_address; // @[cacheModule.scala 56:23]
   wire [511:0] aceUnit_writeRequest_request_data; // @[cacheModule.scala 56:23]
+  wire  aceUnit_coherencyRequest_ready; // @[cacheModule.scala 56:23]
   wire  aceUnit_coherencyRequest_request_valid; // @[cacheModule.scala 56:23]
   wire [31:0] aceUnit_coherencyRequest_request_address; // @[cacheModule.scala 56:23]
   wire [1:0] aceUnit_coherencyRequest_request_response; // @[cacheModule.scala 56:23]
   wire  aceUnit_coherencyResponse_ready; // @[cacheModule.scala 56:23]
   wire  aceUnit_coherencyResponse_request_valid; // @[cacheModule.scala 56:23]
   wire [511:0] aceUnit_coherencyResponse_request_data; // @[cacheModule.scala 56:23]
+  wire  aceUnit_coherencyResponse_request_dataValid; // @[cacheModule.scala 56:23]
   wire [1:0] aceUnit_coherencyResponse_request_response; // @[cacheModule.scala 56:23]
   wire  aceUnit_fenceReady; // @[cacheModule.scala 56:23]
   wire  aceUnit_branchOps_valid; // @[cacheModule.scala 56:23]
@@ -43452,8 +44219,11 @@ module core_Anon_1(
     .replayRequest_request_branchMask(arbiter_replayRequest_request_branchMask),
     .replayRequest_request_robAddr(arbiter_replayRequest_request_robAddr),
     .replayRequest_request_prfDest(arbiter_replayRequest_request_prfDest),
+    .replayRequest_request_writeEn(arbiter_replayRequest_request_writeEn),
+    .replayRequest_request_writeData(arbiter_replayRequest_request_writeData),
     .replayRequest_request_cacheLine(arbiter_replayRequest_request_cacheLine),
     .replayRequest_request_response(arbiter_replayRequest_request_response),
+    .coherencyRequest_ready(arbiter_coherencyRequest_ready),
     .coherencyRequest_request_valid(arbiter_coherencyRequest_request_valid),
     .coherencyRequest_request_address(arbiter_coherencyRequest_request_address),
     .coherencyRequest_request_response(arbiter_coherencyRequest_request_response),
@@ -43491,6 +44261,8 @@ module core_Anon_1(
     .toReplay_request_branchMask(cacheLookup_toReplay_request_branchMask),
     .toReplay_request_robAddr(cacheLookup_toReplay_request_robAddr),
     .toReplay_request_prfDest(cacheLookup_toReplay_request_prfDest),
+    .toReplay_request_writeEn(cacheLookup_toReplay_request_writeEn),
+    .toReplay_request_writeData(cacheLookup_toReplay_request_writeData),
     .toWriteBack_ready(cacheLookup_toWriteBack_ready),
     .toWriteBack_request_valid(cacheLookup_toWriteBack_request_valid),
     .toWriteBack_request_address(cacheLookup_toWriteBack_request_address),
@@ -43498,6 +44270,7 @@ module core_Anon_1(
     .toCoherency_ready(cacheLookup_toCoherency_ready),
     .toCoherency_request_valid(cacheLookup_toCoherency_request_valid),
     .toCoherency_request_data(cacheLookup_toCoherency_request_data),
+    .toCoherency_request_dataValid(cacheLookup_toCoherency_request_dataValid),
     .toCoherency_request_response(cacheLookup_toCoherency_request_response),
     .toResponse_request_valid(cacheLookup_toResponse_request_valid),
     .toResponse_request_address(cacheLookup_toResponse_request_address),
@@ -43520,6 +44293,8 @@ module core_Anon_1(
     .requestIn_request_branchMask(replayUnit_requestIn_request_branchMask),
     .requestIn_request_robAddr(replayUnit_requestIn_request_robAddr),
     .requestIn_request_prfDest(replayUnit_requestIn_request_prfDest),
+    .requestIn_request_writeEn(replayUnit_requestIn_request_writeEn),
+    .requestIn_request_writeData(replayUnit_requestIn_request_writeData),
     .requestOut_ready(replayUnit_requestOut_ready),
     .requestOut_request_valid(replayUnit_requestOut_request_valid),
     .requestOut_request_address(replayUnit_requestOut_request_address),
@@ -43527,6 +44302,8 @@ module core_Anon_1(
     .requestOut_request_branchMask(replayUnit_requestOut_request_branchMask),
     .requestOut_request_robAddr(replayUnit_requestOut_request_robAddr),
     .requestOut_request_prfDest(replayUnit_requestOut_request_prfDest),
+    .requestOut_request_writeEn(replayUnit_requestOut_request_writeEn),
+    .requestOut_request_writeData(replayUnit_requestOut_request_writeData),
     .responseIn_ready(replayUnit_responseIn_ready),
     .responseIn_request_valid(replayUnit_responseIn_request_valid),
     .responseIn_request_address(replayUnit_responseIn_request_address),
@@ -43534,6 +44311,8 @@ module core_Anon_1(
     .responseIn_request_branchMask(replayUnit_responseIn_request_branchMask),
     .responseIn_request_robAddr(replayUnit_responseIn_request_robAddr),
     .responseIn_request_prfDest(replayUnit_responseIn_request_prfDest),
+    .responseIn_request_writeEn(replayUnit_responseIn_request_writeEn),
+    .responseIn_request_writeData(replayUnit_responseIn_request_writeData),
     .responseIn_request_cacheLine(replayUnit_responseIn_request_cacheLine),
     .responseIn_request_response(replayUnit_responseIn_request_response),
     .responseOut_ready(replayUnit_responseOut_ready),
@@ -43543,6 +44322,8 @@ module core_Anon_1(
     .responseOut_request_branchMask(replayUnit_responseOut_request_branchMask),
     .responseOut_request_robAddr(replayUnit_responseOut_request_robAddr),
     .responseOut_request_prfDest(replayUnit_responseOut_request_prfDest),
+    .responseOut_request_writeEn(replayUnit_responseOut_request_writeEn),
+    .responseOut_request_writeData(replayUnit_responseOut_request_writeData),
     .responseOut_request_cacheLine(replayUnit_responseOut_request_cacheLine),
     .responseOut_request_response(replayUnit_responseOut_request_response),
     .writeBackIn_ready(replayUnit_writeBackIn_ready),
@@ -43606,6 +44387,8 @@ module core_Anon_1(
     .readRequest_request_branchMask(aceUnit_readRequest_request_branchMask),
     .readRequest_request_robAddr(aceUnit_readRequest_request_robAddr),
     .readRequest_request_prfDest(aceUnit_readRequest_request_prfDest),
+    .readRequest_request_writeEn(aceUnit_readRequest_request_writeEn),
+    .readRequest_request_writeData(aceUnit_readRequest_request_writeData),
     .readResponse_ready(aceUnit_readResponse_ready),
     .readResponse_request_valid(aceUnit_readResponse_request_valid),
     .readResponse_request_address(aceUnit_readResponse_request_address),
@@ -43613,18 +44396,22 @@ module core_Anon_1(
     .readResponse_request_branchMask(aceUnit_readResponse_request_branchMask),
     .readResponse_request_robAddr(aceUnit_readResponse_request_robAddr),
     .readResponse_request_prfDest(aceUnit_readResponse_request_prfDest),
+    .readResponse_request_writeEn(aceUnit_readResponse_request_writeEn),
+    .readResponse_request_writeData(aceUnit_readResponse_request_writeData),
     .readResponse_request_cacheLine(aceUnit_readResponse_request_cacheLine),
     .readResponse_request_response(aceUnit_readResponse_request_response),
     .writeRequest_ready(aceUnit_writeRequest_ready),
     .writeRequest_request_valid(aceUnit_writeRequest_request_valid),
     .writeRequest_request_address(aceUnit_writeRequest_request_address),
     .writeRequest_request_data(aceUnit_writeRequest_request_data),
+    .coherencyRequest_ready(aceUnit_coherencyRequest_ready),
     .coherencyRequest_request_valid(aceUnit_coherencyRequest_request_valid),
     .coherencyRequest_request_address(aceUnit_coherencyRequest_request_address),
     .coherencyRequest_request_response(aceUnit_coherencyRequest_request_response),
     .coherencyResponse_ready(aceUnit_coherencyResponse_ready),
     .coherencyResponse_request_valid(aceUnit_coherencyResponse_request_valid),
     .coherencyResponse_request_data(aceUnit_coherencyResponse_request_data),
+    .coherencyResponse_request_dataValid(aceUnit_coherencyResponse_request_dataValid),
     .coherencyResponse_request_response(aceUnit_coherencyResponse_request_response),
     .fenceReady(aceUnit_fenceReady),
     .branchOps_valid(aceUnit_branchOps_valid),
@@ -43744,6 +44531,8 @@ module core_Anon_1(
   assign arbiter_replayRequest_request_branchMask = replayUnit_responseOut_request_branchMask; // @[cacheModule.scala 86:25]
   assign arbiter_replayRequest_request_robAddr = replayUnit_responseOut_request_robAddr; // @[cacheModule.scala 86:25]
   assign arbiter_replayRequest_request_prfDest = replayUnit_responseOut_request_prfDest; // @[cacheModule.scala 86:25]
+  assign arbiter_replayRequest_request_writeEn = replayUnit_responseOut_request_writeEn; // @[cacheModule.scala 86:25]
+  assign arbiter_replayRequest_request_writeData = replayUnit_responseOut_request_writeData; // @[cacheModule.scala 86:25]
   assign arbiter_replayRequest_request_cacheLine = replayUnit_responseOut_request_cacheLine; // @[cacheModule.scala 86:25]
   assign arbiter_replayRequest_request_response = replayUnit_responseOut_request_response; // @[cacheModule.scala 86:25]
   assign arbiter_coherencyRequest_request_valid = aceUnit_coherencyRequest_request_valid; // @[cacheModule.scala 87:28]
@@ -43784,6 +44573,8 @@ module core_Anon_1(
   assign replayUnit_requestIn_request_branchMask = cacheLookup_toReplay_request_branchMask; // @[cacheModule.scala 97:24]
   assign replayUnit_requestIn_request_robAddr = cacheLookup_toReplay_request_robAddr; // @[cacheModule.scala 97:24]
   assign replayUnit_requestIn_request_prfDest = cacheLookup_toReplay_request_prfDest; // @[cacheModule.scala 97:24]
+  assign replayUnit_requestIn_request_writeEn = cacheLookup_toReplay_request_writeEn; // @[cacheModule.scala 97:24]
+  assign replayUnit_requestIn_request_writeData = cacheLookup_toReplay_request_writeData; // @[cacheModule.scala 97:24]
   assign replayUnit_requestOut_ready = aceUnit_readRequest_ready; // @[cacheModule.scala 105:23]
   assign replayUnit_responseIn_request_valid = aceUnit_readResponse_request_valid; // @[cacheModule.scala 98:25]
   assign replayUnit_responseIn_request_address = aceUnit_readResponse_request_address; // @[cacheModule.scala 98:25]
@@ -43791,6 +44582,8 @@ module core_Anon_1(
   assign replayUnit_responseIn_request_branchMask = aceUnit_readResponse_request_branchMask; // @[cacheModule.scala 98:25]
   assign replayUnit_responseIn_request_robAddr = aceUnit_readResponse_request_robAddr; // @[cacheModule.scala 98:25]
   assign replayUnit_responseIn_request_prfDest = aceUnit_readResponse_request_prfDest; // @[cacheModule.scala 98:25]
+  assign replayUnit_responseIn_request_writeEn = aceUnit_readResponse_request_writeEn; // @[cacheModule.scala 98:25]
+  assign replayUnit_responseIn_request_writeData = aceUnit_readResponse_request_writeData; // @[cacheModule.scala 98:25]
   assign replayUnit_responseIn_request_cacheLine = aceUnit_readResponse_request_cacheLine; // @[cacheModule.scala 98:25]
   assign replayUnit_responseIn_request_response = aceUnit_readResponse_request_response; // @[cacheModule.scala 98:25]
   assign replayUnit_responseOut_ready = arbiter_replayRequest_ready; // @[cacheModule.scala 86:25]
@@ -43830,12 +44623,16 @@ module core_Anon_1(
   assign aceUnit_readRequest_request_branchMask = replayUnit_requestOut_request_branchMask; // @[cacheModule.scala 105:23]
   assign aceUnit_readRequest_request_robAddr = replayUnit_requestOut_request_robAddr; // @[cacheModule.scala 105:23]
   assign aceUnit_readRequest_request_prfDest = replayUnit_requestOut_request_prfDest; // @[cacheModule.scala 105:23]
+  assign aceUnit_readRequest_request_writeEn = replayUnit_requestOut_request_writeEn; // @[cacheModule.scala 105:23]
+  assign aceUnit_readRequest_request_writeData = replayUnit_requestOut_request_writeData; // @[cacheModule.scala 105:23]
   assign aceUnit_readResponse_ready = replayUnit_responseIn_ready; // @[cacheModule.scala 98:25]
   assign aceUnit_writeRequest_request_valid = replayUnit_writeBackOut_request_valid; // @[cacheModule.scala 107:24]
   assign aceUnit_writeRequest_request_address = replayUnit_writeBackOut_request_address; // @[cacheModule.scala 107:24]
   assign aceUnit_writeRequest_request_data = replayUnit_writeBackOut_request_data; // @[cacheModule.scala 107:24]
+  assign aceUnit_coherencyRequest_ready = arbiter_coherencyRequest_ready; // @[cacheModule.scala 87:28]
   assign aceUnit_coherencyResponse_request_valid = cacheLookup_toCoherency_request_valid; // @[cacheModule.scala 106:29]
   assign aceUnit_coherencyResponse_request_data = cacheLookup_toCoherency_request_data; // @[cacheModule.scala 106:29]
+  assign aceUnit_coherencyResponse_request_dataValid = cacheLookup_toCoherency_request_dataValid; // @[cacheModule.scala 106:29]
   assign aceUnit_coherencyResponse_request_response = cacheLookup_toCoherency_request_response; // @[cacheModule.scala 106:29]
   assign aceUnit_branchOps_valid = branchOps_valid; // @[cacheModule.scala 102:21]
   assign aceUnit_branchOps_branchMask = branchOps_branchMask; // @[cacheModule.scala 102:21]

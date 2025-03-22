@@ -202,9 +202,8 @@ class ACEUnit(
     }
   }
   //-----------------------AXI ReadRequest--------------------------------//
-   val readIdleState :: readRequestState :: Nil = Enum(2)
+  val readIdleState :: readRequestState :: Nil = Enum(2)
   val readACERequestState = RegInit(readIdleState)
-
   switch(readACERequestState) {
     is(readIdleState){
       readACERequestState := Mux(readBuffer.valid, readRequestState, readIdleState)
@@ -236,11 +235,8 @@ class ACEUnit(
         readBuffer.valid := false.B
       }
       readACERequestState := Mux(bus.ARREADY, readIdleState, readRequestState)
-      
     }
   }
-  
-
   //-----------------------AXI ReadResponse--------------------------------//
   val readDataInState:: readResponseState :: readDataOutState :: Nil = Enum(3)
   val readACEResponseState = RegInit(readDataInState)
@@ -254,14 +250,8 @@ class ACEUnit(
       readCounter.reset := true.B
 
       ACEMSHR.read.ready := true.B
+      responseBuffer := ACEMSHR.read.data
       responseBuffer.valid := false.B
-      responseBuffer.prfDest := ACEMSHR.read.data.prfDest
-      responseBuffer.robAddr := ACEMSHR.read.data.robAddr
-      responseBuffer.cacheLine := 0.U
-      responseBuffer.instruction := ACEMSHR.read.data.instruction
-      responseBuffer.address := ACEMSHR.read.data.address
-      responseBuffer.branchMask := ACEMSHR.read.data.branchMask
-      responseBuffer.branchInvalid := ACEMSHR.read.data.branchInvalid
       
       readACEResponseState := Mux(ACEMSHR.read.data.valid, readResponseState, readDataInState)
     }
@@ -303,12 +293,14 @@ class ACEUnit(
       coherentAXIState := Mux(coherencyReceived , coherentRequestState, coherentIdleState)
     }
     is(coherentRequestState){
+      when(coherencyRequest.ready){
+        coherencyRequestBuffer.valid:= false.B
+      }
       coherencyResponse.ready := true.B
       when(coherencyResponse.request.valid) {
         coherencyResponseBuffer := coherencyResponse.request
-
-        coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestState)
       }
+      coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestState)
     }
     is(coherentResponseState){
       bus.CRVALID := true.B
@@ -318,7 +310,7 @@ class ACEUnit(
       bus.CRRESP := Mux(coherencyResponseBuffer.valid, Cat(0.U(1.W), !coherencyResponseBuffer.response(0), !coherencyResponseBuffer.response(1) , 0.U(1.W), responseValidReg.asUInt),
                         0.U)
       when(bus.CRREADY){
-        coherentAXIState := Mux(coherencyResponseBuffer.valid, coherentDataOutState, coherentIdleState)    
+        coherentAXIState := Mux(coherencyResponseBuffer.dataValid, coherentDataOutState, coherentIdleState)    
       } .otherwise{
         coherentAXIState := coherentResponseState
       }
