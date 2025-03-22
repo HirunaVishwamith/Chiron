@@ -77,15 +77,15 @@ class Scheduler extends Module{
         requestOut := inorderQueue.read.data
       }
       is("b11".U){
-        when(!speculativeQueue.read.data.branchMask(3,0).orR && !speculativeQueue.isEmpty){
+        when(!speculativeQueue.read.data.branchMask(3,0).orR && !speculativeQueue.isEmpty || !speculativeQueue.read.data.valid && speculativeQueue.read.data.branchMask(3,0).orR){
           speculativeQueue.read.ready:= !speculativeQueue.isEmpty
           controlSignal.isSpeculative  := true.B
           requestOut := speculativeQueue.read.data
-        } .elsewhen(!inorderQueue.read.data.branchMask(3,0).orR && !inorderQueue.isEmpty){
+        } .elsewhen(!inorderQueue.read.data.branchMask(3,0).orR && !inorderQueue.isEmpty || !inorderQueue.read.data.valid && inorderQueue.read.data.branchMask(3,0).orR){
           inorderQueue.read.ready := !inorderQueue.isEmpty
           controlSignal.isSpeculative  := false.B
           requestOut := inorderQueue.read.data
-        } .elsewhen(!speculativeQueue.isEmpty){
+        } .elsewhen(!speculativeQueue.isEmpty || !speculativeQueue.read.data.valid && speculativeQueue.read.data.branchMask(3,0).orR){
           speculativeQueue.read.ready:= !speculativeQueue.isEmpty
           controlSignal.isSpeculative  := true.B
           requestOut := speculativeQueue.read.data

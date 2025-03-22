@@ -33279,44 +33279,60 @@ module Scheduler(
   wire [1:0] _T_2 = {controlSignal_inorderReady,controlSignal_speculativeReady}; // @[scheduler.scala 67:39]
   wire  _speculativeQueue_read_ready_T = ~speculativeQueue_isEmpty; // @[scheduler.scala 70:39]
   wire  _inorderQueue_read_ready_T = ~inorderQueue_isEmpty; // @[scheduler.scala 75:36]
+  wire  _inorderQueue_read_ready_T_2 = |inorderQueue_read_data_branchMask[3:0]; // @[scheduler.scala 75:101]
   wire  _inorderQueue_read_ready_T_3 = ~(|inorderQueue_read_data_branchMask[3:0]); // @[scheduler.scala 75:61]
-  wire  _GEN_36 = _speculativeQueue_read_ready_T & _speculativeQueue_read_ready_T; // @[scheduler.scala 88:47 89:38 94:39]
-  wire [5:0] _GEN_38 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_prfDest : 6'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
-  wire [3:0] _GEN_39 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_robAddr : 4'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
-  wire [4:0] _GEN_40 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_branchMask : 5'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
-  wire [31:0] _GEN_41 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_instruction : 32'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
-  wire [31:0] _GEN_42 = _speculativeQueue_read_ready_T ? speculativeQueue_read_data_address : 32'h0; // @[scheduler.scala 88:47 91:22 utils.scala 48:41]
-  wire  _GEN_43 = _speculativeQueue_read_ready_T & speculativeQueue_read_data_valid; // @[scheduler.scala 88:47 91:22 utils.scala 47:41]
-  wire  _GEN_45 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T & _inorderQueue_read_ready_T; // @[scheduler.scala 84:90 85:35]
-  wire  _GEN_46 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? 1'h0 : _speculativeQueue_read_ready_T; // @[scheduler.scala 84:90 86:40]
-  wire [5:0] _GEN_47 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_prfDest :
-    _GEN_38; // @[scheduler.scala 84:90 87:22]
-  wire [3:0] _GEN_48 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_robAddr :
-    _GEN_39; // @[scheduler.scala 84:90 87:22]
-  wire [4:0] _GEN_49 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_branchMask :
-    _GEN_40; // @[scheduler.scala 84:90 87:22]
-  wire [31:0] _GEN_50 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_instruction
-     : _GEN_41; // @[scheduler.scala 84:90 87:22]
-  wire [31:0] _GEN_51 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_address :
-    _GEN_42; // @[scheduler.scala 84:90 87:22]
-  wire  _GEN_52 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? inorderQueue_read_data_valid : _GEN_43; // @[scheduler.scala 84:90 87:22]
-  wire  _GEN_53 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T ? 1'h0 : _GEN_36; // @[scheduler.scala 40:31 84:90]
-  wire  _GEN_54 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
-    _speculativeQueue_read_ready_T : _GEN_53; // @[scheduler.scala 80:91 81:38]
-  wire  _GEN_55 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | _GEN_46; // @[scheduler.scala 80:91 82:40]
-  wire [5:0] _GEN_56 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
-    speculativeQueue_read_data_prfDest : _GEN_47; // @[scheduler.scala 80:91 83:22]
-  wire [3:0] _GEN_57 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
-    speculativeQueue_read_data_robAddr : _GEN_48; // @[scheduler.scala 80:91 83:22]
-  wire [4:0] _GEN_58 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
-    speculativeQueue_read_data_branchMask : _GEN_49; // @[scheduler.scala 80:91 83:22]
-  wire [31:0] _GEN_59 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
-    speculativeQueue_read_data_instruction : _GEN_50; // @[scheduler.scala 80:91 83:22]
-  wire [31:0] _GEN_60 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
-    speculativeQueue_read_data_address : _GEN_51; // @[scheduler.scala 80:91 83:22]
-  wire  _GEN_61 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ?
-    speculativeQueue_read_data_valid : _GEN_52; // @[scheduler.scala 80:91 83:22]
-  wire  _GEN_62 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T ? 1'h0 : _GEN_45; // @[scheduler.scala 37:27 80:91]
+  wire  _T_15 = ~speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0]; // @[scheduler.scala 80:128]
+  wire  _T_32 = _speculativeQueue_read_ready_T | _T_15; // @[scheduler.scala 88:47]
+  wire  _GEN_36 = (_speculativeQueue_read_ready_T | _T_15) & _speculativeQueue_read_ready_T; // @[scheduler.scala 88:134 89:38 94:39]
+  wire [5:0] _GEN_38 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_prfDest : 6'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
+  wire [3:0] _GEN_39 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_robAddr : 4'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
+  wire [4:0] _GEN_40 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_branchMask : 5'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
+  wire [31:0] _GEN_41 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_instruction : 32'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
+  wire [31:0] _GEN_42 = _speculativeQueue_read_ready_T | _T_15 ? speculativeQueue_read_data_address : 32'h0; // @[scheduler.scala 88:134 91:22 utils.scala 48:41]
+  wire  _GEN_43 = (_speculativeQueue_read_ready_T | _T_15) & speculativeQueue_read_data_valid; // @[scheduler.scala 88:134 91:22 utils.scala 47:41]
+  wire  _GEN_45 = (_inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
+    _inorderQueue_read_ready_T_2) & _inorderQueue_read_ready_T; // @[scheduler.scala 84:169 85:35]
+  wire  _GEN_46 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
+    _inorderQueue_read_ready_T_2 ? 1'h0 : _T_32; // @[scheduler.scala 84:169 86:40]
+  wire [5:0] _GEN_47 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
+    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_prfDest : _GEN_38; // @[scheduler.scala 84:169 87:22]
+  wire [3:0] _GEN_48 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
+    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_robAddr : _GEN_39; // @[scheduler.scala 84:169 87:22]
+  wire [4:0] _GEN_49 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
+    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_branchMask : _GEN_40; // @[scheduler.scala 84:169 87:22]
+  wire [31:0] _GEN_50 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
+    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_instruction : _GEN_41; // @[scheduler.scala 84:169 87:22]
+  wire [31:0] _GEN_51 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
+    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_address : _GEN_42; // @[scheduler.scala 84:169 87:22]
+  wire  _GEN_52 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
+    _inorderQueue_read_ready_T_2 ? inorderQueue_read_data_valid : _GEN_43; // @[scheduler.scala 84:169 87:22]
+  wire  _GEN_53 = _inorderQueue_read_ready_T_3 & _inorderQueue_read_ready_T | ~inorderQueue_read_data_valid &
+    _inorderQueue_read_ready_T_2 ? 1'h0 : _GEN_36; // @[scheduler.scala 84:169 40:31]
+  wire  _GEN_54 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
+    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? _speculativeQueue_read_ready_T :
+    _GEN_53; // @[scheduler.scala 80:178 81:38]
+  wire  _GEN_55 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
+    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] | _GEN_46; // @[scheduler.scala 80:178 82:40]
+  wire [5:0] _GEN_56 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
+    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? speculativeQueue_read_data_prfDest
+     : _GEN_47; // @[scheduler.scala 80:178 83:22]
+  wire [3:0] _GEN_57 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
+    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? speculativeQueue_read_data_robAddr
+     : _GEN_48; // @[scheduler.scala 80:178 83:22]
+  wire [4:0] _GEN_58 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
+    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ?
+    speculativeQueue_read_data_branchMask : _GEN_49; // @[scheduler.scala 80:178 83:22]
+  wire [31:0] _GEN_59 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
+    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ?
+    speculativeQueue_read_data_instruction : _GEN_50; // @[scheduler.scala 80:178 83:22]
+  wire [31:0] _GEN_60 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
+    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? speculativeQueue_read_data_address
+     : _GEN_51; // @[scheduler.scala 80:178 83:22]
+  wire  _GEN_61 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
+    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? speculativeQueue_read_data_valid :
+    _GEN_52; // @[scheduler.scala 80:178 83:22]
+  wire  _GEN_62 = ~(|speculativeQueue_read_data_branchMask[3:0]) & _speculativeQueue_read_ready_T | ~
+    speculativeQueue_read_data_valid & |speculativeQueue_read_data_branchMask[3:0] ? 1'h0 : _GEN_45; // @[scheduler.scala 80:178 37:27]
   wire  _GEN_64 = 2'h3 == _T_2 & _GEN_55; // @[scheduler.scala 24:31 67:73]
   wire [5:0] _GEN_65 = 2'h3 == _T_2 ? _GEN_56 : 6'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
   wire [3:0] _GEN_66 = 2'h3 == _T_2 ? _GEN_57 : 4'h0; // @[scheduler.scala 67:73 utils.scala 48:41]
@@ -42083,6 +42099,7 @@ module ACEUnit(
   reg  coherencyResponseBuffer_dataValid; // @[ACEUnit.scala 149:40]
   reg [1:0] coherencyResponseBuffer_response; // @[ACEUnit.scala 149:40]
   reg [1:0] writeACEState; // @[ACEUnit.scala 156:30]
+  wire [31:0] _bus_AWADDR_T_1 = {writeBuffer_address[31:9],9'h0}; // @[Cat.scala 33:92]
   wire [63:0] writeChunks__0 = writeBuffer_data[63:0]; // @[ACEUnit.scala 187:25]
   wire [63:0] writeChunks__1 = writeBuffer_data[127:64]; // @[ACEUnit.scala 187:25]
   wire [63:0] writeChunks__2 = writeBuffer_data[191:128]; // @[ACEUnit.scala 187:25]
@@ -42101,12 +42118,11 @@ module ACEUnit(
   wire [63:0] _GEN_15 = 3'h7 == writeCounter_count ? writeChunks__7 : _GEN_14; // @[ACEUnit.scala 190:{19,19}]
   wire [63:0] _GEN_16 = bus_WREADY & bus_AWREADY ? _GEN_15 : 64'h0; // @[ACEUnit.scala 189:38 190:19 69:13]
   wire [1:0] _writeACEState_T_8 = bus_BVALID ? 2'h0 : 2'h2; // @[ACEUnit.scala 199:27]
-  wire [25:0] _GEN_23 = 2'h1 == writeACEState ? writeBuffer_address[31:6] : 26'h0; // @[ACEUnit.scala 160:25 169:18 59:14]
+  wire [31:0] _GEN_23 = 2'h1 == writeACEState ? _bus_AWADDR_T_1 : 32'h0; // @[ACEUnit.scala 160:25 169:18 59:14]
   wire [1:0] _GEN_25 = 2'h1 == writeACEState ? 2'h3 : 2'h0; // @[ACEUnit.scala 160:25 171:18 61:14]
   wire  _GEN_29 = 2'h1 == writeACEState & writeCounter_count == 3'h7; // @[ACEUnit.scala 160:25 183:17 71:13]
   wire [63:0] _GEN_30 = 2'h1 == writeACEState ? _GEN_16 : 64'h0; // @[ACEUnit.scala 160:25 69:13]
   wire  _GEN_33 = 2'h1 == writeACEState ? 1'h0 : 2'h2 == writeACEState; // @[ACEUnit.scala 160:25 74:14]
-  wire [25:0] _GEN_39 = 2'h0 == writeACEState ? 26'h0 : _GEN_23; // @[ACEUnit.scala 160:25 59:14]
   wire [1:0] _GEN_41 = 2'h0 == writeACEState ? 2'h0 : _GEN_25; // @[ACEUnit.scala 160:25 61:14]
   reg  readACERequestState; // @[ACEUnit.scala 206:36]
   wire [31:0] _bus_ARADDR_T_1 = {readBuffer_address[31:9],9'h0}; // @[Cat.scala 33:92]
@@ -42259,7 +42275,7 @@ module ACEUnit(
   assign coherencyRequest_request_response = coherencyRequestBuffer_response; // @[ACEUnit.scala 147:28]
   assign coherencyResponse_ready = 2'h0 == coherentAXIState ? ~coherencyResponseBuffer_valid : _GEN_197; // @[ACEUnit.scala 150:27 285:27]
   assign fenceReady = _readRequest_ready_T & ~responseBuffer_valid & ACEMSHR_isEmpty; // @[ACEUnit.scala 335:60]
-  assign bus_AWADDR = {{6'd0}, _GEN_39};
+  assign bus_AWADDR = 2'h0 == writeACEState ? 32'h0 : _GEN_23; // @[ACEUnit.scala 160:25 59:14]
   assign bus_AWVALID = 2'h0 == writeACEState ? 1'h0 : 2'h1 == writeACEState; // @[ACEUnit.scala 160:25 67:15]
   assign bus_WDATA = 2'h0 == writeACEState ? 64'h0 : _GEN_30; // @[ACEUnit.scala 160:25 69:13]
   assign bus_WLAST = 2'h0 == writeACEState ? 1'h0 : _GEN_29; // @[ACEUnit.scala 160:25 71:13]
