@@ -1,0 +1,90 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*] Sun Mar 23 15:50:55 2025
+[*]
+[dumpfile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/system_trace.vcd"
+[dumpfile_mtime] "Sun Mar 23 15:17:14 2025"
+[dumpfile_size] 65137572
+[savefile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/vvadd.gtkw"
+[timestart] 245734
+[size] 1920 998
+[pos] -1 -1
+*-3.600000 245770 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.system.
+[treeopen] TOP.system.core0.
+[treeopen] TOP.system.core0.memAccess.
+[sst_width] 323
+[signals_width] 463
+[sst_expanded] 1
+[sst_vpaned_height] 293
+@28
+TOP.clock
+@200
+-
+@22
+TOP.registersOut_16[63:0]
+TOP.registersOut_17[63:0]
+@c00200
+-Request
+@28
+TOP.system.core0.memAccess.scheduler_requestIn_valid
+@22
+TOP.system.core0.memAccess.scheduler_requestIn_instruction[31:0]
+TOP.system.core0.memAccess.scheduler_requestIn_address[31:0]
+TOP.system.core0.memAccess.scheduler_requestIn_branchMask[4:0]
+@1401200
+-Request
+@800200
+-Arbiter
+@c00200
+-Memory
+@28
+TOP.system.core0.memAccess.arbiter.request_request_valid
+@22
+TOP.system.core0.memAccess.arbiter.request_request_instruction[31:0]
+TOP.system.core0.memAccess.arbiter.request_request_address[31:0]
+@1401200
+-Memory
+@800200
+-Replay
+@28
+TOP.system.core0.memAccess.arbiter.replayRequest_ready
+TOP.system.core0.memAccess.arbiter.replayRequest_request_valid
+@22
+TOP.system.core0.memAccess.arbiter.replayRequest_request_address[31:0]
+TOP.system.core0.memAccess.arbiter.replayRequest_request_instruction[31:0]
+TOP.system.core0.memAccess.arbiter.replayRequest_request_cacheLine[511:0]
+@1000200
+-Replay
+-Arbiter
+@800200
+-CacheLookup
+-Request
+@28
+TOP.system.core0.memAccess.cacheLookup.request_request_valid
+@22
+TOP.system.core0.memAccess.cacheLookup.request_request_instruction[31:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_address[31:0]
+@1000200
+-Request
+@28
+TOP.system.core0.memAccess.cacheLookup.isMissWire
+@800200
+-BRAM
+@23
+TOP.system.core0.memAccess.cacheLookup.tagBRAM_rdData[91:0]
+@22
+TOP.system.core0.memAccess.cacheLookup.tagBRAM_rdAddr[6:0]
+@1000200
+-BRAM
+@28
+TOP.system.core0.memAccess.cacheLookup.toReplay_ready
+TOP.system.core0.memAccess.cacheLookup.toReplay_request_valid
+@22
+TOP.system.core0.memAccess.cacheLookup.toReplay_request_instruction[31:0]
+TOP.system.core0.memAccess.cacheLookup.toReplay_request_address[31:0]
+@1000200
+-CacheLookup
+[pattern_trace] 1
+[pattern_trace] 0

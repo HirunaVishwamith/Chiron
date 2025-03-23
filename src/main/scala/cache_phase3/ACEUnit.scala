@@ -167,7 +167,7 @@ class ACEUnit(
     is(writeRequestState){
       bus.AWVALID := true.B
       bus.AWID := id.U
-      bus.AWADDR := Cat(writeBuffer.address(addrWidth - 1, log2Ceil(lineSize*8)), 0.U(log2Ceil(lineSize*8).W))
+      bus.AWADDR := Cat(writeBuffer.address(addrWidth - 1, log2Ceil(lineSize)), 0.U(log2Ceil(lineSize).W))
       bus.AWLEN := length.U
       bus.AWSIZE := size.U
       bus.AWBURST := "b01".U
@@ -212,7 +212,7 @@ class ACEUnit(
     is(readRequestState){
       bus.ARVALID := true.B
       bus.ARID := id.U
-      bus.ARADDR := Cat(readBuffer.address(addrWidth - 1, log2Ceil(lineSize*8)), 0.U(log2Ceil(lineSize*8).W))
+      bus.ARADDR := Cat(readBuffer.address(addrWidth - 1, log2Ceil(lineSize)), 0.U(log2Ceil(lineSize).W))
       bus.ARLEN := length.U
       bus.ARSIZE := size.U
       bus.ARBURST := "b01".U
