@@ -123,10 +123,14 @@ class arbiter extends Module {
         } .elsewhen(operationWires.isLR){
           inorderBuffer := operationBuffer
           operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
-                                commitReadyState, idleState)
+                                waitState, idleState)
         } .elsewhen(operationWires.isSC){
+          inorderBuffer := operationBuffer
+          inorderBuffer.writeEn := false.B
           operationState := hollowState
         } .elsewhen(operationWires.rAtomics){
+          inorderBuffer := operationBuffer
+          inorderBuffer.writeEn := false.B
           operationState := waitState
         } .otherwise{
           operationBuffer.valid := false.B
@@ -148,15 +152,11 @@ class arbiter extends Module {
         operationState := idleState
       }
     }
-    is(hollowState){
-      inorderBuffer <> operationBuffer
-      inorderBuffer.writeEn := false.B
+    is(hollowState){ 
       operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
                                 commitReadyState, hollowState)
     }
     is(waitState){
-      inorderBuffer <> operationBuffer
-      inorderBuffer.writeEn := false.B
       operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
                                 commitReadyState, waitState)
     }
