@@ -75,11 +75,13 @@ class Scheduler extends Module{
         speculativeQueue.read.ready:= !speculativeQueue.isEmpty
         controlSignal.isSpeculative := true.B
         requestOut := speculativeQueue.read.data
+        requestOut.valid := !speculativeQueue.isEmpty
       }
       is("b10".U){
         inorderQueue.read.ready := !inorderQueue.isEmpty && !inorderQueue.read.data.branchMask(3,0).orR
         controlSignal.isSpeculative  := false.B
         requestOut := inorderQueue.read.data
+        requestOut.valid := !inorderQueue.isEmpty  && !inorderQueue.read.data.branchMask(3,0).orR
       }
       is("b11".U){
         when(speculativeBranchResolved|| speculativeBranchInvalidated){

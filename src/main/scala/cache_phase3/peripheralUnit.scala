@@ -217,12 +217,13 @@ class peripheralUnit(
       readAXIResponseState := Mux(peripheralMSHR.read.data.valid, readResponseState, readDataInState)
     }
     is(readResponseState){
-      bus.RREADY := !responseOutBuffer.valid
+      bus.RREADY := true.B
       when(bus.RVALID & bus.RID === id.U){
         readCounter.incrm := true.B
         readDataVec(readCounter.count) := bus.RDATA
         responseValid := Mux(bus.RRESP === "b00".U, responseValid, false.B)
       }
+      responseOutBuffer.valid := bus.RLAST && bus.RVALID && responseValid
       readAXIResponseState := Mux(bus.RLAST && bus.RVALID && responseValid, readDataOutState, readResponseState)
     }
     is(readDataOutState){
@@ -245,7 +246,7 @@ class peripheralUnit(
         is("b11".U){responseOutBuffer.result := Mux(responseOutBuffer.instruction(14),"x0".U,
                                       doubleWordChoosen)}
       }
-      responseOutBuffer.valid := true.B
+      responseOutBuffer.valid := !responseOut.ready
       readAXIResponseState := Mux(responseOut.ready, readDataInState, readDataOutState)
     }
   }
