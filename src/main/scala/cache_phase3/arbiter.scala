@@ -252,6 +252,7 @@ class arbiter extends Module {
       toCacheLookup.request.instruction := speculativeBuffer.instruction
       toCacheLookup.request.robAddr := speculativeBuffer.robAddr
       toCacheLookup.request.prfDest := speculativeBuffer.prfDest
+      toCacheLookup.request.branchMask := speculativeBuffer.branchMask
       toCacheLookup.request.writeEn :=  false.B
       toCacheLookup.request.writeData :=  0.U
       toCacheLookup.request.requestType := "b01".U
