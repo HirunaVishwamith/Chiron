@@ -17,7 +17,7 @@ fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-amoswap_d.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-amoswap_w.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-amoxor_d.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-amoxor_w.bin: test pass
-fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-lrsc.bin: test fail
+fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-lrsc.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-add.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-addi.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-addiw.bin: test pass

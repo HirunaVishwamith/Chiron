@@ -6,6 +6,7 @@ import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import cache_phase3._
 import cache_phase3.ChiselUtils._
+import os.size
 
 //? After compiling
 //TODO : In replay requests data not required field assertted then should not update cacheline
@@ -335,13 +336,13 @@ class cacheLookupUnit extends Module{
         newShareBitWire := Mux(readBuffer.response(0) && !isMissWire, 1.U, shareBitWire)
       }
     }
-    val isReservationMatch = WireDefault(false.B)
-    when(reservationRegister.reserved && (isCoherentWire || isWriteWire ||  isAtmoicWriteWire || isSCWire)){
+    val isReservationMatch32 = WireDefault((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))
+    val isReservationMatch64 = WireDefault((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))
+    val isReservationMatch = Mux(reservationRegister.size.asBool, isReservationMatch64, isReservationMatch32)
+    when(reservationRegister.reserved && (isCoherentWire || isWriteWire ||  isAtmoicWriteWire)){
       switch(reservationRegister.size){
-        is(0.U){isReservationMatch := ((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))
-                  reservationRegister.reserved := !isReservationMatch && !isSCReadWire}  
-        is(1.U){isReservationMatch := ((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))
-                  reservationRegister.reserved := !isReservationMatch && !isSCReadWire}     
+        is(0.U){reservationRegister.reserved := !isReservationMatch32}  
+        is(1.U){reservationRegister.reserved := !isReservationMatch64}     
       }
     }
 
@@ -477,9 +478,11 @@ class cacheLookupUnit extends Module{
     lastMissRecordRegister.prfDest := readBuffer.prfDest
 
     //Reservation register
-    reservationRegister.reserved := toReservationRegisterWire
-    reservationRegister.address := readBuffer.address
-    reservationRegister.size := readBuffer.instruction(12)
+    when(toReservationRegisterWire){
+      reservationRegister.reserved := toReservationRegisterWire
+      reservationRegister.address := readBuffer.address
+      reservationRegister.size := readBuffer.instruction(12)
+    }
   }
   when(branchOps.valid){
     //If pipeline is running, Only need to update the output buffers when getting updated
