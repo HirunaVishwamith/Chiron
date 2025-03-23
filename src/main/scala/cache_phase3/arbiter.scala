@@ -122,8 +122,7 @@ class arbiter extends Module {
           operationState := commitReadyState
         } .elsewhen(operationWires.isLR){
           inorderBuffer := operationBuffer
-          operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
-                                waitState, idleState)
+          operationState := waitState
         } .elsewhen(operationWires.isSC){
           inorderBuffer := operationBuffer
           inorderBuffer.writeEn := false.B

@@ -152,12 +152,10 @@ class CacheModule (
     RegNext(RegNext(!cacheLookup.request.holdInOrder))
     //* inorder signal is delayed by two clock cycles so all operations are done
   )
-  when(!canInititatedFenceReg){
-    canInititatedFenceReg := initiateFence
-  }
-  when(canInititatedFenceReg && subModulesReady){
-    fenceInititatedReg := true.B
-  }
+  canInititatedFenceReg := Mux(!canInititatedFenceReg, initiateFence, canInititatedFenceReg)
+
+  fenceInititatedReg := canInititatedFenceReg && subModulesReady
+  
   when(fenceInititatedReg){
     fenceInstructions.ready := true.B
     canAllocate := false.B

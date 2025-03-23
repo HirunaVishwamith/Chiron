@@ -332,16 +332,16 @@ class cacheLookupUnit extends Module{
         newShareBitWire := 0.U
         newDirtyBitWire := 0.U
       } .otherwise{
-        newShareBitWire := Mux(readBuffer.response(0), 1.U, tagChunks(hitTagWire)(tagSize + 2))
+        newShareBitWire := Mux(readBuffer.response(0) && !isMissWire, 1.U, shareBitWire)
       }
     }
     val isReservationMatch = WireDefault(false.B)
-    when(reservationRegister.reserved && (isCoherentWire || isWriteWire ||  isAtmoicWriteWire || isSCWriteWire)){
+    when(reservationRegister.reserved && (isCoherentWire || isWriteWire ||  isAtmoicWriteWire || isSCWire)){
       switch(reservationRegister.size){
-        is(0.U){reservationRegister.reserved := !((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))
-                    isReservationMatch := ((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))}
-        is(1.U){reservationRegister.reserved := !((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))
-                    isReservationMatch := ((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))}
+        is(0.U){isReservationMatch := ((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))
+                  reservationRegister.reserved := !isReservationMatch && !isSCReadWire}  
+        is(1.U){isReservationMatch := ((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))
+                  reservationRegister.reserved := !isReservationMatch && !isSCReadWire}     
       }
     }
 
@@ -394,7 +394,6 @@ class cacheLookupUnit extends Module{
     }
     when(isSCReadWire){toMemoryResponseValidWire := true.B}
     when(isSCWriteWire){
-      toMemoryResponseValidWire := true.B
       reservationRegister.reserved := false.B
       when(reservationRegister.reserved && isReservationMatch){
         toWriteBackValidWire := dirtyBitWire && isMissWire
@@ -431,13 +430,10 @@ class cacheLookupUnit extends Module{
       is("b11".U){responseResultWire := Mux(readBuffer.instruction(14),"x0".U,
                                     doubleWordChoosen)}
     }
-    when(isSCWriteWire){
+    when(isSCReadWire){
       responseResultWire := Mux(reservationRegister.reserved && isReservationMatch, 0.U, 1.U)
     } 
-    when(isSCReadWire){
-      responseResultWire := 0.U
-    }
-    
+
     //____________________Output Buffer update___________________//
     //Replay
     replayBuffer.valid := toReplayValidWire
@@ -462,7 +458,7 @@ class cacheLookupUnit extends Module{
     when(readBuffer.response(0)){
       coherencyResponseBuffer.data := Mux(!isMissWire, dataBRAMVec(hitTagWire).rdData, 0.U)
       coherencyResponseBuffer.dataValid := !isMissWire
-      coherencyResponseBuffer.response := Mux(readBuffer.response(1), !dirtyBitWire, 1.U) ## !shareBitWire
+      coherencyResponseBuffer.response := Mux(readBuffer.response(1), !dirtyBitWire, 1.U) ## !newShareBitWire
     } .otherwise{
       coherencyResponseBuffer.data := 0.U
       coherencyResponseBuffer.dataValid := false.B
