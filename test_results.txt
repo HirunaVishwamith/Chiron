@@ -31,7 +31,7 @@ fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-bgeu.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-blt.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-bltu.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-bne.bin: test pass
-fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-fence_i.bin: test fail
+fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-fence_i.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-jal.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-jalr.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lb.bin: test pass

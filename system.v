@@ -42188,29 +42188,28 @@ module ACEUnit(
   wire [63:0] writeChunks_1_5 = coherencyResponseBuffer_data[383:320]; // @[ACEUnit.scala 320:37]
   wire [63:0] writeChunks_1_6 = coherencyResponseBuffer_data[447:384]; // @[ACEUnit.scala 320:37]
   wire [63:0] writeChunks_1_7 = coherencyResponseBuffer_data[511:448]; // @[ACEUnit.scala 320:37]
-  wire [63:0] _GEN_168 = 3'h1 == coherentCounter_count ? writeChunks_1_1 : writeChunks_1_0; // @[ACEUnit.scala 323:{20,20}]
-  wire [63:0] _GEN_169 = 3'h2 == coherentCounter_count ? writeChunks_1_2 : _GEN_168; // @[ACEUnit.scala 323:{20,20}]
-  wire [63:0] _GEN_170 = 3'h3 == coherentCounter_count ? writeChunks_1_3 : _GEN_169; // @[ACEUnit.scala 323:{20,20}]
-  wire [63:0] _GEN_171 = 3'h4 == coherentCounter_count ? writeChunks_1_4 : _GEN_170; // @[ACEUnit.scala 323:{20,20}]
-  wire [63:0] _GEN_172 = 3'h5 == coherentCounter_count ? writeChunks_1_5 : _GEN_171; // @[ACEUnit.scala 323:{20,20}]
-  wire [63:0] _GEN_173 = 3'h6 == coherentCounter_count ? writeChunks_1_6 : _GEN_172; // @[ACEUnit.scala 323:{20,20}]
-  wire [63:0] _GEN_174 = 3'h7 == coherentCounter_count ? writeChunks_1_7 : _GEN_173; // @[ACEUnit.scala 323:{20,20}]
-  wire [63:0] _GEN_175 = bus_CDREADY ? _GEN_174 : 64'h0; // @[ACEUnit.scala 105:14 322:24 323:20]
+  wire [63:0] _GEN_169 = 3'h1 == coherentCounter_count ? writeChunks_1_1 : writeChunks_1_0; // @[ACEUnit.scala 325:{18,18}]
+  wire [63:0] _GEN_170 = 3'h2 == coherentCounter_count ? writeChunks_1_2 : _GEN_169; // @[ACEUnit.scala 325:{18,18}]
+  wire [63:0] _GEN_171 = 3'h3 == coherentCounter_count ? writeChunks_1_3 : _GEN_170; // @[ACEUnit.scala 325:{18,18}]
+  wire [63:0] _GEN_172 = 3'h4 == coherentCounter_count ? writeChunks_1_4 : _GEN_171; // @[ACEUnit.scala 325:{18,18}]
+  wire [63:0] _GEN_173 = 3'h5 == coherentCounter_count ? writeChunks_1_5 : _GEN_172; // @[ACEUnit.scala 325:{18,18}]
+  wire [63:0] _GEN_174 = 3'h6 == coherentCounter_count ? writeChunks_1_6 : _GEN_173; // @[ACEUnit.scala 325:{18,18}]
+  wire [63:0] _GEN_175 = 3'h7 == coherentCounter_count ? writeChunks_1_7 : _GEN_174; // @[ACEUnit.scala 325:{18,18}]
   wire [1:0] _coherentAXIState_T_4 = bus_CDLAST & bus_CDREADY ? 2'h0 : 2'h3; // @[ACEUnit.scala 328:30]
-  wire [63:0] _GEN_178 = 2'h3 == coherentAXIState ? _GEN_175 : 64'h0; // @[ACEUnit.scala 105:14 286:27]
-  wire  _GEN_180 = 2'h3 == coherentAXIState & coherentCounter_count == 3'h7; // @[ACEUnit.scala 106:14 286:27 326:18]
-  wire [1:0] _GEN_181 = 2'h3 == coherentAXIState ? _coherentAXIState_T_4 : coherentAXIState; // @[ACEUnit.scala 286:27 328:24 282:33]
-  wire [4:0] _GEN_183 = 2'h2 == coherentAXIState ? _bus_CRRESP_T_5 : 5'h0; // @[ACEUnit.scala 102:14 286:27 307:18]
-  wire  _GEN_185 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState; // @[ACEUnit.scala 104:15 286:27]
+  wire [63:0] _GEN_178 = 2'h3 == coherentAXIState ? _GEN_175 : 64'h0; // @[ACEUnit.scala 105:14 286:27 325:18]
+  wire  _GEN_179 = 2'h3 == coherentAXIState & coherentCounter_count == 3'h7; // @[ACEUnit.scala 106:14 286:27 326:18]
+  wire [1:0] _GEN_180 = 2'h3 == coherentAXIState ? _coherentAXIState_T_4 : coherentAXIState; // @[ACEUnit.scala 286:27 328:24 282:33]
+  wire [4:0] _GEN_182 = 2'h2 == coherentAXIState ? _bus_CRRESP_T_5 : 5'h0; // @[ACEUnit.scala 102:14 286:27 307:18]
+  wire  _GEN_184 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState; // @[ACEUnit.scala 104:15 286:27]
+  wire  _GEN_185 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState & bus_CDREADY; // @[ACEUnit.scala 284:25 286:27]
   wire [63:0] _GEN_186 = 2'h2 == coherentAXIState ? 64'h0 : _GEN_178; // @[ACEUnit.scala 105:14 286:27]
-  wire  _GEN_187 = 2'h2 == coherentAXIState ? 1'h0 : 2'h3 == coherentAXIState & bus_CDREADY; // @[ACEUnit.scala 284:25 286:27]
-  wire  _GEN_188 = 2'h2 == coherentAXIState ? 1'h0 : _GEN_180; // @[ACEUnit.scala 106:14 286:27]
-  wire  _GEN_191 = 2'h1 == coherentAXIState ? 1'h0 : 2'h2 == coherentAXIState; // @[ACEUnit.scala 101:15 286:27]
-  wire [4:0] _GEN_192 = 2'h1 == coherentAXIState ? 5'h0 : _GEN_183; // @[ACEUnit.scala 102:14 286:27]
-  wire  _GEN_193 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_185; // @[ACEUnit.scala 104:15 286:27]
+  wire  _GEN_187 = 2'h2 == coherentAXIState ? 1'h0 : _GEN_179; // @[ACEUnit.scala 106:14 286:27]
+  wire  _GEN_190 = 2'h1 == coherentAXIState ? 1'h0 : 2'h2 == coherentAXIState; // @[ACEUnit.scala 101:15 286:27]
+  wire [4:0] _GEN_191 = 2'h1 == coherentAXIState ? 5'h0 : _GEN_182; // @[ACEUnit.scala 102:14 286:27]
+  wire  _GEN_192 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_184; // @[ACEUnit.scala 104:15 286:27]
+  wire  _GEN_193 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_185; // @[ACEUnit.scala 284:25 286:27]
   wire [63:0] _GEN_194 = 2'h1 == coherentAXIState ? 64'h0 : _GEN_186; // @[ACEUnit.scala 105:14 286:27]
-  wire  _GEN_195 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_187; // @[ACEUnit.scala 284:25 286:27]
-  wire  _GEN_196 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_188; // @[ACEUnit.scala 106:14 286:27]
+  wire  _GEN_195 = 2'h1 == coherentAXIState ? 1'h0 : _GEN_187; // @[ACEUnit.scala 106:14 286:27]
   fifoWithBranchOpsII ACEMSHR ( // @[ACEUnit.scala 132:23]
     .clock(ACEMSHR_clock),
     .reset(ACEMSHR_reset),
@@ -42284,11 +42283,11 @@ module ACEUnit(
   assign bus_AWSNOOP = {{1'd0}, _GEN_41};
   assign bus_ARSNOOP = {{1'd0}, _GEN_89};
   assign bus_ACREADY = 2'h0 == coherentAXIState; // @[ACEUnit.scala 286:27]
-  assign bus_CRVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_191; // @[ACEUnit.scala 101:15 286:27]
-  assign bus_CRRESP = 2'h0 == coherentAXIState ? 5'h0 : _GEN_192; // @[ACEUnit.scala 102:14 286:27]
-  assign bus_CDVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_193; // @[ACEUnit.scala 104:15 286:27]
+  assign bus_CRVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_190; // @[ACEUnit.scala 101:15 286:27]
+  assign bus_CRRESP = 2'h0 == coherentAXIState ? 5'h0 : _GEN_191; // @[ACEUnit.scala 102:14 286:27]
+  assign bus_CDVALID = 2'h0 == coherentAXIState ? 1'h0 : _GEN_192; // @[ACEUnit.scala 104:15 286:27]
   assign bus_CDDATA = 2'h0 == coherentAXIState ? 64'h0 : _GEN_194; // @[ACEUnit.scala 105:14 286:27]
-  assign bus_CDLAST = 2'h0 == coherentAXIState ? 1'h0 : _GEN_196; // @[ACEUnit.scala 106:14 286:27]
+  assign bus_CDLAST = 2'h0 == coherentAXIState ? 1'h0 : _GEN_195; // @[ACEUnit.scala 106:14 286:27]
   assign ACEMSHR_clock = clock;
   assign ACEMSHR_reset = reset;
   assign ACEMSHR_write_data_valid = ~readACERequestState ? 1'h0 : readACERequestState & _GEN_63; // @[ACEUnit.scala 208:31 utils.scala 47:41]
@@ -42310,8 +42309,8 @@ module ACEUnit(
   assign readCounter_reset = 2'h0 == readACEResponseState; // @[ACEUnit.scala 249:32]
   assign readCounter_incrm = 2'h0 == readACEResponseState ? 1'h0 : 2'h1 == readACEResponseState & bus_RVALID; // @[ACEUnit.scala 247:21 249:32]
   assign coherentCounter_clock = clock;
-  assign coherentCounter_reset = 2'h0 == coherentAXIState ? 1'h0 : _GEN_191; // @[ACEUnit.scala 101:15 286:27]
-  assign coherentCounter_incrm = 2'h0 == coherentAXIState ? 1'h0 : _GEN_195; // @[ACEUnit.scala 284:25 286:27]
+  assign coherentCounter_reset = 2'h0 == coherentAXIState ? 1'h0 : _GEN_190; // @[ACEUnit.scala 101:15 286:27]
+  assign coherentCounter_incrm = 2'h0 == coherentAXIState ? 1'h0 : _GEN_193; // @[ACEUnit.scala 284:25 286:27]
   always @(posedge clock) begin
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_valid <= 1'h0; // @[ACEUnit.scala 108:28]
@@ -42623,7 +42622,7 @@ module ACEUnit(
     end else if (2'h2 == coherentAXIState) begin // @[ACEUnit.scala 286:27]
       coherentAXIState <= _GEN_166;
     end else begin
-      coherentAXIState <= _GEN_181;
+      coherentAXIState <= _GEN_180;
     end
   end
 // Register and memory initialization

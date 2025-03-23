@@ -188,9 +188,9 @@ class ACEUnit(
         writeBuffer.data((i + 1) * busWidth - 1, i * busWidth)
       ))
       when(bus.WREADY && bus.AWREADY){
-        bus.WDATA := writeChunks(writeCounter.count)
         writeCounter.incrm := true.B 
       }
+      bus.WDATA := writeChunks(writeCounter.count)
       writeACEState := Mux(bus.WLAST && bus.WREADY && bus.AWREADY, writeResponseState, writeRequestState)
     }
     is(writeResponseState){
@@ -320,9 +320,9 @@ class ACEUnit(
         coherencyResponseBuffer.data((i + 1) * busWidth - 1, i * busWidth)
       ))
       when(bus.CDREADY){
-        bus.CDDATA := writeChunks(coherentCounter.count)
         coherentCounter.incrm := true.B 
       }
+      bus.CDDATA := writeChunks(coherentCounter.count)
       bus.CDLAST := coherentCounter.count === length.U
 
       coherentAXIState := Mux(bus.CDLAST && bus.CDREADY, coherentIdleState, coherentDataOutState)
