@@ -1,5 +1,5 @@
 fyp18-riscv-emulator/riscv-tests/images/rv64mi-p-mcsr.bin: test pass
-fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-amoadd_d.bin: test fail
+fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-amoadd_d.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-amoadd_w.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-amoand_d.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ua-p-amoand_w.bin: test pass

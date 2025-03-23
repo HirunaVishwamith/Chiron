@@ -6,6 +6,7 @@ import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import dataclass.data
 import cache_phase3.ChiselUtils.zeroInit
+import os.truncate
 
 //TODO : For now only readUnique is used, rest will be added later
 //TODO : Add seperate field for data received for clairty in readresponse
@@ -148,7 +149,7 @@ class ACEUnit(
 
   val coherencyResponseBuffer = RegInit(0.U.asTypeOf(new coherencyResponseWire))
   coherencyResponse.ready := !coherencyResponseBuffer.valid
-  coherencyResponseBuffer := coherencyResponse.request
+  coherencyResponseBuffer := Mux(!coherencyResponseBuffer.valid ,coherencyResponse.request, coherencyResponseBuffer)
 
   //-----------------------AXI Write-------------------------------//
   val writeIdleState :: writeRequestState :: writeResponseState :: Nil = Enum(3)
@@ -285,6 +286,7 @@ class ACEUnit(
   switch(coherentAXIState){
     is(coherentIdleState){
       bus.ACREADY := true.B
+      coherencyResponseBuffer.valid := false.B
       val coherencyReceived = bus.ACVALID && bus.ACPROT === dPort_PROT.U
       coherencyRequestBuffer.valid := coherencyReceived
       coherencyRequestBuffer.address := bus.ACADDR
@@ -293,21 +295,16 @@ class ACEUnit(
       coherentAXIState := Mux(coherencyReceived , coherentRequestState, coherentIdleState)
     }
     is(coherentRequestState){
-      when(coherencyRequest.ready){
-        coherencyRequestBuffer.valid:= false.B
-      }
-      coherencyResponse.ready := true.B
-      when(coherencyResponse.request.valid) {
-        coherencyResponseBuffer := coherencyResponse.request
-      }
+      coherencyRequestBuffer.valid:= Mux(coherencyRequestBuffer.valid && coherencyRequest.ready, false.B, coherencyRequestBuffer.valid)
+      
       coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestState)
     }
     is(coherentResponseState){
       bus.CRVALID := true.B
 
       coherentCounter.reset := true.B
-
-      bus.CRRESP := Mux(coherencyResponseBuffer.valid, Cat(0.U(1.W), !coherencyResponseBuffer.response(0), !coherencyResponseBuffer.response(1) , 0.U(1.W), responseValidReg.asUInt),
+      //TODO : Check on the correct response
+      bus.CRRESP := Mux(coherencyResponseBuffer.valid, Cat(0.U(1.W), !coherencyResponseBuffer.response(0), !coherencyResponseBuffer.response(1) , 0.U(1.W), coherencyResponseBuffer.dataValid.asUInt),
                         0.U)
       when(bus.CRREADY){
         coherentAXIState := Mux(coherencyResponseBuffer.dataValid, coherentDataOutState, coherentIdleState)    
@@ -327,7 +324,6 @@ class ACEUnit(
         coherentCounter.incrm := true.B 
       }
       bus.CDLAST := coherentCounter.count === length.U
-      coherencyResponseBuffer.valid := !(bus.CDLAST && bus.CDREADY)
 
       coherentAXIState := Mux(bus.CDLAST && bus.CDREADY, coherentIdleState, coherentDataOutState)
     }
