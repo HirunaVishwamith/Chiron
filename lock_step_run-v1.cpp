@@ -97,21 +97,12 @@ int main(int argc, char* argv[]) {
   golden_model.step(); */
   #ifdef LOGGING
   std::ofstream outFile("run.log"); // This will create or overwrite the file
-  std::ofstream outState("states.log");
-
 
   // Check if the file is open
   if (!outFile.is_open()) {
     std::cerr << "Error opening the file." << std::endl;
     return 1;
   }
-
-  if (!outState.is_open()) {
-    std::cerr << "Error opening the file." << std::endl;
-    return 1;
-  }
-
-
   #endif
   /* std::ifstream inputFile("resources/symbol_names.txt");
 
@@ -190,10 +181,6 @@ int main(int argc, char* argv[]) {
     outFile <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << " ";
     outFile <<  setfill('0') << setw(16) << hex << golden_model.fetch_long(PROBE_DOUBLE) << " ";
     outFile <<  setfill('0') << setw(16) << hex << bench.get_probe() << endl;
-
-
-    outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
-    outState << golden_model.return_state();
     /* switch (golden_model.check_for_mem_access(&mem_address, &data))
     {
     case 1:
@@ -341,25 +328,12 @@ int main(int argc, char* argv[]) {
     }
     
   }
-  
-
-  printf("Test failed: Time-out!\n");
-  printf("Total ticks: %ld \n", (bench.tickcount+bench.dump_tick));
-  printf("The next instruction should be: \n");
-  golden_model.step();
-  outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
-  outState << golden_model.return_state();
-
-  printf("The next instruction should be: \n");
-  golden_model.step();
-  outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
-  outState << golden_model.return_state();
-  
-
   #ifdef LOGGING
   outFile.close();
   #endif
 
+  printf("Test failed: Time-out!\n");
+  printf("Total ticks: %ld \n", (bench.tickcount+bench.dump_tick));
   // disable_raw_mode();
   tcflush(0, TCIFLUSH); 
 

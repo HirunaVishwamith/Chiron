@@ -958,32 +958,6 @@ public:
 		freg_file[24], freg_file[25], freg_file[26], freg_file[27], freg_file[28], freg_file[29], freg_file[30], freg_file[31]);
 	}
 
-	std::string return_state() {
-    	
-		std::ostringstream out;
-
-    	// Print control/status registers
-		out << "pc: " << std::hex << std::setw(16) << std::setfill('0') << PC
-			<< " mstatus: " << std::hex << std::setw(16) << std::setfill('0') << mstatus.read_reg()
-			<< " mie: " << std::hex << std::setw(16) << std::setfill('0') << mie.read_reg()
-			<< " mcause: " << std::hex << std::setw(16) << std::setfill('0') << mcause.read_reg()
-			<< " mepc: " << std::hex << std::setw(16) << std::setfill('0') << mepc
-			<< " rx_ready: " << 1 << "\n";
-
-		// Print general-purpose registers (GPRs)
-		for (int i = 0; i < 32; i++) {
-    		out << "x" << std::setw(2) << std::setfill('0') << std::dec << i << ": "
-        	<< std::hex << std::setw(16) << std::setfill('0') << reg_file[i] << " ";
-    		if ((i + 1) % 8 == 0) out << "\n";
-		}
-
-
-		out << "\n \n";
-
-		return out.str();
-
-	}
-
 	__uint64_t get_pc() {
 		DEBUG_LOG("fetching PC for cross checking:", PC); 
 		return PC; 

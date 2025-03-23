@@ -102,6 +102,8 @@ class arbiter extends Module {
     val isLR = Bool()
     val isSC = Bool()
     val rAtomics = Bool()
+    val isPeriRead = Bool()
+    val isPeriWrite = Bool()
   })
   operationWires := 0.U.asTypeOf(operationWires) 
   operationWires.valid := operationBuffer.valid
@@ -110,6 +112,8 @@ class arbiter extends Module {
   operationWires.rAtomics := operationBuffer.instruction(6,0) === "b0101111".U
   operationWires.isLR := operationBuffer.instruction(31,27) === "b00010".U && operationWires.rAtomics
   operationWires.isSC := operationBuffer.instruction(31,27) === "b00011".U && operationWires.rAtomics
+  operationWires.isPeriRead := operationBuffer.instruction(6,0) === "b0000011".U && operationBuffer.address === FIFO_ADDR_RX.U
+  operationWires.isPeriWrite := operationBuffer.instruction(6,0) === "b0100011".U && operationBuffer.address === FIFO_ADDR_TX.U
 
   switch(operationState){
     is(idleState){
@@ -176,7 +180,7 @@ class arbiter extends Module {
   val rAtmoicsWritePending = RegInit(false.B)
   when(toCacheLookup.ready && !branchOps.valid) {
     when(rAtmoicsWritePending){
-      when(!toCacheLookup.holdInOrder){
+      when(!toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
         toCacheLookup.request.valid := inorderBuffer.valid && inorderBuffer.branchInvalid
         toCacheLookup.request.address := inorderBuffer.address
         toCacheLookup.request.instruction := inorderBuffer.instruction
@@ -223,7 +227,7 @@ class arbiter extends Module {
       when(branchOps.valid){
         outgoingBranchUpdateData(replayRequestBuffer, branchOps, toCacheLookup.request)
       }
-    }.elsewhen(inorderBuffer.valid && !toCacheLookup.holdInOrder) {
+    }.elsewhen(inorderBuffer.valid && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
       inorderBuffer.valid := false.B
 
       toCacheLookup.request.valid := inorderBuffer.valid && !inorderBuffer.branchInvalid
@@ -264,7 +268,7 @@ class arbiter extends Module {
       toCacheLookup.request.valid := false.B
     }
   }
-  when(toPeripheral.ready) {
+  when(toPeripheral.ready && (operationWires.isPeriRead || operationWires.isPeriWrite)) {
     toPeripheral.request := inorderBuffer
     when(branchOps.valid){
         outgoingBranchUpdateInvalidate(inorderBuffer, branchOps, toCacheLookup.request)
