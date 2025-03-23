@@ -88,15 +88,15 @@ class peripheralUnit(
 
   when(requestBuffer.valid){
     request.ready := false.B
-    when(readRequestBuffer.valid && !requestBuffer.writeEn){
-      readRequestBuffer <> requestBuffer
+    when(!readRequestBuffer.valid && !requestBuffer.writeEn){
+      readRequestBuffer := requestBuffer
 
       when(branchOps.valid){
         cacheBranchWriteUpdate(readRequestBuffer,branchOps,requestBuffer)
       }
       requestBuffer.valid := false.B
     }.elsewhen(!writeRequestBuffer.valid && requestBuffer.writeEn){
-      writeRequestBuffer <> requestBuffer
+      writeRequestBuffer := requestBuffer
 
       when(branchOps.valid){
         cacheBranchWriteUpdate(writeRequestBuffer,branchOps,requestBuffer)

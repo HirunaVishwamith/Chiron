@@ -33777,6 +33777,7 @@ module arbiter(
   wire  _GEN_274 = coherencyRequestBuffer_valid ? 1'h0 : _GEN_257; // @[arbiter.scala 206:46 utils.scala 47:41]
   wire [63:0] _GEN_275 = coherencyRequestBuffer_valid ? 64'h0 : _GEN_258; // @[arbiter.scala 206:46 utils.scala 48:41]
   wire [4:0] _GEN_276 = coherencyRequestBuffer_valid ? 5'h0 : _GEN_260; // @[arbiter.scala 206:46 utils.scala 48:41]
+  wire  _GEN_277 = coherencyRequestBuffer_valid ? _GEN_155 : _GEN_261; // @[arbiter.scala 206:46]
   wire  _GEN_280 = rAtmoicsWritePending ? _GEN_197 : _GEN_265; // @[arbiter.scala 182:31]
   wire [31:0] _GEN_281 = rAtmoicsWritePending ? _GEN_198 : _GEN_266; // @[arbiter.scala 182:31]
   wire [31:0] _GEN_282 = rAtmoicsWritePending ? _GEN_199 : _GEN_270; // @[arbiter.scala 182:31]
@@ -33790,23 +33791,27 @@ module arbiter(
   wire [511:0] _GEN_293 = rAtmoicsWritePending ? 512'h0 : _GEN_273; // @[arbiter.scala 182:31 utils.scala 48:41]
   wire  _GEN_296 = toCacheLookup_ready & ~branchOps_valid & _GEN_280; // @[arbiter.scala 181:49 utils.scala 47:41]
   wire [4:0] _GEN_299 = toCacheLookup_ready & ~branchOps_valid ? _GEN_283 : 5'h0; // @[arbiter.scala 181:49 utils.scala 48:41]
-  wire [4:0] _GEN_316 = branchOps_valid ? _GEN_193 : _GEN_299; // @[arbiter.scala 273:26]
-  wire  _GEN_317 = branchOps_valid ? _GEN_194 : _GEN_296; // @[arbiter.scala 273:26]
-  wire  _fenceReady_T_4 = _request_speculativeReady_T & ~inorderBuffer_valid & ~operationBuffer_valid; // @[arbiter.scala 277:67]
+  wire [4:0] _GEN_316 = branchOps_valid ? _GEN_193 : _GEN_299; // @[arbiter.scala 274:26]
+  wire  _GEN_317 = branchOps_valid ? _GEN_194 : _GEN_296; // @[arbiter.scala 274:26]
+  wire  _fenceReady_T_4 = _request_speculativeReady_T & ~inorderBuffer_valid & ~operationBuffer_valid; // @[arbiter.scala 278:67]
   assign request_inorderReady = ~(operationBuffer_valid | inorderBuffer_valid); // @[arbiter.scala 67:27]
   assign request_speculativeReady = ~speculativeBuffer_valid; // @[arbiter.scala 66:31]
-  assign toPeripheral_request_valid = toPeripheral_ready & _T_33 & inorderBuffer_valid; // @[arbiter.scala 271:89 272:26 utils.scala 47:41]
-  assign toPeripheral_request_address = toPeripheral_ready & _T_33 ? inorderBuffer_address : 32'h0; // @[arbiter.scala 271:89 272:26 utils.scala 48:41]
-  assign toPeripheral_request_instruction = toPeripheral_ready & _T_33 ? inorderBuffer_instruction : 32'h0; // @[arbiter.scala 271:89 272:26 utils.scala 48:41]
-  assign toPeripheral_request_branchMask = toPeripheral_ready & _T_33 ? inorderBuffer_branchMask : 5'h0; // @[arbiter.scala 271:89 272:26 utils.scala 48:41]
-  assign toPeripheral_request_robAddr = toPeripheral_ready & _T_33 ? inorderBuffer_robAddr : 4'h0; // @[arbiter.scala 271:89 272:26 utils.scala 48:41]
-  assign toPeripheral_request_prfDest = toPeripheral_ready & _T_33 ? inorderBuffer_prfDest : 6'h0; // @[arbiter.scala 271:89 272:26 utils.scala 48:41]
-  assign toPeripheral_request_writeEn = toPeripheral_ready & _T_33 & inorderBuffer_writeEn; // @[arbiter.scala 271:89 272:26 utils.scala 47:41]
-  assign toPeripheral_request_writeData = toPeripheral_ready & _T_33 ? inorderBuffer_writeData : 64'h0; // @[arbiter.scala 271:89 272:26 utils.scala 48:41]
-  assign toCacheLookup_request_valid = toPeripheral_ready & _T_33 ? _GEN_317 : _GEN_296; // @[arbiter.scala 271:89]
+  assign toPeripheral_request_valid = toPeripheral_ready & _T_33 & inorderBuffer_valid & inorderBuffer_valid; // @[arbiter.scala 271:112 273:26 utils.scala 47:41]
+  assign toPeripheral_request_address = toPeripheral_ready & _T_33 & inorderBuffer_valid ? inorderBuffer_address : 32'h0
+    ; // @[arbiter.scala 271:112 273:26 utils.scala 48:41]
+  assign toPeripheral_request_instruction = toPeripheral_ready & _T_33 & inorderBuffer_valid ? inorderBuffer_instruction
+     : 32'h0; // @[arbiter.scala 271:112 273:26 utils.scala 48:41]
+  assign toPeripheral_request_branchMask = toPeripheral_ready & _T_33 & inorderBuffer_valid ? inorderBuffer_branchMask
+     : 5'h0; // @[arbiter.scala 271:112 273:26 utils.scala 48:41]
+  assign toPeripheral_request_robAddr = toPeripheral_ready & _T_33 & inorderBuffer_valid ? inorderBuffer_robAddr : 4'h0; // @[arbiter.scala 271:112 273:26 utils.scala 48:41]
+  assign toPeripheral_request_prfDest = toPeripheral_ready & _T_33 & inorderBuffer_valid ? inorderBuffer_prfDest : 6'h0; // @[arbiter.scala 271:112 273:26 utils.scala 48:41]
+  assign toPeripheral_request_writeEn = toPeripheral_ready & _T_33 & inorderBuffer_valid & inorderBuffer_writeEn; // @[arbiter.scala 271:112 273:26 utils.scala 47:41]
+  assign toPeripheral_request_writeData = toPeripheral_ready & _T_33 & inorderBuffer_valid ? inorderBuffer_writeData : 64'h0
+    ; // @[arbiter.scala 271:112 273:26 utils.scala 48:41]
+  assign toCacheLookup_request_valid = toPeripheral_ready & _T_33 & inorderBuffer_valid ? _GEN_317 : _GEN_296; // @[arbiter.scala 271:112]
   assign toCacheLookup_request_address = toCacheLookup_ready & ~branchOps_valid ? _GEN_281 : 32'h0; // @[arbiter.scala 181:49 utils.scala 48:41]
   assign toCacheLookup_request_instruction = toCacheLookup_ready & ~branchOps_valid ? _GEN_282 : 32'h0; // @[arbiter.scala 181:49 utils.scala 48:41]
-  assign toCacheLookup_request_branchMask = toPeripheral_ready & _T_33 ? _GEN_316 : _GEN_299; // @[arbiter.scala 271:89]
+  assign toCacheLookup_request_branchMask = toPeripheral_ready & _T_33 & inorderBuffer_valid ? _GEN_316 : _GEN_299; // @[arbiter.scala 271:112]
   assign toCacheLookup_request_robAddr = toCacheLookup_ready & ~branchOps_valid ? _GEN_284 : 4'h0; // @[arbiter.scala 181:49 utils.scala 48:41]
   assign toCacheLookup_request_prfDest = toCacheLookup_ready & ~branchOps_valid ? _GEN_285 : 6'h0; // @[arbiter.scala 181:49 utils.scala 48:41]
   assign toCacheLookup_request_writeEn = toCacheLookup_ready & ~branchOps_valid & _GEN_286; // @[arbiter.scala 181:49 utils.scala 47:41]
@@ -33817,7 +33822,7 @@ module arbiter(
   assign replayRequest_ready = ~replayRequestBuffer_valid; // @[arbiter.scala 92:26]
   assign coherencyRequest_ready = ~coherencyRequestBuffer_valid; // @[arbiter.scala 88:29]
   assign writeCommit_ready = 3'h0 == operationState ? 1'h0 : 3'h1 == operationState; // @[arbiter.scala 118:25 53:21]
-  assign fenceReady = _fenceReady_T_4 & _T_2; // @[arbiter.scala 278:19]
+  assign fenceReady = _fenceReady_T_4 & _T_2; // @[arbiter.scala 279:19]
   always @(posedge clock) begin
     if (reset) begin // @[arbiter.scala 56:34]
       speculativeBuffer_valid <= 1'h0; // @[arbiter.scala 56:34]
@@ -33877,13 +33882,13 @@ module arbiter(
     end
     if (reset) begin // @[arbiter.scala 58:30]
       inorderBuffer_valid <= 1'h0; // @[arbiter.scala 58:30]
+    end else if (toPeripheral_ready & _T_33 & inorderBuffer_valid) begin // @[arbiter.scala 271:112]
+      inorderBuffer_valid <= 1'h0; // @[arbiter.scala 272:25]
     end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 181:49]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 182:31]
         inorderBuffer_valid <= _GEN_155;
-      end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 206:46]
-        inorderBuffer_valid <= _GEN_155;
       end else begin
-        inorderBuffer_valid <= _GEN_261;
+        inorderBuffer_valid <= _GEN_277;
       end
     end else begin
       inorderBuffer_valid <= _GEN_155;
@@ -39965,11 +39970,11 @@ module peripheralUnit(
   reg [3:0] responseOutBuffer_robAddr; // @[peripheralUnit.scala 73:34]
   reg [63:0] responseOutBuffer_result; // @[peripheralUnit.scala 73:34]
   reg [31:0] responseOutBuffer_instruction; // @[peripheralUnit.scala 73:34]
-  wire [4:0] _T_2 = requestBuffer_branchMask & branchOps_branchMask; // @[utils.scala 176:32]
-  wire  _T_3 = |_T_2; // @[utils.scala 176:56]
+  wire [4:0] _T_3 = requestBuffer_branchMask & branchOps_branchMask; // @[utils.scala 176:32]
+  wire  _T_4 = |_T_3; // @[utils.scala 176:56]
   wire [4:0] _readRequestBuffer_branchMask_T = requestBuffer_branchMask ^ branchOps_branchMask; // @[utils.scala 177:49]
-  wire [4:0] _GEN_0 = |_T_2 ? _readRequestBuffer_branchMask_T : requestBuffer_branchMask; // @[utils.scala 176:61 177:27 peripheralUnit.scala 92:25]
-  wire  _GEN_1 = _T_3 ? 1'h0 : requestBuffer_valid; // @[utils.scala 181:61 182:22 peripheralUnit.scala 92:25]
+  wire [4:0] _GEN_0 = |_T_3 ? _readRequestBuffer_branchMask_T : requestBuffer_branchMask; // @[utils.scala 176:61 177:27 peripheralUnit.scala 92:25]
+  wire  _GEN_1 = _T_4 ? 1'h0 : requestBuffer_valid; // @[utils.scala 181:61 182:22 peripheralUnit.scala 92:25]
   wire [4:0] _GEN_2 = branchOps_passed ? _GEN_0 : requestBuffer_branchMask; // @[utils.scala 174:28 peripheralUnit.scala 92:25]
   wire  _GEN_3 = branchOps_passed ? requestBuffer_valid : _GEN_1; // @[utils.scala 174:28 peripheralUnit.scala 92:25]
   wire [4:0] _GEN_4 = branchOps_passed ? requestBuffer_branchMask : readRequestBuffer_branchMask; // @[utils.scala 174:28 peripheralUnit.scala 69:30 utils.scala 184:26]
@@ -39978,15 +39983,15 @@ module peripheralUnit(
   wire [4:0] _GEN_12 = branchOps_passed ? requestBuffer_branchMask : writeRequestBuffer_branchMask; // @[utils.scala 174:28 peripheralUnit.scala 69:30 utils.scala 184:26]
   wire [4:0] _GEN_15 = branchOps_valid ? _GEN_12 : requestBuffer_branchMask; // @[peripheralUnit.scala 101:28 69:30]
   wire  _GEN_16 = ~writeRequestBuffer_valid & requestBuffer_writeEn ? _GEN_6 : writeRequestBuffer_valid; // @[peripheralUnit.scala 71:35 98:67]
-  wire  _GEN_26 = readRequestBuffer_valid & ~requestBuffer_writeEn ? _GEN_6 : readRequestBuffer_valid; // @[peripheralUnit.scala 70:34 91:60]
-  wire  _GEN_36 = readRequestBuffer_valid & ~requestBuffer_writeEn ? writeRequestBuffer_valid : _GEN_16; // @[peripheralUnit.scala 71:35 91:60]
+  wire  _GEN_26 = ~readRequestBuffer_valid & ~requestBuffer_writeEn ? _GEN_6 : readRequestBuffer_valid; // @[peripheralUnit.scala 70:34 91:61]
+  wire  _GEN_36 = ~readRequestBuffer_valid & ~requestBuffer_writeEn ? writeRequestBuffer_valid : _GEN_16; // @[peripheralUnit.scala 71:35 91:61]
   wire  _GEN_53 = requestBuffer_valid ? _GEN_26 : readRequestBuffer_valid; // @[peripheralUnit.scala 89:28 70:34]
   wire  _GEN_63 = requestBuffer_valid ? _GEN_36 : writeRequestBuffer_valid; // @[peripheralUnit.scala 89:28 71:35]
   reg [1:0] writeAXIState; // @[peripheralUnit.scala 116:30]
   wire [7:0] _GEN_18 = {{7'd0}, writeCounter_count}; // @[peripheralUnit.scala 141:39]
   wire [31:0] writeChunks_0 = writeRequestBuffer_writeData[31:0]; // @[peripheralUnit.scala 145:37]
   wire [31:0] writeChunks_1 = writeRequestBuffer_writeData[63:32]; // @[peripheralUnit.scala 145:37]
-  wire  _T_14 = bus_WREADY & bus_AWREADY; // @[peripheralUnit.scala 147:23]
+  wire  _T_15 = bus_WREADY & bus_AWREADY; // @[peripheralUnit.scala 147:23]
   wire [31:0] _GEN_78 = writeCounter_count ? writeChunks_1 : writeChunks_0; // @[peripheralUnit.scala 148:{19,19}]
   wire [31:0] _GEN_79 = bus_WREADY & bus_AWREADY ? _GEN_78 : 32'h0; // @[peripheralUnit.scala 147:38 148:19 48:13]
   wire [1:0] _writeAXIState_T_8 = bus_BVALID ? 2'h0 : 2'h2; // @[peripheralUnit.scala 157:27]
@@ -40093,7 +40098,7 @@ module peripheralUnit(
   assign peripheralMSHR_read_ready = 2'h0 == readAXIResponseState; // @[peripheralUnit.scala 206:31]
   assign writeCounter_clock = clock;
   assign writeCounter_reset = 1'h0; // @[peripheralUnit.scala 119:22]
-  assign writeCounter_incrm = 2'h0 == writeAXIState ? 1'h0 : 2'h1 == writeAXIState & _T_14; // @[peripheralUnit.scala 118:22 120:25]
+  assign writeCounter_incrm = 2'h0 == writeAXIState ? 1'h0 : 2'h1 == writeAXIState & _T_15; // @[peripheralUnit.scala 118:22 120:25]
   assign readCounter_clock = clock;
   assign readCounter_reset = 2'h0 == readAXIResponseState; // @[peripheralUnit.scala 206:31]
   assign readCounter_incrm = 2'h0 == readAXIResponseState ? 1'h0 : 2'h1 == readAXIResponseState & bus_RVALID; // @[peripheralUnit.scala 204:21 206:31]
@@ -40101,7 +40106,7 @@ module peripheralUnit(
     if (reset) begin // @[peripheralUnit.scala 69:30]
       requestBuffer_valid <= 1'h0; // @[peripheralUnit.scala 69:30]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:60]
+      if (~readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:61]
         requestBuffer_valid <= 1'h0; // @[peripheralUnit.scala 97:27]
       end else if (~writeRequestBuffer_valid & requestBuffer_writeEn) begin // @[peripheralUnit.scala 98:67]
         requestBuffer_valid <= 1'h0; // @[peripheralUnit.scala 104:27]
@@ -40126,7 +40131,7 @@ module peripheralUnit(
     if (reset) begin // @[peripheralUnit.scala 69:30]
       requestBuffer_branchMask <= 5'h0; // @[peripheralUnit.scala 69:30]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:60]
+      if (~readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:61]
         if (branchOps_valid) begin // @[peripheralUnit.scala 94:28]
           requestBuffer_branchMask <= _GEN_4;
         end
@@ -40176,21 +40181,21 @@ module peripheralUnit(
     if (reset) begin // @[peripheralUnit.scala 70:34]
       readRequestBuffer_address <= 32'h0; // @[peripheralUnit.scala 70:34]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:60]
+      if (~readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:61]
         readRequestBuffer_address <= requestBuffer_address; // @[peripheralUnit.scala 92:25]
       end
     end
     if (reset) begin // @[peripheralUnit.scala 70:34]
       readRequestBuffer_instruction <= 32'h0; // @[peripheralUnit.scala 70:34]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:60]
+      if (~readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:61]
         readRequestBuffer_instruction <= requestBuffer_instruction; // @[peripheralUnit.scala 92:25]
       end
     end
     if (reset) begin // @[peripheralUnit.scala 70:34]
       readRequestBuffer_branchMask <= 5'h0; // @[peripheralUnit.scala 70:34]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:60]
+      if (~readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:61]
         if (branchOps_valid) begin // @[peripheralUnit.scala 94:28]
           readRequestBuffer_branchMask <= _GEN_2;
         end else begin
@@ -40201,14 +40206,14 @@ module peripheralUnit(
     if (reset) begin // @[peripheralUnit.scala 70:34]
       readRequestBuffer_robAddr <= 4'h0; // @[peripheralUnit.scala 70:34]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:60]
+      if (~readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:61]
         readRequestBuffer_robAddr <= requestBuffer_robAddr; // @[peripheralUnit.scala 92:25]
       end
     end
     if (reset) begin // @[peripheralUnit.scala 70:34]
       readRequestBuffer_prfDest <= 6'h0; // @[peripheralUnit.scala 70:34]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:60]
+      if (~readRequestBuffer_valid & ~requestBuffer_writeEn) begin // @[peripheralUnit.scala 91:61]
         readRequestBuffer_prfDest <= requestBuffer_prfDest; // @[peripheralUnit.scala 92:25]
       end
     end
@@ -40226,7 +40231,7 @@ module peripheralUnit(
     if (reset) begin // @[peripheralUnit.scala 71:35]
       writeRequestBuffer_address <= 32'h0; // @[peripheralUnit.scala 71:35]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (!(readRequestBuffer_valid & ~requestBuffer_writeEn)) begin // @[peripheralUnit.scala 91:60]
+      if (!(~readRequestBuffer_valid & ~requestBuffer_writeEn)) begin // @[peripheralUnit.scala 91:61]
         if (~writeRequestBuffer_valid & requestBuffer_writeEn) begin // @[peripheralUnit.scala 98:67]
           writeRequestBuffer_address <= requestBuffer_address; // @[peripheralUnit.scala 99:26]
         end
@@ -40235,7 +40240,7 @@ module peripheralUnit(
     if (reset) begin // @[peripheralUnit.scala 71:35]
       writeRequestBuffer_branchMask <= 5'h0; // @[peripheralUnit.scala 71:35]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (!(readRequestBuffer_valid & ~requestBuffer_writeEn)) begin // @[peripheralUnit.scala 91:60]
+      if (!(~readRequestBuffer_valid & ~requestBuffer_writeEn)) begin // @[peripheralUnit.scala 91:61]
         if (~writeRequestBuffer_valid & requestBuffer_writeEn) begin // @[peripheralUnit.scala 98:67]
           writeRequestBuffer_branchMask <= _GEN_5;
         end
@@ -40244,7 +40249,7 @@ module peripheralUnit(
     if (reset) begin // @[peripheralUnit.scala 71:35]
       writeRequestBuffer_writeData <= 64'h0; // @[peripheralUnit.scala 71:35]
     end else if (requestBuffer_valid) begin // @[peripheralUnit.scala 89:28]
-      if (!(readRequestBuffer_valid & ~requestBuffer_writeEn)) begin // @[peripheralUnit.scala 91:60]
+      if (!(~readRequestBuffer_valid & ~requestBuffer_writeEn)) begin // @[peripheralUnit.scala 91:61]
         if (~writeRequestBuffer_valid & requestBuffer_writeEn) begin // @[peripheralUnit.scala 98:67]
           writeRequestBuffer_writeData <= requestBuffer_writeData; // @[peripheralUnit.scala 99:26]
         end

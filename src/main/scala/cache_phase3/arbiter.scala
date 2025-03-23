@@ -268,7 +268,8 @@ class arbiter extends Module {
       toCacheLookup.request.valid := false.B
     }
   }
-  when(toPeripheral.ready && (operationWires.isPeriRead || operationWires.isPeriWrite)) {
+  when(toPeripheral.ready && (operationWires.isPeriRead || operationWires.isPeriWrite) && inorderBuffer.valid) {
+    inorderBuffer.valid := false.B
     toPeripheral.request := inorderBuffer
     when(branchOps.valid){
         outgoingBranchUpdateInvalidate(inorderBuffer, branchOps, toCacheLookup.request)
