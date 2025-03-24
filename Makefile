@@ -51,7 +51,7 @@ sim: .stamp.sim
 		rm fyp18-riscv-emulator/src/Image; \
 	done
 
-VERILATOR_INCLUDE =  /usr/share/verilator/include
+VERILATOR_INCLUDE = /home/mcrparadox/verilator/include
 
 .stamp.runLockStep: .stamp.lock_step_run.out fyp18-riscv-emulator/src/Image
 	./lock_step_run.out
