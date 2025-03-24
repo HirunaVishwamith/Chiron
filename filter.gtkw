@@ -1,0 +1,37 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*] Mon Mar 24 08:59:58 2025
+[*]
+[dumpfile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/system_trace.vcd"
+[dumpfile_mtime] "Mon Mar 24 08:52:18 2025"
+[dumpfile_size] 1783172
+[savefile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/filter.gtkw"
+[timestart] 12719
+[size] 1920 998
+[pos] -961 -1
+*-4.200000 12780 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.system.
+[treeopen] TOP.system.core0.
+[sst_width] 209
+[signals_width] 326
+[sst_expanded] 1
+[sst_vpaned_height] 293
+@28
+TOP.clock
+@800200
+-Scheduler
+-RequestIn
+@29
+TOP.system.core0.memAccess.scheduler_requestIn_valid
+@22
+TOP.system.core0.memAccess.scheduler_requestIn_instruction[31:0]
+TOP.system.core0.memAccess.scheduler_requestIn_address[31:0]
+TOP.system.core0.memAccess.scheduler_requestIn_branchMask[4:0]
+TOP.system.core0.memAccess.scheduler_requestIn_prfDest[5:0]
+TOP.system.core0.memAccess.scheduler_requestIn_robAddr[3:0]
+@1000200
+-RequestIn
+-Scheduler
+[pattern_trace] 1
+[pattern_trace] 0
