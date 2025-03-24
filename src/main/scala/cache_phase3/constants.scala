@@ -35,5 +35,5 @@ object constants{
   val peripheral_SIZE : Int = 2       //= "b010"
   val peripheral_WIDTH : Int = math.pow(2, peripheral_SIZE).toInt * 8//32      //64
 
-  val schedulerDepth : Int = 8
+  val schedulerDepth : Int = 16
 }
