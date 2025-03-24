@@ -219,10 +219,15 @@ class cacheLookupUnit extends Module{
     val validBitWire = WireDefault(tagChunks(hitTagWire)(tagSize))
     val shareBitWire = WireDefault(tagChunks(hitTagWire)(tagSize + 2))
     val dirtyBitWire = WireDefault(tagChunks(hitTagWire)(tagSize + 1))
-    val isMissWire = !(matchFoundVec.reduce(_ | _) && validBitWire)
     val PLRUBitWire = WireDefault(tagChunks(hitTagWire)(tagSize + 3))
-    val isPermissionMiss = !isMissWire && shareBitWire
+    
+    val isDirtyWire = WireDefault(dirtyBitWire && validBitWire)
+    val isSharedWire = WireDefault(shareBitWire && validBitWire)
+    val isMissWire = WireDefault(!(matchFoundVec.reduce(_ | _) && validBitWire))
+    val isPermissionMiss = WireDefault(!isMissWire && shareBitWire)
+    val isReplayValidWire = WireDefault(readBuffer.requestType === "b10".U)
 
+    //Updating wires
     val newtagChunks = VecInit(Seq.tabulate(nway) { i =>
       tagBRAM.rdData((i + 1) * (tagSection) - 1, i * (tagSection))
     })
@@ -240,20 +245,22 @@ class cacheLookupUnit extends Module{
     val newWriteChunks = VecInit(Seq.tabulate(lineSize * 8 * 2 / dataWidth) { i =>
       cacheLineChoosen((i + 1) * (32) - 1, i * (32))
     })
-    //DONE : Parameterize 5 -- Seems its fixed for word, hence no need to paramertize
     val wordWrite = writeChunks(readBuffer.address(5,2))
     val doubleWordWrite = Cat(writeChunks((readBuffer.address(5,3) ## 1.U)),(writeChunks(readBuffer.address(5,3) ## 0.U)))
     val writeByteChunks = VecInit.tabulate(8)(i => doubleWordWrite(8 * (i + 1) - 1, 8 * i))
 
     //PLRU logic
     val PLRUSetWire = WireDefault(VecInit(tagChunks.map(chunk => chunk(tagSize + 3))))
-    val flippedPLRUSetWire = WireDefault(VecInit(PLRUSetWire.map(bit => ~bit)))//~PLRUSetWire.asUInt
+    val flippedPLRUSetWire = WireDefault(VecInit(PLRUSetWire.map(bit => ~bit)))
     val replacingset = PriorityEncoder(flippedPLRUSetWire)
 
     //read 
     when(isReadWire || isLRWire || isAtmoicReadWire){
-      newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
-      when(isMissWire){
+      when(!isMissWire){
+        newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
+      }
+      when(isMissWire && isReplayValidWire){
+        newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
         newValidBitWire := 1.U
         newShareBitWire := readBuffer.response(1)
         newDirtyBitWire := readBuffer.response(0)
@@ -366,14 +373,13 @@ class cacheLookupUnit extends Module{
     dataBRAMVec(updatingSet).wrAddr := readBuffer.address(addrEnd, addrBeg)
 
     //Setting control signals on deciding which buffer should data flow
-    val isReplayValid = (readBuffer.requestType === "b10".U)
     when(isReadWire || isLRWire || isAtmoicReadWire){
-      when(isMissWire && isReplayValid || !isMissWire){ //Hit
+      when(isMissWire && isReplayValidWire || !isMissWire){ //Hit
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
         toReservationRegisterWire := isLRWire
-        toWriteBackValidWire := dirtyBitWire && isReplayValid && validBitWire && isMissWire
-        dataBRAMUpdateWire := isReplayValid
+        toWriteBackValidWire := dirtyBitWire && isReplayValidWire && validBitWire && isMissWire 
+        dataBRAMUpdateWire := isReplayValidWire
       } .otherwise {
         toReplayValidWire := true.B
         toLastMissRecordRegister := !isReadWire
@@ -384,8 +390,8 @@ class cacheLookupUnit extends Module{
       tagBRAMUpdateWire:= !isMissWire
     }
     when(isWriteWire || isAtmoicWriteWire){
-      when(isReplayValid || (!isPermissionMiss && !isMissWire)){
-        toWriteBackValidWire := dirtyBitWire && isReplayValid && validBitWire && isMissWire
+      when(isReplayValidWire || (!isPermissionMiss && !isMissWire)){
+        toWriteBackValidWire := dirtyBitWire && isReplayValidWire && validBitWire && isMissWire 
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
       } .otherwise {
