@@ -264,11 +264,14 @@ class ACEUnit(
         readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
         responseBuffer.response := bus.RRESP(3,2) //Not checking for response validity in isShared and passDirty 
       }
+      when(bus.RLAST && bus.RVALID && readResponseValid){
+        responseBuffer.valid := true.B
+        responseBuffer.cacheLine := Cat(readDataVec.reverse)
+      }
       readACEResponseState := Mux(bus.RLAST && bus.RVALID && readResponseValid, readDataOutState, readResponseState)
     }
     is(readDataOutState){
-      responseBuffer.valid := true.B
-      responseBuffer.cacheLine := Cat(readDataVec.reverse)
+      responseBuffer.valid := !readResponse.ready
       
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }
