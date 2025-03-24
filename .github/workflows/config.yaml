@@ -26,7 +26,11 @@ jobs:
         sudo apt-get install -y make
 
     - name: Run all standard simulation
-      run: make test_all_images
+      run: |
+        make clean
+        make sim
+        make runLockStepTest
+        make test_all_images
 
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
