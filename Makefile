@@ -1,13 +1,47 @@
 VPATH = ../scala:../cache:../common:../decode:../exec:../fetch:./memAccess:../rob:../testbench
 
-.PHONY: test_all_images
+.PHONY: vvadd
+vvadd: .stamp.vvadd
 
-test_all_images:
+.PHONY: matmul
+matmul: .stamp.matmul
+
+.PHONY: filter
+filter: .stamp.filter
+
+.PHONY: test_all_images
+test_all_images: .stamp.test_all_images
+
+.PHONY: runLockStep
+runLockStep: .stamp.runLockStep
+
+.PHONY: runLockStepTest
+runLockStepTest: .stamp.runLockStepTest
+
+.PHONY: sim
+sim: .stamp.sim
+
+.stamp.vvadd: .stamp.sim
+	cp benchmark/mt-vvadd.bin fyp18-riscv-emulator/src/Image 
+	$(MAKE) runLockStep; 
+	@touch .stamp.vvadd
+
+.stamp.matmul: .stamp.matmul
+	cp benchmark/mt-matmul.bin fyp18-riscv-emulator/src/Image 
+	$(MAKE) runLockStep; 
+	@touch .stamp.matmul
+
+.stamp.filter: .stamp.filter
+	cp benchmark/mt-mask-sfilter.bin fyp18-riscv-emulator/src/Image 
+	$(MAKE) runLockStep; 
+	@touch .stamp.filter
+
+.stamp.test_all_images: .stamp.sim
 	@rm -f test_results.txt
 	@for img in fyp18-riscv-emulator/riscv-tests/images/*; do \
 		echo "Processing $$img..."; \
 		cp $$img fyp18-riscv-emulator/src/Image; \
-		$(MAKE) runLockStep; \
+		$(MAKE) runLockStepTest; \
 		STATUS=$$?; \
 		if [ $$STATUS -eq 0 ]; then \
 			echo "$$img: test pass" >> test_results.txt; \
@@ -16,23 +50,28 @@ test_all_images:
 		fi; \
 		rm fyp18-riscv-emulator/src/Image; \
 	done
-USER := $(shell whoami)
 
-ifeq ($(USER), mcrparadox)
-    VERILATOR_INCLUDE = /home/mcrparadox/verilator/include
-else
-    VERILATOR_INCLUDE = /usr/share/verilator/include
-endif
+VERILATOR_INCLUDE = /home/mcrparadox/verilator/include
 
-runLockStep: lock_step_run.out fyp18-riscv-emulator/src/Image
+.stamp.runLockStep: .stamp.lock_step_run.out fyp18-riscv-emulator/src/Image
 	./lock_step_run.out
 
-lock_step_run.out: lock_step_run.cpp fyp18-riscv-emulator/src/emulator.h fyp18-riscv-emulator/src/constants.h simulator/src/simulator.h simulator/src/obj_dir
+.stamp.lock_step_run.out: lock_step_run.cpp fyp18-riscv-emulator/src/emulator.h fyp18-riscv-emulator/src/constants.h simulator/src/simulator.h simulator/src/obj_dir
 	g++ -O3 -I $(VERILATOR_INCLUDE) -I simulator/src/obj_dir \
 		$(VERILATOR_INCLUDE)/verilated.cpp $(VERILATOR_INCLUDE)/verilated_vcd_c.cpp \
 		lock_step_run.cpp simulator/src/obj_dir/Vsystem__ALL.a -o lock_step_run.out
+		@touch .stamp.lock_step_run.out
 
-simulator/src/obj_dir: simulator/src/system.v simulator/src/iCacheRegisters.v
+.stamp.runLockStepTest: .stamp.lock_step_run_test.out fyp18-riscv-emulator/src/Image
+	./lock_step_run_test.out
+
+.stamp.lock_step_run_test.out: lock_step_run_test.cpp fyp18-riscv-emulator/src/emulator.h fyp18-riscv-emulator/src/constants.h simulator/src/simulator.h simulator/src/obj_dir
+	g++ -O3 -I $(VERILATOR_INCLUDE) -I simulator/src/obj_dir \
+		$(VERILATOR_INCLUDE)/verilated.cpp $(VERILATOR_INCLUDE)/verilated_vcd_c.cpp \
+		lock_step_run_test.cpp simulator/src/obj_dir/Vsystem__ALL.a -o lock_step_run_test.out
+		@touch .stamp.lock_step_run_test.out
+
+simulator/src/obj_dir: .stamp.sim simulator/src/system.v simulator/src/iCacheRegisters.v
 	cd simulator/src/; \
 	echo '/* verilator lint_off UNUSED */' | cat - system.v > temp && mv temp system.v; \
 	echo '/* verilator lint_off DECLFILENAME */' | cat - system.v > temp && mv temp system.v; \
@@ -45,12 +84,12 @@ simulator/src/obj_dir: simulator/src/system.v simulator/src/iCacheRegisters.v
 	cd obj_dir/; \
 	make -f Vsystem.mk; \
 
-targets := $(wildcard src/*.scala)
-sim:$(targets)
+.stamp.sim:$(shell find src/main/scala/ -type f -name '*.scala')
 	# Change instructionBase in configuration file
 	mv src/main/scala/common/configuration.scala configuration.txt
 	sed 's/instructionBase/instructionBase = 0x0000000010000000L\/\//' configuration.txt > src/main/scala/common/configuration.scala
-	sbt "clean; compile; runMain system"
+	# sbt "clean; compile; runMain system"
+	sbt "runMain system"
 	# Restoring the original configuration
 	mv configuration.txt src/main/scala/common/configuration.scala
 	cp system.v simulator/src/
@@ -65,7 +104,8 @@ sim:$(targets)
 	echo '/* verilator lint_off WIDTH */' | cat - system.v > temp && mv temp system.v; \
 	verilator -Wall --trace -cc system.v; \
 	cd obj_dir/; \
-	make -f Vsystem.mk; \
+	make -f Vsystem.mk;
+	@touch .stamp.sim
 
 simulator/src/bench.out: simulator/src/obj_dir simulator/src/simulator.h simulator/src/bench.cpp
 	cd simulator/src; \
@@ -105,4 +145,5 @@ fix_inotify_instances_reached:
 
 .PHONY: clean
 clean:
+	rm -rf .stamp.*;
 	rm -rf ./simulator/src/obj_dir
