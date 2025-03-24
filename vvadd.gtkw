@@ -1,18 +1,20 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Mon Mar 24 05:36:18 2025
+[*] Mon Mar 24 06:03:01 2025
 [*]
 [dumpfile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/system_trace.vcd"
-[dumpfile_mtime] "Mon Mar 24 05:10:31 2025"
-[dumpfile_size] 228347649
+[dumpfile_mtime] "Mon Mar 24 06:01:55 2025"
+[dumpfile_size] 228347759
 [savefile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/vvadd.gtkw"
-[timestart] 573803
+[timestart] 573404
 [size] 1920 998
 [pos] -1 -1
-*-3.600000 573820 251290 571920 571310 246980 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-3.600000 573430 251290 571920 571310 246980 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.system.
 [treeopen] TOP.system.core0.
+[treeopen] TOP.system.core0.memAccess.
+[treeopen] TOP.system.core0.memAccess.peripheralUnit.
 [sst_width] 241
 [signals_width] 506
 [sst_expanded] 1
@@ -24,6 +26,7 @@ TOP.clock
 @22
 TOP.system.core0.registersOut_10[63:0]
 TOP.system.core0.registersOut_11[63:0]
+TOP.registersOut_15[63:0]
 TOP.registersOut_16[63:0]
 TOP.registersOut_17[63:0]
 TOP.registersOut_16[63:0]
@@ -264,21 +267,23 @@ TOP.system.core0.memAccess.aceUnit.readResponse_request_writeEn
 -ACEUnit
 @200
 -
-@c00200
+@800200
 -responseOut
 @28
+TOP.system.core0.memAccess.peripheralUnit.responseOut_ready
 TOP.system.core0.memAccess.responseOut_valid
 @22
 TOP.system.core0.memAccess.responseOut_instruction[31:0]
 TOP.system.core0.memAccess.responseOut_result[63:0]
 TOP.system.core0.memAccess.responseOut_robAddr[3:0]
 TOP.system.core0.memAccess.responseOut_prfDest[5:0]
-@1401200
+@1000200
 -responseOut
 @200
 -
-@c00200
+@800200
 -Peripheral
+@c00200
 -BranchOps
 @22
 TOP.system.core0.memAccess.peripheralUnit.branchOps_branchMask[4:0]
@@ -287,7 +292,7 @@ TOP.system.core0.memAccess.peripheralUnit.branchOps_passed
 TOP.system.core0.memAccess.peripheralUnit.branchOps_valid
 @1401200
 -BranchOps
-@800200
+@c00200
 -Request
 @28
 TOP.system.core0.memAccess.peripheralUnit.request_ready
@@ -299,9 +304,9 @@ TOP.system.core0.memAccess.peripheralUnit.request_request_branchMask[4:0]
 @28
 TOP.system.core0.memAccess.writeCommit_fired
 TOP.system.core0.memAccess.writeCommit_ready
-@1000200
+@1401200
 -Request
-@c00200
+@800200
 -RequestBuffer
 @28
 TOP.system.core0.memAccess.peripheralUnit.requestBuffer_valid
@@ -309,22 +314,26 @@ TOP.system.core0.memAccess.peripheralUnit.requestBuffer_valid
 TOP.system.core0.memAccess.peripheralUnit.requestBuffer_instruction[31:0]
 TOP.system.core0.memAccess.peripheralUnit.requestBuffer_address[31:0]
 TOP.system.core0.memAccess.peripheralUnit.requestBuffer_branchMask[4:0]
+TOP.system.core0.memAccess.peripheralUnit.requestBuffer_robAddr[3:0]
+TOP.system.core0.memAccess.peripheralUnit.requestBuffer_prfDest[5:0]
 TOP.system.core0.memAccess.peripheralUnit.requestBuffer_writeData[63:0]
 @28
 TOP.system.core0.memAccess.peripheralUnit.requestBuffer_writeEn
-@1401200
+@1000200
 -RequestBuffer
-@c00200
+@800200
 -ReadRequestBuffer
 @28
 TOP.system.core0.memAccess.peripheralUnit.readRequestBuffer_valid
 @22
 TOP.system.core0.memAccess.peripheralUnit.readRequestBuffer_address[31:0]
 TOP.system.core0.memAccess.peripheralUnit.readRequestBuffer_instruction[31:0]
+TOP.system.core0.memAccess.peripheralUnit.readRequestBuffer_prfDest[5:0]
+TOP.system.core0.memAccess.peripheralUnit.readRequestBuffer_robAddr[3:0]
 TOP.system.core0.memAccess.peripheralUnit.readRequestBuffer_branchMask[4:0]
-@1401200
+@1000200
 -ReadRequestBuffer
-@800200
+@c00200
 -WriteRequestBuffer
 @28
 TOP.system.core0.memAccess.peripheralUnit.writeRequestBuffer_valid
@@ -332,11 +341,11 @@ TOP.system.core0.memAccess.peripheralUnit.writeRequestBuffer_valid
 TOP.system.core0.memAccess.peripheralUnit.writeRequestBuffer_address[31:0]
 TOP.system.core0.memAccess.peripheralUnit.writeRequestBuffer_branchMask[4:0]
 TOP.system.core0.memAccess.peripheralUnit.writeRequestBuffer_writeData[63:0]
-@1000200
+@1401200
 -WriteRequestBuffer
 @28
 TOP.system.core0.memAccess.peripheralUnit.writeAXIState[1:0]
-@800200
+@c00200
 -WriteBus
 @28
 TOP.system.core0.memAccess.peripheralUnit.bus_AWREADY
@@ -350,20 +359,45 @@ TOP.system.core0.memAccess.peripheralUnit.bus_WVALID
 TOP.system.core0.memAccess.peripheralUnit.bus_WDATA[31:0]
 @28
 TOP.system.core0.memAccess.peripheralUnit.bus_WLAST
-@1000200
+@1401200
 -WriteBus
-@c00200
+@800200
+-MSHR
+-Read
+@28
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_write_ready
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_write_data_valid
+@22
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_write_data_instruction[31:0]
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_write_data_prfDest[5:0]
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_write_data_robAddr[3:0]
+@1000200
+-Read
+@800200
+-Write
+@29
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_read_ready
+@28
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_read_data_valid
+@22
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_read_data_instruction[31:0]
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_read_data_prfDest[5:0]
+TOP.system.core0.memAccess.peripheralUnit.peripheralMSHR_read_data_robAddr[3:0]
+@1000200
+-Write
+-MSHR
+@800200
 -ResponseOutBuffer
 @28
 TOP.system.core0.memAccess.peripheralUnit.responseOut_ready
-TOP.system.core0.memAccess.peripheralUnit.readAXIResponseState[1:0]
 TOP.system.core0.memAccess.peripheralUnit.responseOutBuffer_valid
+TOP.system.core0.memAccess.peripheralUnit.readAXIResponseState[1:0]
 @22
 TOP.system.core0.memAccess.peripheralUnit.responseOutBuffer_instruction[31:0]
+TOP.system.core0.memAccess.peripheralUnit.responseOutBuffer_robAddr[3:0]
 TOP.system.core0.memAccess.peripheralUnit.responseOutBuffer_prfDest[5:0]
 TOP.system.core0.memAccess.peripheralUnit.responseOutBuffer_result[63:0]
-TOP.system.core0.memAccess.peripheralUnit.responseOutBuffer_robAddr[3:0]
-@1401200
+@1000200
 -ResponseOutBuffer
 -Peripheral
 @c00200
@@ -377,9 +411,8 @@ TOP.system.core0.decode.writeBackResult_instruction[31:0]
 TOP.system.core0.decode.writeBackResult_rdAddr[4:0]
 @1401200
 -WriteBack
-@800200
--Rob
 @c00200
+-Rob
 -Allocate
 @28
 TOP.system.core0.rob.allocate_ready
@@ -391,9 +424,9 @@ TOP.system.core0.rob.allocate_robAddr[3:0]
 TOP.system.core0.rob.allocate_prfDest[5:0]
 @1401200
 -Allocate
-@800200
+@c00200
 -Commit
-@29
+@28
 TOP.system.core0.rob.commit_ready
 TOP.system.core0.rob.commit_fired
 @22
@@ -407,7 +440,7 @@ TOP.system.core0.rob.commit_isStore
 TOP.system.core0.rob.commit_is_fence
 @22
 TOP.system.core0.rob.commit_mtval[63:0]
-@1000200
+@1401200
 -Commit
 -Rob
 [pattern_trace] 1

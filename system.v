@@ -40025,36 +40025,37 @@ module peripheralUnit(
   reg [1:0] readAXIResponseState; // @[peripheralUnit.scala 201:37]
   reg [31:0] readDataVec_0; // @[peripheralUnit.scala 202:28]
   reg [31:0] readDataVec_1; // @[peripheralUnit.scala 202:28]
-  wire [31:0] _GEN_141 = ~readCounter_count ? bus_RDATA : readDataVec_0; // @[peripheralUnit.scala 202:28 224:{40,40}]
-  wire [31:0] _GEN_142 = readCounter_count ? bus_RDATA : readDataVec_1; // @[peripheralUnit.scala 202:28 224:{40,40}]
-  wire  _responseOutBuffer_valid_T = bus_RLAST & bus_RVALID; // @[peripheralUnit.scala 227:44]
+  wire  _T_20 = ~peripheralMSHR_isEmpty; // @[peripheralUnit.scala 211:12]
+  wire [31:0] _GEN_147 = ~readCounter_count ? bus_RDATA : readDataVec_0; // @[peripheralUnit.scala 202:28 226:{40,40}]
+  wire [31:0] _GEN_148 = readCounter_count ? bus_RDATA : readDataVec_1; // @[peripheralUnit.scala 202:28 226:{40,40}]
+  wire  _responseOutBuffer_valid_T = bus_RLAST & bus_RVALID; // @[peripheralUnit.scala 229:44]
   wire [63:0] doubleWordChoosen = {readDataVec_1,readDataVec_0}; // @[Cat.scala 33:92]
-  wire [7:0] byteChunks_0 = doubleWordChoosen[7:0]; // @[peripheralUnit.scala 235:26]
-  wire [7:0] byteChunks_1 = doubleWordChoosen[15:8]; // @[peripheralUnit.scala 235:26]
-  wire [7:0] byteChunks_2 = doubleWordChoosen[23:16]; // @[peripheralUnit.scala 235:26]
-  wire [7:0] byteChunks_3 = doubleWordChoosen[31:24]; // @[peripheralUnit.scala 235:26]
+  wire [7:0] byteChunks_0 = doubleWordChoosen[7:0]; // @[peripheralUnit.scala 237:26]
+  wire [7:0] byteChunks_1 = doubleWordChoosen[15:8]; // @[peripheralUnit.scala 237:26]
+  wire [7:0] byteChunks_2 = doubleWordChoosen[23:16]; // @[peripheralUnit.scala 237:26]
+  wire [7:0] byteChunks_3 = doubleWordChoosen[31:24]; // @[peripheralUnit.scala 237:26]
   wire [15:0] halfwordChoosed = {byteChunks_1,byteChunks_0}; // @[Cat.scala 33:92]
   wire [31:0] wordChoosed = {byteChunks_3,byteChunks_2,byteChunks_1,byteChunks_0}; // @[Cat.scala 33:92]
   wire [55:0] _responseOutBuffer_result_T_3 = byteChunks_0[7] ? 56'hffffffffffffff : 56'h0; // @[Bitwise.scala 77:12]
   wire [63:0] _responseOutBuffer_result_T_4 = {_responseOutBuffer_result_T_3,byteChunks_0}; // @[Cat.scala 33:92]
   wire [63:0] _responseOutBuffer_result_T_5 = responseOutBuffer_instruction[14] ? {{56'd0}, byteChunks_0} :
-    _responseOutBuffer_result_T_4; // @[peripheralUnit.scala 241:52]
+    _responseOutBuffer_result_T_4; // @[peripheralUnit.scala 243:52]
   wire [47:0] _responseOutBuffer_result_T_9 = halfwordChoosed[15] ? 48'hffffffffffff : 48'h0; // @[Bitwise.scala 77:12]
   wire [63:0] _responseOutBuffer_result_T_10 = {_responseOutBuffer_result_T_9,byteChunks_1,byteChunks_0}; // @[Cat.scala 33:92]
   wire [63:0] _responseOutBuffer_result_T_11 = responseOutBuffer_instruction[14] ? {{48'd0}, halfwordChoosed} :
-    _responseOutBuffer_result_T_10; // @[peripheralUnit.scala 243:52]
+    _responseOutBuffer_result_T_10; // @[peripheralUnit.scala 245:52]
   wire [31:0] _responseOutBuffer_result_T_15 = wordChoosed[31] ? 32'hffffffff : 32'h0; // @[Bitwise.scala 77:12]
   wire [63:0] _responseOutBuffer_result_T_16 = {_responseOutBuffer_result_T_15,byteChunks_3,byteChunks_2,byteChunks_1,
     byteChunks_0}; // @[Cat.scala 33:92]
   wire [63:0] _responseOutBuffer_result_T_17 = responseOutBuffer_instruction[14] ? {{32'd0}, wordChoosed} :
-    _responseOutBuffer_result_T_16; // @[peripheralUnit.scala 245:52]
-  wire [63:0] _responseOutBuffer_result_T_19 = responseOutBuffer_instruction[14] ? 64'h0 : doubleWordChoosen; // @[peripheralUnit.scala 247:52]
-  wire [63:0] _GEN_147 = 2'h3 == responseOutBuffer_instruction[13:12] ? _responseOutBuffer_result_T_19 :
-    responseOutBuffer_result; // @[peripheralUnit.scala 240:52 247:46 73:34]
-  wire [63:0] _GEN_148 = 2'h2 == responseOutBuffer_instruction[13:12] ? _responseOutBuffer_result_T_17 : _GEN_147; // @[peripheralUnit.scala 240:52 245:46]
-  wire [63:0] _GEN_149 = 2'h1 == responseOutBuffer_instruction[13:12] ? _responseOutBuffer_result_T_11 : _GEN_148; // @[peripheralUnit.scala 240:52 243:46]
-  wire [63:0] _GEN_150 = 2'h0 == responseOutBuffer_instruction[13:12] ? _responseOutBuffer_result_T_5 : _GEN_149; // @[peripheralUnit.scala 240:52 241:46]
-  wire [1:0] _readAXIResponseState_T_4 = responseOut_ready ? 2'h0 : 2'h2; // @[peripheralUnit.scala 251:34]
+    _responseOutBuffer_result_T_16; // @[peripheralUnit.scala 247:52]
+  wire [63:0] _responseOutBuffer_result_T_19 = responseOutBuffer_instruction[14] ? 64'h0 : doubleWordChoosen; // @[peripheralUnit.scala 249:52]
+  wire [63:0] _GEN_153 = 2'h3 == responseOutBuffer_instruction[13:12] ? _responseOutBuffer_result_T_19 :
+    responseOutBuffer_result; // @[peripheralUnit.scala 242:52 249:46 73:34]
+  wire [63:0] _GEN_154 = 2'h2 == responseOutBuffer_instruction[13:12] ? _responseOutBuffer_result_T_17 : _GEN_153; // @[peripheralUnit.scala 242:52 247:46]
+  wire [63:0] _GEN_155 = 2'h1 == responseOutBuffer_instruction[13:12] ? _responseOutBuffer_result_T_11 : _GEN_154; // @[peripheralUnit.scala 242:52 245:46]
+  wire [63:0] _GEN_156 = 2'h0 == responseOutBuffer_instruction[13:12] ? _responseOutBuffer_result_T_5 : _GEN_155; // @[peripheralUnit.scala 242:52 243:46]
+  wire [1:0] _readAXIResponseState_T_6 = responseOut_ready ? 2'h0 : 2'h2; // @[peripheralUnit.scala 253:34]
   fifoBaseModule_1 peripheralMSHR ( // @[peripheralUnit.scala 81:30]
     .clock(peripheralMSHR_clock),
     .reset(peripheralMSHR_reset),
@@ -40103,7 +40104,7 @@ module peripheralUnit(
   assign peripheralMSHR_write_data_instruction = ~readAXIRequestState ? 32'h0 : _GEN_125; // @[peripheralUnit.scala 167:31 utils.scala 48:41]
   assign peripheralMSHR_write_data_robAddr = ~readAXIRequestState ? 4'h0 : _GEN_124; // @[peripheralUnit.scala 167:31 utils.scala 48:41]
   assign peripheralMSHR_write_data_prfDest = ~readAXIRequestState ? 6'h0 : _GEN_123; // @[peripheralUnit.scala 167:31 utils.scala 48:41]
-  assign peripheralMSHR_read_ready = 2'h0 == readAXIResponseState & ~peripheralMSHR_isEmpty; // @[peripheralUnit.scala 207:31 211:33 86:29]
+  assign peripheralMSHR_read_ready = 2'h0 == readAXIResponseState & _T_20; // @[peripheralUnit.scala 207:31 86:29]
   assign writeCounter_clock = clock;
   assign writeCounter_reset = 2'h0 == writeAXIState; // @[peripheralUnit.scala 120:25]
   assign writeCounter_incrm = 2'h0 == writeAXIState ? 1'h0 : 2'h1 == writeAXIState & _T_15; // @[peripheralUnit.scala 118:22 120:25]
@@ -40266,35 +40267,45 @@ module peripheralUnit(
     if (reset) begin // @[peripheralUnit.scala 73:34]
       responseOutBuffer_valid <= 1'h0; // @[peripheralUnit.scala 73:34]
     end else if (2'h0 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      responseOutBuffer_valid <= 1'h0; // @[peripheralUnit.scala 212:31]
+      if (~peripheralMSHR_isEmpty) begin // @[peripheralUnit.scala 211:36]
+        responseOutBuffer_valid <= 1'h0; // @[peripheralUnit.scala 213:33]
+      end
     end else if (2'h1 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      responseOutBuffer_valid <= bus_RLAST & bus_RVALID; // @[peripheralUnit.scala 227:31]
+      responseOutBuffer_valid <= bus_RLAST & bus_RVALID; // @[peripheralUnit.scala 229:31]
     end else if (2'h2 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      responseOutBuffer_valid <= ~responseOut_ready; // @[peripheralUnit.scala 250:31]
+      responseOutBuffer_valid <= ~responseOut_ready; // @[peripheralUnit.scala 252:31]
     end
     if (reset) begin // @[peripheralUnit.scala 73:34]
       responseOutBuffer_prfDest <= 6'h0; // @[peripheralUnit.scala 73:34]
     end else if (2'h0 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      responseOutBuffer_prfDest <= peripheralMSHR_read_data_prfDest; // @[peripheralUnit.scala 213:33]
+      if (~peripheralMSHR_isEmpty) begin // @[peripheralUnit.scala 211:36]
+        responseOutBuffer_prfDest <= peripheralMSHR_read_data_prfDest; // @[peripheralUnit.scala 214:35]
+      end
     end
     if (reset) begin // @[peripheralUnit.scala 73:34]
       responseOutBuffer_robAddr <= 4'h0; // @[peripheralUnit.scala 73:34]
     end else if (2'h0 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      responseOutBuffer_robAddr <= peripheralMSHR_read_data_robAddr; // @[peripheralUnit.scala 214:33]
+      if (~peripheralMSHR_isEmpty) begin // @[peripheralUnit.scala 211:36]
+        responseOutBuffer_robAddr <= peripheralMSHR_read_data_robAddr; // @[peripheralUnit.scala 215:35]
+      end
     end
     if (reset) begin // @[peripheralUnit.scala 73:34]
       responseOutBuffer_result <= 64'h0; // @[peripheralUnit.scala 73:34]
     end else if (2'h0 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      responseOutBuffer_result <= 64'h0; // @[peripheralUnit.scala 215:32]
+      if (~peripheralMSHR_isEmpty) begin // @[peripheralUnit.scala 211:36]
+        responseOutBuffer_result <= 64'h0; // @[peripheralUnit.scala 216:34]
+      end
     end else if (!(2'h1 == readAXIResponseState)) begin // @[peripheralUnit.scala 207:31]
       if (2'h2 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-        responseOutBuffer_result <= _GEN_150;
+        responseOutBuffer_result <= _GEN_156;
       end
     end
     if (reset) begin // @[peripheralUnit.scala 73:34]
       responseOutBuffer_instruction <= 32'h0; // @[peripheralUnit.scala 73:34]
     end else if (2'h0 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      responseOutBuffer_instruction <= peripheralMSHR_read_data_instruction; // @[peripheralUnit.scala 216:37]
+      if (~peripheralMSHR_isEmpty) begin // @[peripheralUnit.scala 211:36]
+        responseOutBuffer_instruction <= peripheralMSHR_read_data_instruction; // @[peripheralUnit.scala 217:39]
+      end
     end
     if (reset) begin // @[peripheralUnit.scala 116:30]
       writeAXIState <= 2'h0; // @[peripheralUnit.scala 116:30]
@@ -40327,26 +40338,26 @@ module peripheralUnit(
     if (reset) begin // @[peripheralUnit.scala 201:37]
       readAXIResponseState <= 2'h0; // @[peripheralUnit.scala 201:37]
     end else if (2'h0 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      if (peripheralMSHR_read_data_valid) begin // @[peripheralUnit.scala 218:34]
+      if (peripheralMSHR_read_data_valid & _T_20) begin // @[peripheralUnit.scala 220:34]
         readAXIResponseState <= 2'h1;
       end else begin
         readAXIResponseState <= 2'h0;
       end
     end else if (2'h1 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      if (_responseOutBuffer_valid_T) begin // @[peripheralUnit.scala 228:34]
+      if (_responseOutBuffer_valid_T) begin // @[peripheralUnit.scala 230:34]
         readAXIResponseState <= 2'h2;
       end else begin
         readAXIResponseState <= 2'h1;
       end
     end else if (2'h2 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-      readAXIResponseState <= _readAXIResponseState_T_4; // @[peripheralUnit.scala 251:28]
+      readAXIResponseState <= _readAXIResponseState_T_6; // @[peripheralUnit.scala 253:28]
     end
     if (reset) begin // @[peripheralUnit.scala 202:28]
       readDataVec_0 <= 32'h0; // @[peripheralUnit.scala 202:28]
     end else if (!(2'h0 == readAXIResponseState)) begin // @[peripheralUnit.scala 207:31]
       if (2'h1 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-        if (bus_RVALID) begin // @[peripheralUnit.scala 222:42]
-          readDataVec_0 <= _GEN_141;
+        if (bus_RVALID) begin // @[peripheralUnit.scala 224:42]
+          readDataVec_0 <= _GEN_147;
         end
       end
     end
@@ -40354,8 +40365,8 @@ module peripheralUnit(
       readDataVec_1 <= 32'h0; // @[peripheralUnit.scala 202:28]
     end else if (!(2'h0 == readAXIResponseState)) begin // @[peripheralUnit.scala 207:31]
       if (2'h1 == readAXIResponseState) begin // @[peripheralUnit.scala 207:31]
-        if (bus_RVALID) begin // @[peripheralUnit.scala 222:42]
-          readDataVec_1 <= _GEN_142;
+        if (bus_RVALID) begin // @[peripheralUnit.scala 224:42]
+          readDataVec_1 <= _GEN_148;
         end
       end
     end

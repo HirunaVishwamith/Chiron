@@ -208,14 +208,16 @@ class peripheralUnit(
     is(readDataInState){
       readCounter.reset := true.B
       
-      peripheralMSHR.read.ready := !peripheralMSHR.isEmpty
-      responseOutBuffer.valid := false.B
-      responseOutBuffer.prfDest := peripheralMSHR.read.data.prfDest
-      responseOutBuffer.robAddr := peripheralMSHR.read.data.robAddr
-      responseOutBuffer.result := 0.U
-      responseOutBuffer.instruction := peripheralMSHR.read.data.instruction
+      when(!peripheralMSHR.isEmpty){
+        peripheralMSHR.read.ready := true.B
+        responseOutBuffer.valid := false.B
+        responseOutBuffer.prfDest := peripheralMSHR.read.data.prfDest
+        responseOutBuffer.robAddr := peripheralMSHR.read.data.robAddr
+        responseOutBuffer.result := 0.U
+        responseOutBuffer.instruction := peripheralMSHR.read.data.instruction
+      }
       
-      readAXIResponseState := Mux(peripheralMSHR.read.data.valid, readResponseState, readDataInState)
+      readAXIResponseState := Mux(peripheralMSHR.read.data.valid && !peripheralMSHR.isEmpty, readResponseState, readDataInState)
     }
     is(readResponseState){
       bus.RREADY := true.B
