@@ -208,7 +208,7 @@ class peripheralUnit(
     is(readDataInState){
       readCounter.reset := true.B
       
-      peripheralMSHR.read.ready := true.B
+      peripheralMSHR.read.ready := !peripheralMSHR.isEmpty
       responseOutBuffer.valid := false.B
       responseOutBuffer.prfDest := peripheralMSHR.read.data.prfDest
       responseOutBuffer.robAddr := peripheralMSHR.read.data.robAddr

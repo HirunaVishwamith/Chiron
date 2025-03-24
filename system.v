@@ -39294,7 +39294,8 @@ module fifoBaseModule_1(
   output        read_data_valid,
   output [31:0] read_data_instruction,
   output [3:0]  read_data_robAddr,
-  output [5:0]  read_data_prfDest
+  output [5:0]  read_data_prfDest,
+  output        isEmpty
 );
 `ifdef RANDOMIZE_REG_INIT
   reg [31:0] _RAND_0;
@@ -39425,6 +39426,7 @@ module fifoBaseModule_1(
   assign read_data_instruction = 3'h7 == readPtr ? memReg_7_instruction : _GEN_180; // @[fifo.scala 88:{13,13}]
   assign read_data_robAddr = 3'h7 == readPtr ? memReg_7_robAddr : _GEN_196; // @[fifo.scala 88:{13,13}]
   assign read_data_prfDest = 3'h7 == readPtr ? memReg_7_prfDest : _GEN_204; // @[fifo.scala 88:{13,13}]
+  assign isEmpty = emptyReg; // @[fifo.scala 90:11]
   always @(posedge clock) begin
     if (reset) begin // @[fifo.scala 29:33]
       memReg_0_valid <= 1'h0; // @[fifo.scala 29:33]
@@ -39945,6 +39947,7 @@ module peripheralUnit(
   wire [31:0] peripheralMSHR_read_data_instruction; // @[peripheralUnit.scala 81:30]
   wire [3:0] peripheralMSHR_read_data_robAddr; // @[peripheralUnit.scala 81:30]
   wire [5:0] peripheralMSHR_read_data_prfDest; // @[peripheralUnit.scala 81:30]
+  wire  peripheralMSHR_isEmpty; // @[peripheralUnit.scala 81:30]
   wire  writeCounter_clock; // @[peripheralUnit.scala 117:28]
   wire  writeCounter_reset; // @[peripheralUnit.scala 117:28]
   wire  writeCounter_count; // @[peripheralUnit.scala 117:28]
@@ -40064,7 +40067,8 @@ module peripheralUnit(
     .read_data_valid(peripheralMSHR_read_data_valid),
     .read_data_instruction(peripheralMSHR_read_data_instruction),
     .read_data_robAddr(peripheralMSHR_read_data_robAddr),
-    .read_data_prfDest(peripheralMSHR_read_data_prfDest)
+    .read_data_prfDest(peripheralMSHR_read_data_prfDest),
+    .isEmpty(peripheralMSHR_isEmpty)
   );
   moduleCounter writeCounter ( // @[peripheralUnit.scala 117:28]
     .clock(writeCounter_clock),
@@ -40099,7 +40103,7 @@ module peripheralUnit(
   assign peripheralMSHR_write_data_instruction = ~readAXIRequestState ? 32'h0 : _GEN_125; // @[peripheralUnit.scala 167:31 utils.scala 48:41]
   assign peripheralMSHR_write_data_robAddr = ~readAXIRequestState ? 4'h0 : _GEN_124; // @[peripheralUnit.scala 167:31 utils.scala 48:41]
   assign peripheralMSHR_write_data_prfDest = ~readAXIRequestState ? 6'h0 : _GEN_123; // @[peripheralUnit.scala 167:31 utils.scala 48:41]
-  assign peripheralMSHR_read_ready = 2'h0 == readAXIResponseState; // @[peripheralUnit.scala 207:31]
+  assign peripheralMSHR_read_ready = 2'h0 == readAXIResponseState & ~peripheralMSHR_isEmpty; // @[peripheralUnit.scala 207:31 211:33 86:29]
   assign writeCounter_clock = clock;
   assign writeCounter_reset = 2'h0 == writeAXIState; // @[peripheralUnit.scala 120:25]
   assign writeCounter_incrm = 2'h0 == writeAXIState ? 1'h0 : 2'h1 == writeAXIState & _T_15; // @[peripheralUnit.scala 118:22 120:25]
