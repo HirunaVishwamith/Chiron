@@ -224,7 +224,7 @@ class cacheLookupUnit extends Module{
     val isDirtyWire = WireDefault(dirtyBitWire && validBitWire)
     val isSharedWire = WireDefault(shareBitWire && validBitWire)
     val isDataMissWire = WireDefault(!(matchFoundVec.reduce(_ | _) && validBitWire))
-    val isPermissionMiss = WireDefault(!isDataMissWire && shareBitWire)
+    val isPermissionMiss = WireDefault(!isDataMissWire && isSharedWire)
     val isReplayValidWire = WireDefault(readBuffer.requestType === "b10".U)
 
     //Updating wires
@@ -238,7 +238,7 @@ class cacheLookupUnit extends Module{
     val newPLRUBitWire =  WireDefault(tagChunks(hitTagWire)(tagSize + 3))
 
     //DataBRAMs
-    val cacheLineChoosen = Mux(isDataMissWire, readBuffer.cacheLine, dataBRAMVec(PriorityEncoder(matchFoundVec)).rdData )
+    val cacheLineChoosen = Mux(isDataMissWire && isReplayValidWire, readBuffer.cacheLine, dataBRAMVec(PriorityEncoder(matchFoundVec)).rdData )
     val writeChunks = VecInit(Seq.tabulate(lineSize * 8 * 2 / dataWidth) { i =>
       cacheLineChoosen((i + 1) * (32) - 1, i * (32))
     })
@@ -256,10 +256,10 @@ class cacheLookupUnit extends Module{
 
     //read 
     when(isReadWire || isLRWire || isAtmoicReadWire){
-      when(!isDataMissWire){
+      when(!isDataMissWire){//Hit
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
       }
-      when(isReplayValidWire){
+      when(isReplayValidWire && isDataMissWire){
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
         newValidBitWire := 1.U
         newShareBitWire := readBuffer.response(1)
@@ -384,8 +384,8 @@ class cacheLookupUnit extends Module{
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
         toReservationRegisterWire := isLRWire
-        toWriteBackValidWire := dirtyBitWire && isReplayValidWire && isDataMissWire 
-        dataBRAMUpdateWire := isReplayValidWire
+        toWriteBackValidWire := isDirtyWire && isReplayValidWire && isDataMissWire 
+        dataBRAMUpdateWire := isDataMissWire && isReplayValidWire
       } .otherwise {
         toReplayValidWire := true.B
         toLastMissRecordRegister := !isReadWire
@@ -397,7 +397,7 @@ class cacheLookupUnit extends Module{
     }
     when(isWriteWire || isAtmoicWriteWire){
       when(isReplayValidWire || (!isPermissionMiss && !isDataMissWire)){
-        toWriteBackValidWire := dirtyBitWire && isReplayValidWire && isDataMissWire 
+        toWriteBackValidWire := isDirtyWire && isReplayValidWire && isDataMissWire 
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
       } .otherwise {
@@ -409,7 +409,7 @@ class cacheLookupUnit extends Module{
     when(isSCWriteWire){
       reservationRegister.reserved := false.B
       when(reservationRegister.reserved && isReservationMatch){
-        toWriteBackValidWire := dirtyBitWire && isDataMissWire
+        toWriteBackValidWire := isDirtyWire  && isReplayValidWire && isDataMissWire 
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
       }
@@ -471,7 +471,7 @@ class cacheLookupUnit extends Module{
     when(readBuffer.response(0)){
       coherencyResponseBuffer.data := Mux(!isDataMissWire, dataBRAMVec(hitTagWire).rdData, 0.U)
       coherencyResponseBuffer.dataValid := !isDataMissWire
-      coherencyResponseBuffer.response := Mux(readBuffer.response(1), !dirtyBitWire, 1.U) ## !newShareBitWire
+      coherencyResponseBuffer.response := Mux(readBuffer.response(1), !isDirtyWire, 1.U) ## !newShareBitWire
     } .otherwise{
       coherencyResponseBuffer.data := 0.U
       coherencyResponseBuffer.dataValid := false.B
