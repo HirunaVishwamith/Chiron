@@ -119,6 +119,7 @@ class peripheralUnit(
   writeCounter.reset := false.B
   switch(writeAXIState) {
     is(writeIdleState){
+        writeCounter.reset := true.B
         writeAXIState := Mux(writeRequestBuffer.valid, writeRequestState, writeIdleState)
     }
     is(writeRequestState){
@@ -145,9 +146,9 @@ class peripheralUnit(
         writeRequestBuffer.writeData((i + 1) * busWidth - 1, i * busWidth)
       ))
       when(bus.WREADY && bus.AWREADY){
-        bus.WDATA := writeChunks(writeCounter.count)
         writeCounter.incrm := true.B 
       }
+      bus.WDATA := writeChunks(writeCounter.count)
       writeAXIState := Mux(bus.WLAST && bus.WREADY && bus.AWREADY, writeResponseState, writeRequestState)
     }
     is(writeResponseState){

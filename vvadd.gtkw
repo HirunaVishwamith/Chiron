@@ -1,21 +1,21 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Mon Mar 24 04:19:15 2025
+[*] Mon Mar 24 04:52:30 2025
 [*]
 [dumpfile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/system_trace.vcd"
-[dumpfile_mtime] "Mon Mar 24 03:28:59 2025"
-[dumpfile_size] 65424572
+[dumpfile_mtime] "Mon Mar 24 04:51:15 2025"
+[dumpfile_size] 230301715
 [savefile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/vvadd.gtkw"
-[timestart] 243930
+[timestart] 571896
 [size] 1920 998
 [pos] -1 -1
-*-3.600000 243970 251290 571470 571310 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-3.600000 571930 251290 571470 571310 246980 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.system.
 [treeopen] TOP.system.core0.
 [treeopen] TOP.system.core0.memAccess.
 [sst_width] 241
-[signals_width] 419
+[signals_width] 506
 [sst_expanded] 1
 [sst_vpaned_height] 293
 @28
@@ -36,6 +36,7 @@ TOP.system.core0.memAccess.scheduler_requestIn_valid
 TOP.system.core0.memAccess.scheduler_requestIn_instruction[31:0]
 TOP.system.core0.memAccess.scheduler_requestIn_address[31:0]
 TOP.system.core0.memAccess.scheduler_requestIn_robAddr[3:0]
+TOP.system.core0.memAccess.scheduler_requestIn_prfDest[5:0]
 TOP.system.core0.memAccess.scheduler_requestIn_branchMask[4:0]
 @1000200
 -Request
@@ -43,17 +44,19 @@ TOP.system.core0.memAccess.scheduler_requestIn_branchMask[4:0]
 -
 @800200
 -Arbiter
-@c00200
 -Memory
 @28
 TOP.system.core0.memAccess.arbiter.request_request_valid
 @22
 TOP.system.core0.memAccess.arbiter.request_request_instruction[31:0]
 TOP.system.core0.memAccess.arbiter.request_request_address[31:0]
+TOP.system.core0.memAccess.arbiter.request_request_prfDest[5:0]
+TOP.system.core0.memAccess.arbiter.request_request_robAddr[3:0]
+@23
 TOP.system.core0.memAccess.arbiter.request_request_branchMask[4:0]
-@1401200
+@1000200
 -Memory
-@800200
+@c00200
 -Operation-buffer
 @28
 TOP.system.core0.memAccess.arbiter.operationBuffer_valid
@@ -66,9 +69,9 @@ TOP.system.core0.memAccess.arbiter.operationBuffer_branchMask[4:0]
 TOP.system.core0.memAccess.arbiter.operationState[2:0]
 TOP.system.core0.memAccess.arbiter.writeCommit_fired
 TOP.system.core0.memAccess.arbiter.writeCommit_ready
-@1000200
+@1401200
 -Operation-buffer
-@800200
+@c00200
 -InorderBuffer
 @28
 TOP.system.core0.memAccess.arbiter.inorderBuffer_valid
@@ -82,7 +85,7 @@ TOP.system.core0.memAccess.arbiter.inorderBuffer_writeEn
 TOP.system.core0.memAccess.arbiter.inorderBuffer_robAddr[3:0]
 TOP.system.core0.memAccess.arbiter.inorderBuffer_prfDest[5:0]
 TOP.system.core0.memAccess.arbiter.inorderBuffer_branchMask[4:0]
-@1000200
+@1401200
 -InorderBuffer
 @c00200
 -Replay
@@ -108,21 +111,27 @@ TOP.system.core0.memAccess.cacheLookup.request_request_valid
 @22
 TOP.system.core0.memAccess.cacheLookup.request_request_instruction[31:0]
 TOP.system.core0.memAccess.cacheLookup.request_request_address[31:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_prfDest[5:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_robAddr[3:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_cacheLine[511:0]
 TOP.system.core0.memAccess.cacheLookup.request_request_branchMask[4:0]
 @1000200
 -Request
 @28
 TOP.system.core0.memAccess.cacheLookup.isMissWire
-@c00200
+@800200
 -BRAM
 @22
 TOP.system.core0.memAccess.cacheLookup.tagBRAM_rdData[91:0]
 TOP.system.core0.memAccess.cacheLookup.tagBRAM_rdAddr[6:0]
+@28
+TOP.system.core0.memAccess.cacheLookup.dataBRAM_1_wrEna
+@22
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_0_rdData[511:0]
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_1_rdData[511:0]
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_2_rdData[511:0]
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_3_wrData[511:0]
-@1401200
+@1000200
 -BRAM
 @800200
 -toReplay
@@ -141,9 +150,7 @@ TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_valid
 @22
 TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_instruction[31:0]
 TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_address[31:0]
-@23
 TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_result[63:0]
-@22
 TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_branchMask[4:0]
 @1000200
 -Mem-resp-buffer
