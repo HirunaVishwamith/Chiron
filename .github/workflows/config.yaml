@@ -1,0 +1,35 @@
+name: Build and Test Workflow
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install GCC
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc
+
+    - name: Install Verilator
+      run: |
+        sudo apt-get install -y verilator
+
+    - name: Install Make
+      run: |
+        sudo apt-get install -y make
+
+    - name: Run all standard simulation
+      run: make test_all_images
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: test_results.txt

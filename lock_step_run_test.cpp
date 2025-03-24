@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -14,13 +15,14 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <iomanip>
+#include <time.h>
 using namespace std;
 
 using namespace std::chrono;
 
 #define LOGGING
-#define DUMP_CONDITION 0 && (bench.tickcount > 15878305144UL)
-#define PROBE_DOUBLE (0x2004000UL+0x0UL) & (~7UL)
+#define DUMP_CONDITION 1 //&& (bench.tickcount > 533771995UL)
+#define PROBE_DOUBLE ((0xCA3BF0UL+(-136)) & (~7UL))
 
 emulator golden_model;
 
@@ -61,6 +63,11 @@ void signal_callback_handler(int signum) {
 // emulator emu;
 
 int main(int argc, char* argv[]) {
+  struct tm current_time;
+  time_t now = time(NULL);
+    
+  localtime_r(&now, &current_time);
+    
   // Name of kernel image must be provided at run time
   /* if (argc == 1) {
     printf("Name of kerenl image must be provided at run time\n");
@@ -90,12 +97,21 @@ int main(int argc, char* argv[]) {
   golden_model.step(); */
   #ifdef LOGGING
   std::ofstream outFile("run.log"); // This will create or overwrite the file
+  std::ofstream outState("states.log");
+
 
   // Check if the file is open
   if (!outFile.is_open()) {
     std::cerr << "Error opening the file." << std::endl;
     return 1;
   }
+
+  if (!outState.is_open()) {
+    std::cerr << "Error opening the file." << std::endl;
+    return 1;
+  }
+
+
   #endif
   /* std::ifstream inputFile("resources/symbol_names.txt");
 
@@ -138,7 +154,13 @@ int main(int argc, char* argv[]) {
   bench.set_probe(PROBE_DOUBLE);
   bench.step_nodump();
   unsigned long sim_prev = 0x80100000UL;
-	printf("Simulation start time: %s %s\n", __DATE__, __TIME__);
+	printf("Runtime: %04d-%02d-%02d %02d:%02d:%02d\n",
+    current_time.tm_year + 1900,
+    current_time.tm_mon + 1,
+    current_time.tm_mday,
+    current_time.tm_hour,
+    current_time.tm_min,
+    current_time.tm_sec);
   while (1 || (bench.tickcount + bench.dump_tick) < 800351768UL) {
     // golden_model.show_state();
     //cin >> x;
@@ -168,6 +190,10 @@ int main(int argc, char* argv[]) {
     outFile <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << " ";
     outFile <<  setfill('0') << setw(16) << hex << golden_model.fetch_long(PROBE_DOUBLE) << " ";
     outFile <<  setfill('0') << setw(16) << hex << bench.get_probe() << endl;
+
+
+    outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
+    outState << golden_model.return_state();
     /* switch (golden_model.check_for_mem_access(&mem_address, &data))
     {
     case 1:
@@ -295,15 +321,45 @@ int main(int argc, char* argv[]) {
         golden_model.step();
       }
     }
-    
+
+    // Check for test completion
+    if (bench.read_register(3) == 1 && bench.read_register(17) == 93) {
+      printf("Test complete \n");
+      #ifdef LOGGING
+            outFile.close();
+      #endif
+      tcflush(0, TCIFLUSH); 
+      return 0; // Exit the program here with success.
+    }
+    if (bench.read_register(17) == 93) {
+      printf("Test Failed \n");
+      #ifdef LOGGING
+            outFile.close();
+      #endif
+      tcflush(0, TCIFLUSH); 
+      return 1; // Exit the program here with success.
+    }
     
   }
+  
+
+  printf("Test failed: Time-out!\n");
+  printf("Total ticks: %ld \n", (bench.tickcount+bench.dump_tick));
+  printf("The next instruction should be: \n");
+  golden_model.step();
+  outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
+  outState << golden_model.return_state();
+
+  printf("The next instruction should be: \n");
+  golden_model.step();
+  outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
+  outState << golden_model.return_state();
+  
+
   #ifdef LOGGING
   outFile.close();
   #endif
 
-  printf("Test failed: Time-out!\n");
-  printf("Total ticks: %ld \n", (bench.tickcount+bench.dump_tick));
   // disable_raw_mode();
   tcflush(0, TCIFLUSH); 
 

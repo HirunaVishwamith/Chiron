@@ -250,11 +250,13 @@ class ACEUnit(
     is(readDataInState){
       readCounter.reset := true.B
 
-      ACEMSHR.read.ready := true.B
-      responseBuffer := ACEMSHR.read.data
+      when(!ACEMSHR.isEmpty){
+        ACEMSHR.read.ready := true.B
+        responseBuffer := ACEMSHR.read.data
+      }
       responseBuffer.valid := false.B
       
-      readACEResponseState := Mux(ACEMSHR.read.data.valid, readResponseState, readDataInState)
+      readACEResponseState := Mux(ACEMSHR.read.data.valid && !ACEMSHR.isEmpty, readResponseState, readDataInState)
     }
     is(readResponseState){
       bus.RREADY := true.B

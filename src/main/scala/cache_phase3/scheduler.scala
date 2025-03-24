@@ -64,9 +64,9 @@ class Scheduler extends Module{
   //*    2.  Branch resolved inorder
   //*    3.  Branch unresolved speculative
   val speculativeBranchResolved = WireDefault(!speculativeQueue.read.data.branchMask(3,0).orR && !speculativeQueue.isEmpty)
-  val speculativeBranchInvalidated = WireDefault(!speculativeQueue.read.data.valid && speculativeQueue.read.data.branchMask(3,0).orR)
+  val speculativeBranchInvalidated = WireDefault(!speculativeQueue.read.data.valid && speculativeQueue.read.data.branchMask(3,0).orR && !speculativeQueue.isEmpty)
   val inorderBranchResolved = WireDefault(!inorderQueue.read.data.branchMask(3,0).orR && !inorderQueue.isEmpty)
-  val inorderBranchInvalidated = WireDefault(!inorderQueue.read.data.valid && inorderQueue.read.data.branchMask(3,0).orR)
+  val inorderBranchInvalidated = WireDefault(!inorderQueue.read.data.valid && inorderQueue.read.data.branchMask(3,0).orR && !inorderQueue.isEmpty)
 
   when(controlSignal.inorderReady || controlSignal.speculativeReady){
     switch(controlSignal.inorderReady ## controlSignal.speculativeReady){
