@@ -479,7 +479,7 @@ class cacheLookupUnit extends Module{
 
     //WriteBack
     writeBackBuffer.valid := toWriteBackValidWire
-    writeBackBuffer.address := readBuffer.address
+    writeBackBuffer.address := Cat(tagChunks(updatingSet), readBuffer.address(addrEnd, addrBeg), 0.U(log2Ceil(lineSize).W))
     writeBackBuffer.data := dataBRAMVec(hitTagWire).rdData
     
     //Last Miss Memory Record

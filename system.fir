@@ -12590,7 +12590,12 @@ circuit system :
         coherencyResponseBuffer.data <= UInt<1>("h0") @[cacheLookupUnit.scala 476:36]
         coherencyResponseBuffer.dataValid <= UInt<1>("h0") @[cacheLookupUnit.scala 477:41]
       writeBackBuffer.valid <= toWriteBackValidWire @[cacheLookupUnit.scala 481:27]
-      writeBackBuffer.address <= readBuffer.address @[cacheLookupUnit.scala 482:29]
+      node _writeBackBuffer_address_T = or(updatingSet, UInt<2>("h0"))
+      node _writeBackBuffer_address_T_1 = bits(_writeBackBuffer_address_T, 1, 0)
+      node _writeBackBuffer_address_T_2 = bits(readBuffer.address, 12, 6) @[cacheLookupUnit.scala 482:78]
+      node writeBackBuffer_address_hi = cat(tagChunks[_writeBackBuffer_address_T_1], _writeBackBuffer_address_T_2) @[Cat.scala 33:92]
+      node _writeBackBuffer_address_T_3 = cat(writeBackBuffer_address_hi, UInt<6>("h0")) @[Cat.scala 33:92]
+      writeBackBuffer.address <= _writeBackBuffer_address_T_3 @[cacheLookupUnit.scala 482:29]
       node _writeBackBuffer_data_T = or(hitTagWire, UInt<2>("h0"))
       node _writeBackBuffer_data_T_1 = bits(_writeBackBuffer_data_T, 1, 0)
       writeBackBuffer.data <= dataBRAMVec[_writeBackBuffer_data_T_1].rdData @[cacheLookupUnit.scala 483:26]

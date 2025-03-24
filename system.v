@@ -37171,49 +37171,55 @@ module cacheLookupUnit(
   wire  _coherencyResponseBuffer_response_T_3 = ~newShareBitWire; // @[cacheLookupUnit.scala 474:94]
   wire [1:0] _coherencyResponseBuffer_response_T_4 = {_coherencyResponseBuffer_response_T_2,
     _coherencyResponseBuffer_response_T_3}; // @[cacheLookupUnit.scala 474:91]
+  wire [22:0] _GEN_660 = 2'h1 == updatingSet ? tagChunks_1 : tagChunks_0; // @[Cat.scala 33:{92,92}]
+  wire [22:0] _GEN_661 = 2'h2 == updatingSet ? tagChunks_2 : _GEN_660; // @[Cat.scala 33:{92,92}]
+  wire [22:0] _GEN_662 = 2'h3 == updatingSet ? tagChunks_3 : _GEN_661; // @[Cat.scala 33:{92,92}]
+  wire [35:0] _writeBackBuffer_address_T_3 = {_GEN_662,readBuffer_address[12:6],6'h0}; // @[Cat.scala 33:92]
   wire  toReservationRegisterWire = operationValid & _GEN_558; // @[cacheLookupUnit.scala 194:23]
-  wire  _GEN_666 = operationValid ? 1'h0 : _GEN_38; // @[cacheLookupUnit.scala 194:23 195:22]
+  wire  _GEN_670 = operationValid ? 1'h0 : _GEN_38; // @[cacheLookupUnit.scala 194:23 195:22]
   wire  toMemoryResponseValidWire = operationValid & _GEN_575; // @[cacheLookupUnit.scala 194:23]
   wire  toWriteBackValidWire = operationValid & _GEN_580; // @[cacheLookupUnit.scala 194:23]
   wire  toReplayValidWire = operationValid & _GEN_573; // @[cacheLookupUnit.scala 194:23]
   wire  toLastMissRecordRegister = operationValid & _GEN_574; // @[cacheLookupUnit.scala 194:23]
   wire  toCoherencyResponseValidWire = operationValid & isCoherentWire; // @[cacheLookupUnit.scala 194:23]
-  wire  _GEN_689 = operationValid ? toReplayValidWire : _GEN_10; // @[cacheLookupUnit.scala 194:23 452:24]
-  wire [4:0] _GEN_692 = operationValid ? readBuffer_branchMask : replayBuffer_branchMask; // @[cacheLookupUnit.scala 194:23 146:29 455:29]
-  wire  _GEN_697 = operationValid ? toMemoryResponseValidWire : _memoryResponseBuffer_valid_T; // @[cacheLookupUnit.scala 194:23 159:30 462:32]
-  wire  _GEN_710 = operationValid ? toLastMissRecordRegister : _GEN_1; // @[cacheLookupUnit.scala 194:23 486:34]
+  wire  _GEN_693 = operationValid ? toReplayValidWire : _GEN_10; // @[cacheLookupUnit.scala 194:23 452:24]
+  wire [4:0] _GEN_696 = operationValid ? readBuffer_branchMask : replayBuffer_branchMask; // @[cacheLookupUnit.scala 194:23 146:29 455:29]
+  wire  _GEN_701 = operationValid ? toMemoryResponseValidWire : _memoryResponseBuffer_valid_T; // @[cacheLookupUnit.scala 194:23 159:30 462:32]
+  wire [35:0] _GEN_712 = operationValid ? _writeBackBuffer_address_T_3 : {{4'd0}, writeBackBuffer_address}; // @[cacheLookupUnit.scala 194:23 482:29 168:32]
+  wire  _GEN_714 = operationValid ? toLastMissRecordRegister : _GEN_1; // @[cacheLookupUnit.scala 194:23 486:34]
   wire [4:0] _T_124 = readBuffer_branchMask & branchOps_branchMask; // @[utils.scala 176:32]
   wire  _T_125 = |_T_124; // @[utils.scala 176:56]
   wire [4:0] _replayBuffer_branchMask_T = readBuffer_branchMask ^ branchOps_branchMask; // @[utils.scala 177:49]
-  wire [4:0] _GEN_717 = |_T_124 ? _replayBuffer_branchMask_T : _GEN_692; // @[utils.scala 176:61 177:27]
-  wire  _GEN_718 = _T_125 ? 1'h0 : _GEN_689; // @[utils.scala 181:61 182:22]
-  wire [4:0] _GEN_719 = branchOps_passed ? _GEN_717 : _GEN_692; // @[utils.scala 174:28]
-  wire  _GEN_720 = branchOps_passed ? _GEN_689 : _GEN_718; // @[utils.scala 174:28]
-  wire [4:0] _GEN_721 = branchOps_passed ? _GEN_41 : replayBuffer_branchMask; // @[utils.scala 174:28 184:26]
-  wire [4:0] _GEN_724 = toReplayValidWire ? _GEN_721 : _GEN_41; // @[cacheLookupUnit.scala 502:30]
-  wire [4:0] _GEN_725 = |_T_124 ? _replayBuffer_branchMask_T : _GEN_22; // @[utils.scala 176:61 177:27]
-  wire  _GEN_726 = _T_125 ? 1'h0 : _GEN_697; // @[utils.scala 181:61 182:22]
-  wire [4:0] _GEN_727 = branchOps_passed ? _GEN_725 : _GEN_22; // @[utils.scala 174:28]
-  wire  _GEN_728 = branchOps_passed ? _GEN_697 : _GEN_726; // @[utils.scala 174:28]
-  wire [4:0] _GEN_729 = branchOps_passed ? _GEN_724 : memoryResponseBuffer_branchMask; // @[utils.scala 174:28 184:26]
+  wire [4:0] _GEN_721 = |_T_124 ? _replayBuffer_branchMask_T : _GEN_696; // @[utils.scala 176:61 177:27]
+  wire  _GEN_722 = _T_125 ? 1'h0 : _GEN_693; // @[utils.scala 181:61 182:22]
+  wire [4:0] _GEN_723 = branchOps_passed ? _GEN_721 : _GEN_696; // @[utils.scala 174:28]
+  wire  _GEN_724 = branchOps_passed ? _GEN_693 : _GEN_722; // @[utils.scala 174:28]
+  wire [4:0] _GEN_725 = branchOps_passed ? _GEN_41 : replayBuffer_branchMask; // @[utils.scala 174:28 184:26]
+  wire [4:0] _GEN_728 = toReplayValidWire ? _GEN_725 : _GEN_41; // @[cacheLookupUnit.scala 502:30]
+  wire [4:0] _GEN_729 = |_T_124 ? _replayBuffer_branchMask_T : _GEN_22; // @[utils.scala 176:61 177:27]
+  wire  _GEN_730 = _T_125 ? 1'h0 : _GEN_701; // @[utils.scala 181:61 182:22]
+  wire [4:0] _GEN_731 = branchOps_passed ? _GEN_729 : _GEN_22; // @[utils.scala 174:28]
+  wire  _GEN_732 = branchOps_passed ? _GEN_701 : _GEN_730; // @[utils.scala 174:28]
+  wire [4:0] _GEN_733 = branchOps_passed ? _GEN_728 : memoryResponseBuffer_branchMask; // @[utils.scala 174:28 184:26]
   wire [4:0] _T_134 = replayBuffer_branchMask & branchOps_branchMask; // @[utils.scala 193:31]
   wire  _T_135 = |_T_134; // @[utils.scala 193:55]
   wire [4:0] _replayBuffer_branchMask_T_1 = replayBuffer_branchMask ^ branchOps_branchMask; // @[utils.scala 194:48]
-  wire [4:0] _GEN_733 = |_T_134 ? _replayBuffer_branchMask_T_1 : _GEN_692; // @[utils.scala 193:60 194:27]
-  wire  _GEN_734 = _T_135 ? 1'h0 : _GEN_689; // @[utils.scala 198:60 199:22]
-  wire [4:0] _GEN_735 = branchOps_passed ? _GEN_733 : replayBuffer_branchMask; // @[utils.scala 191:28 201:25]
-  wire  _GEN_736 = branchOps_passed ? _GEN_689 : _GEN_734; // @[utils.scala 191:28]
-  wire [4:0] _GEN_739 = _T_125 ? _replayBuffer_branchMask_T : _GEN_41; // @[utils.scala 193:60 194:27]
-  wire  _GEN_740 = _T_125 ? 1'h0 : _GEN_666; // @[utils.scala 198:60 199:22]
-  wire [4:0] _GEN_741 = branchOps_passed ? _GEN_739 : readBuffer_branchMask; // @[utils.scala 191:28 201:25]
-  wire  _GEN_742 = branchOps_passed ? _GEN_666 : _GEN_740; // @[utils.scala 191:28]
+  wire [4:0] _GEN_737 = |_T_134 ? _replayBuffer_branchMask_T_1 : _GEN_696; // @[utils.scala 193:60 194:27]
+  wire  _GEN_738 = _T_135 ? 1'h0 : _GEN_693; // @[utils.scala 198:60 199:22]
+  wire [4:0] _GEN_739 = branchOps_passed ? _GEN_737 : replayBuffer_branchMask; // @[utils.scala 191:28 201:25]
+  wire  _GEN_740 = branchOps_passed ? _GEN_693 : _GEN_738; // @[utils.scala 191:28]
+  wire [4:0] _GEN_743 = _T_125 ? _replayBuffer_branchMask_T : _GEN_41; // @[utils.scala 193:60 194:27]
+  wire  _GEN_744 = _T_125 ? 1'h0 : _GEN_670; // @[utils.scala 198:60 199:22]
+  wire [4:0] _GEN_745 = branchOps_passed ? _GEN_743 : readBuffer_branchMask; // @[utils.scala 191:28 201:25]
+  wire  _GEN_746 = branchOps_passed ? _GEN_670 : _GEN_744; // @[utils.scala 191:28]
   wire [4:0] _T_142 = lastMissRecordRegister_branchMask & branchOps_branchMask; // @[utils.scala 193:31]
   wire  _T_143 = |_T_142; // @[utils.scala 193:55]
   wire [4:0] _lastMissRecordRegister_branchMask_T = lastMissRecordRegister_branchMask ^ branchOps_branchMask; // @[utils.scala 194:48]
-  wire [4:0] _GEN_745 = |_T_142 ? _lastMissRecordRegister_branchMask_T : lastMissRecordRegister_branchMask; // @[utils.scala 193:60 194:27 cacheLookupUnit.scala 124:39]
-  wire  _GEN_746 = _T_143 ? 1'h0 : _GEN_710; // @[utils.scala 198:60 199:22]
-  wire [4:0] _GEN_747 = branchOps_passed ? _GEN_745 : lastMissRecordRegister_branchMask; // @[utils.scala 191:28 201:25]
-  wire  _GEN_748 = branchOps_passed ? _GEN_710 : _GEN_746; // @[utils.scala 191:28]
+  wire [4:0] _GEN_749 = |_T_142 ? _lastMissRecordRegister_branchMask_T : lastMissRecordRegister_branchMask; // @[utils.scala 193:60 194:27 cacheLookupUnit.scala 124:39]
+  wire  _GEN_750 = _T_143 ? 1'h0 : _GEN_714; // @[utils.scala 198:60 199:22]
+  wire [4:0] _GEN_751 = branchOps_passed ? _GEN_749 : lastMissRecordRegister_branchMask; // @[utils.scala 191:28 201:25]
+  wire  _GEN_752 = branchOps_passed ? _GEN_714 : _GEN_750; // @[utils.scala 191:28]
+  wire [35:0] _GEN_62 = reset ? 36'h0 : _GEN_712; // @[cacheLookupUnit.scala 168:{32,32}]
   moduleForwardingMemory dataBRAM_0 ( // @[cacheLookupUnit.scala 54:39]
     .clock(dataBRAM_0_clock),
     .rdAddr(dataBRAM_0_rdAddr),
@@ -37334,14 +37340,14 @@ module cacheLookupUnit(
       lastMissRecordRegister_valid <= 1'h0; // @[cacheLookupUnit.scala 124:39]
     end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
       if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
-        lastMissRecordRegister_valid <= _GEN_710;
+        lastMissRecordRegister_valid <= _GEN_714;
       end else if (lastMissRecordRegister_valid) begin // @[cacheLookupUnit.scala 519:41]
-        lastMissRecordRegister_valid <= _GEN_748;
+        lastMissRecordRegister_valid <= _GEN_752;
       end else begin
-        lastMissRecordRegister_valid <= _GEN_710;
+        lastMissRecordRegister_valid <= _GEN_714;
       end
     end else begin
-      lastMissRecordRegister_valid <= _GEN_710;
+      lastMissRecordRegister_valid <= _GEN_714;
     end
     if (reset) begin // @[cacheLookupUnit.scala 124:39]
       lastMissRecordRegister_address <= 32'h0; // @[cacheLookupUnit.scala 124:39]
@@ -37358,7 +37364,7 @@ module cacheLookupUnit(
     end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
       if (!(operationValid)) begin // @[cacheLookupUnit.scala 501:25]
         if (lastMissRecordRegister_valid) begin // @[cacheLookupUnit.scala 519:41]
-          lastMissRecordRegister_branchMask <= _GEN_747;
+          lastMissRecordRegister_branchMask <= _GEN_751;
         end
       end
     end
@@ -37376,14 +37382,14 @@ module cacheLookupUnit(
       readBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 140:27]
     end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
       if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
-        readBuffer_valid <= _GEN_666;
+        readBuffer_valid <= _GEN_670;
       end else if (readBuffer_valid) begin // @[cacheLookupUnit.scala 516:29]
-        readBuffer_valid <= _GEN_742;
+        readBuffer_valid <= _GEN_746;
       end else begin
-        readBuffer_valid <= _GEN_666;
+        readBuffer_valid <= _GEN_670;
       end
     end else begin
-      readBuffer_valid <= _GEN_666;
+      readBuffer_valid <= _GEN_670;
     end
     if (reset) begin // @[cacheLookupUnit.scala 140:27]
       readBuffer_address <= 32'h0; // @[cacheLookupUnit.scala 140:27]
@@ -37400,12 +37406,12 @@ module cacheLookupUnit(
     end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
       if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
         if (toMemoryResponseValidWire) begin // @[cacheLookupUnit.scala 505:38]
-          readBuffer_branchMask <= _GEN_729;
+          readBuffer_branchMask <= _GEN_733;
         end else begin
-          readBuffer_branchMask <= _GEN_724;
+          readBuffer_branchMask <= _GEN_728;
         end
       end else if (readBuffer_valid) begin // @[cacheLookupUnit.scala 516:29]
-        readBuffer_branchMask <= _GEN_741;
+        readBuffer_branchMask <= _GEN_745;
       end else begin
         readBuffer_branchMask <= _GEN_41;
       end
@@ -37452,17 +37458,17 @@ module cacheLookupUnit(
     end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
       if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
         if (toReplayValidWire) begin // @[cacheLookupUnit.scala 502:30]
-          replayBuffer_valid <= _GEN_720;
+          replayBuffer_valid <= _GEN_724;
         end else begin
-          replayBuffer_valid <= _GEN_689;
+          replayBuffer_valid <= _GEN_693;
         end
       end else if (replayBuffer_valid & ~toReplay_request_valid) begin // @[cacheLookupUnit.scala 511:58]
-        replayBuffer_valid <= _GEN_736;
+        replayBuffer_valid <= _GEN_740;
       end else begin
-        replayBuffer_valid <= _GEN_689;
+        replayBuffer_valid <= _GEN_693;
       end
     end else begin
-      replayBuffer_valid <= _GEN_689;
+      replayBuffer_valid <= _GEN_693;
     end
     if (reset) begin // @[cacheLookupUnit.scala 146:29]
       replayBuffer_address <= 32'h0; // @[cacheLookupUnit.scala 146:29]
@@ -37479,17 +37485,17 @@ module cacheLookupUnit(
     end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
       if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
         if (toReplayValidWire) begin // @[cacheLookupUnit.scala 502:30]
-          replayBuffer_branchMask <= _GEN_719;
+          replayBuffer_branchMask <= _GEN_723;
         end else begin
-          replayBuffer_branchMask <= _GEN_692;
+          replayBuffer_branchMask <= _GEN_696;
         end
       end else if (replayBuffer_valid & ~toReplay_request_valid) begin // @[cacheLookupUnit.scala 511:58]
-        replayBuffer_branchMask <= _GEN_735;
+        replayBuffer_branchMask <= _GEN_739;
       end else begin
-        replayBuffer_branchMask <= _GEN_692;
+        replayBuffer_branchMask <= _GEN_696;
       end
     end else begin
-      replayBuffer_branchMask <= _GEN_692;
+      replayBuffer_branchMask <= _GEN_696;
     end
     if (reset) begin // @[cacheLookupUnit.scala 146:29]
       replayBuffer_robAddr <= 4'h0; // @[cacheLookupUnit.scala 146:29]
@@ -37516,15 +37522,15 @@ module cacheLookupUnit(
     end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
       if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
         if (toMemoryResponseValidWire) begin // @[cacheLookupUnit.scala 505:38]
-          memoryResponseBuffer_valid <= _GEN_728;
+          memoryResponseBuffer_valid <= _GEN_732;
         end else begin
-          memoryResponseBuffer_valid <= _GEN_697;
+          memoryResponseBuffer_valid <= _GEN_701;
         end
       end else begin
-        memoryResponseBuffer_valid <= _GEN_697;
+        memoryResponseBuffer_valid <= _GEN_701;
       end
     end else begin
-      memoryResponseBuffer_valid <= _GEN_697;
+      memoryResponseBuffer_valid <= _GEN_701;
     end
     if (reset) begin // @[cacheLookupUnit.scala 153:37]
       memoryResponseBuffer_address <= 32'h0; // @[cacheLookupUnit.scala 153:37]
@@ -37541,7 +37547,7 @@ module cacheLookupUnit(
     end else if (branchOps_valid) begin // @[cacheLookupUnit.scala 499:24]
       if (operationValid) begin // @[cacheLookupUnit.scala 501:25]
         if (toMemoryResponseValidWire) begin // @[cacheLookupUnit.scala 505:38]
-          memoryResponseBuffer_branchMask <= _GEN_727;
+          memoryResponseBuffer_branchMask <= _GEN_731;
         end else begin
           memoryResponseBuffer_branchMask <= _GEN_22;
         end
@@ -37611,11 +37617,7 @@ module cacheLookupUnit(
     end else if (toWriteBack_ready) begin // @[cacheLookupUnit.scala 170:26]
       writeBackBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 172:27]
     end
-    if (reset) begin // @[cacheLookupUnit.scala 168:32]
-      writeBackBuffer_address <= 32'h0; // @[cacheLookupUnit.scala 168:32]
-    end else if (operationValid) begin // @[cacheLookupUnit.scala 194:23]
-      writeBackBuffer_address <= readBuffer_address; // @[cacheLookupUnit.scala 482:29]
-    end
+    writeBackBuffer_address <= _GEN_62[31:0]; // @[cacheLookupUnit.scala 168:{32,32}]
     if (reset) begin // @[cacheLookupUnit.scala 168:32]
       writeBackBuffer_data <= 512'h0; // @[cacheLookupUnit.scala 168:32]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 194:23]
