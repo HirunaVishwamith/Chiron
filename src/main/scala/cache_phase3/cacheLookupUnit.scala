@@ -372,8 +372,8 @@ class cacheLookupUnit extends Module{
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
         toReservationRegisterWire := isLRWire
-        toWriteBackValidWire := dirtyBitWire && isMissWire
-        dataBRAMUpdateWire := isMissWire && isReplayValid
+        toWriteBackValidWire := dirtyBitWire && isReplayValid && validBitWire && isMissWire
+        dataBRAMUpdateWire := isReplayValid
       } .otherwise {
         toReplayValidWire := true.B
         toLastMissRecordRegister := !isReadWire
@@ -385,7 +385,7 @@ class cacheLookupUnit extends Module{
     }
     when(isWriteWire || isAtmoicWriteWire){
       when(isReplayValid || (!isPermissionMiss && !isMissWire)){
-        toWriteBackValidWire := dirtyBitWire && isMissWire
+        toWriteBackValidWire := dirtyBitWire && isReplayValid && validBitWire && isMissWire
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
       } .otherwise {
