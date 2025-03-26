@@ -21,11 +21,11 @@ class ACEUnit(
 ) extends Module{
   val readRequest = IO(new Bundle {
     val ready = Output(Bool())
-    val request = Input(new requestWithDataWire)
+    val request = Input(new requestPipelineWire)
   })
   val readResponse = IO(new Bundle {
     val ready = Input(Bool())
-    val request = Output(new replayWithCacheLineWire)
+    val request = Output(new requestPipelineWire)
   })
   val writeRequest = IO(new Bundle {
     val ready = Output(Bool())
@@ -105,33 +105,17 @@ class ACEUnit(
   bus.CDDATA := 0.U
   bus.CDLAST := false.B
 
-  val readBuffer =  RegInit(0.U.asTypeOf(new replayWithBranchInvalidWire))
-  readRequest.ready := !readBuffer.valid
-  when(!readBuffer.valid){
-    readBuffer.valid := readRequest.request.valid
-    readBuffer.address := readRequest.request.address
-    readBuffer.instruction := readRequest.request.instruction
-    readBuffer.branchMask := readRequest.request.branchMask
-    readBuffer.robAddr := readRequest.request.robAddr
-    readBuffer.prfDest := readRequest.request.prfDest
-    readBuffer.writeEn := readRequest.request.writeEn
-    readBuffer.writeData := readRequest.request.writeData
+  val readBuffer =  RegInit(0.U.asTypeOf(new requestPipelineWire))
+  readRequest.ready := !readBuffer.valid || (readBuffer.valid && readBuffer.branch.valid)
+  when(readRequest.request.valid && readRequest.request.branch.valid){
+    readBuffer := readRequest.request
   }
-  val responseBuffer = RegInit(0.U.asTypeOf(new replayWithBranchInvalidWire))
-  readResponse.request.valid := responseBuffer.valid && !responseBuffer.branchInvalid
-  readResponse.request.address := responseBuffer.address
-  readResponse.request.instruction := responseBuffer.instruction
-  readResponse.request.branchMask := responseBuffer.branchMask
-  readResponse.request.robAddr := responseBuffer.robAddr
-  readResponse.request.prfDest := responseBuffer.prfDest
-  readResponse.request.cacheLine := responseBuffer.cacheLine
-  readResponse.request.response := responseBuffer.response
-  readResponse.request.writeEn := responseBuffer.writeEn
-  readResponse.request.writeData := responseBuffer.writeData
+  val responseBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  readResponse.request := responseBuffer
 
-  val ACEMSHR = Module(new fifoWithBranchOpsII(
+  val ACEMSHR = Module(new fifoWithBranchOps(
     depth = schedulerDepth,
-    traitType = new replayWithBranchInvalidWire
+    traitType = new requestPipelineWire
   ))
   zeroInit(ACEMSHR.write.data)
   ACEMSHR.read.ready := false.B
@@ -149,7 +133,7 @@ class ACEUnit(
 
   val coherencyResponseBuffer = RegInit(0.U.asTypeOf(new coherencyResponseWire))
   coherencyResponse.ready := !coherencyResponseBuffer.valid
-  coherencyResponseBuffer := Mux(!coherencyResponseBuffer.valid ,coherencyResponse.request, coherencyResponseBuffer)
+  coherencyResponseBuffer := Mux(!coherencyResponseBuffer.valid, coherencyResponse.request, coherencyResponseBuffer)
 
   //-----------------------AXI Write-------------------------------//
   val writeIdleState :: writeRequestState :: writeResponseState :: Nil = Enum(3)
@@ -222,12 +206,12 @@ class ACEUnit(
       bus.ARQOS := "b0000".U
 
       bus.ARDOMAIN := "b10".U
-      bus.ARSNOOP := "b0001".U    
-      switch(Cat(readBuffer.response)){
-        is("b00".U){ bus.ARSNOOP := "b0001".U}  //ReadShared
-        is("b01".U){ bus.ARSNOOP := "b0111".U}  //ReadUnique
-        is("b11".U){ bus.ARSNOOP := "b1011".U}  //CleanUnique
-      }
+      // bus.ARSNOOP := "b0001".U    //!Not implemented yet
+      // switch(Cat(readBuffer.cacheLine.response)){
+      //   is("b00".U){ bus.ARSNOOP := "b0001".U}  //ReadShared
+      //   is("b01".U){ bus.ARSNOOP := "b0111".U}  //ReadUnique
+      //   is("b11".U){ bus.ARSNOOP := "b1011".U}  //CleanUnique
+      // }
       bus.ARSNOOP := "b0111".U //ReadUnique
       bus.ARBAR := "b00".U
 
@@ -264,13 +248,13 @@ class ACEUnit(
         readCounter.incrm := true.B
         readDataVec(readCounter.count) := bus.RDATA 
         readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
-        responseBuffer.response := bus.RRESP(3,2) //Not checking for response validity in isShared and passDirty 
+        responseBuffer.cacheLine.response := bus.RRESP(3,2) //Not checking for response validity in isShared and passDirty 
       }
       readACEResponseState := Mux(bus.RLAST && bus.RVALID && readResponseValid, readDataOutState, readResponseState)
     }
     is(readDataOutState){
       responseBuffer.valid := true.B
-      responseBuffer.cacheLine := Cat(readDataVec.reverse)
+      responseBuffer.cacheLine.cacheLine := Cat(readDataVec.reverse)
       
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }
@@ -319,7 +303,7 @@ class ACEUnit(
       
       val numSlices = length + 1
       val writeChunks = VecInit(Seq.tabulate(numSlices)(i => 
-        coherencyResponseBuffer.data((i + 1) * busWidth - 1, i * busWidth)
+        coherencyResponseBuffer.cacheLine((i + 1) * busWidth - 1, i * busWidth)
       ))
       when(bus.CDREADY){
         coherentCounter.incrm := true.B 

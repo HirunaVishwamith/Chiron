@@ -6,6 +6,8 @@ import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import dataclass.data
 
+//TODO : Take the branch different cases to functions
+
 class moduleCounter(n: Int) extends Module {
   val width = if (n == 1) 1 else log2Ceil(n)
   val count  = IO(Output(UInt(width.W)))  // Apply the same width logic to count
@@ -41,6 +43,7 @@ class moduleForwardingMemory (addrWidth : Int, dataWidth : Int, depth : Int) ext
 }
 
 object ChiselUtils {
+  //To initalize given object fields to zero, or false
   def zeroInit[T <: Bundle](bundle: T): Unit = {
     bundle.getElements.foreach {
       case nestedBundle: Bundle => zeroInit(nestedBundle) // Recursive call for nested Bundles
@@ -49,156 +52,87 @@ object ChiselUtils {
       case _ => // Do nothing for unsupported types
     }
   }
-  def fifoWriteUpdate[bufT <: requestTrait, reqT <:  requestTrait](
-      buffer: requestTrait,
+
+  def regWriteUpdate[T <: branchTrait](
+      buffer: branchTrait,
       branchOps: branchOps, 
-      request: requestTrait
+      wireBundle: branchTrait
   ): Unit = {
-    when(branchOps.passed) {
-      // BranchPass and match
-      when((request.branchMask & branchOps.branchMask).orR) {
-        buffer.branchMask := request.branchMask ^ branchOps.branchMask
+    when(branchOps.valid){
+      when(branchOps.passed) {
+        // BranchPass and match
+        when((wireBundle.mask & branchOps.branchMask).orR) {
+          buffer.mask := wireBundle.mask ^ branchOps.branchMask
+        }.otherwise {
+          buffer.mask := wireBundle.mask
+        }
+        buffer.valid := wireBundle.valid 
       }.otherwise {
-        buffer.branchMask := request.branchMask
+        // BranchFail and match
+        when((buffer.mask & branchOps.branchMask).orR) {
+          buffer.valid := false.B
+          buffer.mask := 0.U
+        }.otherwise {
+          buffer.valid := wireBundle.valid
+          buffer.mask := wireBundle.mask
+        }
       }
-      buffer.valid := request.valid 
-    }.otherwise {
-      // BranchFail and match
-      when((buffer.branchMask & branchOps.branchMask).orR) {
-        buffer.valid := false.B
-      }.otherwise {
-        buffer.valid := request.valid
-      }
-      buffer.branchMask := request.branchMask
+    } .otherwise {
+        buffer.valid := wireBundle.valid 
+        buffer.mask := wireBundle.mask
     }
   }
-  def fifoReadUpdate[bufT <: requestTrait, reqT <:  requestTrait](
-      buffer: requestTrait,
-      branchOps: branchOps, 
-      request: requestTrait,
-      reg : Bool
+
+  def regReadUpdate[T <: branchTrait](
+    wireBundle: branchTrait,
+    branchOps: branchOps,
+    buffer: branchTrait
   ): Unit = {
     when(branchOps.valid) {
       when(branchOps.passed) {
         //BranchPass and match
-        when((buffer.branchMask & branchOps.branchMask).orR) {
-          request.branchMask := buffer.branchMask ^ branchOps.branchMask
+        when((buffer.mask & branchOps.branchMask).orR) {
+          wireBundle.mask := buffer.mask ^ branchOps.branchMask
         }.otherwise {
           //BranchPass and no match
-          request.branchMask := buffer.branchMask
+          wireBundle.mask := buffer.mask
         }
-        request.valid := !reg && buffer.valid
+        wireBundle.valid := buffer.valid
       }.otherwise {
         //BranchFail and match
-        when((buffer.branchMask & branchOps.branchMask).orR) {
-          request.branchMask := 0.U
-          request.valid := false.B
+        when((buffer.mask & branchOps.branchMask).orR) {
+          wireBundle.mask := 0.U
+          wireBundle.valid := false.B
         } .otherwise{
           //BranchFail and no match
-          request.branchMask := buffer.branchMask
-          request.valid := !reg && buffer.valid
+          wireBundle.mask := buffer.mask
+          wireBundle.valid := buffer.valid
         }
       }
     }.otherwise {
-      request.branchMask := buffer.branchMask
-      request.valid := !reg && buffer.valid
+      wireBundle.mask := buffer.mask
+      wireBundle.valid := buffer.valid
     }    
   }
-  def branchUpdateWithinReg[T <: requestTrait](buffer: T, branchOps: branchOps): Unit = {
+
+  def regRecordUpdate[T <: branchTrait](
+    buffer: T, branchOps: branchOps
+    ): Unit = {
     when(buffer.valid && branchOps.valid) {
       when(branchOps.passed) {
-        when((buffer.branchMask & branchOps.branchMask).orR) {
-          buffer.branchMask := buffer.branchMask ^ branchOps.branchMask
+        when((buffer.mask & branchOps.branchMask).orR) {
+          buffer.mask := buffer.mask ^ branchOps.branchMask
         }
+        buffer.valid := buffer.valid
       }.otherwise {
-        when((buffer.branchMask & branchOps.branchMask).orR) {
-          buffer match {
-            case buf: requestWithBranchInvalid => buf.branchInvalid := false.B
-            case buf: requestTrait => buf.valid := false.B
-          }
+        when((buffer.mask & branchOps.branchMask).orR) {
+          buffer.valid := false.B
+          buffer.mask := 0.U
         }
       }
-    }
-  }
-  def outgoingBranchUpdateInvalidate[bufT <: requestWithBranchInvalid, reqT <:  cacheLookupTrait](
-      buffer: requestWithBranchInvalid, 
-      branchOps: branchOps, 
-      request: cacheLookupTrait
-  ): Unit = {
-    when(branchOps.passed) {
-      // BranchPass and match
-      when((buffer.branchMask & branchOps.branchMask).orR) {
-        request.branchMask := buffer.branchMask ^ branchOps.branchMask
-      }.otherwise {
-        request.branchMask := buffer.branchMask
-      }
-      request.valid := buffer.valid && !buffer.branchInvalid
-    }.otherwise {
-      // BranchFail and match
-      when((buffer.branchMask & branchOps.branchMask).orR) {
-        request.valid := false.B
-      }.otherwise {
-        request.valid := buffer.valid && !buffer.branchInvalid
-      }
-      request.branchMask := buffer.branchMask
-    }
-  }
-  def outgoingBranchUpdateData[bufT <: requestTrait](
-      buffer: requestTrait, 
-      branchOps: branchOps, 
-      request: requestTrait
-  ): Unit = {
-    when(branchOps.passed) {
-      // BranchPass and match
-      when((buffer.branchMask & branchOps.branchMask).orR) {
-        request.branchMask := buffer.branchMask ^ branchOps.branchMask
-      }.otherwise {
-        request.branchMask := buffer.branchMask
-      }
-      request.valid := buffer.valid
-    }.otherwise {
-      // BranchFail and match
-      when((buffer.branchMask & branchOps.branchMask).orR) {
-        request.valid := false.B
-      }.otherwise {
-        request.valid := buffer.valid
-      }
-      request.branchMask := buffer.branchMask
-    }
-  }
-  def cacheBranchWriteUpdate[bufT <: requestTrait](
-      buffer: requestTrait, 
-      branchOps: branchOps, 
-      request: requestTrait
-  ): Unit = {
-    when(branchOps.passed) {
-      // BranchPass and match
-      when((request.branchMask & branchOps.branchMask).orR) {
-        buffer.branchMask := request.branchMask ^ branchOps.branchMask
-      }
-    }.otherwise {
-      // BranchFail and match
-      when((request.branchMask & branchOps.branchMask).orR) {
-        buffer.valid := false.B
-      }
-      request.branchMask := buffer.branchMask
-    }
-  }
-  def cacheBranchRegUpdate[bufT <: requestTrait, reqT <:  cacheLookupTrait](
-      buffer: requestTrait, 
-      branchOps: branchOps, 
-  ): Unit = {
-    when(branchOps.passed) {
-      // BranchPass and match
-      when((buffer.branchMask & branchOps.branchMask).orR) {
-        buffer.branchMask := buffer.branchMask ^ branchOps.branchMask
-      }
-    }.otherwise {
-      // BranchFail and match
-      when((buffer.branchMask & branchOps.branchMask).orR) {
-        buffer.valid := false.B
-      }
-      buffer.branchMask := buffer.branchMask
+    } .otherwise {
+      buffer.mask := buffer.mask
+      buffer.valid := buffer.valid      
     }
   }
 }

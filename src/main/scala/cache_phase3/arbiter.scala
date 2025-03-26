@@ -16,23 +16,24 @@ import cache_phase3.ChiselUtils._
 
 class arbiter extends Module {
   val request = IO(new Bundle{
-    val request = new request
+    val request = Input(new requestPipelineWire)
     val isSpeculative = Input(Bool())
     val inorderReady = Output(Bool())
     val speculativeReady = Output(Bool())
   })
   val toPeripheral = IO(new Bundle {
     val ready = Input(Bool())
-    val request = Output(new requestWithDataWire)
+    val request = Output(new requestPipelineWire)
   })
   val toCacheLookup = IO(new Bundle {
     val ready = Input(Bool())
     val holdInOrder = Input(Bool())
-    val request = Output(new cacheLookupWire)
+    val requestType = Output(UInt(2.W))
+    val request = Output(new requestPipelineWire)
   })
   val replayRequest = IO(new Bundle {
     val ready = Output(Bool())
-    val request = Input(new replayWithCacheLineWire)
+    val request = Input(new requestPipelineWire)
   })
   val coherencyRequest = IO(new Bundle {
     val ready = Output(Bool())
@@ -51,45 +52,37 @@ class arbiter extends Module {
   request.inorderReady := false.B
   zeroInit(toPeripheral.request)
   zeroInit(toCacheLookup.request)
+  toCacheLookup.requestType := 0.U
   replayRequest.ready := false.B
   coherencyRequest.ready := false.B
   writeCommit.ready := false.B
   fenceReady := false.B
 
-  val speculativeBuffer = RegInit(0.U.asTypeOf(new requestWire))
+  val requestTypeWire = WireInit(0.U(2.W))
 
-  val inorderBuffer = RegInit(0.U.asTypeOf(new requestWithBranchInvalidWire))
-
-  val operationBuffer = RegInit(0.U.asTypeOf(new requestWithBranchInvalidWire))
-
+  val speculativeBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  val inorderBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  val operationBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val coherencyRequestBuffer = RegInit(0.U.asTypeOf(new coherencyRequestWire))
-
-  val replayRequestBuffer = RegInit(0.U.asTypeOf(new replayWithCacheLineWire))
+  val replayRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
 
   request.speculativeReady := !speculativeBuffer.valid
   request.inorderReady := !(operationBuffer.valid || inorderBuffer.valid)
 
   //---------------------Request Enqueue---------------------//
-  when(request.request.valid){
+  when(request.request.valid && request.request.branch.valid){
     when(request.isSpeculative){
       speculativeBuffer:= request.request
     } .otherwise {   
-      operationBuffer.valid := request.request.valid
-      operationBuffer.address := request.request.address
-      operationBuffer.instruction := request.request.instruction
-      operationBuffer.branchMask := request.request.branchMask
-      operationBuffer.robAddr := request.request.robAddr
-      operationBuffer.prfDest := request.request.prfDest
-      operationBuffer.branchInvalid := false.B
-      operationBuffer.writeEn := false.B
-      operationBuffer.writeData := 0.U
+      operationBuffer := request.request
     }
   } 
   when(!coherencyRequestBuffer.valid && coherencyRequest.request.valid){
     coherencyRequestBuffer := coherencyRequest.request
   }
   coherencyRequest.ready := !coherencyRequestBuffer.valid
-  when(!replayRequestBuffer.valid && replayRequest.request.valid){
+
+  when(!replayRequestBuffer.valid && replayRequest.request.valid && replayRequest.request.branch.valid){
     replayRequestBuffer := replayRequest.request
   }
   replayRequest.ready := !replayRequestBuffer.valid
@@ -110,69 +103,77 @@ class arbiter extends Module {
   })
   operationWires := 0.U.asTypeOf(operationWires) 
   operationWires.valid := operationBuffer.valid
-  operationWires.isRead := operationBuffer.instruction(6,0) === "b0000011".U
-  operationWires.isWrite := operationBuffer.instruction(6,0) === "b0100011".U
-  operationWires.rAtomics := operationBuffer.instruction(6,0) === "b0101111".U
-  operationWires.isLR := operationBuffer.instruction(31,27) === "b00010".U && operationWires.rAtomics
-  operationWires.isSC := operationBuffer.instruction(31,27) === "b00011".U && operationWires.rAtomics
-  operationWires.isPeriRead := operationBuffer.instruction(6,0) === "b0000011".U && operationBuffer.address === FIFO_ADDR_RX.U
-  operationWires.isPeriWrite := operationBuffer.instruction(6,0) === "b0100011".U && operationBuffer.address === FIFO_ADDR_TX.U
+  operationWires.isRead := operationBuffer.core.instruction(6,0) === "b0000011".U
+  operationWires.isWrite := operationBuffer.core.instruction(6,0) === "b0100011".U
+  operationWires.rAtomics := operationBuffer.core.instruction(6,0) === "b0101111".U
+  operationWires.isLR := operationBuffer.core.instruction(31,27) === "b00010".U && operationWires.rAtomics
+  operationWires.isSC := operationBuffer.core.instruction(31,27) === "b00011".U && operationWires.rAtomics
+  operationWires.isPeriRead := operationBuffer.core.instruction(6,0) === "b0000011".U && operationBuffer.address === FIFO_ADDR_RX.U
+  operationWires.isPeriWrite := operationBuffer.core.instruction(6,0) === "b0100011".U && operationBuffer.address === FIFO_ADDR_TX.U
 
   switch(operationState){
     is(idleState){
-      operationBuffer.writeEn:= false.B
+      operationBuffer.writeData.valid:= false.B
       when(operationWires.valid){
         when(operationWires.isRead){
+
           inorderBuffer := operationBuffer
           operationBuffer.valid := false.B
         } .elsewhen(operationWires.isWrite){
+
           operationState := commitReadyState
         } .elsewhen(operationWires.isLR){
+
           inorderBuffer := operationBuffer
           operationState := waitState
         } .elsewhen(operationWires.isSC){
+
           inorderBuffer := operationBuffer
-          inorderBuffer.writeEn := false.B
+          inorderBuffer.writeData.valid := false.B
           operationState := hollowState
         } .elsewhen(operationWires.rAtomics){
+
           inorderBuffer := operationBuffer
-          inorderBuffer.writeEn := false.B
+          inorderBuffer.writeData.valid := false.B
           operationState := waitState
         } .otherwise{
+
           operationBuffer.valid := false.B
         }
       }
     }
     is(commitReadyState){
+
       writeCommit.ready := true.B
       operationState := Mux(writeCommit.fired, commitFiredState, commitReadyState)
     }
     is(commitFiredState){
       when(writeDataIn.valid){
-        when(!operationWires.isLR){
-          inorderBuffer := operationBuffer
-        }
-        inorderBuffer.writeData := writeDataIn.data
-        inorderBuffer.writeEn := writeDataIn.valid
+
+        inorderBuffer := Mux(!operationWires.isLR, operationBuffer, inorderBuffer)
+        inorderBuffer.writeData.data := writeDataIn.data
+        inorderBuffer.writeData.valid := writeDataIn.valid
         operationBuffer.valid := false.B
         operationState := idleState
       }
     }
     is(hollowState){ 
-      operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
+      operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.core.instruction, 
                                 commitReadyState, hollowState)
     }
     is(waitState){
-      operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.instruction, 
+      operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.core.instruction, 
                                 commitReadyState, waitState)
     }
 
   }
-  //TODO : When data not passed on
-  branchUpdateWithinReg(speculativeBuffer, branchOps)
-  branchUpdateWithinReg(replayRequestBuffer, branchOps)
-  branchUpdateWithinReg(operationBuffer, branchOps)
-  branchUpdateWithinReg(inorderBuffer, branchOps)
+
+  when(requestTypeWire === 0.U){
+    regRecordUpdate(speculativeBuffer.branch, branchOps)
+    regRecordUpdate(replayRequestBuffer.branch, branchOps)
+    regRecordUpdate(operationBuffer.branch, branchOps)
+    regRecordUpdate(inorderBuffer.branch, branchOps)
+  }
 
   //---------------------Request Dequeue---------------------//
   //* Priority Order
@@ -184,99 +185,67 @@ class arbiter extends Module {
   when(toCacheLookup.ready && !(isPauseForBoolean && branchOps.valid)) {
     when(rAtmoicsWritePending){
       when(!toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
-        toCacheLookup.request.valid := inorderBuffer.valid && inorderBuffer.branchInvalid
-        toCacheLookup.request.address := inorderBuffer.address
-        toCacheLookup.request.instruction := inorderBuffer.instruction
-        toCacheLookup.request.branchMask := inorderBuffer.branchMask
-        toCacheLookup.request.robAddr := inorderBuffer.robAddr
-        toCacheLookup.request.prfDest := inorderBuffer.prfDest
-        toCacheLookup.request.writeEn := inorderBuffer.writeEn
-        toCacheLookup.request.writeData := inorderBuffer.writeData
-        toCacheLookup.request.requestType := "b01".U
-
-        when(branchOps.valid){
-          outgoingBranchUpdateInvalidate(inorderBuffer, branchOps, toCacheLookup.request)
-        }
+        inorderBuffer.valid := false.B
+        
+        toCacheLookup.request := inorderBuffer
+        requestTypeWire := "b01".U
+        regReadUpdate(inorderBuffer.branch, branchOps, toCacheLookup.request.branch)
+        
         rAtmoicsWritePending := false.B
       } .otherwise{
         coherencyRequestBuffer.valid := false.B
 
         toCacheLookup.request.valid := coherencyRequestBuffer.valid
         toCacheLookup.request.address := coherencyRequestBuffer.address
-        toCacheLookup.request.response := coherencyRequestBuffer.response
-        toCacheLookup.request.requestType := "b11".U
+        toCacheLookup.request.cacheLine.response := coherencyRequestBuffer.response
+        requestTypeWire := "b11".U
       }
     }.elsewhen(coherencyRequestBuffer.valid) {
       coherencyRequestBuffer.valid := false.B
 
       toCacheLookup.request.valid := coherencyRequestBuffer.valid
       toCacheLookup.request.address := coherencyRequestBuffer.address
-      toCacheLookup.request.response := coherencyRequestBuffer.response
-      toCacheLookup.request.requestType := "b11".U
+      toCacheLookup.request.cacheLine.response := coherencyRequestBuffer.response
+      requestTypeWire := "b11".U
     }.elsewhen(replayRequestBuffer.valid) {
       replayRequestBuffer.valid := false.B
       
-      toCacheLookup.request.valid := replayRequestBuffer.valid
-      toCacheLookup.request.address := replayRequestBuffer.address
-      toCacheLookup.request.instruction := replayRequestBuffer.instruction
-      toCacheLookup.request.robAddr := replayRequestBuffer.robAddr
-      toCacheLookup.request.prfDest := replayRequestBuffer.prfDest
-      toCacheLookup.request.cacheLine := replayRequestBuffer.cacheLine
-      toCacheLookup.request.response := replayRequestBuffer.response
-      toCacheLookup.request.writeEn := replayRequestBuffer.writeEn
-      toCacheLookup.request.writeData := replayRequestBuffer.writeData
-      toCacheLookup.request.requestType := "b10".U
+      toCacheLookup.request := replayRequestBuffer
+      requestTypeWire := "b10".U
       
-      when(branchOps.valid){
-        outgoingBranchUpdateData(replayRequestBuffer, branchOps, toCacheLookup.request)
-      }
+      regReadUpdate(replayRequestBuffer.branch, branchOps, toCacheLookup.request.branch)
+      
     }.elsewhen(inorderBuffer.valid && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
       inorderBuffer.valid := false.B
 
-      toCacheLookup.request.valid := inorderBuffer.valid && !inorderBuffer.branchInvalid
-      toCacheLookup.request.address := inorderBuffer.address
-      toCacheLookup.request.instruction := inorderBuffer.instruction
-      toCacheLookup.request.branchMask := inorderBuffer.branchMask
-      toCacheLookup.request.robAddr := inorderBuffer.robAddr
-      toCacheLookup.request.prfDest := inorderBuffer.prfDest
-      toCacheLookup.request.writeEn := inorderBuffer.writeEn
-      toCacheLookup.request.writeData := inorderBuffer.writeData
-      toCacheLookup.request.requestType := "b01".U
+      toCacheLookup.request := inorderBuffer
+      requestTypeWire := "b01".U
+      regReadUpdate(inorderBuffer.branch, branchOps, toCacheLookup.request.branch)
 
-      when(branchOps.valid){
-          outgoingBranchUpdateInvalidate(inorderBuffer, branchOps, toCacheLookup.request)
-      }
-      val isSCWire = WireDefault(toCacheLookup.request.instruction(31,27) === "b00011".U && (toCacheLookup.request.instruction(6,0) === "b0101111".U))
-      val isSCReadWire = WireDefault(isSCWire && !toCacheLookup.request.writeEn)
+      val isSCWire = WireDefault(toCacheLookup.request.core.instruction(31,27) === "b00011".U && (toCacheLookup.request.core.instruction(6,0) === "b0101111".U))
+      val isSCReadWire = WireDefault(isSCWire && !toCacheLookup.request.writeData.valid)
       when(isSCReadWire){
         rAtmoicsWritePending := true.B
       }
     }.elsewhen(speculativeBuffer.valid) {
       speculativeBuffer.valid := false.B
 
-      toCacheLookup.request.valid := speculativeBuffer.valid
-      toCacheLookup.request.address := speculativeBuffer.address
-      toCacheLookup.request.instruction := speculativeBuffer.instruction
-      toCacheLookup.request.robAddr := speculativeBuffer.robAddr
-      toCacheLookup.request.prfDest := speculativeBuffer.prfDest
-      toCacheLookup.request.branchMask := speculativeBuffer.branchMask
-      toCacheLookup.request.writeEn :=  false.B
-      toCacheLookup.request.writeData :=  0.U
-      toCacheLookup.request.requestType := "b01".U
+      toCacheLookup.request := speculativeBuffer
+      requestTypeWire := "b01".U
+      regReadUpdate(speculativeBuffer.branch, branchOps, toCacheLookup.request.branch)
 
-      when(branchOps.valid){
-        outgoingBranchUpdateData(speculativeBuffer, branchOps, toCacheLookup.request)
-      }
     }.otherwise{
       toCacheLookup.request.valid := false.B
+      requestTypeWire := "b00".U
     }
+    toCacheLookup.requestType := requestTypeWire
   }
   when(toPeripheral.ready && (operationWires.isPeriRead || operationWires.isPeriWrite) && inorderBuffer.valid) {
     inorderBuffer.valid := false.B
     toPeripheral.request := inorderBuffer
-    when(branchOps.valid){
-        outgoingBranchUpdateInvalidate(inorderBuffer, branchOps, toCacheLookup.request)
-    }
+
+    regReadUpdate(inorderBuffer.branch, branchOps, toCacheLookup.request.branch)
+
   }
   fenceReady := (!speculativeBuffer.valid && !inorderBuffer.valid && !operationBuffer.valid 
                   && !replayRequestBuffer.valid)

@@ -6,8 +6,6 @@ import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import cache_phase3.ChiselUtils.zeroInit
 
-//TODO : Commit fifo need to cache branch resolve and remove loads as they might be invliadated while outside the cache module
-
 class CacheModule (
   peripheral_id : Int,
   dPort_id : Int
@@ -68,10 +66,22 @@ class CacheModule (
   ))
 
   //Scheduler connections
-  scheduler.branchOps <> branchOps
+  scheduler.branchOps := branchOps
   canAllocate := scheduler.canAllocate && commitFifo.isEmpty
   
-  scheduler.requestIn <> request
+  scheduler.requestIn.valid := request.valid
+  scheduler.requestIn.address := request.address
+  scheduler.requestIn.core.instruction := request.instruction
+  scheduler.requestIn.core.robAddr := request.robAddr
+  scheduler.requestIn.core.prfDest := request.prfDest
+  scheduler.requestIn.branch.mask := request.branchMask
+
+  scheduler.requestIn.branch.valid := true.B
+  scheduler.requestIn.writeData.valid := false.B
+  scheduler.requestIn.writeData.data := 0.U
+  scheduler.requestIn.cacheLine.valid := false.B
+  scheduler.requestIn.cacheLine.cacheLine := 0.U
+  scheduler.requestIn.cacheLine.response := 0.U
   
   //Arbiter connections
   arbiter.writeDataIn <> writeDataIn
@@ -88,7 +98,7 @@ class CacheModule (
   arbiter.coherencyRequest <> aceUnit.coherencyRequest
 
   //Cachelookup
-  cacheLookup.branchOps <> branchOps
+  cacheLookup.branchOps := branchOps
 
   cacheLookup.request <> arbiter.toCacheLookup
   //!Debug only
@@ -116,11 +126,12 @@ class CacheModule (
   peripheralUnit.request <>arbiter.toPeripheral 
   peripheralUnit.responseOut.ready := !cacheLookup.toResponse.request.valid
 
-  responseOut.valid := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.valid, peripheralUnit.responseOut.request.valid)
-  responseOut.prfDest := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.prfDest, peripheralUnit.responseOut.request.prfDest)
-  responseOut.robAddr := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.robAddr, peripheralUnit.responseOut.request.robAddr)
-  responseOut.result := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.result, peripheralUnit.responseOut.request.result)
-  responseOut.instruction := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.instruction, peripheralUnit.responseOut.request.instruction)
+  responseOut.valid := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.valid && cacheLookup.toResponse.request.branch.valid, 
+                  peripheralUnit.responseOut.request.valid)
+  responseOut.prfDest := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.core.prfDest, peripheralUnit.responseOut.request.core.prfDest)
+  responseOut.robAddr := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.core.robAddr, peripheralUnit.responseOut.request.core.robAddr)
+  responseOut.result := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.writeData.data, peripheralUnit.responseOut.request.writeData.data)
+  responseOut.instruction := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.core.instruction, peripheralUnit.responseOut.request.core.instruction)
 
   //-----------------------Commit FIFO-----------------------------//
   zeroInit(commitFifo.write.data)
@@ -129,7 +140,7 @@ class CacheModule (
   commitFifo.invalidateEnable := false.B
 
   //Enqueue from responseOut of cacheLookup
-  when(cacheLookup.toResponse.request.valid && cacheLookup.toResponse.request.instruction(6,0) === "b0000000".U){
+  when(cacheLookup.toResponse.request.valid && cacheLookup.toResponse.request.core.instruction(6,0) === "b0000000".U){
     commitFifo.write.data.address := cacheLookup.toResponse.request.address
     commitFifo.write.data.valid := true.B
   }

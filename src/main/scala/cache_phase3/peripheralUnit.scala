@@ -5,8 +5,7 @@ import chisel3.util._
 import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import cache_phase3._
-import cache_phase3.ChiselUtils.zeroInit
-import cache_phase3.ChiselUtils.cacheBranchWriteUpdate
+import cache_phase3.ChiselUtils._
 
 class peripheralUnit(
 	dataWidth: Int,
@@ -17,10 +16,10 @@ class peripheralUnit(
 ) extends Module {
   val request = IO(new Bundle{
     val ready = Output(Bool())
-    val request = Input(new requestWithDataWire)})
+    val request = Input(new requestPipelineWire)})
   val responseOut = IO(new Bundle {
     val ready = Input(Bool())
-    val request = Output(new responseOutWithAddrWire)})
+    val request = Output(new requestPipelineWire)})
   val bus = IO(new AXI(
     idWidth = 2,
     addressWidth = addrWidth,
@@ -66,46 +65,38 @@ class peripheralUnit(
   bus.RREADY := false.B
 
   //-----------------------Buffers----------------------------//
-  val requestBuffer = RegInit(0.U.asTypeOf(new requestWithDataWire))
-  val readRequestBuffer = RegInit(0.U.asTypeOf(new requestWithDataWire))
-  val writeRequestBuffer = RegInit(0.U.asTypeOf(new requestWithDataWire))
+  val requestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  val readRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  val writeRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
 
-  val responseOutBuffer = RegInit(0.U.asTypeOf(new responseOut))
-  responseOut.request.valid := responseOutBuffer.valid
-  responseOut.request.prfDest := responseOutBuffer.prfDest
-  responseOut.request.robAddr := responseOutBuffer.robAddr
-  responseOut.request.result := responseOutBuffer.result
-  responseOut.request.instruction := responseOutBuffer.instruction
+  val responseOutBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  responseOut.request := responseOutBuffer
 
   //-----------------------MSHR-------------------------------------------//
   val peripheralMSHR = Module(new fifoBaseModule(
     depth = schedulerDepth,
-    traitType = new requestWithDataWire
+    traitType = new requestPipelineWire
   ))
 
   peripheralMSHR.read.ready := false.B
   zeroInit(peripheralMSHR.write.data)
 
-  when(requestBuffer.valid){
+  when(requestBuffer.valid && requestBuffer.branch.valid){
     request.ready := false.B
-    when(!readRequestBuffer.valid && !requestBuffer.writeEn){
+    when(!readRequestBuffer.valid && !requestBuffer.writeData.valid){
+      
       readRequestBuffer := requestBuffer
-
-      when(branchOps.valid){
-        cacheBranchWriteUpdate(readRequestBuffer,branchOps,requestBuffer)
-      }
+      regWriteUpdate(readRequestBuffer.branch,branchOps,requestBuffer.branch)
       requestBuffer.valid := false.B
-    }.elsewhen(!writeRequestBuffer.valid && requestBuffer.writeEn){
-      writeRequestBuffer := requestBuffer
+    }.elsewhen(!writeRequestBuffer.valid && requestBuffer.writeData.valid && requestBuffer.branch.valid){
 
-      when(branchOps.valid){
-        cacheBranchWriteUpdate(writeRequestBuffer,branchOps,requestBuffer)
-      }
+      writeRequestBuffer := requestBuffer
+      regWriteUpdate(writeRequestBuffer.branch,branchOps,requestBuffer.branch)
       requestBuffer.valid := false.B
     }
   } .otherwise {
     request.ready := true.B
-    when(request.request.valid){
+    when(request.request.valid && request.request.branch.valid){
       requestBuffer := request.request
     }
   }
@@ -120,10 +111,10 @@ class peripheralUnit(
   switch(writeAXIState) {
     is(writeIdleState){
         writeCounter.reset := true.B
-        writeAXIState := Mux(writeRequestBuffer.valid, writeRequestState, writeIdleState)
+        writeAXIState := Mux(writeRequestBuffer.valid && writeRequestBuffer.branch.valid, writeRequestState, writeIdleState)
     }
     is(writeRequestState){
-      val sizeByIns = writeRequestBuffer.instruction(13,12)
+      val sizeByIns = writeRequestBuffer.core.instruction(13,12)
       val sizePerBeat = (1.U << sizeByIns) * 8.U
 
       bus.AWVALID := true.B
@@ -143,7 +134,7 @@ class peripheralUnit(
 
       val numSlices = length + 1
       val writeChunks = VecInit(Seq.tabulate(numSlices)(i => 
-        writeRequestBuffer.writeData((i + 1) * busWidth - 1, i * busWidth)
+        writeRequestBuffer.writeData.data((i + 1) * busWidth - 1, i * busWidth)
       ))
       when(bus.WREADY && bus.AWREADY){
         writeCounter.incrm := true.B 
@@ -166,10 +157,10 @@ class peripheralUnit(
   val readAXIRequestState = RegInit(readIdleState)
   switch(readAXIRequestState) {
     is(readIdleState){
-      readAXIRequestState := Mux(readRequestBuffer.valid && peripheralMSHR.write.ready, readRequestState, readIdleState)
+      readAXIRequestState := Mux(readRequestBuffer.valid && readRequestBuffer.branch.valid && peripheralMSHR.write.ready, readRequestState, readIdleState)
     }
     is(readRequestState){
-      val sizeByIns = readRequestBuffer.instruction(13,12)
+      val sizeByIns = readRequestBuffer.core.instruction(13,12)
       val sizePerBeat = (1.U << sizeByIns) * 8.U
 
       bus.ARVALID := true.B
@@ -186,11 +177,7 @@ class peripheralUnit(
       readRequestBuffer.valid := !bus.ARREADY
 
       when(bus.ARREADY){
-        peripheralMSHR.write.data.valid := true.B
-        peripheralMSHR.write.data.prfDest := readRequestBuffer.prfDest
-        peripheralMSHR.write.data.robAddr := readRequestBuffer.robAddr
-        peripheralMSHR.write.data.instruction := readRequestBuffer.instruction
-        peripheralMSHR.write.data.address := readRequestBuffer.address
+        peripheralMSHR.write.data := readRequestBuffer
       }
       readAXIRequestState := Mux(bus.ARREADY, readIdleState, readRequestState)
     }
@@ -210,14 +197,9 @@ class peripheralUnit(
       
       when(!peripheralMSHR.isEmpty){
         peripheralMSHR.read.ready := true.B
-        responseOutBuffer.valid := false.B
-        responseOutBuffer.prfDest := peripheralMSHR.read.data.prfDest
-        responseOutBuffer.robAddr := peripheralMSHR.read.data.robAddr
-        responseOutBuffer.result := 0.U
-        responseOutBuffer.instruction := peripheralMSHR.read.data.instruction
+        responseOutBuffer := peripheralMSHR.read.data
       }
-      
-      readAXIResponseState := Mux(peripheralMSHR.read.data.valid && !peripheralMSHR.isEmpty, readResponseState, readDataInState)
+      readAXIResponseState := Mux(peripheralMSHR.read.data.valid && peripheralMSHR.read.data.branch.valid && !peripheralMSHR.isEmpty, readResponseState, readDataInState)
     }
     is(readResponseState){
       bus.RREADY := true.B
@@ -231,7 +213,7 @@ class peripheralUnit(
     }
     is(readDataOutState){
       val doubleWordChoosen = Cat(readDataVec.reverse)
-      val shiftAmount = (1.U << responseOutBuffer.instruction(13,12).asUInt)
+      val shiftAmount = (1.U << responseOutBuffer.core.instruction(13,12).asUInt)
       val section = (1.U << (8.U*shiftAmount)) - 1.U 
       val byteChunks = VecInit(Seq.tabulate(8) { i =>
         doubleWordChoosen((i + 1) * 8 - 1, i * 8) // 8-bit slices
@@ -239,14 +221,14 @@ class peripheralUnit(
       val byteChoosed     = byteChunks(0.U)
       val halfwordChoosed = Cat(byteChunks(1.U),byteChunks(0.U))
       val wordChoosed     = Cat(byteChunks(3.U),byteChunks(2.U), byteChunks(1.U),byteChunks(0.U))
-      switch(responseOutBuffer.instruction(13, 12)){
-        is("b00".U){responseOutBuffer.result := Mux(responseOutBuffer.instruction(14),byteChoosed,
+      switch(responseOutBuffer.core.instruction(13, 12)){
+        is("b00".U){responseOutBuffer.writeData.data := Mux(responseOutBuffer.core.instruction(14),byteChoosed,
                                       Cat(Fill((dataWidth-1*8),byteChoosed(7)),byteChoosed))}
-        is("b01".U){responseOutBuffer.result := Mux(responseOutBuffer.instruction(14),halfwordChoosed,
+        is("b01".U){responseOutBuffer.writeData.data := Mux(responseOutBuffer.core.instruction(14),halfwordChoosed,
                                       Cat(Fill((dataWidth-2*8),halfwordChoosed(15)),halfwordChoosed))}
-        is("b10".U){responseOutBuffer.result := Mux(responseOutBuffer.instruction(14),wordChoosed,
+        is("b10".U){responseOutBuffer.writeData.data := Mux(responseOutBuffer.core.instruction(14),wordChoosed,
                                       Cat(Fill((dataWidth-4*8),wordChoosed(31)),wordChoosed))}
-        is("b11".U){responseOutBuffer.result := Mux(responseOutBuffer.instruction(14),"x0".U,
+        is("b11".U){responseOutBuffer.writeData.data := Mux(responseOutBuffer.core.instruction(14),"x0".U,
                                       doubleWordChoosen)}
       }
       responseOutBuffer.valid := !responseOut.ready

@@ -1,6 +1,12 @@
 [
   {
     "class":"firrtl.transforms.DedupedResult",
+    "original":"~system|fifoWithBranchOps",
+    "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/scheduler:Scheduler/speculativeQueue:fifoWithBranchOps",
+    "index":0.234375
+  },
+  {
+    "class":"firrtl.transforms.DedupedResult",
     "original":"~system|moduleForwardingMemory",
     "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/cacheLookup:cacheLookupUnit/dataBRAM_0:moduleForwardingMemory",
     "index":0.28125
@@ -25,6 +31,18 @@
   },
   {
     "class":"firrtl.transforms.DedupedResult",
+    "original":"~system|fifoWithBranchOps_1",
+    "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/replayUnit:replayUnit/requestWaitFIFO:fifoWithBranchOps",
+    "index":0.375
+  },
+  {
+    "class":"firrtl.transforms.DedupedResult",
+    "original":"~system|fifoWithBranchOps_2",
+    "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/replayUnit:replayUnit/responseWaitFIFO:fifoWithBranchOps",
+    "index":0.390625
+  },
+  {
+    "class":"firrtl.transforms.DedupedResult",
     "original":"~system|moduleCounter",
     "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/peripheralUnit:peripheralUnit/writeCounter:moduleCounter",
     "index":0.453125
@@ -34,6 +52,12 @@
     "original":"~system|moduleCounter_1",
     "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/peripheralUnit:peripheralUnit/readCounter:moduleCounter",
     "index":0.46875
+  },
+  {
+    "class":"firrtl.transforms.DedupedResult",
+    "original":"~system|fifoWithBranchOps_3",
+    "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/aceUnit:ACEUnit/ACEMSHR:fifoWithBranchOps",
+    "index":0.5
   },
   {
     "class":"firrtl.transforms.DedupedResult",

@@ -11,71 +11,6 @@ trait baseTrait extends Bundle {
 }
 class baseWire extends baseTrait
 
-trait requestTrait extends baseTrait {
-  val instruction = UInt(insWidth.W)
-  val branchMask = UInt(branchMaskWidth.W)
-  val robAddr = UInt(robAddrWidth.W)
-  val prfDest = UInt(prfAddrWidth.W)
-}
-class requestWire extends requestTrait
-
-trait requestWithDataTrait extends requestTrait{
-  val writeEn = Bool()
-  val writeData = UInt(dataWidth.W)
-}
-class requestWithDataWire extends requestWithDataTrait
-
-trait replayWithCacheLineTrait extends requestWithDataWire{
-  val cacheLine = UInt((lineSize*8).W)
-  val response = UInt(2.W)
-}
-class replayWithCacheLineWire extends replayWithCacheLineTrait
-
-trait requestWithBranchInvalid extends requestWithDataTrait{
-  val branchInvalid = Bool()
-}
-class requestWithBranchInvalidWire extends requestWithBranchInvalid
-
-trait replayWithBranchInvalidTrait extends replayWithCacheLineTrait{
-  val branchInvalid = Bool()
-}
-class replayWithBranchInvalidWire extends replayWithBranchInvalidTrait
-
-trait  coherencyRequestTrait extends Bundle{
-	val valid = Bool()
-	val address = UInt(addrWidth.W)
-	val response = UInt(2.W)
-  //response(1) : Invalidate, response(0) : DataRequired
-}
-class coherencyRequestWire extends coherencyRequestTrait
-
-trait  coherencyResponseTrait extends Bundle{
-	val valid = Bool()
-	val data = UInt((lineSize*8).W)
-	val dataValid = Bool()
-	val response = UInt(2.W)
-  //response(1) : isClean, response(0) : isUnique
-}
-class coherencyResponseWire extends coherencyResponseTrait
-
-trait cacheLookupTrait extends replayWithCacheLineTrait{
-  val requestType = UInt(2.W)
-}
-class cacheLookupWire extends cacheLookupTrait
-
-trait responseOutTrait extends Bundle{
-  val valid = Bool()
-  val prfDest = UInt(prfAddrWidth.W)
-  val robAddr = UInt(robAddrWidth.W)
-  val result = UInt(dataWidth.W)
-  val instruction = UInt(insWidth.W)
-}
-
-trait responseOutWithAddrTrait extends requestTrait{
-  val result = UInt(dataWidth.W)
-}
-class responseOutWithAddrWire extends responseOutWithAddrTrait
-
 trait  writeBackTrait extends baseTrait {
 	val data = UInt((lineSize*8).W)
 }
@@ -85,3 +20,48 @@ trait loadCommitTrait extends baseTrait{
 	val state = Bool()
 }
 class loadCommitWire extends loadCommitTrait
+
+trait coreTrait extends Bundle {
+  val instruction = UInt(insWidth.W)
+  val robAddr = UInt(robAddrWidth.W)
+  val prfDest = UInt(prfAddrWidth.W)
+}
+
+trait branchTrait extends Bundle {
+  val valid = Bool()
+  val mask = UInt(branchMaskWidth.W)
+}
+
+trait writeDataTrait extends Bundle {
+  val valid = Bool()
+  val data =UInt(dataWidth.W)
+}
+
+trait cacheLineTrait extends Bundle {
+  val valid = Bool()
+  val cacheLine = UInt((lineSize*8).W)
+  val response = UInt(2.W)
+}
+
+trait requestPipelineTrait extends baseTrait {
+  val core = new coreTrait {}
+  val branch = new branchTrait {}
+  val writeData = new writeDataTrait {}
+  val cacheLine = new cacheLineTrait {}
+}
+
+class requestPipelineWire extends requestPipelineTrait
+
+
+trait  coherencyRequestTrait extends baseTrait{
+	val response = UInt(2.W)
+  //response(1) : Invalidate, response(0) : DataRequired
+}
+class coherencyRequestWire extends coherencyRequestTrait
+
+trait  coherencyResponseTrait extends coherencyRequestTrait{
+	val cacheLine = UInt((lineSize*8).W)
+	val dataValid = Bool()
+  //response(1) : isClean, response(0) : isUnique
+}
+class coherencyResponseWire extends coherencyResponseTrait
