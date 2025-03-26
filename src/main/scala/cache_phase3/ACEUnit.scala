@@ -223,6 +223,7 @@ class ACEUnit(
 
       when(bus.ARREADY){
         ACEMSHR.write.data := readBuffer
+        regReadUpdate(ACEMSHR.write.data.branch, branchOps, readBuffer.branch)
         readBuffer.valid := false.B
       }
       readACERequestState := Mux(bus.ARREADY, readIdleState, readRequestState)
