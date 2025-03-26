@@ -66,8 +66,9 @@ class arbiter extends Module {
   val coherencyRequestBuffer = RegInit(0.U.asTypeOf(new coherencyRequestWire))
   val replayRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
 
-  request.speculativeReady := !speculativeBuffer.valid
-  request.inorderReady := !(operationBuffer.valid || inorderBuffer.valid)
+  request.speculativeReady := !speculativeBuffer.valid || (speculativeBuffer.valid && !speculativeBuffer.branch.valid)
+  request.inorderReady := !operationBuffer.valid || (operationBuffer.valid && !operationBuffer.branch.valid) &&
+                            !inorderBuffer.valid || (inorderBuffer.valid && !inorderBuffer.branch.valid)
 
   //---------------------Request Enqueue---------------------//
   when(request.request.valid && request.request.branch.valid){
@@ -168,7 +169,7 @@ class arbiter extends Module {
 
   }
 
-  when(requestTypeWire === 0.U){
+  when(requestTypeWire === 0.U && branchOps.valid){
     regRecordUpdate(speculativeBuffer.branch, branchOps)
     regRecordUpdate(replayRequestBuffer.branch, branchOps)
     regRecordUpdate(operationBuffer.branch, branchOps)
@@ -198,6 +199,7 @@ class arbiter extends Module {
         toCacheLookup.request.valid := coherencyRequestBuffer.valid
         toCacheLookup.request.address := coherencyRequestBuffer.address
         toCacheLookup.request.cacheLine.response := coherencyRequestBuffer.response
+        toCacheLookup.request.branch.valid := true.B
         requestTypeWire := "b11".U
       }
     }.elsewhen(coherencyRequestBuffer.valid) {
@@ -206,6 +208,7 @@ class arbiter extends Module {
       toCacheLookup.request.valid := coherencyRequestBuffer.valid
       toCacheLookup.request.address := coherencyRequestBuffer.address
       toCacheLookup.request.cacheLine.response := coherencyRequestBuffer.response
+      toCacheLookup.request.branch.valid := true.B
       requestTypeWire := "b11".U
     }.elsewhen(replayRequestBuffer.valid) {
       replayRequestBuffer.valid := false.B
