@@ -200,7 +200,7 @@ class arbiter extends Module {
         
         toCacheLookup.request := inorderBuffer
         requestTypeWire := "b01".U
-        regReadUpdate(inorderBuffer.branch, branchOps, toCacheLookup.request.branch)
+        regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
         
         rAtmoicsWritePending := false.B
       } .otherwise{
@@ -226,14 +226,14 @@ class arbiter extends Module {
       toCacheLookup.request := replayRequestBuffer
       requestTypeWire := "b10".U
       
-      regReadUpdate(replayRequestBuffer.branch, branchOps, toCacheLookup.request.branch)
+      regReadUpdate(toCacheLookup.request.branch, branchOps, replayRequestBuffer.branch)
       
     }.elsewhen(inorderBuffer.valid && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
       inorderBuffer.valid := false.B
 
       toCacheLookup.request := inorderBuffer
       requestTypeWire := "b01".U
-      regReadUpdate(inorderBuffer.branch, branchOps, toCacheLookup.request.branch)
+      regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
 
       val isSCWire = WireDefault(toCacheLookup.request.core.instruction(31,27) === "b00011".U && (toCacheLookup.request.core.instruction(6,0) === "b0101111".U))
       val isSCReadWire = WireDefault(isSCWire && !toCacheLookup.request.writeData.valid)
@@ -245,7 +245,7 @@ class arbiter extends Module {
 
       toCacheLookup.request := speculativeBuffer
       requestTypeWire := "b01".U
-      regReadUpdate(speculativeBuffer.branch, branchOps, toCacheLookup.request.branch)
+      regReadUpdate(toCacheLookup.request.branch, branchOps, speculativeBuffer.branch)
 
     }.otherwise{
       toCacheLookup.request.valid := false.B
@@ -257,7 +257,7 @@ class arbiter extends Module {
     inorderBuffer.valid := false.B
     toPeripheral.request := inorderBuffer
 
-    regReadUpdate(inorderBuffer.branch, branchOps, toCacheLookup.request.branch)
+    regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
 
   }
   fenceReady := (!speculativeBuffer.valid && !inorderBuffer.valid && !operationBuffer.valid 

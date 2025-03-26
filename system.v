@@ -36870,11 +36870,11 @@ module arbiter(
   wire  _T_35 = ~(operationWires_isPeriRead | operationWires_isPeriWrite); // @[arbiter.scala 198:42]
   wire [1:0] _GEN_278 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ? 2'h1 : 2'h3
     ; // @[arbiter.scala 198:101 202:25 213:25]
-  wire  _GEN_334 = inorderBuffer_valid & _T_33 & _T_35 | speculativeBuffer_valid; // @[arbiter.scala 231:129 235:23]
-  wire [1:0] _GEN_354 = replayRequestBuffer_valid ? 2'h2 : {{1'd0}, _GEN_334}; // @[arbiter.scala 223:43 227:23]
-  wire [1:0] _GEN_369 = coherencyRequestBuffer_valid ? 2'h3 : _GEN_354; // @[arbiter.scala 215:46 222:23]
-  wire [1:0] _GEN_401 = rAtmoicsWritePending ? _GEN_278 : _GEN_369; // @[arbiter.scala 197:31]
-  wire [1:0] requestTypeWire = toCacheLookup_ready ? _GEN_401 : 2'h0; // @[arbiter.scala 196:72]
+  wire  _GEN_330 = inorderBuffer_valid & _T_33 & _T_35 | speculativeBuffer_valid; // @[arbiter.scala 231:129 235:23]
+  wire [1:0] _GEN_346 = replayRequestBuffer_valid ? 2'h2 : {{1'd0}, _GEN_330}; // @[arbiter.scala 223:43 227:23]
+  wire [1:0] _GEN_355 = coherencyRequestBuffer_valid ? 2'h3 : _GEN_346; // @[arbiter.scala 215:46 222:23]
+  wire [1:0] _GEN_381 = rAtmoicsWritePending ? _GEN_278 : _GEN_355; // @[arbiter.scala 197:31]
+  wire [1:0] requestTypeWire = toCacheLookup_ready ? _GEN_381 : 2'h0; // @[arbiter.scala 196:72]
   wire [4:0] _T_12 = speculativeBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 124:29]
   wire  _T_13 = |_T_12; // @[utils.scala 124:53]
   wire [4:0] _speculativeBuffer_branch_mask_T = speculativeBuffer_branch_mask ^ branchOps_branchMask; // @[utils.scala 125:40]
@@ -36885,10 +36885,6 @@ module arbiter(
   wire  _GEN_212 = branchOps_passed ? speculativeBuffer_branch_valid : _GEN_209; // @[utils.scala 123:32 127:24]
   wire [4:0] _GEN_213 = branchOps_valid ? _GEN_211 : _GEN_30; // @[utils.scala 122:29]
   wire  _GEN_214 = branchOps_valid ? _GEN_212 : _GEN_29; // @[utils.scala 122:29]
-  wire [4:0] _GEN_215 = speculativeBuffer_branch_valid ? _GEN_213 : _GEN_30; // @[utils.scala 121:24]
-  wire  _GEN_216 = speculativeBuffer_branch_valid ? _GEN_214 : _GEN_29; // @[utils.scala 121:24]
-  wire [4:0] _GEN_217 = speculativeBuffer_valid ? _GEN_215 : _GEN_30; // @[arbiter.scala 175:34]
-  wire  _GEN_218 = speculativeBuffer_valid ? _GEN_216 : _GEN_29; // @[arbiter.scala 175:34]
   wire [4:0] _T_16 = operationBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 124:29]
   wire  _T_17 = |_T_16; // @[utils.scala 124:53]
   wire [4:0] _operationBuffer_branch_mask_T = operationBuffer_branch_mask ^ branchOps_branchMask; // @[utils.scala 125:40]
@@ -36909,14 +36905,6 @@ module arbiter(
   wire  _GEN_234 = branchOps_passed ? inorderBuffer_branch_valid : _GEN_231; // @[utils.scala 123:32 127:24]
   wire [4:0] _GEN_235 = branchOps_valid ? _GEN_233 : _GEN_199; // @[utils.scala 122:29]
   wire  _GEN_236 = branchOps_valid ? _GEN_234 : _GEN_198; // @[utils.scala 122:29]
-  wire [4:0] _GEN_237 = inorderBuffer_branch_valid ? _GEN_235 : _GEN_199; // @[utils.scala 121:24]
-  wire  _GEN_238 = inorderBuffer_branch_valid ? _GEN_236 : _GEN_198; // @[utils.scala 121:24]
-  wire [4:0] _GEN_239 = inorderBuffer_valid ? _GEN_237 : _GEN_199; // @[arbiter.scala 181:30]
-  wire  _GEN_240 = inorderBuffer_valid ? _GEN_238 : _GEN_198; // @[arbiter.scala 181:30]
-  wire [4:0] _GEN_241 = requestTypeWire != 2'h1 ? _GEN_217 : _GEN_30; // @[arbiter.scala 174:32]
-  wire  _GEN_242 = requestTypeWire != 2'h1 ? _GEN_218 : _GEN_29; // @[arbiter.scala 174:32]
-  wire [4:0] _GEN_245 = requestTypeWire != 2'h1 ? _GEN_239 : _GEN_199; // @[arbiter.scala 174:32]
-  wire  _GEN_246 = requestTypeWire != 2'h1 ? _GEN_240 : _GEN_198; // @[arbiter.scala 174:32]
   wire [4:0] _T_26 = replayRequestBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 124:29]
   wire  _T_27 = |_T_26; // @[utils.scala 124:53]
   wire [4:0] _replayRequestBuffer_branch_mask_T = replayRequestBuffer_branch_mask ^ branchOps_branchMask; // @[utils.scala 125:40]
@@ -36925,22 +36913,13 @@ module arbiter(
   wire [4:0] _GEN_249 = _T_27 ? 5'h0 : _GEN_57; // @[utils.scala 129:58 131:25]
   wire [4:0] _GEN_250 = branchOps_passed ? _GEN_247 : _GEN_249; // @[utils.scala 123:32]
   wire  _GEN_251 = branchOps_passed ? replayRequestBuffer_branch_valid : _GEN_248; // @[utils.scala 123:32 127:24]
-  wire [4:0] _GEN_252 = branchOps_valid ? _GEN_250 : _GEN_57; // @[utils.scala 122:29]
-  wire  _GEN_253 = branchOps_valid ? _GEN_251 : _GEN_56; // @[utils.scala 122:29]
-  wire [4:0] _GEN_254 = replayRequestBuffer_branch_valid ? _GEN_252 : _GEN_57; // @[utils.scala 121:24]
-  wire  _GEN_255 = replayRequestBuffer_branch_valid ? _GEN_253 : _GEN_56; // @[utils.scala 121:24]
-  wire [4:0] _GEN_256 = requestTypeWire != 2'h2 & replayRequestBuffer_valid ? _GEN_254 : _GEN_57; // @[arbiter.scala 185:61]
-  wire  _GEN_257 = requestTypeWire != 2'h2 & replayRequestBuffer_valid ? _GEN_255 : _GEN_56; // @[arbiter.scala 185:61]
-  wire [4:0] _T_37 = toCacheLookup_request_branch_mask & branchOps_branchMask; // @[utils.scala 94:27]
-  wire  _T_38 = |_T_37; // @[utils.scala 94:51]
-  wire [4:0] _inorderBuffer_branch_mask_T_1 = toCacheLookup_request_branch_mask ^ branchOps_branchMask; // @[utils.scala 95:42]
-  wire [4:0] _GEN_258 = |_T_37 ? _inorderBuffer_branch_mask_T_1 : toCacheLookup_request_branch_mask; // @[utils.scala 94:56 95:27 98:27]
-  wire [4:0] _GEN_259 = _T_38 ? 5'h0 : toCacheLookup_request_branch_mask; // @[utils.scala 103:56 104:27 108:27]
-  wire  _GEN_260 = _T_38 ? 1'h0 : toCacheLookup_request_branch_valid; // @[utils.scala 103:56 105:28 109:28]
+  wire [4:0] _GEN_258 = _T_21 ? _inorderBuffer_branch_mask_T : inorderBuffer_branch_mask; // @[utils.scala 94:56 95:27 98:27]
+  wire [4:0] _GEN_259 = _T_21 ? 5'h0 : inorderBuffer_branch_mask; // @[utils.scala 103:56 104:27 108:27]
+  wire  _GEN_260 = _T_21 ? 1'h0 : inorderBuffer_branch_valid; // @[utils.scala 103:56 105:28 109:28]
   wire [4:0] _GEN_261 = branchOps_passed ? _GEN_258 : _GEN_259; // @[utils.scala 92:30]
-  wire  _GEN_262 = branchOps_passed ? toCacheLookup_request_branch_valid : _GEN_260; // @[utils.scala 100:26 92:30]
-  wire [4:0] _GEN_263 = branchOps_valid ? _GEN_261 : toCacheLookup_request_branch_mask; // @[utils.scala 113:23 91:27]
-  wire  _GEN_264 = branchOps_valid ? _GEN_262 : toCacheLookup_request_branch_valid; // @[utils.scala 114:24 91:27]
+  wire  _GEN_262 = branchOps_passed ? inorderBuffer_branch_valid : _GEN_260; // @[utils.scala 100:26 92:30]
+  wire [4:0] _GEN_263 = branchOps_valid ? _GEN_261 : inorderBuffer_branch_mask; // @[utils.scala 113:23 91:27]
+  wire  _GEN_264 = branchOps_valid ? _GEN_262 : inorderBuffer_branch_valid; // @[utils.scala 114:24 91:27]
   wire  _GEN_265 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ? 1'h0 :
     _GEN_193; // @[arbiter.scala 198:101 199:29]
   wire  _GEN_266 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ?
@@ -36953,10 +36932,10 @@ module arbiter(
     inorderBuffer_core_robAddr : 4'h0; // @[arbiter.scala 198:101 201:31 utils.scala 51:41]
   wire [5:0] _GEN_270 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ?
     inorderBuffer_core_prfDest : 6'h0; // @[arbiter.scala 198:101 201:31 utils.scala 51:41]
-  wire  _GEN_271 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ?
-    inorderBuffer_branch_valid : 1'h1; // @[arbiter.scala 198:101 201:31 212:44]
+  wire  _GEN_271 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ? _GEN_264 : 1'h1
+    ; // @[arbiter.scala 198:101 212:44]
   wire [4:0] _GEN_272 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ?
-    inorderBuffer_branch_mask : 5'h0; // @[arbiter.scala 198:101 201:31 utils.scala 51:41]
+    _GEN_263 : 5'h0; // @[arbiter.scala 198:101 utils.scala 51:41]
   wire  _GEN_273 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) &
     inorderBuffer_writeData_valid; // @[arbiter.scala 198:101 201:31 utils.scala 50:41]
   wire [63:0] _GEN_274 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ?
@@ -36965,92 +36944,90 @@ module arbiter(
     inorderBuffer_cacheLine_cacheLine : 512'h0; // @[arbiter.scala 198:101 201:31 utils.scala 51:41]
   wire [1:0] _GEN_277 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ?
     inorderBuffer_cacheLine_response : coherencyRequestBuffer_response; // @[arbiter.scala 198:101 201:31 211:50]
-  wire [4:0] _GEN_279 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ?
-    _GEN_263 : _GEN_245; // @[arbiter.scala 198:101]
-  wire  _GEN_280 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) ? _GEN_264 :
-    _GEN_246; // @[arbiter.scala 198:101]
-  wire  _GEN_282 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) & _GEN_48; // @[arbiter.scala 198:101 207:38]
+  wire  _GEN_280 = ~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite) & _GEN_48; // @[arbiter.scala 198:101 207:38]
+  wire [4:0] _GEN_281 = _T_27 ? _replayRequestBuffer_branch_mask_T : replayRequestBuffer_branch_mask; // @[utils.scala 94:56 95:27 98:27]
+  wire [4:0] _GEN_282 = _T_27 ? 5'h0 : replayRequestBuffer_branch_mask; // @[utils.scala 103:56 104:27 108:27]
+  wire  _GEN_283 = _T_27 ? 1'h0 : replayRequestBuffer_branch_valid; // @[utils.scala 103:56 105:28 109:28]
+  wire [4:0] _GEN_284 = branchOps_passed ? _GEN_281 : _GEN_282; // @[utils.scala 92:30]
+  wire  _GEN_285 = branchOps_passed ? replayRequestBuffer_branch_valid : _GEN_283; // @[utils.scala 100:26 92:30]
+  wire [4:0] _GEN_286 = branchOps_valid ? _GEN_284 : replayRequestBuffer_branch_mask; // @[utils.scala 113:23 91:27]
+  wire  _GEN_287 = branchOps_valid ? _GEN_285 : replayRequestBuffer_branch_valid; // @[utils.scala 114:24 91:27]
   wire  isSCWire = toCacheLookup_request_core_instruction[31:27] == 5'h3 & toCacheLookup_request_core_instruction[6:0]
      == 7'h2f; // @[arbiter.scala 238:95]
   wire  isSCReadWire = isSCWire & ~toCacheLookup_request_writeData_valid; // @[arbiter.scala 239:47]
-  wire  _GEN_297 = isSCReadWire | rAtmoicsWritePending; // @[arbiter.scala 240:25 241:30 195:37]
-  wire  _GEN_305 = speculativeBuffer_valid ? 1'h0 : _GEN_24; // @[arbiter.scala 243:41 244:31]
-  wire [31:0] _GEN_307 = speculativeBuffer_valid ? speculativeBuffer_address : 32'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
-  wire [31:0] _GEN_308 = speculativeBuffer_valid ? speculativeBuffer_core_instruction : 32'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
-  wire [3:0] _GEN_309 = speculativeBuffer_valid ? speculativeBuffer_core_robAddr : 4'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
-  wire [5:0] _GEN_310 = speculativeBuffer_valid ? speculativeBuffer_core_prfDest : 6'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
-  wire  _GEN_311 = speculativeBuffer_valid & speculativeBuffer_branch_valid; // @[arbiter.scala 243:41 246:29 utils.scala 50:41]
-  wire [4:0] _GEN_312 = speculativeBuffer_valid ? speculativeBuffer_branch_mask : 5'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
-  wire  _GEN_313 = speculativeBuffer_valid & speculativeBuffer_writeData_valid; // @[arbiter.scala 243:41 246:29 utils.scala 50:41]
-  wire [63:0] _GEN_314 = speculativeBuffer_valid ? speculativeBuffer_writeData_data : 64'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
-  wire [511:0] _GEN_316 = speculativeBuffer_valid ? speculativeBuffer_cacheLine_cacheLine : 512'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
-  wire [1:0] _GEN_317 = speculativeBuffer_valid ? speculativeBuffer_cacheLine_response : 2'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
-  wire [4:0] _GEN_319 = speculativeBuffer_valid ? _GEN_263 : _GEN_241; // @[arbiter.scala 243:41]
-  wire  _GEN_320 = speculativeBuffer_valid ? _GEN_264 : _GEN_242; // @[arbiter.scala 243:41]
-  wire  _GEN_321 = inorderBuffer_valid & _T_33 & _T_35 ? 1'h0 : _GEN_193; // @[arbiter.scala 231:129 232:27]
-  wire  _GEN_322 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_valid : speculativeBuffer_valid; // @[arbiter.scala 231:129 234:29]
-  wire [31:0] _GEN_323 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_address : _GEN_307; // @[arbiter.scala 231:129 234:29]
-  wire [31:0] _GEN_324 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_core_instruction : _GEN_308; // @[arbiter.scala 231:129 234:29]
-  wire [3:0] _GEN_325 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_core_robAddr : _GEN_309; // @[arbiter.scala 231:129 234:29]
-  wire [5:0] _GEN_326 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_core_prfDest : _GEN_310; // @[arbiter.scala 231:129 234:29]
-  wire  _GEN_327 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_branch_valid : _GEN_311; // @[arbiter.scala 231:129 234:29]
-  wire [4:0] _GEN_328 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_branch_mask : _GEN_312; // @[arbiter.scala 231:129 234:29]
-  wire  _GEN_329 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_writeData_valid : _GEN_313; // @[arbiter.scala 231:129 234:29]
-  wire [63:0] _GEN_330 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_writeData_data : _GEN_314; // @[arbiter.scala 231:129 234:29]
-  wire [511:0] _GEN_332 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_cacheLine_cacheLine : _GEN_316; // @[arbiter.scala 231:129 234:29]
-  wire [1:0] _GEN_333 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_cacheLine_response : _GEN_317; // @[arbiter.scala 231:129 234:29]
-  wire [4:0] _GEN_335 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_263 : _GEN_245; // @[arbiter.scala 231:129]
-  wire  _GEN_336 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_264 : _GEN_246; // @[arbiter.scala 231:129]
-  wire  _GEN_337 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_297 : rAtmoicsWritePending; // @[arbiter.scala 231:129 195:37]
-  wire  _GEN_338 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_24 : _GEN_305; // @[arbiter.scala 231:129]
-  wire [4:0] _GEN_339 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_241 : _GEN_319; // @[arbiter.scala 231:129]
-  wire  _GEN_340 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_242 : _GEN_320; // @[arbiter.scala 231:129]
-  wire  _GEN_341 = replayRequestBuffer_valid ? 1'h0 : _GEN_51; // @[arbiter.scala 223:43 224:33]
-  wire  _GEN_342 = replayRequestBuffer_valid ? replayRequestBuffer_valid : _GEN_322; // @[arbiter.scala 223:43 226:29]
-  wire [31:0] _GEN_343 = replayRequestBuffer_valid ? replayRequestBuffer_address : _GEN_323; // @[arbiter.scala 223:43 226:29]
-  wire [31:0] _GEN_344 = replayRequestBuffer_valid ? replayRequestBuffer_core_instruction : _GEN_324; // @[arbiter.scala 223:43 226:29]
-  wire [3:0] _GEN_345 = replayRequestBuffer_valid ? replayRequestBuffer_core_robAddr : _GEN_325; // @[arbiter.scala 223:43 226:29]
-  wire [5:0] _GEN_346 = replayRequestBuffer_valid ? replayRequestBuffer_core_prfDest : _GEN_326; // @[arbiter.scala 223:43 226:29]
-  wire  _GEN_347 = replayRequestBuffer_valid ? replayRequestBuffer_branch_valid : _GEN_327; // @[arbiter.scala 223:43 226:29]
-  wire [4:0] _GEN_348 = replayRequestBuffer_valid ? replayRequestBuffer_branch_mask : _GEN_328; // @[arbiter.scala 223:43 226:29]
-  wire  _GEN_349 = replayRequestBuffer_valid ? replayRequestBuffer_writeData_valid : _GEN_329; // @[arbiter.scala 223:43 226:29]
-  wire [63:0] _GEN_350 = replayRequestBuffer_valid ? replayRequestBuffer_writeData_data : _GEN_330; // @[arbiter.scala 223:43 226:29]
-  wire [511:0] _GEN_352 = replayRequestBuffer_valid ? replayRequestBuffer_cacheLine_cacheLine : _GEN_332; // @[arbiter.scala 223:43 226:29]
-  wire [1:0] _GEN_353 = replayRequestBuffer_valid ? replayRequestBuffer_cacheLine_response : _GEN_333; // @[arbiter.scala 223:43 226:29]
-  wire [4:0] _GEN_355 = replayRequestBuffer_valid ? _GEN_263 : _GEN_256; // @[arbiter.scala 223:43]
-  wire  _GEN_356 = replayRequestBuffer_valid ? _GEN_264 : _GEN_257; // @[arbiter.scala 223:43]
-  wire  _GEN_357 = replayRequestBuffer_valid ? _GEN_193 : _GEN_321; // @[arbiter.scala 223:43]
-  wire [4:0] _GEN_358 = replayRequestBuffer_valid ? _GEN_245 : _GEN_335; // @[arbiter.scala 223:43]
-  wire  _GEN_359 = replayRequestBuffer_valid ? _GEN_246 : _GEN_336; // @[arbiter.scala 223:43]
-  wire  _GEN_360 = replayRequestBuffer_valid ? rAtmoicsWritePending : _GEN_337; // @[arbiter.scala 195:37 223:43]
-  wire  _GEN_361 = replayRequestBuffer_valid ? _GEN_24 : _GEN_338; // @[arbiter.scala 223:43]
-  wire [4:0] _GEN_362 = replayRequestBuffer_valid ? _GEN_241 : _GEN_339; // @[arbiter.scala 223:43]
-  wire  _GEN_363 = replayRequestBuffer_valid ? _GEN_242 : _GEN_340; // @[arbiter.scala 223:43]
-  wire  _GEN_365 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_valid : _GEN_342; // @[arbiter.scala 215:46 218:35]
-  wire [31:0] _GEN_366 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_address : _GEN_343; // @[arbiter.scala 215:46 219:37]
-  wire [1:0] _GEN_367 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_response : _GEN_353; // @[arbiter.scala 215:46 220:48]
-  wire  _GEN_368 = coherencyRequestBuffer_valid | _GEN_347; // @[arbiter.scala 215:46 221:42]
-  wire [31:0] _GEN_371 = coherencyRequestBuffer_valid ? 32'h0 : _GEN_344; // @[arbiter.scala 215:46 utils.scala 51:41]
-  wire [3:0] _GEN_372 = coherencyRequestBuffer_valid ? 4'h0 : _GEN_345; // @[arbiter.scala 215:46 utils.scala 51:41]
-  wire [5:0] _GEN_373 = coherencyRequestBuffer_valid ? 6'h0 : _GEN_346; // @[arbiter.scala 215:46 utils.scala 51:41]
-  wire [4:0] _GEN_374 = coherencyRequestBuffer_valid ? 5'h0 : _GEN_348; // @[arbiter.scala 215:46 utils.scala 51:41]
-  wire  _GEN_375 = coherencyRequestBuffer_valid ? 1'h0 : _GEN_349; // @[arbiter.scala 215:46 utils.scala 50:41]
-  wire [63:0] _GEN_376 = coherencyRequestBuffer_valid ? 64'h0 : _GEN_350; // @[arbiter.scala 215:46 utils.scala 51:41]
-  wire [511:0] _GEN_378 = coherencyRequestBuffer_valid ? 512'h0 : _GEN_352; // @[arbiter.scala 215:46 utils.scala 51:41]
-  wire  _GEN_381 = coherencyRequestBuffer_valid ? _GEN_193 : _GEN_357; // @[arbiter.scala 215:46]
-  wire [4:0] _GEN_382 = coherencyRequestBuffer_valid ? _GEN_245 : _GEN_358; // @[arbiter.scala 215:46]
-  wire  _GEN_383 = coherencyRequestBuffer_valid ? _GEN_246 : _GEN_359; // @[arbiter.scala 215:46]
-  wire  _GEN_389 = rAtmoicsWritePending ? _GEN_266 : _GEN_365; // @[arbiter.scala 197:31]
-  wire [31:0] _GEN_390 = rAtmoicsWritePending ? _GEN_267 : _GEN_366; // @[arbiter.scala 197:31]
-  wire [31:0] _GEN_391 = rAtmoicsWritePending ? _GEN_268 : _GEN_371; // @[arbiter.scala 197:31]
-  wire [3:0] _GEN_392 = rAtmoicsWritePending ? _GEN_269 : _GEN_372; // @[arbiter.scala 197:31]
-  wire [5:0] _GEN_393 = rAtmoicsWritePending ? _GEN_270 : _GEN_373; // @[arbiter.scala 197:31]
-  wire  _GEN_394 = rAtmoicsWritePending ? _GEN_271 : _GEN_368; // @[arbiter.scala 197:31]
-  wire [4:0] _GEN_395 = rAtmoicsWritePending ? _GEN_272 : _GEN_374; // @[arbiter.scala 197:31]
-  wire  _GEN_396 = rAtmoicsWritePending ? _GEN_273 : _GEN_375; // @[arbiter.scala 197:31]
-  wire [63:0] _GEN_397 = rAtmoicsWritePending ? _GEN_274 : _GEN_376; // @[arbiter.scala 197:31]
-  wire [511:0] _GEN_399 = rAtmoicsWritePending ? _GEN_276 : _GEN_378; // @[arbiter.scala 197:31]
-  wire [1:0] _GEN_400 = rAtmoicsWritePending ? _GEN_277 : _GEN_367; // @[arbiter.scala 197:31]
+  wire  _GEN_295 = isSCReadWire | rAtmoicsWritePending; // @[arbiter.scala 240:25 241:30 195:37]
+  wire [4:0] _GEN_296 = _T_13 ? _speculativeBuffer_branch_mask_T : speculativeBuffer_branch_mask; // @[utils.scala 94:56 95:27 98:27]
+  wire [4:0] _GEN_297 = _T_13 ? 5'h0 : speculativeBuffer_branch_mask; // @[utils.scala 103:56 104:27 108:27]
+  wire  _GEN_298 = _T_13 ? 1'h0 : speculativeBuffer_branch_valid; // @[utils.scala 103:56 105:28 109:28]
+  wire [4:0] _GEN_299 = branchOps_passed ? _GEN_296 : _GEN_297; // @[utils.scala 92:30]
+  wire  _GEN_300 = branchOps_passed ? speculativeBuffer_branch_valid : _GEN_298; // @[utils.scala 100:26 92:30]
+  wire [4:0] _GEN_301 = branchOps_valid ? _GEN_299 : speculativeBuffer_branch_mask; // @[utils.scala 113:23 91:27]
+  wire  _GEN_302 = branchOps_valid ? _GEN_300 : speculativeBuffer_branch_valid; // @[utils.scala 114:24 91:27]
+  wire  _GEN_303 = speculativeBuffer_valid ? 1'h0 : _GEN_24; // @[arbiter.scala 243:41 244:31]
+  wire [31:0] _GEN_305 = speculativeBuffer_valid ? speculativeBuffer_address : 32'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
+  wire [31:0] _GEN_306 = speculativeBuffer_valid ? speculativeBuffer_core_instruction : 32'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
+  wire [3:0] _GEN_307 = speculativeBuffer_valid ? speculativeBuffer_core_robAddr : 4'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
+  wire [5:0] _GEN_308 = speculativeBuffer_valid ? speculativeBuffer_core_prfDest : 6'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
+  wire  _GEN_309 = speculativeBuffer_valid & _GEN_302; // @[arbiter.scala 243:41 utils.scala 50:41]
+  wire [4:0] _GEN_310 = speculativeBuffer_valid ? _GEN_301 : 5'h0; // @[arbiter.scala 243:41 utils.scala 51:41]
+  wire  _GEN_311 = speculativeBuffer_valid & speculativeBuffer_writeData_valid; // @[arbiter.scala 243:41 246:29 utils.scala 50:41]
+  wire [63:0] _GEN_312 = speculativeBuffer_valid ? speculativeBuffer_writeData_data : 64'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
+  wire [511:0] _GEN_314 = speculativeBuffer_valid ? speculativeBuffer_cacheLine_cacheLine : 512'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
+  wire [1:0] _GEN_315 = speculativeBuffer_valid ? speculativeBuffer_cacheLine_response : 2'h0; // @[arbiter.scala 243:41 246:29 utils.scala 51:41]
+  wire  _GEN_317 = inorderBuffer_valid & _T_33 & _T_35 ? 1'h0 : _GEN_193; // @[arbiter.scala 231:129 232:27]
+  wire  _GEN_318 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_valid : speculativeBuffer_valid; // @[arbiter.scala 231:129 234:29]
+  wire [31:0] _GEN_319 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_address : _GEN_305; // @[arbiter.scala 231:129 234:29]
+  wire [31:0] _GEN_320 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_core_instruction : _GEN_306; // @[arbiter.scala 231:129 234:29]
+  wire [3:0] _GEN_321 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_core_robAddr : _GEN_307; // @[arbiter.scala 231:129 234:29]
+  wire [5:0] _GEN_322 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_core_prfDest : _GEN_308; // @[arbiter.scala 231:129 234:29]
+  wire  _GEN_323 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_264 : _GEN_309; // @[arbiter.scala 231:129]
+  wire [4:0] _GEN_324 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_263 : _GEN_310; // @[arbiter.scala 231:129]
+  wire  _GEN_325 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_writeData_valid : _GEN_311; // @[arbiter.scala 231:129 234:29]
+  wire [63:0] _GEN_326 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_writeData_data : _GEN_312; // @[arbiter.scala 231:129 234:29]
+  wire [511:0] _GEN_328 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_cacheLine_cacheLine : _GEN_314; // @[arbiter.scala 231:129 234:29]
+  wire [1:0] _GEN_329 = inorderBuffer_valid & _T_33 & _T_35 ? inorderBuffer_cacheLine_response : _GEN_315; // @[arbiter.scala 231:129 234:29]
+  wire  _GEN_331 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_295 : rAtmoicsWritePending; // @[arbiter.scala 231:129 195:37]
+  wire  _GEN_332 = inorderBuffer_valid & _T_33 & _T_35 ? _GEN_24 : _GEN_303; // @[arbiter.scala 231:129]
+  wire  _GEN_333 = replayRequestBuffer_valid ? 1'h0 : _GEN_51; // @[arbiter.scala 223:43 224:33]
+  wire  _GEN_334 = replayRequestBuffer_valid ? replayRequestBuffer_valid : _GEN_318; // @[arbiter.scala 223:43 226:29]
+  wire [31:0] _GEN_335 = replayRequestBuffer_valid ? replayRequestBuffer_address : _GEN_319; // @[arbiter.scala 223:43 226:29]
+  wire [31:0] _GEN_336 = replayRequestBuffer_valid ? replayRequestBuffer_core_instruction : _GEN_320; // @[arbiter.scala 223:43 226:29]
+  wire [3:0] _GEN_337 = replayRequestBuffer_valid ? replayRequestBuffer_core_robAddr : _GEN_321; // @[arbiter.scala 223:43 226:29]
+  wire [5:0] _GEN_338 = replayRequestBuffer_valid ? replayRequestBuffer_core_prfDest : _GEN_322; // @[arbiter.scala 223:43 226:29]
+  wire  _GEN_339 = replayRequestBuffer_valid ? _GEN_287 : _GEN_323; // @[arbiter.scala 223:43]
+  wire [4:0] _GEN_340 = replayRequestBuffer_valid ? _GEN_286 : _GEN_324; // @[arbiter.scala 223:43]
+  wire  _GEN_341 = replayRequestBuffer_valid ? replayRequestBuffer_writeData_valid : _GEN_325; // @[arbiter.scala 223:43 226:29]
+  wire [63:0] _GEN_342 = replayRequestBuffer_valid ? replayRequestBuffer_writeData_data : _GEN_326; // @[arbiter.scala 223:43 226:29]
+  wire [511:0] _GEN_344 = replayRequestBuffer_valid ? replayRequestBuffer_cacheLine_cacheLine : _GEN_328; // @[arbiter.scala 223:43 226:29]
+  wire [1:0] _GEN_345 = replayRequestBuffer_valid ? replayRequestBuffer_cacheLine_response : _GEN_329; // @[arbiter.scala 223:43 226:29]
+  wire  _GEN_347 = replayRequestBuffer_valid ? _GEN_193 : _GEN_317; // @[arbiter.scala 223:43]
+  wire  _GEN_348 = replayRequestBuffer_valid ? rAtmoicsWritePending : _GEN_331; // @[arbiter.scala 195:37 223:43]
+  wire  _GEN_349 = replayRequestBuffer_valid ? _GEN_24 : _GEN_332; // @[arbiter.scala 223:43]
+  wire  _GEN_351 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_valid : _GEN_334; // @[arbiter.scala 215:46 218:35]
+  wire [31:0] _GEN_352 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_address : _GEN_335; // @[arbiter.scala 215:46 219:37]
+  wire [1:0] _GEN_353 = coherencyRequestBuffer_valid ? coherencyRequestBuffer_response : _GEN_345; // @[arbiter.scala 215:46 220:48]
+  wire  _GEN_354 = coherencyRequestBuffer_valid | _GEN_339; // @[arbiter.scala 215:46 221:42]
+  wire [31:0] _GEN_357 = coherencyRequestBuffer_valid ? 32'h0 : _GEN_336; // @[arbiter.scala 215:46 utils.scala 51:41]
+  wire [3:0] _GEN_358 = coherencyRequestBuffer_valid ? 4'h0 : _GEN_337; // @[arbiter.scala 215:46 utils.scala 51:41]
+  wire [5:0] _GEN_359 = coherencyRequestBuffer_valid ? 6'h0 : _GEN_338; // @[arbiter.scala 215:46 utils.scala 51:41]
+  wire [4:0] _GEN_360 = coherencyRequestBuffer_valid ? 5'h0 : _GEN_340; // @[arbiter.scala 215:46 utils.scala 51:41]
+  wire  _GEN_361 = coherencyRequestBuffer_valid ? 1'h0 : _GEN_341; // @[arbiter.scala 215:46 utils.scala 50:41]
+  wire [63:0] _GEN_362 = coherencyRequestBuffer_valid ? 64'h0 : _GEN_342; // @[arbiter.scala 215:46 utils.scala 51:41]
+  wire [511:0] _GEN_364 = coherencyRequestBuffer_valid ? 512'h0 : _GEN_344; // @[arbiter.scala 215:46 utils.scala 51:41]
+  wire  _GEN_365 = coherencyRequestBuffer_valid ? _GEN_193 : _GEN_347; // @[arbiter.scala 215:46]
+  wire  _GEN_369 = rAtmoicsWritePending ? _GEN_266 : _GEN_351; // @[arbiter.scala 197:31]
+  wire [31:0] _GEN_370 = rAtmoicsWritePending ? _GEN_267 : _GEN_352; // @[arbiter.scala 197:31]
+  wire [31:0] _GEN_371 = rAtmoicsWritePending ? _GEN_268 : _GEN_357; // @[arbiter.scala 197:31]
+  wire [3:0] _GEN_372 = rAtmoicsWritePending ? _GEN_269 : _GEN_358; // @[arbiter.scala 197:31]
+  wire [5:0] _GEN_373 = rAtmoicsWritePending ? _GEN_270 : _GEN_359; // @[arbiter.scala 197:31]
+  wire  _GEN_374 = rAtmoicsWritePending ? _GEN_271 : _GEN_354; // @[arbiter.scala 197:31]
+  wire [4:0] _GEN_375 = rAtmoicsWritePending ? _GEN_272 : _GEN_360; // @[arbiter.scala 197:31]
+  wire  _GEN_376 = rAtmoicsWritePending ? _GEN_273 : _GEN_361; // @[arbiter.scala 197:31]
+  wire [63:0] _GEN_377 = rAtmoicsWritePending ? _GEN_274 : _GEN_362; // @[arbiter.scala 197:31]
+  wire [511:0] _GEN_379 = rAtmoicsWritePending ? _GEN_276 : _GEN_364; // @[arbiter.scala 197:31]
+  wire [1:0] _GEN_380 = rAtmoicsWritePending ? _GEN_277 : _GEN_353; // @[arbiter.scala 197:31]
+  wire  _GEN_392 = toCacheLookup_ready & _GEN_374; // @[arbiter.scala 196:72 utils.scala 50:41]
+  wire [4:0] _GEN_393 = toCacheLookup_ready ? _GEN_375 : 5'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
   wire  _fenceReady_T_4 = _speculativeBufferReadyWire_T & _inorderBufferReadyWire_T & _operationBufferReadyWire_T; // @[arbiter.scala 263:67]
   assign request_inorderReady = inorderBufferReadyWire & operationBufferReadyWire; // @[arbiter.scala 73:51]
   assign request_speculativeReady = ~speculativeBuffer_valid | speculativeBuffer_valid & ~speculativeBuffer_branch_valid
@@ -37073,17 +37050,17 @@ module arbiter(
   assign toPeripheral_request_writeData_data = toPeripheral_ready & _T_34 & inorderBuffer_valid ?
     inorderBuffer_writeData_data : 64'h0; // @[arbiter.scala 256:112 258:26 utils.scala 51:41]
   assign toCacheLookup_requestType = toCacheLookup_ready ? requestTypeWire : 2'h0; // @[arbiter.scala 196:72 254:31 55:29]
-  assign toCacheLookup_request_valid = toCacheLookup_ready & _GEN_389; // @[arbiter.scala 196:72 utils.scala 50:41]
-  assign toCacheLookup_request_address = toCacheLookup_ready ? _GEN_390 : 32'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
-  assign toCacheLookup_request_core_instruction = toCacheLookup_ready ? _GEN_391 : 32'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
-  assign toCacheLookup_request_core_robAddr = toCacheLookup_ready ? _GEN_392 : 4'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
-  assign toCacheLookup_request_core_prfDest = toCacheLookup_ready ? _GEN_393 : 6'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
-  assign toCacheLookup_request_branch_valid = toCacheLookup_ready & _GEN_394; // @[arbiter.scala 196:72 utils.scala 50:41]
-  assign toCacheLookup_request_branch_mask = toCacheLookup_ready ? _GEN_395 : 5'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
-  assign toCacheLookup_request_writeData_valid = toCacheLookup_ready & _GEN_396; // @[arbiter.scala 196:72 utils.scala 50:41]
-  assign toCacheLookup_request_writeData_data = toCacheLookup_ready ? _GEN_397 : 64'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
-  assign toCacheLookup_request_cacheLine_cacheLine = toCacheLookup_ready ? _GEN_399 : 512'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
-  assign toCacheLookup_request_cacheLine_response = toCacheLookup_ready ? _GEN_400 : 2'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
+  assign toCacheLookup_request_valid = toCacheLookup_ready & _GEN_369; // @[arbiter.scala 196:72 utils.scala 50:41]
+  assign toCacheLookup_request_address = toCacheLookup_ready ? _GEN_370 : 32'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
+  assign toCacheLookup_request_core_instruction = toCacheLookup_ready ? _GEN_371 : 32'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
+  assign toCacheLookup_request_core_robAddr = toCacheLookup_ready ? _GEN_372 : 4'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
+  assign toCacheLookup_request_core_prfDest = toCacheLookup_ready ? _GEN_373 : 6'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
+  assign toCacheLookup_request_branch_valid = toPeripheral_ready & _T_34 & inorderBuffer_valid ? _GEN_264 : _GEN_392; // @[arbiter.scala 256:112]
+  assign toCacheLookup_request_branch_mask = toPeripheral_ready & _T_34 & inorderBuffer_valid ? _GEN_263 : _GEN_393; // @[arbiter.scala 256:112]
+  assign toCacheLookup_request_writeData_valid = toCacheLookup_ready & _GEN_376; // @[arbiter.scala 196:72 utils.scala 50:41]
+  assign toCacheLookup_request_writeData_data = toCacheLookup_ready ? _GEN_377 : 64'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
+  assign toCacheLookup_request_cacheLine_cacheLine = toCacheLookup_ready ? _GEN_379 : 512'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
+  assign toCacheLookup_request_cacheLine_response = toCacheLookup_ready ? _GEN_380 : 2'h0; // @[arbiter.scala 196:72 utils.scala 51:41]
   assign replayRequest_ready = ~replayRequestBuffer_valid; // @[arbiter.scala 91:26]
   assign coherencyRequest_ready = ~coherencyRequestBuffer_valid; // @[arbiter.scala 86:29]
   assign writeCommit_ready = 3'h0 == operationState ? 1'h0 : 3'h1 == operationState; // @[arbiter.scala 117:25 58:21]
@@ -37097,7 +37074,7 @@ module arbiter(
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 215:46]
         speculativeBuffer_valid <= _GEN_24;
       end else begin
-        speculativeBuffer_valid <= _GEN_361;
+        speculativeBuffer_valid <= _GEN_349;
       end
     end else begin
       speculativeBuffer_valid <= _GEN_24;
@@ -37132,29 +37109,33 @@ module arbiter(
     end
     if (reset) begin // @[arbiter.scala 61:34]
       speculativeBuffer_branch_valid <= 1'h0; // @[arbiter.scala 61:34]
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 196:72]
-      if (rAtmoicsWritePending) begin // @[arbiter.scala 197:31]
-        speculativeBuffer_branch_valid <= _GEN_242;
-      end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 215:46]
-        speculativeBuffer_branch_valid <= _GEN_242;
+    end else if (requestTypeWire != 2'h1) begin // @[arbiter.scala 174:32]
+      if (speculativeBuffer_valid) begin // @[arbiter.scala 175:34]
+        if (speculativeBuffer_branch_valid) begin // @[utils.scala 121:24]
+          speculativeBuffer_branch_valid <= _GEN_214;
+        end else begin
+          speculativeBuffer_branch_valid <= _GEN_29;
+        end
       end else begin
-        speculativeBuffer_branch_valid <= _GEN_363;
+        speculativeBuffer_branch_valid <= _GEN_29;
       end
     end else begin
-      speculativeBuffer_branch_valid <= _GEN_242;
+      speculativeBuffer_branch_valid <= _GEN_29;
     end
     if (reset) begin // @[arbiter.scala 61:34]
       speculativeBuffer_branch_mask <= 5'h0; // @[arbiter.scala 61:34]
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 196:72]
-      if (rAtmoicsWritePending) begin // @[arbiter.scala 197:31]
-        speculativeBuffer_branch_mask <= _GEN_241;
-      end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 215:46]
-        speculativeBuffer_branch_mask <= _GEN_241;
+    end else if (requestTypeWire != 2'h1) begin // @[arbiter.scala 174:32]
+      if (speculativeBuffer_valid) begin // @[arbiter.scala 175:34]
+        if (speculativeBuffer_branch_valid) begin // @[utils.scala 121:24]
+          speculativeBuffer_branch_mask <= _GEN_213;
+        end else begin
+          speculativeBuffer_branch_mask <= _GEN_30;
+        end
       end else begin
-        speculativeBuffer_branch_mask <= _GEN_362;
+        speculativeBuffer_branch_mask <= _GEN_30;
       end
     end else begin
-      speculativeBuffer_branch_mask <= _GEN_241;
+      speculativeBuffer_branch_mask <= _GEN_30;
     end
     if (reset) begin // @[arbiter.scala 61:34]
       speculativeBuffer_writeData_valid <= 1'h0; // @[arbiter.scala 61:34]
@@ -37192,7 +37173,7 @@ module arbiter(
       if (rAtmoicsWritePending) begin // @[arbiter.scala 197:31]
         inorderBuffer_valid <= _GEN_265;
       end else begin
-        inorderBuffer_valid <= _GEN_381;
+        inorderBuffer_valid <= _GEN_365;
       end
     end else if (3'h0 == operationState) begin // @[arbiter.scala 117:25]
       inorderBuffer_valid <= _GEN_133;
@@ -37261,47 +37242,31 @@ module arbiter(
     end
     if (reset) begin // @[arbiter.scala 62:30]
       inorderBuffer_branch_valid <= 1'h0; // @[arbiter.scala 62:30]
-    end else if (toPeripheral_ready & _T_34 & inorderBuffer_valid) begin // @[arbiter.scala 256:112]
-      if (branchOps_valid) begin // @[utils.scala 91:27]
-        if (branchOps_passed) begin // @[utils.scala 92:30]
-          inorderBuffer_branch_valid <= toCacheLookup_request_branch_valid; // @[utils.scala 100:26]
+    end else if (requestTypeWire != 2'h1) begin // @[arbiter.scala 174:32]
+      if (inorderBuffer_valid) begin // @[arbiter.scala 181:30]
+        if (inorderBuffer_branch_valid) begin // @[utils.scala 121:24]
+          inorderBuffer_branch_valid <= _GEN_236;
         end else begin
-          inorderBuffer_branch_valid <= _GEN_260;
+          inorderBuffer_branch_valid <= _GEN_198;
         end
       end else begin
-        inorderBuffer_branch_valid <= toCacheLookup_request_branch_valid; // @[utils.scala 114:24]
+        inorderBuffer_branch_valid <= _GEN_198;
       end
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 196:72]
-      if (rAtmoicsWritePending) begin // @[arbiter.scala 197:31]
-        inorderBuffer_branch_valid <= _GEN_280;
-      end else begin
-        inorderBuffer_branch_valid <= _GEN_383;
-      end
-    end else if (requestTypeWire != 2'h1) begin // @[arbiter.scala 174:32]
-      inorderBuffer_branch_valid <= _GEN_240;
     end else begin
       inorderBuffer_branch_valid <= _GEN_198;
     end
     if (reset) begin // @[arbiter.scala 62:30]
       inorderBuffer_branch_mask <= 5'h0; // @[arbiter.scala 62:30]
-    end else if (toPeripheral_ready & _T_34 & inorderBuffer_valid) begin // @[arbiter.scala 256:112]
-      if (branchOps_valid) begin // @[utils.scala 91:27]
-        if (branchOps_passed) begin // @[utils.scala 92:30]
-          inorderBuffer_branch_mask <= _GEN_258;
+    end else if (requestTypeWire != 2'h1) begin // @[arbiter.scala 174:32]
+      if (inorderBuffer_valid) begin // @[arbiter.scala 181:30]
+        if (inorderBuffer_branch_valid) begin // @[utils.scala 121:24]
+          inorderBuffer_branch_mask <= _GEN_235;
         end else begin
-          inorderBuffer_branch_mask <= _GEN_259;
+          inorderBuffer_branch_mask <= _GEN_199;
         end
       end else begin
-        inorderBuffer_branch_mask <= toCacheLookup_request_branch_mask; // @[utils.scala 113:23]
+        inorderBuffer_branch_mask <= _GEN_199;
       end
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 196:72]
-      if (rAtmoicsWritePending) begin // @[arbiter.scala 197:31]
-        inorderBuffer_branch_mask <= _GEN_279;
-      end else begin
-        inorderBuffer_branch_mask <= _GEN_382;
-      end
-    end else if (requestTypeWire != 2'h1) begin // @[arbiter.scala 174:32]
-      inorderBuffer_branch_mask <= _GEN_239;
     end else begin
       inorderBuffer_branch_mask <= _GEN_199;
     end
@@ -37476,7 +37441,7 @@ module arbiter(
       coherencyRequestBuffer_valid <= 1'h0; // @[arbiter.scala 64:39]
     end else if (toCacheLookup_ready) begin // @[arbiter.scala 196:72]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 197:31]
-        coherencyRequestBuffer_valid <= _GEN_282;
+        coherencyRequestBuffer_valid <= _GEN_280;
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 215:46]
         coherencyRequestBuffer_valid <= 1'h0; // @[arbiter.scala 216:36]
       end else begin
@@ -37503,7 +37468,7 @@ module arbiter(
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 215:46]
         replayRequestBuffer_valid <= _GEN_51;
       end else begin
-        replayRequestBuffer_valid <= _GEN_341;
+        replayRequestBuffer_valid <= _GEN_333;
       end
     end else begin
       replayRequestBuffer_valid <= _GEN_51;
@@ -37530,29 +37495,33 @@ module arbiter(
     end
     if (reset) begin // @[arbiter.scala 65:36]
       replayRequestBuffer_branch_valid <= 1'h0; // @[arbiter.scala 65:36]
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 196:72]
-      if (rAtmoicsWritePending) begin // @[arbiter.scala 197:31]
-        replayRequestBuffer_branch_valid <= _GEN_257;
-      end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 215:46]
-        replayRequestBuffer_branch_valid <= _GEN_257;
+    end else if (requestTypeWire != 2'h2 & replayRequestBuffer_valid) begin // @[arbiter.scala 185:61]
+      if (replayRequestBuffer_branch_valid) begin // @[utils.scala 121:24]
+        if (branchOps_valid) begin // @[utils.scala 122:29]
+          replayRequestBuffer_branch_valid <= _GEN_251;
+        end else begin
+          replayRequestBuffer_branch_valid <= _GEN_56;
+        end
       end else begin
-        replayRequestBuffer_branch_valid <= _GEN_356;
+        replayRequestBuffer_branch_valid <= _GEN_56;
       end
     end else begin
-      replayRequestBuffer_branch_valid <= _GEN_257;
+      replayRequestBuffer_branch_valid <= _GEN_56;
     end
     if (reset) begin // @[arbiter.scala 65:36]
       replayRequestBuffer_branch_mask <= 5'h0; // @[arbiter.scala 65:36]
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 196:72]
-      if (rAtmoicsWritePending) begin // @[arbiter.scala 197:31]
-        replayRequestBuffer_branch_mask <= _GEN_256;
-      end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 215:46]
-        replayRequestBuffer_branch_mask <= _GEN_256;
+    end else if (requestTypeWire != 2'h2 & replayRequestBuffer_valid) begin // @[arbiter.scala 185:61]
+      if (replayRequestBuffer_branch_valid) begin // @[utils.scala 121:24]
+        if (branchOps_valid) begin // @[utils.scala 122:29]
+          replayRequestBuffer_branch_mask <= _GEN_250;
+        end else begin
+          replayRequestBuffer_branch_mask <= _GEN_57;
+        end
       end else begin
-        replayRequestBuffer_branch_mask <= _GEN_355;
+        replayRequestBuffer_branch_mask <= _GEN_57;
       end
     end else begin
-      replayRequestBuffer_branch_mask <= _GEN_256;
+      replayRequestBuffer_branch_mask <= _GEN_57;
     end
     if (reset) begin // @[arbiter.scala 65:36]
       replayRequestBuffer_writeData_valid <= 1'h0; // @[arbiter.scala 65:36]
@@ -37601,7 +37570,7 @@ module arbiter(
           rAtmoicsWritePending <= 1'h0; // @[arbiter.scala 205:30]
         end
       end else if (!(coherencyRequestBuffer_valid)) begin // @[arbiter.scala 215:46]
-        rAtmoicsWritePending <= _GEN_360;
+        rAtmoicsWritePending <= _GEN_348;
       end
     end
   end
