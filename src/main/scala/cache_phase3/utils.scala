@@ -116,23 +116,25 @@ object ChiselUtils {
   }
 
   def regRecordUpdate[T <: branchTrait](
-    buffer: T, branchOps: branchOps
-    ): Unit = {
-    when(buffer.valid && branchOps.valid) {
-      when(branchOps.passed) {
-        when((buffer.mask & branchOps.branchMask).orR) {
-          buffer.mask := buffer.mask ^ branchOps.branchMask
+  buffer: T, branchOps: branchOps
+  ): Unit = {
+    when(buffer.valid) {
+      when(branchOps.valid) {
+        when(branchOps.passed) {
+          when((buffer.mask & branchOps.branchMask).orR) {
+            buffer.mask := buffer.mask ^ branchOps.branchMask
+          }
+          buffer.valid := buffer.valid
+        }.otherwise {
+          when((buffer.mask & branchOps.branchMask).orR) {
+            buffer.valid := false.B
+            buffer.mask := 0.U
+          }
         }
-        buffer.valid := buffer.valid
-      }.otherwise {
-        when((buffer.mask & branchOps.branchMask).orR) {
-          buffer.valid := false.B
-          buffer.mask := 0.U
-        }
+      // } .otherwise {
+      //   buffer.mask := buffer.mask
+      //   buffer.valid := buffer.valid      
       }
-    } .otherwise {
-      buffer.mask := buffer.mask
-      buffer.valid := buffer.valid      
     }
   }
 }

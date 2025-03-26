@@ -5,8 +5,8 @@ import chisel3.util._
 import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import dataclass.data
-import cache_phase3.ChiselUtils.zeroInit
 import os.truncate
+import cache_phase3.ChiselUtils._
 
 //TODO : For now only readUnique is used, rest will be added later
 //TODO : Add seperate field for data received for clairty in readresponse
@@ -109,9 +109,15 @@ class ACEUnit(
   readRequest.ready := !readBuffer.valid || (readBuffer.valid && !readBuffer.branch.valid)
   when(readRequest.request.valid && readRequest.request.branch.valid && readRequest.ready){
     readBuffer := readRequest.request
+    regWriteUpdate(readBuffer.branch, branchOps, readRequest.request.branch)
+  }
+  when(readBuffer.valid){
+    regRecordUpdate(readBuffer.branch, branchOps)
   }
   val responseBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   readResponse.request := responseBuffer
+  regReadUpdate(readResponse.request.branch, branchOps, responseBuffer.branch)
+
 
   val ACEMSHR = Module(new fifoWithBranchOps(
     depth = schedulerDepth,
@@ -259,6 +265,7 @@ class ACEUnit(
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }
   } 
+  regRecordUpdate(responseBuffer.branch, branchOps)
 
   //--------------------Coherent state----------------------------//
   //* Since a new coherent request comes after the previous request's response is released-

@@ -160,7 +160,9 @@ class cacheLookupUnit extends Module{
     toResponse.request := memoryResponseBuffer
     regReadUpdate(toResponse.request.branch, branchOps, memoryResponseBuffer.branch)
   }
-  memoryResponseBuffer.valid := Mux(memoryResponseBuffer.valid, false.B, memoryResponseBuffer.valid)
+  when(memoryResponseBuffer.valid){
+    memoryResponseBuffer.valid := false.B
+  }
 
   val coherencyResponseBuffer = RegInit(0.U.asTypeOf(new coherencyResponseWire))
   val toCoherencyResponseValidWire = WireDefault(false.B)
@@ -456,14 +458,16 @@ class cacheLookupUnit extends Module{
 
     //____________________Output Buffer update___________________//
     //Replay
-    replayBuffer := Mux(toReplayValidWire && readBuffer.branch.valid, readBuffer, replayBuffer)
+    when(toReplayValidWire && readBuffer.branch.valid){
+      replayBuffer := readBuffer
+    }
 
     //Response
     when(toMemoryResponseValidWire && readBuffer.branch.valid){
       memoryResponseBuffer := readBuffer
       memoryResponseBuffer.writeData.data := responseResultWire
-
     }
+
     //Coherency
     when(toCoherencyResponseValidWire){
       coherencyResponseBuffer.valid := toCoherencyResponseValidWire
@@ -487,7 +491,6 @@ class cacheLookupUnit extends Module{
     //Last Miss Memory Record
     when(toLastMissRecordRegister && readBuffer.branch.valid){  
       lastMissRecordRegister := readBuffer
-
     }
 
     //Reservation register

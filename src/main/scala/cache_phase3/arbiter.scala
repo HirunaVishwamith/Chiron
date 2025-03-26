@@ -57,18 +57,20 @@ class arbiter extends Module {
   coherencyRequest.ready := false.B
   writeCommit.ready := false.B
   fenceReady := false.B
-
-  val requestTypeWire = WireInit(0.U(arbiterReqTypesWidth.W))
-
+  
   val speculativeBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val inorderBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val operationBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val coherencyRequestBuffer = RegInit(0.U.asTypeOf(new coherencyRequestWire))
   val replayRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  
+  val requestTypeWire = WireInit(0.U(arbiterReqTypesWidth.W))
+  val speculativeBufferReadyWire = WireDefault(!speculativeBuffer.valid || (speculativeBuffer.valid && !speculativeBuffer.branch.valid))
+  val operationBufferReadyWire = WireDefault((!operationBuffer.valid || (operationBuffer.valid && !operationBuffer.branch.valid)))
+  val inorderBufferReadyWire = !inorderBuffer.valid || (inorderBuffer.valid && !inorderBuffer.branch.valid)
 
-  request.speculativeReady := !speculativeBuffer.valid || (speculativeBuffer.valid && !speculativeBuffer.branch.valid)
-  request.inorderReady := (!operationBuffer.valid || (operationBuffer.valid && !operationBuffer.branch.valid)) &&
-                            (!inorderBuffer.valid || (inorderBuffer.valid && !inorderBuffer.branch.valid))
+  request.speculativeReady := speculativeBufferReadyWire
+  request.inorderReady :=  inorderBufferReadyWire && operationBufferReadyWire                        
 
   //---------------------Request Enqueue---------------------//
   when(request.request.valid && request.request.branch.valid){
@@ -169,11 +171,19 @@ class arbiter extends Module {
 
   }
 
-  when(requestTypeWire === 0.U && branchOps.valid){
-    regRecordUpdate(speculativeBuffer.branch, branchOps)
+  when(requestTypeWire =/= 1.U){ 
+    when(speculativeBuffer.valid){
+      regRecordUpdate(speculativeBuffer.branch, branchOps)
+    }
+    when(operationBuffer.valid){
+      regRecordUpdate(operationBuffer.branch, branchOps)
+    }
+    when(inorderBuffer.valid){
+      regRecordUpdate(inorderBuffer.branch, branchOps)
+    }
+  }
+  when(requestTypeWire =/= 2.U && replayRequestBuffer.valid){
     regRecordUpdate(replayRequestBuffer.branch, branchOps)
-    regRecordUpdate(operationBuffer.branch, branchOps)
-    regRecordUpdate(inorderBuffer.branch, branchOps)
   }
 
   //---------------------Request Dequeue---------------------//

@@ -64,14 +64,18 @@ class replayUnit extends Module{
   requestIn.ready := false.B
   responseIn.ready := false.B
   writeBackIn.ready := false.B
+  requestWaitFIFO.read.ready := false.B
+  responseWaitFIFO.read.ready := false.B
+  writeBackFIFO.read.ready := false.B
+  
   zeroInit(requestWaitFIFO.write.data)
-  requestWaitFIFO.branchOps <> branchOps
   zeroInit(responseWaitFIFO.write.data)
-  responseWaitFIFO.branchOps <> branchOps
   zeroInit(writeBackFIFO.write.data)
+
+  requestWaitFIFO.branchOps <> branchOps
+  responseWaitFIFO.branchOps <> branchOps
     
   //! Debug only
-  requestWaitFIFO.read.ready := false.B
   when(!(isPauseForBoolean && branchOps.valid)){
     requestIn.ready := requestWaitFIFO.write.ready
     requestWaitFIFO.read.ready := requestOut.ready
@@ -82,7 +86,6 @@ class replayUnit extends Module{
   requestOut.request := requestWaitFIFO.read.data
 
   //! Debug only
-  responseWaitFIFO.read.ready := false.B
   when(!(isPauseForBoolean && branchOps.valid)){
     responseIn.ready := responseWaitFIFO.write.ready
     responseWaitFIFO.read.ready := responseOut.ready
@@ -93,7 +96,6 @@ class replayUnit extends Module{
   responseOut.request := responseWaitFIFO.read.data
 
   //! Debug only
-  writeBackFIFO.read.ready := false.B
   when(!(isPauseForBoolean && branchOps.valid)){
     writeBackIn.ready := writeBackFIFO.write.ready
     writeBackFIFO.read.ready := writeBackOut.ready
