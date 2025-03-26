@@ -5,7 +5,7 @@ import chisel3.util._
 import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import cache_phase3._
-import cache_phase3.ChiselUtils.zeroInit
+import cache_phase3.ChiselUtils._
 
 //? After compiling
 //TODO : Check with old requests to see if the memory address is already in a previous request
@@ -82,6 +82,7 @@ class replayUnit extends Module{
   }
   when(requestIn.request.valid && requestIn.request.branch.valid){
     requestWaitFIFO.write.data := requestIn.request
+    regReadUpdate(requestWaitFIFO.write.data.branch, branchOps, requestIn.request.branch)
   }
   requestOut.request := requestWaitFIFO.read.data
 
@@ -92,6 +93,7 @@ class replayUnit extends Module{
   }
   when(responseIn.request.valid && responseIn.request.branch.valid){
     responseWaitFIFO.write.data := responseIn.request
+    regReadUpdate(responseWaitFIFO.write.data.branch, branchOps, requestIn.request.branch)
   }
   responseOut.request := responseWaitFIFO.read.data
 

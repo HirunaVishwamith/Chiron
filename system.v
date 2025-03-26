@@ -36280,170 +36280,181 @@ module Scheduler(
   wire [4:0] speculativeQueue_branchOps_branchMask; // @[scheduler.scala 34:32]
   wire  speculativeQueue_branchOps_passed; // @[scheduler.scala 34:32]
   wire  speculativeEntryWire = requestIn_core_instruction[6:2] == 5'h0 & requestIn_address != 32'he000102c; // @[scheduler.scala 46:89]
-  wire [4:0] _GEN_5 = speculativeEntryWire ? requestIn_branch_mask : 5'h0; // @[scheduler.scala 52:38 53:35 utils.scala 51:41]
-  wire [5:0] _GEN_7 = speculativeEntryWire ? requestIn_core_prfDest : 6'h0; // @[scheduler.scala 52:38 53:35 utils.scala 51:41]
-  wire [3:0] _GEN_8 = speculativeEntryWire ? requestIn_core_robAddr : 4'h0; // @[scheduler.scala 52:38 53:35 utils.scala 51:41]
-  wire [31:0] _GEN_9 = speculativeEntryWire ? requestIn_core_instruction : 32'h0; // @[scheduler.scala 52:38 53:35 utils.scala 51:41]
-  wire [31:0] _GEN_10 = speculativeEntryWire ? requestIn_address : 32'h0; // @[scheduler.scala 52:38 53:35 utils.scala 51:41]
-  wire  _GEN_11 = speculativeEntryWire & requestIn_valid; // @[scheduler.scala 52:38 53:35 utils.scala 50:41]
-  wire [4:0] _GEN_17 = speculativeEntryWire ? 5'h0 : requestIn_branch_mask; // @[scheduler.scala 52:38 utils.scala 51:41 scheduler.scala 55:31]
-  wire  _GEN_18 = speculativeEntryWire ? 1'h0 : 1'h1; // @[scheduler.scala 52:38 utils.scala 50:41 scheduler.scala 55:31]
-  wire [5:0] _GEN_19 = speculativeEntryWire ? 6'h0 : requestIn_core_prfDest; // @[scheduler.scala 52:38 utils.scala 51:41 scheduler.scala 55:31]
-  wire [3:0] _GEN_20 = speculativeEntryWire ? 4'h0 : requestIn_core_robAddr; // @[scheduler.scala 52:38 utils.scala 51:41 scheduler.scala 55:31]
-  wire [31:0] _GEN_21 = speculativeEntryWire ? 32'h0 : requestIn_core_instruction; // @[scheduler.scala 52:38 utils.scala 51:41 scheduler.scala 55:31]
-  wire [31:0] _GEN_22 = speculativeEntryWire ? 32'h0 : requestIn_address; // @[scheduler.scala 52:38 utils.scala 51:41 scheduler.scala 55:31]
-  wire  _GEN_23 = speculativeEntryWire ? 1'h0 : requestIn_valid; // @[scheduler.scala 52:38 utils.scala 50:41 scheduler.scala 55:31]
-  wire [4:0] _GEN_29 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_branch_mask : _GEN_17; // @[scheduler.scala 50:58 51:31]
-  wire  _GEN_30 = speculativeEntryWire & inorderQueue_matchFound | _GEN_18; // @[scheduler.scala 50:58 51:31]
-  wire [5:0] _GEN_31 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_core_prfDest : _GEN_19; // @[scheduler.scala 50:58 51:31]
-  wire [3:0] _GEN_32 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_core_robAddr : _GEN_20; // @[scheduler.scala 50:58 51:31]
-  wire [31:0] _GEN_33 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_core_instruction : _GEN_21; // @[scheduler.scala 50:58 51:31]
-  wire [31:0] _GEN_34 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_address : _GEN_22; // @[scheduler.scala 50:58 51:31]
-  wire  _GEN_35 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_valid : _GEN_23; // @[scheduler.scala 50:58 51:31]
-  wire [4:0] _GEN_41 = speculativeEntryWire & inorderQueue_matchFound ? 5'h0 : _GEN_5; // @[scheduler.scala 50:58 utils.scala 51:41]
-  wire  _GEN_42 = speculativeEntryWire & inorderQueue_matchFound ? 1'h0 : speculativeEntryWire; // @[scheduler.scala 50:58 utils.scala 50:41]
-  wire [5:0] _GEN_43 = speculativeEntryWire & inorderQueue_matchFound ? 6'h0 : _GEN_7; // @[scheduler.scala 50:58 utils.scala 51:41]
-  wire [3:0] _GEN_44 = speculativeEntryWire & inorderQueue_matchFound ? 4'h0 : _GEN_8; // @[scheduler.scala 50:58 utils.scala 51:41]
-  wire [31:0] _GEN_45 = speculativeEntryWire & inorderQueue_matchFound ? 32'h0 : _GEN_9; // @[scheduler.scala 50:58 utils.scala 51:41]
-  wire [31:0] _GEN_46 = speculativeEntryWire & inorderQueue_matchFound ? 32'h0 : _GEN_10; // @[scheduler.scala 50:58 utils.scala 51:41]
-  wire  _GEN_47 = speculativeEntryWire & inorderQueue_matchFound ? 1'h0 : _GEN_11; // @[scheduler.scala 50:58 utils.scala 50:41]
-  wire  _speculativeBranchResolved_T_1 = |speculativeQueue_read_data_branch_mask[3:0]; // @[scheduler.scala 69:92]
-  wire  _speculativeBranchResolved_T_3 = ~speculativeQueue_isEmpty; // @[scheduler.scala 69:99]
-  wire  speculativeBranchResolved = ~(|speculativeQueue_read_data_branch_mask[3:0]) & ~speculativeQueue_isEmpty; // @[scheduler.scala 69:96]
+  wire [4:0] _T_2 = requestIn_branch_mask & branchOps_branchMask; // @[utils.scala 94:27]
+  wire  _T_3 = |_T_2; // @[utils.scala 94:51]
+  wire [4:0] _inorderQueue_write_data_branch_mask_T = requestIn_branch_mask ^ branchOps_branchMask; // @[utils.scala 95:42]
+  wire [4:0] _GEN_0 = |_T_2 ? _inorderQueue_write_data_branch_mask_T : requestIn_branch_mask; // @[utils.scala 94:56 95:27 98:27]
+  wire [4:0] _GEN_1 = _T_3 ? 5'h0 : requestIn_branch_mask; // @[utils.scala 103:56 104:27 108:27]
+  wire  _GEN_2 = _T_3 ? 1'h0 : 1'h1; // @[utils.scala 103:56 105:28 109:28]
+  wire [4:0] _GEN_3 = branchOps_passed ? _GEN_0 : _GEN_1; // @[utils.scala 92:30]
+  wire  _GEN_4 = branchOps_passed | _GEN_2; // @[utils.scala 100:26 92:30]
+  wire [4:0] _GEN_5 = branchOps_valid ? _GEN_3 : requestIn_branch_mask; // @[utils.scala 113:23 91:27]
+  wire  _GEN_6 = branchOps_valid ? _GEN_4 : 1'h1; // @[utils.scala 114:24 91:27]
+  wire [4:0] _GEN_26 = speculativeEntryWire ? _GEN_5 : 5'h0; // @[scheduler.scala 53:38 utils.scala 51:41]
+  wire  _GEN_27 = speculativeEntryWire & _GEN_6; // @[scheduler.scala 53:38 utils.scala 50:41]
+  wire [5:0] _GEN_28 = speculativeEntryWire ? requestIn_core_prfDest : 6'h0; // @[scheduler.scala 53:38 54:35 utils.scala 51:41]
+  wire [3:0] _GEN_29 = speculativeEntryWire ? requestIn_core_robAddr : 4'h0; // @[scheduler.scala 53:38 54:35 utils.scala 51:41]
+  wire [31:0] _GEN_30 = speculativeEntryWire ? requestIn_core_instruction : 32'h0; // @[scheduler.scala 53:38 54:35 utils.scala 51:41]
+  wire [31:0] _GEN_31 = speculativeEntryWire ? requestIn_address : 32'h0; // @[scheduler.scala 53:38 54:35 utils.scala 51:41]
+  wire  _GEN_32 = speculativeEntryWire & requestIn_valid; // @[scheduler.scala 53:38 54:35 utils.scala 50:41]
+  wire [4:0] _GEN_38 = speculativeEntryWire ? 5'h0 : _GEN_5; // @[scheduler.scala 53:38 utils.scala 51:41]
+  wire  _GEN_39 = speculativeEntryWire ? 1'h0 : _GEN_6; // @[scheduler.scala 53:38 utils.scala 50:41]
+  wire [5:0] _GEN_40 = speculativeEntryWire ? 6'h0 : requestIn_core_prfDest; // @[scheduler.scala 53:38 utils.scala 51:41 scheduler.scala 57:31]
+  wire [3:0] _GEN_41 = speculativeEntryWire ? 4'h0 : requestIn_core_robAddr; // @[scheduler.scala 53:38 utils.scala 51:41 scheduler.scala 57:31]
+  wire [31:0] _GEN_42 = speculativeEntryWire ? 32'h0 : requestIn_core_instruction; // @[scheduler.scala 53:38 utils.scala 51:41 scheduler.scala 57:31]
+  wire [31:0] _GEN_43 = speculativeEntryWire ? 32'h0 : requestIn_address; // @[scheduler.scala 53:38 utils.scala 51:41 scheduler.scala 57:31]
+  wire  _GEN_44 = speculativeEntryWire ? 1'h0 : requestIn_valid; // @[scheduler.scala 53:38 utils.scala 50:41 scheduler.scala 57:31]
+  wire [4:0] _GEN_50 = speculativeEntryWire & inorderQueue_matchFound ? _GEN_5 : _GEN_38; // @[scheduler.scala 50:58]
+  wire  _GEN_51 = speculativeEntryWire & inorderQueue_matchFound ? _GEN_6 : _GEN_39; // @[scheduler.scala 50:58]
+  wire [5:0] _GEN_52 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_core_prfDest : _GEN_40; // @[scheduler.scala 50:58 51:31]
+  wire [3:0] _GEN_53 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_core_robAddr : _GEN_41; // @[scheduler.scala 50:58 51:31]
+  wire [31:0] _GEN_54 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_core_instruction : _GEN_42; // @[scheduler.scala 50:58 51:31]
+  wire [31:0] _GEN_55 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_address : _GEN_43; // @[scheduler.scala 50:58 51:31]
+  wire  _GEN_56 = speculativeEntryWire & inorderQueue_matchFound ? requestIn_valid : _GEN_44; // @[scheduler.scala 50:58 51:31]
+  wire [4:0] _GEN_62 = speculativeEntryWire & inorderQueue_matchFound ? 5'h0 : _GEN_26; // @[scheduler.scala 50:58 utils.scala 51:41]
+  wire  _GEN_63 = speculativeEntryWire & inorderQueue_matchFound ? 1'h0 : _GEN_27; // @[scheduler.scala 50:58 utils.scala 50:41]
+  wire [5:0] _GEN_64 = speculativeEntryWire & inorderQueue_matchFound ? 6'h0 : _GEN_28; // @[scheduler.scala 50:58 utils.scala 51:41]
+  wire [3:0] _GEN_65 = speculativeEntryWire & inorderQueue_matchFound ? 4'h0 : _GEN_29; // @[scheduler.scala 50:58 utils.scala 51:41]
+  wire [31:0] _GEN_66 = speculativeEntryWire & inorderQueue_matchFound ? 32'h0 : _GEN_30; // @[scheduler.scala 50:58 utils.scala 51:41]
+  wire [31:0] _GEN_67 = speculativeEntryWire & inorderQueue_matchFound ? 32'h0 : _GEN_31; // @[scheduler.scala 50:58 utils.scala 51:41]
+  wire  _GEN_68 = speculativeEntryWire & inorderQueue_matchFound ? 1'h0 : _GEN_32; // @[scheduler.scala 50:58 utils.scala 50:41]
+  wire  _speculativeBranchResolved_T_1 = |speculativeQueue_read_data_branch_mask[3:0]; // @[scheduler.scala 72:92]
+  wire  _speculativeBranchResolved_T_3 = ~speculativeQueue_isEmpty; // @[scheduler.scala 72:99]
+  wire  speculativeBranchResolved = ~(|speculativeQueue_read_data_branch_mask[3:0]) & ~speculativeQueue_isEmpty; // @[scheduler.scala 72:96]
   wire  speculativeBranchInvalidated = ~speculativeQueue_read_data_branch_valid & _speculativeBranchResolved_T_1 &
-    _speculativeBranchResolved_T_3; // @[scheduler.scala 70:142]
-  wire  _inorderBranchResolved_T_1 = |inorderQueue_read_data_branch_mask[3:0]; // @[scheduler.scala 71:84]
-  wire  _inorderBranchResolved_T_3 = ~inorderQueue_isEmpty; // @[scheduler.scala 71:91]
-  wire  inorderBranchResolved = ~(|inorderQueue_read_data_branch_mask[3:0]) & ~inorderQueue_isEmpty; // @[scheduler.scala 71:88]
+    _speculativeBranchResolved_T_3; // @[scheduler.scala 73:142]
+  wire  _inorderBranchResolved_T_1 = |inorderQueue_read_data_branch_mask[3:0]; // @[scheduler.scala 74:84]
+  wire  _inorderBranchResolved_T_3 = ~inorderQueue_isEmpty; // @[scheduler.scala 74:91]
+  wire  inorderBranchResolved = ~(|inorderQueue_read_data_branch_mask[3:0]) & ~inorderQueue_isEmpty; // @[scheduler.scala 74:88]
   wire  inorderBranchInvalidated = ~inorderQueue_read_data_branch_valid & _inorderBranchResolved_T_1 &
-    _inorderBranchResolved_T_3; // @[scheduler.scala 72:130]
-  wire [1:0] _T_6 = {controlSignal_inorderReady,controlSignal_speculativeReady}; // @[scheduler.scala 75:39]
-  wire  _T_10 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated; // @[scheduler.scala 78:40]
-  wire  _GEN_72 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) & _speculativeBranchResolved_T_3; // @[scheduler.scala 43:31 78:72 79:38]
-  wire  _GEN_74 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) & speculativeQueue_read_data_valid; // @[scheduler.scala 78:72 81:22 utils.scala 50:41]
-  wire [31:0] _GEN_75 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_address : 32'h0; // @[scheduler.scala 78:72 81:22 utils.scala 51:41]
-  wire [31:0] _GEN_76 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_core_instruction : 32'h0; // @[scheduler.scala 78:72 81:22 utils.scala 51:41]
-  wire [3:0] _GEN_77 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_core_robAddr : 4'h0; // @[scheduler.scala 78:72 81:22 utils.scala 51:41]
-  wire [5:0] _GEN_78 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_core_prfDest : 6'h0; // @[scheduler.scala 78:72 81:22 utils.scala 51:41]
-  wire  _GEN_79 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) &
-    speculativeQueue_read_data_branch_valid; // @[scheduler.scala 78:72 81:22 utils.scala 50:41]
-  wire [4:0] _GEN_80 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_branch_mask : 5'h0; // @[scheduler.scala 78:72 81:22 utils.scala 51:41]
-  wire  _GEN_81 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) &
-    speculativeQueue_read_data_writeData_valid; // @[scheduler.scala 78:72 81:22 utils.scala 50:41]
-  wire [63:0] _GEN_82 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_writeData_data : 64'h0; // @[scheduler.scala 78:72 81:22 utils.scala 51:41]
-  wire [511:0] _GEN_84 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_cacheLine_cacheLine : 512'h0; // @[scheduler.scala 78:72 81:22 utils.scala 51:41]
-  wire [1:0] _GEN_85 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_cacheLine_response : 2'h0; // @[scheduler.scala 78:72 81:22 utils.scala 51:41]
-  wire  _T_12 = inorderBranchResolved | inorderBranchInvalidated; // @[scheduler.scala 85:36]
-  wire  _GEN_86 = (inorderBranchResolved | inorderBranchInvalidated) & _inorderBranchResolved_T_3; // @[scheduler.scala 40:27 85:64 86:35]
-  wire  _GEN_88 = (inorderBranchResolved | inorderBranchInvalidated) & inorderQueue_read_data_valid; // @[scheduler.scala 85:64 88:22 utils.scala 50:41]
-  wire [31:0] _GEN_89 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_address : 32'h0; // @[scheduler.scala 85:64 88:22 utils.scala 51:41]
-  wire [31:0] _GEN_90 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_core_instruction : 32'h0
-    ; // @[scheduler.scala 85:64 88:22 utils.scala 51:41]
-  wire [3:0] _GEN_91 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_core_robAddr : 4'h0; // @[scheduler.scala 85:64 88:22 utils.scala 51:41]
-  wire [5:0] _GEN_92 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_core_prfDest : 6'h0; // @[scheduler.scala 85:64 88:22 utils.scala 51:41]
-  wire  _GEN_93 = (inorderBranchResolved | inorderBranchInvalidated) & inorderQueue_read_data_branch_valid; // @[scheduler.scala 85:64 88:22 utils.scala 50:41]
-  wire [4:0] _GEN_94 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_branch_mask : 5'h0; // @[scheduler.scala 85:64 88:22 utils.scala 51:41]
-  wire  _GEN_116 = _T_12 ? 1'h0 : _T_10; // @[scheduler.scala 100:40 97:71]
-  wire  _GEN_117 = _T_12 ? inorderQueue_read_data_valid : _GEN_74; // @[scheduler.scala 101:22 97:71]
-  wire [31:0] _GEN_118 = _T_12 ? inorderQueue_read_data_address : _GEN_75; // @[scheduler.scala 101:22 97:71]
-  wire [31:0] _GEN_119 = _T_12 ? inorderQueue_read_data_core_instruction : _GEN_76; // @[scheduler.scala 101:22 97:71]
-  wire [3:0] _GEN_120 = _T_12 ? inorderQueue_read_data_core_robAddr : _GEN_77; // @[scheduler.scala 101:22 97:71]
-  wire [5:0] _GEN_121 = _T_12 ? inorderQueue_read_data_core_prfDest : _GEN_78; // @[scheduler.scala 101:22 97:71]
-  wire  _GEN_122 = _T_12 ? inorderQueue_read_data_branch_valid : _GEN_79; // @[scheduler.scala 101:22 97:71]
-  wire [4:0] _GEN_123 = _T_12 ? inorderQueue_read_data_branch_mask : _GEN_80; // @[scheduler.scala 101:22 97:71]
-  wire  _GEN_124 = _T_12 ? 1'h0 : _GEN_81; // @[scheduler.scala 101:22 97:71]
-  wire [63:0] _GEN_125 = _T_12 ? 64'h0 : _GEN_82; // @[scheduler.scala 101:22 97:71]
-  wire [511:0] _GEN_127 = _T_12 ? 512'h0 : _GEN_84; // @[scheduler.scala 101:22 97:71]
-  wire [1:0] _GEN_128 = _T_12 ? 2'h0 : _GEN_85; // @[scheduler.scala 101:22 97:71]
-  wire  _GEN_129 = _T_12 ? 1'h0 : _GEN_72; // @[scheduler.scala 43:31 97:71]
-  wire  _GEN_130 = speculativeBranchResolved | speculativeBranchInvalidated ? _speculativeBranchResolved_T_3 : _GEN_129; // @[scheduler.scala 92:72 94:38]
-  wire  _GEN_131 = speculativeBranchResolved | speculativeBranchInvalidated | _GEN_116; // @[scheduler.scala 92:72 95:40]
-  wire  _GEN_132 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_valid :
-    _GEN_117; // @[scheduler.scala 92:72 96:22]
-  wire [31:0] _GEN_133 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_address
-     : _GEN_118; // @[scheduler.scala 92:72 96:22]
-  wire [31:0] _GEN_134 = speculativeBranchResolved | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_core_instruction : _GEN_119; // @[scheduler.scala 92:72 96:22]
-  wire [3:0] _GEN_135 = speculativeBranchResolved | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_core_robAddr : _GEN_120; // @[scheduler.scala 92:72 96:22]
-  wire [5:0] _GEN_136 = speculativeBranchResolved | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_core_prfDest : _GEN_121; // @[scheduler.scala 92:72 96:22]
-  wire  _GEN_137 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_branch_valid :
-    _GEN_122; // @[scheduler.scala 92:72 96:22]
-  wire [4:0] _GEN_138 = speculativeBranchResolved | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_branch_mask : _GEN_123; // @[scheduler.scala 92:72 96:22]
-  wire  _GEN_139 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_writeData_valid
-     : _GEN_124; // @[scheduler.scala 92:72 96:22]
-  wire [63:0] _GEN_140 = speculativeBranchResolved | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_writeData_data : _GEN_125; // @[scheduler.scala 92:72 96:22]
-  wire [511:0] _GEN_142 = speculativeBranchResolved | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_cacheLine_cacheLine : _GEN_127; // @[scheduler.scala 92:72 96:22]
-  wire [1:0] _GEN_143 = speculativeBranchResolved | speculativeBranchInvalidated ?
-    speculativeQueue_read_data_cacheLine_response : _GEN_128; // @[scheduler.scala 92:72 96:22]
-  wire  _GEN_144 = speculativeBranchResolved | speculativeBranchInvalidated ? 1'h0 : _GEN_86; // @[scheduler.scala 40:27 92:72]
-  wire  _GEN_146 = 2'h3 == _T_6 & _GEN_131; // @[scheduler.scala 27:31 75:73]
-  wire  _GEN_147 = 2'h3 == _T_6 & _GEN_132; // @[scheduler.scala 75:73 utils.scala 50:41]
-  wire [31:0] _GEN_148 = 2'h3 == _T_6 ? _GEN_133 : 32'h0; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [31:0] _GEN_149 = 2'h3 == _T_6 ? _GEN_134 : 32'h0; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [3:0] _GEN_150 = 2'h3 == _T_6 ? _GEN_135 : 4'h0; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [5:0] _GEN_151 = 2'h3 == _T_6 ? _GEN_136 : 6'h0; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire  _GEN_152 = 2'h3 == _T_6 & _GEN_137; // @[scheduler.scala 75:73 utils.scala 50:41]
-  wire [4:0] _GEN_153 = 2'h3 == _T_6 ? _GEN_138 : 5'h0; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire  _GEN_154 = 2'h3 == _T_6 & _GEN_139; // @[scheduler.scala 75:73 utils.scala 50:41]
-  wire [63:0] _GEN_155 = 2'h3 == _T_6 ? _GEN_140 : 64'h0; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [511:0] _GEN_157 = 2'h3 == _T_6 ? _GEN_142 : 512'h0; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [1:0] _GEN_158 = 2'h3 == _T_6 ? _GEN_143 : 2'h0; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire  _GEN_159 = 2'h3 == _T_6 & _GEN_144; // @[scheduler.scala 40:27 75:73]
-  wire  _GEN_160 = 2'h2 == _T_6 ? _GEN_86 : _GEN_159; // @[scheduler.scala 75:73]
-  wire  _GEN_161 = 2'h2 == _T_6 ? 1'h0 : _GEN_146; // @[scheduler.scala 75:73]
-  wire  _GEN_162 = 2'h2 == _T_6 ? _GEN_88 : _GEN_147; // @[scheduler.scala 75:73]
-  wire [31:0] _GEN_163 = 2'h2 == _T_6 ? _GEN_89 : _GEN_148; // @[scheduler.scala 75:73]
-  wire [31:0] _GEN_164 = 2'h2 == _T_6 ? _GEN_90 : _GEN_149; // @[scheduler.scala 75:73]
-  wire [3:0] _GEN_165 = 2'h2 == _T_6 ? _GEN_91 : _GEN_150; // @[scheduler.scala 75:73]
-  wire [5:0] _GEN_166 = 2'h2 == _T_6 ? _GEN_92 : _GEN_151; // @[scheduler.scala 75:73]
-  wire  _GEN_167 = 2'h2 == _T_6 ? _GEN_93 : _GEN_152; // @[scheduler.scala 75:73]
-  wire [4:0] _GEN_168 = 2'h2 == _T_6 ? _GEN_94 : _GEN_153; // @[scheduler.scala 75:73]
-  wire  _GEN_169 = 2'h2 == _T_6 ? 1'h0 : _GEN_154; // @[scheduler.scala 75:73]
-  wire [63:0] _GEN_170 = 2'h2 == _T_6 ? 64'h0 : _GEN_155; // @[scheduler.scala 75:73]
-  wire [511:0] _GEN_172 = 2'h2 == _T_6 ? 512'h0 : _GEN_157; // @[scheduler.scala 75:73]
-  wire [1:0] _GEN_173 = 2'h2 == _T_6 ? 2'h0 : _GEN_158; // @[scheduler.scala 75:73]
-  wire  _GEN_174 = 2'h2 == _T_6 ? 1'h0 : 2'h3 == _T_6 & _GEN_130; // @[scheduler.scala 43:31 75:73]
-  wire  _GEN_175 = 2'h1 == _T_6 ? _GEN_72 : _GEN_174; // @[scheduler.scala 75:73]
-  wire  _GEN_176 = 2'h1 == _T_6 ? _T_10 : _GEN_161; // @[scheduler.scala 75:73]
-  wire  _GEN_177 = 2'h1 == _T_6 ? _GEN_74 : _GEN_162; // @[scheduler.scala 75:73]
-  wire [31:0] _GEN_178 = 2'h1 == _T_6 ? _GEN_75 : _GEN_163; // @[scheduler.scala 75:73]
-  wire [31:0] _GEN_179 = 2'h1 == _T_6 ? _GEN_76 : _GEN_164; // @[scheduler.scala 75:73]
-  wire [3:0] _GEN_180 = 2'h1 == _T_6 ? _GEN_77 : _GEN_165; // @[scheduler.scala 75:73]
-  wire [5:0] _GEN_181 = 2'h1 == _T_6 ? _GEN_78 : _GEN_166; // @[scheduler.scala 75:73]
-  wire  _GEN_182 = 2'h1 == _T_6 ? _GEN_79 : _GEN_167; // @[scheduler.scala 75:73]
-  wire [4:0] _GEN_183 = 2'h1 == _T_6 ? _GEN_80 : _GEN_168; // @[scheduler.scala 75:73]
-  wire  _GEN_184 = 2'h1 == _T_6 ? _GEN_81 : _GEN_169; // @[scheduler.scala 75:73]
-  wire [63:0] _GEN_185 = 2'h1 == _T_6 ? _GEN_82 : _GEN_170; // @[scheduler.scala 75:73]
-  wire [511:0] _GEN_187 = 2'h1 == _T_6 ? _GEN_84 : _GEN_172; // @[scheduler.scala 75:73]
-  wire [1:0] _GEN_188 = 2'h1 == _T_6 ? _GEN_85 : _GEN_173; // @[scheduler.scala 75:73]
-  wire  _GEN_189 = 2'h1 == _T_6 ? 1'h0 : _GEN_160; // @[scheduler.scala 40:27 75:73]
-  wire  _GEN_190 = 2'h0 == _T_6 ? 1'h0 : _GEN_175; // @[scheduler.scala 43:31 75:73]
-  wire  _GEN_191 = 2'h0 == _T_6 ? 1'h0 : _GEN_176; // @[scheduler.scala 27:31 75:73]
-  wire  _GEN_192 = 2'h0 == _T_6 ? 1'h0 : _GEN_177; // @[scheduler.scala 75:73 utils.scala 50:41]
-  wire [31:0] _GEN_193 = 2'h0 == _T_6 ? 32'h0 : _GEN_178; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [31:0] _GEN_194 = 2'h0 == _T_6 ? 32'h0 : _GEN_179; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [3:0] _GEN_195 = 2'h0 == _T_6 ? 4'h0 : _GEN_180; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [5:0] _GEN_196 = 2'h0 == _T_6 ? 6'h0 : _GEN_181; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire  _GEN_197 = 2'h0 == _T_6 ? 1'h0 : _GEN_182; // @[scheduler.scala 75:73 utils.scala 50:41]
-  wire [4:0] _GEN_198 = 2'h0 == _T_6 ? 5'h0 : _GEN_183; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire  _GEN_199 = 2'h0 == _T_6 ? 1'h0 : _GEN_184; // @[scheduler.scala 75:73 utils.scala 50:41]
-  wire [63:0] _GEN_200 = 2'h0 == _T_6 ? 64'h0 : _GEN_185; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [511:0] _GEN_202 = 2'h0 == _T_6 ? 512'h0 : _GEN_187; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire [1:0] _GEN_203 = 2'h0 == _T_6 ? 2'h0 : _GEN_188; // @[scheduler.scala 75:73 utils.scala 51:41]
-  wire  _GEN_204 = 2'h0 == _T_6 ? 1'h0 : _GEN_189; // @[scheduler.scala 40:27 75:73]
+    _inorderBranchResolved_T_3; // @[scheduler.scala 75:130]
+  wire [1:0] _T_18 = {controlSignal_inorderReady,controlSignal_speculativeReady}; // @[scheduler.scala 78:39]
+  wire  _T_22 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated; // @[scheduler.scala 81:40]
+  wire  _GEN_93 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) & _speculativeBranchResolved_T_3; // @[scheduler.scala 43:31 81:72 82:38]
+  wire  _GEN_95 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) & speculativeQueue_read_data_valid; // @[scheduler.scala 81:72 84:22 utils.scala 50:41]
+  wire [31:0] _GEN_96 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_address : 32'h0; // @[scheduler.scala 81:72 84:22 utils.scala 51:41]
+  wire [31:0] _GEN_97 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_core_instruction : 32'h0; // @[scheduler.scala 81:72 84:22 utils.scala 51:41]
+  wire [3:0] _GEN_98 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_core_robAddr : 4'h0; // @[scheduler.scala 81:72 84:22 utils.scala 51:41]
+  wire [5:0] _GEN_99 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_core_prfDest : 6'h0; // @[scheduler.scala 81:72 84:22 utils.scala 51:41]
+  wire  _GEN_100 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) &
+    speculativeQueue_read_data_branch_valid; // @[scheduler.scala 81:72 84:22 utils.scala 50:41]
+  wire [4:0] _GEN_101 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_branch_mask : 5'h0; // @[scheduler.scala 81:72 84:22 utils.scala 51:41]
+  wire  _GEN_102 = (_speculativeBranchResolved_T_3 | speculativeBranchInvalidated) &
+    speculativeQueue_read_data_writeData_valid; // @[scheduler.scala 81:72 84:22 utils.scala 50:41]
+  wire [63:0] _GEN_103 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_writeData_data : 64'h0; // @[scheduler.scala 81:72 84:22 utils.scala 51:41]
+  wire [511:0] _GEN_105 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_cacheLine_cacheLine : 512'h0; // @[scheduler.scala 81:72 84:22 utils.scala 51:41]
+  wire [1:0] _GEN_106 = _speculativeBranchResolved_T_3 | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_cacheLine_response : 2'h0; // @[scheduler.scala 81:72 84:22 utils.scala 51:41]
+  wire  _T_24 = inorderBranchResolved | inorderBranchInvalidated; // @[scheduler.scala 88:36]
+  wire  _GEN_107 = (inorderBranchResolved | inorderBranchInvalidated) & _inorderBranchResolved_T_3; // @[scheduler.scala 40:27 88:64 89:35]
+  wire  _GEN_109 = (inorderBranchResolved | inorderBranchInvalidated) & inorderQueue_read_data_valid; // @[scheduler.scala 88:64 91:22 utils.scala 50:41]
+  wire [31:0] _GEN_110 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_address : 32'h0; // @[scheduler.scala 88:64 91:22 utils.scala 51:41]
+  wire [31:0] _GEN_111 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_core_instruction : 32'h0
+    ; // @[scheduler.scala 88:64 91:22 utils.scala 51:41]
+  wire [3:0] _GEN_112 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_core_robAddr : 4'h0; // @[scheduler.scala 88:64 91:22 utils.scala 51:41]
+  wire [5:0] _GEN_113 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_core_prfDest : 6'h0; // @[scheduler.scala 88:64 91:22 utils.scala 51:41]
+  wire  _GEN_114 = (inorderBranchResolved | inorderBranchInvalidated) & inorderQueue_read_data_branch_valid; // @[scheduler.scala 88:64 91:22 utils.scala 50:41]
+  wire [4:0] _GEN_115 = inorderBranchResolved | inorderBranchInvalidated ? inorderQueue_read_data_branch_mask : 5'h0; // @[scheduler.scala 88:64 91:22 utils.scala 51:41]
+  wire  _GEN_137 = _T_24 ? 1'h0 : _T_22; // @[scheduler.scala 100:71 103:40]
+  wire  _GEN_138 = _T_24 ? inorderQueue_read_data_valid : _GEN_95; // @[scheduler.scala 100:71 104:22]
+  wire [31:0] _GEN_139 = _T_24 ? inorderQueue_read_data_address : _GEN_96; // @[scheduler.scala 100:71 104:22]
+  wire [31:0] _GEN_140 = _T_24 ? inorderQueue_read_data_core_instruction : _GEN_97; // @[scheduler.scala 100:71 104:22]
+  wire [3:0] _GEN_141 = _T_24 ? inorderQueue_read_data_core_robAddr : _GEN_98; // @[scheduler.scala 100:71 104:22]
+  wire [5:0] _GEN_142 = _T_24 ? inorderQueue_read_data_core_prfDest : _GEN_99; // @[scheduler.scala 100:71 104:22]
+  wire  _GEN_143 = _T_24 ? inorderQueue_read_data_branch_valid : _GEN_100; // @[scheduler.scala 100:71 104:22]
+  wire [4:0] _GEN_144 = _T_24 ? inorderQueue_read_data_branch_mask : _GEN_101; // @[scheduler.scala 100:71 104:22]
+  wire  _GEN_145 = _T_24 ? 1'h0 : _GEN_102; // @[scheduler.scala 100:71 104:22]
+  wire [63:0] _GEN_146 = _T_24 ? 64'h0 : _GEN_103; // @[scheduler.scala 100:71 104:22]
+  wire [511:0] _GEN_148 = _T_24 ? 512'h0 : _GEN_105; // @[scheduler.scala 100:71 104:22]
+  wire [1:0] _GEN_149 = _T_24 ? 2'h0 : _GEN_106; // @[scheduler.scala 100:71 104:22]
+  wire  _GEN_150 = _T_24 ? 1'h0 : _GEN_93; // @[scheduler.scala 100:71 43:31]
+  wire  _GEN_151 = speculativeBranchResolved | speculativeBranchInvalidated ? _speculativeBranchResolved_T_3 : _GEN_150; // @[scheduler.scala 95:72 97:38]
+  wire  _GEN_152 = speculativeBranchResolved | speculativeBranchInvalidated | _GEN_137; // @[scheduler.scala 95:72 98:40]
+  wire  _GEN_153 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_valid :
+    _GEN_138; // @[scheduler.scala 95:72 99:22]
+  wire [31:0] _GEN_154 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_address
+     : _GEN_139; // @[scheduler.scala 95:72 99:22]
+  wire [31:0] _GEN_155 = speculativeBranchResolved | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_core_instruction : _GEN_140; // @[scheduler.scala 95:72 99:22]
+  wire [3:0] _GEN_156 = speculativeBranchResolved | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_core_robAddr : _GEN_141; // @[scheduler.scala 95:72 99:22]
+  wire [5:0] _GEN_157 = speculativeBranchResolved | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_core_prfDest : _GEN_142; // @[scheduler.scala 95:72 99:22]
+  wire  _GEN_158 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_branch_valid :
+    _GEN_143; // @[scheduler.scala 95:72 99:22]
+  wire [4:0] _GEN_159 = speculativeBranchResolved | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_branch_mask : _GEN_144; // @[scheduler.scala 95:72 99:22]
+  wire  _GEN_160 = speculativeBranchResolved | speculativeBranchInvalidated ? speculativeQueue_read_data_writeData_valid
+     : _GEN_145; // @[scheduler.scala 95:72 99:22]
+  wire [63:0] _GEN_161 = speculativeBranchResolved | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_writeData_data : _GEN_146; // @[scheduler.scala 95:72 99:22]
+  wire [511:0] _GEN_163 = speculativeBranchResolved | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_cacheLine_cacheLine : _GEN_148; // @[scheduler.scala 95:72 99:22]
+  wire [1:0] _GEN_164 = speculativeBranchResolved | speculativeBranchInvalidated ?
+    speculativeQueue_read_data_cacheLine_response : _GEN_149; // @[scheduler.scala 95:72 99:22]
+  wire  _GEN_165 = speculativeBranchResolved | speculativeBranchInvalidated ? 1'h0 : _GEN_107; // @[scheduler.scala 40:27 95:72]
+  wire  _GEN_167 = 2'h3 == _T_18 & _GEN_152; // @[scheduler.scala 27:31 78:73]
+  wire  _GEN_168 = 2'h3 == _T_18 & _GEN_153; // @[scheduler.scala 78:73 utils.scala 50:41]
+  wire [31:0] _GEN_169 = 2'h3 == _T_18 ? _GEN_154 : 32'h0; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [31:0] _GEN_170 = 2'h3 == _T_18 ? _GEN_155 : 32'h0; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [3:0] _GEN_171 = 2'h3 == _T_18 ? _GEN_156 : 4'h0; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [5:0] _GEN_172 = 2'h3 == _T_18 ? _GEN_157 : 6'h0; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire  _GEN_173 = 2'h3 == _T_18 & _GEN_158; // @[scheduler.scala 78:73 utils.scala 50:41]
+  wire [4:0] _GEN_174 = 2'h3 == _T_18 ? _GEN_159 : 5'h0; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire  _GEN_175 = 2'h3 == _T_18 & _GEN_160; // @[scheduler.scala 78:73 utils.scala 50:41]
+  wire [63:0] _GEN_176 = 2'h3 == _T_18 ? _GEN_161 : 64'h0; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [511:0] _GEN_178 = 2'h3 == _T_18 ? _GEN_163 : 512'h0; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [1:0] _GEN_179 = 2'h3 == _T_18 ? _GEN_164 : 2'h0; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire  _GEN_180 = 2'h3 == _T_18 & _GEN_165; // @[scheduler.scala 40:27 78:73]
+  wire  _GEN_181 = 2'h2 == _T_18 ? _GEN_107 : _GEN_180; // @[scheduler.scala 78:73]
+  wire  _GEN_182 = 2'h2 == _T_18 ? 1'h0 : _GEN_167; // @[scheduler.scala 78:73]
+  wire  _GEN_183 = 2'h2 == _T_18 ? _GEN_109 : _GEN_168; // @[scheduler.scala 78:73]
+  wire [31:0] _GEN_184 = 2'h2 == _T_18 ? _GEN_110 : _GEN_169; // @[scheduler.scala 78:73]
+  wire [31:0] _GEN_185 = 2'h2 == _T_18 ? _GEN_111 : _GEN_170; // @[scheduler.scala 78:73]
+  wire [3:0] _GEN_186 = 2'h2 == _T_18 ? _GEN_112 : _GEN_171; // @[scheduler.scala 78:73]
+  wire [5:0] _GEN_187 = 2'h2 == _T_18 ? _GEN_113 : _GEN_172; // @[scheduler.scala 78:73]
+  wire  _GEN_188 = 2'h2 == _T_18 ? _GEN_114 : _GEN_173; // @[scheduler.scala 78:73]
+  wire [4:0] _GEN_189 = 2'h2 == _T_18 ? _GEN_115 : _GEN_174; // @[scheduler.scala 78:73]
+  wire  _GEN_190 = 2'h2 == _T_18 ? 1'h0 : _GEN_175; // @[scheduler.scala 78:73]
+  wire [63:0] _GEN_191 = 2'h2 == _T_18 ? 64'h0 : _GEN_176; // @[scheduler.scala 78:73]
+  wire [511:0] _GEN_193 = 2'h2 == _T_18 ? 512'h0 : _GEN_178; // @[scheduler.scala 78:73]
+  wire [1:0] _GEN_194 = 2'h2 == _T_18 ? 2'h0 : _GEN_179; // @[scheduler.scala 78:73]
+  wire  _GEN_195 = 2'h2 == _T_18 ? 1'h0 : 2'h3 == _T_18 & _GEN_151; // @[scheduler.scala 43:31 78:73]
+  wire  _GEN_196 = 2'h1 == _T_18 ? _GEN_93 : _GEN_195; // @[scheduler.scala 78:73]
+  wire  _GEN_197 = 2'h1 == _T_18 ? _T_22 : _GEN_182; // @[scheduler.scala 78:73]
+  wire  _GEN_198 = 2'h1 == _T_18 ? _GEN_95 : _GEN_183; // @[scheduler.scala 78:73]
+  wire [31:0] _GEN_199 = 2'h1 == _T_18 ? _GEN_96 : _GEN_184; // @[scheduler.scala 78:73]
+  wire [31:0] _GEN_200 = 2'h1 == _T_18 ? _GEN_97 : _GEN_185; // @[scheduler.scala 78:73]
+  wire [3:0] _GEN_201 = 2'h1 == _T_18 ? _GEN_98 : _GEN_186; // @[scheduler.scala 78:73]
+  wire [5:0] _GEN_202 = 2'h1 == _T_18 ? _GEN_99 : _GEN_187; // @[scheduler.scala 78:73]
+  wire  _GEN_203 = 2'h1 == _T_18 ? _GEN_100 : _GEN_188; // @[scheduler.scala 78:73]
+  wire [4:0] _GEN_204 = 2'h1 == _T_18 ? _GEN_101 : _GEN_189; // @[scheduler.scala 78:73]
+  wire  _GEN_205 = 2'h1 == _T_18 ? _GEN_102 : _GEN_190; // @[scheduler.scala 78:73]
+  wire [63:0] _GEN_206 = 2'h1 == _T_18 ? _GEN_103 : _GEN_191; // @[scheduler.scala 78:73]
+  wire [511:0] _GEN_208 = 2'h1 == _T_18 ? _GEN_105 : _GEN_193; // @[scheduler.scala 78:73]
+  wire [1:0] _GEN_209 = 2'h1 == _T_18 ? _GEN_106 : _GEN_194; // @[scheduler.scala 78:73]
+  wire  _GEN_210 = 2'h1 == _T_18 ? 1'h0 : _GEN_181; // @[scheduler.scala 40:27 78:73]
+  wire  _GEN_211 = 2'h0 == _T_18 ? 1'h0 : _GEN_196; // @[scheduler.scala 43:31 78:73]
+  wire  _GEN_212 = 2'h0 == _T_18 ? 1'h0 : _GEN_197; // @[scheduler.scala 27:31 78:73]
+  wire  _GEN_213 = 2'h0 == _T_18 ? 1'h0 : _GEN_198; // @[scheduler.scala 78:73 utils.scala 50:41]
+  wire [31:0] _GEN_214 = 2'h0 == _T_18 ? 32'h0 : _GEN_199; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [31:0] _GEN_215 = 2'h0 == _T_18 ? 32'h0 : _GEN_200; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [3:0] _GEN_216 = 2'h0 == _T_18 ? 4'h0 : _GEN_201; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [5:0] _GEN_217 = 2'h0 == _T_18 ? 6'h0 : _GEN_202; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire  _GEN_218 = 2'h0 == _T_18 ? 1'h0 : _GEN_203; // @[scheduler.scala 78:73 utils.scala 50:41]
+  wire [4:0] _GEN_219 = 2'h0 == _T_18 ? 5'h0 : _GEN_204; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire  _GEN_220 = 2'h0 == _T_18 ? 1'h0 : _GEN_205; // @[scheduler.scala 78:73 utils.scala 50:41]
+  wire [63:0] _GEN_221 = 2'h0 == _T_18 ? 64'h0 : _GEN_206; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [511:0] _GEN_223 = 2'h0 == _T_18 ? 512'h0 : _GEN_208; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire [1:0] _GEN_224 = 2'h0 == _T_18 ? 2'h0 : _GEN_209; // @[scheduler.scala 78:73 utils.scala 51:41]
+  wire  _GEN_225 = 2'h0 == _T_18 ? 1'h0 : _GEN_210; // @[scheduler.scala 40:27 78:73]
   fifoWithAddrCheck inorderQueue ( // @[scheduler.scala 30:28]
     .clock(inorderQueue_clock),
     .reset(inorderQueue_reset),
@@ -36502,52 +36513,52 @@ module Scheduler(
     .branchOps_branchMask(speculativeQueue_branchOps_branchMask),
     .branchOps_passed(speculativeQueue_branchOps_passed)
   );
-  assign canAllocate = inorderQueue_write_ready & speculativeQueue_write_ready; // @[scheduler.scala 116:43]
-  assign requestOut_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_192; // @[scheduler.scala 74:113 utils.scala 50:41]
-  assign requestOut_address = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_193 : 32'h0; // @[scheduler.scala 74:113 utils.scala 51:41]
-  assign requestOut_core_instruction = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_194 : 32'h0; // @[scheduler.scala 74:113 utils.scala 51:41]
-  assign requestOut_core_robAddr = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_195 : 4'h0; // @[scheduler.scala 74:113 utils.scala 51:41]
-  assign requestOut_core_prfDest = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_196 : 6'h0; // @[scheduler.scala 74:113 utils.scala 51:41]
-  assign requestOut_branch_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_197; // @[scheduler.scala 74:113 utils.scala 50:41]
-  assign requestOut_branch_mask = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_198 : 5'h0; // @[scheduler.scala 74:113 utils.scala 51:41]
-  assign requestOut_writeData_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_199; // @[scheduler.scala 74:113 utils.scala 50:41]
-  assign requestOut_writeData_data = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_200 : 64'h0; // @[scheduler.scala 74:113 utils.scala 51:41]
-  assign requestOut_cacheLine_cacheLine = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_202 : 512'h0
-    ; // @[scheduler.scala 74:113 utils.scala 51:41]
-  assign requestOut_cacheLine_response = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_203 : 2'h0; // @[scheduler.scala 74:113 utils.scala 51:41]
-  assign controlSignal_isSpeculative = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_191; // @[scheduler.scala 74:113 27:31]
-  assign fenceReady = inorderQueue_isEmpty & speculativeQueue_isEmpty; // @[scheduler.scala 117:38]
+  assign canAllocate = inorderQueue_write_ready & speculativeQueue_write_ready; // @[scheduler.scala 119:43]
+  assign requestOut_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_213; // @[scheduler.scala 77:113 utils.scala 50:41]
+  assign requestOut_address = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_214 : 32'h0; // @[scheduler.scala 77:113 utils.scala 51:41]
+  assign requestOut_core_instruction = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_215 : 32'h0; // @[scheduler.scala 77:113 utils.scala 51:41]
+  assign requestOut_core_robAddr = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_216 : 4'h0; // @[scheduler.scala 77:113 utils.scala 51:41]
+  assign requestOut_core_prfDest = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_217 : 6'h0; // @[scheduler.scala 77:113 utils.scala 51:41]
+  assign requestOut_branch_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_218; // @[scheduler.scala 77:113 utils.scala 50:41]
+  assign requestOut_branch_mask = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_219 : 5'h0; // @[scheduler.scala 77:113 utils.scala 51:41]
+  assign requestOut_writeData_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_220; // @[scheduler.scala 77:113 utils.scala 50:41]
+  assign requestOut_writeData_data = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_221 : 64'h0; // @[scheduler.scala 77:113 utils.scala 51:41]
+  assign requestOut_cacheLine_cacheLine = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_223 : 512'h0
+    ; // @[scheduler.scala 77:113 utils.scala 51:41]
+  assign requestOut_cacheLine_response = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_224 : 2'h0; // @[scheduler.scala 77:113 utils.scala 51:41]
+  assign controlSignal_isSpeculative = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_212; // @[scheduler.scala 77:113 27:31]
+  assign fenceReady = inorderQueue_isEmpty & speculativeQueue_isEmpty; // @[scheduler.scala 120:38]
   assign inorderQueue_clock = clock;
   assign inorderQueue_reset = reset;
-  assign inorderQueue_write_data_valid = requestIn_valid & _GEN_35; // @[scheduler.scala 49:50 58:35]
-  assign inorderQueue_write_data_address = requestIn_valid ? _GEN_34 : 32'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign inorderQueue_write_data_core_instruction = requestIn_valid ? _GEN_33 : 32'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign inorderQueue_write_data_core_robAddr = requestIn_valid ? _GEN_32 : 4'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign inorderQueue_write_data_core_prfDest = requestIn_valid ? _GEN_31 : 6'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign inorderQueue_write_data_branch_valid = requestIn_valid & _GEN_30; // @[scheduler.scala 49:50 utils.scala 50:41]
-  assign inorderQueue_write_data_branch_mask = requestIn_valid ? _GEN_29 : 5'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign inorderQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_204; // @[scheduler.scala 74:113 40:27]
-  assign inorderQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 61:26]
-  assign inorderQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 61:26]
-  assign inorderQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 61:26]
+  assign inorderQueue_write_data_valid = requestIn_valid & _GEN_56; // @[scheduler.scala 49:50 61:35]
+  assign inorderQueue_write_data_address = requestIn_valid ? _GEN_55 : 32'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign inorderQueue_write_data_core_instruction = requestIn_valid ? _GEN_54 : 32'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign inorderQueue_write_data_core_robAddr = requestIn_valid ? _GEN_53 : 4'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign inorderQueue_write_data_core_prfDest = requestIn_valid ? _GEN_52 : 6'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign inorderQueue_write_data_branch_valid = requestIn_valid & _GEN_51; // @[scheduler.scala 49:50 utils.scala 50:41]
+  assign inorderQueue_write_data_branch_mask = requestIn_valid ? _GEN_50 : 5'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign inorderQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_225; // @[scheduler.scala 77:113 40:27]
+  assign inorderQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 64:26]
+  assign inorderQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 64:26]
+  assign inorderQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 64:26]
   assign inorderQueue_checkAddress = requestIn_address; // @[scheduler.scala 39:29]
   assign speculativeQueue_clock = clock;
   assign speculativeQueue_reset = reset;
-  assign speculativeQueue_write_data_valid = requestIn_valid & _GEN_47; // @[scheduler.scala 49:50 59:39]
-  assign speculativeQueue_write_data_address = requestIn_valid ? _GEN_46 : 32'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign speculativeQueue_write_data_core_instruction = requestIn_valid ? _GEN_45 : 32'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign speculativeQueue_write_data_core_robAddr = requestIn_valid ? _GEN_44 : 4'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign speculativeQueue_write_data_core_prfDest = requestIn_valid ? _GEN_43 : 6'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign speculativeQueue_write_data_branch_valid = requestIn_valid & _GEN_42; // @[scheduler.scala 49:50 utils.scala 50:41]
-  assign speculativeQueue_write_data_branch_mask = requestIn_valid ? _GEN_41 : 5'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign speculativeQueue_write_data_valid = requestIn_valid & _GEN_68; // @[scheduler.scala 49:50 62:39]
+  assign speculativeQueue_write_data_address = requestIn_valid ? _GEN_67 : 32'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign speculativeQueue_write_data_core_instruction = requestIn_valid ? _GEN_66 : 32'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign speculativeQueue_write_data_core_robAddr = requestIn_valid ? _GEN_65 : 4'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign speculativeQueue_write_data_core_prfDest = requestIn_valid ? _GEN_64 : 6'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
+  assign speculativeQueue_write_data_branch_valid = requestIn_valid & _GEN_63; // @[scheduler.scala 49:50 utils.scala 50:41]
+  assign speculativeQueue_write_data_branch_mask = requestIn_valid ? _GEN_62 : 5'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
   assign speculativeQueue_write_data_writeData_valid = 1'h0; // @[scheduler.scala 49:50 utils.scala 50:41]
   assign speculativeQueue_write_data_writeData_data = 64'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
   assign speculativeQueue_write_data_cacheLine_cacheLine = 512'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
   assign speculativeQueue_write_data_cacheLine_response = 2'h0; // @[scheduler.scala 49:50 utils.scala 51:41]
-  assign speculativeQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_190; // @[scheduler.scala 74:113 43:31]
-  assign speculativeQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 62:30]
-  assign speculativeQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 62:30]
-  assign speculativeQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 62:30]
+  assign speculativeQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_211; // @[scheduler.scala 77:113 43:31]
+  assign speculativeQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 65:30]
+  assign speculativeQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 65:30]
+  assign speculativeQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 65:30]
 endmodule
 module arbiter(
   input          clock,
@@ -40372,7 +40383,6 @@ module replayUnit(
   input  [3:0]   responseIn_request_core_robAddr,
   input  [5:0]   responseIn_request_core_prfDest,
   input          responseIn_request_branch_valid,
-  input  [4:0]   responseIn_request_branch_mask,
   input          responseIn_request_writeData_valid,
   input  [63:0]  responseIn_request_writeData_data,
   input  [511:0] responseIn_request_cacheLine_cacheLine,
@@ -40472,6 +40482,16 @@ module replayUnit(
   wire  writeBackFIFO_read_data_valid; // @[replayUnit.scala 59:29]
   wire [31:0] writeBackFIFO_read_data_address; // @[replayUnit.scala 59:29]
   wire [511:0] writeBackFIFO_read_data_data; // @[replayUnit.scala 59:29]
+  wire [4:0] _T_3 = requestIn_request_branch_mask & branchOps_branchMask; // @[utils.scala 94:27]
+  wire  _T_4 = |_T_3; // @[utils.scala 94:51]
+  wire [4:0] _requestWaitFIFO_write_data_branch_mask_T = requestIn_request_branch_mask ^ branchOps_branchMask; // @[utils.scala 95:42]
+  wire [4:0] _GEN_2 = |_T_3 ? _requestWaitFIFO_write_data_branch_mask_T : requestIn_request_branch_mask; // @[utils.scala 94:56 95:27 98:27]
+  wire [4:0] _GEN_3 = _T_4 ? 5'h0 : requestIn_request_branch_mask; // @[utils.scala 103:56 104:27 108:27]
+  wire  _GEN_4 = _T_4 ? 1'h0 : requestIn_request_branch_valid; // @[utils.scala 103:56 105:28 109:28]
+  wire [4:0] _GEN_5 = branchOps_passed ? _GEN_2 : _GEN_3; // @[utils.scala 92:30]
+  wire  _GEN_6 = branchOps_passed ? requestIn_request_branch_valid : _GEN_4; // @[utils.scala 100:26 92:30]
+  wire [4:0] _GEN_7 = branchOps_valid ? _GEN_5 : requestIn_request_branch_mask; // @[utils.scala 113:23 91:27]
+  wire  _GEN_8 = branchOps_valid ? _GEN_6 : requestIn_request_branch_valid; // @[utils.scala 114:24 91:27]
   fifoWithBranchOps requestWaitFIFO ( // @[replayUnit.scala 51:31]
     .clock(requestWaitFIFO_clock),
     .reset(requestWaitFIFO_reset),
@@ -40549,34 +40569,34 @@ module replayUnit(
     .read_data_data(writeBackFIFO_read_data_data)
   );
   assign requestIn_ready = requestWaitFIFO_write_ready; // @[replayUnit.scala 64:19 79:48 80:21]
-  assign requestOut_request_valid = requestWaitFIFO_read_data_valid; // @[replayUnit.scala 86:22]
-  assign requestOut_request_address = requestWaitFIFO_read_data_address; // @[replayUnit.scala 86:22]
-  assign requestOut_request_core_instruction = requestWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 86:22]
-  assign requestOut_request_core_robAddr = requestWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 86:22]
-  assign requestOut_request_core_prfDest = requestWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 86:22]
-  assign requestOut_request_branch_valid = requestWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 86:22]
-  assign requestOut_request_branch_mask = requestWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 86:22]
-  assign requestOut_request_writeData_valid = requestWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 86:22]
-  assign requestOut_request_writeData_data = requestWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 86:22]
-  assign requestOut_request_cacheLine_cacheLine = requestWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 86:22]
-  assign requestOut_request_cacheLine_response = requestWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 86:22]
-  assign responseIn_ready = responseWaitFIFO_write_ready; // @[replayUnit.scala 65:20 89:48 90:22]
-  assign responseOut_request_valid = responseWaitFIFO_read_data_valid; // @[replayUnit.scala 96:23]
-  assign responseOut_request_address = responseWaitFIFO_read_data_address; // @[replayUnit.scala 96:23]
-  assign responseOut_request_core_instruction = responseWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 96:23]
-  assign responseOut_request_core_robAddr = responseWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 96:23]
-  assign responseOut_request_core_prfDest = responseWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 96:23]
-  assign responseOut_request_branch_valid = responseWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 96:23]
-  assign responseOut_request_branch_mask = responseWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 96:23]
-  assign responseOut_request_writeData_valid = responseWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 96:23]
-  assign responseOut_request_writeData_data = responseWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 96:23]
-  assign responseOut_request_cacheLine_cacheLine = responseWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 96:23]
-  assign responseOut_request_cacheLine_response = responseWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 96:23]
-  assign writeBackIn_ready = writeBackFIFO_write_ready; // @[replayUnit.scala 100:23 66:21 99:48]
-  assign writeBackOut_request_valid = writeBackFIFO_read_data_valid; // @[replayUnit.scala 106:24]
-  assign writeBackOut_request_address = writeBackFIFO_read_data_address; // @[replayUnit.scala 106:24]
-  assign writeBackOut_request_data = writeBackFIFO_read_data_data; // @[replayUnit.scala 106:24]
-  assign fenceReady = requestWaitFIFO_isEmpty & responseWaitFIFO_isEmpty; // @[replayUnit.scala 108:41]
+  assign requestOut_request_valid = requestWaitFIFO_read_data_valid; // @[replayUnit.scala 87:22]
+  assign requestOut_request_address = requestWaitFIFO_read_data_address; // @[replayUnit.scala 87:22]
+  assign requestOut_request_core_instruction = requestWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 87:22]
+  assign requestOut_request_core_robAddr = requestWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 87:22]
+  assign requestOut_request_core_prfDest = requestWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 87:22]
+  assign requestOut_request_branch_valid = requestWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 87:22]
+  assign requestOut_request_branch_mask = requestWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 87:22]
+  assign requestOut_request_writeData_valid = requestWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 87:22]
+  assign requestOut_request_writeData_data = requestWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 87:22]
+  assign requestOut_request_cacheLine_cacheLine = requestWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 87:22]
+  assign requestOut_request_cacheLine_response = requestWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 87:22]
+  assign responseIn_ready = responseWaitFIFO_write_ready; // @[replayUnit.scala 65:20 90:48 91:22]
+  assign responseOut_request_valid = responseWaitFIFO_read_data_valid; // @[replayUnit.scala 98:23]
+  assign responseOut_request_address = responseWaitFIFO_read_data_address; // @[replayUnit.scala 98:23]
+  assign responseOut_request_core_instruction = responseWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 98:23]
+  assign responseOut_request_core_robAddr = responseWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 98:23]
+  assign responseOut_request_core_prfDest = responseWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 98:23]
+  assign responseOut_request_branch_valid = responseWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 98:23]
+  assign responseOut_request_branch_mask = responseWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 98:23]
+  assign responseOut_request_writeData_valid = responseWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 98:23]
+  assign responseOut_request_writeData_data = responseWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 98:23]
+  assign responseOut_request_cacheLine_cacheLine = responseWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 98:23]
+  assign responseOut_request_cacheLine_response = responseWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 98:23]
+  assign writeBackIn_ready = writeBackFIFO_write_ready; // @[replayUnit.scala 101:48 102:23 66:21]
+  assign writeBackOut_request_valid = writeBackFIFO_read_data_valid; // @[replayUnit.scala 108:24]
+  assign writeBackOut_request_address = writeBackFIFO_read_data_address; // @[replayUnit.scala 108:24]
+  assign writeBackOut_request_data = writeBackFIFO_read_data_data; // @[replayUnit.scala 108:24]
+  assign fenceReady = requestWaitFIFO_isEmpty & responseWaitFIFO_isEmpty; // @[replayUnit.scala 110:41]
   assign requestWaitFIFO_clock = clock;
   assign requestWaitFIFO_reset = reset;
   assign requestWaitFIFO_write_data_valid = requestIn_request_valid & requestIn_request_branch_valid &
@@ -40589,10 +40609,9 @@ module replayUnit(
     requestIn_request_core_robAddr : 4'h0; // @[replayUnit.scala 83:66 84:32 utils.scala 51:41]
   assign requestWaitFIFO_write_data_core_prfDest = requestIn_request_valid & requestIn_request_branch_valid ?
     requestIn_request_core_prfDest : 6'h0; // @[replayUnit.scala 83:66 84:32 utils.scala 51:41]
-  assign requestWaitFIFO_write_data_branch_valid = requestIn_request_valid & requestIn_request_branch_valid &
-    requestIn_request_branch_valid; // @[replayUnit.scala 83:66 84:32 utils.scala 50:41]
-  assign requestWaitFIFO_write_data_branch_mask = requestIn_request_valid & requestIn_request_branch_valid ?
-    requestIn_request_branch_mask : 5'h0; // @[replayUnit.scala 83:66 84:32 utils.scala 51:41]
+  assign requestWaitFIFO_write_data_branch_valid = requestIn_request_valid & requestIn_request_branch_valid & _GEN_8; // @[replayUnit.scala 83:66 utils.scala 50:41]
+  assign requestWaitFIFO_write_data_branch_mask = requestIn_request_valid & requestIn_request_branch_valid ? _GEN_7 : 5'h0
+    ; // @[replayUnit.scala 83:66 utils.scala 51:41]
   assign requestWaitFIFO_write_data_writeData_valid = requestIn_request_valid & requestIn_request_branch_valid &
     requestIn_request_writeData_valid; // @[replayUnit.scala 83:66 84:32 utils.scala 50:41]
   assign requestWaitFIFO_write_data_writeData_data = requestIn_request_valid & requestIn_request_branch_valid ?
@@ -40608,37 +40627,36 @@ module replayUnit(
   assign responseWaitFIFO_clock = clock;
   assign responseWaitFIFO_reset = reset;
   assign responseWaitFIFO_write_data_valid = responseIn_request_valid & responseIn_request_branch_valid &
-    responseIn_request_valid; // @[replayUnit.scala 93:68 94:33 utils.scala 50:41]
+    responseIn_request_valid; // @[replayUnit.scala 94:68 95:33 utils.scala 50:41]
   assign responseWaitFIFO_write_data_address = responseIn_request_valid & responseIn_request_branch_valid ?
-    responseIn_request_address : 32'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 51:41]
+    responseIn_request_address : 32'h0; // @[replayUnit.scala 94:68 95:33 utils.scala 51:41]
   assign responseWaitFIFO_write_data_core_instruction = responseIn_request_valid & responseIn_request_branch_valid ?
-    responseIn_request_core_instruction : 32'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 51:41]
+    responseIn_request_core_instruction : 32'h0; // @[replayUnit.scala 94:68 95:33 utils.scala 51:41]
   assign responseWaitFIFO_write_data_core_robAddr = responseIn_request_valid & responseIn_request_branch_valid ?
-    responseIn_request_core_robAddr : 4'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 51:41]
+    responseIn_request_core_robAddr : 4'h0; // @[replayUnit.scala 94:68 95:33 utils.scala 51:41]
   assign responseWaitFIFO_write_data_core_prfDest = responseIn_request_valid & responseIn_request_branch_valid ?
-    responseIn_request_core_prfDest : 6'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 51:41]
-  assign responseWaitFIFO_write_data_branch_valid = responseIn_request_valid & responseIn_request_branch_valid &
-    responseIn_request_branch_valid; // @[replayUnit.scala 93:68 94:33 utils.scala 50:41]
-  assign responseWaitFIFO_write_data_branch_mask = responseIn_request_valid & responseIn_request_branch_valid ?
-    responseIn_request_branch_mask : 5'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 51:41]
+    responseIn_request_core_prfDest : 6'h0; // @[replayUnit.scala 94:68 95:33 utils.scala 51:41]
+  assign responseWaitFIFO_write_data_branch_valid = responseIn_request_valid & responseIn_request_branch_valid & _GEN_8; // @[replayUnit.scala 94:68 utils.scala 50:41]
+  assign responseWaitFIFO_write_data_branch_mask = responseIn_request_valid & responseIn_request_branch_valid ? _GEN_7
+     : 5'h0; // @[replayUnit.scala 94:68 utils.scala 51:41]
   assign responseWaitFIFO_write_data_writeData_valid = responseIn_request_valid & responseIn_request_branch_valid &
-    responseIn_request_writeData_valid; // @[replayUnit.scala 93:68 94:33 utils.scala 50:41]
+    responseIn_request_writeData_valid; // @[replayUnit.scala 94:68 95:33 utils.scala 50:41]
   assign responseWaitFIFO_write_data_writeData_data = responseIn_request_valid & responseIn_request_branch_valid ?
-    responseIn_request_writeData_data : 64'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 51:41]
+    responseIn_request_writeData_data : 64'h0; // @[replayUnit.scala 94:68 95:33 utils.scala 51:41]
   assign responseWaitFIFO_write_data_cacheLine_cacheLine = responseIn_request_valid & responseIn_request_branch_valid ?
-    responseIn_request_cacheLine_cacheLine : 512'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 51:41]
+    responseIn_request_cacheLine_cacheLine : 512'h0; // @[replayUnit.scala 94:68 95:33 utils.scala 51:41]
   assign responseWaitFIFO_write_data_cacheLine_response = responseIn_request_valid & responseIn_request_branch_valid ?
-    responseIn_request_cacheLine_response : 2'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 51:41]
-  assign responseWaitFIFO_read_ready = responseOut_ready; // @[replayUnit.scala 68:31 89:48 91:33]
+    responseIn_request_cacheLine_response : 2'h0; // @[replayUnit.scala 94:68 95:33 utils.scala 51:41]
+  assign responseWaitFIFO_read_ready = responseOut_ready; // @[replayUnit.scala 68:31 90:48 92:33]
   assign responseWaitFIFO_branchOps_valid = branchOps_valid; // @[replayUnit.scala 76:30]
   assign responseWaitFIFO_branchOps_branchMask = branchOps_branchMask; // @[replayUnit.scala 76:30]
   assign responseWaitFIFO_branchOps_passed = branchOps_passed; // @[replayUnit.scala 76:30]
   assign writeBackFIFO_clock = clock;
   assign writeBackFIFO_reset = reset;
-  assign writeBackFIFO_write_data_valid = writeBackIn_request_valid; // @[replayUnit.scala 103:34 104:30 utils.scala 50:41]
-  assign writeBackFIFO_write_data_address = writeBackIn_request_valid ? writeBackIn_request_address : 32'h0; // @[replayUnit.scala 103:34 104:30 utils.scala 51:41]
-  assign writeBackFIFO_write_data_data = writeBackIn_request_valid ? writeBackIn_request_data : 512'h0; // @[replayUnit.scala 103:34 104:30 utils.scala 51:41]
-  assign writeBackFIFO_read_ready = writeBackOut_ready; // @[replayUnit.scala 101:30 69:28 99:48]
+  assign writeBackFIFO_write_data_valid = writeBackIn_request_valid; // @[replayUnit.scala 105:34 106:30 utils.scala 50:41]
+  assign writeBackFIFO_write_data_address = writeBackIn_request_valid ? writeBackIn_request_address : 32'h0; // @[replayUnit.scala 105:34 106:30 utils.scala 51:41]
+  assign writeBackFIFO_write_data_data = writeBackIn_request_valid ? writeBackIn_request_data : 512'h0; // @[replayUnit.scala 105:34 106:30 utils.scala 51:41]
+  assign writeBackFIFO_read_ready = writeBackOut_ready; // @[replayUnit.scala 101:48 103:30 69:28]
 endmodule
 module fifoBaseModule_1(
   input         clock,
@@ -42757,7 +42775,6 @@ module ACEUnit(
   output [3:0]   readResponse_request_core_robAddr,
   output [5:0]   readResponse_request_core_prfDest,
   output         readResponse_request_branch_valid,
-  output [4:0]   readResponse_request_branch_mask,
   output         readResponse_request_writeData_valid,
   output [63:0]  readResponse_request_writeData_data,
   output [511:0] readResponse_request_cacheLine_cacheLine,
@@ -42945,13 +42962,9 @@ module ACEUnit(
   reg [63:0] responseBuffer_writeData_data; // @[ACEUnit.scala 117:31]
   reg [511:0] responseBuffer_cacheLine_cacheLine; // @[ACEUnit.scala 117:31]
   reg [1:0] responseBuffer_cacheLine_response; // @[ACEUnit.scala 117:31]
-  wire [4:0] _T_10 = responseBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 94:27]
-  wire  _T_11 = |_T_10; // @[utils.scala 94:51]
-  wire [4:0] _readResponse_request_branch_mask_T = responseBuffer_branch_mask ^ branchOps_branchMask; // @[utils.scala 95:42]
-  wire [4:0] _GEN_30 = |_T_10 ? _readResponse_request_branch_mask_T : responseBuffer_branch_mask; // @[utils.scala 94:56 95:27 98:27]
-  wire [4:0] _GEN_31 = _T_11 ? 5'h0 : responseBuffer_branch_mask; // @[utils.scala 103:56 104:27 108:27]
-  wire  _GEN_32 = _T_11 ? 1'h0 : responseBuffer_branch_valid; // @[utils.scala 103:56 105:28 109:28]
-  wire [4:0] _GEN_33 = branchOps_passed ? _GEN_30 : _GEN_31; // @[utils.scala 92:30]
+  wire [4:0] _T_12 = responseBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 103:27]
+  wire  _T_13 = |_T_12; // @[utils.scala 103:51]
+  wire  _GEN_32 = |_T_12 ? 1'h0 : responseBuffer_branch_valid; // @[utils.scala 103:56 105:28 109:28]
   wire  _GEN_34 = branchOps_passed ? responseBuffer_branch_valid : _GEN_32; // @[utils.scala 100:26 92:30]
   reg  writeBuffer_valid; // @[ACEUnit.scala 131:28]
   reg [31:0] writeBuffer_address; // @[ACEUnit.scala 131:28]
@@ -43050,9 +43063,10 @@ module ACEUnit(
   wire  _GEN_197 = 2'h0 == readACEResponseState ? _GEN_146 : responseBuffer_branch_valid; // @[ACEUnit.scala 117:31 240:32]
   wire [4:0] _GEN_198 = 2'h0 == readACEResponseState ? _GEN_147 : responseBuffer_branch_mask; // @[ACEUnit.scala 117:31 240:32]
   wire  _GEN_215 = 2'h0 == readACEResponseState ? readResponseValid : _GEN_185; // @[ACEUnit.scala 240:32 236:34]
-  wire [4:0] _GEN_216 = _T_11 ? _readResponse_request_branch_mask_T : _GEN_198; // @[utils.scala 124:58 125:25]
-  wire  _GEN_217 = _T_11 ? 1'h0 : _GEN_197; // @[utils.scala 129:58 130:26]
-  wire [4:0] _GEN_218 = _T_11 ? 5'h0 : _GEN_198; // @[utils.scala 129:58 131:25]
+  wire [4:0] _responseBuffer_branch_mask_T = responseBuffer_branch_mask ^ branchOps_branchMask; // @[utils.scala 125:40]
+  wire [4:0] _GEN_216 = _T_13 ? _responseBuffer_branch_mask_T : _GEN_198; // @[utils.scala 124:58 125:25]
+  wire  _GEN_217 = _T_13 ? 1'h0 : _GEN_197; // @[utils.scala 129:58 130:26]
+  wire [4:0] _GEN_218 = _T_13 ? 5'h0 : _GEN_198; // @[utils.scala 129:58 131:25]
   reg [1:0] coherentAXIState; // @[ACEUnit.scala 276:33]
   wire  _coherencyRequestBuffer_response_T_1 = bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 287:91]
   wire  _coherencyRequestBuffer_response_T_2 = bus_ACSNOOP == 4'h9 | bus_ACSNOOP == 4'h7; // @[ACEUnit.scala 287:75]
@@ -43152,7 +43166,6 @@ module ACEUnit(
   assign readResponse_request_core_robAddr = responseBuffer_core_robAddr; // @[ACEUnit.scala 118:24]
   assign readResponse_request_core_prfDest = responseBuffer_core_prfDest; // @[ACEUnit.scala 118:24]
   assign readResponse_request_branch_valid = branchOps_valid ? _GEN_34 : responseBuffer_branch_valid; // @[utils.scala 114:24 91:27]
-  assign readResponse_request_branch_mask = branchOps_valid ? _GEN_33 : responseBuffer_branch_mask; // @[utils.scala 113:23 91:27]
   assign readResponse_request_writeData_valid = responseBuffer_writeData_valid; // @[ACEUnit.scala 118:24]
   assign readResponse_request_writeData_data = responseBuffer_writeData_data; // @[ACEUnit.scala 118:24]
   assign readResponse_request_cacheLine_cacheLine = responseBuffer_cacheLine_cacheLine; // @[ACEUnit.scala 118:24]
@@ -45966,7 +45979,6 @@ module core_Anon_1(
   wire [3:0] replayUnit_responseIn_request_core_robAddr; // @[cacheModule.scala 48:26]
   wire [5:0] replayUnit_responseIn_request_core_prfDest; // @[cacheModule.scala 48:26]
   wire  replayUnit_responseIn_request_branch_valid; // @[cacheModule.scala 48:26]
-  wire [4:0] replayUnit_responseIn_request_branch_mask; // @[cacheModule.scala 48:26]
   wire  replayUnit_responseIn_request_writeData_valid; // @[cacheModule.scala 48:26]
   wire [63:0] replayUnit_responseIn_request_writeData_data; // @[cacheModule.scala 48:26]
   wire [511:0] replayUnit_responseIn_request_cacheLine_cacheLine; // @[cacheModule.scala 48:26]
@@ -46053,7 +46065,6 @@ module core_Anon_1(
   wire [3:0] aceUnit_readResponse_request_core_robAddr; // @[cacheModule.scala 56:23]
   wire [5:0] aceUnit_readResponse_request_core_prfDest; // @[cacheModule.scala 56:23]
   wire  aceUnit_readResponse_request_branch_valid; // @[cacheModule.scala 56:23]
-  wire [4:0] aceUnit_readResponse_request_branch_mask; // @[cacheModule.scala 56:23]
   wire  aceUnit_readResponse_request_writeData_valid; // @[cacheModule.scala 56:23]
   wire [63:0] aceUnit_readResponse_request_writeData_data; // @[cacheModule.scala 56:23]
   wire [511:0] aceUnit_readResponse_request_cacheLine_cacheLine; // @[cacheModule.scala 56:23]
@@ -46302,7 +46313,6 @@ module core_Anon_1(
     .responseIn_request_core_robAddr(replayUnit_responseIn_request_core_robAddr),
     .responseIn_request_core_prfDest(replayUnit_responseIn_request_core_prfDest),
     .responseIn_request_branch_valid(replayUnit_responseIn_request_branch_valid),
-    .responseIn_request_branch_mask(replayUnit_responseIn_request_branch_mask),
     .responseIn_request_writeData_valid(replayUnit_responseIn_request_writeData_valid),
     .responseIn_request_writeData_data(replayUnit_responseIn_request_writeData_data),
     .responseIn_request_cacheLine_cacheLine(replayUnit_responseIn_request_cacheLine_cacheLine),
@@ -46393,7 +46403,6 @@ module core_Anon_1(
     .readResponse_request_core_robAddr(aceUnit_readResponse_request_core_robAddr),
     .readResponse_request_core_prfDest(aceUnit_readResponse_request_core_prfDest),
     .readResponse_request_branch_valid(aceUnit_readResponse_request_branch_valid),
-    .readResponse_request_branch_mask(aceUnit_readResponse_request_branch_mask),
     .readResponse_request_writeData_valid(aceUnit_readResponse_request_writeData_valid),
     .readResponse_request_writeData_data(aceUnit_readResponse_request_writeData_data),
     .readResponse_request_cacheLine_cacheLine(aceUnit_readResponse_request_cacheLine_cacheLine),
@@ -46590,7 +46599,6 @@ module core_Anon_1(
   assign replayUnit_responseIn_request_core_robAddr = aceUnit_readResponse_request_core_robAddr; // @[cacheModule.scala 111:25]
   assign replayUnit_responseIn_request_core_prfDest = aceUnit_readResponse_request_core_prfDest; // @[cacheModule.scala 111:25]
   assign replayUnit_responseIn_request_branch_valid = aceUnit_readResponse_request_branch_valid; // @[cacheModule.scala 111:25]
-  assign replayUnit_responseIn_request_branch_mask = aceUnit_readResponse_request_branch_mask; // @[cacheModule.scala 111:25]
   assign replayUnit_responseIn_request_writeData_valid = aceUnit_readResponse_request_writeData_valid; // @[cacheModule.scala 111:25]
   assign replayUnit_responseIn_request_writeData_data = aceUnit_readResponse_request_writeData_data; // @[cacheModule.scala 111:25]
   assign replayUnit_responseIn_request_cacheLine_cacheLine = aceUnit_readResponse_request_cacheLine_cacheLine; // @[cacheModule.scala 111:25]

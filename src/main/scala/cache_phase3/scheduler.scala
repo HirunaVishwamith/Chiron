@@ -49,10 +49,13 @@ class Scheduler extends Module{
   when(requestIn.valid && requestIn.branch.valid){
     when(speculativeEntryWire && inorderQueue.matchFound){
       inorderQueue.write.data := requestIn
+      regReadUpdate(inorderQueue.write.data.branch, branchOps, requestIn.branch)
     } .elsewhen(speculativeEntryWire){
       speculativeQueue.write.data := requestIn
+      regReadUpdate(speculativeQueue.write.data.branch, branchOps, requestIn.branch)
     }.otherwise{
       inorderQueue.write.data := requestIn
+      regReadUpdate(inorderQueue.write.data.branch, branchOps, requestIn.branch)
     }
   } .otherwise{
     inorderQueue.write.data.valid := false.B
