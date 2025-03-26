@@ -37,6 +37,9 @@ object constants{
 
   val schedulerDepth : Int = 16
 
+  val cacheResponseWidth : Int = 2
+  val arbiterReqTypesWidth : Int = 2
+
   //!Debug only
   val pauseForBranch : Boolean = false
 }

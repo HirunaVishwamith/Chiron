@@ -58,7 +58,7 @@ class arbiter extends Module {
   writeCommit.ready := false.B
   fenceReady := false.B
 
-  val requestTypeWire = WireInit(0.U(2.W))
+  val requestTypeWire = WireInit(0.U(arbiterReqTypesWidth.W))
 
   val speculativeBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val inorderBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))

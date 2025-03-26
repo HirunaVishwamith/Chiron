@@ -54,7 +54,7 @@ class requestPipelineWire extends requestPipelineTrait
 
 
 trait  coherencyRequestTrait extends baseTrait{
-	val response = UInt(2.W)
+	val response = UInt(cacheResponseWidth.W)
   //response(1) : Invalidate, response(0) : DataRequired
 }
 class coherencyRequestWire extends coherencyRequestTrait
