@@ -45,7 +45,7 @@ fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-lwu.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-or.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-ori.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-sb.bin: test pass
-fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-sd.bin: test fail
+fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-sd.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-sh.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-simple.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64ui-p-sll.bin: test pass

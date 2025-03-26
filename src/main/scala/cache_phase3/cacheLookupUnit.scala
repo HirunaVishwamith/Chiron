@@ -195,9 +195,11 @@ class cacheLookupUnit extends Module{
 
     readBuffer := request.request
     requestType := request.requestType
+  } .otherwise {
+    readBuffer.valid := false.B
   }
   when(operationValid){
-    readBuffer.valid := operationValid
+    // readBuffer.valid := operationValid
     //Setting control wires for request types
     val isReadWire = WireDefault(readBuffer.core.instruction(6,0) === "b0000011".U)
     val isWriteWire = WireDefault(readBuffer.core.instruction(6,0) === "b0100011".U)
@@ -457,8 +459,11 @@ class cacheLookupUnit extends Module{
     replayBuffer := Mux(toReplayValidWire && readBuffer.branch.valid, readBuffer, replayBuffer)
 
     //Response
-    memoryResponseBuffer := Mux(toMemoryResponseValidWire && readBuffer.branch.valid, readBuffer, memoryResponseBuffer)
-    memoryResponseBuffer.writeData.data := responseResultWire
+    when(toMemoryResponseValidWire && readBuffer.branch.valid){
+      memoryResponseBuffer := readBuffer
+      memoryResponseBuffer.writeData.data := responseResultWire
+
+    }
     //Coherency
     when(toCoherencyResponseValidWire){
       coherencyResponseBuffer.valid := toCoherencyResponseValidWire
