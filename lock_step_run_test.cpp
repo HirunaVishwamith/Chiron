@@ -98,6 +98,7 @@ int main(int argc, char* argv[]) {
   #ifdef LOGGING
   std::ofstream outFile("run.log"); // This will create or overwrite the file
   std::ofstream outState("states.log");
+  std::ofstream outregs("regs.log");
 
 
   // Check if the file is open
@@ -107,6 +108,11 @@ int main(int argc, char* argv[]) {
   }
 
   if (!outState.is_open()) {
+    std::cerr << "Error opening the file." << std::endl;
+    return 1;
+  }
+
+  if (!outregs.is_open()) {
     std::cerr << "Error opening the file." << std::endl;
     return 1;
   }
@@ -194,6 +200,11 @@ int main(int argc, char* argv[]) {
 
     outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
     outState << golden_model.return_state();
+
+
+    outregs <<  setfill('0') << setw(16) << hex << bench.return_instruction() << endl;
+    outregs << bench.return_registers();
+    outregs << "\n";
     /* switch (golden_model.check_for_mem_access(&mem_address, &data))
     {
     case 1:

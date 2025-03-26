@@ -12813,6 +12813,7 @@ circuit system :
       node _memoryResponseBuffer_T = and(toMemoryResponseValidWire, readBuffer.branch.valid) @[cacheLookupUnit.scala 460:59]
       node _memoryResponseBuffer_T_1 = mux(_memoryResponseBuffer_T, readBuffer, memoryResponseBuffer) @[cacheLookupUnit.scala 460:32]
       memoryResponseBuffer <= _memoryResponseBuffer_T_1 @[cacheLookupUnit.scala 460:26]
+      memoryResponseBuffer.writeData.data <= responseResultWire @[cacheLookupUnit.scala 461:41]
       when toCoherencyResponseValidWire : @[cacheLookupUnit.scala 463:39]
         coherencyResponseBuffer.valid <= toCoherencyResponseValidWire @[cacheLookupUnit.scala 464:37]
         node _T_127 = bits(readBuffer.cacheLine.response, 0, 0) @[cacheLookupUnit.scala 465:41]

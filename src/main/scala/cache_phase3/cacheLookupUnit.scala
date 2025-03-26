@@ -458,7 +458,7 @@ class cacheLookupUnit extends Module{
 
     //Response
     memoryResponseBuffer := Mux(toMemoryResponseValidWire && readBuffer.branch.valid, readBuffer, memoryResponseBuffer)
-    
+    memoryResponseBuffer.writeData.data := responseResultWire
     //Coherency
     when(toCoherencyResponseValidWire){
       coherencyResponseBuffer.valid := toCoherencyResponseValidWire
