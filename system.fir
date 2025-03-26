@@ -10580,7 +10580,7 @@ circuit system :
     output branchOps : { flip valid : UInt<1>, flip branchMask : UInt<5>, flip passed : UInt<1>}
 
     wire isPauseForBoolean : UInt<1>
-    isPauseForBoolean <= UInt<1>("h0")
+    isPauseForBoolean <= UInt<1>("h1")
     canAllocate <= UInt<1>("h0") @[scheduler.scala 25:15]
     requestOut.prfDest <= UInt<1>("h0") @[utils.scala 48:41]
     requestOut.robAddr <= UInt<1>("h0") @[utils.scala 48:41]
@@ -10780,7 +10780,7 @@ circuit system :
     output fenceReady : UInt<1>
 
     wire isPauseForBoolean : UInt<1>
-    isPauseForBoolean <= UInt<1>("h0")
+    isPauseForBoolean <= UInt<1>("h1")
     request.speculativeReady <= UInt<1>("h0") @[arbiter.scala 50:28]
     request.inorderReady <= UInt<1>("h0") @[arbiter.scala 51:24]
     toPeripheral.request.writeData <= UInt<1>("h0") @[utils.scala 48:41]
@@ -13958,7 +13958,7 @@ circuit system :
     responseIn.ready <= UInt<1>("h0") @[replayUnit.scala 48:20]
     writeBackIn.ready <= UInt<1>("h0") @[replayUnit.scala 49:21]
     wire isPauseForBoolean : UInt<1>
-    isPauseForBoolean <= UInt<1>("h0")
+    isPauseForBoolean <= UInt<1>("h1")
     inst requestWaitFIFO of fifoWithBranchOpsI_1 @[replayUnit.scala 54:31]
     requestWaitFIFO.clock <= clock
     requestWaitFIFO.reset <= reset

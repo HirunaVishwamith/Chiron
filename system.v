@@ -35169,13 +35169,19 @@ module Scheduler(
     .branchOps_passed(speculativeQueue_branchOps_passed)
   );
   assign canAllocate = inorderQueue_write_ready & speculativeQueue_write_ready; // @[scheduler.scala 112:43]
-  assign requestOut_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_113; // @[scheduler.scala 74:114 utils.scala 47:41]
-  assign requestOut_address = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_112 : 32'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
-  assign requestOut_instruction = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_111 : 32'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
-  assign requestOut_branchMask = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_110 : 5'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
-  assign requestOut_robAddr = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_109 : 4'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
-  assign requestOut_prfDest = controlSignal_inorderReady | controlSignal_speculativeReady ? _GEN_108 : 6'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
-  assign controlSignal_isSpeculative = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_107; // @[scheduler.scala 74:114 27:31]
+  assign requestOut_valid = (controlSignal_inorderReady | controlSignal_speculativeReady) & ~branchOps_valid & _GEN_113; // @[scheduler.scala 74:114 utils.scala 47:41]
+  assign requestOut_address = (controlSignal_inorderReady | controlSignal_speculativeReady) & ~branchOps_valid ?
+    _GEN_112 : 32'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
+  assign requestOut_instruction = (controlSignal_inorderReady | controlSignal_speculativeReady) & ~branchOps_valid ?
+    _GEN_111 : 32'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
+  assign requestOut_branchMask = (controlSignal_inorderReady | controlSignal_speculativeReady) & ~branchOps_valid ?
+    _GEN_110 : 5'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
+  assign requestOut_robAddr = (controlSignal_inorderReady | controlSignal_speculativeReady) & ~branchOps_valid ?
+    _GEN_109 : 4'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
+  assign requestOut_prfDest = (controlSignal_inorderReady | controlSignal_speculativeReady) & ~branchOps_valid ?
+    _GEN_108 : 6'h0; // @[scheduler.scala 74:114 utils.scala 48:41]
+  assign controlSignal_isSpeculative = (controlSignal_inorderReady | controlSignal_speculativeReady) & ~branchOps_valid
+     & _GEN_107; // @[scheduler.scala 74:114 27:31]
   assign fenceReady = inorderQueue_isEmpty & speculativeQueue_isEmpty; // @[scheduler.scala 113:38]
   assign inorderQueue_clock = clock;
   assign inorderQueue_reset = reset;
@@ -35185,7 +35191,8 @@ module Scheduler(
   assign inorderQueue_write_data_branchMask = requestIn_valid ? _GEN_14 : 5'h0; // @[scheduler.scala 49:24 utils.scala 48:41]
   assign inorderQueue_write_data_robAddr = requestIn_valid ? _GEN_13 : 4'h0; // @[scheduler.scala 49:24 utils.scala 48:41]
   assign inorderQueue_write_data_prfDest = requestIn_valid ? _GEN_12 : 6'h0; // @[scheduler.scala 49:24 utils.scala 48:41]
-  assign inorderQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_114; // @[scheduler.scala 74:114 40:27]
+  assign inorderQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & ~branchOps_valid &
+    _GEN_114; // @[scheduler.scala 74:114 40:27]
   assign inorderQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 61:26]
   assign inorderQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 61:26]
   assign inorderQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 61:26]
@@ -35198,7 +35205,8 @@ module Scheduler(
   assign speculativeQueue_write_data_branchMask = requestIn_valid ? _GEN_20 : 5'h0; // @[scheduler.scala 49:24 utils.scala 48:41]
   assign speculativeQueue_write_data_robAddr = requestIn_valid ? _GEN_19 : 4'h0; // @[scheduler.scala 49:24 utils.scala 48:41]
   assign speculativeQueue_write_data_prfDest = requestIn_valid ? _GEN_18 : 6'h0; // @[scheduler.scala 49:24 utils.scala 48:41]
-  assign speculativeQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_106; // @[scheduler.scala 74:114 43:31]
+  assign speculativeQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & ~branchOps_valid
+     & _GEN_106; // @[scheduler.scala 74:114 43:31]
   assign speculativeQueue_branchOps_valid = branchOps_valid; // @[scheduler.scala 62:30]
   assign speculativeQueue_branchOps_branchMask = branchOps_branchMask; // @[scheduler.scala 62:30]
   assign speculativeQueue_branchOps_passed = branchOps_passed; // @[scheduler.scala 62:30]
@@ -35550,8 +35558,8 @@ module arbiter(
   wire [1:0] _GEN_288 = rAtmoicsWritePending ? _GEN_205 : _GEN_268; // @[arbiter.scala 185:31]
   wire [1:0] _GEN_291 = rAtmoicsWritePending ? _GEN_208 : _GEN_267; // @[arbiter.scala 185:31]
   wire [511:0] _GEN_293 = rAtmoicsWritePending ? 512'h0 : _GEN_273; // @[arbiter.scala 185:31 utils.scala 48:41]
-  wire  _GEN_296 = toCacheLookup_ready & _GEN_280; // @[arbiter.scala 184:72 utils.scala 47:41]
-  wire [4:0] _GEN_299 = toCacheLookup_ready ? _GEN_283 : 5'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
+  wire  _GEN_296 = toCacheLookup_ready & ~branchOps_valid & _GEN_280; // @[arbiter.scala 184:72 utils.scala 47:41]
+  wire [4:0] _GEN_299 = toCacheLookup_ready & ~branchOps_valid ? _GEN_283 : 5'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
   wire [4:0] _GEN_316 = branchOps_valid ? _GEN_193 : _GEN_299; // @[arbiter.scala 277:26]
   wire  _GEN_317 = branchOps_valid ? _GEN_194 : _GEN_296; // @[arbiter.scala 277:26]
   wire  _fenceReady_T_4 = _request_speculativeReady_T & ~inorderBuffer_valid & ~operationBuffer_valid; // @[arbiter.scala 281:67]
@@ -35570,16 +35578,16 @@ module arbiter(
   assign toPeripheral_request_writeData = toPeripheral_ready & _T_34 & inorderBuffer_valid ? inorderBuffer_writeData : 64'h0
     ; // @[arbiter.scala 274:112 276:26 utils.scala 48:41]
   assign toCacheLookup_request_valid = toPeripheral_ready & _T_34 & inorderBuffer_valid ? _GEN_317 : _GEN_296; // @[arbiter.scala 274:112]
-  assign toCacheLookup_request_address = toCacheLookup_ready ? _GEN_281 : 32'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
-  assign toCacheLookup_request_instruction = toCacheLookup_ready ? _GEN_282 : 32'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
+  assign toCacheLookup_request_address = toCacheLookup_ready & ~branchOps_valid ? _GEN_281 : 32'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
+  assign toCacheLookup_request_instruction = toCacheLookup_ready & ~branchOps_valid ? _GEN_282 : 32'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
   assign toCacheLookup_request_branchMask = toPeripheral_ready & _T_34 & inorderBuffer_valid ? _GEN_316 : _GEN_299; // @[arbiter.scala 274:112]
-  assign toCacheLookup_request_robAddr = toCacheLookup_ready ? _GEN_284 : 4'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
-  assign toCacheLookup_request_prfDest = toCacheLookup_ready ? _GEN_285 : 6'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
-  assign toCacheLookup_request_writeEn = toCacheLookup_ready & _GEN_286; // @[arbiter.scala 184:72 utils.scala 47:41]
-  assign toCacheLookup_request_writeData = toCacheLookup_ready ? _GEN_287 : 64'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
-  assign toCacheLookup_request_cacheLine = toCacheLookup_ready ? _GEN_293 : 512'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
-  assign toCacheLookup_request_response = toCacheLookup_ready ? _GEN_291 : 2'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
-  assign toCacheLookup_request_requestType = toCacheLookup_ready ? _GEN_288 : 2'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
+  assign toCacheLookup_request_robAddr = toCacheLookup_ready & ~branchOps_valid ? _GEN_284 : 4'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
+  assign toCacheLookup_request_prfDest = toCacheLookup_ready & ~branchOps_valid ? _GEN_285 : 6'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
+  assign toCacheLookup_request_writeEn = toCacheLookup_ready & ~branchOps_valid & _GEN_286; // @[arbiter.scala 184:72 utils.scala 47:41]
+  assign toCacheLookup_request_writeData = toCacheLookup_ready & ~branchOps_valid ? _GEN_287 : 64'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
+  assign toCacheLookup_request_cacheLine = toCacheLookup_ready & ~branchOps_valid ? _GEN_293 : 512'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
+  assign toCacheLookup_request_response = toCacheLookup_ready & ~branchOps_valid ? _GEN_291 : 2'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
+  assign toCacheLookup_request_requestType = toCacheLookup_ready & ~branchOps_valid ? _GEN_288 : 2'h0; // @[arbiter.scala 184:72 utils.scala 48:41]
   assign replayRequest_ready = ~replayRequestBuffer_valid; // @[arbiter.scala 95:26]
   assign coherencyRequest_ready = ~coherencyRequestBuffer_valid; // @[arbiter.scala 91:29]
   assign writeCommit_ready = 3'h0 == operationState ? 1'h0 : 3'h1 == operationState; // @[arbiter.scala 121:25 56:21]
@@ -35587,7 +35595,7 @@ module arbiter(
   always @(posedge clock) begin
     if (reset) begin // @[arbiter.scala 59:34]
       speculativeBuffer_valid <= 1'h0; // @[arbiter.scala 59:34]
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 184:72]
+    end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 184:72]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 185:31]
         speculativeBuffer_valid <= _GEN_172;
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 209:46]
@@ -35645,7 +35653,7 @@ module arbiter(
       inorderBuffer_valid <= 1'h0; // @[arbiter.scala 61:30]
     end else if (toPeripheral_ready & _T_34 & inorderBuffer_valid) begin // @[arbiter.scala 274:112]
       inorderBuffer_valid <= 1'h0; // @[arbiter.scala 275:25]
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 184:72]
+    end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 184:72]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 185:31]
         inorderBuffer_valid <= _GEN_155;
       end else begin
@@ -35823,7 +35831,7 @@ module arbiter(
     end
     if (reset) begin // @[arbiter.scala 65:39]
       coherencyRequestBuffer_valid <= 1'h0; // @[arbiter.scala 65:39]
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 184:72]
+    end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 184:72]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 185:31]
         coherencyRequestBuffer_valid <= _GEN_207;
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 209:46]
@@ -35846,7 +35854,7 @@ module arbiter(
     end
     if (reset) begin // @[arbiter.scala 67:36]
       replayRequestBuffer_valid <= 1'h0; // @[arbiter.scala 67:36]
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 184:72]
+    end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 184:72]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 185:31]
         replayRequestBuffer_valid <= _GEN_178;
       end else if (coherencyRequestBuffer_valid) begin // @[arbiter.scala 209:46]
@@ -35933,7 +35941,7 @@ module arbiter(
     end
     if (reset) begin // @[arbiter.scala 183:37]
       rAtmoicsWritePending <= 1'h0; // @[arbiter.scala 183:37]
-    end else if (toCacheLookup_ready) begin // @[arbiter.scala 184:72]
+    end else if (toCacheLookup_ready & ~branchOps_valid) begin // @[arbiter.scala 184:72]
       if (rAtmoicsWritePending) begin // @[arbiter.scala 185:31]
         if (~toCacheLookup_holdInOrder & ~(operationWires_isPeriRead | operationWires_isPeriWrite)) begin // @[arbiter.scala 186:101]
           rAtmoicsWritePending <= 1'h0; // @[arbiter.scala 200:30]
@@ -43528,6 +43536,7 @@ module replayUnit(
   wire  writeBackFIFO_read_data_valid; // @[replayUnit.scala 84:29]
   wire [31:0] writeBackFIFO_read_data_address; // @[replayUnit.scala 84:29]
   wire [511:0] writeBackFIFO_read_data_data; // @[replayUnit.scala 84:29]
+  wire  _T_1 = ~branchOps_valid; // @[replayUnit.scala 62:8]
   fifoWithBranchOpsI_1 requestWaitFIFO ( // @[replayUnit.scala 54:31]
     .clock(requestWaitFIFO_clock),
     .reset(requestWaitFIFO_reset),
@@ -43596,7 +43605,7 @@ module replayUnit(
     .read_data_address(writeBackFIFO_read_data_address),
     .read_data_data(writeBackFIFO_read_data_data)
   );
-  assign requestIn_ready = requestWaitFIFO_write_ready; // @[replayUnit.scala 47:19 62:48 63:33]
+  assign requestIn_ready = ~branchOps_valid & requestWaitFIFO_write_ready; // @[replayUnit.scala 47:19 62:48 63:33]
   assign requestOut_request_valid = requestWaitFIFO_read_data_valid; // @[replayUnit.scala 67:29]
   assign requestOut_request_address = requestWaitFIFO_read_data_address; // @[replayUnit.scala 67:29]
   assign requestOut_request_instruction = requestWaitFIFO_read_data_instruction; // @[replayUnit.scala 67:29]
@@ -43605,7 +43614,7 @@ module replayUnit(
   assign requestOut_request_prfDest = requestWaitFIFO_read_data_prfDest; // @[replayUnit.scala 67:29]
   assign requestOut_request_writeEn = requestWaitFIFO_read_data_writeEn; // @[replayUnit.scala 67:29]
   assign requestOut_request_writeData = requestWaitFIFO_read_data_writeData; // @[replayUnit.scala 67:29]
-  assign responseIn_ready = responseWaitFIFO_write_ready; // @[replayUnit.scala 48:20 76:48 77:34]
+  assign responseIn_ready = _T_1 & responseWaitFIFO_write_ready; // @[replayUnit.scala 48:20 76:48 77:34]
   assign responseOut_request_valid = responseWaitFIFO_read_data_valid; // @[replayUnit.scala 81:30]
   assign responseOut_request_address = responseWaitFIFO_read_data_address; // @[replayUnit.scala 81:30]
   assign responseOut_request_instruction = responseWaitFIFO_read_data_instruction; // @[replayUnit.scala 81:30]
@@ -43616,7 +43625,7 @@ module replayUnit(
   assign responseOut_request_writeData = responseWaitFIFO_read_data_writeData; // @[replayUnit.scala 81:30]
   assign responseOut_request_cacheLine = responseWaitFIFO_read_data_cacheLine; // @[replayUnit.scala 81:30]
   assign responseOut_request_response = responseWaitFIFO_read_data_response; // @[replayUnit.scala 81:30]
-  assign writeBackIn_ready = writeBackFIFO_write_ready; // @[replayUnit.scala 49:21 91:48 92:31]
+  assign writeBackIn_ready = _T_1 & writeBackFIFO_write_ready; // @[replayUnit.scala 49:21 91:48 92:31]
   assign writeBackOut_request_valid = writeBackFIFO_read_data_valid; // @[replayUnit.scala 96:27]
   assign writeBackOut_request_address = writeBackFIFO_read_data_address; // @[replayUnit.scala 96:27]
   assign writeBackOut_request_data = writeBackFIFO_read_data_data; // @[replayUnit.scala 96:27]
@@ -43631,7 +43640,7 @@ module replayUnit(
   assign requestWaitFIFO_write_data_prfDest = requestIn_request_prfDest; // @[replayUnit.scala 66:30]
   assign requestWaitFIFO_write_data_writeEn = requestIn_request_writeEn; // @[replayUnit.scala 66:30]
   assign requestWaitFIFO_write_data_writeData = requestIn_request_writeData; // @[replayUnit.scala 66:30]
-  assign requestWaitFIFO_read_ready = requestOut_ready; // @[replayUnit.scala 61:30 62:48 64:32]
+  assign requestWaitFIFO_read_ready = ~branchOps_valid & requestOut_ready; // @[replayUnit.scala 61:30 62:48 64:32]
   assign requestWaitFIFO_branchOps_valid = branchOps_valid; // @[replayUnit.scala 58:31]
   assign requestWaitFIFO_branchOps_branchMask = branchOps_branchMask; // @[replayUnit.scala 58:31]
   assign requestWaitFIFO_branchOps_passed = branchOps_passed; // @[replayUnit.scala 58:31]
@@ -43647,7 +43656,7 @@ module replayUnit(
   assign responseWaitFIFO_write_data_writeData = responseIn_request_writeData; // @[replayUnit.scala 80:31]
   assign responseWaitFIFO_write_data_cacheLine = responseIn_request_cacheLine; // @[replayUnit.scala 80:31]
   assign responseWaitFIFO_write_data_response = responseIn_request_response; // @[replayUnit.scala 80:31]
-  assign responseWaitFIFO_read_ready = responseOut_ready; // @[replayUnit.scala 75:31 76:48 78:33]
+  assign responseWaitFIFO_read_ready = _T_1 & responseOut_ready; // @[replayUnit.scala 75:31 76:48 78:33]
   assign responseWaitFIFO_branchOps_valid = branchOps_valid; // @[replayUnit.scala 82:30]
   assign responseWaitFIFO_branchOps_branchMask = branchOps_branchMask; // @[replayUnit.scala 82:30]
   assign responseWaitFIFO_branchOps_passed = branchOps_passed; // @[replayUnit.scala 82:30]
@@ -43656,7 +43665,7 @@ module replayUnit(
   assign writeBackFIFO_write_data_valid = writeBackIn_request_valid; // @[replayUnit.scala 95:28]
   assign writeBackFIFO_write_data_address = writeBackIn_request_address; // @[replayUnit.scala 95:28]
   assign writeBackFIFO_write_data_data = writeBackIn_request_data; // @[replayUnit.scala 95:28]
-  assign writeBackFIFO_read_ready = writeBackOut_ready; // @[replayUnit.scala 90:28 91:48 93:30]
+  assign writeBackFIFO_read_ready = _T_1 & writeBackOut_ready; // @[replayUnit.scala 90:28 91:48 93:30]
 endmodule
 module fifoBaseModule_1(
   input         clock,
