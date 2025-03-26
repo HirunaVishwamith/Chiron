@@ -42742,8 +42742,8 @@ module ACEUnit(
   reg [511:0] readBuffer_cacheLine_cacheLine; // @[ACEUnit.scala 108:28]
   reg [1:0] readBuffer_cacheLine_response; // @[ACEUnit.scala 108:28]
   wire  _readRequest_ready_T = ~readBuffer_valid; // @[ACEUnit.scala 109:24]
-  wire  _GEN_0 = readRequest_request_valid & readRequest_request_branch_valid ? readRequest_request_valid :
-    readBuffer_valid; // @[ACEUnit.scala 110:70 111:16 108:28]
+  wire  _GEN_0 = readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready ?
+    readRequest_request_valid : readBuffer_valid; // @[ACEUnit.scala 110:91 111:16 108:28]
   reg  responseBuffer_valid; // @[ACEUnit.scala 113:31]
   reg [31:0] responseBuffer_address; // @[ACEUnit.scala 113:31]
   reg [31:0] responseBuffer_core_instruction; // @[ACEUnit.scala 113:31]
@@ -42776,7 +42776,7 @@ module ACEUnit(
   wire [63:0] writeChunks__5 = writeBuffer_data[383:320]; // @[ACEUnit.scala 172:25]
   wire [63:0] writeChunks__6 = writeBuffer_data[447:384]; // @[ACEUnit.scala 172:25]
   wire [63:0] writeChunks__7 = writeBuffer_data[511:448]; // @[ACEUnit.scala 172:25]
-  wire  _T_3 = bus_WREADY & bus_AWREADY; // @[ACEUnit.scala 174:23]
+  wire  _T_4 = bus_WREADY & bus_AWREADY; // @[ACEUnit.scala 174:23]
   wire [63:0] _GEN_14 = 3'h1 == writeCounter_count ? writeChunks__1 : writeChunks__0; // @[ACEUnit.scala 177:{17,17}]
   wire [63:0] _GEN_15 = 3'h2 == writeCounter_count ? writeChunks__2 : _GEN_14; // @[ACEUnit.scala 177:{17,17}]
   wire [63:0] _GEN_16 = 3'h3 == writeCounter_count ? writeChunks__3 : _GEN_15; // @[ACEUnit.scala 177:{17,17}]
@@ -42825,7 +42825,7 @@ module ACEUnit(
   reg [63:0] readDataVec_6; // @[ACEUnit.scala 228:28]
   reg [63:0] readDataVec_7; // @[ACEUnit.scala 228:28]
   reg  readResponseValid; // @[ACEUnit.scala 229:34]
-  wire  _T_8 = ~ACEMSHR_isEmpty; // @[ACEUnit.scala 237:12]
+  wire  _T_9 = ~ACEMSHR_isEmpty; // @[ACEUnit.scala 237:12]
   wire [63:0] _GEN_121 = 3'h0 == readCounter_count ? bus_RDATA : readDataVec_0; // @[ACEUnit.scala 228:28 249:{40,40}]
   wire [63:0] _GEN_122 = 3'h1 == readCounter_count ? bus_RDATA : readDataVec_1; // @[ACEUnit.scala 228:28 249:{40,40}]
   wire [63:0] _GEN_123 = 3'h2 == readCounter_count ? bus_RDATA : readDataVec_2; // @[ACEUnit.scala 228:28 249:{40,40}]
@@ -42933,7 +42933,7 @@ module ACEUnit(
     .count(coherentCounter_count),
     .incrm(coherentCounter_incrm)
   );
-  assign readRequest_ready = ~readBuffer_valid | readBuffer_valid & readBuffer_branch_valid; // @[ACEUnit.scala 109:42]
+  assign readRequest_ready = ~readBuffer_valid | readBuffer_valid & ~readBuffer_branch_valid; // @[ACEUnit.scala 109:42]
   assign readResponse_request_valid = responseBuffer_valid; // @[ACEUnit.scala 114:24]
   assign readResponse_request_address = responseBuffer_address; // @[ACEUnit.scala 114:24]
   assign readResponse_request_core_instruction = responseBuffer_core_instruction; // @[ACEUnit.scala 114:24]
@@ -42981,13 +42981,13 @@ module ACEUnit(
   assign ACEMSHR_write_data_writeData_data = ~readACERequestState ? 64'h0 : _GEN_76; // @[ACEUnit.scala 192:31 utils.scala 51:41]
   assign ACEMSHR_write_data_cacheLine_cacheLine = ~readACERequestState ? 512'h0 : _GEN_74; // @[ACEUnit.scala 192:31 utils.scala 51:41]
   assign ACEMSHR_write_data_cacheLine_response = ~readACERequestState ? 2'h0 : _GEN_73; // @[ACEUnit.scala 192:31 utils.scala 51:41]
-  assign ACEMSHR_read_ready = 2'h0 == readACEResponseState & _T_8; // @[ACEUnit.scala 121:22 233:32]
+  assign ACEMSHR_read_ready = 2'h0 == readACEResponseState & _T_9; // @[ACEUnit.scala 121:22 233:32]
   assign ACEMSHR_branchOps_valid = branchOps_valid; // @[ACEUnit.scala 122:21]
   assign ACEMSHR_branchOps_branchMask = branchOps_branchMask; // @[ACEUnit.scala 122:21]
   assign ACEMSHR_branchOps_passed = branchOps_passed; // @[ACEUnit.scala 122:21]
   assign writeCounter_clock = clock;
   assign writeCounter_reset = 2'h0 == writeACEState; // @[ACEUnit.scala 145:25]
-  assign writeCounter_incrm = 2'h0 == writeACEState ? 1'h0 : 2'h1 == writeACEState & _T_3; // @[ACEUnit.scala 143:22 145:25]
+  assign writeCounter_incrm = 2'h0 == writeACEState ? 1'h0 : 2'h1 == writeACEState & _T_4; // @[ACEUnit.scala 143:22 145:25]
   assign readCounter_clock = clock;
   assign readCounter_reset = 2'h0 == readACEResponseState; // @[ACEUnit.scala 233:32]
   assign readCounter_incrm = 2'h0 == readACEResponseState ? 1'h0 : 2'h1 == readACEResponseState & bus_RVALID; // @[ACEUnit.scala 231:21 233:32]
@@ -43010,52 +43010,52 @@ module ACEUnit(
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_address <= 32'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_address <= readRequest_request_address; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_core_instruction <= 32'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_core_instruction <= readRequest_request_core_instruction; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_core_robAddr <= 4'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_core_robAddr <= readRequest_request_core_robAddr; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_core_prfDest <= 6'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_core_prfDest <= readRequest_request_core_prfDest; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_branch_valid <= 1'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_branch_valid <= readRequest_request_branch_valid; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_branch_mask <= 5'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_branch_mask <= readRequest_request_branch_mask; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_writeData_valid <= 1'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_writeData_valid <= readRequest_request_writeData_valid; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_writeData_data <= 64'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_writeData_data <= readRequest_request_writeData_data; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_cacheLine_cacheLine <= 512'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_cacheLine_cacheLine <= readRequest_request_cacheLine_cacheLine; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 108:28]
       readBuffer_cacheLine_response <= 2'h0; // @[ACEUnit.scala 108:28]
-    end else if (readRequest_request_valid & readRequest_request_branch_valid) begin // @[ACEUnit.scala 110:70]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 110:91]
       readBuffer_cacheLine_response <= readRequest_request_cacheLine_response; // @[ACEUnit.scala 111:16]
     end
     if (reset) begin // @[ACEUnit.scala 113:31]
@@ -43236,7 +43236,7 @@ module ACEUnit(
     if (reset) begin // @[ACEUnit.scala 227:37]
       readACEResponseState <= 2'h0; // @[ACEUnit.scala 227:37]
     end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 233:32]
-      if (ACEMSHR_read_data_valid & _T_8) begin // @[ACEUnit.scala 243:34]
+      if (ACEMSHR_read_data_valid & _T_9) begin // @[ACEUnit.scala 243:34]
         readACEResponseState <= 2'h1;
       end else begin
         readACEResponseState <= 2'h0;
