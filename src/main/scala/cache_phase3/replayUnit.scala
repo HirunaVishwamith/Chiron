@@ -44,34 +44,56 @@ class replayUnit extends Module{
   val branchOps = IO(new branchOps)
   val fenceReady = IO(Output(Bool()))
 
+  requestIn.ready := false.B
+  responseIn.ready := false.B
+  writeBackIn.ready := false.B
+  
+  //!Debug only
+  val isPauseForBoolean = WireDefault(pauseForBranch.B)
+  
   val requestWaitFIFO = Module(new fifoWithBranchOpsI(
     depth = schedulerDepth,
     traitType = new requestWithDataWire
-  ))
-  requestWaitFIFO.branchOps <> branchOps
+    ))
+    requestWaitFIFO.branchOps <> branchOps
+    
+    //! Debug only
+  requestWaitFIFO.read.ready := false.B
+  when(!(isPauseForBoolean && branchOps.valid)){
+    requestWaitFIFO.write.ready <> requestIn.ready
+    requestWaitFIFO.read.ready <> requestOut.ready
+  }
   requestWaitFIFO.write.data <> requestIn.request
-  requestWaitFIFO.write.ready <> requestIn.ready
   requestWaitFIFO.read.data <> requestOut.request
-  requestWaitFIFO.read.ready <> requestOut.ready
 
   val responseWaitFIFO = Module(new fifoWithBranchOpsI(
     depth = schedulerDepth,
     traitType = new replayWithCacheLineWire
   ))
-  responseWaitFIFO.branchOps <> branchOps
+
+  //! Debug only
+  responseWaitFIFO.read.ready := false.B
+  when(!(isPauseForBoolean && branchOps.valid)){
+    responseWaitFIFO.write.ready <> responseIn.ready
+    responseWaitFIFO.read.ready <> responseOut.ready
+  }
   responseWaitFIFO.write.data <> responseIn.request
-  responseWaitFIFO.write.ready <> responseIn.ready
   responseWaitFIFO.read.data <> responseOut.request
-  responseWaitFIFO.read.ready <> responseOut.ready
+  responseWaitFIFO.branchOps <> branchOps
 
   val writeBackFIFO = Module(new fifoBaseModule(
     depth = schedulerDepth,
     traitType = new writeBackWire
   ))
-  writeBackFIFO.write.ready <> writeBackIn.ready
+
+  //! Debug only
+  writeBackFIFO.read.ready := false.B
+  when(!(isPauseForBoolean && branchOps.valid)){
+    writeBackFIFO.write.ready <> writeBackIn.ready
+    writeBackFIFO.read.ready <> writeBackOut.ready
+  }
   writeBackFIFO.write.data <> writeBackIn.request
   writeBackFIFO.read.data <> writeBackOut.request
-  writeBackFIFO.read.ready <> writeBackOut.ready
 
   fenceReady := requestWaitFIFO.isEmpty && responseWaitFIFO.isEmpty
 }

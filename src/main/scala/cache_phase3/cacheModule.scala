@@ -27,6 +27,8 @@ class CacheModule (
   val writeCommit = IO(new composableInterface)
   val branchOps = IO(new branchOps)
   val loadCommit = IO(new loadCommit)
+  //!Debug only
+  val debug = IO(new debug)
 
   canAllocate := false.B  
   
@@ -89,6 +91,8 @@ class CacheModule (
   cacheLookup.branchOps <> branchOps
 
   cacheLookup.request <> arbiter.toCacheLookup
+  //!Debug only
+  debug := cacheLookup.debug 
   
   //ReplayUnit
   replayUnit.branchOps <> branchOps

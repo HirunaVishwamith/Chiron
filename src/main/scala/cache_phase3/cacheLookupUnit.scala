@@ -34,6 +34,8 @@ class cacheLookupUnit extends Module{
     val request = Output(new responseOutWithAddrWire)
   })
   val branchOps = IO(new branchOps)
+  //! Debug only
+  val debug = IO(new debug)
 
   request.ready := false.B
   request.holdInOrder := false.B
@@ -521,4 +523,13 @@ class cacheLookupUnit extends Module{
       }
     }
   }
+  //! Debug only
+  debug.request := readBuffer
+  debug.isServicing := operationValid
+  debug.rdAddr := tagBRAM.rdAddr
+  debug.tagData := tagBRAM.rdData
+  debug.dataBRAM0 := dataBRAMVec(0).rdData
+  debug.dataBRAM1 := dataBRAMVec(1).rdData
+  debug.dataBRAM2 := dataBRAMVec(2).rdData
+  debug.dataBRAM3 := dataBRAMVec(3).rdData
 }

@@ -36,4 +36,7 @@ object constants{
   val peripheral_WIDTH : Int = math.pow(2, peripheral_SIZE).toInt * 8//32      //64
 
   val schedulerDepth : Int = 16
+
+  //!Debug only
+  val pauseForBranch : Boolean = false
 }

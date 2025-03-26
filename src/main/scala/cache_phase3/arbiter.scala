@@ -43,6 +43,9 @@ class arbiter extends Module {
   val branchOps = IO(new branchOps)
   val responseOut = IO(Flipped(new responseOut))
   val fenceReady = IO(Output(Bool()))
+
+  //!Debug only
+  val isPauseForBoolean = WireDefault(pauseForBranch.B)
   
   request.speculativeReady := false.B
   request.inorderReady := false.B
@@ -178,7 +181,7 @@ class arbiter extends Module {
   //*    3.  Inorder
   //*    4.  Speculative
   val rAtmoicsWritePending = RegInit(false.B)
-  when(toCacheLookup.ready && !branchOps.valid) {
+  when(toCacheLookup.ready && !(isPauseForBoolean && branchOps.valid)) {
     when(rAtmoicsWritePending){
       when(!toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
         toCacheLookup.request.valid := inorderBuffer.valid && inorderBuffer.branchInvalid

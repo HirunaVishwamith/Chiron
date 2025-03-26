@@ -130,3 +130,15 @@ class loadCommit extends Bundle{
 	val valid = Output(Bool())
 	val state = Output(Bool())
 }
+
+class debug extends Bundle{
+	//TODO : Replace the cachelookup with branchInvalid, once all signals added
+	val request = Output(new cacheLookupWire)
+	val isServicing = Output(Bool())
+	val rdAddr = Output(UInt(8.W))
+	val tagData = Output(UInt(128.W))
+	val dataBRAM0 = Output(UInt((lineSize*8).W))
+	val dataBRAM1 = Output(UInt((lineSize*8).W))
+	val dataBRAM2 = Output(UInt((lineSize*8).W))
+	val dataBRAM3 = Output(UInt((lineSize*8).W))
+}
