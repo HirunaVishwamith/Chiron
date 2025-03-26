@@ -197,7 +197,7 @@ class cacheLookupUnit extends Module{
     requestType := request.requestType
   }
   when(operationValid){
-    readBuffer.valid := false.B
+    readBuffer.valid := operationValid
     //Setting control wires for request types
     val isReadWire = WireDefault(readBuffer.core.instruction(6,0) === "b0000011".U)
     val isWriteWire = WireDefault(readBuffer.core.instruction(6,0) === "b0100011".U)
@@ -481,9 +481,8 @@ class cacheLookupUnit extends Module{
     
     //Last Miss Memory Record
     when(toLastMissRecordRegister && readBuffer.branch.valid){  
-      lastMissRecordRegister.valid := toLastMissRecordRegister
-      lastMissRecordRegister.address := readBuffer.address
-      lastMissRecordRegister.core := readBuffer.core
+      lastMissRecordRegister := readBuffer
+
     }
 
     //Reservation register

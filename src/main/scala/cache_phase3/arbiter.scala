@@ -67,8 +67,8 @@ class arbiter extends Module {
   val replayRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
 
   request.speculativeReady := !speculativeBuffer.valid || (speculativeBuffer.valid && !speculativeBuffer.branch.valid)
-  request.inorderReady := !operationBuffer.valid || (operationBuffer.valid && !operationBuffer.branch.valid) &&
-                            !inorderBuffer.valid || (inorderBuffer.valid && !inorderBuffer.branch.valid)
+  request.inorderReady := (!operationBuffer.valid || (operationBuffer.valid && !operationBuffer.branch.valid)) &&
+                            (!inorderBuffer.valid || (inorderBuffer.valid && !inorderBuffer.branch.valid))
 
   //---------------------Request Enqueue---------------------//
   when(request.request.valid && request.request.branch.valid){
