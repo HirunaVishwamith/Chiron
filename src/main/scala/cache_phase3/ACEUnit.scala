@@ -130,7 +130,9 @@ class ACEUnit(
   //WriteRequests
   val writeBuffer = RegInit(0.U.asTypeOf(new writeBackWire))
   writeRequest.ready := !writeBuffer.valid
-  writeBuffer := writeRequest.request
+  when(!writeBuffer.valid){
+    writeBuffer := writeRequest.request
+  }
 
 
   //CoherentRequests
@@ -142,7 +144,7 @@ class ACEUnit(
   coherencyResponseBuffer := Mux(!coherencyResponseBuffer.valid, coherencyResponse.request, coherencyResponseBuffer)
 
   //-----------------------AXI Write-------------------------------//
-  val writeIdleState :: writeRequestState :: writeResponseState :: Nil = Enum(3)
+  val writeIdleState :: writeRequestState :: writeDataState :: writeResponseState :: Nil = Enum(4)
 
   val writeACEState = RegInit(writeIdleState)
   val writeCounter = Module(new moduleCounter(length))
@@ -169,6 +171,10 @@ class ACEUnit(
       bus.AWDOMAIN := "b10".U
       bus.AWSNOOP := "b011".U
 
+      writeACEState := Mux(bus.AWREADY, writeDataState, writeRequestState)
+    }
+    is(writeDataState){
+
       bus.WVALID := true.B
       bus.WSTRB := Fill(busWidth/8, 1.U)
       bus.WLAST := writeCounter.count === length.U
@@ -177,11 +183,11 @@ class ACEUnit(
       val writeChunks = VecInit(Seq.tabulate(numSlices)(i => 
         writeBuffer.data((i + 1) * busWidth - 1, i * busWidth)
       ))
-      when(bus.WREADY && bus.AWREADY){
+      when(bus.WREADY){
         writeCounter.incrm := true.B 
       }
       bus.WDATA := writeChunks(writeCounter.count)
-      writeACEState := Mux(bus.WLAST && bus.WREADY && bus.AWREADY, writeResponseState, writeRequestState)
+      writeACEState := Mux(bus.WLAST && bus.WREADY, writeResponseState, writeDataState)
     }
     is(writeResponseState){
       bus.BREADY := true.B

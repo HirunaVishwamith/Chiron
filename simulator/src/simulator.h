@@ -12,7 +12,7 @@
 #include <typeinfo>
 #include <sstream>
 
-#define STEP_TIMEOUT 100000
+#define STEP_TIMEOUT 1000
 
 using namespace std;
 
