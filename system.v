@@ -38903,6 +38903,8 @@ module cacheLookupUnit(
   wire [22:0] _GEN_707 = 2'h2 == updatingSet ? tagChunks_2 : _GEN_706; // @[Cat.scala 33:{92,92}]
   wire [22:0] _GEN_708 = 2'h3 == updatingSet ? tagChunks_3 : _GEN_707; // @[Cat.scala 33:{92,92}]
   wire [35:0] _writeBackBuffer_address_T_3 = {_GEN_708,readBuffer_address[12:6],6'h0}; // @[Cat.scala 33:92]
+  wire [511:0] _GEN_710 = 2'h1 == updatingSet ? dataBRAMVec_1_rdData : dataBRAMVec_0_rdData; // @[cacheLookupUnit.scala 491:{28,28}]
+  wire [511:0] _GEN_711 = 2'h2 == updatingSet ? dataBRAMVec_2_rdData : _GEN_710; // @[cacheLookupUnit.scala 491:{28,28}]
   wire  toWriteBackValidWire = operationValid & _GEN_598; // @[cacheLookupUnit.scala 203:23]
   wire [35:0] _GEN_714 = toWriteBackValidWire ? _writeBackBuffer_address_T_3 : {{4'd0}, writeBackBuffer_address}; // @[cacheLookupUnit.scala 488:31 490:31 174:32]
   wire  toLastMissRecordRegister = operationValid & _GEN_592; // @[cacheLookupUnit.scala 203:23]
@@ -39467,10 +39469,10 @@ module cacheLookupUnit(
       writeBackBuffer_data <= 512'h0; // @[cacheLookupUnit.scala 174:32]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 203:23]
       if (toWriteBackValidWire) begin // @[cacheLookupUnit.scala 488:31]
-        if (2'h3 == hitTagWire) begin // @[cacheLookupUnit.scala 250:31]
-          writeBackBuffer_data <= dataBRAMVec_3_rdData; // @[cacheLookupUnit.scala 250:31]
+        if (2'h3 == updatingSet) begin // @[cacheLookupUnit.scala 491:28]
+          writeBackBuffer_data <= dataBRAMVec_3_rdData; // @[cacheLookupUnit.scala 491:28]
         end else begin
-          writeBackBuffer_data <= _GEN_101;
+          writeBackBuffer_data <= _GEN_711;
         end
       end
     end

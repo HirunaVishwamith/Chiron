@@ -12914,7 +12914,7 @@ circuit system :
         node writeBackBuffer_address_hi = cat(tagChunks[_writeBackBuffer_address_T_1], _writeBackBuffer_address_T_2) @[Cat.scala 33:92]
         node _writeBackBuffer_address_T_3 = cat(writeBackBuffer_address_hi, UInt<6>("h0")) @[Cat.scala 33:92]
         writeBackBuffer.address <= _writeBackBuffer_address_T_3 @[cacheLookupUnit.scala 490:31]
-        node _writeBackBuffer_data_T = or(hitTagWire, UInt<2>("h0"))
+        node _writeBackBuffer_data_T = or(updatingSet, UInt<2>("h0"))
         node _writeBackBuffer_data_T_1 = bits(_writeBackBuffer_data_T, 1, 0)
         writeBackBuffer.data <= dataBRAMVec[_writeBackBuffer_data_T_1].rdData @[cacheLookupUnit.scala 491:28]
       node _T_130 = and(toLastMissRecordRegister, readBuffer.branch.valid) @[cacheLookupUnit.scala 495:35]

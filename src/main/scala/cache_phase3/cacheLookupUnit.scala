@@ -488,7 +488,7 @@ class cacheLookupUnit extends Module{
     when(toWriteBackValidWire){
       writeBackBuffer.valid := toWriteBackValidWire
       writeBackBuffer.address := Cat(tagChunks(updatingSet), readBuffer.address(addrEnd, addrBeg), 0.U(log2Ceil(lineSize).W))
-      writeBackBuffer.data := dataBRAMVec(hitTagWire).rdData
+      writeBackBuffer.data := dataBRAMVec(updatingSet).rdData
     }
     
     //Last Miss Memory Record

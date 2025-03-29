@@ -20,11 +20,11 @@ public:
     }
     
     uint32_t getCacheLineNumber() const {
-        return ((address >> 8) & 0x7F);
+        return ((address >> 6) & 0x7F);
     }
     
     uint32_t getWayNumber() const {
-        return ((address >> 6) & 0x3);
+        return ((address >> 13) & 0x3);
     }
     
     uint32_t getInCacheLine() const {
@@ -83,10 +83,10 @@ void decodeTag(const std::string& hexInput) {
     // Extract the tag bits
     std::string tagSection = binaryString.substr(startPosition, TAG_BITS);
     uint32_t tagValue = std::bitset<19>(binaryString.substr(binaryString.length() - 19, 19)).to_ulong();
-    uint32_t validBit = tagSection[19] - '0';
-    uint32_t modifyBit = tagSection[20] - '0';
-    uint32_t sharedBit = tagSection[21] - '0';
-    uint32_t plruBit = tagSection[22] - '0';
+    uint32_t validBit = tagSection[3] - '0';
+    uint32_t modifyBit = tagSection[2] - '0';
+    uint32_t sharedBit = tagSection[1] - '0';
+    uint32_t plruBit = tagSection[0] - '0';
 
     std::cout << "Tag" << " = " << std::hex << stoi(tagSection, 0, 2) << std::endl;
 
