@@ -54,3 +54,4 @@ bintoh*
 prog.h
 !vivado.tcl
 .stamp.*
+run.log
