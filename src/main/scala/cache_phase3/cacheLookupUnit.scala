@@ -263,6 +263,9 @@ class cacheLookupUnit extends Module{
     val flippedPLRUSetWire = WireDefault(VecInit(PLRUSetWire.map(bit => ~bit)))
     val replacingset = PriorityEncoder(flippedPLRUSetWire)
 
+    val isUpdateValidWire = WireDefault(tagChunks(replacingset)(tagSize))
+    val isUpdateDirtyWire = WireDefault(tagChunks(replacingset)(tagSize + 1))
+
     //read 
     when(isReadWire || isLRWire || isAtmoicReadWire){
       when(!isDataMissWire){//Hit
@@ -393,7 +396,7 @@ class cacheLookupUnit extends Module{
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
         toReservationRegisterWire := isLRWire
-        toWriteBackValidWire := isDirtyWire && isReplayValidWire && isDataMissWire 
+        toWriteBackValidWire := (isUpdateDirtyWire && isUpdateValidWire) && isReplayValidWire && isDataMissWire 
         dataBRAMUpdateWire := isDataMissWire && isReplayValidWire
       } .otherwise {
         toReplayValidWire := true.B
@@ -406,7 +409,7 @@ class cacheLookupUnit extends Module{
     }
     when(isWriteWire || isAtmoicWriteWire){
       when(isReplayValidWire || (!isPermissionMiss && !isDataMissWire)){
-        toWriteBackValidWire := isDirtyWire && isReplayValidWire && isDataMissWire 
+        toWriteBackValidWire := (isUpdateDirtyWire && isUpdateValidWire) && isReplayValidWire && isDataMissWire 
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
       } .otherwise {

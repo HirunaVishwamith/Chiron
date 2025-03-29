@@ -1,38 +1,38 @@
 [*]
 [*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
-[*] Mon Mar 24 10:04:23 2025
+[*] Sat Mar 29 08:12:47 2025
 [*]
 [dumpfile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/system_trace.vcd"
-[dumpfile_mtime] "Mon Mar 24 10:00:38 2025"
-[dumpfile_size] 2524814505
+[dumpfile_mtime] "Sat Mar 29 04:44:38 2025"
+[dumpfile_size] 2502473431
 [savefile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/filter.gtkw"
-[timestart] 4274021
+[timestart] 4278404
 [size] 1920 998
-[pos] -1 -1
-*-4.200000 4274050 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -961 -1
+*-3.600000 4278440 4273060 4278480 957480 4273350 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.system.
 [treeopen] TOP.system.core0.
 [treeopen] TOP.system.core0.memAccess.
-[sst_width] 209
-[signals_width] 368
+[sst_width] 239
+[signals_width] 533
 [sst_expanded] 1
 [sst_vpaned_height] 293
 @28
 TOP.clock
+@22
+TOP.registersOut_9[63:0]
 @800200
 -Scheduler
-@c00200
 -RequestIn
 @28
 TOP.system.core0.memAccess.scheduler_requestIn_valid
 @22
-TOP.system.core0.memAccess.scheduler_requestIn_instruction[31:0]
+TOP.system.core0.memAccess.scheduler.requestIn_core_instruction[31:0]
 TOP.system.core0.memAccess.scheduler_requestIn_address[31:0]
-TOP.system.core0.memAccess.scheduler_requestIn_branchMask[4:0]
-TOP.system.core0.memAccess.scheduler_requestIn_prfDest[5:0]
-TOP.system.core0.memAccess.scheduler_requestIn_robAddr[3:0]
-@1401200
+TOP.system.core0.memAccess.scheduler.requestIn_core_prfDest[5:0]
+TOP.system.core0.memAccess.scheduler.requestIn_core_robAddr[3:0]
+@1000200
 -RequestIn
 @c00200
 -SpeculativeQueue
@@ -40,11 +40,7 @@ TOP.system.core0.memAccess.scheduler_requestIn_robAddr[3:0]
 TOP.system.core0.memAccess.scheduler.speculativeQueue_write_ready
 TOP.system.core0.memAccess.scheduler.speculativeQueue_write_data_valid
 @22
-TOP.system.core0.memAccess.scheduler.speculativeQueue_write_data_instruction[31:0]
 TOP.system.core0.memAccess.scheduler.speculativeQueue_write_data_address[31:0]
-TOP.system.core0.memAccess.scheduler.speculativeQueue_write_data_branchMask[4:0]
-TOP.system.core0.memAccess.scheduler.speculativeQueue_write_data_prfDest[5:0]
-TOP.system.core0.memAccess.scheduler.speculativeQueue_write_data_robAddr[3:0]
 @1401200
 -SpeculativeQueue
 @1000200
@@ -57,18 +53,7 @@ TOP.system.core0.memAccess.scheduler.speculativeQueue_write_data_robAddr[3:0]
 TOP.system.core0.memAccess.arbiter.replayRequest_request_valid
 TOP.system.core0.memAccess.arbiter.replayRequest_ready
 @22
-TOP.system.core0.memAccess.arbiter.replayRequest_request_instruction[31:0]
 TOP.system.core0.memAccess.arbiter.replayRequest_request_address[31:0]
-TOP.system.core0.memAccess.arbiter.replayRequest_request_branchMask[4:0]
-TOP.system.core0.memAccess.arbiter.replayRequest_request_cacheLine[511:0]
-TOP.system.core0.memAccess.arbiter.replayRequest_request_prfDest[5:0]
-@28
-TOP.system.core0.memAccess.arbiter.replayRequest_request_response[1:0]
-@22
-TOP.system.core0.memAccess.arbiter.replayRequest_request_robAddr[3:0]
-TOP.system.core0.memAccess.arbiter.replayRequest_request_writeData[63:0]
-@28
-TOP.system.core0.memAccess.arbiter.replayRequest_request_writeEn
 @1401200
 -Replay
 @1000200
@@ -79,37 +64,73 @@ TOP.system.core0.memAccess.arbiter.replayRequest_request_writeEn
 @28
 TOP.system.core0.memAccess.cacheLookup.request_request_valid
 @22
-TOP.system.core0.memAccess.cacheLookup.request_request_instruction[31:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_core_instruction[31:0]
 TOP.system.core0.memAccess.cacheLookup.request_request_address[31:0]
-TOP.system.core0.memAccess.cacheLookup.request_request_branchMask[4:0]
-TOP.system.core0.memAccess.cacheLookup.request_request_cacheLine[511:0]
-TOP.system.core0.memAccess.cacheLookup.request_request_prfDest[5:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_core_prfDest[5:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_core_robAddr[3:0]
 @28
-TOP.system.core0.memAccess.cacheLookup.request_request_response[1:0]
+TOP.system.core0.memAccess.cacheLookup.request_requestType[1:0]
 @22
-TOP.system.core0.memAccess.cacheLookup.request_request_robAddr[3:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_cacheLine_cacheLine[511:0]
 @28
-TOP.system.core0.memAccess.cacheLookup.request_request_requestType[1:0]
-TOP.system.core0.memAccess.cacheLookup.request_request_writeEn
-@22
-TOP.system.core0.memAccess.cacheLookup.request_request_writeData[63:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_cacheLine_response[1:0]
 @1000200
 -RequestIn
+@c00200
+-ReadBuffer
 @28
-TOP.system.core0.memAccess.cacheLookup.isMissWire
-@29
+TOP.system.core0.memAccess.cacheLookup.readBuffer_valid
+@22
+TOP.system.core0.memAccess.cacheLookup.readBuffer_core_instruction[31:0]
+TOP.system.core0.memAccess.cacheLookup.readBuffer_address[31:0]
+TOP.system.core0.memAccess.cacheLookup.readBuffer_branch_mask[4:0]
+@28
+TOP.system.core0.memAccess.cacheLookup.readBuffer_branch_valid
+@22
+TOP.system.core0.memAccess.cacheLookup.readBuffer_cacheLine_cacheLine[511:0]
+@28
+TOP.system.core0.memAccess.cacheLookup.readBuffer_cacheLine_response[1:0]
+@22
+TOP.system.core0.memAccess.cacheLookup.readBuffer_core_prfDest[5:0]
+TOP.system.core0.memAccess.cacheLookup.readBuffer_core_robAddr[3:0]
+@28
+TOP.system.core0.memAccess.cacheLookup.readBuffer_writeData_valid
+@22
+TOP.system.core0.memAccess.cacheLookup.readBuffer_writeData_data[63:0]
+@1401200
+-ReadBuffer
+@28
 TOP.system.core0.memAccess.cacheLookup.operationValid
-@800200
+TOP.system.core0.memAccess.cacheLookup.isDataMissWire
+TOP.system.core0.memAccess.cacheLookup.hitTagWire[1:0]
+@c00200
 -BRAM
+@800200
+-TagBRAM
 @22
 TOP.system.core0.memAccess.cacheLookup.tagBRAM_rdAddr[6:0]
+TOP.system.core0.memAccess.cacheLookup.tagBRAM_rdData[91:0]
+TOP.system.core0.memAccess.cacheLookup.tagChunks_0[22:0]
+TOP.system.core0.memAccess.cacheLookup.tagChunks_1[22:0]
+TOP.system.core0.memAccess.cacheLookup.tagChunks_2[22:0]
+TOP.system.core0.memAccess.cacheLookup.tagChunks_3[22:0]
+@28
+TOP.system.core0.memAccess.cacheLookup.tagBRAM_wrEna
+@22
+TOP.system.core0.memAccess.cacheLookup.tagBRAM_wrAddr[6:0]
+TOP.system.core0.memAccess.cacheLookup.tagBRAM_wrData[91:0]
+TOP.system.core0.memAccess.cacheLookup.tagBRAM_rdData[91:0]
+@1000200
+-TagBRAM
+@800200
+-DataBRAM
+@22
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_0_rdAddr[6:0]
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_1_rdAddr[6:0]
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_2_rdAddr[6:0]
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_3_rdAddr[6:0]
 TOP.system.core0.memAccess.cacheLookup.dataBRAMVec_0_rdData[511:0]
 TOP.system.core0.memAccess.cacheLookup.dataBRAMVec_1_rdData[511:0]
-TOP.system.core0.memAccess.cacheLookup.dataBRAMVec_2_rdData[511:0]
 TOP.system.core0.memAccess.cacheLookup.dataBRAMVec_3_rdData[511:0]
 @28
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_0_wrEna
@@ -117,6 +138,8 @@ TOP.system.core0.memAccess.cacheLookup.dataBRAM_1_wrEna
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_2_wrEna
 TOP.system.core0.memAccess.cacheLookup.dataBRAM_3_wrEna
 @22
+TOP.system.core0.memAccess.cacheLookup.dataBRAMVec_2_rdData[511:0]
+TOP.system.core0.memAccess.cacheLookup.dataBRAM_2_wrData[511:0]
 TOP.system.core0.memAccess.cacheLookup.doubleWordChunks_0[63:0]
 TOP.system.core0.memAccess.cacheLookup.doubleWordChunks_1[63:0]
 TOP.system.core0.memAccess.cacheLookup.doubleWordChunks_2[63:0]
@@ -126,23 +149,117 @@ TOP.system.core0.memAccess.cacheLookup.doubleWordChunks_5[63:0]
 TOP.system.core0.memAccess.cacheLookup.doubleWordChunks_6[63:0]
 TOP.system.core0.memAccess.cacheLookup.doubleWordChunks_7[63:0]
 @1000200
+-DataBRAM
+@1401200
 -BRAM
-@800200
+@c00200
 -MemRespBuffer
 @28
 TOP.system.core0.memAccess.cacheLookup.toMemoryResponseValidWire
 TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_valid
 @22
-TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_instruction[31:0]
 TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_address[31:0]
-TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_result[63:0]
-TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_branchMask[4:0]
-TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_prfDest[5:0]
-TOP.system.core0.memAccess.cacheLookup.memoryResponseBuffer_robAddr[3:0]
-@1000200
+@1401200
 -MemRespBuffer
+@c00201
+-ReplayBuffer
+@28
+TOP.system.core0.memAccess.cacheLookup.isReplayValidWire
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_valid
+@22
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_core_instruction[31:0]
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_address[31:0]
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_branch_mask[4:0]
+@28
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_branch_valid
+@22
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_cacheLine_cacheLine[511:0]
+@28
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_cacheLine_response[1:0]
+@22
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_core_prfDest[5:0]
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_core_robAddr[3:0]
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_writeData_data[63:0]
+@28
+TOP.system.core0.memAccess.cacheLookup.replayBuffer_writeData_valid
+@1401201
+-ReplayBuffer
+@1000200
 -Cachelookup
 @800200
+-ACEUnit
+@c00200
+-ReadRequest
+@28
+TOP.system.core0.memAccess.aceUnit.readRequest_ready
+TOP.system.core0.memAccess.aceUnit.readRequest_request_valid
+@22
+TOP.system.core0.memAccess.aceUnit.readRequest_request_core_instruction[31:0]
+TOP.system.core0.memAccess.aceUnit.readRequest_request_address[31:0]
+TOP.system.core0.memAccess.aceUnit.readRequest_request_branch_mask[4:0]
+@28
+TOP.system.core0.memAccess.aceUnit.readRequest_request_branch_valid
+@22
+TOP.system.core0.memAccess.aceUnit.readRequest_request_cacheLine_cacheLine[511:0]
+@28
+TOP.system.core0.memAccess.aceUnit.readRequest_request_cacheLine_response[1:0]
+@22
+TOP.system.core0.memAccess.aceUnit.readRequest_request_core_prfDest[5:0]
+TOP.system.core0.memAccess.aceUnit.readRequest_request_core_robAddr[3:0]
+TOP.system.core0.memAccess.aceUnit.readRequest_request_writeData_data[63:0]
+@28
+TOP.system.core0.memAccess.aceUnit.readRequest_request_writeData_valid
+@1401200
+-ReadRequest
+@c00200
+-ARBUs
+@28
+TOP.system.core0.memAccess.aceUnit.bus_ARREADY
+TOP.system.core0.memAccess.aceUnit.bus_ARVALID
+@22
+TOP.system.core0.memAccess.aceUnit.bus_ARADDR[31:0]
+TOP.system.core0.memAccess.aceUnit.bus_ARSNOOP[3:0]
+@1401200
+-ARBUs
+@800200
+-RBus
+@28
+TOP.system.core0.memAccess.aceUnit.bus_RREADY
+TOP.system.core0.memAccess.aceUnit.bus_RVALID
+@22
+TOP.system.core0.memAccess.aceUnit.bus_RDATA[63:0]
+@28
+TOP.system.core0.memAccess.aceUnit.bus_RLAST
+@22
+TOP.system.core0.memAccess.aceUnit.bus_RRESP[3:0]
+@1000200
+-RBus
+@c00200
+-ReadResponse_Buffer
+@28
+TOP.system.core0.memAccess.aceUnit.readResponseValid
+TOP.system.core0.memAccess.aceUnit.readResponse_request_valid
+TOP.system.core0.memAccess.aceUnit.readResponse_ready
+@22
+TOP.system.core0.memAccess.aceUnit.readResponse_request_core_instruction[31:0]
+TOP.system.core0.memAccess.aceUnit.readResponse_request_address[31:0]
+@28
+TOP.system.core0.memAccess.aceUnit.readResponse_request_branch_valid
+@22
+TOP.system.core0.memAccess.aceUnit.readResponse_request_cacheLine_cacheLine[511:0]
+@28
+TOP.system.core0.memAccess.aceUnit.readResponse_request_cacheLine_response[1:0]
+@22
+TOP.system.core0.memAccess.aceUnit.readResponse_request_core_prfDest[5:0]
+TOP.system.core0.memAccess.aceUnit.readResponse_request_core_robAddr[3:0]
+TOP.system.core0.memAccess.aceUnit.readResponse_request_writeData_data[63:0]
+@28
+TOP.system.core0.memAccess.aceUnit.readResponse_request_writeData_valid
+@1401200
+-ReadResponse_Buffer
+@1000200
+-ACEUnit
+@c00200
 -ResponseOut
 @28
 TOP.system.core0.memAccess.responseOut_valid
@@ -151,7 +268,7 @@ TOP.system.core0.memAccess.responseOut_instruction[31:0]
 TOP.system.core0.memAccess.responseOut_prfDest[5:0]
 TOP.system.core0.memAccess.responseOut_result[63:0]
 TOP.system.core0.memAccess.responseOut_robAddr[3:0]
-@1000200
+@1401200
 -ResponseOut
 [pattern_trace] 1
 [pattern_trace] 0
