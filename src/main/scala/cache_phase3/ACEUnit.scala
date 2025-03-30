@@ -8,9 +8,7 @@ import dataclass.data
 import os.truncate
 import cache_phase3.ChiselUtils._
 
-//TODO : For now only readUnique is used, rest will be added later
 //TODO : Add seperate field for data received for clairty in readresponse
-//TODO : Add branchOps for the readBuffer, responseBuffer, read, Reg and Write all cases
 
 class ACEUnit(
 	dataWidth: Int,
@@ -224,7 +222,7 @@ class ACEUnit(
         is("b01".U){ bus.ARSNOOP := "b0111".U}  //ReadUnique
         is("b11".U){ bus.ARSNOOP := "b1011".U}  //CleanUnique
       }
-      bus.ARSNOOP := "b0111".U //ReadUnique
+      // bus.ARSNOOP := "b0111".U //ReadUnique
       bus.ARBAR := "b00".U
 
       when(bus.ARREADY){
@@ -240,6 +238,7 @@ class ACEUnit(
   val readACEResponseState = RegInit(readDataInState)
   val readDataVec = RegInit(VecInit(Seq.fill(length+1)(0.U(busWidth.W))))
   val readResponseValid = RegInit(true.B)
+  val readResponseReg = RegInit(0.U(2.W))
   val readCounter = Module(new moduleCounter(length))
   readCounter.incrm := false.B
   readCounter.reset := false.B
@@ -256,18 +255,33 @@ class ACEUnit(
       readACEResponseState := Mux(ACEMSHR.read.data.valid && !ACEMSHR.isEmpty, readResponseState, readDataInState)
     }
     is(readResponseState){
+      val isCleanUniqueWire = responseBuffer.cacheLine.response === "b11".U
+      
       bus.RREADY := true.B
-      when(bus.RVALID & bus.RID === id.U){
-        readCounter.incrm := true.B
-        readDataVec(readCounter.count) := bus.RDATA 
+      when(isCleanUniqueWire){
+        readResponseReg := bus.RRESP(3,2)
         readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
-        responseBuffer.cacheLine.response := bus.RRESP(3,2) //Not checking for response validity in isShared and passDirty 
+        responseBuffer.cacheLine.valid := false.B
+      } .otherwise{
+        when(bus.RVALID & bus.RID === id.U){
+          readCounter.incrm := true.B
+          readDataVec(readCounter.count) := bus.RDATA 
+          readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
+          readResponseReg :=  bus.RRESP(3,2) //Not checking for response validity in isShared and passDirty 
+          responseBuffer.cacheLine.valid := true.B
+        }
       }
-      readACEResponseState := Mux(bus.RLAST && bus.RVALID && readResponseValid, readDataOutState, readResponseState)
+
+      when(isCleanUniqueWire){
+        readACEResponseState := Mux(bus.RVALID & bus.RID === id.U, readDataOutState, readResponseState)
+      } .otherwise  {
+        readACEResponseState := Mux(bus.RLAST && bus.RVALID && readResponseValid, readDataOutState, readResponseState)
+      }
     }
     is(readDataOutState){
       responseBuffer.valid := true.B
       responseBuffer.cacheLine.cacheLine := Cat(readDataVec.reverse)
+      responseBuffer.cacheLine.response := readResponseReg
       
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }

@@ -270,7 +270,6 @@ class cacheLookupUnit extends Module{
     when(isReadWire || isLRWire || isAtmoicReadWire){
       when(!isDataMissWire){//Hit
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
-        requiredResponseReg := "b00".U
       }
       when(isReplayValidWire && isDataMissWire){
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
@@ -292,7 +291,7 @@ class cacheLookupUnit extends Module{
         newDirtyBitWire := 1.U
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
       }
-      when(isReplayValidWire){
+      when(isReplayValidWire && readBuffer.cacheLine.valid){
         newValidBitWire := 1.U
         newDirtyBitWire := 1.U
         newShareBitWire := readBuffer.cacheLine.response(1)       
@@ -303,10 +302,10 @@ class cacheLookupUnit extends Module{
         }
         //The data available but permission miss situation
         //TODO : yet to implement
-      // }.otherwise{
-      //   newValidBitWire := 1.U
-      //   newShareBitWire := readBuffer.cacheLine.response(1)         
-      //   newAddrWire := readBuffer.address(addrWidth - 1, dataAddrWidth + log2Ceil(lineSize))
+      }.elsewhen(isReplayValidWire && !readBuffer.cacheLine.valid){
+        newValidBitWire := 1.U
+        newShareBitWire := readBuffer.cacheLine.response(1)         
+        newAddrWire := readBuffer.address(addrWidth - 1, dataAddrWidth + log2Ceil(lineSize))
       }
       when(isAtmoicWriteWire){
         when(readBuffer.core.instruction(14,12) === "b010".U){
@@ -401,6 +400,7 @@ class cacheLookupUnit extends Module{
         dataBRAMUpdateWire := isDataMissWire && isReplayValidWire
       } .otherwise {
         toReplayValidWire := true.B
+        requiredResponseReg := Mux(isLRWire || isAtmoicReadWire, "b01".U, "b00".U)
         toLastMissRecordRegister := !isReadWire
       }
     }
@@ -415,6 +415,7 @@ class cacheLookupUnit extends Module{
         dataBRAMUpdateWire := true.B
       } .otherwise {
         toReplayValidWire := true.B
+        requiredResponseReg := Mux(isPermissionMiss && !isDataMissWire, "b11".U, "b01".U)
         toLastMissRecordRegister := true.B
       }
     }
@@ -464,6 +465,7 @@ class cacheLookupUnit extends Module{
     //Replay
     when(toReplayValidWire && readBuffer.branch.valid){
       replayBuffer := readBuffer
+      replayBuffer.cacheLine.response := requiredResponseReg
     }
 
     //Response

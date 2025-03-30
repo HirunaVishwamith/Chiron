@@ -2,7 +2,7 @@
   {
     "class":"firrtl.transforms.DedupedResult",
     "original":"~system|fifoWithBranchOps",
-    "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/scheduler:Scheduler/speculativeQueue:fifoWithBranchOps",
+    "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/requestScheduler:requestScheduler/speculativeQueue:fifoWithBranchOps",
     "index":0.234375
   },
   {
