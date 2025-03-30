@@ -201,7 +201,6 @@ class cacheLookupUnit extends Module{
     readBuffer.valid := false.B
   }
   when(operationValid){
-    // readBuffer.valid := operationValid
     //Setting control wires for request types
     val isReadWire = WireDefault(readBuffer.core.instruction(6,0) === "b0000011".U)
     val isWriteWire = WireDefault(readBuffer.core.instruction(6,0) === "b0100011".U)
@@ -213,6 +212,7 @@ class cacheLookupUnit extends Module{
     val isAtmoicWriteWire = WireDefault(isAtomicsWire && readBuffer.writeData.valid && !(isSCWire || isLRWire))
     val isSCReadWire = WireDefault(isSCWire && !readBuffer.writeData.valid)
     val isSCWriteWire = WireDefault(isSCWire && readBuffer.writeData.valid)
+    val requiredResponseReg = RegInit(0.U(2.W))
 
     //Getting tagBRAM results
     val tagChunks = VecInit(Seq.tabulate(nway) { i =>
@@ -270,6 +270,7 @@ class cacheLookupUnit extends Module{
     when(isReadWire || isLRWire || isAtmoicReadWire){
       when(!isDataMissWire){//Hit
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
+        requiredResponseReg := "b00".U
       }
       when(isReplayValidWire && isDataMissWire){
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)

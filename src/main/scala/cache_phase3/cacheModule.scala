@@ -42,7 +42,7 @@ class CacheModule (
   loadCommit.valid := false.B
   loadCommit.state := false.B
 
-  val scheduler = Module(new Scheduler)
+  val requestScheduler = Module(new requestScheduler)
   val arbiter = Module(new arbiter)
   val cacheLookup = Module(new cacheLookupUnit)
   val replayUnit = Module(new replayUnit)
@@ -66,22 +66,22 @@ class CacheModule (
   ))
 
   //Scheduler connections
-  scheduler.branchOps := branchOps
-  canAllocate := scheduler.canAllocate && commitFifo.isEmpty
+  requestScheduler.branchOps := branchOps
+  canAllocate := requestScheduler.canAllocate && commitFifo.isEmpty
   
-  scheduler.requestIn.valid := request.valid
-  scheduler.requestIn.address := request.address
-  scheduler.requestIn.core.instruction := request.instruction
-  scheduler.requestIn.core.robAddr := request.robAddr
-  scheduler.requestIn.core.prfDest := request.prfDest
-  scheduler.requestIn.branch.mask := request.branchMask
+  requestScheduler.requestIn.valid := request.valid
+  requestScheduler.requestIn.address := request.address
+  requestScheduler.requestIn.core.instruction := request.instruction
+  requestScheduler.requestIn.core.robAddr := request.robAddr
+  requestScheduler.requestIn.core.prfDest := request.prfDest
+  requestScheduler.requestIn.branch.mask := request.branchMask
 
-  scheduler.requestIn.branch.valid := true.B
-  scheduler.requestIn.writeData.valid := false.B
-  scheduler.requestIn.writeData.data := 0.U
-  scheduler.requestIn.cacheLine.valid := false.B
-  scheduler.requestIn.cacheLine.cacheLine := 0.U
-  scheduler.requestIn.cacheLine.response := 0.U
+  requestScheduler.requestIn.branch.valid := true.B
+  requestScheduler.requestIn.writeData.valid := false.B
+  requestScheduler.requestIn.writeData.data := 0.U
+  requestScheduler.requestIn.cacheLine.valid := false.B
+  requestScheduler.requestIn.cacheLine.cacheLine := 0.U
+  requestScheduler.requestIn.cacheLine.response := 0.U
   
   //Arbiter connections
   arbiter.writeDataIn <> writeDataIn
@@ -89,11 +89,11 @@ class CacheModule (
   arbiter.responseOut := responseOut
   arbiter.branchOps <> branchOps
   
-  // arbiter.request <> scheduler.requestOut
-  scheduler.controlSignal.inorderReady := arbiter.request.inorderReady
-  scheduler.controlSignal.speculativeReady := arbiter.request.speculativeReady
-  arbiter.request.isSpeculative := scheduler.controlSignal.isSpeculative
-  arbiter.request.request := scheduler.requestOut
+  // arbiter.request <> requestScheduler.requestOut
+  requestScheduler.controlSignal.inorderReady := arbiter.request.inorderReady
+  requestScheduler.controlSignal.speculativeReady := arbiter.request.speculativeReady
+  arbiter.request.isSpeculative := requestScheduler.controlSignal.isSpeculative
+  arbiter.request.request := requestScheduler.requestOut
   arbiter.replayRequest <> replayUnit.responseOut
   arbiter.coherencyRequest <> aceUnit.coherencyRequest
 
@@ -160,7 +160,7 @@ class CacheModule (
   val fenceInititatedReg = RegInit(false.B)
   val canInititatedFenceReg = RegInit(false.B)
   val subModulesReady = WireDefault(
-    scheduler.fenceReady && 
+    requestScheduler.fenceReady && 
     arbiter.fenceReady &&
     replayUnit.fenceReady &&
     aceUnit.fenceReady &&

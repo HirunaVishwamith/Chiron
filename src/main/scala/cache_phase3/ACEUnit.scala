@@ -218,12 +218,12 @@ class ACEUnit(
       bus.ARQOS := "b0000".U
 
       bus.ARDOMAIN := "b10".U
-      // bus.ARSNOOP := "b0001".U    //!Not implemented yet
-      // switch(Cat(readBuffer.cacheLine.response)){
-      //   is("b00".U){ bus.ARSNOOP := "b0001".U}  //ReadShared
-      //   is("b01".U){ bus.ARSNOOP := "b0111".U}  //ReadUnique
-      //   is("b11".U){ bus.ARSNOOP := "b1011".U}  //CleanUnique
-      // }
+      bus.ARSNOOP := "b0001".U    //!Not implemented yet
+      switch(Cat(readBuffer.cacheLine.response)){
+        is("b00".U){ bus.ARSNOOP := "b0001".U}  //ReadShared
+        is("b01".U){ bus.ARSNOOP := "b0111".U}  //ReadUnique
+        is("b11".U){ bus.ARSNOOP := "b1011".U}  //CleanUnique
+      }
       bus.ARSNOOP := "b0111".U //ReadUnique
       bus.ARBAR := "b00".U
 

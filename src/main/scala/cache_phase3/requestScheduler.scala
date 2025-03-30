@@ -7,7 +7,7 @@ import cache_phase3.constants._
 import cache_phase3._
 import cache_phase3.ChiselUtils._
 
-class Scheduler extends Module{
+class requestScheduler extends Module{
   val requestIn = IO(Input(new requestPipelineWire))
   val canAllocate = IO(Output(Bool()))
   val requestOut = IO(Output(new requestPipelineWire))
