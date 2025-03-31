@@ -128,6 +128,7 @@ class arbiter extends Module {
         } .elsewhen(operationWires.isLR){
 
           inorderBuffer := operationBuffer
+          inorderBuffer.writeData.valid := false.B
           operationState := waitState
         } .elsewhen(operationWires.isSC){
 
@@ -153,7 +154,7 @@ class arbiter extends Module {
     is(commitFiredState){
       when(writeDataIn.valid){
 
-        inorderBuffer := Mux(!operationWires.isLR, operationBuffer, inorderBuffer)
+        inorderBuffer := operationBuffer
         inorderBuffer.writeData.data := writeDataIn.data
         inorderBuffer.writeData.valid := writeDataIn.valid
         operationBuffer.valid := false.B

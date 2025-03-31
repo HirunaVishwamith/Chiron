@@ -23,6 +23,7 @@ class CacheModule (
   val initiateFence = IO(Input(Bool()))
   val fenceInstructions = IO(new composableInterface)
   val writeCommit = IO(new composableInterface)
+  val writeInstructionCommit = IO(new composableInterface)
   val branchOps = IO(new branchOps)
   val loadCommit = IO(new loadCommit)
   //!Debug only
@@ -41,6 +42,8 @@ class CacheModule (
 
   loadCommit.valid := false.B
   loadCommit.state := false.B
+
+  writeInstructionCommit.ready := false.B
 
   val requestScheduler = Module(new requestScheduler)
   val arbiter = Module(new arbiter)
@@ -103,6 +106,8 @@ class CacheModule (
   cacheLookup.branchOps := branchOps
 
   cacheLookup.request <> arbiter.toCacheLookup
+  cacheLookup.writeInstructionCommit.fired := false.B
+
   //!Debug only
   debug := cacheLookup.debug 
   
@@ -128,6 +133,7 @@ class CacheModule (
 
   peripheralUnit.request <>arbiter.toPeripheral 
   peripheralUnit.responseOut.ready := !cacheLookup.toResponse.request.valid
+  peripheralUnit.writeInstructionCommit.fired := false.B
 
   responseOut.valid := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.valid && cacheLookup.toResponse.request.branch.valid, 
                   peripheralUnit.responseOut.request.valid)
@@ -135,6 +141,12 @@ class CacheModule (
   responseOut.robAddr := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.core.robAddr, peripheralUnit.responseOut.request.core.robAddr)
   responseOut.result := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.writeData.data, peripheralUnit.responseOut.request.writeData.data)
   responseOut.instruction := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.core.instruction, peripheralUnit.responseOut.request.core.instruction)
+
+  when(cacheLookup.writeInstructionCommit.ready){
+    cacheLookup.writeInstructionCommit <> writeInstructionCommit
+  } .otherwise{
+    peripheralUnit.writeInstructionCommit <> writeInstructionCommit
+  }
 
   //-----------------------Commit FIFO-----------------------------//
   zeroInit(commitFifo.write.data)

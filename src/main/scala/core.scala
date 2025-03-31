@@ -711,8 +711,10 @@ class core (
 
   //leon coherency
   Seq(decode.writeBackResult.fired, rob.commit.fired).foreach{ 
-    _ := ((!rob.commit.instruction(6,2).orR===0.U || !coherentLoadInvalid) && decode.writeBackResult.ready && rob.commit.ready && (memAccess.writeCommit.ready || (rob.commit.instruction(6, 4) =/= "b010".U)))
+    _ := ((!rob.commit.instruction(6,2).orR===0.U || !coherentLoadInvalid) && decode.writeBackResult.ready && rob.commit.ready && (memAccess.writeInstructionCommit.ready || (rob.commit.instruction(6, 4) =/= "b010".U)))
   }
+
+  memAccess.writeInstructionCommit.fired := memAccess.writeInstructionCommit.ready && (rob.commit.instruction(6, 4) === "b010".U)  && rob.commit.fired
 
   //leon coherency
   memAccess.loadCommit.ready := rob.commit.instruction(6,2).orR===0.U && rob.commit.ready
@@ -815,7 +817,7 @@ class core (
   memAccess.writeDataIn.data := prf.toStore.rs2Data
   memAccess.writeDataIn.valid := prf.toStore.valid
 
-  memAccess.writeCommit.fired := memAccess.writeCommit.ready && (rob.commit.instruction(6, 4) === "b010".U) && rob.commit.fired
+  memAccess.writeCommit.fired := memAccess.writeCommit.ready && (rob.commit.instruction(6, 4) === "b010".U) 
 
   (wakeUps.drop(1) zip scheduler.wakeUpExt)
   .foreach{ case (wakeup, schedulerWakeup) => {

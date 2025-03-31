@@ -82,7 +82,7 @@ class sdiFifo( depth: Int) extends Fifo(depth: Int) {
 
   io.deq.bits := memReg(readPtr)
   io.enq.ready := (!fullReg | (io.deq.valid & io.deq.ready)) & !modify
-  io.deq.valid := !emptyReg & !modify
+  io.deq.valid := !emptyReg
 
   //val memVals = Seq.fill(depth)(gen)
 

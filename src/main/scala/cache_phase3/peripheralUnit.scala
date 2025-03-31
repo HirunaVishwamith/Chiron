@@ -25,6 +25,7 @@ class peripheralUnit(
     addressWidth = addrWidth,
     busWidth = peripheral_WIDTH, //32
   ))
+  val writeInstructionCommit = IO(new composableInterface)
   val branchOps = IO(new branchOps)
   val busWidth : Int = math.pow(2, peripheral_SIZE).toInt * 8
 
@@ -68,10 +69,15 @@ class peripheralUnit(
   val requestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val readRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val writeRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
-
+  
   val responseOutBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   responseOut.request := responseOutBuffer
-
+  
+  val writeCommitInstructionBuffer = RegInit(false.B)
+  writeInstructionCommit.ready := writeCommitInstructionBuffer
+  when(writeInstructionCommit.fired){
+    writeCommitInstructionBuffer := false.B
+  }
   //-----------------------MSHR-------------------------------------------//
   val peripheralMSHR = Module(new fifoBaseModule(
     depth = schedulerDepth,
@@ -95,7 +101,7 @@ class peripheralUnit(
       requestBuffer.valid := false.B
     }
   } .otherwise {
-    request.ready := true.B
+    request.ready := !writeCommitInstructionBuffer
     when(request.request.valid && request.request.branch.valid){
       requestBuffer := request.request
     }
@@ -145,7 +151,7 @@ class peripheralUnit(
     is(writeResponseState){
       bus.BREADY := true.B
       writeRequestBuffer.valid := !(bus.BVALID && bus.BID === id.U && bus.BRESP === "b00".U)
-
+      writeCommitInstructionBuffer := true.B
       writeAXIState := Mux(bus.BVALID && (bus.BID === id.U), 
                         Mux(bus.BRESP === "b00".U, writeIdleState, writeRequestState),
                           writeResponseState)

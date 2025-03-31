@@ -36,6 +36,7 @@ class cacheLookupUnit extends Module{
   val toResponse = IO(new Bundle {
     val request = Output(new requestPipelineWire)
   })
+  val writeInstructionCommit = IO(new composableInterface)
   val branchOps = IO(new branchOps)
   //! Debug only
   val debug = IO(new debug)
@@ -180,10 +181,16 @@ class cacheLookupUnit extends Module{
     writeBackBuffer.valid := false.B
   }
 
+  val writeCommitInstructionBuffer = RegInit(false.B)
+  writeInstructionCommit.ready := writeCommitInstructionBuffer
+  when(writeInstructionCommit.fired){
+    writeCommitInstructionBuffer := false.B
+  }
+
   //____________________Functional description_________________________//
 
   //Response out is always release in one clock cycle, so no ready signal
-  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready
+  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready && !writeCommitInstructionBuffer
   request.holdInOrder := lastMissRecordRegister.valid && lastMissRecordRegister.branch.valid
 
   //Assigning addresses to the BRAMs
@@ -212,6 +219,8 @@ class cacheLookupUnit extends Module{
     val isSCWire = WireDefault(readBuffer.core.instruction(31,27) === "b00011".U && isAtomicsWire)
     val isAtmoicReadWire = WireDefault(isAtomicsWire && !readBuffer.writeData.valid && !(isSCWire || isLRWire))
     val isAtmoicWriteWire = WireDefault(isAtomicsWire && readBuffer.writeData.valid && !(isSCWire || isLRWire))
+    val isLRReadWire = WireDefault(isLRWire && !readBuffer.writeData.valid)
+    val isLRWriteWire = WireDefault(isLRWire && readBuffer.writeData.valid)
     val isSCReadWire = WireDefault(isSCWire && !readBuffer.writeData.valid)
     val isSCWriteWire = WireDefault(isSCWire && readBuffer.writeData.valid)
     val requiredResponseReg = RegInit(0.U(2.W))
@@ -269,7 +278,7 @@ class cacheLookupUnit extends Module{
     val isUpdateDirtyWire = WireDefault(tagChunks(replacingset)(tagSize + 1))
 
     //read 
-    when(isReadWire || isLRWire || isAtmoicReadWire){
+    when(isReadWire || isLRReadWire || isAtmoicReadWire){
       when(!isDataMissWire){//Hit
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
       }
@@ -339,7 +348,6 @@ class cacheLookupUnit extends Module{
           newWriteChunks(readBuffer.address(5,2) + 1.U) := result64(63,32)
         }
       } .otherwise {
-        when(!isPermissionMiss){
           switch(readBuffer.core.instruction(13,12)){
             is("b00".U){for (i <- 0 until 1) {writeByteChunks(readBuffer.address(2, 0) + i.U) := readBuffer.writeData.data(8 * (i + 1) - 1, 8 * i)}}
             is("b01".U){for (i <- 0 until 2) {writeByteChunks(readBuffer.address(2, 1)*2.U + i.U) := readBuffer.writeData.data(8 * (i + 1) - 1, 8 * i)}}
@@ -348,8 +356,6 @@ class cacheLookupUnit extends Module{
           }
           newWriteChunks(readBuffer.address(5, 3)*2.U) := Cat(writeByteChunks.slice(0, 4).reverse)
           newWriteChunks(readBuffer.address(5, 3)*2.U + 1.U) := Cat(writeByteChunks.slice(4, 8).reverse)
-        }
-        //If permission miss, CleanUnique
       }  
     }
     when(isCoherentWire){
@@ -392,19 +398,20 @@ class cacheLookupUnit extends Module{
     dataBRAMVec(updatingSet).wrAddr := readBuffer.address(addrEnd, addrBeg)
 
     //Setting control signals on deciding which buffer should data flow
-    when(isReadWire || isLRWire || isAtmoicReadWire){
+    when(isReadWire || isLRReadWire || isAtmoicReadWire){
       when(isDataMissWire && isReplayValidWire || !isDataMissWire){ //Hit
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
-        toReservationRegisterWire := isLRWire
+        toReservationRegisterWire := isLRReadWire
         toWriteBackValidWire := (isUpdateDirtyWire && isUpdateValidWire) && isReplayValidWire && isDataMissWire 
         dataBRAMUpdateWire := isDataMissWire && isReplayValidWire
       } .otherwise {
         toReplayValidWire := true.B
-        requiredResponseReg := Mux(isLRWire || isAtmoicReadWire, "b01".U, "b00".U)
+        requiredResponseReg := Mux(isLRReadWire || isAtmoicReadWire, "b01".U, "b00".U)
         toLastMissRecordRegister := !isReadWire
       }
     }
+    when(isLRWriteWire){writeCommitInstructionBuffer := true.B}
     when(isCoherentWire){
       toCoherencyResponseValidWire := true.B
       tagBRAMUpdateWire:= !isDataMissWire
@@ -414,6 +421,7 @@ class cacheLookupUnit extends Module{
         toWriteBackValidWire := (isUpdateDirtyWire && isUpdateValidWire) && isReplayValidWire && isDataMissWire 
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
+        writeCommitInstructionBuffer := true.B
       } .otherwise {
         toReplayValidWire := true.B
         requiredResponseReg := Mux(isPermissionMiss && !isDataMissWire, "b11".U, "b01".U)
@@ -428,6 +436,7 @@ class cacheLookupUnit extends Module{
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
       }
+      writeCommitInstructionBuffer := true.B
     }
 
     //Setting the dataOut

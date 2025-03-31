@@ -45,6 +45,7 @@ class composableInterface extends Bundle {
 //For write commit and fenceInstruction just extend the composable interface
 //val writeCommit = IO(new composableInterface)
 //val fenceInstructions = IO(new composableInterface)
+// val writeInstructionCommit = IO(new composableInterface)
 
 class AXI(
   idWidth: Int = 2,

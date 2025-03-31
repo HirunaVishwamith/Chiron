@@ -122,7 +122,7 @@ class PRF extends Module {
       toExec_valid := ((branchCheck.branchmask & execRead.branchmask) === 0.U && execRead.valid)
       toExec_mask := execRead.branchmask
 
-      toStore_valid := (branchCheck.branchmask & fromStore.branchmask) === 0.U
+      toStore_valid := fromStore.valid
       toStore_mask := fromStore.branchmask
     }
   }.otherwise{
