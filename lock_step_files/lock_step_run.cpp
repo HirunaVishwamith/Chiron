@@ -295,15 +295,6 @@ int main(int argc, char* argv[]) {
         golden_model.step();
       }
     }
-    // Check for test completion
-    if (bench.prev_pc == 0x10000970) {
-      printf("Test complete \n");
-      #ifdef LOGGING
-            outFile.close();
-      #endif
-      tcflush(0, TCIFLUSH);
-      return 0; // Exit the program here with success.
-    }
     
     
   }

@@ -10,7 +10,10 @@ import os.size
 
 //? After compiling
 //TODO : In replay requests data not required field assertted then should not update cacheline
-//TODO : Different read types are not yet implemented
+//TODO : Add cacheLine required track fifo
+//TODO : -Enque if no match
+//TODO : -Deque if match found
+//TODO : Add required logic for replay
 
 class cacheLookupUnit extends Module{
   val request = IO(new Bundle {
@@ -234,7 +237,7 @@ class cacheLookupUnit extends Module{
     val isSharedWire = WireDefault(shareBitWire && validBitWire)
     val isDataMissWire = WireDefault(!(matchFoundVec.reduce(_ | _) && validBitWire))
     val isPermissionMiss = WireDefault(!isDataMissWire && isSharedWire)
-    val isReplayValidWire = WireDefault(requestType === "b10".U)
+    val isReplayValidWire = WireDefault(requestType === "b10".U && !readBuffer.cacheLine.invalidated)
 
     //Updating wires
     val newtagChunks = VecInit(Seq.tabulate(nway) { i =>
@@ -301,7 +304,6 @@ class cacheLookupUnit extends Module{
           writeChunks(i) := readBuffer.cacheLine.cacheLine((i + 1) * 32 - 1, i * 32)
         }
         //The data available but permission miss situation
-        //TODO : yet to implement
       }.elsewhen(isReplayValidWire && !readBuffer.cacheLine.valid){
         newValidBitWire := 1.U
         newShareBitWire := readBuffer.cacheLine.response(1)         
@@ -466,6 +468,7 @@ class cacheLookupUnit extends Module{
     when(toReplayValidWire && readBuffer.branch.valid){
       replayBuffer := readBuffer
       replayBuffer.cacheLine.response := requiredResponseReg
+      replayBuffer.cacheLine.invalidated := false.B
     }
 
     //Response

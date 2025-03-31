@@ -29,7 +29,8 @@ class requestScheduler extends Module{
   
   val inorderQueue = Module(new fifoWithAddrCheck(
     depth = schedulerDepth,
-    traitType = new requestPipelineWire
+    traitType = new requestPipelineWire,
+    width = 3
   ))
   val speculativeQueue = Module(new fifoWithBranchOps(
     depth = schedulerDepth,

@@ -6,8 +6,6 @@ import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import dataclass.data
 
-//TODO : Take the branch different cases to functions
-
 class moduleCounter(n: Int) extends Module {
   val width = if (n == 1) 1 else log2Ceil(n)
   val count  = IO(Output(UInt(width.W)))  // Apply the same width logic to count

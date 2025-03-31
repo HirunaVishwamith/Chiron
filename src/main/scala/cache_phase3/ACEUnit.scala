@@ -8,8 +8,6 @@ import dataclass.data
 import os.truncate
 import cache_phase3.ChiselUtils._
 
-//TODO : Add seperate field for data received for clairty in readresponse
-
 class ACEUnit(
 	dataWidth: Int,
   addrWidth: Int,
@@ -317,7 +315,7 @@ class ACEUnit(
       bus.CRVALID := true.B
 
       coherentCounter.reset := true.B
-      //TODO : Check on the correct response
+
       bus.CRRESP := Mux(coherencyResponseBuffer.valid, Cat(0.U(1.W), !coherencyResponseBuffer.response(0), !coherencyResponseBuffer.response(1) , 0.U(1.W), coherencyResponseBuffer.dataValid.asUInt),
                         0.U)
       when(bus.CRREADY){

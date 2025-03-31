@@ -37,12 +37,6 @@
   },
   {
     "class":"firrtl.transforms.DedupedResult",
-    "original":"~system|fifoWithBranchOps_2",
-    "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/replayUnit:replayUnit/responseWaitFIFO:fifoWithBranchOps",
-    "index":0.390625
-  },
-  {
-    "class":"firrtl.transforms.DedupedResult",
     "original":"~system|moduleCounter",
     "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/peripheralUnit:peripheralUnit/writeCounter:moduleCounter",
     "index":0.453125
@@ -55,7 +49,7 @@
   },
   {
     "class":"firrtl.transforms.DedupedResult",
-    "original":"~system|fifoWithBranchOps_3",
+    "original":"~system|fifoWithBranchOps_2",
     "duplicate":"~system|system/core0:system_Anon/memAccess:core_Anon_1/aceUnit:ACEUnit/ACEMSHR:fifoWithBranchOps",
     "index":0.5
   },

@@ -132,7 +132,6 @@ class loadCommit extends Bundle{
 }
 
 class debug extends Bundle{
-	//TODO : Replace the cachelookup with branchInvalid, once all signals added
 	val request = Output(new requestPipelineWire)
 	val isServicing = Output(Bool())
 	val rdAddr = Output(UInt(8.W))

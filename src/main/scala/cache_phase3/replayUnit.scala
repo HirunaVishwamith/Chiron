@@ -43,6 +43,7 @@ class replayUnit extends Module{
     val request = Output(new writeBackWire)
   })
   val branchOps = IO(new branchOps)
+  val coherencyRequest = IO(Input(new coherencyRequestWire))
   val fenceReady = IO(Output(Bool()))
 
   //!Debug only
@@ -52,7 +53,7 @@ class replayUnit extends Module{
     depth = schedulerDepth,
     traitType = new requestPipelineWire
   ))
-  val responseWaitFIFO = Module(new fifoWithBranchOps(
+  val responseWaitFIFO = Module(new fifoRecordInvalidateII(
     depth = schedulerDepth,
     traitType = new requestPipelineWire
   ))
@@ -66,6 +67,8 @@ class replayUnit extends Module{
   writeBackIn.ready := false.B
   requestWaitFIFO.read.ready := false.B
   responseWaitFIFO.read.ready := false.B
+  responseWaitFIFO.invalidateEnable := false.B
+  responseWaitFIFO.invalidateAddr := 0.U
   writeBackFIFO.read.ready := false.B
   
   zeroInit(requestWaitFIFO.write.data)
@@ -96,6 +99,10 @@ class replayUnit extends Module{
     regReadUpdate(responseWaitFIFO.write.data.branch, branchOps, requestIn.request.branch)
   }
   responseOut.request := responseWaitFIFO.read.data
+  when(coherencyRequest.valid){
+    responseWaitFIFO.invalidateEnable := true.B
+    responseWaitFIFO.invalidateAddr := coherencyRequest.address
+  }
 
   //! Debug only
   when(!(isPauseForBoolean && branchOps.valid)){

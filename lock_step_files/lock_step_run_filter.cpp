@@ -296,7 +296,7 @@ int main(int argc, char* argv[]) {
       }
     }
     // Check for test completion
-    if (bench.prev_pc == 0x10000970) {
+    if (bench.prev_pc == 0x10000a18) {
       printf("Test complete \n");
       #ifdef LOGGING
             outFile.close();

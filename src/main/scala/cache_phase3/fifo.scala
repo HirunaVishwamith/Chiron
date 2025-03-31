@@ -122,17 +122,17 @@ class fifoWithBranchOps[T <: requestPipelineTrait](depth: Int, traitType: T) ext
 }
 
 //Use in scheduler
-class fifoWithAddrCheck[T <: requestPipelineTrait](depth: Int, traitType: T) extends fifoWithBranchOps(depth: Int, traitType: T) {
+class fifoWithAddrCheck[T <: requestPipelineTrait](depth: Int, traitType: T, width: Int) extends fifoWithBranchOps(depth: Int, traitType: T) {
   val checkAddress = IO(Input(UInt(addrWidth.W)))
   val matchFound = IO(Output(Bool()))
 
   //Checking the address match for the double word range
   matchFound := memReg.map(
-    entry => entry.valid && entry.address(addrWidth-1,3) === checkAddress(addrWidth-1,3)
+    entry => entry.valid && entry.address(addrWidth-1,width) === checkAddress(addrWidth-1,width)
     ).reduce(_ || _)
 }
 
-class fifoRecordInvalidate[T <: baseTrait](depth: Int, traitType: T) extends fifoBaseModule(depth: Int, traitType: T){
+class fifoRecordInvalidateI[T <: requestPipelineTrait](depth: Int, traitType: T) extends fifoWithBranchOps(depth: Int, traitType: T){
   val isFull = IO(Output(Bool()))
   val invalidateAddr = IO(Input(UInt(addrWidth.W)))
   val invalidateEnable = IO(Input(Bool()))
@@ -147,3 +147,15 @@ class fifoRecordInvalidate[T <: baseTrait](depth: Int, traitType: T) extends fif
   isFull := fullReg
 }
 
+class fifoRecordInvalidateII[T <: requestPipelineTrait](depth: Int, traitType: T) extends fifoWithBranchOps(depth: Int, traitType: T){
+  val invalidateAddr = IO(Input(UInt(addrWidth.W)))
+  val invalidateEnable = IO(Input(Bool()))
+
+  when(invalidateEnable) {
+    for (i <- 0 until depth) {
+      when(memReg(i).address(addrWidth - 1, log2Ceil(lineSize)) === invalidateAddr(addrWidth - 1, log2Ceil(lineSize))) {
+        memReg(i).cacheLine.invalidated := true.B
+      }
+    }
+  }
+}

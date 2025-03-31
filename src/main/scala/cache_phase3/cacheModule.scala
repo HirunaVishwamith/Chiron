@@ -60,9 +60,9 @@ class CacheModule (
     length = dPort_LEN,
     size = dPort_SIZE
   ))
-  val commitFifo = Module(new fifoRecordInvalidate(
+  val commitFifo = Module(new fifoRecordInvalidateI(
     depth = schedulerDepth*4,
-    traitType = new baseWire
+    traitType = new requestPipelineWire
   ))
 
   //Scheduler connections
@@ -82,6 +82,8 @@ class CacheModule (
   requestScheduler.requestIn.cacheLine.valid := false.B
   requestScheduler.requestIn.cacheLine.cacheLine := 0.U
   requestScheduler.requestIn.cacheLine.response := 0.U
+  requestScheduler.requestIn.cacheLine.required := false.B
+  requestScheduler.requestIn.cacheLine.invalidated := false.B
   
   //Arbiter connections
   arbiter.writeDataIn <> writeDataIn
@@ -110,6 +112,7 @@ class CacheModule (
   replayUnit.requestIn <> cacheLookup.toReplay
   replayUnit.responseIn <> aceUnit.readResponse
   replayUnit.writeBackIn <> cacheLookup.toWriteBack
+  replayUnit.coherencyRequest := aceUnit.coherencyRequest.request
 
   //ACEUnit
   aceUnit.branchOps <> branchOps
@@ -141,9 +144,11 @@ class CacheModule (
 
   //Enqueue from responseOut of cacheLookup
   when(cacheLookup.toResponse.request.valid && cacheLookup.toResponse.request.core.instruction(6,0) === "b0000000".U){
-    commitFifo.write.data.address := cacheLookup.toResponse.request.address
+    commitFifo.write.data := cacheLookup.toResponse.request
     commitFifo.write.data.valid := true.B
   }
+  //BranchOps
+  commitFifo.branchOps := branchOps
   //Invalidate from the coherentRequest from aceUnit
   when(aceUnit.coherencyRequest.request.valid){
     commitFifo.invalidateAddr := aceUnit.coherencyRequest.request.address
@@ -153,7 +158,7 @@ class CacheModule (
   when(loadCommit.ready){
     commitFifo.read.ready := true.B
     loadCommit.state := commitFifo.read.data.valid
-    loadCommit.valid := !commitFifo.isEmpty
+    loadCommit.valid := !commitFifo.isEmpty && commitFifo.read.data.branch.valid
   }
 
   //-----------------Initiate Fence----------------------//
