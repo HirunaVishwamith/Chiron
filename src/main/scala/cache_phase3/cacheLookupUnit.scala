@@ -13,7 +13,6 @@ import os.size
 //TODO : Add cacheLine required track fifo
 //TODO : -Enque if no match
 //TODO : -Deque if match found
-//TODO : Add required logic for replay
 
 class cacheLookupUnit extends Module{
   val request = IO(new Bundle {

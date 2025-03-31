@@ -240,7 +240,7 @@ class arbiter extends Module {
       when(isSCReadWire){
         rAtmoicsWritePending := true.B
       }
-    }.elsewhen(speculativeBuffer.valid) {
+    }.elsewhen(speculativeBuffer.valid && !(operationBuffer.valid && operationBuffer.address(addrWidth - 1, 3) === speculativeBuffer.address(addrWidth - 1, 3))) {
       speculativeBuffer.valid := false.B
 
       toCacheLookup.request := speculativeBuffer
