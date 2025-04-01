@@ -53,10 +53,10 @@ class replayUnit extends Module{
     depth = schedulerDepth,
     traitType = new requestPipelineWire
   ))
-  val responseWaitFIFO = Module(new fifoRecordInvalidateII(
-    depth = schedulerDepth,
-    traitType = new requestPipelineWire
-  ))
+  // val responseWaitFIFO = Module(new fifoRecordInvalidateII(
+  //   depth = schedulerDepth,
+  //   traitType = new requestPipelineWire
+  // ))
   val writeBackFIFO = Module(new fifoBaseModule(
     depth = schedulerDepth,
     traitType = new writeBackWire
@@ -66,17 +66,17 @@ class replayUnit extends Module{
   responseIn.ready := false.B
   writeBackIn.ready := false.B
   requestWaitFIFO.read.ready := false.B
-  responseWaitFIFO.read.ready := false.B
-  responseWaitFIFO.invalidateEnable := false.B
-  responseWaitFIFO.invalidateAddr := 0.U
+  // responseWaitFIFO.read.ready := false.B
+  // responseWaitFIFO.invalidateEnable := false.B
+  // responseWaitFIFO.invalidateAddr := 0.U
   writeBackFIFO.read.ready := false.B
   
   zeroInit(requestWaitFIFO.write.data)
-  zeroInit(responseWaitFIFO.write.data)
+  // zeroInit(responseWaitFIFO.write.data)
   zeroInit(writeBackFIFO.write.data)
 
   requestWaitFIFO.branchOps <> branchOps
-  responseWaitFIFO.branchOps <> branchOps
+  // responseWaitFIFO.branchOps <> branchOps
     
   //! Debug only
   when(!(isPauseForBoolean && branchOps.valid)){
@@ -91,18 +91,18 @@ class replayUnit extends Module{
 
   //! Debug only
   when(!(isPauseForBoolean && branchOps.valid)){
-    responseIn.ready := responseWaitFIFO.write.ready
-    responseWaitFIFO.read.ready := responseOut.ready
+    responseIn.ready := responseOut.ready//responseWaitFIFO.write.ready
+    // responseWaitFIFO.read.ready := responseOut.ready
   }
-  when(responseIn.request.valid && responseIn.request.branch.valid){
-    responseWaitFIFO.write.data := responseIn.request
-    regReadUpdate(responseWaitFIFO.write.data.branch, branchOps, requestIn.request.branch)
-  }
-  responseOut.request := responseWaitFIFO.read.data
-  when(coherencyRequest.valid){
-    responseWaitFIFO.invalidateEnable := true.B
-    responseWaitFIFO.invalidateAddr := coherencyRequest.address
-  }
+  // when(responseIn.request.valid && responseIn.request.branch.valid){
+  //   responseWaitFIFO.write.data := responseIn.request
+  //   regReadUpdate(responseWaitFIFO.write.data.branch, branchOps, requestIn.request.branch)
+  // }
+  responseOut.request := responseIn.request //responseWaitFIFO.read.data
+  // when(coherencyRequest.valid){
+  //   responseWaitFIFO.invalidateEnable := true.B
+  //   responseWaitFIFO.invalidateAddr := coherencyRequest.address
+  // }
 
   //! Debug only
   when(!(isPauseForBoolean && branchOps.valid)){
@@ -114,5 +114,5 @@ class replayUnit extends Module{
   }
   writeBackOut.request := writeBackFIFO.read.data
 
-  fenceReady := requestWaitFIFO.isEmpty && responseWaitFIFO.isEmpty
+  fenceReady := requestWaitFIFO.isEmpty //&& responseWaitFIFO.isEmpty
 }
