@@ -31589,6 +31589,7 @@ module fifoWithAddrCheck(
   wire [4:0] _GEN_588 = 4'he == readPtr ? memReg_14_branch_mask : _GEN_587; // @[fifo.scala 86:{13,13}]
   wire [4:0] _GEN_589 = 4'hf == readPtr ? memReg_15_branch_mask : _GEN_588; // @[fifo.scala 86:{13,13}]
   wire [4:0] _T_8 = write_data_branch_mask & branchOps_branchMask; // @[utils.scala 62:31]
+  wire  _T_9 = |_T_8; // @[utils.scala 62:55]
   wire [4:0] _memReg_branch_mask_T = write_data_branch_mask ^ branchOps_branchMask; // @[utils.scala 63:42]
   wire [4:0] _GEN_702 = 4'h0 == writePtr ? _memReg_branch_mask_T : _GEN_350; // @[utils.scala 63:{23,23}]
   wire [4:0] _GEN_703 = 4'h1 == writePtr ? _memReg_branch_mask_T : _GEN_351; // @[utils.scala 63:{23,23}]
@@ -31654,182 +31655,166 @@ module fifoWithAddrCheck(
   wire  _GEN_763 = 4'hd == writePtr ? write_data_branch_valid : _GEN_347; // @[utils.scala 67:{22,22}]
   wire  _GEN_764 = 4'he == writePtr ? write_data_branch_valid : _GEN_348; // @[utils.scala 67:{22,22}]
   wire  _GEN_765 = 4'hf == writePtr ? write_data_branch_valid : _GEN_349; // @[utils.scala 67:{22,22}]
-  wire [4:0] _GEN_767 = 4'h1 == writePtr ? memReg_1_branch_mask : memReg_0_branch_mask; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_768 = 4'h2 == writePtr ? memReg_2_branch_mask : _GEN_767; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_769 = 4'h3 == writePtr ? memReg_3_branch_mask : _GEN_768; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_770 = 4'h4 == writePtr ? memReg_4_branch_mask : _GEN_769; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_771 = 4'h5 == writePtr ? memReg_5_branch_mask : _GEN_770; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_772 = 4'h6 == writePtr ? memReg_6_branch_mask : _GEN_771; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_773 = 4'h7 == writePtr ? memReg_7_branch_mask : _GEN_772; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_774 = 4'h8 == writePtr ? memReg_8_branch_mask : _GEN_773; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_775 = 4'h9 == writePtr ? memReg_9_branch_mask : _GEN_774; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_776 = 4'ha == writePtr ? memReg_10_branch_mask : _GEN_775; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_777 = 4'hb == writePtr ? memReg_11_branch_mask : _GEN_776; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_778 = 4'hc == writePtr ? memReg_12_branch_mask : _GEN_777; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_779 = 4'hd == writePtr ? memReg_13_branch_mask : _GEN_778; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_780 = 4'he == writePtr ? memReg_14_branch_mask : _GEN_779; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_781 = 4'hf == writePtr ? memReg_15_branch_mask : _GEN_780; // @[utils.scala 70:{27,27}]
-  wire [4:0] _T_10 = _GEN_781 & branchOps_branchMask; // @[utils.scala 70:27]
-  wire  _GEN_782 = 4'h0 == writePtr ? 1'h0 : _GEN_334; // @[utils.scala 71:{24,24}]
-  wire  _GEN_783 = 4'h1 == writePtr ? 1'h0 : _GEN_335; // @[utils.scala 71:{24,24}]
-  wire  _GEN_784 = 4'h2 == writePtr ? 1'h0 : _GEN_336; // @[utils.scala 71:{24,24}]
-  wire  _GEN_785 = 4'h3 == writePtr ? 1'h0 : _GEN_337; // @[utils.scala 71:{24,24}]
-  wire  _GEN_786 = 4'h4 == writePtr ? 1'h0 : _GEN_338; // @[utils.scala 71:{24,24}]
-  wire  _GEN_787 = 4'h5 == writePtr ? 1'h0 : _GEN_339; // @[utils.scala 71:{24,24}]
-  wire  _GEN_788 = 4'h6 == writePtr ? 1'h0 : _GEN_340; // @[utils.scala 71:{24,24}]
-  wire  _GEN_789 = 4'h7 == writePtr ? 1'h0 : _GEN_341; // @[utils.scala 71:{24,24}]
-  wire  _GEN_790 = 4'h8 == writePtr ? 1'h0 : _GEN_342; // @[utils.scala 71:{24,24}]
-  wire  _GEN_791 = 4'h9 == writePtr ? 1'h0 : _GEN_343; // @[utils.scala 71:{24,24}]
-  wire  _GEN_792 = 4'ha == writePtr ? 1'h0 : _GEN_344; // @[utils.scala 71:{24,24}]
-  wire  _GEN_793 = 4'hb == writePtr ? 1'h0 : _GEN_345; // @[utils.scala 71:{24,24}]
-  wire  _GEN_794 = 4'hc == writePtr ? 1'h0 : _GEN_346; // @[utils.scala 71:{24,24}]
-  wire  _GEN_795 = 4'hd == writePtr ? 1'h0 : _GEN_347; // @[utils.scala 71:{24,24}]
-  wire  _GEN_796 = 4'he == writePtr ? 1'h0 : _GEN_348; // @[utils.scala 71:{24,24}]
-  wire  _GEN_797 = 4'hf == writePtr ? 1'h0 : _GEN_349; // @[utils.scala 71:{24,24}]
-  wire [4:0] _GEN_798 = 4'h0 == writePtr ? 5'h0 : _GEN_350; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_799 = 4'h1 == writePtr ? 5'h0 : _GEN_351; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_800 = 4'h2 == writePtr ? 5'h0 : _GEN_352; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_801 = 4'h3 == writePtr ? 5'h0 : _GEN_353; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_802 = 4'h4 == writePtr ? 5'h0 : _GEN_354; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_803 = 4'h5 == writePtr ? 5'h0 : _GEN_355; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_804 = 4'h6 == writePtr ? 5'h0 : _GEN_356; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_805 = 4'h7 == writePtr ? 5'h0 : _GEN_357; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_806 = 4'h8 == writePtr ? 5'h0 : _GEN_358; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_807 = 4'h9 == writePtr ? 5'h0 : _GEN_359; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_808 = 4'ha == writePtr ? 5'h0 : _GEN_360; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_809 = 4'hb == writePtr ? 5'h0 : _GEN_361; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_810 = 4'hc == writePtr ? 5'h0 : _GEN_362; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_811 = 4'hd == writePtr ? 5'h0 : _GEN_363; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_812 = 4'he == writePtr ? 5'h0 : _GEN_364; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_813 = 4'hf == writePtr ? 5'h0 : _GEN_365; // @[utils.scala 72:{23,23}]
-  wire  _GEN_846 = |_T_10 ? _GEN_782 : _GEN_750; // @[utils.scala 70:56]
-  wire  _GEN_847 = |_T_10 ? _GEN_783 : _GEN_751; // @[utils.scala 70:56]
-  wire  _GEN_848 = |_T_10 ? _GEN_784 : _GEN_752; // @[utils.scala 70:56]
-  wire  _GEN_849 = |_T_10 ? _GEN_785 : _GEN_753; // @[utils.scala 70:56]
-  wire  _GEN_850 = |_T_10 ? _GEN_786 : _GEN_754; // @[utils.scala 70:56]
-  wire  _GEN_851 = |_T_10 ? _GEN_787 : _GEN_755; // @[utils.scala 70:56]
-  wire  _GEN_852 = |_T_10 ? _GEN_788 : _GEN_756; // @[utils.scala 70:56]
-  wire  _GEN_853 = |_T_10 ? _GEN_789 : _GEN_757; // @[utils.scala 70:56]
-  wire  _GEN_854 = |_T_10 ? _GEN_790 : _GEN_758; // @[utils.scala 70:56]
-  wire  _GEN_855 = |_T_10 ? _GEN_791 : _GEN_759; // @[utils.scala 70:56]
-  wire  _GEN_856 = |_T_10 ? _GEN_792 : _GEN_760; // @[utils.scala 70:56]
-  wire  _GEN_857 = |_T_10 ? _GEN_793 : _GEN_761; // @[utils.scala 70:56]
-  wire  _GEN_858 = |_T_10 ? _GEN_794 : _GEN_762; // @[utils.scala 70:56]
-  wire  _GEN_859 = |_T_10 ? _GEN_795 : _GEN_763; // @[utils.scala 70:56]
-  wire  _GEN_860 = |_T_10 ? _GEN_796 : _GEN_764; // @[utils.scala 70:56]
-  wire  _GEN_861 = |_T_10 ? _GEN_797 : _GEN_765; // @[utils.scala 70:56]
-  wire [4:0] _GEN_862 = |_T_10 ? _GEN_798 : _GEN_718; // @[utils.scala 70:56]
-  wire [4:0] _GEN_863 = |_T_10 ? _GEN_799 : _GEN_719; // @[utils.scala 70:56]
-  wire [4:0] _GEN_864 = |_T_10 ? _GEN_800 : _GEN_720; // @[utils.scala 70:56]
-  wire [4:0] _GEN_865 = |_T_10 ? _GEN_801 : _GEN_721; // @[utils.scala 70:56]
-  wire [4:0] _GEN_866 = |_T_10 ? _GEN_802 : _GEN_722; // @[utils.scala 70:56]
-  wire [4:0] _GEN_867 = |_T_10 ? _GEN_803 : _GEN_723; // @[utils.scala 70:56]
-  wire [4:0] _GEN_868 = |_T_10 ? _GEN_804 : _GEN_724; // @[utils.scala 70:56]
-  wire [4:0] _GEN_869 = |_T_10 ? _GEN_805 : _GEN_725; // @[utils.scala 70:56]
-  wire [4:0] _GEN_870 = |_T_10 ? _GEN_806 : _GEN_726; // @[utils.scala 70:56]
-  wire [4:0] _GEN_871 = |_T_10 ? _GEN_807 : _GEN_727; // @[utils.scala 70:56]
-  wire [4:0] _GEN_872 = |_T_10 ? _GEN_808 : _GEN_728; // @[utils.scala 70:56]
-  wire [4:0] _GEN_873 = |_T_10 ? _GEN_809 : _GEN_729; // @[utils.scala 70:56]
-  wire [4:0] _GEN_874 = |_T_10 ? _GEN_810 : _GEN_730; // @[utils.scala 70:56]
-  wire [4:0] _GEN_875 = |_T_10 ? _GEN_811 : _GEN_731; // @[utils.scala 70:56]
-  wire [4:0] _GEN_876 = |_T_10 ? _GEN_812 : _GEN_732; // @[utils.scala 70:56]
-  wire [4:0] _GEN_877 = |_T_10 ? _GEN_813 : _GEN_733; // @[utils.scala 70:56]
-  wire [4:0] _GEN_878 = branchOps_passed ? _GEN_734 : _GEN_862; // @[utils.scala 60:30]
-  wire [4:0] _GEN_879 = branchOps_passed ? _GEN_735 : _GEN_863; // @[utils.scala 60:30]
-  wire [4:0] _GEN_880 = branchOps_passed ? _GEN_736 : _GEN_864; // @[utils.scala 60:30]
-  wire [4:0] _GEN_881 = branchOps_passed ? _GEN_737 : _GEN_865; // @[utils.scala 60:30]
-  wire [4:0] _GEN_882 = branchOps_passed ? _GEN_738 : _GEN_866; // @[utils.scala 60:30]
-  wire [4:0] _GEN_883 = branchOps_passed ? _GEN_739 : _GEN_867; // @[utils.scala 60:30]
-  wire [4:0] _GEN_884 = branchOps_passed ? _GEN_740 : _GEN_868; // @[utils.scala 60:30]
-  wire [4:0] _GEN_885 = branchOps_passed ? _GEN_741 : _GEN_869; // @[utils.scala 60:30]
-  wire [4:0] _GEN_886 = branchOps_passed ? _GEN_742 : _GEN_870; // @[utils.scala 60:30]
-  wire [4:0] _GEN_887 = branchOps_passed ? _GEN_743 : _GEN_871; // @[utils.scala 60:30]
-  wire [4:0] _GEN_888 = branchOps_passed ? _GEN_744 : _GEN_872; // @[utils.scala 60:30]
-  wire [4:0] _GEN_889 = branchOps_passed ? _GEN_745 : _GEN_873; // @[utils.scala 60:30]
-  wire [4:0] _GEN_890 = branchOps_passed ? _GEN_746 : _GEN_874; // @[utils.scala 60:30]
-  wire [4:0] _GEN_891 = branchOps_passed ? _GEN_747 : _GEN_875; // @[utils.scala 60:30]
-  wire [4:0] _GEN_892 = branchOps_passed ? _GEN_748 : _GEN_876; // @[utils.scala 60:30]
-  wire [4:0] _GEN_893 = branchOps_passed ? _GEN_749 : _GEN_877; // @[utils.scala 60:30]
-  wire  _GEN_894 = branchOps_passed ? _GEN_750 : _GEN_846; // @[utils.scala 60:30]
-  wire  _GEN_895 = branchOps_passed ? _GEN_751 : _GEN_847; // @[utils.scala 60:30]
-  wire  _GEN_896 = branchOps_passed ? _GEN_752 : _GEN_848; // @[utils.scala 60:30]
-  wire  _GEN_897 = branchOps_passed ? _GEN_753 : _GEN_849; // @[utils.scala 60:30]
-  wire  _GEN_898 = branchOps_passed ? _GEN_754 : _GEN_850; // @[utils.scala 60:30]
-  wire  _GEN_899 = branchOps_passed ? _GEN_755 : _GEN_851; // @[utils.scala 60:30]
-  wire  _GEN_900 = branchOps_passed ? _GEN_756 : _GEN_852; // @[utils.scala 60:30]
-  wire  _GEN_901 = branchOps_passed ? _GEN_757 : _GEN_853; // @[utils.scala 60:30]
-  wire  _GEN_902 = branchOps_passed ? _GEN_758 : _GEN_854; // @[utils.scala 60:30]
-  wire  _GEN_903 = branchOps_passed ? _GEN_759 : _GEN_855; // @[utils.scala 60:30]
-  wire  _GEN_904 = branchOps_passed ? _GEN_760 : _GEN_856; // @[utils.scala 60:30]
-  wire  _GEN_905 = branchOps_passed ? _GEN_761 : _GEN_857; // @[utils.scala 60:30]
-  wire  _GEN_906 = branchOps_passed ? _GEN_762 : _GEN_858; // @[utils.scala 60:30]
-  wire  _GEN_907 = branchOps_passed ? _GEN_763 : _GEN_859; // @[utils.scala 60:30]
-  wire  _GEN_908 = branchOps_passed ? _GEN_764 : _GEN_860; // @[utils.scala 60:30]
-  wire  _GEN_909 = branchOps_passed ? _GEN_765 : _GEN_861; // @[utils.scala 60:30]
-  wire [4:0] _GEN_942 = branchOps_valid ? _GEN_878 : _GEN_718; // @[utils.scala 59:26]
-  wire [4:0] _GEN_943 = branchOps_valid ? _GEN_879 : _GEN_719; // @[utils.scala 59:26]
-  wire [4:0] _GEN_944 = branchOps_valid ? _GEN_880 : _GEN_720; // @[utils.scala 59:26]
-  wire [4:0] _GEN_945 = branchOps_valid ? _GEN_881 : _GEN_721; // @[utils.scala 59:26]
-  wire [4:0] _GEN_946 = branchOps_valid ? _GEN_882 : _GEN_722; // @[utils.scala 59:26]
-  wire [4:0] _GEN_947 = branchOps_valid ? _GEN_883 : _GEN_723; // @[utils.scala 59:26]
-  wire [4:0] _GEN_948 = branchOps_valid ? _GEN_884 : _GEN_724; // @[utils.scala 59:26]
-  wire [4:0] _GEN_949 = branchOps_valid ? _GEN_885 : _GEN_725; // @[utils.scala 59:26]
-  wire [4:0] _GEN_950 = branchOps_valid ? _GEN_886 : _GEN_726; // @[utils.scala 59:26]
-  wire [4:0] _GEN_951 = branchOps_valid ? _GEN_887 : _GEN_727; // @[utils.scala 59:26]
-  wire [4:0] _GEN_952 = branchOps_valid ? _GEN_888 : _GEN_728; // @[utils.scala 59:26]
-  wire [4:0] _GEN_953 = branchOps_valid ? _GEN_889 : _GEN_729; // @[utils.scala 59:26]
-  wire [4:0] _GEN_954 = branchOps_valid ? _GEN_890 : _GEN_730; // @[utils.scala 59:26]
-  wire [4:0] _GEN_955 = branchOps_valid ? _GEN_891 : _GEN_731; // @[utils.scala 59:26]
-  wire [4:0] _GEN_956 = branchOps_valid ? _GEN_892 : _GEN_732; // @[utils.scala 59:26]
-  wire [4:0] _GEN_957 = branchOps_valid ? _GEN_893 : _GEN_733; // @[utils.scala 59:26]
-  wire  _GEN_958 = branchOps_valid ? _GEN_894 : _GEN_750; // @[utils.scala 59:26]
-  wire  _GEN_959 = branchOps_valid ? _GEN_895 : _GEN_751; // @[utils.scala 59:26]
-  wire  _GEN_960 = branchOps_valid ? _GEN_896 : _GEN_752; // @[utils.scala 59:26]
-  wire  _GEN_961 = branchOps_valid ? _GEN_897 : _GEN_753; // @[utils.scala 59:26]
-  wire  _GEN_962 = branchOps_valid ? _GEN_898 : _GEN_754; // @[utils.scala 59:26]
-  wire  _GEN_963 = branchOps_valid ? _GEN_899 : _GEN_755; // @[utils.scala 59:26]
-  wire  _GEN_964 = branchOps_valid ? _GEN_900 : _GEN_756; // @[utils.scala 59:26]
-  wire  _GEN_965 = branchOps_valid ? _GEN_901 : _GEN_757; // @[utils.scala 59:26]
-  wire  _GEN_966 = branchOps_valid ? _GEN_902 : _GEN_758; // @[utils.scala 59:26]
-  wire  _GEN_967 = branchOps_valid ? _GEN_903 : _GEN_759; // @[utils.scala 59:26]
-  wire  _GEN_968 = branchOps_valid ? _GEN_904 : _GEN_760; // @[utils.scala 59:26]
-  wire  _GEN_969 = branchOps_valid ? _GEN_905 : _GEN_761; // @[utils.scala 59:26]
-  wire  _GEN_970 = branchOps_valid ? _GEN_906 : _GEN_762; // @[utils.scala 59:26]
-  wire  _GEN_971 = branchOps_valid ? _GEN_907 : _GEN_763; // @[utils.scala 59:26]
-  wire  _GEN_972 = branchOps_valid ? _GEN_908 : _GEN_764; // @[utils.scala 59:26]
-  wire  _GEN_973 = branchOps_valid ? _GEN_909 : _GEN_765; // @[utils.scala 59:26]
-  wire [4:0] _GEN_974 = incrWrite ? _GEN_942 : _GEN_350; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_975 = incrWrite ? _GEN_943 : _GEN_351; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_976 = incrWrite ? _GEN_944 : _GEN_352; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_977 = incrWrite ? _GEN_945 : _GEN_353; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_978 = incrWrite ? _GEN_946 : _GEN_354; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_979 = incrWrite ? _GEN_947 : _GEN_355; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_980 = incrWrite ? _GEN_948 : _GEN_356; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_981 = incrWrite ? _GEN_949 : _GEN_357; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_982 = incrWrite ? _GEN_950 : _GEN_358; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_983 = incrWrite ? _GEN_951 : _GEN_359; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_984 = incrWrite ? _GEN_952 : _GEN_360; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_985 = incrWrite ? _GEN_953 : _GEN_361; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_986 = incrWrite ? _GEN_954 : _GEN_362; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_987 = incrWrite ? _GEN_955 : _GEN_363; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_988 = incrWrite ? _GEN_956 : _GEN_364; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_989 = incrWrite ? _GEN_957 : _GEN_365; // @[fifo.scala 96:16]
-  wire  _GEN_990 = incrWrite ? _GEN_958 : _GEN_334; // @[fifo.scala 96:16]
-  wire  _GEN_991 = incrWrite ? _GEN_959 : _GEN_335; // @[fifo.scala 96:16]
-  wire  _GEN_992 = incrWrite ? _GEN_960 : _GEN_336; // @[fifo.scala 96:16]
-  wire  _GEN_993 = incrWrite ? _GEN_961 : _GEN_337; // @[fifo.scala 96:16]
-  wire  _GEN_994 = incrWrite ? _GEN_962 : _GEN_338; // @[fifo.scala 96:16]
-  wire  _GEN_995 = incrWrite ? _GEN_963 : _GEN_339; // @[fifo.scala 96:16]
-  wire  _GEN_996 = incrWrite ? _GEN_964 : _GEN_340; // @[fifo.scala 96:16]
-  wire  _GEN_997 = incrWrite ? _GEN_965 : _GEN_341; // @[fifo.scala 96:16]
-  wire  _GEN_998 = incrWrite ? _GEN_966 : _GEN_342; // @[fifo.scala 96:16]
-  wire  _GEN_999 = incrWrite ? _GEN_967 : _GEN_343; // @[fifo.scala 96:16]
-  wire  _GEN_1000 = incrWrite ? _GEN_968 : _GEN_344; // @[fifo.scala 96:16]
-  wire  _GEN_1001 = incrWrite ? _GEN_969 : _GEN_345; // @[fifo.scala 96:16]
-  wire  _GEN_1002 = incrWrite ? _GEN_970 : _GEN_346; // @[fifo.scala 96:16]
-  wire  _GEN_1003 = incrWrite ? _GEN_971 : _GEN_347; // @[fifo.scala 96:16]
-  wire  _GEN_1004 = incrWrite ? _GEN_972 : _GEN_348; // @[fifo.scala 96:16]
-  wire  _GEN_1005 = incrWrite ? _GEN_973 : _GEN_349; // @[fifo.scala 96:16]
+  wire  _GEN_766 = 4'h0 == writePtr ? 1'h0 : _GEN_334; // @[utils.scala 71:{24,24}]
+  wire  _GEN_767 = 4'h1 == writePtr ? 1'h0 : _GEN_335; // @[utils.scala 71:{24,24}]
+  wire  _GEN_768 = 4'h2 == writePtr ? 1'h0 : _GEN_336; // @[utils.scala 71:{24,24}]
+  wire  _GEN_769 = 4'h3 == writePtr ? 1'h0 : _GEN_337; // @[utils.scala 71:{24,24}]
+  wire  _GEN_770 = 4'h4 == writePtr ? 1'h0 : _GEN_338; // @[utils.scala 71:{24,24}]
+  wire  _GEN_771 = 4'h5 == writePtr ? 1'h0 : _GEN_339; // @[utils.scala 71:{24,24}]
+  wire  _GEN_772 = 4'h6 == writePtr ? 1'h0 : _GEN_340; // @[utils.scala 71:{24,24}]
+  wire  _GEN_773 = 4'h7 == writePtr ? 1'h0 : _GEN_341; // @[utils.scala 71:{24,24}]
+  wire  _GEN_774 = 4'h8 == writePtr ? 1'h0 : _GEN_342; // @[utils.scala 71:{24,24}]
+  wire  _GEN_775 = 4'h9 == writePtr ? 1'h0 : _GEN_343; // @[utils.scala 71:{24,24}]
+  wire  _GEN_776 = 4'ha == writePtr ? 1'h0 : _GEN_344; // @[utils.scala 71:{24,24}]
+  wire  _GEN_777 = 4'hb == writePtr ? 1'h0 : _GEN_345; // @[utils.scala 71:{24,24}]
+  wire  _GEN_778 = 4'hc == writePtr ? 1'h0 : _GEN_346; // @[utils.scala 71:{24,24}]
+  wire  _GEN_779 = 4'hd == writePtr ? 1'h0 : _GEN_347; // @[utils.scala 71:{24,24}]
+  wire  _GEN_780 = 4'he == writePtr ? 1'h0 : _GEN_348; // @[utils.scala 71:{24,24}]
+  wire  _GEN_781 = 4'hf == writePtr ? 1'h0 : _GEN_349; // @[utils.scala 71:{24,24}]
+  wire [4:0] _GEN_782 = 4'h0 == writePtr ? 5'h0 : _GEN_350; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_783 = 4'h1 == writePtr ? 5'h0 : _GEN_351; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_784 = 4'h2 == writePtr ? 5'h0 : _GEN_352; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_785 = 4'h3 == writePtr ? 5'h0 : _GEN_353; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_786 = 4'h4 == writePtr ? 5'h0 : _GEN_354; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_787 = 4'h5 == writePtr ? 5'h0 : _GEN_355; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_788 = 4'h6 == writePtr ? 5'h0 : _GEN_356; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_789 = 4'h7 == writePtr ? 5'h0 : _GEN_357; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_790 = 4'h8 == writePtr ? 5'h0 : _GEN_358; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_791 = 4'h9 == writePtr ? 5'h0 : _GEN_359; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_792 = 4'ha == writePtr ? 5'h0 : _GEN_360; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_793 = 4'hb == writePtr ? 5'h0 : _GEN_361; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_794 = 4'hc == writePtr ? 5'h0 : _GEN_362; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_795 = 4'hd == writePtr ? 5'h0 : _GEN_363; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_796 = 4'he == writePtr ? 5'h0 : _GEN_364; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_797 = 4'hf == writePtr ? 5'h0 : _GEN_365; // @[utils.scala 72:{23,23}]
+  wire  _GEN_830 = _T_9 ? _GEN_766 : _GEN_750; // @[utils.scala 70:60]
+  wire  _GEN_831 = _T_9 ? _GEN_767 : _GEN_751; // @[utils.scala 70:60]
+  wire  _GEN_832 = _T_9 ? _GEN_768 : _GEN_752; // @[utils.scala 70:60]
+  wire  _GEN_833 = _T_9 ? _GEN_769 : _GEN_753; // @[utils.scala 70:60]
+  wire  _GEN_834 = _T_9 ? _GEN_770 : _GEN_754; // @[utils.scala 70:60]
+  wire  _GEN_835 = _T_9 ? _GEN_771 : _GEN_755; // @[utils.scala 70:60]
+  wire  _GEN_836 = _T_9 ? _GEN_772 : _GEN_756; // @[utils.scala 70:60]
+  wire  _GEN_837 = _T_9 ? _GEN_773 : _GEN_757; // @[utils.scala 70:60]
+  wire  _GEN_838 = _T_9 ? _GEN_774 : _GEN_758; // @[utils.scala 70:60]
+  wire  _GEN_839 = _T_9 ? _GEN_775 : _GEN_759; // @[utils.scala 70:60]
+  wire  _GEN_840 = _T_9 ? _GEN_776 : _GEN_760; // @[utils.scala 70:60]
+  wire  _GEN_841 = _T_9 ? _GEN_777 : _GEN_761; // @[utils.scala 70:60]
+  wire  _GEN_842 = _T_9 ? _GEN_778 : _GEN_762; // @[utils.scala 70:60]
+  wire  _GEN_843 = _T_9 ? _GEN_779 : _GEN_763; // @[utils.scala 70:60]
+  wire  _GEN_844 = _T_9 ? _GEN_780 : _GEN_764; // @[utils.scala 70:60]
+  wire  _GEN_845 = _T_9 ? _GEN_781 : _GEN_765; // @[utils.scala 70:60]
+  wire [4:0] _GEN_846 = _T_9 ? _GEN_782 : _GEN_718; // @[utils.scala 70:60]
+  wire [4:0] _GEN_847 = _T_9 ? _GEN_783 : _GEN_719; // @[utils.scala 70:60]
+  wire [4:0] _GEN_848 = _T_9 ? _GEN_784 : _GEN_720; // @[utils.scala 70:60]
+  wire [4:0] _GEN_849 = _T_9 ? _GEN_785 : _GEN_721; // @[utils.scala 70:60]
+  wire [4:0] _GEN_850 = _T_9 ? _GEN_786 : _GEN_722; // @[utils.scala 70:60]
+  wire [4:0] _GEN_851 = _T_9 ? _GEN_787 : _GEN_723; // @[utils.scala 70:60]
+  wire [4:0] _GEN_852 = _T_9 ? _GEN_788 : _GEN_724; // @[utils.scala 70:60]
+  wire [4:0] _GEN_853 = _T_9 ? _GEN_789 : _GEN_725; // @[utils.scala 70:60]
+  wire [4:0] _GEN_854 = _T_9 ? _GEN_790 : _GEN_726; // @[utils.scala 70:60]
+  wire [4:0] _GEN_855 = _T_9 ? _GEN_791 : _GEN_727; // @[utils.scala 70:60]
+  wire [4:0] _GEN_856 = _T_9 ? _GEN_792 : _GEN_728; // @[utils.scala 70:60]
+  wire [4:0] _GEN_857 = _T_9 ? _GEN_793 : _GEN_729; // @[utils.scala 70:60]
+  wire [4:0] _GEN_858 = _T_9 ? _GEN_794 : _GEN_730; // @[utils.scala 70:60]
+  wire [4:0] _GEN_859 = _T_9 ? _GEN_795 : _GEN_731; // @[utils.scala 70:60]
+  wire [4:0] _GEN_860 = _T_9 ? _GEN_796 : _GEN_732; // @[utils.scala 70:60]
+  wire [4:0] _GEN_861 = _T_9 ? _GEN_797 : _GEN_733; // @[utils.scala 70:60]
+  wire [4:0] _GEN_862 = branchOps_passed ? _GEN_734 : _GEN_846; // @[utils.scala 60:30]
+  wire [4:0] _GEN_863 = branchOps_passed ? _GEN_735 : _GEN_847; // @[utils.scala 60:30]
+  wire [4:0] _GEN_864 = branchOps_passed ? _GEN_736 : _GEN_848; // @[utils.scala 60:30]
+  wire [4:0] _GEN_865 = branchOps_passed ? _GEN_737 : _GEN_849; // @[utils.scala 60:30]
+  wire [4:0] _GEN_866 = branchOps_passed ? _GEN_738 : _GEN_850; // @[utils.scala 60:30]
+  wire [4:0] _GEN_867 = branchOps_passed ? _GEN_739 : _GEN_851; // @[utils.scala 60:30]
+  wire [4:0] _GEN_868 = branchOps_passed ? _GEN_740 : _GEN_852; // @[utils.scala 60:30]
+  wire [4:0] _GEN_869 = branchOps_passed ? _GEN_741 : _GEN_853; // @[utils.scala 60:30]
+  wire [4:0] _GEN_870 = branchOps_passed ? _GEN_742 : _GEN_854; // @[utils.scala 60:30]
+  wire [4:0] _GEN_871 = branchOps_passed ? _GEN_743 : _GEN_855; // @[utils.scala 60:30]
+  wire [4:0] _GEN_872 = branchOps_passed ? _GEN_744 : _GEN_856; // @[utils.scala 60:30]
+  wire [4:0] _GEN_873 = branchOps_passed ? _GEN_745 : _GEN_857; // @[utils.scala 60:30]
+  wire [4:0] _GEN_874 = branchOps_passed ? _GEN_746 : _GEN_858; // @[utils.scala 60:30]
+  wire [4:0] _GEN_875 = branchOps_passed ? _GEN_747 : _GEN_859; // @[utils.scala 60:30]
+  wire [4:0] _GEN_876 = branchOps_passed ? _GEN_748 : _GEN_860; // @[utils.scala 60:30]
+  wire [4:0] _GEN_877 = branchOps_passed ? _GEN_749 : _GEN_861; // @[utils.scala 60:30]
+  wire  _GEN_878 = branchOps_passed ? _GEN_750 : _GEN_830; // @[utils.scala 60:30]
+  wire  _GEN_879 = branchOps_passed ? _GEN_751 : _GEN_831; // @[utils.scala 60:30]
+  wire  _GEN_880 = branchOps_passed ? _GEN_752 : _GEN_832; // @[utils.scala 60:30]
+  wire  _GEN_881 = branchOps_passed ? _GEN_753 : _GEN_833; // @[utils.scala 60:30]
+  wire  _GEN_882 = branchOps_passed ? _GEN_754 : _GEN_834; // @[utils.scala 60:30]
+  wire  _GEN_883 = branchOps_passed ? _GEN_755 : _GEN_835; // @[utils.scala 60:30]
+  wire  _GEN_884 = branchOps_passed ? _GEN_756 : _GEN_836; // @[utils.scala 60:30]
+  wire  _GEN_885 = branchOps_passed ? _GEN_757 : _GEN_837; // @[utils.scala 60:30]
+  wire  _GEN_886 = branchOps_passed ? _GEN_758 : _GEN_838; // @[utils.scala 60:30]
+  wire  _GEN_887 = branchOps_passed ? _GEN_759 : _GEN_839; // @[utils.scala 60:30]
+  wire  _GEN_888 = branchOps_passed ? _GEN_760 : _GEN_840; // @[utils.scala 60:30]
+  wire  _GEN_889 = branchOps_passed ? _GEN_761 : _GEN_841; // @[utils.scala 60:30]
+  wire  _GEN_890 = branchOps_passed ? _GEN_762 : _GEN_842; // @[utils.scala 60:30]
+  wire  _GEN_891 = branchOps_passed ? _GEN_763 : _GEN_843; // @[utils.scala 60:30]
+  wire  _GEN_892 = branchOps_passed ? _GEN_764 : _GEN_844; // @[utils.scala 60:30]
+  wire  _GEN_893 = branchOps_passed ? _GEN_765 : _GEN_845; // @[utils.scala 60:30]
+  wire [4:0] _GEN_926 = branchOps_valid ? _GEN_862 : _GEN_718; // @[utils.scala 59:26]
+  wire [4:0] _GEN_927 = branchOps_valid ? _GEN_863 : _GEN_719; // @[utils.scala 59:26]
+  wire [4:0] _GEN_928 = branchOps_valid ? _GEN_864 : _GEN_720; // @[utils.scala 59:26]
+  wire [4:0] _GEN_929 = branchOps_valid ? _GEN_865 : _GEN_721; // @[utils.scala 59:26]
+  wire [4:0] _GEN_930 = branchOps_valid ? _GEN_866 : _GEN_722; // @[utils.scala 59:26]
+  wire [4:0] _GEN_931 = branchOps_valid ? _GEN_867 : _GEN_723; // @[utils.scala 59:26]
+  wire [4:0] _GEN_932 = branchOps_valid ? _GEN_868 : _GEN_724; // @[utils.scala 59:26]
+  wire [4:0] _GEN_933 = branchOps_valid ? _GEN_869 : _GEN_725; // @[utils.scala 59:26]
+  wire [4:0] _GEN_934 = branchOps_valid ? _GEN_870 : _GEN_726; // @[utils.scala 59:26]
+  wire [4:0] _GEN_935 = branchOps_valid ? _GEN_871 : _GEN_727; // @[utils.scala 59:26]
+  wire [4:0] _GEN_936 = branchOps_valid ? _GEN_872 : _GEN_728; // @[utils.scala 59:26]
+  wire [4:0] _GEN_937 = branchOps_valid ? _GEN_873 : _GEN_729; // @[utils.scala 59:26]
+  wire [4:0] _GEN_938 = branchOps_valid ? _GEN_874 : _GEN_730; // @[utils.scala 59:26]
+  wire [4:0] _GEN_939 = branchOps_valid ? _GEN_875 : _GEN_731; // @[utils.scala 59:26]
+  wire [4:0] _GEN_940 = branchOps_valid ? _GEN_876 : _GEN_732; // @[utils.scala 59:26]
+  wire [4:0] _GEN_941 = branchOps_valid ? _GEN_877 : _GEN_733; // @[utils.scala 59:26]
+  wire  _GEN_942 = branchOps_valid ? _GEN_878 : _GEN_750; // @[utils.scala 59:26]
+  wire  _GEN_943 = branchOps_valid ? _GEN_879 : _GEN_751; // @[utils.scala 59:26]
+  wire  _GEN_944 = branchOps_valid ? _GEN_880 : _GEN_752; // @[utils.scala 59:26]
+  wire  _GEN_945 = branchOps_valid ? _GEN_881 : _GEN_753; // @[utils.scala 59:26]
+  wire  _GEN_946 = branchOps_valid ? _GEN_882 : _GEN_754; // @[utils.scala 59:26]
+  wire  _GEN_947 = branchOps_valid ? _GEN_883 : _GEN_755; // @[utils.scala 59:26]
+  wire  _GEN_948 = branchOps_valid ? _GEN_884 : _GEN_756; // @[utils.scala 59:26]
+  wire  _GEN_949 = branchOps_valid ? _GEN_885 : _GEN_757; // @[utils.scala 59:26]
+  wire  _GEN_950 = branchOps_valid ? _GEN_886 : _GEN_758; // @[utils.scala 59:26]
+  wire  _GEN_951 = branchOps_valid ? _GEN_887 : _GEN_759; // @[utils.scala 59:26]
+  wire  _GEN_952 = branchOps_valid ? _GEN_888 : _GEN_760; // @[utils.scala 59:26]
+  wire  _GEN_953 = branchOps_valid ? _GEN_889 : _GEN_761; // @[utils.scala 59:26]
+  wire  _GEN_954 = branchOps_valid ? _GEN_890 : _GEN_762; // @[utils.scala 59:26]
+  wire  _GEN_955 = branchOps_valid ? _GEN_891 : _GEN_763; // @[utils.scala 59:26]
+  wire  _GEN_956 = branchOps_valid ? _GEN_892 : _GEN_764; // @[utils.scala 59:26]
+  wire  _GEN_957 = branchOps_valid ? _GEN_893 : _GEN_765; // @[utils.scala 59:26]
+  wire [4:0] _GEN_958 = incrWrite ? _GEN_926 : _GEN_350; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_959 = incrWrite ? _GEN_927 : _GEN_351; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_960 = incrWrite ? _GEN_928 : _GEN_352; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_961 = incrWrite ? _GEN_929 : _GEN_353; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_962 = incrWrite ? _GEN_930 : _GEN_354; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_963 = incrWrite ? _GEN_931 : _GEN_355; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_964 = incrWrite ? _GEN_932 : _GEN_356; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_965 = incrWrite ? _GEN_933 : _GEN_357; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_966 = incrWrite ? _GEN_934 : _GEN_358; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_967 = incrWrite ? _GEN_935 : _GEN_359; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_968 = incrWrite ? _GEN_936 : _GEN_360; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_969 = incrWrite ? _GEN_937 : _GEN_361; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_970 = incrWrite ? _GEN_938 : _GEN_362; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_971 = incrWrite ? _GEN_939 : _GEN_363; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_972 = incrWrite ? _GEN_940 : _GEN_364; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_973 = incrWrite ? _GEN_941 : _GEN_365; // @[fifo.scala 96:16]
+  wire  _GEN_974 = incrWrite ? _GEN_942 : _GEN_334; // @[fifo.scala 96:16]
+  wire  _GEN_975 = incrWrite ? _GEN_943 : _GEN_335; // @[fifo.scala 96:16]
+  wire  _GEN_976 = incrWrite ? _GEN_944 : _GEN_336; // @[fifo.scala 96:16]
+  wire  _GEN_977 = incrWrite ? _GEN_945 : _GEN_337; // @[fifo.scala 96:16]
+  wire  _GEN_978 = incrWrite ? _GEN_946 : _GEN_338; // @[fifo.scala 96:16]
+  wire  _GEN_979 = incrWrite ? _GEN_947 : _GEN_339; // @[fifo.scala 96:16]
+  wire  _GEN_980 = incrWrite ? _GEN_948 : _GEN_340; // @[fifo.scala 96:16]
+  wire  _GEN_981 = incrWrite ? _GEN_949 : _GEN_341; // @[fifo.scala 96:16]
+  wire  _GEN_982 = incrWrite ? _GEN_950 : _GEN_342; // @[fifo.scala 96:16]
+  wire  _GEN_983 = incrWrite ? _GEN_951 : _GEN_343; // @[fifo.scala 96:16]
+  wire  _GEN_984 = incrWrite ? _GEN_952 : _GEN_344; // @[fifo.scala 96:16]
+  wire  _GEN_985 = incrWrite ? _GEN_953 : _GEN_345; // @[fifo.scala 96:16]
+  wire  _GEN_986 = incrWrite ? _GEN_954 : _GEN_346; // @[fifo.scala 96:16]
+  wire  _GEN_987 = incrWrite ? _GEN_955 : _GEN_347; // @[fifo.scala 96:16]
+  wire  _GEN_988 = incrWrite ? _GEN_956 : _GEN_348; // @[fifo.scala 96:16]
+  wire  _GEN_989 = incrWrite ? _GEN_957 : _GEN_349; // @[fifo.scala 96:16]
   wire [3:0] startPointer = read_ready ? _nextVal_T_2 : readPtr; // @[fifo.scala 101:25]
   wire [3:0] endPointer = writePtr - 4'h1; // @[fifo.scala 102:29]
   wire [4:0] _T_15 = memReg_0_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
@@ -31838,84 +31823,84 @@ module fifoWithAddrCheck(
   wire [4:0] _T_22 = memReg_1_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_23 = |_T_22; // @[fifo.scala 108:63]
   wire [4:0] _memReg_1_branch_mask_T = memReg_1_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1012 = |_T_22 ? _memReg_1_branch_mask_T : _GEN_975; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1013 = _T_23 ? 1'h0 : _GEN_991; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_996 = |_T_22 ? _memReg_1_branch_mask_T : _GEN_959; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_997 = _T_23 ? 1'h0 : _GEN_975; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_29 = memReg_2_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_30 = |_T_29; // @[fifo.scala 108:63]
   wire [4:0] _memReg_2_branch_mask_T = memReg_2_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1018 = |_T_29 ? _memReg_2_branch_mask_T : _GEN_976; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1019 = _T_30 ? 1'h0 : _GEN_992; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1002 = |_T_29 ? _memReg_2_branch_mask_T : _GEN_960; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1003 = _T_30 ? 1'h0 : _GEN_976; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_36 = memReg_3_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_37 = |_T_36; // @[fifo.scala 108:63]
   wire [4:0] _memReg_3_branch_mask_T = memReg_3_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1024 = |_T_36 ? _memReg_3_branch_mask_T : _GEN_977; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1025 = _T_37 ? 1'h0 : _GEN_993; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1008 = |_T_36 ? _memReg_3_branch_mask_T : _GEN_961; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1009 = _T_37 ? 1'h0 : _GEN_977; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_43 = memReg_4_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_44 = |_T_43; // @[fifo.scala 108:63]
   wire [4:0] _memReg_4_branch_mask_T = memReg_4_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1030 = |_T_43 ? _memReg_4_branch_mask_T : _GEN_978; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1031 = _T_44 ? 1'h0 : _GEN_994; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1014 = |_T_43 ? _memReg_4_branch_mask_T : _GEN_962; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1015 = _T_44 ? 1'h0 : _GEN_978; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_50 = memReg_5_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_51 = |_T_50; // @[fifo.scala 108:63]
   wire [4:0] _memReg_5_branch_mask_T = memReg_5_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1036 = |_T_50 ? _memReg_5_branch_mask_T : _GEN_979; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1037 = _T_51 ? 1'h0 : _GEN_995; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1020 = |_T_50 ? _memReg_5_branch_mask_T : _GEN_963; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1021 = _T_51 ? 1'h0 : _GEN_979; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_57 = memReg_6_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_58 = |_T_57; // @[fifo.scala 108:63]
   wire [4:0] _memReg_6_branch_mask_T = memReg_6_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1042 = |_T_57 ? _memReg_6_branch_mask_T : _GEN_980; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1043 = _T_58 ? 1'h0 : _GEN_996; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1026 = |_T_57 ? _memReg_6_branch_mask_T : _GEN_964; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1027 = _T_58 ? 1'h0 : _GEN_980; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_64 = memReg_7_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_65 = |_T_64; // @[fifo.scala 108:63]
   wire [4:0] _memReg_7_branch_mask_T = memReg_7_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1048 = |_T_64 ? _memReg_7_branch_mask_T : _GEN_981; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1049 = _T_65 ? 1'h0 : _GEN_997; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1032 = |_T_64 ? _memReg_7_branch_mask_T : _GEN_965; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1033 = _T_65 ? 1'h0 : _GEN_981; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_71 = memReg_8_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_72 = |_T_71; // @[fifo.scala 108:63]
   wire [4:0] _memReg_8_branch_mask_T = memReg_8_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1054 = |_T_71 ? _memReg_8_branch_mask_T : _GEN_982; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1055 = _T_72 ? 1'h0 : _GEN_998; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1038 = |_T_71 ? _memReg_8_branch_mask_T : _GEN_966; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1039 = _T_72 ? 1'h0 : _GEN_982; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_78 = memReg_9_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_79 = |_T_78; // @[fifo.scala 108:63]
   wire [4:0] _memReg_9_branch_mask_T = memReg_9_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1060 = |_T_78 ? _memReg_9_branch_mask_T : _GEN_983; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1061 = _T_79 ? 1'h0 : _GEN_999; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1044 = |_T_78 ? _memReg_9_branch_mask_T : _GEN_967; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1045 = _T_79 ? 1'h0 : _GEN_983; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_85 = memReg_10_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_86 = |_T_85; // @[fifo.scala 108:63]
   wire [4:0] _memReg_10_branch_mask_T = memReg_10_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1066 = |_T_85 ? _memReg_10_branch_mask_T : _GEN_984; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1067 = _T_86 ? 1'h0 : _GEN_1000; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1050 = |_T_85 ? _memReg_10_branch_mask_T : _GEN_968; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1051 = _T_86 ? 1'h0 : _GEN_984; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_92 = memReg_11_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_93 = |_T_92; // @[fifo.scala 108:63]
   wire [4:0] _memReg_11_branch_mask_T = memReg_11_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1072 = |_T_92 ? _memReg_11_branch_mask_T : _GEN_985; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1073 = _T_93 ? 1'h0 : _GEN_1001; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1056 = |_T_92 ? _memReg_11_branch_mask_T : _GEN_969; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1057 = _T_93 ? 1'h0 : _GEN_985; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_99 = memReg_12_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_100 = |_T_99; // @[fifo.scala 108:63]
   wire [4:0] _memReg_12_branch_mask_T = memReg_12_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1078 = |_T_99 ? _memReg_12_branch_mask_T : _GEN_986; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1079 = _T_100 ? 1'h0 : _GEN_1002; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1062 = |_T_99 ? _memReg_12_branch_mask_T : _GEN_970; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1063 = _T_100 ? 1'h0 : _GEN_986; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_106 = memReg_13_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_107 = |_T_106; // @[fifo.scala 108:63]
   wire [4:0] _memReg_13_branch_mask_T = memReg_13_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1084 = |_T_106 ? _memReg_13_branch_mask_T : _GEN_987; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1085 = _T_107 ? 1'h0 : _GEN_1003; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1068 = |_T_106 ? _memReg_13_branch_mask_T : _GEN_971; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1069 = _T_107 ? 1'h0 : _GEN_987; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_113 = memReg_14_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_114 = |_T_113; // @[fifo.scala 108:63]
   wire [4:0] _memReg_14_branch_mask_T = memReg_14_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1090 = |_T_113 ? _memReg_14_branch_mask_T : _GEN_988; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1091 = _T_114 ? 1'h0 : _GEN_1004; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1074 = |_T_113 ? _memReg_14_branch_mask_T : _GEN_972; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1075 = _T_114 ? 1'h0 : _GEN_988; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_120 = memReg_15_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_121 = |_T_120; // @[fifo.scala 108:63]
   wire [4:0] _memReg_15_branch_mask_T = memReg_15_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
   wire [4:0] _T_124 = _GEN_589 & branchOps_branchMask; // @[utils.scala 92:27]
   wire  _T_125 = |_T_124; // @[utils.scala 92:51]
   wire [4:0] _read_data_branch_mask_T = _GEN_589 ^ branchOps_branchMask; // @[utils.scala 93:42]
-  wire [4:0] _GEN_1134 = |_T_124 ? _read_data_branch_mask_T : _GEN_589; // @[utils.scala 92:56 93:27 96:27]
-  wire [4:0] _GEN_1135 = _T_125 ? 5'h0 : _GEN_589; // @[utils.scala 101:56 102:27 106:27]
-  wire  _GEN_1136 = _T_125 ? 1'h0 : _GEN_573; // @[utils.scala 101:56 103:28 107:28]
-  wire [4:0] _GEN_1137 = branchOps_passed ? _GEN_1134 : _GEN_1135; // @[utils.scala 90:30]
-  wire  _GEN_1138 = branchOps_passed ? _GEN_573 : _GEN_1136; // @[utils.scala 90:30 98:26]
+  wire [4:0] _GEN_1118 = |_T_124 ? _read_data_branch_mask_T : _GEN_589; // @[utils.scala 92:56 93:27 96:27]
+  wire [4:0] _GEN_1119 = _T_125 ? 5'h0 : _GEN_589; // @[utils.scala 101:56 102:27 106:27]
+  wire  _GEN_1120 = _T_125 ? 1'h0 : _GEN_573; // @[utils.scala 101:56 103:28 107:28]
+  wire [4:0] _GEN_1121 = branchOps_passed ? _GEN_1118 : _GEN_1119; // @[utils.scala 90:30]
+  wire  _GEN_1122 = branchOps_passed ? _GEN_573 : _GEN_1120; // @[utils.scala 90:30 98:26]
   wire  _matchFound_T_3 = memReg_0_valid & memReg_0_address[31:3] == checkAddress[31:3]; // @[fifo.scala 131:26]
   wire  _matchFound_T_7 = memReg_1_valid & memReg_1_address[31:3] == checkAddress[31:3]; // @[fifo.scala 131:26]
   wire  _matchFound_T_11 = memReg_2_valid & memReg_2_address[31:3] == checkAddress[31:3]; // @[fifo.scala 131:26]
@@ -31938,8 +31923,8 @@ module fifoWithAddrCheck(
   assign read_data_core_instruction = 4'hf == readPtr ? memReg_15_core_instruction : _GEN_524; // @[fifo.scala 86:{13,13}]
   assign read_data_core_robAddr = 4'hf == readPtr ? memReg_15_core_robAddr : _GEN_540; // @[fifo.scala 86:{13,13}]
   assign read_data_core_prfDest = 4'hf == readPtr ? memReg_15_core_prfDest : _GEN_556; // @[fifo.scala 86:{13,13}]
-  assign read_data_branch_valid = branchOps_valid ? _GEN_1138 : _GEN_573; // @[utils.scala 112:24 89:27]
-  assign read_data_branch_mask = branchOps_valid ? _GEN_1137 : _GEN_589; // @[utils.scala 111:23 89:27]
+  assign read_data_branch_valid = branchOps_valid ? _GEN_1122 : _GEN_573; // @[utils.scala 112:24 89:27]
+  assign read_data_branch_mask = branchOps_valid ? _GEN_1121 : _GEN_589; // @[utils.scala 111:23 89:27]
   assign isEmpty = emptyReg; // @[fifo.scala 88:11]
   assign matchFound = _matchFound_T_3 | _matchFound_T_7 | _matchFound_T_11 | _matchFound_T_15 | _matchFound_T_19 |
     _matchFound_T_23 | _matchFound_T_27 | _matchFound_T_31 | _matchFound_T_35 | _matchFound_T_39 | _matchFound_T_43 |
@@ -31984,14 +31969,14 @@ module fifoWithAddrCheck(
       memReg_0_branch_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (branchOps_passed) begin // @[fifo.scala 107:32]
-        memReg_0_branch_valid <= _GEN_990;
+        memReg_0_branch_valid <= _GEN_974;
       end else if (_T_16) begin // @[fifo.scala 112:68]
         memReg_0_branch_valid <= 1'h0; // @[fifo.scala 113:36]
       end else begin
-        memReg_0_branch_valid <= _GEN_990;
+        memReg_0_branch_valid <= _GEN_974;
       end
     end else begin
-      memReg_0_branch_valid <= _GEN_990;
+      memReg_0_branch_valid <= _GEN_974;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_0_branch_mask <= 5'h0; // @[fifo.scala 27:33]
@@ -32000,13 +31985,13 @@ module fifoWithAddrCheck(
         if (|_T_15) begin // @[fifo.scala 108:68]
           memReg_0_branch_mask <= _memReg_0_branch_mask_T; // @[fifo.scala 109:35]
         end else begin
-          memReg_0_branch_mask <= _GEN_974;
+          memReg_0_branch_mask <= _GEN_958;
         end
       end else begin
-        memReg_0_branch_mask <= _GEN_974;
+        memReg_0_branch_mask <= _GEN_958;
       end
     end else begin
-      memReg_0_branch_mask <= _GEN_974;
+      memReg_0_branch_mask <= _GEN_958;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_1_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32048,30 +32033,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h1 | 4'h1 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_1_branch_valid <= _GEN_991;
+          memReg_1_branch_valid <= _GEN_975;
         end else begin
-          memReg_1_branch_valid <= _GEN_1013;
+          memReg_1_branch_valid <= _GEN_997;
         end
       end else begin
-        memReg_1_branch_valid <= _GEN_991;
+        memReg_1_branch_valid <= _GEN_975;
       end
     end else begin
-      memReg_1_branch_valid <= _GEN_991;
+      memReg_1_branch_valid <= _GEN_975;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_1_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h1 | 4'h1 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_1_branch_mask <= _GEN_1012;
+          memReg_1_branch_mask <= _GEN_996;
         end else begin
-          memReg_1_branch_mask <= _GEN_975;
+          memReg_1_branch_mask <= _GEN_959;
         end
       end else begin
-        memReg_1_branch_mask <= _GEN_975;
+        memReg_1_branch_mask <= _GEN_959;
       end
     end else begin
-      memReg_1_branch_mask <= _GEN_975;
+      memReg_1_branch_mask <= _GEN_959;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_2_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32113,30 +32098,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h2 | 4'h2 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_2_branch_valid <= _GEN_992;
+          memReg_2_branch_valid <= _GEN_976;
         end else begin
-          memReg_2_branch_valid <= _GEN_1019;
+          memReg_2_branch_valid <= _GEN_1003;
         end
       end else begin
-        memReg_2_branch_valid <= _GEN_992;
+        memReg_2_branch_valid <= _GEN_976;
       end
     end else begin
-      memReg_2_branch_valid <= _GEN_992;
+      memReg_2_branch_valid <= _GEN_976;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_2_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h2 | 4'h2 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_2_branch_mask <= _GEN_1018;
+          memReg_2_branch_mask <= _GEN_1002;
         end else begin
-          memReg_2_branch_mask <= _GEN_976;
+          memReg_2_branch_mask <= _GEN_960;
         end
       end else begin
-        memReg_2_branch_mask <= _GEN_976;
+        memReg_2_branch_mask <= _GEN_960;
       end
     end else begin
-      memReg_2_branch_mask <= _GEN_976;
+      memReg_2_branch_mask <= _GEN_960;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_3_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32178,30 +32163,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h3 | 4'h3 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_3_branch_valid <= _GEN_993;
+          memReg_3_branch_valid <= _GEN_977;
         end else begin
-          memReg_3_branch_valid <= _GEN_1025;
+          memReg_3_branch_valid <= _GEN_1009;
         end
       end else begin
-        memReg_3_branch_valid <= _GEN_993;
+        memReg_3_branch_valid <= _GEN_977;
       end
     end else begin
-      memReg_3_branch_valid <= _GEN_993;
+      memReg_3_branch_valid <= _GEN_977;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_3_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h3 | 4'h3 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_3_branch_mask <= _GEN_1024;
+          memReg_3_branch_mask <= _GEN_1008;
         end else begin
-          memReg_3_branch_mask <= _GEN_977;
+          memReg_3_branch_mask <= _GEN_961;
         end
       end else begin
-        memReg_3_branch_mask <= _GEN_977;
+        memReg_3_branch_mask <= _GEN_961;
       end
     end else begin
-      memReg_3_branch_mask <= _GEN_977;
+      memReg_3_branch_mask <= _GEN_961;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_4_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32243,30 +32228,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h4 | 4'h4 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_4_branch_valid <= _GEN_994;
+          memReg_4_branch_valid <= _GEN_978;
         end else begin
-          memReg_4_branch_valid <= _GEN_1031;
+          memReg_4_branch_valid <= _GEN_1015;
         end
       end else begin
-        memReg_4_branch_valid <= _GEN_994;
+        memReg_4_branch_valid <= _GEN_978;
       end
     end else begin
-      memReg_4_branch_valid <= _GEN_994;
+      memReg_4_branch_valid <= _GEN_978;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_4_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h4 | 4'h4 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_4_branch_mask <= _GEN_1030;
+          memReg_4_branch_mask <= _GEN_1014;
         end else begin
-          memReg_4_branch_mask <= _GEN_978;
+          memReg_4_branch_mask <= _GEN_962;
         end
       end else begin
-        memReg_4_branch_mask <= _GEN_978;
+        memReg_4_branch_mask <= _GEN_962;
       end
     end else begin
-      memReg_4_branch_mask <= _GEN_978;
+      memReg_4_branch_mask <= _GEN_962;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_5_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32308,30 +32293,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h5 | 4'h5 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_5_branch_valid <= _GEN_995;
+          memReg_5_branch_valid <= _GEN_979;
         end else begin
-          memReg_5_branch_valid <= _GEN_1037;
+          memReg_5_branch_valid <= _GEN_1021;
         end
       end else begin
-        memReg_5_branch_valid <= _GEN_995;
+        memReg_5_branch_valid <= _GEN_979;
       end
     end else begin
-      memReg_5_branch_valid <= _GEN_995;
+      memReg_5_branch_valid <= _GEN_979;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_5_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h5 | 4'h5 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_5_branch_mask <= _GEN_1036;
+          memReg_5_branch_mask <= _GEN_1020;
         end else begin
-          memReg_5_branch_mask <= _GEN_979;
+          memReg_5_branch_mask <= _GEN_963;
         end
       end else begin
-        memReg_5_branch_mask <= _GEN_979;
+        memReg_5_branch_mask <= _GEN_963;
       end
     end else begin
-      memReg_5_branch_mask <= _GEN_979;
+      memReg_5_branch_mask <= _GEN_963;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_6_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32373,30 +32358,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h6 | 4'h6 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_6_branch_valid <= _GEN_996;
+          memReg_6_branch_valid <= _GEN_980;
         end else begin
-          memReg_6_branch_valid <= _GEN_1043;
+          memReg_6_branch_valid <= _GEN_1027;
         end
       end else begin
-        memReg_6_branch_valid <= _GEN_996;
+        memReg_6_branch_valid <= _GEN_980;
       end
     end else begin
-      memReg_6_branch_valid <= _GEN_996;
+      memReg_6_branch_valid <= _GEN_980;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_6_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h6 | 4'h6 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_6_branch_mask <= _GEN_1042;
+          memReg_6_branch_mask <= _GEN_1026;
         end else begin
-          memReg_6_branch_mask <= _GEN_980;
+          memReg_6_branch_mask <= _GEN_964;
         end
       end else begin
-        memReg_6_branch_mask <= _GEN_980;
+        memReg_6_branch_mask <= _GEN_964;
       end
     end else begin
-      memReg_6_branch_mask <= _GEN_980;
+      memReg_6_branch_mask <= _GEN_964;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_7_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32438,30 +32423,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h7 | 4'h7 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_7_branch_valid <= _GEN_997;
+          memReg_7_branch_valid <= _GEN_981;
         end else begin
-          memReg_7_branch_valid <= _GEN_1049;
+          memReg_7_branch_valid <= _GEN_1033;
         end
       end else begin
-        memReg_7_branch_valid <= _GEN_997;
+        memReg_7_branch_valid <= _GEN_981;
       end
     end else begin
-      memReg_7_branch_valid <= _GEN_997;
+      memReg_7_branch_valid <= _GEN_981;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_7_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h7 | 4'h7 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_7_branch_mask <= _GEN_1048;
+          memReg_7_branch_mask <= _GEN_1032;
         end else begin
-          memReg_7_branch_mask <= _GEN_981;
+          memReg_7_branch_mask <= _GEN_965;
         end
       end else begin
-        memReg_7_branch_mask <= _GEN_981;
+        memReg_7_branch_mask <= _GEN_965;
       end
     end else begin
-      memReg_7_branch_mask <= _GEN_981;
+      memReg_7_branch_mask <= _GEN_965;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_8_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32503,30 +32488,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h8 | 4'h8 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_8_branch_valid <= _GEN_998;
+          memReg_8_branch_valid <= _GEN_982;
         end else begin
-          memReg_8_branch_valid <= _GEN_1055;
+          memReg_8_branch_valid <= _GEN_1039;
         end
       end else begin
-        memReg_8_branch_valid <= _GEN_998;
+        memReg_8_branch_valid <= _GEN_982;
       end
     end else begin
-      memReg_8_branch_valid <= _GEN_998;
+      memReg_8_branch_valid <= _GEN_982;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_8_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h8 | 4'h8 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_8_branch_mask <= _GEN_1054;
+          memReg_8_branch_mask <= _GEN_1038;
         end else begin
-          memReg_8_branch_mask <= _GEN_982;
+          memReg_8_branch_mask <= _GEN_966;
         end
       end else begin
-        memReg_8_branch_mask <= _GEN_982;
+        memReg_8_branch_mask <= _GEN_966;
       end
     end else begin
-      memReg_8_branch_mask <= _GEN_982;
+      memReg_8_branch_mask <= _GEN_966;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_9_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32568,30 +32553,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h9 | 4'h9 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_9_branch_valid <= _GEN_999;
+          memReg_9_branch_valid <= _GEN_983;
         end else begin
-          memReg_9_branch_valid <= _GEN_1061;
+          memReg_9_branch_valid <= _GEN_1045;
         end
       end else begin
-        memReg_9_branch_valid <= _GEN_999;
+        memReg_9_branch_valid <= _GEN_983;
       end
     end else begin
-      memReg_9_branch_valid <= _GEN_999;
+      memReg_9_branch_valid <= _GEN_983;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_9_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h9 | 4'h9 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_9_branch_mask <= _GEN_1060;
+          memReg_9_branch_mask <= _GEN_1044;
         end else begin
-          memReg_9_branch_mask <= _GEN_983;
+          memReg_9_branch_mask <= _GEN_967;
         end
       end else begin
-        memReg_9_branch_mask <= _GEN_983;
+        memReg_9_branch_mask <= _GEN_967;
       end
     end else begin
-      memReg_9_branch_mask <= _GEN_983;
+      memReg_9_branch_mask <= _GEN_967;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_10_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32633,30 +32618,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'ha | 4'ha <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_10_branch_valid <= _GEN_1000;
+          memReg_10_branch_valid <= _GEN_984;
         end else begin
-          memReg_10_branch_valid <= _GEN_1067;
+          memReg_10_branch_valid <= _GEN_1051;
         end
       end else begin
-        memReg_10_branch_valid <= _GEN_1000;
+        memReg_10_branch_valid <= _GEN_984;
       end
     end else begin
-      memReg_10_branch_valid <= _GEN_1000;
+      memReg_10_branch_valid <= _GEN_984;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_10_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'ha | 4'ha <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_10_branch_mask <= _GEN_1066;
+          memReg_10_branch_mask <= _GEN_1050;
         end else begin
-          memReg_10_branch_mask <= _GEN_984;
+          memReg_10_branch_mask <= _GEN_968;
         end
       end else begin
-        memReg_10_branch_mask <= _GEN_984;
+        memReg_10_branch_mask <= _GEN_968;
       end
     end else begin
-      memReg_10_branch_mask <= _GEN_984;
+      memReg_10_branch_mask <= _GEN_968;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_11_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32698,30 +32683,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hb | 4'hb <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_11_branch_valid <= _GEN_1001;
+          memReg_11_branch_valid <= _GEN_985;
         end else begin
-          memReg_11_branch_valid <= _GEN_1073;
+          memReg_11_branch_valid <= _GEN_1057;
         end
       end else begin
-        memReg_11_branch_valid <= _GEN_1001;
+        memReg_11_branch_valid <= _GEN_985;
       end
     end else begin
-      memReg_11_branch_valid <= _GEN_1001;
+      memReg_11_branch_valid <= _GEN_985;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_11_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hb | 4'hb <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_11_branch_mask <= _GEN_1072;
+          memReg_11_branch_mask <= _GEN_1056;
         end else begin
-          memReg_11_branch_mask <= _GEN_985;
+          memReg_11_branch_mask <= _GEN_969;
         end
       end else begin
-        memReg_11_branch_mask <= _GEN_985;
+        memReg_11_branch_mask <= _GEN_969;
       end
     end else begin
-      memReg_11_branch_mask <= _GEN_985;
+      memReg_11_branch_mask <= _GEN_969;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_12_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32763,30 +32748,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hc | 4'hc <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_12_branch_valid <= _GEN_1002;
+          memReg_12_branch_valid <= _GEN_986;
         end else begin
-          memReg_12_branch_valid <= _GEN_1079;
+          memReg_12_branch_valid <= _GEN_1063;
         end
       end else begin
-        memReg_12_branch_valid <= _GEN_1002;
+        memReg_12_branch_valid <= _GEN_986;
       end
     end else begin
-      memReg_12_branch_valid <= _GEN_1002;
+      memReg_12_branch_valid <= _GEN_986;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_12_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hc | 4'hc <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_12_branch_mask <= _GEN_1078;
+          memReg_12_branch_mask <= _GEN_1062;
         end else begin
-          memReg_12_branch_mask <= _GEN_986;
+          memReg_12_branch_mask <= _GEN_970;
         end
       end else begin
-        memReg_12_branch_mask <= _GEN_986;
+        memReg_12_branch_mask <= _GEN_970;
       end
     end else begin
-      memReg_12_branch_mask <= _GEN_986;
+      memReg_12_branch_mask <= _GEN_970;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_13_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32828,30 +32813,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hd | 4'hd <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_13_branch_valid <= _GEN_1003;
+          memReg_13_branch_valid <= _GEN_987;
         end else begin
-          memReg_13_branch_valid <= _GEN_1085;
+          memReg_13_branch_valid <= _GEN_1069;
         end
       end else begin
-        memReg_13_branch_valid <= _GEN_1003;
+        memReg_13_branch_valid <= _GEN_987;
       end
     end else begin
-      memReg_13_branch_valid <= _GEN_1003;
+      memReg_13_branch_valid <= _GEN_987;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_13_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hd | 4'hd <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_13_branch_mask <= _GEN_1084;
+          memReg_13_branch_mask <= _GEN_1068;
         end else begin
-          memReg_13_branch_mask <= _GEN_987;
+          memReg_13_branch_mask <= _GEN_971;
         end
       end else begin
-        memReg_13_branch_mask <= _GEN_987;
+        memReg_13_branch_mask <= _GEN_971;
       end
     end else begin
-      memReg_13_branch_mask <= _GEN_987;
+      memReg_13_branch_mask <= _GEN_971;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_14_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32893,30 +32878,30 @@ module fifoWithAddrCheck(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'he | 4'he <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_14_branch_valid <= _GEN_1004;
+          memReg_14_branch_valid <= _GEN_988;
         end else begin
-          memReg_14_branch_valid <= _GEN_1091;
+          memReg_14_branch_valid <= _GEN_1075;
         end
       end else begin
-        memReg_14_branch_valid <= _GEN_1004;
+        memReg_14_branch_valid <= _GEN_988;
       end
     end else begin
-      memReg_14_branch_valid <= _GEN_1004;
+      memReg_14_branch_valid <= _GEN_988;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_14_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'he | 4'he <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_14_branch_mask <= _GEN_1090;
+          memReg_14_branch_mask <= _GEN_1074;
         end else begin
-          memReg_14_branch_mask <= _GEN_988;
+          memReg_14_branch_mask <= _GEN_972;
         end
       end else begin
-        memReg_14_branch_mask <= _GEN_988;
+        memReg_14_branch_mask <= _GEN_972;
       end
     end else begin
-      memReg_14_branch_mask <= _GEN_988;
+      memReg_14_branch_mask <= _GEN_972;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_15_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -32957,14 +32942,14 @@ module fifoWithAddrCheck(
       memReg_15_branch_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (branchOps_passed) begin // @[fifo.scala 107:32]
-        memReg_15_branch_valid <= _GEN_1005;
+        memReg_15_branch_valid <= _GEN_989;
       end else if (_T_121) begin // @[fifo.scala 112:68]
         memReg_15_branch_valid <= 1'h0; // @[fifo.scala 113:36]
       end else begin
-        memReg_15_branch_valid <= _GEN_1005;
+        memReg_15_branch_valid <= _GEN_989;
       end
     end else begin
-      memReg_15_branch_valid <= _GEN_1005;
+      memReg_15_branch_valid <= _GEN_989;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_15_branch_mask <= 5'h0; // @[fifo.scala 27:33]
@@ -32973,13 +32958,13 @@ module fifoWithAddrCheck(
         if (|_T_120) begin // @[fifo.scala 108:68]
           memReg_15_branch_mask <= _memReg_15_branch_mask_T; // @[fifo.scala 109:35]
         end else begin
-          memReg_15_branch_mask <= _GEN_989;
+          memReg_15_branch_mask <= _GEN_973;
         end
       end else begin
-        memReg_15_branch_mask <= _GEN_989;
+        memReg_15_branch_mask <= _GEN_973;
       end
     end else begin
-      memReg_15_branch_mask <= _GEN_989;
+      memReg_15_branch_mask <= _GEN_973;
     end
     if (reset) begin // @[fifo.scala 33:25]
       readPtr <= 4'h0; // @[fifo.scala 33:25]
@@ -34028,6 +34013,7 @@ module fifoWithBranchOps(
   wire  _GEN_699 = 4'hd == readPtr ? memReg_13_cacheLine_invalidated : _GEN_698; // @[fifo.scala 86:{13,13}]
   wire  _GEN_700 = 4'he == readPtr ? memReg_14_cacheLine_invalidated : _GEN_699; // @[fifo.scala 86:{13,13}]
   wire [4:0] _T_8 = write_data_branch_mask & branchOps_branchMask; // @[utils.scala 62:31]
+  wire  _T_9 = |_T_8; // @[utils.scala 62:55]
   wire [4:0] _memReg_branch_mask_T = write_data_branch_mask ^ branchOps_branchMask; // @[utils.scala 63:42]
   wire [4:0] _GEN_702 = 4'h0 == writePtr ? _memReg_branch_mask_T : _GEN_350; // @[utils.scala 63:{23,23}]
   wire [4:0] _GEN_703 = 4'h1 == writePtr ? _memReg_branch_mask_T : _GEN_351; // @[utils.scala 63:{23,23}]
@@ -34093,182 +34079,166 @@ module fifoWithBranchOps(
   wire  _GEN_763 = 4'hd == writePtr ? write_data_branch_valid : _GEN_347; // @[utils.scala 67:{22,22}]
   wire  _GEN_764 = 4'he == writePtr ? write_data_branch_valid : _GEN_348; // @[utils.scala 67:{22,22}]
   wire  _GEN_765 = 4'hf == writePtr ? write_data_branch_valid : _GEN_349; // @[utils.scala 67:{22,22}]
-  wire [4:0] _GEN_767 = 4'h1 == writePtr ? memReg_1_branch_mask : memReg_0_branch_mask; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_768 = 4'h2 == writePtr ? memReg_2_branch_mask : _GEN_767; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_769 = 4'h3 == writePtr ? memReg_3_branch_mask : _GEN_768; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_770 = 4'h4 == writePtr ? memReg_4_branch_mask : _GEN_769; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_771 = 4'h5 == writePtr ? memReg_5_branch_mask : _GEN_770; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_772 = 4'h6 == writePtr ? memReg_6_branch_mask : _GEN_771; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_773 = 4'h7 == writePtr ? memReg_7_branch_mask : _GEN_772; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_774 = 4'h8 == writePtr ? memReg_8_branch_mask : _GEN_773; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_775 = 4'h9 == writePtr ? memReg_9_branch_mask : _GEN_774; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_776 = 4'ha == writePtr ? memReg_10_branch_mask : _GEN_775; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_777 = 4'hb == writePtr ? memReg_11_branch_mask : _GEN_776; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_778 = 4'hc == writePtr ? memReg_12_branch_mask : _GEN_777; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_779 = 4'hd == writePtr ? memReg_13_branch_mask : _GEN_778; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_780 = 4'he == writePtr ? memReg_14_branch_mask : _GEN_779; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_781 = 4'hf == writePtr ? memReg_15_branch_mask : _GEN_780; // @[utils.scala 70:{27,27}]
-  wire [4:0] _T_10 = _GEN_781 & branchOps_branchMask; // @[utils.scala 70:27]
-  wire  _GEN_782 = 4'h0 == writePtr ? 1'h0 : _GEN_334; // @[utils.scala 71:{24,24}]
-  wire  _GEN_783 = 4'h1 == writePtr ? 1'h0 : _GEN_335; // @[utils.scala 71:{24,24}]
-  wire  _GEN_784 = 4'h2 == writePtr ? 1'h0 : _GEN_336; // @[utils.scala 71:{24,24}]
-  wire  _GEN_785 = 4'h3 == writePtr ? 1'h0 : _GEN_337; // @[utils.scala 71:{24,24}]
-  wire  _GEN_786 = 4'h4 == writePtr ? 1'h0 : _GEN_338; // @[utils.scala 71:{24,24}]
-  wire  _GEN_787 = 4'h5 == writePtr ? 1'h0 : _GEN_339; // @[utils.scala 71:{24,24}]
-  wire  _GEN_788 = 4'h6 == writePtr ? 1'h0 : _GEN_340; // @[utils.scala 71:{24,24}]
-  wire  _GEN_789 = 4'h7 == writePtr ? 1'h0 : _GEN_341; // @[utils.scala 71:{24,24}]
-  wire  _GEN_790 = 4'h8 == writePtr ? 1'h0 : _GEN_342; // @[utils.scala 71:{24,24}]
-  wire  _GEN_791 = 4'h9 == writePtr ? 1'h0 : _GEN_343; // @[utils.scala 71:{24,24}]
-  wire  _GEN_792 = 4'ha == writePtr ? 1'h0 : _GEN_344; // @[utils.scala 71:{24,24}]
-  wire  _GEN_793 = 4'hb == writePtr ? 1'h0 : _GEN_345; // @[utils.scala 71:{24,24}]
-  wire  _GEN_794 = 4'hc == writePtr ? 1'h0 : _GEN_346; // @[utils.scala 71:{24,24}]
-  wire  _GEN_795 = 4'hd == writePtr ? 1'h0 : _GEN_347; // @[utils.scala 71:{24,24}]
-  wire  _GEN_796 = 4'he == writePtr ? 1'h0 : _GEN_348; // @[utils.scala 71:{24,24}]
-  wire  _GEN_797 = 4'hf == writePtr ? 1'h0 : _GEN_349; // @[utils.scala 71:{24,24}]
-  wire [4:0] _GEN_798 = 4'h0 == writePtr ? 5'h0 : _GEN_350; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_799 = 4'h1 == writePtr ? 5'h0 : _GEN_351; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_800 = 4'h2 == writePtr ? 5'h0 : _GEN_352; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_801 = 4'h3 == writePtr ? 5'h0 : _GEN_353; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_802 = 4'h4 == writePtr ? 5'h0 : _GEN_354; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_803 = 4'h5 == writePtr ? 5'h0 : _GEN_355; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_804 = 4'h6 == writePtr ? 5'h0 : _GEN_356; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_805 = 4'h7 == writePtr ? 5'h0 : _GEN_357; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_806 = 4'h8 == writePtr ? 5'h0 : _GEN_358; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_807 = 4'h9 == writePtr ? 5'h0 : _GEN_359; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_808 = 4'ha == writePtr ? 5'h0 : _GEN_360; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_809 = 4'hb == writePtr ? 5'h0 : _GEN_361; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_810 = 4'hc == writePtr ? 5'h0 : _GEN_362; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_811 = 4'hd == writePtr ? 5'h0 : _GEN_363; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_812 = 4'he == writePtr ? 5'h0 : _GEN_364; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_813 = 4'hf == writePtr ? 5'h0 : _GEN_365; // @[utils.scala 72:{23,23}]
-  wire  _GEN_846 = |_T_10 ? _GEN_782 : _GEN_750; // @[utils.scala 70:56]
-  wire  _GEN_847 = |_T_10 ? _GEN_783 : _GEN_751; // @[utils.scala 70:56]
-  wire  _GEN_848 = |_T_10 ? _GEN_784 : _GEN_752; // @[utils.scala 70:56]
-  wire  _GEN_849 = |_T_10 ? _GEN_785 : _GEN_753; // @[utils.scala 70:56]
-  wire  _GEN_850 = |_T_10 ? _GEN_786 : _GEN_754; // @[utils.scala 70:56]
-  wire  _GEN_851 = |_T_10 ? _GEN_787 : _GEN_755; // @[utils.scala 70:56]
-  wire  _GEN_852 = |_T_10 ? _GEN_788 : _GEN_756; // @[utils.scala 70:56]
-  wire  _GEN_853 = |_T_10 ? _GEN_789 : _GEN_757; // @[utils.scala 70:56]
-  wire  _GEN_854 = |_T_10 ? _GEN_790 : _GEN_758; // @[utils.scala 70:56]
-  wire  _GEN_855 = |_T_10 ? _GEN_791 : _GEN_759; // @[utils.scala 70:56]
-  wire  _GEN_856 = |_T_10 ? _GEN_792 : _GEN_760; // @[utils.scala 70:56]
-  wire  _GEN_857 = |_T_10 ? _GEN_793 : _GEN_761; // @[utils.scala 70:56]
-  wire  _GEN_858 = |_T_10 ? _GEN_794 : _GEN_762; // @[utils.scala 70:56]
-  wire  _GEN_859 = |_T_10 ? _GEN_795 : _GEN_763; // @[utils.scala 70:56]
-  wire  _GEN_860 = |_T_10 ? _GEN_796 : _GEN_764; // @[utils.scala 70:56]
-  wire  _GEN_861 = |_T_10 ? _GEN_797 : _GEN_765; // @[utils.scala 70:56]
-  wire [4:0] _GEN_862 = |_T_10 ? _GEN_798 : _GEN_718; // @[utils.scala 70:56]
-  wire [4:0] _GEN_863 = |_T_10 ? _GEN_799 : _GEN_719; // @[utils.scala 70:56]
-  wire [4:0] _GEN_864 = |_T_10 ? _GEN_800 : _GEN_720; // @[utils.scala 70:56]
-  wire [4:0] _GEN_865 = |_T_10 ? _GEN_801 : _GEN_721; // @[utils.scala 70:56]
-  wire [4:0] _GEN_866 = |_T_10 ? _GEN_802 : _GEN_722; // @[utils.scala 70:56]
-  wire [4:0] _GEN_867 = |_T_10 ? _GEN_803 : _GEN_723; // @[utils.scala 70:56]
-  wire [4:0] _GEN_868 = |_T_10 ? _GEN_804 : _GEN_724; // @[utils.scala 70:56]
-  wire [4:0] _GEN_869 = |_T_10 ? _GEN_805 : _GEN_725; // @[utils.scala 70:56]
-  wire [4:0] _GEN_870 = |_T_10 ? _GEN_806 : _GEN_726; // @[utils.scala 70:56]
-  wire [4:0] _GEN_871 = |_T_10 ? _GEN_807 : _GEN_727; // @[utils.scala 70:56]
-  wire [4:0] _GEN_872 = |_T_10 ? _GEN_808 : _GEN_728; // @[utils.scala 70:56]
-  wire [4:0] _GEN_873 = |_T_10 ? _GEN_809 : _GEN_729; // @[utils.scala 70:56]
-  wire [4:0] _GEN_874 = |_T_10 ? _GEN_810 : _GEN_730; // @[utils.scala 70:56]
-  wire [4:0] _GEN_875 = |_T_10 ? _GEN_811 : _GEN_731; // @[utils.scala 70:56]
-  wire [4:0] _GEN_876 = |_T_10 ? _GEN_812 : _GEN_732; // @[utils.scala 70:56]
-  wire [4:0] _GEN_877 = |_T_10 ? _GEN_813 : _GEN_733; // @[utils.scala 70:56]
-  wire [4:0] _GEN_878 = branchOps_passed ? _GEN_734 : _GEN_862; // @[utils.scala 60:30]
-  wire [4:0] _GEN_879 = branchOps_passed ? _GEN_735 : _GEN_863; // @[utils.scala 60:30]
-  wire [4:0] _GEN_880 = branchOps_passed ? _GEN_736 : _GEN_864; // @[utils.scala 60:30]
-  wire [4:0] _GEN_881 = branchOps_passed ? _GEN_737 : _GEN_865; // @[utils.scala 60:30]
-  wire [4:0] _GEN_882 = branchOps_passed ? _GEN_738 : _GEN_866; // @[utils.scala 60:30]
-  wire [4:0] _GEN_883 = branchOps_passed ? _GEN_739 : _GEN_867; // @[utils.scala 60:30]
-  wire [4:0] _GEN_884 = branchOps_passed ? _GEN_740 : _GEN_868; // @[utils.scala 60:30]
-  wire [4:0] _GEN_885 = branchOps_passed ? _GEN_741 : _GEN_869; // @[utils.scala 60:30]
-  wire [4:0] _GEN_886 = branchOps_passed ? _GEN_742 : _GEN_870; // @[utils.scala 60:30]
-  wire [4:0] _GEN_887 = branchOps_passed ? _GEN_743 : _GEN_871; // @[utils.scala 60:30]
-  wire [4:0] _GEN_888 = branchOps_passed ? _GEN_744 : _GEN_872; // @[utils.scala 60:30]
-  wire [4:0] _GEN_889 = branchOps_passed ? _GEN_745 : _GEN_873; // @[utils.scala 60:30]
-  wire [4:0] _GEN_890 = branchOps_passed ? _GEN_746 : _GEN_874; // @[utils.scala 60:30]
-  wire [4:0] _GEN_891 = branchOps_passed ? _GEN_747 : _GEN_875; // @[utils.scala 60:30]
-  wire [4:0] _GEN_892 = branchOps_passed ? _GEN_748 : _GEN_876; // @[utils.scala 60:30]
-  wire [4:0] _GEN_893 = branchOps_passed ? _GEN_749 : _GEN_877; // @[utils.scala 60:30]
-  wire  _GEN_894 = branchOps_passed ? _GEN_750 : _GEN_846; // @[utils.scala 60:30]
-  wire  _GEN_895 = branchOps_passed ? _GEN_751 : _GEN_847; // @[utils.scala 60:30]
-  wire  _GEN_896 = branchOps_passed ? _GEN_752 : _GEN_848; // @[utils.scala 60:30]
-  wire  _GEN_897 = branchOps_passed ? _GEN_753 : _GEN_849; // @[utils.scala 60:30]
-  wire  _GEN_898 = branchOps_passed ? _GEN_754 : _GEN_850; // @[utils.scala 60:30]
-  wire  _GEN_899 = branchOps_passed ? _GEN_755 : _GEN_851; // @[utils.scala 60:30]
-  wire  _GEN_900 = branchOps_passed ? _GEN_756 : _GEN_852; // @[utils.scala 60:30]
-  wire  _GEN_901 = branchOps_passed ? _GEN_757 : _GEN_853; // @[utils.scala 60:30]
-  wire  _GEN_902 = branchOps_passed ? _GEN_758 : _GEN_854; // @[utils.scala 60:30]
-  wire  _GEN_903 = branchOps_passed ? _GEN_759 : _GEN_855; // @[utils.scala 60:30]
-  wire  _GEN_904 = branchOps_passed ? _GEN_760 : _GEN_856; // @[utils.scala 60:30]
-  wire  _GEN_905 = branchOps_passed ? _GEN_761 : _GEN_857; // @[utils.scala 60:30]
-  wire  _GEN_906 = branchOps_passed ? _GEN_762 : _GEN_858; // @[utils.scala 60:30]
-  wire  _GEN_907 = branchOps_passed ? _GEN_763 : _GEN_859; // @[utils.scala 60:30]
-  wire  _GEN_908 = branchOps_passed ? _GEN_764 : _GEN_860; // @[utils.scala 60:30]
-  wire  _GEN_909 = branchOps_passed ? _GEN_765 : _GEN_861; // @[utils.scala 60:30]
-  wire [4:0] _GEN_942 = branchOps_valid ? _GEN_878 : _GEN_718; // @[utils.scala 59:26]
-  wire [4:0] _GEN_943 = branchOps_valid ? _GEN_879 : _GEN_719; // @[utils.scala 59:26]
-  wire [4:0] _GEN_944 = branchOps_valid ? _GEN_880 : _GEN_720; // @[utils.scala 59:26]
-  wire [4:0] _GEN_945 = branchOps_valid ? _GEN_881 : _GEN_721; // @[utils.scala 59:26]
-  wire [4:0] _GEN_946 = branchOps_valid ? _GEN_882 : _GEN_722; // @[utils.scala 59:26]
-  wire [4:0] _GEN_947 = branchOps_valid ? _GEN_883 : _GEN_723; // @[utils.scala 59:26]
-  wire [4:0] _GEN_948 = branchOps_valid ? _GEN_884 : _GEN_724; // @[utils.scala 59:26]
-  wire [4:0] _GEN_949 = branchOps_valid ? _GEN_885 : _GEN_725; // @[utils.scala 59:26]
-  wire [4:0] _GEN_950 = branchOps_valid ? _GEN_886 : _GEN_726; // @[utils.scala 59:26]
-  wire [4:0] _GEN_951 = branchOps_valid ? _GEN_887 : _GEN_727; // @[utils.scala 59:26]
-  wire [4:0] _GEN_952 = branchOps_valid ? _GEN_888 : _GEN_728; // @[utils.scala 59:26]
-  wire [4:0] _GEN_953 = branchOps_valid ? _GEN_889 : _GEN_729; // @[utils.scala 59:26]
-  wire [4:0] _GEN_954 = branchOps_valid ? _GEN_890 : _GEN_730; // @[utils.scala 59:26]
-  wire [4:0] _GEN_955 = branchOps_valid ? _GEN_891 : _GEN_731; // @[utils.scala 59:26]
-  wire [4:0] _GEN_956 = branchOps_valid ? _GEN_892 : _GEN_732; // @[utils.scala 59:26]
-  wire [4:0] _GEN_957 = branchOps_valid ? _GEN_893 : _GEN_733; // @[utils.scala 59:26]
-  wire  _GEN_958 = branchOps_valid ? _GEN_894 : _GEN_750; // @[utils.scala 59:26]
-  wire  _GEN_959 = branchOps_valid ? _GEN_895 : _GEN_751; // @[utils.scala 59:26]
-  wire  _GEN_960 = branchOps_valid ? _GEN_896 : _GEN_752; // @[utils.scala 59:26]
-  wire  _GEN_961 = branchOps_valid ? _GEN_897 : _GEN_753; // @[utils.scala 59:26]
-  wire  _GEN_962 = branchOps_valid ? _GEN_898 : _GEN_754; // @[utils.scala 59:26]
-  wire  _GEN_963 = branchOps_valid ? _GEN_899 : _GEN_755; // @[utils.scala 59:26]
-  wire  _GEN_964 = branchOps_valid ? _GEN_900 : _GEN_756; // @[utils.scala 59:26]
-  wire  _GEN_965 = branchOps_valid ? _GEN_901 : _GEN_757; // @[utils.scala 59:26]
-  wire  _GEN_966 = branchOps_valid ? _GEN_902 : _GEN_758; // @[utils.scala 59:26]
-  wire  _GEN_967 = branchOps_valid ? _GEN_903 : _GEN_759; // @[utils.scala 59:26]
-  wire  _GEN_968 = branchOps_valid ? _GEN_904 : _GEN_760; // @[utils.scala 59:26]
-  wire  _GEN_969 = branchOps_valid ? _GEN_905 : _GEN_761; // @[utils.scala 59:26]
-  wire  _GEN_970 = branchOps_valid ? _GEN_906 : _GEN_762; // @[utils.scala 59:26]
-  wire  _GEN_971 = branchOps_valid ? _GEN_907 : _GEN_763; // @[utils.scala 59:26]
-  wire  _GEN_972 = branchOps_valid ? _GEN_908 : _GEN_764; // @[utils.scala 59:26]
-  wire  _GEN_973 = branchOps_valid ? _GEN_909 : _GEN_765; // @[utils.scala 59:26]
-  wire [4:0] _GEN_974 = incrWrite ? _GEN_942 : _GEN_350; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_975 = incrWrite ? _GEN_943 : _GEN_351; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_976 = incrWrite ? _GEN_944 : _GEN_352; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_977 = incrWrite ? _GEN_945 : _GEN_353; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_978 = incrWrite ? _GEN_946 : _GEN_354; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_979 = incrWrite ? _GEN_947 : _GEN_355; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_980 = incrWrite ? _GEN_948 : _GEN_356; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_981 = incrWrite ? _GEN_949 : _GEN_357; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_982 = incrWrite ? _GEN_950 : _GEN_358; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_983 = incrWrite ? _GEN_951 : _GEN_359; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_984 = incrWrite ? _GEN_952 : _GEN_360; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_985 = incrWrite ? _GEN_953 : _GEN_361; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_986 = incrWrite ? _GEN_954 : _GEN_362; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_987 = incrWrite ? _GEN_955 : _GEN_363; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_988 = incrWrite ? _GEN_956 : _GEN_364; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_989 = incrWrite ? _GEN_957 : _GEN_365; // @[fifo.scala 96:16]
-  wire  _GEN_990 = incrWrite ? _GEN_958 : _GEN_334; // @[fifo.scala 96:16]
-  wire  _GEN_991 = incrWrite ? _GEN_959 : _GEN_335; // @[fifo.scala 96:16]
-  wire  _GEN_992 = incrWrite ? _GEN_960 : _GEN_336; // @[fifo.scala 96:16]
-  wire  _GEN_993 = incrWrite ? _GEN_961 : _GEN_337; // @[fifo.scala 96:16]
-  wire  _GEN_994 = incrWrite ? _GEN_962 : _GEN_338; // @[fifo.scala 96:16]
-  wire  _GEN_995 = incrWrite ? _GEN_963 : _GEN_339; // @[fifo.scala 96:16]
-  wire  _GEN_996 = incrWrite ? _GEN_964 : _GEN_340; // @[fifo.scala 96:16]
-  wire  _GEN_997 = incrWrite ? _GEN_965 : _GEN_341; // @[fifo.scala 96:16]
-  wire  _GEN_998 = incrWrite ? _GEN_966 : _GEN_342; // @[fifo.scala 96:16]
-  wire  _GEN_999 = incrWrite ? _GEN_967 : _GEN_343; // @[fifo.scala 96:16]
-  wire  _GEN_1000 = incrWrite ? _GEN_968 : _GEN_344; // @[fifo.scala 96:16]
-  wire  _GEN_1001 = incrWrite ? _GEN_969 : _GEN_345; // @[fifo.scala 96:16]
-  wire  _GEN_1002 = incrWrite ? _GEN_970 : _GEN_346; // @[fifo.scala 96:16]
-  wire  _GEN_1003 = incrWrite ? _GEN_971 : _GEN_347; // @[fifo.scala 96:16]
-  wire  _GEN_1004 = incrWrite ? _GEN_972 : _GEN_348; // @[fifo.scala 96:16]
-  wire  _GEN_1005 = incrWrite ? _GEN_973 : _GEN_349; // @[fifo.scala 96:16]
+  wire  _GEN_766 = 4'h0 == writePtr ? 1'h0 : _GEN_334; // @[utils.scala 71:{24,24}]
+  wire  _GEN_767 = 4'h1 == writePtr ? 1'h0 : _GEN_335; // @[utils.scala 71:{24,24}]
+  wire  _GEN_768 = 4'h2 == writePtr ? 1'h0 : _GEN_336; // @[utils.scala 71:{24,24}]
+  wire  _GEN_769 = 4'h3 == writePtr ? 1'h0 : _GEN_337; // @[utils.scala 71:{24,24}]
+  wire  _GEN_770 = 4'h4 == writePtr ? 1'h0 : _GEN_338; // @[utils.scala 71:{24,24}]
+  wire  _GEN_771 = 4'h5 == writePtr ? 1'h0 : _GEN_339; // @[utils.scala 71:{24,24}]
+  wire  _GEN_772 = 4'h6 == writePtr ? 1'h0 : _GEN_340; // @[utils.scala 71:{24,24}]
+  wire  _GEN_773 = 4'h7 == writePtr ? 1'h0 : _GEN_341; // @[utils.scala 71:{24,24}]
+  wire  _GEN_774 = 4'h8 == writePtr ? 1'h0 : _GEN_342; // @[utils.scala 71:{24,24}]
+  wire  _GEN_775 = 4'h9 == writePtr ? 1'h0 : _GEN_343; // @[utils.scala 71:{24,24}]
+  wire  _GEN_776 = 4'ha == writePtr ? 1'h0 : _GEN_344; // @[utils.scala 71:{24,24}]
+  wire  _GEN_777 = 4'hb == writePtr ? 1'h0 : _GEN_345; // @[utils.scala 71:{24,24}]
+  wire  _GEN_778 = 4'hc == writePtr ? 1'h0 : _GEN_346; // @[utils.scala 71:{24,24}]
+  wire  _GEN_779 = 4'hd == writePtr ? 1'h0 : _GEN_347; // @[utils.scala 71:{24,24}]
+  wire  _GEN_780 = 4'he == writePtr ? 1'h0 : _GEN_348; // @[utils.scala 71:{24,24}]
+  wire  _GEN_781 = 4'hf == writePtr ? 1'h0 : _GEN_349; // @[utils.scala 71:{24,24}]
+  wire [4:0] _GEN_782 = 4'h0 == writePtr ? 5'h0 : _GEN_350; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_783 = 4'h1 == writePtr ? 5'h0 : _GEN_351; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_784 = 4'h2 == writePtr ? 5'h0 : _GEN_352; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_785 = 4'h3 == writePtr ? 5'h0 : _GEN_353; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_786 = 4'h4 == writePtr ? 5'h0 : _GEN_354; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_787 = 4'h5 == writePtr ? 5'h0 : _GEN_355; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_788 = 4'h6 == writePtr ? 5'h0 : _GEN_356; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_789 = 4'h7 == writePtr ? 5'h0 : _GEN_357; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_790 = 4'h8 == writePtr ? 5'h0 : _GEN_358; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_791 = 4'h9 == writePtr ? 5'h0 : _GEN_359; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_792 = 4'ha == writePtr ? 5'h0 : _GEN_360; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_793 = 4'hb == writePtr ? 5'h0 : _GEN_361; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_794 = 4'hc == writePtr ? 5'h0 : _GEN_362; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_795 = 4'hd == writePtr ? 5'h0 : _GEN_363; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_796 = 4'he == writePtr ? 5'h0 : _GEN_364; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_797 = 4'hf == writePtr ? 5'h0 : _GEN_365; // @[utils.scala 72:{23,23}]
+  wire  _GEN_830 = _T_9 ? _GEN_766 : _GEN_750; // @[utils.scala 70:60]
+  wire  _GEN_831 = _T_9 ? _GEN_767 : _GEN_751; // @[utils.scala 70:60]
+  wire  _GEN_832 = _T_9 ? _GEN_768 : _GEN_752; // @[utils.scala 70:60]
+  wire  _GEN_833 = _T_9 ? _GEN_769 : _GEN_753; // @[utils.scala 70:60]
+  wire  _GEN_834 = _T_9 ? _GEN_770 : _GEN_754; // @[utils.scala 70:60]
+  wire  _GEN_835 = _T_9 ? _GEN_771 : _GEN_755; // @[utils.scala 70:60]
+  wire  _GEN_836 = _T_9 ? _GEN_772 : _GEN_756; // @[utils.scala 70:60]
+  wire  _GEN_837 = _T_9 ? _GEN_773 : _GEN_757; // @[utils.scala 70:60]
+  wire  _GEN_838 = _T_9 ? _GEN_774 : _GEN_758; // @[utils.scala 70:60]
+  wire  _GEN_839 = _T_9 ? _GEN_775 : _GEN_759; // @[utils.scala 70:60]
+  wire  _GEN_840 = _T_9 ? _GEN_776 : _GEN_760; // @[utils.scala 70:60]
+  wire  _GEN_841 = _T_9 ? _GEN_777 : _GEN_761; // @[utils.scala 70:60]
+  wire  _GEN_842 = _T_9 ? _GEN_778 : _GEN_762; // @[utils.scala 70:60]
+  wire  _GEN_843 = _T_9 ? _GEN_779 : _GEN_763; // @[utils.scala 70:60]
+  wire  _GEN_844 = _T_9 ? _GEN_780 : _GEN_764; // @[utils.scala 70:60]
+  wire  _GEN_845 = _T_9 ? _GEN_781 : _GEN_765; // @[utils.scala 70:60]
+  wire [4:0] _GEN_846 = _T_9 ? _GEN_782 : _GEN_718; // @[utils.scala 70:60]
+  wire [4:0] _GEN_847 = _T_9 ? _GEN_783 : _GEN_719; // @[utils.scala 70:60]
+  wire [4:0] _GEN_848 = _T_9 ? _GEN_784 : _GEN_720; // @[utils.scala 70:60]
+  wire [4:0] _GEN_849 = _T_9 ? _GEN_785 : _GEN_721; // @[utils.scala 70:60]
+  wire [4:0] _GEN_850 = _T_9 ? _GEN_786 : _GEN_722; // @[utils.scala 70:60]
+  wire [4:0] _GEN_851 = _T_9 ? _GEN_787 : _GEN_723; // @[utils.scala 70:60]
+  wire [4:0] _GEN_852 = _T_9 ? _GEN_788 : _GEN_724; // @[utils.scala 70:60]
+  wire [4:0] _GEN_853 = _T_9 ? _GEN_789 : _GEN_725; // @[utils.scala 70:60]
+  wire [4:0] _GEN_854 = _T_9 ? _GEN_790 : _GEN_726; // @[utils.scala 70:60]
+  wire [4:0] _GEN_855 = _T_9 ? _GEN_791 : _GEN_727; // @[utils.scala 70:60]
+  wire [4:0] _GEN_856 = _T_9 ? _GEN_792 : _GEN_728; // @[utils.scala 70:60]
+  wire [4:0] _GEN_857 = _T_9 ? _GEN_793 : _GEN_729; // @[utils.scala 70:60]
+  wire [4:0] _GEN_858 = _T_9 ? _GEN_794 : _GEN_730; // @[utils.scala 70:60]
+  wire [4:0] _GEN_859 = _T_9 ? _GEN_795 : _GEN_731; // @[utils.scala 70:60]
+  wire [4:0] _GEN_860 = _T_9 ? _GEN_796 : _GEN_732; // @[utils.scala 70:60]
+  wire [4:0] _GEN_861 = _T_9 ? _GEN_797 : _GEN_733; // @[utils.scala 70:60]
+  wire [4:0] _GEN_862 = branchOps_passed ? _GEN_734 : _GEN_846; // @[utils.scala 60:30]
+  wire [4:0] _GEN_863 = branchOps_passed ? _GEN_735 : _GEN_847; // @[utils.scala 60:30]
+  wire [4:0] _GEN_864 = branchOps_passed ? _GEN_736 : _GEN_848; // @[utils.scala 60:30]
+  wire [4:0] _GEN_865 = branchOps_passed ? _GEN_737 : _GEN_849; // @[utils.scala 60:30]
+  wire [4:0] _GEN_866 = branchOps_passed ? _GEN_738 : _GEN_850; // @[utils.scala 60:30]
+  wire [4:0] _GEN_867 = branchOps_passed ? _GEN_739 : _GEN_851; // @[utils.scala 60:30]
+  wire [4:0] _GEN_868 = branchOps_passed ? _GEN_740 : _GEN_852; // @[utils.scala 60:30]
+  wire [4:0] _GEN_869 = branchOps_passed ? _GEN_741 : _GEN_853; // @[utils.scala 60:30]
+  wire [4:0] _GEN_870 = branchOps_passed ? _GEN_742 : _GEN_854; // @[utils.scala 60:30]
+  wire [4:0] _GEN_871 = branchOps_passed ? _GEN_743 : _GEN_855; // @[utils.scala 60:30]
+  wire [4:0] _GEN_872 = branchOps_passed ? _GEN_744 : _GEN_856; // @[utils.scala 60:30]
+  wire [4:0] _GEN_873 = branchOps_passed ? _GEN_745 : _GEN_857; // @[utils.scala 60:30]
+  wire [4:0] _GEN_874 = branchOps_passed ? _GEN_746 : _GEN_858; // @[utils.scala 60:30]
+  wire [4:0] _GEN_875 = branchOps_passed ? _GEN_747 : _GEN_859; // @[utils.scala 60:30]
+  wire [4:0] _GEN_876 = branchOps_passed ? _GEN_748 : _GEN_860; // @[utils.scala 60:30]
+  wire [4:0] _GEN_877 = branchOps_passed ? _GEN_749 : _GEN_861; // @[utils.scala 60:30]
+  wire  _GEN_878 = branchOps_passed ? _GEN_750 : _GEN_830; // @[utils.scala 60:30]
+  wire  _GEN_879 = branchOps_passed ? _GEN_751 : _GEN_831; // @[utils.scala 60:30]
+  wire  _GEN_880 = branchOps_passed ? _GEN_752 : _GEN_832; // @[utils.scala 60:30]
+  wire  _GEN_881 = branchOps_passed ? _GEN_753 : _GEN_833; // @[utils.scala 60:30]
+  wire  _GEN_882 = branchOps_passed ? _GEN_754 : _GEN_834; // @[utils.scala 60:30]
+  wire  _GEN_883 = branchOps_passed ? _GEN_755 : _GEN_835; // @[utils.scala 60:30]
+  wire  _GEN_884 = branchOps_passed ? _GEN_756 : _GEN_836; // @[utils.scala 60:30]
+  wire  _GEN_885 = branchOps_passed ? _GEN_757 : _GEN_837; // @[utils.scala 60:30]
+  wire  _GEN_886 = branchOps_passed ? _GEN_758 : _GEN_838; // @[utils.scala 60:30]
+  wire  _GEN_887 = branchOps_passed ? _GEN_759 : _GEN_839; // @[utils.scala 60:30]
+  wire  _GEN_888 = branchOps_passed ? _GEN_760 : _GEN_840; // @[utils.scala 60:30]
+  wire  _GEN_889 = branchOps_passed ? _GEN_761 : _GEN_841; // @[utils.scala 60:30]
+  wire  _GEN_890 = branchOps_passed ? _GEN_762 : _GEN_842; // @[utils.scala 60:30]
+  wire  _GEN_891 = branchOps_passed ? _GEN_763 : _GEN_843; // @[utils.scala 60:30]
+  wire  _GEN_892 = branchOps_passed ? _GEN_764 : _GEN_844; // @[utils.scala 60:30]
+  wire  _GEN_893 = branchOps_passed ? _GEN_765 : _GEN_845; // @[utils.scala 60:30]
+  wire [4:0] _GEN_926 = branchOps_valid ? _GEN_862 : _GEN_718; // @[utils.scala 59:26]
+  wire [4:0] _GEN_927 = branchOps_valid ? _GEN_863 : _GEN_719; // @[utils.scala 59:26]
+  wire [4:0] _GEN_928 = branchOps_valid ? _GEN_864 : _GEN_720; // @[utils.scala 59:26]
+  wire [4:0] _GEN_929 = branchOps_valid ? _GEN_865 : _GEN_721; // @[utils.scala 59:26]
+  wire [4:0] _GEN_930 = branchOps_valid ? _GEN_866 : _GEN_722; // @[utils.scala 59:26]
+  wire [4:0] _GEN_931 = branchOps_valid ? _GEN_867 : _GEN_723; // @[utils.scala 59:26]
+  wire [4:0] _GEN_932 = branchOps_valid ? _GEN_868 : _GEN_724; // @[utils.scala 59:26]
+  wire [4:0] _GEN_933 = branchOps_valid ? _GEN_869 : _GEN_725; // @[utils.scala 59:26]
+  wire [4:0] _GEN_934 = branchOps_valid ? _GEN_870 : _GEN_726; // @[utils.scala 59:26]
+  wire [4:0] _GEN_935 = branchOps_valid ? _GEN_871 : _GEN_727; // @[utils.scala 59:26]
+  wire [4:0] _GEN_936 = branchOps_valid ? _GEN_872 : _GEN_728; // @[utils.scala 59:26]
+  wire [4:0] _GEN_937 = branchOps_valid ? _GEN_873 : _GEN_729; // @[utils.scala 59:26]
+  wire [4:0] _GEN_938 = branchOps_valid ? _GEN_874 : _GEN_730; // @[utils.scala 59:26]
+  wire [4:0] _GEN_939 = branchOps_valid ? _GEN_875 : _GEN_731; // @[utils.scala 59:26]
+  wire [4:0] _GEN_940 = branchOps_valid ? _GEN_876 : _GEN_732; // @[utils.scala 59:26]
+  wire [4:0] _GEN_941 = branchOps_valid ? _GEN_877 : _GEN_733; // @[utils.scala 59:26]
+  wire  _GEN_942 = branchOps_valid ? _GEN_878 : _GEN_750; // @[utils.scala 59:26]
+  wire  _GEN_943 = branchOps_valid ? _GEN_879 : _GEN_751; // @[utils.scala 59:26]
+  wire  _GEN_944 = branchOps_valid ? _GEN_880 : _GEN_752; // @[utils.scala 59:26]
+  wire  _GEN_945 = branchOps_valid ? _GEN_881 : _GEN_753; // @[utils.scala 59:26]
+  wire  _GEN_946 = branchOps_valid ? _GEN_882 : _GEN_754; // @[utils.scala 59:26]
+  wire  _GEN_947 = branchOps_valid ? _GEN_883 : _GEN_755; // @[utils.scala 59:26]
+  wire  _GEN_948 = branchOps_valid ? _GEN_884 : _GEN_756; // @[utils.scala 59:26]
+  wire  _GEN_949 = branchOps_valid ? _GEN_885 : _GEN_757; // @[utils.scala 59:26]
+  wire  _GEN_950 = branchOps_valid ? _GEN_886 : _GEN_758; // @[utils.scala 59:26]
+  wire  _GEN_951 = branchOps_valid ? _GEN_887 : _GEN_759; // @[utils.scala 59:26]
+  wire  _GEN_952 = branchOps_valid ? _GEN_888 : _GEN_760; // @[utils.scala 59:26]
+  wire  _GEN_953 = branchOps_valid ? _GEN_889 : _GEN_761; // @[utils.scala 59:26]
+  wire  _GEN_954 = branchOps_valid ? _GEN_890 : _GEN_762; // @[utils.scala 59:26]
+  wire  _GEN_955 = branchOps_valid ? _GEN_891 : _GEN_763; // @[utils.scala 59:26]
+  wire  _GEN_956 = branchOps_valid ? _GEN_892 : _GEN_764; // @[utils.scala 59:26]
+  wire  _GEN_957 = branchOps_valid ? _GEN_893 : _GEN_765; // @[utils.scala 59:26]
+  wire [4:0] _GEN_958 = incrWrite ? _GEN_926 : _GEN_350; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_959 = incrWrite ? _GEN_927 : _GEN_351; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_960 = incrWrite ? _GEN_928 : _GEN_352; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_961 = incrWrite ? _GEN_929 : _GEN_353; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_962 = incrWrite ? _GEN_930 : _GEN_354; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_963 = incrWrite ? _GEN_931 : _GEN_355; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_964 = incrWrite ? _GEN_932 : _GEN_356; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_965 = incrWrite ? _GEN_933 : _GEN_357; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_966 = incrWrite ? _GEN_934 : _GEN_358; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_967 = incrWrite ? _GEN_935 : _GEN_359; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_968 = incrWrite ? _GEN_936 : _GEN_360; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_969 = incrWrite ? _GEN_937 : _GEN_361; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_970 = incrWrite ? _GEN_938 : _GEN_362; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_971 = incrWrite ? _GEN_939 : _GEN_363; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_972 = incrWrite ? _GEN_940 : _GEN_364; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_973 = incrWrite ? _GEN_941 : _GEN_365; // @[fifo.scala 96:16]
+  wire  _GEN_974 = incrWrite ? _GEN_942 : _GEN_334; // @[fifo.scala 96:16]
+  wire  _GEN_975 = incrWrite ? _GEN_943 : _GEN_335; // @[fifo.scala 96:16]
+  wire  _GEN_976 = incrWrite ? _GEN_944 : _GEN_336; // @[fifo.scala 96:16]
+  wire  _GEN_977 = incrWrite ? _GEN_945 : _GEN_337; // @[fifo.scala 96:16]
+  wire  _GEN_978 = incrWrite ? _GEN_946 : _GEN_338; // @[fifo.scala 96:16]
+  wire  _GEN_979 = incrWrite ? _GEN_947 : _GEN_339; // @[fifo.scala 96:16]
+  wire  _GEN_980 = incrWrite ? _GEN_948 : _GEN_340; // @[fifo.scala 96:16]
+  wire  _GEN_981 = incrWrite ? _GEN_949 : _GEN_341; // @[fifo.scala 96:16]
+  wire  _GEN_982 = incrWrite ? _GEN_950 : _GEN_342; // @[fifo.scala 96:16]
+  wire  _GEN_983 = incrWrite ? _GEN_951 : _GEN_343; // @[fifo.scala 96:16]
+  wire  _GEN_984 = incrWrite ? _GEN_952 : _GEN_344; // @[fifo.scala 96:16]
+  wire  _GEN_985 = incrWrite ? _GEN_953 : _GEN_345; // @[fifo.scala 96:16]
+  wire  _GEN_986 = incrWrite ? _GEN_954 : _GEN_346; // @[fifo.scala 96:16]
+  wire  _GEN_987 = incrWrite ? _GEN_955 : _GEN_347; // @[fifo.scala 96:16]
+  wire  _GEN_988 = incrWrite ? _GEN_956 : _GEN_348; // @[fifo.scala 96:16]
+  wire  _GEN_989 = incrWrite ? _GEN_957 : _GEN_349; // @[fifo.scala 96:16]
   wire [3:0] startPointer = read_ready ? _nextVal_T_2 : readPtr; // @[fifo.scala 101:25]
   wire [3:0] endPointer = writePtr - 4'h1; // @[fifo.scala 102:29]
   wire [4:0] _T_15 = memReg_0_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
@@ -34277,92 +34247,92 @@ module fifoWithBranchOps(
   wire [4:0] _T_22 = memReg_1_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_23 = |_T_22; // @[fifo.scala 108:63]
   wire [4:0] _memReg_1_branch_mask_T = memReg_1_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1012 = |_T_22 ? _memReg_1_branch_mask_T : _GEN_975; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1013 = _T_23 ? 1'h0 : _GEN_991; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_996 = |_T_22 ? _memReg_1_branch_mask_T : _GEN_959; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_997 = _T_23 ? 1'h0 : _GEN_975; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_29 = memReg_2_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_30 = |_T_29; // @[fifo.scala 108:63]
   wire [4:0] _memReg_2_branch_mask_T = memReg_2_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1018 = |_T_29 ? _memReg_2_branch_mask_T : _GEN_976; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1019 = _T_30 ? 1'h0 : _GEN_992; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1002 = |_T_29 ? _memReg_2_branch_mask_T : _GEN_960; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1003 = _T_30 ? 1'h0 : _GEN_976; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_36 = memReg_3_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_37 = |_T_36; // @[fifo.scala 108:63]
   wire [4:0] _memReg_3_branch_mask_T = memReg_3_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1024 = |_T_36 ? _memReg_3_branch_mask_T : _GEN_977; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1025 = _T_37 ? 1'h0 : _GEN_993; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1008 = |_T_36 ? _memReg_3_branch_mask_T : _GEN_961; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1009 = _T_37 ? 1'h0 : _GEN_977; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_43 = memReg_4_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_44 = |_T_43; // @[fifo.scala 108:63]
   wire [4:0] _memReg_4_branch_mask_T = memReg_4_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1030 = |_T_43 ? _memReg_4_branch_mask_T : _GEN_978; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1031 = _T_44 ? 1'h0 : _GEN_994; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1014 = |_T_43 ? _memReg_4_branch_mask_T : _GEN_962; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1015 = _T_44 ? 1'h0 : _GEN_978; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_50 = memReg_5_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_51 = |_T_50; // @[fifo.scala 108:63]
   wire [4:0] _memReg_5_branch_mask_T = memReg_5_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1036 = |_T_50 ? _memReg_5_branch_mask_T : _GEN_979; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1037 = _T_51 ? 1'h0 : _GEN_995; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1020 = |_T_50 ? _memReg_5_branch_mask_T : _GEN_963; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1021 = _T_51 ? 1'h0 : _GEN_979; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_57 = memReg_6_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_58 = |_T_57; // @[fifo.scala 108:63]
   wire [4:0] _memReg_6_branch_mask_T = memReg_6_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1042 = |_T_57 ? _memReg_6_branch_mask_T : _GEN_980; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1043 = _T_58 ? 1'h0 : _GEN_996; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1026 = |_T_57 ? _memReg_6_branch_mask_T : _GEN_964; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1027 = _T_58 ? 1'h0 : _GEN_980; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_64 = memReg_7_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_65 = |_T_64; // @[fifo.scala 108:63]
   wire [4:0] _memReg_7_branch_mask_T = memReg_7_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1048 = |_T_64 ? _memReg_7_branch_mask_T : _GEN_981; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1049 = _T_65 ? 1'h0 : _GEN_997; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1032 = |_T_64 ? _memReg_7_branch_mask_T : _GEN_965; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1033 = _T_65 ? 1'h0 : _GEN_981; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_71 = memReg_8_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_72 = |_T_71; // @[fifo.scala 108:63]
   wire [4:0] _memReg_8_branch_mask_T = memReg_8_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1054 = |_T_71 ? _memReg_8_branch_mask_T : _GEN_982; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1055 = _T_72 ? 1'h0 : _GEN_998; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1038 = |_T_71 ? _memReg_8_branch_mask_T : _GEN_966; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1039 = _T_72 ? 1'h0 : _GEN_982; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_78 = memReg_9_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_79 = |_T_78; // @[fifo.scala 108:63]
   wire [4:0] _memReg_9_branch_mask_T = memReg_9_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1060 = |_T_78 ? _memReg_9_branch_mask_T : _GEN_983; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1061 = _T_79 ? 1'h0 : _GEN_999; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1044 = |_T_78 ? _memReg_9_branch_mask_T : _GEN_967; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1045 = _T_79 ? 1'h0 : _GEN_983; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_85 = memReg_10_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_86 = |_T_85; // @[fifo.scala 108:63]
   wire [4:0] _memReg_10_branch_mask_T = memReg_10_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1066 = |_T_85 ? _memReg_10_branch_mask_T : _GEN_984; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1067 = _T_86 ? 1'h0 : _GEN_1000; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1050 = |_T_85 ? _memReg_10_branch_mask_T : _GEN_968; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1051 = _T_86 ? 1'h0 : _GEN_984; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_92 = memReg_11_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_93 = |_T_92; // @[fifo.scala 108:63]
   wire [4:0] _memReg_11_branch_mask_T = memReg_11_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1072 = |_T_92 ? _memReg_11_branch_mask_T : _GEN_985; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1073 = _T_93 ? 1'h0 : _GEN_1001; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1056 = |_T_92 ? _memReg_11_branch_mask_T : _GEN_969; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1057 = _T_93 ? 1'h0 : _GEN_985; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_99 = memReg_12_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_100 = |_T_99; // @[fifo.scala 108:63]
   wire [4:0] _memReg_12_branch_mask_T = memReg_12_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1078 = |_T_99 ? _memReg_12_branch_mask_T : _GEN_986; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1079 = _T_100 ? 1'h0 : _GEN_1002; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1062 = |_T_99 ? _memReg_12_branch_mask_T : _GEN_970; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1063 = _T_100 ? 1'h0 : _GEN_986; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_106 = memReg_13_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_107 = |_T_106; // @[fifo.scala 108:63]
   wire [4:0] _memReg_13_branch_mask_T = memReg_13_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1084 = |_T_106 ? _memReg_13_branch_mask_T : _GEN_987; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1085 = _T_107 ? 1'h0 : _GEN_1003; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1068 = |_T_106 ? _memReg_13_branch_mask_T : _GEN_971; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1069 = _T_107 ? 1'h0 : _GEN_987; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_113 = memReg_14_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_114 = |_T_113; // @[fifo.scala 108:63]
   wire [4:0] _memReg_14_branch_mask_T = memReg_14_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_1090 = |_T_113 ? _memReg_14_branch_mask_T : _GEN_988; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_1091 = _T_114 ? 1'h0 : _GEN_1004; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_1074 = |_T_113 ? _memReg_14_branch_mask_T : _GEN_972; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1075 = _T_114 ? 1'h0 : _GEN_988; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_120 = memReg_15_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_121 = |_T_120; // @[fifo.scala 108:63]
   wire [4:0] _memReg_15_branch_mask_T = memReg_15_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
   wire [4:0] _T_124 = _GEN_589 & branchOps_branchMask; // @[utils.scala 92:27]
   wire  _T_125 = |_T_124; // @[utils.scala 92:51]
   wire [4:0] _read_data_branch_mask_T = _GEN_589 ^ branchOps_branchMask; // @[utils.scala 93:42]
-  wire [4:0] _GEN_1134 = |_T_124 ? _read_data_branch_mask_T : _GEN_589; // @[utils.scala 92:56 93:27 96:27]
-  wire [4:0] _GEN_1135 = _T_125 ? 5'h0 : _GEN_589; // @[utils.scala 101:56 102:27 106:27]
-  wire  _GEN_1136 = _T_125 ? 1'h0 : _GEN_573; // @[utils.scala 101:56 103:28 107:28]
-  wire [4:0] _GEN_1137 = branchOps_passed ? _GEN_1134 : _GEN_1135; // @[utils.scala 90:30]
-  wire  _GEN_1138 = branchOps_passed ? _GEN_573 : _GEN_1136; // @[utils.scala 90:30 98:26]
+  wire [4:0] _GEN_1118 = |_T_124 ? _read_data_branch_mask_T : _GEN_589; // @[utils.scala 92:56 93:27 96:27]
+  wire [4:0] _GEN_1119 = _T_125 ? 5'h0 : _GEN_589; // @[utils.scala 101:56 102:27 106:27]
+  wire  _GEN_1120 = _T_125 ? 1'h0 : _GEN_573; // @[utils.scala 101:56 103:28 107:28]
+  wire [4:0] _GEN_1121 = branchOps_passed ? _GEN_1118 : _GEN_1119; // @[utils.scala 90:30]
+  wire  _GEN_1122 = branchOps_passed ? _GEN_573 : _GEN_1120; // @[utils.scala 90:30 98:26]
   assign write_ready = ~fullReg; // @[fifo.scala 87:18]
   assign read_data_valid = _T_2 & _GEN_493; // @[fifo.scala 121:32]
   assign read_data_address = 4'hf == readPtr ? memReg_15_address : _GEN_508; // @[fifo.scala 86:{13,13}]
   assign read_data_core_instruction = 4'hf == readPtr ? memReg_15_core_instruction : _GEN_524; // @[fifo.scala 86:{13,13}]
   assign read_data_core_robAddr = 4'hf == readPtr ? memReg_15_core_robAddr : _GEN_540; // @[fifo.scala 86:{13,13}]
   assign read_data_core_prfDest = 4'hf == readPtr ? memReg_15_core_prfDest : _GEN_556; // @[fifo.scala 86:{13,13}]
-  assign read_data_branch_valid = branchOps_valid ? _GEN_1138 : _GEN_573; // @[utils.scala 112:24 89:27]
-  assign read_data_branch_mask = branchOps_valid ? _GEN_1137 : _GEN_589; // @[utils.scala 111:23 89:27]
+  assign read_data_branch_valid = branchOps_valid ? _GEN_1122 : _GEN_573; // @[utils.scala 112:24 89:27]
+  assign read_data_branch_mask = branchOps_valid ? _GEN_1121 : _GEN_589; // @[utils.scala 111:23 89:27]
   assign read_data_writeData_valid = 4'hf == readPtr ? memReg_15_writeData_valid : _GEN_604; // @[fifo.scala 86:{13,13}]
   assign read_data_writeData_data = 4'hf == readPtr ? memReg_15_writeData_data : _GEN_620; // @[fifo.scala 86:{13,13}]
   assign read_data_cacheLine_valid = 4'hf == readPtr ? memReg_15_cacheLine_valid : _GEN_636; // @[fifo.scala 86:{13,13}]
@@ -34410,14 +34380,14 @@ module fifoWithBranchOps(
       memReg_0_branch_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (branchOps_passed) begin // @[fifo.scala 107:32]
-        memReg_0_branch_valid <= _GEN_990;
+        memReg_0_branch_valid <= _GEN_974;
       end else if (_T_16) begin // @[fifo.scala 112:68]
         memReg_0_branch_valid <= 1'h0; // @[fifo.scala 113:36]
       end else begin
-        memReg_0_branch_valid <= _GEN_990;
+        memReg_0_branch_valid <= _GEN_974;
       end
     end else begin
-      memReg_0_branch_valid <= _GEN_990;
+      memReg_0_branch_valid <= _GEN_974;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_0_branch_mask <= 5'h0; // @[fifo.scala 27:33]
@@ -34426,13 +34396,13 @@ module fifoWithBranchOps(
         if (|_T_15) begin // @[fifo.scala 108:68]
           memReg_0_branch_mask <= _memReg_0_branch_mask_T; // @[fifo.scala 109:35]
         end else begin
-          memReg_0_branch_mask <= _GEN_974;
+          memReg_0_branch_mask <= _GEN_958;
         end
       end else begin
-        memReg_0_branch_mask <= _GEN_974;
+        memReg_0_branch_mask <= _GEN_958;
       end
     end else begin
-      memReg_0_branch_mask <= _GEN_974;
+      memReg_0_branch_mask <= _GEN_958;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_0_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -34516,30 +34486,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h1 | 4'h1 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_1_branch_valid <= _GEN_991;
+          memReg_1_branch_valid <= _GEN_975;
         end else begin
-          memReg_1_branch_valid <= _GEN_1013;
+          memReg_1_branch_valid <= _GEN_997;
         end
       end else begin
-        memReg_1_branch_valid <= _GEN_991;
+        memReg_1_branch_valid <= _GEN_975;
       end
     end else begin
-      memReg_1_branch_valid <= _GEN_991;
+      memReg_1_branch_valid <= _GEN_975;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_1_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h1 | 4'h1 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_1_branch_mask <= _GEN_1012;
+          memReg_1_branch_mask <= _GEN_996;
         end else begin
-          memReg_1_branch_mask <= _GEN_975;
+          memReg_1_branch_mask <= _GEN_959;
         end
       end else begin
-        memReg_1_branch_mask <= _GEN_975;
+        memReg_1_branch_mask <= _GEN_959;
       end
     end else begin
-      memReg_1_branch_mask <= _GEN_975;
+      memReg_1_branch_mask <= _GEN_959;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_1_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -34623,30 +34593,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h2 | 4'h2 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_2_branch_valid <= _GEN_992;
+          memReg_2_branch_valid <= _GEN_976;
         end else begin
-          memReg_2_branch_valid <= _GEN_1019;
+          memReg_2_branch_valid <= _GEN_1003;
         end
       end else begin
-        memReg_2_branch_valid <= _GEN_992;
+        memReg_2_branch_valid <= _GEN_976;
       end
     end else begin
-      memReg_2_branch_valid <= _GEN_992;
+      memReg_2_branch_valid <= _GEN_976;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_2_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h2 | 4'h2 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_2_branch_mask <= _GEN_1018;
+          memReg_2_branch_mask <= _GEN_1002;
         end else begin
-          memReg_2_branch_mask <= _GEN_976;
+          memReg_2_branch_mask <= _GEN_960;
         end
       end else begin
-        memReg_2_branch_mask <= _GEN_976;
+        memReg_2_branch_mask <= _GEN_960;
       end
     end else begin
-      memReg_2_branch_mask <= _GEN_976;
+      memReg_2_branch_mask <= _GEN_960;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_2_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -34730,30 +34700,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h3 | 4'h3 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_3_branch_valid <= _GEN_993;
+          memReg_3_branch_valid <= _GEN_977;
         end else begin
-          memReg_3_branch_valid <= _GEN_1025;
+          memReg_3_branch_valid <= _GEN_1009;
         end
       end else begin
-        memReg_3_branch_valid <= _GEN_993;
+        memReg_3_branch_valid <= _GEN_977;
       end
     end else begin
-      memReg_3_branch_valid <= _GEN_993;
+      memReg_3_branch_valid <= _GEN_977;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_3_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h3 | 4'h3 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_3_branch_mask <= _GEN_1024;
+          memReg_3_branch_mask <= _GEN_1008;
         end else begin
-          memReg_3_branch_mask <= _GEN_977;
+          memReg_3_branch_mask <= _GEN_961;
         end
       end else begin
-        memReg_3_branch_mask <= _GEN_977;
+        memReg_3_branch_mask <= _GEN_961;
       end
     end else begin
-      memReg_3_branch_mask <= _GEN_977;
+      memReg_3_branch_mask <= _GEN_961;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_3_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -34837,30 +34807,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h4 | 4'h4 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_4_branch_valid <= _GEN_994;
+          memReg_4_branch_valid <= _GEN_978;
         end else begin
-          memReg_4_branch_valid <= _GEN_1031;
+          memReg_4_branch_valid <= _GEN_1015;
         end
       end else begin
-        memReg_4_branch_valid <= _GEN_994;
+        memReg_4_branch_valid <= _GEN_978;
       end
     end else begin
-      memReg_4_branch_valid <= _GEN_994;
+      memReg_4_branch_valid <= _GEN_978;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_4_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h4 | 4'h4 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_4_branch_mask <= _GEN_1030;
+          memReg_4_branch_mask <= _GEN_1014;
         end else begin
-          memReg_4_branch_mask <= _GEN_978;
+          memReg_4_branch_mask <= _GEN_962;
         end
       end else begin
-        memReg_4_branch_mask <= _GEN_978;
+        memReg_4_branch_mask <= _GEN_962;
       end
     end else begin
-      memReg_4_branch_mask <= _GEN_978;
+      memReg_4_branch_mask <= _GEN_962;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_4_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -34944,30 +34914,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h5 | 4'h5 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_5_branch_valid <= _GEN_995;
+          memReg_5_branch_valid <= _GEN_979;
         end else begin
-          memReg_5_branch_valid <= _GEN_1037;
+          memReg_5_branch_valid <= _GEN_1021;
         end
       end else begin
-        memReg_5_branch_valid <= _GEN_995;
+        memReg_5_branch_valid <= _GEN_979;
       end
     end else begin
-      memReg_5_branch_valid <= _GEN_995;
+      memReg_5_branch_valid <= _GEN_979;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_5_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h5 | 4'h5 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_5_branch_mask <= _GEN_1036;
+          memReg_5_branch_mask <= _GEN_1020;
         end else begin
-          memReg_5_branch_mask <= _GEN_979;
+          memReg_5_branch_mask <= _GEN_963;
         end
       end else begin
-        memReg_5_branch_mask <= _GEN_979;
+        memReg_5_branch_mask <= _GEN_963;
       end
     end else begin
-      memReg_5_branch_mask <= _GEN_979;
+      memReg_5_branch_mask <= _GEN_963;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_5_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -35051,30 +35021,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h6 | 4'h6 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_6_branch_valid <= _GEN_996;
+          memReg_6_branch_valid <= _GEN_980;
         end else begin
-          memReg_6_branch_valid <= _GEN_1043;
+          memReg_6_branch_valid <= _GEN_1027;
         end
       end else begin
-        memReg_6_branch_valid <= _GEN_996;
+        memReg_6_branch_valid <= _GEN_980;
       end
     end else begin
-      memReg_6_branch_valid <= _GEN_996;
+      memReg_6_branch_valid <= _GEN_980;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_6_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h6 | 4'h6 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_6_branch_mask <= _GEN_1042;
+          memReg_6_branch_mask <= _GEN_1026;
         end else begin
-          memReg_6_branch_mask <= _GEN_980;
+          memReg_6_branch_mask <= _GEN_964;
         end
       end else begin
-        memReg_6_branch_mask <= _GEN_980;
+        memReg_6_branch_mask <= _GEN_964;
       end
     end else begin
-      memReg_6_branch_mask <= _GEN_980;
+      memReg_6_branch_mask <= _GEN_964;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_6_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -35158,30 +35128,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h7 | 4'h7 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_7_branch_valid <= _GEN_997;
+          memReg_7_branch_valid <= _GEN_981;
         end else begin
-          memReg_7_branch_valid <= _GEN_1049;
+          memReg_7_branch_valid <= _GEN_1033;
         end
       end else begin
-        memReg_7_branch_valid <= _GEN_997;
+        memReg_7_branch_valid <= _GEN_981;
       end
     end else begin
-      memReg_7_branch_valid <= _GEN_997;
+      memReg_7_branch_valid <= _GEN_981;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_7_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h7 | 4'h7 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_7_branch_mask <= _GEN_1048;
+          memReg_7_branch_mask <= _GEN_1032;
         end else begin
-          memReg_7_branch_mask <= _GEN_981;
+          memReg_7_branch_mask <= _GEN_965;
         end
       end else begin
-        memReg_7_branch_mask <= _GEN_981;
+        memReg_7_branch_mask <= _GEN_965;
       end
     end else begin
-      memReg_7_branch_mask <= _GEN_981;
+      memReg_7_branch_mask <= _GEN_965;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_7_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -35265,30 +35235,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h8 | 4'h8 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_8_branch_valid <= _GEN_998;
+          memReg_8_branch_valid <= _GEN_982;
         end else begin
-          memReg_8_branch_valid <= _GEN_1055;
+          memReg_8_branch_valid <= _GEN_1039;
         end
       end else begin
-        memReg_8_branch_valid <= _GEN_998;
+        memReg_8_branch_valid <= _GEN_982;
       end
     end else begin
-      memReg_8_branch_valid <= _GEN_998;
+      memReg_8_branch_valid <= _GEN_982;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_8_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h8 | 4'h8 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_8_branch_mask <= _GEN_1054;
+          memReg_8_branch_mask <= _GEN_1038;
         end else begin
-          memReg_8_branch_mask <= _GEN_982;
+          memReg_8_branch_mask <= _GEN_966;
         end
       end else begin
-        memReg_8_branch_mask <= _GEN_982;
+        memReg_8_branch_mask <= _GEN_966;
       end
     end else begin
-      memReg_8_branch_mask <= _GEN_982;
+      memReg_8_branch_mask <= _GEN_966;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_8_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -35372,30 +35342,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h9 | 4'h9 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_9_branch_valid <= _GEN_999;
+          memReg_9_branch_valid <= _GEN_983;
         end else begin
-          memReg_9_branch_valid <= _GEN_1061;
+          memReg_9_branch_valid <= _GEN_1045;
         end
       end else begin
-        memReg_9_branch_valid <= _GEN_999;
+        memReg_9_branch_valid <= _GEN_983;
       end
     end else begin
-      memReg_9_branch_valid <= _GEN_999;
+      memReg_9_branch_valid <= _GEN_983;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_9_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'h9 | 4'h9 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_9_branch_mask <= _GEN_1060;
+          memReg_9_branch_mask <= _GEN_1044;
         end else begin
-          memReg_9_branch_mask <= _GEN_983;
+          memReg_9_branch_mask <= _GEN_967;
         end
       end else begin
-        memReg_9_branch_mask <= _GEN_983;
+        memReg_9_branch_mask <= _GEN_967;
       end
     end else begin
-      memReg_9_branch_mask <= _GEN_983;
+      memReg_9_branch_mask <= _GEN_967;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_9_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -35479,30 +35449,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'ha | 4'ha <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_10_branch_valid <= _GEN_1000;
+          memReg_10_branch_valid <= _GEN_984;
         end else begin
-          memReg_10_branch_valid <= _GEN_1067;
+          memReg_10_branch_valid <= _GEN_1051;
         end
       end else begin
-        memReg_10_branch_valid <= _GEN_1000;
+        memReg_10_branch_valid <= _GEN_984;
       end
     end else begin
-      memReg_10_branch_valid <= _GEN_1000;
+      memReg_10_branch_valid <= _GEN_984;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_10_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'ha | 4'ha <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_10_branch_mask <= _GEN_1066;
+          memReg_10_branch_mask <= _GEN_1050;
         end else begin
-          memReg_10_branch_mask <= _GEN_984;
+          memReg_10_branch_mask <= _GEN_968;
         end
       end else begin
-        memReg_10_branch_mask <= _GEN_984;
+        memReg_10_branch_mask <= _GEN_968;
       end
     end else begin
-      memReg_10_branch_mask <= _GEN_984;
+      memReg_10_branch_mask <= _GEN_968;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_10_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -35586,30 +35556,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hb | 4'hb <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_11_branch_valid <= _GEN_1001;
+          memReg_11_branch_valid <= _GEN_985;
         end else begin
-          memReg_11_branch_valid <= _GEN_1073;
+          memReg_11_branch_valid <= _GEN_1057;
         end
       end else begin
-        memReg_11_branch_valid <= _GEN_1001;
+        memReg_11_branch_valid <= _GEN_985;
       end
     end else begin
-      memReg_11_branch_valid <= _GEN_1001;
+      memReg_11_branch_valid <= _GEN_985;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_11_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hb | 4'hb <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_11_branch_mask <= _GEN_1072;
+          memReg_11_branch_mask <= _GEN_1056;
         end else begin
-          memReg_11_branch_mask <= _GEN_985;
+          memReg_11_branch_mask <= _GEN_969;
         end
       end else begin
-        memReg_11_branch_mask <= _GEN_985;
+        memReg_11_branch_mask <= _GEN_969;
       end
     end else begin
-      memReg_11_branch_mask <= _GEN_985;
+      memReg_11_branch_mask <= _GEN_969;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_11_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -35693,30 +35663,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hc | 4'hc <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_12_branch_valid <= _GEN_1002;
+          memReg_12_branch_valid <= _GEN_986;
         end else begin
-          memReg_12_branch_valid <= _GEN_1079;
+          memReg_12_branch_valid <= _GEN_1063;
         end
       end else begin
-        memReg_12_branch_valid <= _GEN_1002;
+        memReg_12_branch_valid <= _GEN_986;
       end
     end else begin
-      memReg_12_branch_valid <= _GEN_1002;
+      memReg_12_branch_valid <= _GEN_986;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_12_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hc | 4'hc <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_12_branch_mask <= _GEN_1078;
+          memReg_12_branch_mask <= _GEN_1062;
         end else begin
-          memReg_12_branch_mask <= _GEN_986;
+          memReg_12_branch_mask <= _GEN_970;
         end
       end else begin
-        memReg_12_branch_mask <= _GEN_986;
+        memReg_12_branch_mask <= _GEN_970;
       end
     end else begin
-      memReg_12_branch_mask <= _GEN_986;
+      memReg_12_branch_mask <= _GEN_970;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_12_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -35800,30 +35770,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hd | 4'hd <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_13_branch_valid <= _GEN_1003;
+          memReg_13_branch_valid <= _GEN_987;
         end else begin
-          memReg_13_branch_valid <= _GEN_1085;
+          memReg_13_branch_valid <= _GEN_1069;
         end
       end else begin
-        memReg_13_branch_valid <= _GEN_1003;
+        memReg_13_branch_valid <= _GEN_987;
       end
     end else begin
-      memReg_13_branch_valid <= _GEN_1003;
+      memReg_13_branch_valid <= _GEN_987;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_13_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'hd | 4'hd <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_13_branch_mask <= _GEN_1084;
+          memReg_13_branch_mask <= _GEN_1068;
         end else begin
-          memReg_13_branch_mask <= _GEN_987;
+          memReg_13_branch_mask <= _GEN_971;
         end
       end else begin
-        memReg_13_branch_mask <= _GEN_987;
+        memReg_13_branch_mask <= _GEN_971;
       end
     end else begin
-      memReg_13_branch_mask <= _GEN_987;
+      memReg_13_branch_mask <= _GEN_971;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_13_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -35907,30 +35877,30 @@ module fifoWithBranchOps(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'he | 4'he <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_14_branch_valid <= _GEN_1004;
+          memReg_14_branch_valid <= _GEN_988;
         end else begin
-          memReg_14_branch_valid <= _GEN_1091;
+          memReg_14_branch_valid <= _GEN_1075;
         end
       end else begin
-        memReg_14_branch_valid <= _GEN_1004;
+        memReg_14_branch_valid <= _GEN_988;
       end
     end else begin
-      memReg_14_branch_valid <= _GEN_1004;
+      memReg_14_branch_valid <= _GEN_988;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_14_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 4'he | 4'he <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_14_branch_mask <= _GEN_1090;
+          memReg_14_branch_mask <= _GEN_1074;
         end else begin
-          memReg_14_branch_mask <= _GEN_988;
+          memReg_14_branch_mask <= _GEN_972;
         end
       end else begin
-        memReg_14_branch_mask <= _GEN_988;
+        memReg_14_branch_mask <= _GEN_972;
       end
     end else begin
-      memReg_14_branch_mask <= _GEN_988;
+      memReg_14_branch_mask <= _GEN_972;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_14_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -36013,14 +35983,14 @@ module fifoWithBranchOps(
       memReg_15_branch_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (branchOps_passed) begin // @[fifo.scala 107:32]
-        memReg_15_branch_valid <= _GEN_1005;
+        memReg_15_branch_valid <= _GEN_989;
       end else if (_T_121) begin // @[fifo.scala 112:68]
         memReg_15_branch_valid <= 1'h0; // @[fifo.scala 113:36]
       end else begin
-        memReg_15_branch_valid <= _GEN_1005;
+        memReg_15_branch_valid <= _GEN_989;
       end
     end else begin
-      memReg_15_branch_valid <= _GEN_1005;
+      memReg_15_branch_valid <= _GEN_989;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_15_branch_mask <= 5'h0; // @[fifo.scala 27:33]
@@ -36029,13 +35999,13 @@ module fifoWithBranchOps(
         if (|_T_120) begin // @[fifo.scala 108:68]
           memReg_15_branch_mask <= _memReg_15_branch_mask_T; // @[fifo.scala 109:35]
         end else begin
-          memReg_15_branch_mask <= _GEN_989;
+          memReg_15_branch_mask <= _GEN_973;
         end
       end else begin
-        memReg_15_branch_mask <= _GEN_989;
+        memReg_15_branch_mask <= _GEN_973;
       end
     end else begin
-      memReg_15_branch_mask <= _GEN_989;
+      memReg_15_branch_mask <= _GEN_973;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_15_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -40245,6 +40215,3363 @@ end // initial
 `endif
 `endif // SYNTHESIS
 endmodule
+module fifoRecordInvalidateII(
+  input          clock,
+  input          reset,
+  output         write_ready,
+  input          write_data_valid,
+  input  [31:0]  write_data_address,
+  input  [31:0]  write_data_core_instruction,
+  input  [3:0]   write_data_core_robAddr,
+  input  [5:0]   write_data_core_prfDest,
+  input          write_data_branch_valid,
+  input  [4:0]   write_data_branch_mask,
+  input          write_data_writeData_valid,
+  input  [63:0]  write_data_writeData_data,
+  input          write_data_cacheLine_valid,
+  input  [511:0] write_data_cacheLine_cacheLine,
+  input  [1:0]   write_data_cacheLine_response,
+  input          write_data_cacheLine_invalidated,
+  input          read_ready,
+  output         read_data_valid,
+  output [31:0]  read_data_address,
+  output [31:0]  read_data_core_instruction,
+  output [3:0]   read_data_core_robAddr,
+  output [5:0]   read_data_core_prfDest,
+  output         read_data_branch_valid,
+  output [4:0]   read_data_branch_mask,
+  output         read_data_writeData_valid,
+  output [63:0]  read_data_writeData_data,
+  output         read_data_cacheLine_valid,
+  output [511:0] read_data_cacheLine_cacheLine,
+  output [1:0]   read_data_cacheLine_response,
+  output         read_data_cacheLine_invalidated,
+  output         isEmpty,
+  input          branchOps_valid,
+  input  [4:0]   branchOps_branchMask,
+  input          branchOps_passed,
+  input  [31:0]  invalidateAddr,
+  input          invalidateEnable
+);
+`ifdef RANDOMIZE_REG_INIT
+  reg [31:0] _RAND_0;
+  reg [31:0] _RAND_1;
+  reg [31:0] _RAND_2;
+  reg [31:0] _RAND_3;
+  reg [31:0] _RAND_4;
+  reg [31:0] _RAND_5;
+  reg [31:0] _RAND_6;
+  reg [31:0] _RAND_7;
+  reg [63:0] _RAND_8;
+  reg [31:0] _RAND_9;
+  reg [511:0] _RAND_10;
+  reg [31:0] _RAND_11;
+  reg [31:0] _RAND_12;
+  reg [31:0] _RAND_13;
+  reg [31:0] _RAND_14;
+  reg [31:0] _RAND_15;
+  reg [31:0] _RAND_16;
+  reg [31:0] _RAND_17;
+  reg [31:0] _RAND_18;
+  reg [31:0] _RAND_19;
+  reg [31:0] _RAND_20;
+  reg [63:0] _RAND_21;
+  reg [31:0] _RAND_22;
+  reg [511:0] _RAND_23;
+  reg [31:0] _RAND_24;
+  reg [31:0] _RAND_25;
+  reg [31:0] _RAND_26;
+  reg [31:0] _RAND_27;
+  reg [31:0] _RAND_28;
+  reg [31:0] _RAND_29;
+  reg [31:0] _RAND_30;
+  reg [31:0] _RAND_31;
+  reg [31:0] _RAND_32;
+  reg [31:0] _RAND_33;
+  reg [63:0] _RAND_34;
+  reg [31:0] _RAND_35;
+  reg [511:0] _RAND_36;
+  reg [31:0] _RAND_37;
+  reg [31:0] _RAND_38;
+  reg [31:0] _RAND_39;
+  reg [31:0] _RAND_40;
+  reg [31:0] _RAND_41;
+  reg [31:0] _RAND_42;
+  reg [31:0] _RAND_43;
+  reg [31:0] _RAND_44;
+  reg [31:0] _RAND_45;
+  reg [31:0] _RAND_46;
+  reg [63:0] _RAND_47;
+  reg [31:0] _RAND_48;
+  reg [511:0] _RAND_49;
+  reg [31:0] _RAND_50;
+  reg [31:0] _RAND_51;
+  reg [31:0] _RAND_52;
+  reg [31:0] _RAND_53;
+  reg [31:0] _RAND_54;
+  reg [31:0] _RAND_55;
+  reg [31:0] _RAND_56;
+  reg [31:0] _RAND_57;
+  reg [31:0] _RAND_58;
+  reg [31:0] _RAND_59;
+  reg [63:0] _RAND_60;
+  reg [31:0] _RAND_61;
+  reg [511:0] _RAND_62;
+  reg [31:0] _RAND_63;
+  reg [31:0] _RAND_64;
+  reg [31:0] _RAND_65;
+  reg [31:0] _RAND_66;
+  reg [31:0] _RAND_67;
+  reg [31:0] _RAND_68;
+  reg [31:0] _RAND_69;
+  reg [31:0] _RAND_70;
+  reg [31:0] _RAND_71;
+  reg [31:0] _RAND_72;
+  reg [63:0] _RAND_73;
+  reg [31:0] _RAND_74;
+  reg [511:0] _RAND_75;
+  reg [31:0] _RAND_76;
+  reg [31:0] _RAND_77;
+  reg [31:0] _RAND_78;
+  reg [31:0] _RAND_79;
+  reg [31:0] _RAND_80;
+  reg [31:0] _RAND_81;
+  reg [31:0] _RAND_82;
+  reg [31:0] _RAND_83;
+  reg [31:0] _RAND_84;
+  reg [31:0] _RAND_85;
+  reg [63:0] _RAND_86;
+  reg [31:0] _RAND_87;
+  reg [511:0] _RAND_88;
+  reg [31:0] _RAND_89;
+  reg [31:0] _RAND_90;
+  reg [31:0] _RAND_91;
+  reg [31:0] _RAND_92;
+  reg [31:0] _RAND_93;
+  reg [31:0] _RAND_94;
+  reg [31:0] _RAND_95;
+  reg [31:0] _RAND_96;
+  reg [31:0] _RAND_97;
+  reg [31:0] _RAND_98;
+  reg [63:0] _RAND_99;
+  reg [31:0] _RAND_100;
+  reg [511:0] _RAND_101;
+  reg [31:0] _RAND_102;
+  reg [31:0] _RAND_103;
+  reg [31:0] _RAND_104;
+  reg [31:0] _RAND_105;
+  reg [31:0] _RAND_106;
+  reg [31:0] _RAND_107;
+  reg [31:0] _RAND_108;
+  reg [31:0] _RAND_109;
+  reg [31:0] _RAND_110;
+  reg [31:0] _RAND_111;
+  reg [63:0] _RAND_112;
+  reg [31:0] _RAND_113;
+  reg [511:0] _RAND_114;
+  reg [31:0] _RAND_115;
+  reg [31:0] _RAND_116;
+  reg [31:0] _RAND_117;
+  reg [31:0] _RAND_118;
+  reg [31:0] _RAND_119;
+  reg [31:0] _RAND_120;
+  reg [31:0] _RAND_121;
+  reg [31:0] _RAND_122;
+  reg [31:0] _RAND_123;
+  reg [31:0] _RAND_124;
+  reg [63:0] _RAND_125;
+  reg [31:0] _RAND_126;
+  reg [511:0] _RAND_127;
+  reg [31:0] _RAND_128;
+  reg [31:0] _RAND_129;
+  reg [31:0] _RAND_130;
+  reg [31:0] _RAND_131;
+  reg [31:0] _RAND_132;
+  reg [31:0] _RAND_133;
+  reg [31:0] _RAND_134;
+  reg [31:0] _RAND_135;
+  reg [31:0] _RAND_136;
+  reg [31:0] _RAND_137;
+  reg [63:0] _RAND_138;
+  reg [31:0] _RAND_139;
+  reg [511:0] _RAND_140;
+  reg [31:0] _RAND_141;
+  reg [31:0] _RAND_142;
+  reg [31:0] _RAND_143;
+  reg [31:0] _RAND_144;
+  reg [31:0] _RAND_145;
+  reg [31:0] _RAND_146;
+  reg [31:0] _RAND_147;
+  reg [31:0] _RAND_148;
+  reg [31:0] _RAND_149;
+  reg [31:0] _RAND_150;
+  reg [63:0] _RAND_151;
+  reg [31:0] _RAND_152;
+  reg [511:0] _RAND_153;
+  reg [31:0] _RAND_154;
+  reg [31:0] _RAND_155;
+  reg [31:0] _RAND_156;
+  reg [31:0] _RAND_157;
+  reg [31:0] _RAND_158;
+  reg [31:0] _RAND_159;
+  reg [31:0] _RAND_160;
+  reg [31:0] _RAND_161;
+  reg [31:0] _RAND_162;
+  reg [31:0] _RAND_163;
+  reg [63:0] _RAND_164;
+  reg [31:0] _RAND_165;
+  reg [511:0] _RAND_166;
+  reg [31:0] _RAND_167;
+  reg [31:0] _RAND_168;
+  reg [31:0] _RAND_169;
+  reg [31:0] _RAND_170;
+  reg [31:0] _RAND_171;
+  reg [31:0] _RAND_172;
+  reg [31:0] _RAND_173;
+  reg [31:0] _RAND_174;
+  reg [31:0] _RAND_175;
+  reg [31:0] _RAND_176;
+  reg [63:0] _RAND_177;
+  reg [31:0] _RAND_178;
+  reg [511:0] _RAND_179;
+  reg [31:0] _RAND_180;
+  reg [31:0] _RAND_181;
+  reg [31:0] _RAND_182;
+  reg [31:0] _RAND_183;
+  reg [31:0] _RAND_184;
+  reg [31:0] _RAND_185;
+  reg [31:0] _RAND_186;
+  reg [31:0] _RAND_187;
+  reg [31:0] _RAND_188;
+  reg [31:0] _RAND_189;
+  reg [63:0] _RAND_190;
+  reg [31:0] _RAND_191;
+  reg [511:0] _RAND_192;
+  reg [31:0] _RAND_193;
+  reg [31:0] _RAND_194;
+  reg [31:0] _RAND_195;
+  reg [31:0] _RAND_196;
+  reg [31:0] _RAND_197;
+  reg [31:0] _RAND_198;
+  reg [31:0] _RAND_199;
+  reg [31:0] _RAND_200;
+  reg [31:0] _RAND_201;
+  reg [31:0] _RAND_202;
+  reg [63:0] _RAND_203;
+  reg [31:0] _RAND_204;
+  reg [511:0] _RAND_205;
+  reg [31:0] _RAND_206;
+  reg [31:0] _RAND_207;
+  reg [31:0] _RAND_208;
+  reg [31:0] _RAND_209;
+  reg [31:0] _RAND_210;
+  reg [31:0] _RAND_211;
+`endif // RANDOMIZE_REG_INIT
+  reg  memReg_0_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_0_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_0_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_0_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_0_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_0_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_0_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_0_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_0_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_0_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_0_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_0_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_0_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_1_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_1_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_1_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_1_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_1_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_1_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_1_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_1_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_1_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_1_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_1_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_1_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_1_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_2_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_2_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_2_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_2_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_2_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_2_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_2_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_2_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_2_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_2_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_2_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_2_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_2_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_3_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_3_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_3_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_3_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_3_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_3_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_3_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_3_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_3_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_3_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_3_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_3_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_3_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_4_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_4_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_4_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_4_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_4_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_4_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_4_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_4_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_4_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_4_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_4_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_4_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_4_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_5_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_5_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_5_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_5_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_5_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_5_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_5_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_5_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_5_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_5_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_5_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_5_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_5_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_6_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_6_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_6_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_6_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_6_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_6_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_6_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_6_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_6_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_6_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_6_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_6_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_6_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_7_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_7_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_7_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_7_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_7_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_7_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_7_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_7_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_7_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_7_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_7_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_7_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_7_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_8_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_8_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_8_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_8_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_8_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_8_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_8_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_8_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_8_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_8_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_8_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_8_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_8_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_9_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_9_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_9_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_9_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_9_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_9_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_9_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_9_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_9_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_9_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_9_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_9_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_9_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_10_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_10_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_10_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_10_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_10_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_10_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_10_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_10_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_10_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_10_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_10_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_10_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_10_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_11_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_11_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_11_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_11_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_11_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_11_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_11_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_11_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_11_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_11_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_11_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_11_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_11_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_12_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_12_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_12_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_12_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_12_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_12_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_12_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_12_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_12_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_12_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_12_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_12_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_12_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_13_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_13_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_13_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_13_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_13_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_13_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_13_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_13_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_13_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_13_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_13_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_13_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_13_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_14_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_14_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_14_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_14_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_14_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_14_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_14_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_14_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_14_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_14_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_14_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_14_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_14_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg  memReg_15_valid; // @[fifo.scala 27:33]
+  reg [31:0] memReg_15_address; // @[fifo.scala 27:33]
+  reg [31:0] memReg_15_core_instruction; // @[fifo.scala 27:33]
+  reg [3:0] memReg_15_core_robAddr; // @[fifo.scala 27:33]
+  reg [5:0] memReg_15_core_prfDest; // @[fifo.scala 27:33]
+  reg  memReg_15_branch_valid; // @[fifo.scala 27:33]
+  reg [4:0] memReg_15_branch_mask; // @[fifo.scala 27:33]
+  reg  memReg_15_writeData_valid; // @[fifo.scala 27:33]
+  reg [63:0] memReg_15_writeData_data; // @[fifo.scala 27:33]
+  reg  memReg_15_cacheLine_valid; // @[fifo.scala 27:33]
+  reg [511:0] memReg_15_cacheLine_cacheLine; // @[fifo.scala 27:33]
+  reg [1:0] memReg_15_cacheLine_response; // @[fifo.scala 27:33]
+  reg  memReg_15_cacheLine_invalidated; // @[fifo.scala 27:33]
+  reg [3:0] readPtr; // @[fifo.scala 33:25]
+  wire [3:0] _nextVal_T_2 = readPtr + 4'h1; // @[fifo.scala 34:60]
+  wire [3:0] nextRead = readPtr == 4'hf ? 4'h0 : _nextVal_T_2; // @[fifo.scala 34:22]
+  wire [1:0] op = {write_data_valid,read_ready}; // @[fifo.scala 46:29]
+  reg  emptyReg; // @[fifo.scala 43:25]
+  wire  _T_2 = ~emptyReg; // @[fifo.scala 52:12]
+  wire  _GEN_21 = 2'h2 == op ? 1'h0 : 2'h3 == op & _T_2; // @[fifo.scala 49:14]
+  wire  _GEN_24 = 2'h1 == op ? _T_2 : _GEN_21; // @[fifo.scala 49:14]
+  wire  incrRead = 2'h0 == op ? 1'h0 : _GEN_24; // @[fifo.scala 49:14]
+  reg [3:0] writePtr; // @[fifo.scala 33:25]
+  wire [3:0] _nextVal_T_5 = writePtr + 4'h1; // @[fifo.scala 34:60]
+  wire [3:0] nextWrite = writePtr == 4'hf ? 4'h0 : _nextVal_T_5; // @[fifo.scala 34:22]
+  reg  fullReg; // @[fifo.scala 44:34]
+  wire  _T_4 = ~fullReg; // @[fifo.scala 59:12]
+  wire  _GEN_18 = 2'h2 == op ? _T_4 : 2'h3 == op & _T_4; // @[fifo.scala 49:14]
+  wire  _GEN_25 = 2'h1 == op ? 1'h0 : _GEN_18; // @[fifo.scala 49:14]
+  wire  incrWrite = 2'h0 == op ? 1'h0 : _GEN_25; // @[fifo.scala 49:14]
+  wire  _GEN_3 = ~emptyReg ? nextRead == writePtr : emptyReg; // @[fifo.scala 52:23 54:18 43:25]
+  wire  _GEN_6 = ~fullReg ? 1'h0 : emptyReg; // @[fifo.scala 59:22 61:18 43:25]
+  wire  _GEN_7 = ~fullReg ? nextWrite == readPtr : fullReg; // @[fifo.scala 59:22 62:17 44:34]
+  wire  _fullReg_T_2 = emptyReg ? 1'h0 : nextWrite == nextRead; // @[fifo.scala 70:23]
+  wire  _GEN_10 = _T_4 ? _fullReg_T_2 : fullReg; // @[fifo.scala 67:22 70:17 44:34]
+  wire  _emptyReg_T_2 = fullReg ? 1'h0 : nextRead == nextWrite; // @[fifo.scala 75:24]
+  wire  _GEN_11 = _T_2 ? 1'h0 : _GEN_10; // @[fifo.scala 73:23 74:17]
+  wire  _GEN_12 = _T_2 ? _emptyReg_T_2 : _GEN_6; // @[fifo.scala 73:23 75:18]
+  wire  _GEN_15 = 2'h3 == op ? _GEN_12 : emptyReg; // @[fifo.scala 49:14 43:25]
+  wire  _GEN_16 = 2'h3 == op ? _GEN_11 : fullReg; // @[fifo.scala 49:14 44:34]
+  wire  _GEN_19 = 2'h2 == op ? _GEN_6 : _GEN_15; // @[fifo.scala 49:14]
+  wire  _GEN_23 = 2'h1 == op ? _GEN_3 : _GEN_19; // @[fifo.scala 49:14]
+  wire  _GEN_27 = 2'h0 == op ? emptyReg : _GEN_23; // @[fifo.scala 49:14 43:25]
+  wire  _GEN_110 = 4'h0 == writePtr ? write_data_branch_valid : memReg_0_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_111 = 4'h1 == writePtr ? write_data_branch_valid : memReg_1_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_112 = 4'h2 == writePtr ? write_data_branch_valid : memReg_2_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_113 = 4'h3 == writePtr ? write_data_branch_valid : memReg_3_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_114 = 4'h4 == writePtr ? write_data_branch_valid : memReg_4_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_115 = 4'h5 == writePtr ? write_data_branch_valid : memReg_5_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_116 = 4'h6 == writePtr ? write_data_branch_valid : memReg_6_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_117 = 4'h7 == writePtr ? write_data_branch_valid : memReg_7_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_118 = 4'h8 == writePtr ? write_data_branch_valid : memReg_8_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_119 = 4'h9 == writePtr ? write_data_branch_valid : memReg_9_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_120 = 4'ha == writePtr ? write_data_branch_valid : memReg_10_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_121 = 4'hb == writePtr ? write_data_branch_valid : memReg_11_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_122 = 4'hc == writePtr ? write_data_branch_valid : memReg_12_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_123 = 4'hd == writePtr ? write_data_branch_valid : memReg_13_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_124 = 4'he == writePtr ? write_data_branch_valid : memReg_14_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_125 = 4'hf == writePtr ? write_data_branch_valid : memReg_15_branch_valid; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_126 = 4'h0 == writePtr ? write_data_branch_mask : memReg_0_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_127 = 4'h1 == writePtr ? write_data_branch_mask : memReg_1_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_128 = 4'h2 == writePtr ? write_data_branch_mask : memReg_2_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_129 = 4'h3 == writePtr ? write_data_branch_mask : memReg_3_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_130 = 4'h4 == writePtr ? write_data_branch_mask : memReg_4_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_131 = 4'h5 == writePtr ? write_data_branch_mask : memReg_5_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_132 = 4'h6 == writePtr ? write_data_branch_mask : memReg_6_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_133 = 4'h7 == writePtr ? write_data_branch_mask : memReg_7_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_134 = 4'h8 == writePtr ? write_data_branch_mask : memReg_8_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_135 = 4'h9 == writePtr ? write_data_branch_mask : memReg_9_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_136 = 4'ha == writePtr ? write_data_branch_mask : memReg_10_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_137 = 4'hb == writePtr ? write_data_branch_mask : memReg_11_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_138 = 4'hc == writePtr ? write_data_branch_mask : memReg_12_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_139 = 4'hd == writePtr ? write_data_branch_mask : memReg_13_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_140 = 4'he == writePtr ? write_data_branch_mask : memReg_14_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire [4:0] _GEN_141 = 4'hf == writePtr ? write_data_branch_mask : memReg_15_branch_mask; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_238 = 4'h0 == writePtr ? write_data_cacheLine_invalidated : memReg_0_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_239 = 4'h1 == writePtr ? write_data_cacheLine_invalidated : memReg_1_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_240 = 4'h2 == writePtr ? write_data_cacheLine_invalidated : memReg_2_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_241 = 4'h3 == writePtr ? write_data_cacheLine_invalidated : memReg_3_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_242 = 4'h4 == writePtr ? write_data_cacheLine_invalidated : memReg_4_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_243 = 4'h5 == writePtr ? write_data_cacheLine_invalidated : memReg_5_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_244 = 4'h6 == writePtr ? write_data_cacheLine_invalidated : memReg_6_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_245 = 4'h7 == writePtr ? write_data_cacheLine_invalidated : memReg_7_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_246 = 4'h8 == writePtr ? write_data_cacheLine_invalidated : memReg_8_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_247 = 4'h9 == writePtr ? write_data_cacheLine_invalidated : memReg_9_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_248 = 4'ha == writePtr ? write_data_cacheLine_invalidated : memReg_10_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_249 = 4'hb == writePtr ? write_data_cacheLine_invalidated : memReg_11_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_250 = 4'hc == writePtr ? write_data_cacheLine_invalidated : memReg_12_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_251 = 4'hd == writePtr ? write_data_cacheLine_invalidated : memReg_13_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_252 = 4'he == writePtr ? write_data_cacheLine_invalidated : memReg_14_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_253 = 4'hf == writePtr ? write_data_cacheLine_invalidated : memReg_15_cacheLine_invalidated; // @[fifo.scala 82:{22,22} 27:33]
+  wire  _GEN_334 = incrWrite ? _GEN_110 : memReg_0_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_335 = incrWrite ? _GEN_111 : memReg_1_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_336 = incrWrite ? _GEN_112 : memReg_2_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_337 = incrWrite ? _GEN_113 : memReg_3_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_338 = incrWrite ? _GEN_114 : memReg_4_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_339 = incrWrite ? _GEN_115 : memReg_5_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_340 = incrWrite ? _GEN_116 : memReg_6_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_341 = incrWrite ? _GEN_117 : memReg_7_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_342 = incrWrite ? _GEN_118 : memReg_8_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_343 = incrWrite ? _GEN_119 : memReg_9_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_344 = incrWrite ? _GEN_120 : memReg_10_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_345 = incrWrite ? _GEN_121 : memReg_11_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_346 = incrWrite ? _GEN_122 : memReg_12_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_347 = incrWrite ? _GEN_123 : memReg_13_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_348 = incrWrite ? _GEN_124 : memReg_14_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_349 = incrWrite ? _GEN_125 : memReg_15_branch_valid; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_350 = incrWrite ? _GEN_126 : memReg_0_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_351 = incrWrite ? _GEN_127 : memReg_1_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_352 = incrWrite ? _GEN_128 : memReg_2_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_353 = incrWrite ? _GEN_129 : memReg_3_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_354 = incrWrite ? _GEN_130 : memReg_4_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_355 = incrWrite ? _GEN_131 : memReg_5_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_356 = incrWrite ? _GEN_132 : memReg_6_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_357 = incrWrite ? _GEN_133 : memReg_7_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_358 = incrWrite ? _GEN_134 : memReg_8_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_359 = incrWrite ? _GEN_135 : memReg_9_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_360 = incrWrite ? _GEN_136 : memReg_10_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_361 = incrWrite ? _GEN_137 : memReg_11_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_362 = incrWrite ? _GEN_138 : memReg_12_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_363 = incrWrite ? _GEN_139 : memReg_13_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_364 = incrWrite ? _GEN_140 : memReg_14_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire [4:0] _GEN_365 = incrWrite ? _GEN_141 : memReg_15_branch_mask; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_462 = incrWrite ? _GEN_238 : memReg_0_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_463 = incrWrite ? _GEN_239 : memReg_1_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_464 = incrWrite ? _GEN_240 : memReg_2_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_465 = incrWrite ? _GEN_241 : memReg_3_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_466 = incrWrite ? _GEN_242 : memReg_4_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_467 = incrWrite ? _GEN_243 : memReg_5_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_468 = incrWrite ? _GEN_244 : memReg_6_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_469 = incrWrite ? _GEN_245 : memReg_7_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_470 = incrWrite ? _GEN_246 : memReg_8_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_471 = incrWrite ? _GEN_247 : memReg_9_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_472 = incrWrite ? _GEN_248 : memReg_10_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_473 = incrWrite ? _GEN_249 : memReg_11_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_474 = incrWrite ? _GEN_250 : memReg_12_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_475 = incrWrite ? _GEN_251 : memReg_13_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_476 = incrWrite ? _GEN_252 : memReg_14_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_477 = incrWrite ? _GEN_253 : memReg_15_cacheLine_invalidated; // @[fifo.scala 81:17 27:33]
+  wire  _GEN_479 = 4'h1 == readPtr ? memReg_1_valid : memReg_0_valid; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_480 = 4'h2 == readPtr ? memReg_2_valid : _GEN_479; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_481 = 4'h3 == readPtr ? memReg_3_valid : _GEN_480; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_482 = 4'h4 == readPtr ? memReg_4_valid : _GEN_481; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_483 = 4'h5 == readPtr ? memReg_5_valid : _GEN_482; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_484 = 4'h6 == readPtr ? memReg_6_valid : _GEN_483; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_485 = 4'h7 == readPtr ? memReg_7_valid : _GEN_484; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_486 = 4'h8 == readPtr ? memReg_8_valid : _GEN_485; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_487 = 4'h9 == readPtr ? memReg_9_valid : _GEN_486; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_488 = 4'ha == readPtr ? memReg_10_valid : _GEN_487; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_489 = 4'hb == readPtr ? memReg_11_valid : _GEN_488; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_490 = 4'hc == readPtr ? memReg_12_valid : _GEN_489; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_491 = 4'hd == readPtr ? memReg_13_valid : _GEN_490; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_492 = 4'he == readPtr ? memReg_14_valid : _GEN_491; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_493 = 4'hf == readPtr ? memReg_15_valid : _GEN_492; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_495 = 4'h1 == readPtr ? memReg_1_address : memReg_0_address; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_496 = 4'h2 == readPtr ? memReg_2_address : _GEN_495; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_497 = 4'h3 == readPtr ? memReg_3_address : _GEN_496; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_498 = 4'h4 == readPtr ? memReg_4_address : _GEN_497; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_499 = 4'h5 == readPtr ? memReg_5_address : _GEN_498; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_500 = 4'h6 == readPtr ? memReg_6_address : _GEN_499; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_501 = 4'h7 == readPtr ? memReg_7_address : _GEN_500; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_502 = 4'h8 == readPtr ? memReg_8_address : _GEN_501; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_503 = 4'h9 == readPtr ? memReg_9_address : _GEN_502; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_504 = 4'ha == readPtr ? memReg_10_address : _GEN_503; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_505 = 4'hb == readPtr ? memReg_11_address : _GEN_504; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_506 = 4'hc == readPtr ? memReg_12_address : _GEN_505; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_507 = 4'hd == readPtr ? memReg_13_address : _GEN_506; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_508 = 4'he == readPtr ? memReg_14_address : _GEN_507; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_511 = 4'h1 == readPtr ? memReg_1_core_instruction : memReg_0_core_instruction; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_512 = 4'h2 == readPtr ? memReg_2_core_instruction : _GEN_511; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_513 = 4'h3 == readPtr ? memReg_3_core_instruction : _GEN_512; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_514 = 4'h4 == readPtr ? memReg_4_core_instruction : _GEN_513; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_515 = 4'h5 == readPtr ? memReg_5_core_instruction : _GEN_514; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_516 = 4'h6 == readPtr ? memReg_6_core_instruction : _GEN_515; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_517 = 4'h7 == readPtr ? memReg_7_core_instruction : _GEN_516; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_518 = 4'h8 == readPtr ? memReg_8_core_instruction : _GEN_517; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_519 = 4'h9 == readPtr ? memReg_9_core_instruction : _GEN_518; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_520 = 4'ha == readPtr ? memReg_10_core_instruction : _GEN_519; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_521 = 4'hb == readPtr ? memReg_11_core_instruction : _GEN_520; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_522 = 4'hc == readPtr ? memReg_12_core_instruction : _GEN_521; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_523 = 4'hd == readPtr ? memReg_13_core_instruction : _GEN_522; // @[fifo.scala 86:{13,13}]
+  wire [31:0] _GEN_524 = 4'he == readPtr ? memReg_14_core_instruction : _GEN_523; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_527 = 4'h1 == readPtr ? memReg_1_core_robAddr : memReg_0_core_robAddr; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_528 = 4'h2 == readPtr ? memReg_2_core_robAddr : _GEN_527; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_529 = 4'h3 == readPtr ? memReg_3_core_robAddr : _GEN_528; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_530 = 4'h4 == readPtr ? memReg_4_core_robAddr : _GEN_529; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_531 = 4'h5 == readPtr ? memReg_5_core_robAddr : _GEN_530; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_532 = 4'h6 == readPtr ? memReg_6_core_robAddr : _GEN_531; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_533 = 4'h7 == readPtr ? memReg_7_core_robAddr : _GEN_532; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_534 = 4'h8 == readPtr ? memReg_8_core_robAddr : _GEN_533; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_535 = 4'h9 == readPtr ? memReg_9_core_robAddr : _GEN_534; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_536 = 4'ha == readPtr ? memReg_10_core_robAddr : _GEN_535; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_537 = 4'hb == readPtr ? memReg_11_core_robAddr : _GEN_536; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_538 = 4'hc == readPtr ? memReg_12_core_robAddr : _GEN_537; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_539 = 4'hd == readPtr ? memReg_13_core_robAddr : _GEN_538; // @[fifo.scala 86:{13,13}]
+  wire [3:0] _GEN_540 = 4'he == readPtr ? memReg_14_core_robAddr : _GEN_539; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_543 = 4'h1 == readPtr ? memReg_1_core_prfDest : memReg_0_core_prfDest; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_544 = 4'h2 == readPtr ? memReg_2_core_prfDest : _GEN_543; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_545 = 4'h3 == readPtr ? memReg_3_core_prfDest : _GEN_544; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_546 = 4'h4 == readPtr ? memReg_4_core_prfDest : _GEN_545; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_547 = 4'h5 == readPtr ? memReg_5_core_prfDest : _GEN_546; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_548 = 4'h6 == readPtr ? memReg_6_core_prfDest : _GEN_547; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_549 = 4'h7 == readPtr ? memReg_7_core_prfDest : _GEN_548; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_550 = 4'h8 == readPtr ? memReg_8_core_prfDest : _GEN_549; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_551 = 4'h9 == readPtr ? memReg_9_core_prfDest : _GEN_550; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_552 = 4'ha == readPtr ? memReg_10_core_prfDest : _GEN_551; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_553 = 4'hb == readPtr ? memReg_11_core_prfDest : _GEN_552; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_554 = 4'hc == readPtr ? memReg_12_core_prfDest : _GEN_553; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_555 = 4'hd == readPtr ? memReg_13_core_prfDest : _GEN_554; // @[fifo.scala 86:{13,13}]
+  wire [5:0] _GEN_556 = 4'he == readPtr ? memReg_14_core_prfDest : _GEN_555; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_559 = 4'h1 == readPtr ? memReg_1_branch_valid : memReg_0_branch_valid; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_560 = 4'h2 == readPtr ? memReg_2_branch_valid : _GEN_559; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_561 = 4'h3 == readPtr ? memReg_3_branch_valid : _GEN_560; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_562 = 4'h4 == readPtr ? memReg_4_branch_valid : _GEN_561; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_563 = 4'h5 == readPtr ? memReg_5_branch_valid : _GEN_562; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_564 = 4'h6 == readPtr ? memReg_6_branch_valid : _GEN_563; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_565 = 4'h7 == readPtr ? memReg_7_branch_valid : _GEN_564; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_566 = 4'h8 == readPtr ? memReg_8_branch_valid : _GEN_565; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_567 = 4'h9 == readPtr ? memReg_9_branch_valid : _GEN_566; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_568 = 4'ha == readPtr ? memReg_10_branch_valid : _GEN_567; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_569 = 4'hb == readPtr ? memReg_11_branch_valid : _GEN_568; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_570 = 4'hc == readPtr ? memReg_12_branch_valid : _GEN_569; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_571 = 4'hd == readPtr ? memReg_13_branch_valid : _GEN_570; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_572 = 4'he == readPtr ? memReg_14_branch_valid : _GEN_571; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_573 = 4'hf == readPtr ? memReg_15_branch_valid : _GEN_572; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_575 = 4'h1 == readPtr ? memReg_1_branch_mask : memReg_0_branch_mask; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_576 = 4'h2 == readPtr ? memReg_2_branch_mask : _GEN_575; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_577 = 4'h3 == readPtr ? memReg_3_branch_mask : _GEN_576; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_578 = 4'h4 == readPtr ? memReg_4_branch_mask : _GEN_577; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_579 = 4'h5 == readPtr ? memReg_5_branch_mask : _GEN_578; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_580 = 4'h6 == readPtr ? memReg_6_branch_mask : _GEN_579; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_581 = 4'h7 == readPtr ? memReg_7_branch_mask : _GEN_580; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_582 = 4'h8 == readPtr ? memReg_8_branch_mask : _GEN_581; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_583 = 4'h9 == readPtr ? memReg_9_branch_mask : _GEN_582; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_584 = 4'ha == readPtr ? memReg_10_branch_mask : _GEN_583; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_585 = 4'hb == readPtr ? memReg_11_branch_mask : _GEN_584; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_586 = 4'hc == readPtr ? memReg_12_branch_mask : _GEN_585; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_587 = 4'hd == readPtr ? memReg_13_branch_mask : _GEN_586; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_588 = 4'he == readPtr ? memReg_14_branch_mask : _GEN_587; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _GEN_589 = 4'hf == readPtr ? memReg_15_branch_mask : _GEN_588; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_591 = 4'h1 == readPtr ? memReg_1_writeData_valid : memReg_0_writeData_valid; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_592 = 4'h2 == readPtr ? memReg_2_writeData_valid : _GEN_591; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_593 = 4'h3 == readPtr ? memReg_3_writeData_valid : _GEN_592; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_594 = 4'h4 == readPtr ? memReg_4_writeData_valid : _GEN_593; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_595 = 4'h5 == readPtr ? memReg_5_writeData_valid : _GEN_594; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_596 = 4'h6 == readPtr ? memReg_6_writeData_valid : _GEN_595; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_597 = 4'h7 == readPtr ? memReg_7_writeData_valid : _GEN_596; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_598 = 4'h8 == readPtr ? memReg_8_writeData_valid : _GEN_597; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_599 = 4'h9 == readPtr ? memReg_9_writeData_valid : _GEN_598; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_600 = 4'ha == readPtr ? memReg_10_writeData_valid : _GEN_599; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_601 = 4'hb == readPtr ? memReg_11_writeData_valid : _GEN_600; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_602 = 4'hc == readPtr ? memReg_12_writeData_valid : _GEN_601; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_603 = 4'hd == readPtr ? memReg_13_writeData_valid : _GEN_602; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_604 = 4'he == readPtr ? memReg_14_writeData_valid : _GEN_603; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_607 = 4'h1 == readPtr ? memReg_1_writeData_data : memReg_0_writeData_data; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_608 = 4'h2 == readPtr ? memReg_2_writeData_data : _GEN_607; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_609 = 4'h3 == readPtr ? memReg_3_writeData_data : _GEN_608; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_610 = 4'h4 == readPtr ? memReg_4_writeData_data : _GEN_609; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_611 = 4'h5 == readPtr ? memReg_5_writeData_data : _GEN_610; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_612 = 4'h6 == readPtr ? memReg_6_writeData_data : _GEN_611; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_613 = 4'h7 == readPtr ? memReg_7_writeData_data : _GEN_612; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_614 = 4'h8 == readPtr ? memReg_8_writeData_data : _GEN_613; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_615 = 4'h9 == readPtr ? memReg_9_writeData_data : _GEN_614; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_616 = 4'ha == readPtr ? memReg_10_writeData_data : _GEN_615; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_617 = 4'hb == readPtr ? memReg_11_writeData_data : _GEN_616; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_618 = 4'hc == readPtr ? memReg_12_writeData_data : _GEN_617; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_619 = 4'hd == readPtr ? memReg_13_writeData_data : _GEN_618; // @[fifo.scala 86:{13,13}]
+  wire [63:0] _GEN_620 = 4'he == readPtr ? memReg_14_writeData_data : _GEN_619; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_623 = 4'h1 == readPtr ? memReg_1_cacheLine_valid : memReg_0_cacheLine_valid; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_624 = 4'h2 == readPtr ? memReg_2_cacheLine_valid : _GEN_623; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_625 = 4'h3 == readPtr ? memReg_3_cacheLine_valid : _GEN_624; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_626 = 4'h4 == readPtr ? memReg_4_cacheLine_valid : _GEN_625; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_627 = 4'h5 == readPtr ? memReg_5_cacheLine_valid : _GEN_626; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_628 = 4'h6 == readPtr ? memReg_6_cacheLine_valid : _GEN_627; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_629 = 4'h7 == readPtr ? memReg_7_cacheLine_valid : _GEN_628; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_630 = 4'h8 == readPtr ? memReg_8_cacheLine_valid : _GEN_629; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_631 = 4'h9 == readPtr ? memReg_9_cacheLine_valid : _GEN_630; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_632 = 4'ha == readPtr ? memReg_10_cacheLine_valid : _GEN_631; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_633 = 4'hb == readPtr ? memReg_11_cacheLine_valid : _GEN_632; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_634 = 4'hc == readPtr ? memReg_12_cacheLine_valid : _GEN_633; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_635 = 4'hd == readPtr ? memReg_13_cacheLine_valid : _GEN_634; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_636 = 4'he == readPtr ? memReg_14_cacheLine_valid : _GEN_635; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_639 = 4'h1 == readPtr ? memReg_1_cacheLine_cacheLine : memReg_0_cacheLine_cacheLine; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_640 = 4'h2 == readPtr ? memReg_2_cacheLine_cacheLine : _GEN_639; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_641 = 4'h3 == readPtr ? memReg_3_cacheLine_cacheLine : _GEN_640; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_642 = 4'h4 == readPtr ? memReg_4_cacheLine_cacheLine : _GEN_641; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_643 = 4'h5 == readPtr ? memReg_5_cacheLine_cacheLine : _GEN_642; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_644 = 4'h6 == readPtr ? memReg_6_cacheLine_cacheLine : _GEN_643; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_645 = 4'h7 == readPtr ? memReg_7_cacheLine_cacheLine : _GEN_644; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_646 = 4'h8 == readPtr ? memReg_8_cacheLine_cacheLine : _GEN_645; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_647 = 4'h9 == readPtr ? memReg_9_cacheLine_cacheLine : _GEN_646; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_648 = 4'ha == readPtr ? memReg_10_cacheLine_cacheLine : _GEN_647; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_649 = 4'hb == readPtr ? memReg_11_cacheLine_cacheLine : _GEN_648; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_650 = 4'hc == readPtr ? memReg_12_cacheLine_cacheLine : _GEN_649; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_651 = 4'hd == readPtr ? memReg_13_cacheLine_cacheLine : _GEN_650; // @[fifo.scala 86:{13,13}]
+  wire [511:0] _GEN_652 = 4'he == readPtr ? memReg_14_cacheLine_cacheLine : _GEN_651; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_655 = 4'h1 == readPtr ? memReg_1_cacheLine_response : memReg_0_cacheLine_response; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_656 = 4'h2 == readPtr ? memReg_2_cacheLine_response : _GEN_655; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_657 = 4'h3 == readPtr ? memReg_3_cacheLine_response : _GEN_656; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_658 = 4'h4 == readPtr ? memReg_4_cacheLine_response : _GEN_657; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_659 = 4'h5 == readPtr ? memReg_5_cacheLine_response : _GEN_658; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_660 = 4'h6 == readPtr ? memReg_6_cacheLine_response : _GEN_659; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_661 = 4'h7 == readPtr ? memReg_7_cacheLine_response : _GEN_660; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_662 = 4'h8 == readPtr ? memReg_8_cacheLine_response : _GEN_661; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_663 = 4'h9 == readPtr ? memReg_9_cacheLine_response : _GEN_662; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_664 = 4'ha == readPtr ? memReg_10_cacheLine_response : _GEN_663; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_665 = 4'hb == readPtr ? memReg_11_cacheLine_response : _GEN_664; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_666 = 4'hc == readPtr ? memReg_12_cacheLine_response : _GEN_665; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_667 = 4'hd == readPtr ? memReg_13_cacheLine_response : _GEN_666; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_668 = 4'he == readPtr ? memReg_14_cacheLine_response : _GEN_667; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_687 = 4'h1 == readPtr ? memReg_1_cacheLine_invalidated : memReg_0_cacheLine_invalidated; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_688 = 4'h2 == readPtr ? memReg_2_cacheLine_invalidated : _GEN_687; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_689 = 4'h3 == readPtr ? memReg_3_cacheLine_invalidated : _GEN_688; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_690 = 4'h4 == readPtr ? memReg_4_cacheLine_invalidated : _GEN_689; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_691 = 4'h5 == readPtr ? memReg_5_cacheLine_invalidated : _GEN_690; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_692 = 4'h6 == readPtr ? memReg_6_cacheLine_invalidated : _GEN_691; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_693 = 4'h7 == readPtr ? memReg_7_cacheLine_invalidated : _GEN_692; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_694 = 4'h8 == readPtr ? memReg_8_cacheLine_invalidated : _GEN_693; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_695 = 4'h9 == readPtr ? memReg_9_cacheLine_invalidated : _GEN_694; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_696 = 4'ha == readPtr ? memReg_10_cacheLine_invalidated : _GEN_695; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_697 = 4'hb == readPtr ? memReg_11_cacheLine_invalidated : _GEN_696; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_698 = 4'hc == readPtr ? memReg_12_cacheLine_invalidated : _GEN_697; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_699 = 4'hd == readPtr ? memReg_13_cacheLine_invalidated : _GEN_698; // @[fifo.scala 86:{13,13}]
+  wire  _GEN_700 = 4'he == readPtr ? memReg_14_cacheLine_invalidated : _GEN_699; // @[fifo.scala 86:{13,13}]
+  wire [4:0] _T_8 = write_data_branch_mask & branchOps_branchMask; // @[utils.scala 62:31]
+  wire  _T_9 = |_T_8; // @[utils.scala 62:55]
+  wire [4:0] _memReg_branch_mask_T = write_data_branch_mask ^ branchOps_branchMask; // @[utils.scala 63:42]
+  wire [4:0] _GEN_702 = 4'h0 == writePtr ? _memReg_branch_mask_T : _GEN_350; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_703 = 4'h1 == writePtr ? _memReg_branch_mask_T : _GEN_351; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_704 = 4'h2 == writePtr ? _memReg_branch_mask_T : _GEN_352; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_705 = 4'h3 == writePtr ? _memReg_branch_mask_T : _GEN_353; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_706 = 4'h4 == writePtr ? _memReg_branch_mask_T : _GEN_354; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_707 = 4'h5 == writePtr ? _memReg_branch_mask_T : _GEN_355; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_708 = 4'h6 == writePtr ? _memReg_branch_mask_T : _GEN_356; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_709 = 4'h7 == writePtr ? _memReg_branch_mask_T : _GEN_357; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_710 = 4'h8 == writePtr ? _memReg_branch_mask_T : _GEN_358; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_711 = 4'h9 == writePtr ? _memReg_branch_mask_T : _GEN_359; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_712 = 4'ha == writePtr ? _memReg_branch_mask_T : _GEN_360; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_713 = 4'hb == writePtr ? _memReg_branch_mask_T : _GEN_361; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_714 = 4'hc == writePtr ? _memReg_branch_mask_T : _GEN_362; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_715 = 4'hd == writePtr ? _memReg_branch_mask_T : _GEN_363; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_716 = 4'he == writePtr ? _memReg_branch_mask_T : _GEN_364; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_717 = 4'hf == writePtr ? _memReg_branch_mask_T : _GEN_365; // @[utils.scala 63:{23,23}]
+  wire [4:0] _GEN_718 = 4'h0 == writePtr ? write_data_branch_mask : _GEN_350; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_719 = 4'h1 == writePtr ? write_data_branch_mask : _GEN_351; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_720 = 4'h2 == writePtr ? write_data_branch_mask : _GEN_352; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_721 = 4'h3 == writePtr ? write_data_branch_mask : _GEN_353; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_722 = 4'h4 == writePtr ? write_data_branch_mask : _GEN_354; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_723 = 4'h5 == writePtr ? write_data_branch_mask : _GEN_355; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_724 = 4'h6 == writePtr ? write_data_branch_mask : _GEN_356; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_725 = 4'h7 == writePtr ? write_data_branch_mask : _GEN_357; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_726 = 4'h8 == writePtr ? write_data_branch_mask : _GEN_358; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_727 = 4'h9 == writePtr ? write_data_branch_mask : _GEN_359; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_728 = 4'ha == writePtr ? write_data_branch_mask : _GEN_360; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_729 = 4'hb == writePtr ? write_data_branch_mask : _GEN_361; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_730 = 4'hc == writePtr ? write_data_branch_mask : _GEN_362; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_731 = 4'hd == writePtr ? write_data_branch_mask : _GEN_363; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_732 = 4'he == writePtr ? write_data_branch_mask : _GEN_364; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_733 = 4'hf == writePtr ? write_data_branch_mask : _GEN_365; // @[utils.scala 65:{23,23}]
+  wire [4:0] _GEN_734 = |_T_8 ? _GEN_702 : _GEN_718; // @[utils.scala 62:60]
+  wire [4:0] _GEN_735 = |_T_8 ? _GEN_703 : _GEN_719; // @[utils.scala 62:60]
+  wire [4:0] _GEN_736 = |_T_8 ? _GEN_704 : _GEN_720; // @[utils.scala 62:60]
+  wire [4:0] _GEN_737 = |_T_8 ? _GEN_705 : _GEN_721; // @[utils.scala 62:60]
+  wire [4:0] _GEN_738 = |_T_8 ? _GEN_706 : _GEN_722; // @[utils.scala 62:60]
+  wire [4:0] _GEN_739 = |_T_8 ? _GEN_707 : _GEN_723; // @[utils.scala 62:60]
+  wire [4:0] _GEN_740 = |_T_8 ? _GEN_708 : _GEN_724; // @[utils.scala 62:60]
+  wire [4:0] _GEN_741 = |_T_8 ? _GEN_709 : _GEN_725; // @[utils.scala 62:60]
+  wire [4:0] _GEN_742 = |_T_8 ? _GEN_710 : _GEN_726; // @[utils.scala 62:60]
+  wire [4:0] _GEN_743 = |_T_8 ? _GEN_711 : _GEN_727; // @[utils.scala 62:60]
+  wire [4:0] _GEN_744 = |_T_8 ? _GEN_712 : _GEN_728; // @[utils.scala 62:60]
+  wire [4:0] _GEN_745 = |_T_8 ? _GEN_713 : _GEN_729; // @[utils.scala 62:60]
+  wire [4:0] _GEN_746 = |_T_8 ? _GEN_714 : _GEN_730; // @[utils.scala 62:60]
+  wire [4:0] _GEN_747 = |_T_8 ? _GEN_715 : _GEN_731; // @[utils.scala 62:60]
+  wire [4:0] _GEN_748 = |_T_8 ? _GEN_716 : _GEN_732; // @[utils.scala 62:60]
+  wire [4:0] _GEN_749 = |_T_8 ? _GEN_717 : _GEN_733; // @[utils.scala 62:60]
+  wire  _GEN_750 = 4'h0 == writePtr ? write_data_branch_valid : _GEN_334; // @[utils.scala 67:{22,22}]
+  wire  _GEN_751 = 4'h1 == writePtr ? write_data_branch_valid : _GEN_335; // @[utils.scala 67:{22,22}]
+  wire  _GEN_752 = 4'h2 == writePtr ? write_data_branch_valid : _GEN_336; // @[utils.scala 67:{22,22}]
+  wire  _GEN_753 = 4'h3 == writePtr ? write_data_branch_valid : _GEN_337; // @[utils.scala 67:{22,22}]
+  wire  _GEN_754 = 4'h4 == writePtr ? write_data_branch_valid : _GEN_338; // @[utils.scala 67:{22,22}]
+  wire  _GEN_755 = 4'h5 == writePtr ? write_data_branch_valid : _GEN_339; // @[utils.scala 67:{22,22}]
+  wire  _GEN_756 = 4'h6 == writePtr ? write_data_branch_valid : _GEN_340; // @[utils.scala 67:{22,22}]
+  wire  _GEN_757 = 4'h7 == writePtr ? write_data_branch_valid : _GEN_341; // @[utils.scala 67:{22,22}]
+  wire  _GEN_758 = 4'h8 == writePtr ? write_data_branch_valid : _GEN_342; // @[utils.scala 67:{22,22}]
+  wire  _GEN_759 = 4'h9 == writePtr ? write_data_branch_valid : _GEN_343; // @[utils.scala 67:{22,22}]
+  wire  _GEN_760 = 4'ha == writePtr ? write_data_branch_valid : _GEN_344; // @[utils.scala 67:{22,22}]
+  wire  _GEN_761 = 4'hb == writePtr ? write_data_branch_valid : _GEN_345; // @[utils.scala 67:{22,22}]
+  wire  _GEN_762 = 4'hc == writePtr ? write_data_branch_valid : _GEN_346; // @[utils.scala 67:{22,22}]
+  wire  _GEN_763 = 4'hd == writePtr ? write_data_branch_valid : _GEN_347; // @[utils.scala 67:{22,22}]
+  wire  _GEN_764 = 4'he == writePtr ? write_data_branch_valid : _GEN_348; // @[utils.scala 67:{22,22}]
+  wire  _GEN_765 = 4'hf == writePtr ? write_data_branch_valid : _GEN_349; // @[utils.scala 67:{22,22}]
+  wire  _GEN_766 = 4'h0 == writePtr ? 1'h0 : _GEN_334; // @[utils.scala 71:{24,24}]
+  wire  _GEN_767 = 4'h1 == writePtr ? 1'h0 : _GEN_335; // @[utils.scala 71:{24,24}]
+  wire  _GEN_768 = 4'h2 == writePtr ? 1'h0 : _GEN_336; // @[utils.scala 71:{24,24}]
+  wire  _GEN_769 = 4'h3 == writePtr ? 1'h0 : _GEN_337; // @[utils.scala 71:{24,24}]
+  wire  _GEN_770 = 4'h4 == writePtr ? 1'h0 : _GEN_338; // @[utils.scala 71:{24,24}]
+  wire  _GEN_771 = 4'h5 == writePtr ? 1'h0 : _GEN_339; // @[utils.scala 71:{24,24}]
+  wire  _GEN_772 = 4'h6 == writePtr ? 1'h0 : _GEN_340; // @[utils.scala 71:{24,24}]
+  wire  _GEN_773 = 4'h7 == writePtr ? 1'h0 : _GEN_341; // @[utils.scala 71:{24,24}]
+  wire  _GEN_774 = 4'h8 == writePtr ? 1'h0 : _GEN_342; // @[utils.scala 71:{24,24}]
+  wire  _GEN_775 = 4'h9 == writePtr ? 1'h0 : _GEN_343; // @[utils.scala 71:{24,24}]
+  wire  _GEN_776 = 4'ha == writePtr ? 1'h0 : _GEN_344; // @[utils.scala 71:{24,24}]
+  wire  _GEN_777 = 4'hb == writePtr ? 1'h0 : _GEN_345; // @[utils.scala 71:{24,24}]
+  wire  _GEN_778 = 4'hc == writePtr ? 1'h0 : _GEN_346; // @[utils.scala 71:{24,24}]
+  wire  _GEN_779 = 4'hd == writePtr ? 1'h0 : _GEN_347; // @[utils.scala 71:{24,24}]
+  wire  _GEN_780 = 4'he == writePtr ? 1'h0 : _GEN_348; // @[utils.scala 71:{24,24}]
+  wire  _GEN_781 = 4'hf == writePtr ? 1'h0 : _GEN_349; // @[utils.scala 71:{24,24}]
+  wire [4:0] _GEN_782 = 4'h0 == writePtr ? 5'h0 : _GEN_350; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_783 = 4'h1 == writePtr ? 5'h0 : _GEN_351; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_784 = 4'h2 == writePtr ? 5'h0 : _GEN_352; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_785 = 4'h3 == writePtr ? 5'h0 : _GEN_353; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_786 = 4'h4 == writePtr ? 5'h0 : _GEN_354; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_787 = 4'h5 == writePtr ? 5'h0 : _GEN_355; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_788 = 4'h6 == writePtr ? 5'h0 : _GEN_356; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_789 = 4'h7 == writePtr ? 5'h0 : _GEN_357; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_790 = 4'h8 == writePtr ? 5'h0 : _GEN_358; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_791 = 4'h9 == writePtr ? 5'h0 : _GEN_359; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_792 = 4'ha == writePtr ? 5'h0 : _GEN_360; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_793 = 4'hb == writePtr ? 5'h0 : _GEN_361; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_794 = 4'hc == writePtr ? 5'h0 : _GEN_362; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_795 = 4'hd == writePtr ? 5'h0 : _GEN_363; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_796 = 4'he == writePtr ? 5'h0 : _GEN_364; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_797 = 4'hf == writePtr ? 5'h0 : _GEN_365; // @[utils.scala 72:{23,23}]
+  wire  _GEN_830 = _T_9 ? _GEN_766 : _GEN_750; // @[utils.scala 70:60]
+  wire  _GEN_831 = _T_9 ? _GEN_767 : _GEN_751; // @[utils.scala 70:60]
+  wire  _GEN_832 = _T_9 ? _GEN_768 : _GEN_752; // @[utils.scala 70:60]
+  wire  _GEN_833 = _T_9 ? _GEN_769 : _GEN_753; // @[utils.scala 70:60]
+  wire  _GEN_834 = _T_9 ? _GEN_770 : _GEN_754; // @[utils.scala 70:60]
+  wire  _GEN_835 = _T_9 ? _GEN_771 : _GEN_755; // @[utils.scala 70:60]
+  wire  _GEN_836 = _T_9 ? _GEN_772 : _GEN_756; // @[utils.scala 70:60]
+  wire  _GEN_837 = _T_9 ? _GEN_773 : _GEN_757; // @[utils.scala 70:60]
+  wire  _GEN_838 = _T_9 ? _GEN_774 : _GEN_758; // @[utils.scala 70:60]
+  wire  _GEN_839 = _T_9 ? _GEN_775 : _GEN_759; // @[utils.scala 70:60]
+  wire  _GEN_840 = _T_9 ? _GEN_776 : _GEN_760; // @[utils.scala 70:60]
+  wire  _GEN_841 = _T_9 ? _GEN_777 : _GEN_761; // @[utils.scala 70:60]
+  wire  _GEN_842 = _T_9 ? _GEN_778 : _GEN_762; // @[utils.scala 70:60]
+  wire  _GEN_843 = _T_9 ? _GEN_779 : _GEN_763; // @[utils.scala 70:60]
+  wire  _GEN_844 = _T_9 ? _GEN_780 : _GEN_764; // @[utils.scala 70:60]
+  wire  _GEN_845 = _T_9 ? _GEN_781 : _GEN_765; // @[utils.scala 70:60]
+  wire [4:0] _GEN_846 = _T_9 ? _GEN_782 : _GEN_718; // @[utils.scala 70:60]
+  wire [4:0] _GEN_847 = _T_9 ? _GEN_783 : _GEN_719; // @[utils.scala 70:60]
+  wire [4:0] _GEN_848 = _T_9 ? _GEN_784 : _GEN_720; // @[utils.scala 70:60]
+  wire [4:0] _GEN_849 = _T_9 ? _GEN_785 : _GEN_721; // @[utils.scala 70:60]
+  wire [4:0] _GEN_850 = _T_9 ? _GEN_786 : _GEN_722; // @[utils.scala 70:60]
+  wire [4:0] _GEN_851 = _T_9 ? _GEN_787 : _GEN_723; // @[utils.scala 70:60]
+  wire [4:0] _GEN_852 = _T_9 ? _GEN_788 : _GEN_724; // @[utils.scala 70:60]
+  wire [4:0] _GEN_853 = _T_9 ? _GEN_789 : _GEN_725; // @[utils.scala 70:60]
+  wire [4:0] _GEN_854 = _T_9 ? _GEN_790 : _GEN_726; // @[utils.scala 70:60]
+  wire [4:0] _GEN_855 = _T_9 ? _GEN_791 : _GEN_727; // @[utils.scala 70:60]
+  wire [4:0] _GEN_856 = _T_9 ? _GEN_792 : _GEN_728; // @[utils.scala 70:60]
+  wire [4:0] _GEN_857 = _T_9 ? _GEN_793 : _GEN_729; // @[utils.scala 70:60]
+  wire [4:0] _GEN_858 = _T_9 ? _GEN_794 : _GEN_730; // @[utils.scala 70:60]
+  wire [4:0] _GEN_859 = _T_9 ? _GEN_795 : _GEN_731; // @[utils.scala 70:60]
+  wire [4:0] _GEN_860 = _T_9 ? _GEN_796 : _GEN_732; // @[utils.scala 70:60]
+  wire [4:0] _GEN_861 = _T_9 ? _GEN_797 : _GEN_733; // @[utils.scala 70:60]
+  wire [4:0] _GEN_862 = branchOps_passed ? _GEN_734 : _GEN_846; // @[utils.scala 60:30]
+  wire [4:0] _GEN_863 = branchOps_passed ? _GEN_735 : _GEN_847; // @[utils.scala 60:30]
+  wire [4:0] _GEN_864 = branchOps_passed ? _GEN_736 : _GEN_848; // @[utils.scala 60:30]
+  wire [4:0] _GEN_865 = branchOps_passed ? _GEN_737 : _GEN_849; // @[utils.scala 60:30]
+  wire [4:0] _GEN_866 = branchOps_passed ? _GEN_738 : _GEN_850; // @[utils.scala 60:30]
+  wire [4:0] _GEN_867 = branchOps_passed ? _GEN_739 : _GEN_851; // @[utils.scala 60:30]
+  wire [4:0] _GEN_868 = branchOps_passed ? _GEN_740 : _GEN_852; // @[utils.scala 60:30]
+  wire [4:0] _GEN_869 = branchOps_passed ? _GEN_741 : _GEN_853; // @[utils.scala 60:30]
+  wire [4:0] _GEN_870 = branchOps_passed ? _GEN_742 : _GEN_854; // @[utils.scala 60:30]
+  wire [4:0] _GEN_871 = branchOps_passed ? _GEN_743 : _GEN_855; // @[utils.scala 60:30]
+  wire [4:0] _GEN_872 = branchOps_passed ? _GEN_744 : _GEN_856; // @[utils.scala 60:30]
+  wire [4:0] _GEN_873 = branchOps_passed ? _GEN_745 : _GEN_857; // @[utils.scala 60:30]
+  wire [4:0] _GEN_874 = branchOps_passed ? _GEN_746 : _GEN_858; // @[utils.scala 60:30]
+  wire [4:0] _GEN_875 = branchOps_passed ? _GEN_747 : _GEN_859; // @[utils.scala 60:30]
+  wire [4:0] _GEN_876 = branchOps_passed ? _GEN_748 : _GEN_860; // @[utils.scala 60:30]
+  wire [4:0] _GEN_877 = branchOps_passed ? _GEN_749 : _GEN_861; // @[utils.scala 60:30]
+  wire  _GEN_878 = branchOps_passed ? _GEN_750 : _GEN_830; // @[utils.scala 60:30]
+  wire  _GEN_879 = branchOps_passed ? _GEN_751 : _GEN_831; // @[utils.scala 60:30]
+  wire  _GEN_880 = branchOps_passed ? _GEN_752 : _GEN_832; // @[utils.scala 60:30]
+  wire  _GEN_881 = branchOps_passed ? _GEN_753 : _GEN_833; // @[utils.scala 60:30]
+  wire  _GEN_882 = branchOps_passed ? _GEN_754 : _GEN_834; // @[utils.scala 60:30]
+  wire  _GEN_883 = branchOps_passed ? _GEN_755 : _GEN_835; // @[utils.scala 60:30]
+  wire  _GEN_884 = branchOps_passed ? _GEN_756 : _GEN_836; // @[utils.scala 60:30]
+  wire  _GEN_885 = branchOps_passed ? _GEN_757 : _GEN_837; // @[utils.scala 60:30]
+  wire  _GEN_886 = branchOps_passed ? _GEN_758 : _GEN_838; // @[utils.scala 60:30]
+  wire  _GEN_887 = branchOps_passed ? _GEN_759 : _GEN_839; // @[utils.scala 60:30]
+  wire  _GEN_888 = branchOps_passed ? _GEN_760 : _GEN_840; // @[utils.scala 60:30]
+  wire  _GEN_889 = branchOps_passed ? _GEN_761 : _GEN_841; // @[utils.scala 60:30]
+  wire  _GEN_890 = branchOps_passed ? _GEN_762 : _GEN_842; // @[utils.scala 60:30]
+  wire  _GEN_891 = branchOps_passed ? _GEN_763 : _GEN_843; // @[utils.scala 60:30]
+  wire  _GEN_892 = branchOps_passed ? _GEN_764 : _GEN_844; // @[utils.scala 60:30]
+  wire  _GEN_893 = branchOps_passed ? _GEN_765 : _GEN_845; // @[utils.scala 60:30]
+  wire [4:0] _GEN_926 = branchOps_valid ? _GEN_862 : _GEN_718; // @[utils.scala 59:26]
+  wire [4:0] _GEN_927 = branchOps_valid ? _GEN_863 : _GEN_719; // @[utils.scala 59:26]
+  wire [4:0] _GEN_928 = branchOps_valid ? _GEN_864 : _GEN_720; // @[utils.scala 59:26]
+  wire [4:0] _GEN_929 = branchOps_valid ? _GEN_865 : _GEN_721; // @[utils.scala 59:26]
+  wire [4:0] _GEN_930 = branchOps_valid ? _GEN_866 : _GEN_722; // @[utils.scala 59:26]
+  wire [4:0] _GEN_931 = branchOps_valid ? _GEN_867 : _GEN_723; // @[utils.scala 59:26]
+  wire [4:0] _GEN_932 = branchOps_valid ? _GEN_868 : _GEN_724; // @[utils.scala 59:26]
+  wire [4:0] _GEN_933 = branchOps_valid ? _GEN_869 : _GEN_725; // @[utils.scala 59:26]
+  wire [4:0] _GEN_934 = branchOps_valid ? _GEN_870 : _GEN_726; // @[utils.scala 59:26]
+  wire [4:0] _GEN_935 = branchOps_valid ? _GEN_871 : _GEN_727; // @[utils.scala 59:26]
+  wire [4:0] _GEN_936 = branchOps_valid ? _GEN_872 : _GEN_728; // @[utils.scala 59:26]
+  wire [4:0] _GEN_937 = branchOps_valid ? _GEN_873 : _GEN_729; // @[utils.scala 59:26]
+  wire [4:0] _GEN_938 = branchOps_valid ? _GEN_874 : _GEN_730; // @[utils.scala 59:26]
+  wire [4:0] _GEN_939 = branchOps_valid ? _GEN_875 : _GEN_731; // @[utils.scala 59:26]
+  wire [4:0] _GEN_940 = branchOps_valid ? _GEN_876 : _GEN_732; // @[utils.scala 59:26]
+  wire [4:0] _GEN_941 = branchOps_valid ? _GEN_877 : _GEN_733; // @[utils.scala 59:26]
+  wire  _GEN_942 = branchOps_valid ? _GEN_878 : _GEN_750; // @[utils.scala 59:26]
+  wire  _GEN_943 = branchOps_valid ? _GEN_879 : _GEN_751; // @[utils.scala 59:26]
+  wire  _GEN_944 = branchOps_valid ? _GEN_880 : _GEN_752; // @[utils.scala 59:26]
+  wire  _GEN_945 = branchOps_valid ? _GEN_881 : _GEN_753; // @[utils.scala 59:26]
+  wire  _GEN_946 = branchOps_valid ? _GEN_882 : _GEN_754; // @[utils.scala 59:26]
+  wire  _GEN_947 = branchOps_valid ? _GEN_883 : _GEN_755; // @[utils.scala 59:26]
+  wire  _GEN_948 = branchOps_valid ? _GEN_884 : _GEN_756; // @[utils.scala 59:26]
+  wire  _GEN_949 = branchOps_valid ? _GEN_885 : _GEN_757; // @[utils.scala 59:26]
+  wire  _GEN_950 = branchOps_valid ? _GEN_886 : _GEN_758; // @[utils.scala 59:26]
+  wire  _GEN_951 = branchOps_valid ? _GEN_887 : _GEN_759; // @[utils.scala 59:26]
+  wire  _GEN_952 = branchOps_valid ? _GEN_888 : _GEN_760; // @[utils.scala 59:26]
+  wire  _GEN_953 = branchOps_valid ? _GEN_889 : _GEN_761; // @[utils.scala 59:26]
+  wire  _GEN_954 = branchOps_valid ? _GEN_890 : _GEN_762; // @[utils.scala 59:26]
+  wire  _GEN_955 = branchOps_valid ? _GEN_891 : _GEN_763; // @[utils.scala 59:26]
+  wire  _GEN_956 = branchOps_valid ? _GEN_892 : _GEN_764; // @[utils.scala 59:26]
+  wire  _GEN_957 = branchOps_valid ? _GEN_893 : _GEN_765; // @[utils.scala 59:26]
+  wire [4:0] _GEN_958 = incrWrite ? _GEN_926 : _GEN_350; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_959 = incrWrite ? _GEN_927 : _GEN_351; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_960 = incrWrite ? _GEN_928 : _GEN_352; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_961 = incrWrite ? _GEN_929 : _GEN_353; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_962 = incrWrite ? _GEN_930 : _GEN_354; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_963 = incrWrite ? _GEN_931 : _GEN_355; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_964 = incrWrite ? _GEN_932 : _GEN_356; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_965 = incrWrite ? _GEN_933 : _GEN_357; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_966 = incrWrite ? _GEN_934 : _GEN_358; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_967 = incrWrite ? _GEN_935 : _GEN_359; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_968 = incrWrite ? _GEN_936 : _GEN_360; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_969 = incrWrite ? _GEN_937 : _GEN_361; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_970 = incrWrite ? _GEN_938 : _GEN_362; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_971 = incrWrite ? _GEN_939 : _GEN_363; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_972 = incrWrite ? _GEN_940 : _GEN_364; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_973 = incrWrite ? _GEN_941 : _GEN_365; // @[fifo.scala 96:16]
+  wire  _GEN_974 = incrWrite ? _GEN_942 : _GEN_334; // @[fifo.scala 96:16]
+  wire  _GEN_975 = incrWrite ? _GEN_943 : _GEN_335; // @[fifo.scala 96:16]
+  wire  _GEN_976 = incrWrite ? _GEN_944 : _GEN_336; // @[fifo.scala 96:16]
+  wire  _GEN_977 = incrWrite ? _GEN_945 : _GEN_337; // @[fifo.scala 96:16]
+  wire  _GEN_978 = incrWrite ? _GEN_946 : _GEN_338; // @[fifo.scala 96:16]
+  wire  _GEN_979 = incrWrite ? _GEN_947 : _GEN_339; // @[fifo.scala 96:16]
+  wire  _GEN_980 = incrWrite ? _GEN_948 : _GEN_340; // @[fifo.scala 96:16]
+  wire  _GEN_981 = incrWrite ? _GEN_949 : _GEN_341; // @[fifo.scala 96:16]
+  wire  _GEN_982 = incrWrite ? _GEN_950 : _GEN_342; // @[fifo.scala 96:16]
+  wire  _GEN_983 = incrWrite ? _GEN_951 : _GEN_343; // @[fifo.scala 96:16]
+  wire  _GEN_984 = incrWrite ? _GEN_952 : _GEN_344; // @[fifo.scala 96:16]
+  wire  _GEN_985 = incrWrite ? _GEN_953 : _GEN_345; // @[fifo.scala 96:16]
+  wire  _GEN_986 = incrWrite ? _GEN_954 : _GEN_346; // @[fifo.scala 96:16]
+  wire  _GEN_987 = incrWrite ? _GEN_955 : _GEN_347; // @[fifo.scala 96:16]
+  wire  _GEN_988 = incrWrite ? _GEN_956 : _GEN_348; // @[fifo.scala 96:16]
+  wire  _GEN_989 = incrWrite ? _GEN_957 : _GEN_349; // @[fifo.scala 96:16]
+  wire [3:0] startPointer = read_ready ? _nextVal_T_2 : readPtr; // @[fifo.scala 101:25]
+  wire [3:0] endPointer = writePtr - 4'h1; // @[fifo.scala 102:29]
+  wire [4:0] _T_15 = memReg_0_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_16 = |_T_15; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_0_branch_mask_T = memReg_0_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _T_22 = memReg_1_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_23 = |_T_22; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_1_branch_mask_T = memReg_1_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_996 = |_T_22 ? _memReg_1_branch_mask_T : _GEN_959; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_997 = _T_23 ? 1'h0 : _GEN_975; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_29 = memReg_2_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_30 = |_T_29; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_2_branch_mask_T = memReg_2_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1002 = |_T_29 ? _memReg_2_branch_mask_T : _GEN_960; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1003 = _T_30 ? 1'h0 : _GEN_976; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_36 = memReg_3_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_37 = |_T_36; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_3_branch_mask_T = memReg_3_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1008 = |_T_36 ? _memReg_3_branch_mask_T : _GEN_961; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1009 = _T_37 ? 1'h0 : _GEN_977; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_43 = memReg_4_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_44 = |_T_43; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_4_branch_mask_T = memReg_4_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1014 = |_T_43 ? _memReg_4_branch_mask_T : _GEN_962; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1015 = _T_44 ? 1'h0 : _GEN_978; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_50 = memReg_5_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_51 = |_T_50; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_5_branch_mask_T = memReg_5_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1020 = |_T_50 ? _memReg_5_branch_mask_T : _GEN_963; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1021 = _T_51 ? 1'h0 : _GEN_979; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_57 = memReg_6_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_58 = |_T_57; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_6_branch_mask_T = memReg_6_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1026 = |_T_57 ? _memReg_6_branch_mask_T : _GEN_964; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1027 = _T_58 ? 1'h0 : _GEN_980; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_64 = memReg_7_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_65 = |_T_64; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_7_branch_mask_T = memReg_7_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1032 = |_T_64 ? _memReg_7_branch_mask_T : _GEN_965; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1033 = _T_65 ? 1'h0 : _GEN_981; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_71 = memReg_8_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_72 = |_T_71; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_8_branch_mask_T = memReg_8_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1038 = |_T_71 ? _memReg_8_branch_mask_T : _GEN_966; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1039 = _T_72 ? 1'h0 : _GEN_982; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_78 = memReg_9_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_79 = |_T_78; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_9_branch_mask_T = memReg_9_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1044 = |_T_78 ? _memReg_9_branch_mask_T : _GEN_967; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1045 = _T_79 ? 1'h0 : _GEN_983; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_85 = memReg_10_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_86 = |_T_85; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_10_branch_mask_T = memReg_10_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1050 = |_T_85 ? _memReg_10_branch_mask_T : _GEN_968; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1051 = _T_86 ? 1'h0 : _GEN_984; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_92 = memReg_11_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_93 = |_T_92; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_11_branch_mask_T = memReg_11_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1056 = |_T_92 ? _memReg_11_branch_mask_T : _GEN_969; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1057 = _T_93 ? 1'h0 : _GEN_985; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_99 = memReg_12_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_100 = |_T_99; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_12_branch_mask_T = memReg_12_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1062 = |_T_99 ? _memReg_12_branch_mask_T : _GEN_970; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1063 = _T_100 ? 1'h0 : _GEN_986; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_106 = memReg_13_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_107 = |_T_106; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_13_branch_mask_T = memReg_13_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1068 = |_T_106 ? _memReg_13_branch_mask_T : _GEN_971; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1069 = _T_107 ? 1'h0 : _GEN_987; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_113 = memReg_14_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_114 = |_T_113; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_14_branch_mask_T = memReg_14_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _GEN_1074 = |_T_113 ? _memReg_14_branch_mask_T : _GEN_972; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_1075 = _T_114 ? 1'h0 : _GEN_988; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _T_120 = memReg_15_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
+  wire  _T_121 = |_T_120; // @[fifo.scala 108:63]
+  wire [4:0] _memReg_15_branch_mask_T = memReg_15_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
+  wire [4:0] _T_124 = _GEN_589 & branchOps_branchMask; // @[utils.scala 92:27]
+  wire  _T_125 = |_T_124; // @[utils.scala 92:51]
+  wire [4:0] _read_data_branch_mask_T = _GEN_589 ^ branchOps_branchMask; // @[utils.scala 93:42]
+  wire [4:0] _GEN_1118 = |_T_124 ? _read_data_branch_mask_T : _GEN_589; // @[utils.scala 92:56 93:27 96:27]
+  wire [4:0] _GEN_1119 = _T_125 ? 5'h0 : _GEN_589; // @[utils.scala 101:56 102:27 106:27]
+  wire  _GEN_1120 = _T_125 ? 1'h0 : _GEN_573; // @[utils.scala 101:56 103:28 107:28]
+  wire [4:0] _GEN_1121 = branchOps_passed ? _GEN_1118 : _GEN_1119; // @[utils.scala 90:30]
+  wire  _GEN_1122 = branchOps_passed ? _GEN_573 : _GEN_1120; // @[utils.scala 90:30 98:26]
+  wire  _GEN_1125 = memReg_0_address[31:6] == invalidateAddr[31:6] | _GEN_462; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1126 = memReg_1_address[31:6] == invalidateAddr[31:6] | _GEN_463; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1127 = memReg_2_address[31:6] == invalidateAddr[31:6] | _GEN_464; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1128 = memReg_3_address[31:6] == invalidateAddr[31:6] | _GEN_465; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1129 = memReg_4_address[31:6] == invalidateAddr[31:6] | _GEN_466; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1130 = memReg_5_address[31:6] == invalidateAddr[31:6] | _GEN_467; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1131 = memReg_6_address[31:6] == invalidateAddr[31:6] | _GEN_468; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1132 = memReg_7_address[31:6] == invalidateAddr[31:6] | _GEN_469; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1133 = memReg_8_address[31:6] == invalidateAddr[31:6] | _GEN_470; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1134 = memReg_9_address[31:6] == invalidateAddr[31:6] | _GEN_471; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1135 = memReg_10_address[31:6] == invalidateAddr[31:6] | _GEN_472; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1136 = memReg_11_address[31:6] == invalidateAddr[31:6] | _GEN_473; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1137 = memReg_12_address[31:6] == invalidateAddr[31:6] | _GEN_474; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1138 = memReg_13_address[31:6] == invalidateAddr[31:6] | _GEN_475; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1139 = memReg_14_address[31:6] == invalidateAddr[31:6] | _GEN_476; // @[fifo.scala 156:120 157:41]
+  wire  _GEN_1140 = memReg_15_address[31:6] == invalidateAddr[31:6] | _GEN_477; // @[fifo.scala 156:120 157:41]
+  assign write_ready = ~fullReg; // @[fifo.scala 87:18]
+  assign read_data_valid = _T_2 & _GEN_493; // @[fifo.scala 121:32]
+  assign read_data_address = 4'hf == readPtr ? memReg_15_address : _GEN_508; // @[fifo.scala 86:{13,13}]
+  assign read_data_core_instruction = 4'hf == readPtr ? memReg_15_core_instruction : _GEN_524; // @[fifo.scala 86:{13,13}]
+  assign read_data_core_robAddr = 4'hf == readPtr ? memReg_15_core_robAddr : _GEN_540; // @[fifo.scala 86:{13,13}]
+  assign read_data_core_prfDest = 4'hf == readPtr ? memReg_15_core_prfDest : _GEN_556; // @[fifo.scala 86:{13,13}]
+  assign read_data_branch_valid = branchOps_valid ? _GEN_1122 : _GEN_573; // @[utils.scala 112:24 89:27]
+  assign read_data_branch_mask = branchOps_valid ? _GEN_1121 : _GEN_589; // @[utils.scala 111:23 89:27]
+  assign read_data_writeData_valid = 4'hf == readPtr ? memReg_15_writeData_valid : _GEN_604; // @[fifo.scala 86:{13,13}]
+  assign read_data_writeData_data = 4'hf == readPtr ? memReg_15_writeData_data : _GEN_620; // @[fifo.scala 86:{13,13}]
+  assign read_data_cacheLine_valid = 4'hf == readPtr ? memReg_15_cacheLine_valid : _GEN_636; // @[fifo.scala 86:{13,13}]
+  assign read_data_cacheLine_cacheLine = 4'hf == readPtr ? memReg_15_cacheLine_cacheLine : _GEN_652; // @[fifo.scala 86:{13,13}]
+  assign read_data_cacheLine_response = 4'hf == readPtr ? memReg_15_cacheLine_response : _GEN_668; // @[fifo.scala 86:{13,13}]
+  assign read_data_cacheLine_invalidated = 4'hf == readPtr ? memReg_15_cacheLine_invalidated : _GEN_700; // @[fifo.scala 86:{13,13}]
+  assign isEmpty = emptyReg; // @[fifo.scala 88:11]
+  always @(posedge clock) begin
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (branchOps_passed) begin // @[fifo.scala 107:32]
+        memReg_0_branch_valid <= _GEN_974;
+      end else if (_T_16) begin // @[fifo.scala 112:68]
+        memReg_0_branch_valid <= 1'h0; // @[fifo.scala 113:36]
+      end else begin
+        memReg_0_branch_valid <= _GEN_974;
+      end
+    end else begin
+      memReg_0_branch_valid <= _GEN_974;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (branchOps_passed) begin // @[fifo.scala 107:32]
+        if (|_T_15) begin // @[fifo.scala 108:68]
+          memReg_0_branch_mask <= _memReg_0_branch_mask_T; // @[fifo.scala 109:35]
+        end else begin
+          memReg_0_branch_mask <= _GEN_958;
+        end
+      end else begin
+        memReg_0_branch_mask <= _GEN_958;
+      end
+    end else begin
+      memReg_0_branch_mask <= _GEN_958;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_0_cacheLine_invalidated <= _GEN_1125;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h1 | 4'h1 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_1_branch_valid <= _GEN_975;
+        end else begin
+          memReg_1_branch_valid <= _GEN_997;
+        end
+      end else begin
+        memReg_1_branch_valid <= _GEN_975;
+      end
+    end else begin
+      memReg_1_branch_valid <= _GEN_975;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h1 | 4'h1 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_1_branch_mask <= _GEN_996;
+        end else begin
+          memReg_1_branch_mask <= _GEN_959;
+        end
+      end else begin
+        memReg_1_branch_mask <= _GEN_959;
+      end
+    end else begin
+      memReg_1_branch_mask <= _GEN_959;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_1_cacheLine_invalidated <= _GEN_1126;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h2 | 4'h2 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_2_branch_valid <= _GEN_976;
+        end else begin
+          memReg_2_branch_valid <= _GEN_1003;
+        end
+      end else begin
+        memReg_2_branch_valid <= _GEN_976;
+      end
+    end else begin
+      memReg_2_branch_valid <= _GEN_976;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h2 | 4'h2 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_2_branch_mask <= _GEN_1002;
+        end else begin
+          memReg_2_branch_mask <= _GEN_960;
+        end
+      end else begin
+        memReg_2_branch_mask <= _GEN_960;
+      end
+    end else begin
+      memReg_2_branch_mask <= _GEN_960;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_2_cacheLine_invalidated <= _GEN_1127;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h3 | 4'h3 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_3_branch_valid <= _GEN_977;
+        end else begin
+          memReg_3_branch_valid <= _GEN_1009;
+        end
+      end else begin
+        memReg_3_branch_valid <= _GEN_977;
+      end
+    end else begin
+      memReg_3_branch_valid <= _GEN_977;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h3 | 4'h3 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_3_branch_mask <= _GEN_1008;
+        end else begin
+          memReg_3_branch_mask <= _GEN_961;
+        end
+      end else begin
+        memReg_3_branch_mask <= _GEN_961;
+      end
+    end else begin
+      memReg_3_branch_mask <= _GEN_961;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_3_cacheLine_invalidated <= _GEN_1128;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h4 | 4'h4 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_4_branch_valid <= _GEN_978;
+        end else begin
+          memReg_4_branch_valid <= _GEN_1015;
+        end
+      end else begin
+        memReg_4_branch_valid <= _GEN_978;
+      end
+    end else begin
+      memReg_4_branch_valid <= _GEN_978;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h4 | 4'h4 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_4_branch_mask <= _GEN_1014;
+        end else begin
+          memReg_4_branch_mask <= _GEN_962;
+        end
+      end else begin
+        memReg_4_branch_mask <= _GEN_962;
+      end
+    end else begin
+      memReg_4_branch_mask <= _GEN_962;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_4_cacheLine_invalidated <= _GEN_1129;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h5 | 4'h5 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_5_branch_valid <= _GEN_979;
+        end else begin
+          memReg_5_branch_valid <= _GEN_1021;
+        end
+      end else begin
+        memReg_5_branch_valid <= _GEN_979;
+      end
+    end else begin
+      memReg_5_branch_valid <= _GEN_979;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h5 | 4'h5 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_5_branch_mask <= _GEN_1020;
+        end else begin
+          memReg_5_branch_mask <= _GEN_963;
+        end
+      end else begin
+        memReg_5_branch_mask <= _GEN_963;
+      end
+    end else begin
+      memReg_5_branch_mask <= _GEN_963;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_5_cacheLine_invalidated <= _GEN_1130;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h6 | 4'h6 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_6_branch_valid <= _GEN_980;
+        end else begin
+          memReg_6_branch_valid <= _GEN_1027;
+        end
+      end else begin
+        memReg_6_branch_valid <= _GEN_980;
+      end
+    end else begin
+      memReg_6_branch_valid <= _GEN_980;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h6 | 4'h6 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_6_branch_mask <= _GEN_1026;
+        end else begin
+          memReg_6_branch_mask <= _GEN_964;
+        end
+      end else begin
+        memReg_6_branch_mask <= _GEN_964;
+      end
+    end else begin
+      memReg_6_branch_mask <= _GEN_964;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_6_cacheLine_invalidated <= _GEN_1131;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h7 | 4'h7 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_7_branch_valid <= _GEN_981;
+        end else begin
+          memReg_7_branch_valid <= _GEN_1033;
+        end
+      end else begin
+        memReg_7_branch_valid <= _GEN_981;
+      end
+    end else begin
+      memReg_7_branch_valid <= _GEN_981;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h7 | 4'h7 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_7_branch_mask <= _GEN_1032;
+        end else begin
+          memReg_7_branch_mask <= _GEN_965;
+        end
+      end else begin
+        memReg_7_branch_mask <= _GEN_965;
+      end
+    end else begin
+      memReg_7_branch_mask <= _GEN_965;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_7_cacheLine_invalidated <= _GEN_1132;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h8 | 4'h8 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_8_branch_valid <= _GEN_982;
+        end else begin
+          memReg_8_branch_valid <= _GEN_1039;
+        end
+      end else begin
+        memReg_8_branch_valid <= _GEN_982;
+      end
+    end else begin
+      memReg_8_branch_valid <= _GEN_982;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h8 | 4'h8 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_8_branch_mask <= _GEN_1038;
+        end else begin
+          memReg_8_branch_mask <= _GEN_966;
+        end
+      end else begin
+        memReg_8_branch_mask <= _GEN_966;
+      end
+    end else begin
+      memReg_8_branch_mask <= _GEN_966;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_8_cacheLine_invalidated <= _GEN_1133;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h9 | 4'h9 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_9_branch_valid <= _GEN_983;
+        end else begin
+          memReg_9_branch_valid <= _GEN_1045;
+        end
+      end else begin
+        memReg_9_branch_valid <= _GEN_983;
+      end
+    end else begin
+      memReg_9_branch_valid <= _GEN_983;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'h9 | 4'h9 <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_9_branch_mask <= _GEN_1044;
+        end else begin
+          memReg_9_branch_mask <= _GEN_967;
+        end
+      end else begin
+        memReg_9_branch_mask <= _GEN_967;
+      end
+    end else begin
+      memReg_9_branch_mask <= _GEN_967;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_9_cacheLine_invalidated <= _GEN_1134;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'ha | 4'ha <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_10_branch_valid <= _GEN_984;
+        end else begin
+          memReg_10_branch_valid <= _GEN_1051;
+        end
+      end else begin
+        memReg_10_branch_valid <= _GEN_984;
+      end
+    end else begin
+      memReg_10_branch_valid <= _GEN_984;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'ha | 4'ha <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_10_branch_mask <= _GEN_1050;
+        end else begin
+          memReg_10_branch_mask <= _GEN_968;
+        end
+      end else begin
+        memReg_10_branch_mask <= _GEN_968;
+      end
+    end else begin
+      memReg_10_branch_mask <= _GEN_968;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_10_cacheLine_invalidated <= _GEN_1135;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'hb | 4'hb <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_11_branch_valid <= _GEN_985;
+        end else begin
+          memReg_11_branch_valid <= _GEN_1057;
+        end
+      end else begin
+        memReg_11_branch_valid <= _GEN_985;
+      end
+    end else begin
+      memReg_11_branch_valid <= _GEN_985;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'hb | 4'hb <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_11_branch_mask <= _GEN_1056;
+        end else begin
+          memReg_11_branch_mask <= _GEN_969;
+        end
+      end else begin
+        memReg_11_branch_mask <= _GEN_969;
+      end
+    end else begin
+      memReg_11_branch_mask <= _GEN_969;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_11_cacheLine_invalidated <= _GEN_1136;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'hc | 4'hc <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_12_branch_valid <= _GEN_986;
+        end else begin
+          memReg_12_branch_valid <= _GEN_1063;
+        end
+      end else begin
+        memReg_12_branch_valid <= _GEN_986;
+      end
+    end else begin
+      memReg_12_branch_valid <= _GEN_986;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'hc | 4'hc <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_12_branch_mask <= _GEN_1062;
+        end else begin
+          memReg_12_branch_mask <= _GEN_970;
+        end
+      end else begin
+        memReg_12_branch_mask <= _GEN_970;
+      end
+    end else begin
+      memReg_12_branch_mask <= _GEN_970;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_12_cacheLine_invalidated <= _GEN_1137;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'hd | 4'hd <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_13_branch_valid <= _GEN_987;
+        end else begin
+          memReg_13_branch_valid <= _GEN_1069;
+        end
+      end else begin
+        memReg_13_branch_valid <= _GEN_987;
+      end
+    end else begin
+      memReg_13_branch_valid <= _GEN_987;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'hd | 4'hd <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_13_branch_mask <= _GEN_1068;
+        end else begin
+          memReg_13_branch_mask <= _GEN_971;
+        end
+      end else begin
+        memReg_13_branch_mask <= _GEN_971;
+      end
+    end else begin
+      memReg_13_branch_mask <= _GEN_971;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_13_cacheLine_invalidated <= _GEN_1138;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'he | 4'he <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_14_branch_valid <= _GEN_988;
+        end else begin
+          memReg_14_branch_valid <= _GEN_1075;
+        end
+      end else begin
+        memReg_14_branch_valid <= _GEN_988;
+      end
+    end else begin
+      memReg_14_branch_valid <= _GEN_988;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (startPointer <= 4'he | 4'he <= endPointer) begin // @[fifo.scala 106:54]
+        if (branchOps_passed) begin // @[fifo.scala 107:32]
+          memReg_14_branch_mask <= _GEN_1074;
+        end else begin
+          memReg_14_branch_mask <= _GEN_972;
+        end
+      end else begin
+        memReg_14_branch_mask <= _GEN_972;
+      end
+    end else begin
+      memReg_14_branch_mask <= _GEN_972;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_14_cacheLine_invalidated <= _GEN_1139;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_valid <= write_data_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_address <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_address <= write_data_address; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_core_instruction <= 32'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_core_instruction <= write_data_core_instruction; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_core_robAddr <= 4'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_core_robAddr <= write_data_core_robAddr; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_core_prfDest <= 6'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_core_prfDest <= write_data_core_prfDest; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_branch_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (branchOps_passed) begin // @[fifo.scala 107:32]
+        memReg_15_branch_valid <= _GEN_989;
+      end else if (_T_121) begin // @[fifo.scala 112:68]
+        memReg_15_branch_valid <= 1'h0; // @[fifo.scala 113:36]
+      end else begin
+        memReg_15_branch_valid <= _GEN_989;
+      end
+    end else begin
+      memReg_15_branch_valid <= _GEN_989;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_branch_mask <= 5'h0; // @[fifo.scala 27:33]
+    end else if (branchOps_valid) begin // @[fifo.scala 104:25]
+      if (branchOps_passed) begin // @[fifo.scala 107:32]
+        if (|_T_120) begin // @[fifo.scala 108:68]
+          memReg_15_branch_mask <= _memReg_15_branch_mask_T; // @[fifo.scala 109:35]
+        end else begin
+          memReg_15_branch_mask <= _GEN_973;
+        end
+      end else begin
+        memReg_15_branch_mask <= _GEN_973;
+      end
+    end else begin
+      memReg_15_branch_mask <= _GEN_973;
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_writeData_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_writeData_valid <= write_data_writeData_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_writeData_data <= 64'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_cacheLine_valid <= 1'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_cacheLine_valid <= write_data_cacheLine_valid; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_cacheLine_cacheLine <= 512'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_cacheLine_cacheLine <= write_data_cacheLine_cacheLine; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_cacheLine_invalidated <= 1'h0; // @[fifo.scala 27:33]
+    end else if (invalidateEnable) begin // @[fifo.scala 154:26]
+      memReg_15_cacheLine_invalidated <= _GEN_1140;
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_cacheLine_invalidated <= write_data_cacheLine_invalidated; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 33:25]
+      readPtr <= 4'h0; // @[fifo.scala 33:25]
+    end else if (incrRead) begin // @[fifo.scala 35:15]
+      if (readPtr == 4'hf) begin // @[fifo.scala 34:22]
+        readPtr <= 4'h0;
+      end else begin
+        readPtr <= _nextVal_T_2;
+      end
+    end
+    emptyReg <= reset | _GEN_27; // @[fifo.scala 43:{25,25}]
+    if (reset) begin // @[fifo.scala 33:25]
+      writePtr <= 4'h0; // @[fifo.scala 33:25]
+    end else if (incrWrite) begin // @[fifo.scala 35:15]
+      if (writePtr == 4'hf) begin // @[fifo.scala 34:22]
+        writePtr <= 4'h0;
+      end else begin
+        writePtr <= _nextVal_T_5;
+      end
+    end
+    if (reset) begin // @[fifo.scala 44:34]
+      fullReg <= 1'h0; // @[fifo.scala 44:34]
+    end else if (!(2'h0 == op)) begin // @[fifo.scala 49:14]
+      if (2'h1 == op) begin // @[fifo.scala 49:14]
+        if (~emptyReg) begin // @[fifo.scala 52:23]
+          fullReg <= 1'h0; // @[fifo.scala 53:17]
+        end
+      end else if (2'h2 == op) begin // @[fifo.scala 49:14]
+        fullReg <= _GEN_7;
+      end else begin
+        fullReg <= _GEN_16;
+      end
+    end
+  end
+// Register and memory initialization
+`ifdef RANDOMIZE_GARBAGE_ASSIGN
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_INVALID_ASSIGN
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_REG_INIT
+`define RANDOMIZE
+`endif
+`ifdef RANDOMIZE_MEM_INIT
+`define RANDOMIZE
+`endif
+`ifndef RANDOM
+`define RANDOM $random
+`endif
+`ifdef RANDOMIZE_MEM_INIT
+  integer initvar;
+`endif
+`ifndef SYNTHESIS
+`ifdef FIRRTL_BEFORE_INITIAL
+`FIRRTL_BEFORE_INITIAL
+`endif
+initial begin
+  `ifdef RANDOMIZE
+    `ifdef INIT_RANDOM
+      `INIT_RANDOM
+    `endif
+    `ifndef VERILATOR
+      `ifdef RANDOMIZE_DELAY
+        #`RANDOMIZE_DELAY begin end
+      `else
+        #0.002 begin end
+      `endif
+    `endif
+`ifdef RANDOMIZE_REG_INIT
+  _RAND_0 = {1{`RANDOM}};
+  memReg_0_valid = _RAND_0[0:0];
+  _RAND_1 = {1{`RANDOM}};
+  memReg_0_address = _RAND_1[31:0];
+  _RAND_2 = {1{`RANDOM}};
+  memReg_0_core_instruction = _RAND_2[31:0];
+  _RAND_3 = {1{`RANDOM}};
+  memReg_0_core_robAddr = _RAND_3[3:0];
+  _RAND_4 = {1{`RANDOM}};
+  memReg_0_core_prfDest = _RAND_4[5:0];
+  _RAND_5 = {1{`RANDOM}};
+  memReg_0_branch_valid = _RAND_5[0:0];
+  _RAND_6 = {1{`RANDOM}};
+  memReg_0_branch_mask = _RAND_6[4:0];
+  _RAND_7 = {1{`RANDOM}};
+  memReg_0_writeData_valid = _RAND_7[0:0];
+  _RAND_8 = {2{`RANDOM}};
+  memReg_0_writeData_data = _RAND_8[63:0];
+  _RAND_9 = {1{`RANDOM}};
+  memReg_0_cacheLine_valid = _RAND_9[0:0];
+  _RAND_10 = {16{`RANDOM}};
+  memReg_0_cacheLine_cacheLine = _RAND_10[511:0];
+  _RAND_11 = {1{`RANDOM}};
+  memReg_0_cacheLine_response = _RAND_11[1:0];
+  _RAND_12 = {1{`RANDOM}};
+  memReg_0_cacheLine_invalidated = _RAND_12[0:0];
+  _RAND_13 = {1{`RANDOM}};
+  memReg_1_valid = _RAND_13[0:0];
+  _RAND_14 = {1{`RANDOM}};
+  memReg_1_address = _RAND_14[31:0];
+  _RAND_15 = {1{`RANDOM}};
+  memReg_1_core_instruction = _RAND_15[31:0];
+  _RAND_16 = {1{`RANDOM}};
+  memReg_1_core_robAddr = _RAND_16[3:0];
+  _RAND_17 = {1{`RANDOM}};
+  memReg_1_core_prfDest = _RAND_17[5:0];
+  _RAND_18 = {1{`RANDOM}};
+  memReg_1_branch_valid = _RAND_18[0:0];
+  _RAND_19 = {1{`RANDOM}};
+  memReg_1_branch_mask = _RAND_19[4:0];
+  _RAND_20 = {1{`RANDOM}};
+  memReg_1_writeData_valid = _RAND_20[0:0];
+  _RAND_21 = {2{`RANDOM}};
+  memReg_1_writeData_data = _RAND_21[63:0];
+  _RAND_22 = {1{`RANDOM}};
+  memReg_1_cacheLine_valid = _RAND_22[0:0];
+  _RAND_23 = {16{`RANDOM}};
+  memReg_1_cacheLine_cacheLine = _RAND_23[511:0];
+  _RAND_24 = {1{`RANDOM}};
+  memReg_1_cacheLine_response = _RAND_24[1:0];
+  _RAND_25 = {1{`RANDOM}};
+  memReg_1_cacheLine_invalidated = _RAND_25[0:0];
+  _RAND_26 = {1{`RANDOM}};
+  memReg_2_valid = _RAND_26[0:0];
+  _RAND_27 = {1{`RANDOM}};
+  memReg_2_address = _RAND_27[31:0];
+  _RAND_28 = {1{`RANDOM}};
+  memReg_2_core_instruction = _RAND_28[31:0];
+  _RAND_29 = {1{`RANDOM}};
+  memReg_2_core_robAddr = _RAND_29[3:0];
+  _RAND_30 = {1{`RANDOM}};
+  memReg_2_core_prfDest = _RAND_30[5:0];
+  _RAND_31 = {1{`RANDOM}};
+  memReg_2_branch_valid = _RAND_31[0:0];
+  _RAND_32 = {1{`RANDOM}};
+  memReg_2_branch_mask = _RAND_32[4:0];
+  _RAND_33 = {1{`RANDOM}};
+  memReg_2_writeData_valid = _RAND_33[0:0];
+  _RAND_34 = {2{`RANDOM}};
+  memReg_2_writeData_data = _RAND_34[63:0];
+  _RAND_35 = {1{`RANDOM}};
+  memReg_2_cacheLine_valid = _RAND_35[0:0];
+  _RAND_36 = {16{`RANDOM}};
+  memReg_2_cacheLine_cacheLine = _RAND_36[511:0];
+  _RAND_37 = {1{`RANDOM}};
+  memReg_2_cacheLine_response = _RAND_37[1:0];
+  _RAND_38 = {1{`RANDOM}};
+  memReg_2_cacheLine_invalidated = _RAND_38[0:0];
+  _RAND_39 = {1{`RANDOM}};
+  memReg_3_valid = _RAND_39[0:0];
+  _RAND_40 = {1{`RANDOM}};
+  memReg_3_address = _RAND_40[31:0];
+  _RAND_41 = {1{`RANDOM}};
+  memReg_3_core_instruction = _RAND_41[31:0];
+  _RAND_42 = {1{`RANDOM}};
+  memReg_3_core_robAddr = _RAND_42[3:0];
+  _RAND_43 = {1{`RANDOM}};
+  memReg_3_core_prfDest = _RAND_43[5:0];
+  _RAND_44 = {1{`RANDOM}};
+  memReg_3_branch_valid = _RAND_44[0:0];
+  _RAND_45 = {1{`RANDOM}};
+  memReg_3_branch_mask = _RAND_45[4:0];
+  _RAND_46 = {1{`RANDOM}};
+  memReg_3_writeData_valid = _RAND_46[0:0];
+  _RAND_47 = {2{`RANDOM}};
+  memReg_3_writeData_data = _RAND_47[63:0];
+  _RAND_48 = {1{`RANDOM}};
+  memReg_3_cacheLine_valid = _RAND_48[0:0];
+  _RAND_49 = {16{`RANDOM}};
+  memReg_3_cacheLine_cacheLine = _RAND_49[511:0];
+  _RAND_50 = {1{`RANDOM}};
+  memReg_3_cacheLine_response = _RAND_50[1:0];
+  _RAND_51 = {1{`RANDOM}};
+  memReg_3_cacheLine_invalidated = _RAND_51[0:0];
+  _RAND_52 = {1{`RANDOM}};
+  memReg_4_valid = _RAND_52[0:0];
+  _RAND_53 = {1{`RANDOM}};
+  memReg_4_address = _RAND_53[31:0];
+  _RAND_54 = {1{`RANDOM}};
+  memReg_4_core_instruction = _RAND_54[31:0];
+  _RAND_55 = {1{`RANDOM}};
+  memReg_4_core_robAddr = _RAND_55[3:0];
+  _RAND_56 = {1{`RANDOM}};
+  memReg_4_core_prfDest = _RAND_56[5:0];
+  _RAND_57 = {1{`RANDOM}};
+  memReg_4_branch_valid = _RAND_57[0:0];
+  _RAND_58 = {1{`RANDOM}};
+  memReg_4_branch_mask = _RAND_58[4:0];
+  _RAND_59 = {1{`RANDOM}};
+  memReg_4_writeData_valid = _RAND_59[0:0];
+  _RAND_60 = {2{`RANDOM}};
+  memReg_4_writeData_data = _RAND_60[63:0];
+  _RAND_61 = {1{`RANDOM}};
+  memReg_4_cacheLine_valid = _RAND_61[0:0];
+  _RAND_62 = {16{`RANDOM}};
+  memReg_4_cacheLine_cacheLine = _RAND_62[511:0];
+  _RAND_63 = {1{`RANDOM}};
+  memReg_4_cacheLine_response = _RAND_63[1:0];
+  _RAND_64 = {1{`RANDOM}};
+  memReg_4_cacheLine_invalidated = _RAND_64[0:0];
+  _RAND_65 = {1{`RANDOM}};
+  memReg_5_valid = _RAND_65[0:0];
+  _RAND_66 = {1{`RANDOM}};
+  memReg_5_address = _RAND_66[31:0];
+  _RAND_67 = {1{`RANDOM}};
+  memReg_5_core_instruction = _RAND_67[31:0];
+  _RAND_68 = {1{`RANDOM}};
+  memReg_5_core_robAddr = _RAND_68[3:0];
+  _RAND_69 = {1{`RANDOM}};
+  memReg_5_core_prfDest = _RAND_69[5:0];
+  _RAND_70 = {1{`RANDOM}};
+  memReg_5_branch_valid = _RAND_70[0:0];
+  _RAND_71 = {1{`RANDOM}};
+  memReg_5_branch_mask = _RAND_71[4:0];
+  _RAND_72 = {1{`RANDOM}};
+  memReg_5_writeData_valid = _RAND_72[0:0];
+  _RAND_73 = {2{`RANDOM}};
+  memReg_5_writeData_data = _RAND_73[63:0];
+  _RAND_74 = {1{`RANDOM}};
+  memReg_5_cacheLine_valid = _RAND_74[0:0];
+  _RAND_75 = {16{`RANDOM}};
+  memReg_5_cacheLine_cacheLine = _RAND_75[511:0];
+  _RAND_76 = {1{`RANDOM}};
+  memReg_5_cacheLine_response = _RAND_76[1:0];
+  _RAND_77 = {1{`RANDOM}};
+  memReg_5_cacheLine_invalidated = _RAND_77[0:0];
+  _RAND_78 = {1{`RANDOM}};
+  memReg_6_valid = _RAND_78[0:0];
+  _RAND_79 = {1{`RANDOM}};
+  memReg_6_address = _RAND_79[31:0];
+  _RAND_80 = {1{`RANDOM}};
+  memReg_6_core_instruction = _RAND_80[31:0];
+  _RAND_81 = {1{`RANDOM}};
+  memReg_6_core_robAddr = _RAND_81[3:0];
+  _RAND_82 = {1{`RANDOM}};
+  memReg_6_core_prfDest = _RAND_82[5:0];
+  _RAND_83 = {1{`RANDOM}};
+  memReg_6_branch_valid = _RAND_83[0:0];
+  _RAND_84 = {1{`RANDOM}};
+  memReg_6_branch_mask = _RAND_84[4:0];
+  _RAND_85 = {1{`RANDOM}};
+  memReg_6_writeData_valid = _RAND_85[0:0];
+  _RAND_86 = {2{`RANDOM}};
+  memReg_6_writeData_data = _RAND_86[63:0];
+  _RAND_87 = {1{`RANDOM}};
+  memReg_6_cacheLine_valid = _RAND_87[0:0];
+  _RAND_88 = {16{`RANDOM}};
+  memReg_6_cacheLine_cacheLine = _RAND_88[511:0];
+  _RAND_89 = {1{`RANDOM}};
+  memReg_6_cacheLine_response = _RAND_89[1:0];
+  _RAND_90 = {1{`RANDOM}};
+  memReg_6_cacheLine_invalidated = _RAND_90[0:0];
+  _RAND_91 = {1{`RANDOM}};
+  memReg_7_valid = _RAND_91[0:0];
+  _RAND_92 = {1{`RANDOM}};
+  memReg_7_address = _RAND_92[31:0];
+  _RAND_93 = {1{`RANDOM}};
+  memReg_7_core_instruction = _RAND_93[31:0];
+  _RAND_94 = {1{`RANDOM}};
+  memReg_7_core_robAddr = _RAND_94[3:0];
+  _RAND_95 = {1{`RANDOM}};
+  memReg_7_core_prfDest = _RAND_95[5:0];
+  _RAND_96 = {1{`RANDOM}};
+  memReg_7_branch_valid = _RAND_96[0:0];
+  _RAND_97 = {1{`RANDOM}};
+  memReg_7_branch_mask = _RAND_97[4:0];
+  _RAND_98 = {1{`RANDOM}};
+  memReg_7_writeData_valid = _RAND_98[0:0];
+  _RAND_99 = {2{`RANDOM}};
+  memReg_7_writeData_data = _RAND_99[63:0];
+  _RAND_100 = {1{`RANDOM}};
+  memReg_7_cacheLine_valid = _RAND_100[0:0];
+  _RAND_101 = {16{`RANDOM}};
+  memReg_7_cacheLine_cacheLine = _RAND_101[511:0];
+  _RAND_102 = {1{`RANDOM}};
+  memReg_7_cacheLine_response = _RAND_102[1:0];
+  _RAND_103 = {1{`RANDOM}};
+  memReg_7_cacheLine_invalidated = _RAND_103[0:0];
+  _RAND_104 = {1{`RANDOM}};
+  memReg_8_valid = _RAND_104[0:0];
+  _RAND_105 = {1{`RANDOM}};
+  memReg_8_address = _RAND_105[31:0];
+  _RAND_106 = {1{`RANDOM}};
+  memReg_8_core_instruction = _RAND_106[31:0];
+  _RAND_107 = {1{`RANDOM}};
+  memReg_8_core_robAddr = _RAND_107[3:0];
+  _RAND_108 = {1{`RANDOM}};
+  memReg_8_core_prfDest = _RAND_108[5:0];
+  _RAND_109 = {1{`RANDOM}};
+  memReg_8_branch_valid = _RAND_109[0:0];
+  _RAND_110 = {1{`RANDOM}};
+  memReg_8_branch_mask = _RAND_110[4:0];
+  _RAND_111 = {1{`RANDOM}};
+  memReg_8_writeData_valid = _RAND_111[0:0];
+  _RAND_112 = {2{`RANDOM}};
+  memReg_8_writeData_data = _RAND_112[63:0];
+  _RAND_113 = {1{`RANDOM}};
+  memReg_8_cacheLine_valid = _RAND_113[0:0];
+  _RAND_114 = {16{`RANDOM}};
+  memReg_8_cacheLine_cacheLine = _RAND_114[511:0];
+  _RAND_115 = {1{`RANDOM}};
+  memReg_8_cacheLine_response = _RAND_115[1:0];
+  _RAND_116 = {1{`RANDOM}};
+  memReg_8_cacheLine_invalidated = _RAND_116[0:0];
+  _RAND_117 = {1{`RANDOM}};
+  memReg_9_valid = _RAND_117[0:0];
+  _RAND_118 = {1{`RANDOM}};
+  memReg_9_address = _RAND_118[31:0];
+  _RAND_119 = {1{`RANDOM}};
+  memReg_9_core_instruction = _RAND_119[31:0];
+  _RAND_120 = {1{`RANDOM}};
+  memReg_9_core_robAddr = _RAND_120[3:0];
+  _RAND_121 = {1{`RANDOM}};
+  memReg_9_core_prfDest = _RAND_121[5:0];
+  _RAND_122 = {1{`RANDOM}};
+  memReg_9_branch_valid = _RAND_122[0:0];
+  _RAND_123 = {1{`RANDOM}};
+  memReg_9_branch_mask = _RAND_123[4:0];
+  _RAND_124 = {1{`RANDOM}};
+  memReg_9_writeData_valid = _RAND_124[0:0];
+  _RAND_125 = {2{`RANDOM}};
+  memReg_9_writeData_data = _RAND_125[63:0];
+  _RAND_126 = {1{`RANDOM}};
+  memReg_9_cacheLine_valid = _RAND_126[0:0];
+  _RAND_127 = {16{`RANDOM}};
+  memReg_9_cacheLine_cacheLine = _RAND_127[511:0];
+  _RAND_128 = {1{`RANDOM}};
+  memReg_9_cacheLine_response = _RAND_128[1:0];
+  _RAND_129 = {1{`RANDOM}};
+  memReg_9_cacheLine_invalidated = _RAND_129[0:0];
+  _RAND_130 = {1{`RANDOM}};
+  memReg_10_valid = _RAND_130[0:0];
+  _RAND_131 = {1{`RANDOM}};
+  memReg_10_address = _RAND_131[31:0];
+  _RAND_132 = {1{`RANDOM}};
+  memReg_10_core_instruction = _RAND_132[31:0];
+  _RAND_133 = {1{`RANDOM}};
+  memReg_10_core_robAddr = _RAND_133[3:0];
+  _RAND_134 = {1{`RANDOM}};
+  memReg_10_core_prfDest = _RAND_134[5:0];
+  _RAND_135 = {1{`RANDOM}};
+  memReg_10_branch_valid = _RAND_135[0:0];
+  _RAND_136 = {1{`RANDOM}};
+  memReg_10_branch_mask = _RAND_136[4:0];
+  _RAND_137 = {1{`RANDOM}};
+  memReg_10_writeData_valid = _RAND_137[0:0];
+  _RAND_138 = {2{`RANDOM}};
+  memReg_10_writeData_data = _RAND_138[63:0];
+  _RAND_139 = {1{`RANDOM}};
+  memReg_10_cacheLine_valid = _RAND_139[0:0];
+  _RAND_140 = {16{`RANDOM}};
+  memReg_10_cacheLine_cacheLine = _RAND_140[511:0];
+  _RAND_141 = {1{`RANDOM}};
+  memReg_10_cacheLine_response = _RAND_141[1:0];
+  _RAND_142 = {1{`RANDOM}};
+  memReg_10_cacheLine_invalidated = _RAND_142[0:0];
+  _RAND_143 = {1{`RANDOM}};
+  memReg_11_valid = _RAND_143[0:0];
+  _RAND_144 = {1{`RANDOM}};
+  memReg_11_address = _RAND_144[31:0];
+  _RAND_145 = {1{`RANDOM}};
+  memReg_11_core_instruction = _RAND_145[31:0];
+  _RAND_146 = {1{`RANDOM}};
+  memReg_11_core_robAddr = _RAND_146[3:0];
+  _RAND_147 = {1{`RANDOM}};
+  memReg_11_core_prfDest = _RAND_147[5:0];
+  _RAND_148 = {1{`RANDOM}};
+  memReg_11_branch_valid = _RAND_148[0:0];
+  _RAND_149 = {1{`RANDOM}};
+  memReg_11_branch_mask = _RAND_149[4:0];
+  _RAND_150 = {1{`RANDOM}};
+  memReg_11_writeData_valid = _RAND_150[0:0];
+  _RAND_151 = {2{`RANDOM}};
+  memReg_11_writeData_data = _RAND_151[63:0];
+  _RAND_152 = {1{`RANDOM}};
+  memReg_11_cacheLine_valid = _RAND_152[0:0];
+  _RAND_153 = {16{`RANDOM}};
+  memReg_11_cacheLine_cacheLine = _RAND_153[511:0];
+  _RAND_154 = {1{`RANDOM}};
+  memReg_11_cacheLine_response = _RAND_154[1:0];
+  _RAND_155 = {1{`RANDOM}};
+  memReg_11_cacheLine_invalidated = _RAND_155[0:0];
+  _RAND_156 = {1{`RANDOM}};
+  memReg_12_valid = _RAND_156[0:0];
+  _RAND_157 = {1{`RANDOM}};
+  memReg_12_address = _RAND_157[31:0];
+  _RAND_158 = {1{`RANDOM}};
+  memReg_12_core_instruction = _RAND_158[31:0];
+  _RAND_159 = {1{`RANDOM}};
+  memReg_12_core_robAddr = _RAND_159[3:0];
+  _RAND_160 = {1{`RANDOM}};
+  memReg_12_core_prfDest = _RAND_160[5:0];
+  _RAND_161 = {1{`RANDOM}};
+  memReg_12_branch_valid = _RAND_161[0:0];
+  _RAND_162 = {1{`RANDOM}};
+  memReg_12_branch_mask = _RAND_162[4:0];
+  _RAND_163 = {1{`RANDOM}};
+  memReg_12_writeData_valid = _RAND_163[0:0];
+  _RAND_164 = {2{`RANDOM}};
+  memReg_12_writeData_data = _RAND_164[63:0];
+  _RAND_165 = {1{`RANDOM}};
+  memReg_12_cacheLine_valid = _RAND_165[0:0];
+  _RAND_166 = {16{`RANDOM}};
+  memReg_12_cacheLine_cacheLine = _RAND_166[511:0];
+  _RAND_167 = {1{`RANDOM}};
+  memReg_12_cacheLine_response = _RAND_167[1:0];
+  _RAND_168 = {1{`RANDOM}};
+  memReg_12_cacheLine_invalidated = _RAND_168[0:0];
+  _RAND_169 = {1{`RANDOM}};
+  memReg_13_valid = _RAND_169[0:0];
+  _RAND_170 = {1{`RANDOM}};
+  memReg_13_address = _RAND_170[31:0];
+  _RAND_171 = {1{`RANDOM}};
+  memReg_13_core_instruction = _RAND_171[31:0];
+  _RAND_172 = {1{`RANDOM}};
+  memReg_13_core_robAddr = _RAND_172[3:0];
+  _RAND_173 = {1{`RANDOM}};
+  memReg_13_core_prfDest = _RAND_173[5:0];
+  _RAND_174 = {1{`RANDOM}};
+  memReg_13_branch_valid = _RAND_174[0:0];
+  _RAND_175 = {1{`RANDOM}};
+  memReg_13_branch_mask = _RAND_175[4:0];
+  _RAND_176 = {1{`RANDOM}};
+  memReg_13_writeData_valid = _RAND_176[0:0];
+  _RAND_177 = {2{`RANDOM}};
+  memReg_13_writeData_data = _RAND_177[63:0];
+  _RAND_178 = {1{`RANDOM}};
+  memReg_13_cacheLine_valid = _RAND_178[0:0];
+  _RAND_179 = {16{`RANDOM}};
+  memReg_13_cacheLine_cacheLine = _RAND_179[511:0];
+  _RAND_180 = {1{`RANDOM}};
+  memReg_13_cacheLine_response = _RAND_180[1:0];
+  _RAND_181 = {1{`RANDOM}};
+  memReg_13_cacheLine_invalidated = _RAND_181[0:0];
+  _RAND_182 = {1{`RANDOM}};
+  memReg_14_valid = _RAND_182[0:0];
+  _RAND_183 = {1{`RANDOM}};
+  memReg_14_address = _RAND_183[31:0];
+  _RAND_184 = {1{`RANDOM}};
+  memReg_14_core_instruction = _RAND_184[31:0];
+  _RAND_185 = {1{`RANDOM}};
+  memReg_14_core_robAddr = _RAND_185[3:0];
+  _RAND_186 = {1{`RANDOM}};
+  memReg_14_core_prfDest = _RAND_186[5:0];
+  _RAND_187 = {1{`RANDOM}};
+  memReg_14_branch_valid = _RAND_187[0:0];
+  _RAND_188 = {1{`RANDOM}};
+  memReg_14_branch_mask = _RAND_188[4:0];
+  _RAND_189 = {1{`RANDOM}};
+  memReg_14_writeData_valid = _RAND_189[0:0];
+  _RAND_190 = {2{`RANDOM}};
+  memReg_14_writeData_data = _RAND_190[63:0];
+  _RAND_191 = {1{`RANDOM}};
+  memReg_14_cacheLine_valid = _RAND_191[0:0];
+  _RAND_192 = {16{`RANDOM}};
+  memReg_14_cacheLine_cacheLine = _RAND_192[511:0];
+  _RAND_193 = {1{`RANDOM}};
+  memReg_14_cacheLine_response = _RAND_193[1:0];
+  _RAND_194 = {1{`RANDOM}};
+  memReg_14_cacheLine_invalidated = _RAND_194[0:0];
+  _RAND_195 = {1{`RANDOM}};
+  memReg_15_valid = _RAND_195[0:0];
+  _RAND_196 = {1{`RANDOM}};
+  memReg_15_address = _RAND_196[31:0];
+  _RAND_197 = {1{`RANDOM}};
+  memReg_15_core_instruction = _RAND_197[31:0];
+  _RAND_198 = {1{`RANDOM}};
+  memReg_15_core_robAddr = _RAND_198[3:0];
+  _RAND_199 = {1{`RANDOM}};
+  memReg_15_core_prfDest = _RAND_199[5:0];
+  _RAND_200 = {1{`RANDOM}};
+  memReg_15_branch_valid = _RAND_200[0:0];
+  _RAND_201 = {1{`RANDOM}};
+  memReg_15_branch_mask = _RAND_201[4:0];
+  _RAND_202 = {1{`RANDOM}};
+  memReg_15_writeData_valid = _RAND_202[0:0];
+  _RAND_203 = {2{`RANDOM}};
+  memReg_15_writeData_data = _RAND_203[63:0];
+  _RAND_204 = {1{`RANDOM}};
+  memReg_15_cacheLine_valid = _RAND_204[0:0];
+  _RAND_205 = {16{`RANDOM}};
+  memReg_15_cacheLine_cacheLine = _RAND_205[511:0];
+  _RAND_206 = {1{`RANDOM}};
+  memReg_15_cacheLine_response = _RAND_206[1:0];
+  _RAND_207 = {1{`RANDOM}};
+  memReg_15_cacheLine_invalidated = _RAND_207[0:0];
+  _RAND_208 = {1{`RANDOM}};
+  readPtr = _RAND_208[3:0];
+  _RAND_209 = {1{`RANDOM}};
+  emptyReg = _RAND_209[0:0];
+  _RAND_210 = {1{`RANDOM}};
+  writePtr = _RAND_210[3:0];
+  _RAND_211 = {1{`RANDOM}};
+  fullReg = _RAND_211[0:0];
+`endif // RANDOMIZE_REG_INIT
+  `endif // RANDOMIZE
+end // initial
+`ifdef FIRRTL_AFTER_INITIAL
+`FIRRTL_AFTER_INITIAL
+`endif
+`endif // SYNTHESIS
+endmodule
 module fifoBaseModule(
   input          clock,
   input          reset,
@@ -41022,63 +44349,111 @@ module replayUnit(
   input          branchOps_valid,
   input  [4:0]   branchOps_branchMask,
   input          branchOps_passed,
+  input          coherencyRequest_valid,
+  input  [31:0]  coherencyRequest_address,
   output         fenceReady
 );
-  wire  requestWaitFIFO_clock; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_reset; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_write_ready; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_write_data_valid; // @[replayUnit.scala 52:31]
-  wire [31:0] requestWaitFIFO_write_data_address; // @[replayUnit.scala 52:31]
-  wire [31:0] requestWaitFIFO_write_data_core_instruction; // @[replayUnit.scala 52:31]
-  wire [3:0] requestWaitFIFO_write_data_core_robAddr; // @[replayUnit.scala 52:31]
-  wire [5:0] requestWaitFIFO_write_data_core_prfDest; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_write_data_branch_valid; // @[replayUnit.scala 52:31]
-  wire [4:0] requestWaitFIFO_write_data_branch_mask; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_write_data_writeData_valid; // @[replayUnit.scala 52:31]
-  wire [63:0] requestWaitFIFO_write_data_writeData_data; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_write_data_cacheLine_valid; // @[replayUnit.scala 52:31]
-  wire [511:0] requestWaitFIFO_write_data_cacheLine_cacheLine; // @[replayUnit.scala 52:31]
-  wire [1:0] requestWaitFIFO_write_data_cacheLine_response; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_write_data_cacheLine_invalidated; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_read_ready; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_read_data_valid; // @[replayUnit.scala 52:31]
-  wire [31:0] requestWaitFIFO_read_data_address; // @[replayUnit.scala 52:31]
-  wire [31:0] requestWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 52:31]
-  wire [3:0] requestWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 52:31]
-  wire [5:0] requestWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 52:31]
-  wire [4:0] requestWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 52:31]
-  wire [63:0] requestWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_read_data_cacheLine_valid; // @[replayUnit.scala 52:31]
-  wire [511:0] requestWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 52:31]
-  wire [1:0] requestWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_read_data_cacheLine_invalidated; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_isEmpty; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_branchOps_valid; // @[replayUnit.scala 52:31]
-  wire [4:0] requestWaitFIFO_branchOps_branchMask; // @[replayUnit.scala 52:31]
-  wire  requestWaitFIFO_branchOps_passed; // @[replayUnit.scala 52:31]
-  wire  writeBackFIFO_clock; // @[replayUnit.scala 60:29]
-  wire  writeBackFIFO_reset; // @[replayUnit.scala 60:29]
-  wire  writeBackFIFO_write_ready; // @[replayUnit.scala 60:29]
-  wire  writeBackFIFO_write_data_valid; // @[replayUnit.scala 60:29]
-  wire [31:0] writeBackFIFO_write_data_address; // @[replayUnit.scala 60:29]
-  wire [511:0] writeBackFIFO_write_data_data; // @[replayUnit.scala 60:29]
-  wire  writeBackFIFO_read_ready; // @[replayUnit.scala 60:29]
-  wire  writeBackFIFO_read_data_valid; // @[replayUnit.scala 60:29]
-  wire [31:0] writeBackFIFO_read_data_address; // @[replayUnit.scala 60:29]
-  wire [511:0] writeBackFIFO_read_data_data; // @[replayUnit.scala 60:29]
-  wire [4:0] _T_3 = requestIn_request_branch_mask & branchOps_branchMask; // @[utils.scala 92:27]
-  wire  _T_4 = |_T_3; // @[utils.scala 92:51]
-  wire [4:0] _requestWaitFIFO_write_data_branch_mask_T = requestIn_request_branch_mask ^ branchOps_branchMask; // @[utils.scala 93:42]
-  wire [4:0] _GEN_2 = |_T_3 ? _requestWaitFIFO_write_data_branch_mask_T : requestIn_request_branch_mask; // @[utils.scala 92:56 93:27 96:27]
-  wire [4:0] _GEN_3 = _T_4 ? 5'h0 : requestIn_request_branch_mask; // @[utils.scala 101:56 102:27 106:27]
-  wire  _GEN_4 = _T_4 ? 1'h0 : requestIn_request_branch_valid; // @[utils.scala 101:56 103:28 107:28]
-  wire [4:0] _GEN_5 = branchOps_passed ? _GEN_2 : _GEN_3; // @[utils.scala 90:30]
-  wire  _GEN_6 = branchOps_passed ? requestIn_request_branch_valid : _GEN_4; // @[utils.scala 90:30 98:26]
-  wire [4:0] _GEN_7 = branchOps_valid ? _GEN_5 : requestIn_request_branch_mask; // @[utils.scala 111:23 89:27]
-  wire  _GEN_8 = branchOps_valid ? _GEN_6 : requestIn_request_branch_valid; // @[utils.scala 112:24 89:27]
-  fifoWithBranchOps requestWaitFIFO ( // @[replayUnit.scala 52:31]
+  wire  requestWaitFIFO_clock; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_reset; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_write_ready; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_write_data_valid; // @[replayUnit.scala 48:31]
+  wire [31:0] requestWaitFIFO_write_data_address; // @[replayUnit.scala 48:31]
+  wire [31:0] requestWaitFIFO_write_data_core_instruction; // @[replayUnit.scala 48:31]
+  wire [3:0] requestWaitFIFO_write_data_core_robAddr; // @[replayUnit.scala 48:31]
+  wire [5:0] requestWaitFIFO_write_data_core_prfDest; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_write_data_branch_valid; // @[replayUnit.scala 48:31]
+  wire [4:0] requestWaitFIFO_write_data_branch_mask; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_write_data_writeData_valid; // @[replayUnit.scala 48:31]
+  wire [63:0] requestWaitFIFO_write_data_writeData_data; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_write_data_cacheLine_valid; // @[replayUnit.scala 48:31]
+  wire [511:0] requestWaitFIFO_write_data_cacheLine_cacheLine; // @[replayUnit.scala 48:31]
+  wire [1:0] requestWaitFIFO_write_data_cacheLine_response; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_write_data_cacheLine_invalidated; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_read_ready; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_read_data_valid; // @[replayUnit.scala 48:31]
+  wire [31:0] requestWaitFIFO_read_data_address; // @[replayUnit.scala 48:31]
+  wire [31:0] requestWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 48:31]
+  wire [3:0] requestWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 48:31]
+  wire [5:0] requestWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 48:31]
+  wire [4:0] requestWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 48:31]
+  wire [63:0] requestWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_read_data_cacheLine_valid; // @[replayUnit.scala 48:31]
+  wire [511:0] requestWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 48:31]
+  wire [1:0] requestWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_read_data_cacheLine_invalidated; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_isEmpty; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_branchOps_valid; // @[replayUnit.scala 48:31]
+  wire [4:0] requestWaitFIFO_branchOps_branchMask; // @[replayUnit.scala 48:31]
+  wire  requestWaitFIFO_branchOps_passed; // @[replayUnit.scala 48:31]
+  wire  responseWaitFIFO_clock; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_reset; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_write_ready; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_write_data_valid; // @[replayUnit.scala 52:32]
+  wire [31:0] responseWaitFIFO_write_data_address; // @[replayUnit.scala 52:32]
+  wire [31:0] responseWaitFIFO_write_data_core_instruction; // @[replayUnit.scala 52:32]
+  wire [3:0] responseWaitFIFO_write_data_core_robAddr; // @[replayUnit.scala 52:32]
+  wire [5:0] responseWaitFIFO_write_data_core_prfDest; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_write_data_branch_valid; // @[replayUnit.scala 52:32]
+  wire [4:0] responseWaitFIFO_write_data_branch_mask; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_write_data_writeData_valid; // @[replayUnit.scala 52:32]
+  wire [63:0] responseWaitFIFO_write_data_writeData_data; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_write_data_cacheLine_valid; // @[replayUnit.scala 52:32]
+  wire [511:0] responseWaitFIFO_write_data_cacheLine_cacheLine; // @[replayUnit.scala 52:32]
+  wire [1:0] responseWaitFIFO_write_data_cacheLine_response; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_write_data_cacheLine_invalidated; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_read_ready; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_read_data_valid; // @[replayUnit.scala 52:32]
+  wire [31:0] responseWaitFIFO_read_data_address; // @[replayUnit.scala 52:32]
+  wire [31:0] responseWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 52:32]
+  wire [3:0] responseWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 52:32]
+  wire [5:0] responseWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 52:32]
+  wire [4:0] responseWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 52:32]
+  wire [63:0] responseWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_read_data_cacheLine_valid; // @[replayUnit.scala 52:32]
+  wire [511:0] responseWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 52:32]
+  wire [1:0] responseWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_read_data_cacheLine_invalidated; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_isEmpty; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_branchOps_valid; // @[replayUnit.scala 52:32]
+  wire [4:0] responseWaitFIFO_branchOps_branchMask; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_branchOps_passed; // @[replayUnit.scala 52:32]
+  wire [31:0] responseWaitFIFO_invalidateAddr; // @[replayUnit.scala 52:32]
+  wire  responseWaitFIFO_invalidateEnable; // @[replayUnit.scala 52:32]
+  wire  writeBackFIFO_clock; // @[replayUnit.scala 56:29]
+  wire  writeBackFIFO_reset; // @[replayUnit.scala 56:29]
+  wire  writeBackFIFO_write_ready; // @[replayUnit.scala 56:29]
+  wire  writeBackFIFO_write_data_valid; // @[replayUnit.scala 56:29]
+  wire [31:0] writeBackFIFO_write_data_address; // @[replayUnit.scala 56:29]
+  wire [511:0] writeBackFIFO_write_data_data; // @[replayUnit.scala 56:29]
+  wire  writeBackFIFO_read_ready; // @[replayUnit.scala 56:29]
+  wire  writeBackFIFO_read_data_valid; // @[replayUnit.scala 56:29]
+  wire [31:0] writeBackFIFO_read_data_address; // @[replayUnit.scala 56:29]
+  wire [511:0] writeBackFIFO_read_data_data; // @[replayUnit.scala 56:29]
+  wire [4:0] _T_3 = requestIn_request_branch_mask & branchOps_branchMask; // @[utils.scala 62:31]
+  wire  _T_4 = |_T_3; // @[utils.scala 62:55]
+  wire [4:0] _requestWaitFIFO_write_data_branch_mask_T = requestIn_request_branch_mask ^ branchOps_branchMask; // @[utils.scala 63:42]
+  wire [4:0] _GEN_2 = |_T_3 ? _requestWaitFIFO_write_data_branch_mask_T : requestIn_request_branch_mask; // @[utils.scala 62:60 63:23 65:23]
+  wire  _GEN_3 = _T_4 ? 1'h0 : requestIn_request_branch_valid; // @[utils.scala 70:60 71:24 74:24]
+  wire [4:0] _GEN_4 = _T_4 ? 5'h0 : requestIn_request_branch_mask; // @[utils.scala 70:60 72:23 75:23]
+  wire [4:0] _GEN_5 = branchOps_passed ? _GEN_2 : _GEN_4; // @[utils.scala 60:30]
+  wire  _GEN_6 = branchOps_passed ? requestIn_request_branch_valid : _GEN_3; // @[utils.scala 60:30 67:22]
+  wire [4:0] _GEN_7 = branchOps_valid ? _GEN_5 : requestIn_request_branch_mask; // @[utils.scala 59:26 80:21]
+  wire  _GEN_8 = branchOps_valid ? _GEN_6 : requestIn_request_branch_valid; // @[utils.scala 59:26 79:22]
+  wire [4:0] _T_10 = responseIn_request_branch_mask & branchOps_branchMask; // @[utils.scala 62:31]
+  wire  _T_11 = |_T_10; // @[utils.scala 62:55]
+  wire [4:0] _responseWaitFIFO_write_data_branch_mask_T = responseIn_request_branch_mask ^ branchOps_branchMask; // @[utils.scala 63:42]
+  wire [4:0] _GEN_25 = |_T_10 ? _responseWaitFIFO_write_data_branch_mask_T : responseIn_request_branch_mask; // @[utils.scala 62:60 63:23 65:23]
+  wire  _GEN_26 = _T_11 ? 1'h0 : responseIn_request_branch_valid; // @[utils.scala 70:60 71:24 74:24]
+  wire [4:0] _GEN_27 = _T_11 ? 5'h0 : responseIn_request_branch_mask; // @[utils.scala 70:60 72:23 75:23]
+  wire [4:0] _GEN_28 = branchOps_passed ? _GEN_25 : _GEN_27; // @[utils.scala 60:30]
+  wire  _GEN_29 = branchOps_passed ? responseIn_request_branch_valid : _GEN_26; // @[utils.scala 60:30 67:22]
+  wire [4:0] _GEN_30 = branchOps_valid ? _GEN_28 : responseIn_request_branch_mask; // @[utils.scala 59:26 80:21]
+  wire  _GEN_31 = branchOps_valid ? _GEN_29 : responseIn_request_branch_valid; // @[utils.scala 59:26 79:22]
+  fifoWithBranchOps requestWaitFIFO ( // @[replayUnit.scala 48:31]
     .clock(requestWaitFIFO_clock),
     .reset(requestWaitFIFO_reset),
     .write_ready(requestWaitFIFO_write_ready),
@@ -41114,7 +44489,45 @@ module replayUnit(
     .branchOps_branchMask(requestWaitFIFO_branchOps_branchMask),
     .branchOps_passed(requestWaitFIFO_branchOps_passed)
   );
-  fifoBaseModule writeBackFIFO ( // @[replayUnit.scala 60:29]
+  fifoRecordInvalidateII responseWaitFIFO ( // @[replayUnit.scala 52:32]
+    .clock(responseWaitFIFO_clock),
+    .reset(responseWaitFIFO_reset),
+    .write_ready(responseWaitFIFO_write_ready),
+    .write_data_valid(responseWaitFIFO_write_data_valid),
+    .write_data_address(responseWaitFIFO_write_data_address),
+    .write_data_core_instruction(responseWaitFIFO_write_data_core_instruction),
+    .write_data_core_robAddr(responseWaitFIFO_write_data_core_robAddr),
+    .write_data_core_prfDest(responseWaitFIFO_write_data_core_prfDest),
+    .write_data_branch_valid(responseWaitFIFO_write_data_branch_valid),
+    .write_data_branch_mask(responseWaitFIFO_write_data_branch_mask),
+    .write_data_writeData_valid(responseWaitFIFO_write_data_writeData_valid),
+    .write_data_writeData_data(responseWaitFIFO_write_data_writeData_data),
+    .write_data_cacheLine_valid(responseWaitFIFO_write_data_cacheLine_valid),
+    .write_data_cacheLine_cacheLine(responseWaitFIFO_write_data_cacheLine_cacheLine),
+    .write_data_cacheLine_response(responseWaitFIFO_write_data_cacheLine_response),
+    .write_data_cacheLine_invalidated(responseWaitFIFO_write_data_cacheLine_invalidated),
+    .read_ready(responseWaitFIFO_read_ready),
+    .read_data_valid(responseWaitFIFO_read_data_valid),
+    .read_data_address(responseWaitFIFO_read_data_address),
+    .read_data_core_instruction(responseWaitFIFO_read_data_core_instruction),
+    .read_data_core_robAddr(responseWaitFIFO_read_data_core_robAddr),
+    .read_data_core_prfDest(responseWaitFIFO_read_data_core_prfDest),
+    .read_data_branch_valid(responseWaitFIFO_read_data_branch_valid),
+    .read_data_branch_mask(responseWaitFIFO_read_data_branch_mask),
+    .read_data_writeData_valid(responseWaitFIFO_read_data_writeData_valid),
+    .read_data_writeData_data(responseWaitFIFO_read_data_writeData_data),
+    .read_data_cacheLine_valid(responseWaitFIFO_read_data_cacheLine_valid),
+    .read_data_cacheLine_cacheLine(responseWaitFIFO_read_data_cacheLine_cacheLine),
+    .read_data_cacheLine_response(responseWaitFIFO_read_data_cacheLine_response),
+    .read_data_cacheLine_invalidated(responseWaitFIFO_read_data_cacheLine_invalidated),
+    .isEmpty(responseWaitFIFO_isEmpty),
+    .branchOps_valid(responseWaitFIFO_branchOps_valid),
+    .branchOps_branchMask(responseWaitFIFO_branchOps_branchMask),
+    .branchOps_passed(responseWaitFIFO_branchOps_passed),
+    .invalidateAddr(responseWaitFIFO_invalidateAddr),
+    .invalidateEnable(responseWaitFIFO_invalidateEnable)
+  );
+  fifoBaseModule writeBackFIFO ( // @[replayUnit.scala 56:29]
     .clock(writeBackFIFO_clock),
     .reset(writeBackFIFO_reset),
     .write_ready(writeBackFIFO_write_ready),
@@ -41126,75 +44539,109 @@ module replayUnit(
     .read_data_address(writeBackFIFO_read_data_address),
     .read_data_data(writeBackFIFO_read_data_data)
   );
-  assign requestIn_ready = requestWaitFIFO_write_ready; // @[replayUnit.scala 65:19 82:48 83:21]
-  assign requestOut_request_valid = requestWaitFIFO_read_data_valid; // @[replayUnit.scala 90:22]
-  assign requestOut_request_address = requestWaitFIFO_read_data_address; // @[replayUnit.scala 90:22]
-  assign requestOut_request_core_instruction = requestWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 90:22]
-  assign requestOut_request_core_robAddr = requestWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 90:22]
-  assign requestOut_request_core_prfDest = requestWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 90:22]
-  assign requestOut_request_branch_valid = requestWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 90:22]
-  assign requestOut_request_branch_mask = requestWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 90:22]
-  assign requestOut_request_writeData_valid = requestWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 90:22]
-  assign requestOut_request_writeData_data = requestWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 90:22]
-  assign requestOut_request_cacheLine_valid = requestWaitFIFO_read_data_cacheLine_valid; // @[replayUnit.scala 90:22]
-  assign requestOut_request_cacheLine_cacheLine = requestWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 90:22]
-  assign requestOut_request_cacheLine_response = requestWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 90:22]
-  assign requestOut_request_cacheLine_invalidated = requestWaitFIFO_read_data_cacheLine_invalidated; // @[replayUnit.scala 90:22]
-  assign responseIn_ready = responseOut_ready; // @[replayUnit.scala 66:20 93:48 94:22]
-  assign responseOut_request_valid = responseIn_request_valid; // @[replayUnit.scala 101:23]
-  assign responseOut_request_address = responseIn_request_address; // @[replayUnit.scala 101:23]
-  assign responseOut_request_core_instruction = responseIn_request_core_instruction; // @[replayUnit.scala 101:23]
-  assign responseOut_request_core_robAddr = responseIn_request_core_robAddr; // @[replayUnit.scala 101:23]
-  assign responseOut_request_core_prfDest = responseIn_request_core_prfDest; // @[replayUnit.scala 101:23]
-  assign responseOut_request_branch_valid = responseIn_request_branch_valid; // @[replayUnit.scala 101:23]
-  assign responseOut_request_branch_mask = responseIn_request_branch_mask; // @[replayUnit.scala 101:23]
-  assign responseOut_request_writeData_valid = responseIn_request_writeData_valid; // @[replayUnit.scala 101:23]
-  assign responseOut_request_writeData_data = responseIn_request_writeData_data; // @[replayUnit.scala 101:23]
-  assign responseOut_request_cacheLine_valid = responseIn_request_cacheLine_valid; // @[replayUnit.scala 101:23]
-  assign responseOut_request_cacheLine_cacheLine = responseIn_request_cacheLine_cacheLine; // @[replayUnit.scala 101:23]
-  assign responseOut_request_cacheLine_response = responseIn_request_cacheLine_response; // @[replayUnit.scala 101:23]
-  assign responseOut_request_cacheLine_invalidated = responseIn_request_cacheLine_invalidated; // @[replayUnit.scala 101:23]
-  assign writeBackIn_ready = writeBackFIFO_write_ready; // @[replayUnit.scala 108:48 109:23 67:21]
-  assign writeBackOut_request_valid = writeBackFIFO_read_data_valid; // @[replayUnit.scala 115:24]
-  assign writeBackOut_request_address = writeBackFIFO_read_data_address; // @[replayUnit.scala 115:24]
-  assign writeBackOut_request_data = writeBackFIFO_read_data_data; // @[replayUnit.scala 115:24]
-  assign fenceReady = requestWaitFIFO_isEmpty; // @[replayUnit.scala 117:14]
+  assign requestIn_ready = requestWaitFIFO_write_ready; // @[replayUnit.scala 61:19 78:48 79:21]
+  assign requestOut_request_valid = requestWaitFIFO_read_data_valid; // @[replayUnit.scala 86:22]
+  assign requestOut_request_address = requestWaitFIFO_read_data_address; // @[replayUnit.scala 86:22]
+  assign requestOut_request_core_instruction = requestWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 86:22]
+  assign requestOut_request_core_robAddr = requestWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 86:22]
+  assign requestOut_request_core_prfDest = requestWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 86:22]
+  assign requestOut_request_branch_valid = requestWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 86:22]
+  assign requestOut_request_branch_mask = requestWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 86:22]
+  assign requestOut_request_writeData_valid = requestWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 86:22]
+  assign requestOut_request_writeData_data = requestWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 86:22]
+  assign requestOut_request_cacheLine_valid = requestWaitFIFO_read_data_cacheLine_valid; // @[replayUnit.scala 86:22]
+  assign requestOut_request_cacheLine_cacheLine = requestWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 86:22]
+  assign requestOut_request_cacheLine_response = requestWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 86:22]
+  assign requestOut_request_cacheLine_invalidated = requestWaitFIFO_read_data_cacheLine_invalidated; // @[replayUnit.scala 86:22]
+  assign responseIn_ready = responseWaitFIFO_write_ready; // @[replayUnit.scala 62:20 89:48 90:22]
+  assign responseOut_request_valid = responseWaitFIFO_read_data_valid; // @[replayUnit.scala 97:23]
+  assign responseOut_request_address = responseWaitFIFO_read_data_address; // @[replayUnit.scala 97:23]
+  assign responseOut_request_core_instruction = responseWaitFIFO_read_data_core_instruction; // @[replayUnit.scala 97:23]
+  assign responseOut_request_core_robAddr = responseWaitFIFO_read_data_core_robAddr; // @[replayUnit.scala 97:23]
+  assign responseOut_request_core_prfDest = responseWaitFIFO_read_data_core_prfDest; // @[replayUnit.scala 97:23]
+  assign responseOut_request_branch_valid = responseWaitFIFO_read_data_branch_valid; // @[replayUnit.scala 97:23]
+  assign responseOut_request_branch_mask = responseWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 97:23]
+  assign responseOut_request_writeData_valid = responseWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 97:23]
+  assign responseOut_request_writeData_data = responseWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 97:23]
+  assign responseOut_request_cacheLine_valid = responseWaitFIFO_read_data_cacheLine_valid; // @[replayUnit.scala 97:23]
+  assign responseOut_request_cacheLine_cacheLine = responseWaitFIFO_read_data_cacheLine_cacheLine; // @[replayUnit.scala 97:23]
+  assign responseOut_request_cacheLine_response = responseWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 97:23]
+  assign responseOut_request_cacheLine_invalidated = responseWaitFIFO_read_data_cacheLine_invalidated; // @[replayUnit.scala 97:23]
+  assign writeBackIn_ready = writeBackFIFO_write_ready; // @[replayUnit.scala 104:48 105:23 63:21]
+  assign writeBackOut_request_valid = writeBackFIFO_read_data_valid; // @[replayUnit.scala 111:24]
+  assign writeBackOut_request_address = writeBackFIFO_read_data_address; // @[replayUnit.scala 111:24]
+  assign writeBackOut_request_data = writeBackFIFO_read_data_data; // @[replayUnit.scala 111:24]
+  assign fenceReady = requestWaitFIFO_isEmpty & responseWaitFIFO_isEmpty; // @[replayUnit.scala 113:41]
   assign requestWaitFIFO_clock = clock;
   assign requestWaitFIFO_reset = reset;
   assign requestWaitFIFO_write_data_valid = requestIn_request_valid & requestIn_request_branch_valid &
-    requestIn_request_valid; // @[replayUnit.scala 86:66 87:32 utils.scala 48:41]
+    requestIn_request_valid; // @[replayUnit.scala 82:66 83:32 utils.scala 48:41]
   assign requestWaitFIFO_write_data_address = requestIn_request_valid & requestIn_request_branch_valid ?
-    requestIn_request_address : 32'h0; // @[replayUnit.scala 86:66 87:32 utils.scala 49:41]
+    requestIn_request_address : 32'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 49:41]
   assign requestWaitFIFO_write_data_core_instruction = requestIn_request_valid & requestIn_request_branch_valid ?
-    requestIn_request_core_instruction : 32'h0; // @[replayUnit.scala 86:66 87:32 utils.scala 49:41]
+    requestIn_request_core_instruction : 32'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 49:41]
   assign requestWaitFIFO_write_data_core_robAddr = requestIn_request_valid & requestIn_request_branch_valid ?
-    requestIn_request_core_robAddr : 4'h0; // @[replayUnit.scala 86:66 87:32 utils.scala 49:41]
+    requestIn_request_core_robAddr : 4'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 49:41]
   assign requestWaitFIFO_write_data_core_prfDest = requestIn_request_valid & requestIn_request_branch_valid ?
-    requestIn_request_core_prfDest : 6'h0; // @[replayUnit.scala 86:66 87:32 utils.scala 49:41]
-  assign requestWaitFIFO_write_data_branch_valid = requestIn_request_valid & requestIn_request_branch_valid & _GEN_8; // @[replayUnit.scala 86:66 utils.scala 48:41]
+    requestIn_request_core_prfDest : 6'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 49:41]
+  assign requestWaitFIFO_write_data_branch_valid = requestIn_request_valid & requestIn_request_branch_valid & _GEN_8; // @[replayUnit.scala 82:66 utils.scala 48:41]
   assign requestWaitFIFO_write_data_branch_mask = requestIn_request_valid & requestIn_request_branch_valid ? _GEN_7 : 5'h0
-    ; // @[replayUnit.scala 86:66 utils.scala 49:41]
+    ; // @[replayUnit.scala 82:66 utils.scala 49:41]
   assign requestWaitFIFO_write_data_writeData_valid = requestIn_request_valid & requestIn_request_branch_valid &
-    requestIn_request_writeData_valid; // @[replayUnit.scala 86:66 87:32 utils.scala 48:41]
+    requestIn_request_writeData_valid; // @[replayUnit.scala 82:66 83:32 utils.scala 48:41]
   assign requestWaitFIFO_write_data_writeData_data = requestIn_request_valid & requestIn_request_branch_valid ?
-    requestIn_request_writeData_data : 64'h0; // @[replayUnit.scala 86:66 87:32 utils.scala 49:41]
+    requestIn_request_writeData_data : 64'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 49:41]
   assign requestWaitFIFO_write_data_cacheLine_valid = requestIn_request_valid & requestIn_request_branch_valid &
-    requestIn_request_cacheLine_valid; // @[replayUnit.scala 86:66 87:32 utils.scala 48:41]
+    requestIn_request_cacheLine_valid; // @[replayUnit.scala 82:66 83:32 utils.scala 48:41]
   assign requestWaitFIFO_write_data_cacheLine_cacheLine = requestIn_request_valid & requestIn_request_branch_valid ?
-    requestIn_request_cacheLine_cacheLine : 512'h0; // @[replayUnit.scala 86:66 87:32 utils.scala 49:41]
+    requestIn_request_cacheLine_cacheLine : 512'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 49:41]
   assign requestWaitFIFO_write_data_cacheLine_response = requestIn_request_valid & requestIn_request_branch_valid ?
-    requestIn_request_cacheLine_response : 2'h0; // @[replayUnit.scala 86:66 87:32 utils.scala 49:41]
-  assign requestWaitFIFO_write_data_cacheLine_invalidated = 1'h0; // @[replayUnit.scala 86:66 87:32 utils.scala 48:41]
-  assign requestWaitFIFO_read_ready = requestOut_ready; // @[replayUnit.scala 68:30 82:48 84:32]
-  assign requestWaitFIFO_branchOps_valid = branchOps_valid; // @[replayUnit.scala 78:29]
-  assign requestWaitFIFO_branchOps_branchMask = branchOps_branchMask; // @[replayUnit.scala 78:29]
-  assign requestWaitFIFO_branchOps_passed = branchOps_passed; // @[replayUnit.scala 78:29]
+    requestIn_request_cacheLine_response : 2'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 49:41]
+  assign requestWaitFIFO_write_data_cacheLine_invalidated = 1'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 48:41]
+  assign requestWaitFIFO_read_ready = requestOut_ready; // @[replayUnit.scala 64:30 78:48 80:32]
+  assign requestWaitFIFO_branchOps_valid = branchOps_valid; // @[replayUnit.scala 74:29]
+  assign requestWaitFIFO_branchOps_branchMask = branchOps_branchMask; // @[replayUnit.scala 74:29]
+  assign requestWaitFIFO_branchOps_passed = branchOps_passed; // @[replayUnit.scala 74:29]
+  assign responseWaitFIFO_clock = clock;
+  assign responseWaitFIFO_reset = reset;
+  assign responseWaitFIFO_write_data_valid = responseIn_request_valid & responseIn_request_branch_valid &
+    responseIn_request_valid; // @[replayUnit.scala 93:68 94:33 utils.scala 48:41]
+  assign responseWaitFIFO_write_data_address = responseIn_request_valid & responseIn_request_branch_valid ?
+    responseIn_request_address : 32'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 49:41]
+  assign responseWaitFIFO_write_data_core_instruction = responseIn_request_valid & responseIn_request_branch_valid ?
+    responseIn_request_core_instruction : 32'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 49:41]
+  assign responseWaitFIFO_write_data_core_robAddr = responseIn_request_valid & responseIn_request_branch_valid ?
+    responseIn_request_core_robAddr : 4'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 49:41]
+  assign responseWaitFIFO_write_data_core_prfDest = responseIn_request_valid & responseIn_request_branch_valid ?
+    responseIn_request_core_prfDest : 6'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 49:41]
+  assign responseWaitFIFO_write_data_branch_valid = responseIn_request_valid & responseIn_request_branch_valid & _GEN_31
+    ; // @[replayUnit.scala 93:68 utils.scala 48:41]
+  assign responseWaitFIFO_write_data_branch_mask = responseIn_request_valid & responseIn_request_branch_valid ? _GEN_30
+     : 5'h0; // @[replayUnit.scala 93:68 utils.scala 49:41]
+  assign responseWaitFIFO_write_data_writeData_valid = responseIn_request_valid & responseIn_request_branch_valid &
+    responseIn_request_writeData_valid; // @[replayUnit.scala 93:68 94:33 utils.scala 48:41]
+  assign responseWaitFIFO_write_data_writeData_data = responseIn_request_valid & responseIn_request_branch_valid ?
+    responseIn_request_writeData_data : 64'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 49:41]
+  assign responseWaitFIFO_write_data_cacheLine_valid = responseIn_request_valid & responseIn_request_branch_valid &
+    responseIn_request_cacheLine_valid; // @[replayUnit.scala 93:68 94:33 utils.scala 48:41]
+  assign responseWaitFIFO_write_data_cacheLine_cacheLine = responseIn_request_valid & responseIn_request_branch_valid ?
+    responseIn_request_cacheLine_cacheLine : 512'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 49:41]
+  assign responseWaitFIFO_write_data_cacheLine_response = responseIn_request_valid & responseIn_request_branch_valid ?
+    responseIn_request_cacheLine_response : 2'h0; // @[replayUnit.scala 93:68 94:33 utils.scala 49:41]
+  assign responseWaitFIFO_write_data_cacheLine_invalidated = responseIn_request_valid & responseIn_request_branch_valid
+     & responseIn_request_cacheLine_invalidated; // @[replayUnit.scala 93:68 94:33 utils.scala 48:41]
+  assign responseWaitFIFO_read_ready = responseOut_ready; // @[replayUnit.scala 65:31 89:48 91:33]
+  assign responseWaitFIFO_branchOps_valid = branchOps_valid; // @[replayUnit.scala 75:30]
+  assign responseWaitFIFO_branchOps_branchMask = branchOps_branchMask; // @[replayUnit.scala 75:30]
+  assign responseWaitFIFO_branchOps_passed = branchOps_passed; // @[replayUnit.scala 75:30]
+  assign responseWaitFIFO_invalidateAddr = coherencyRequest_valid ? coherencyRequest_address : 32'h0; // @[replayUnit.scala 98:31 100:37 67:35]
+  assign responseWaitFIFO_invalidateEnable = coherencyRequest_valid; // @[replayUnit.scala 98:31 66:37 99:39]
   assign writeBackFIFO_clock = clock;
   assign writeBackFIFO_reset = reset;
-  assign writeBackFIFO_write_data_valid = writeBackIn_request_valid; // @[replayUnit.scala 112:34 113:30 utils.scala 48:41]
-  assign writeBackFIFO_write_data_address = writeBackIn_request_valid ? writeBackIn_request_address : 32'h0; // @[replayUnit.scala 112:34 113:30 utils.scala 49:41]
-  assign writeBackFIFO_write_data_data = writeBackIn_request_valid ? writeBackIn_request_data : 512'h0; // @[replayUnit.scala 112:34 113:30 utils.scala 49:41]
-  assign writeBackFIFO_read_ready = writeBackOut_ready; // @[replayUnit.scala 108:48 110:30 72:28]
+  assign writeBackFIFO_write_data_valid = writeBackIn_request_valid; // @[replayUnit.scala 108:34 109:30 utils.scala 48:41]
+  assign writeBackFIFO_write_data_address = writeBackIn_request_valid ? writeBackIn_request_address : 32'h0; // @[replayUnit.scala 108:34 109:30 utils.scala 49:41]
+  assign writeBackFIFO_write_data_data = writeBackIn_request_valid ? writeBackIn_request_data : 512'h0; // @[replayUnit.scala 108:34 109:30 utils.scala 49:41]
+  assign writeBackFIFO_read_ready = writeBackOut_ready; // @[replayUnit.scala 104:48 106:30 68:28]
 endmodule
 module fifoBaseModule_1(
   input         clock,
@@ -42608,24 +46055,22 @@ module peripheralUnit(
   reg [31:0] _RAND_12;
   reg [31:0] _RAND_13;
   reg [31:0] _RAND_14;
-  reg [31:0] _RAND_15;
-  reg [63:0] _RAND_16;
+  reg [63:0] _RAND_15;
+  reg [31:0] _RAND_16;
   reg [31:0] _RAND_17;
   reg [31:0] _RAND_18;
-  reg [31:0] _RAND_19;
+  reg [63:0] _RAND_19;
   reg [31:0] _RAND_20;
-  reg [63:0] _RAND_21;
+  reg [31:0] _RAND_21;
   reg [31:0] _RAND_22;
   reg [31:0] _RAND_23;
-  reg [31:0] _RAND_24;
+  reg [63:0] _RAND_24;
   reg [31:0] _RAND_25;
-  reg [63:0] _RAND_26;
+  reg [31:0] _RAND_26;
   reg [31:0] _RAND_27;
   reg [31:0] _RAND_28;
   reg [31:0] _RAND_29;
   reg [31:0] _RAND_30;
-  reg [31:0] _RAND_31;
-  reg [31:0] _RAND_32;
 `endif // RANDOMIZE_REG_INIT
   wire  peripheralMSHR_clock; // @[peripheralUnit.scala 82:30]
   wire  peripheralMSHR_reset; // @[peripheralUnit.scala 82:30]
@@ -42667,12 +46112,10 @@ module peripheralUnit(
   reg [3:0] readRequestBuffer_core_robAddr; // @[peripheralUnit.scala 70:34]
   reg [5:0] readRequestBuffer_core_prfDest; // @[peripheralUnit.scala 70:34]
   reg  readRequestBuffer_branch_valid; // @[peripheralUnit.scala 70:34]
-  reg [4:0] readRequestBuffer_branch_mask; // @[peripheralUnit.scala 70:34]
   reg [63:0] readRequestBuffer_writeData_data; // @[peripheralUnit.scala 70:34]
   reg  writeRequestBuffer_valid; // @[peripheralUnit.scala 71:35]
   reg [31:0] writeRequestBuffer_address; // @[peripheralUnit.scala 71:35]
   reg  writeRequestBuffer_branch_valid; // @[peripheralUnit.scala 71:35]
-  reg [4:0] writeRequestBuffer_branch_mask; // @[peripheralUnit.scala 71:35]
   reg [63:0] writeRequestBuffer_writeData_data; // @[peripheralUnit.scala 71:35]
   reg  responseOutBuffer_valid; // @[peripheralUnit.scala 73:34]
   reg [31:0] responseOutBuffer_core_instruction; // @[peripheralUnit.scala 73:34]
@@ -42681,21 +46124,10 @@ module peripheralUnit(
   reg [63:0] responseOutBuffer_writeData_data; // @[peripheralUnit.scala 73:34]
   reg  writeCommitInstructionBuffer; // @[peripheralUnit.scala 76:45]
   wire  _GEN_0 = writeInstructionCommit_fired ? 1'h0 : writeCommitInstructionBuffer; // @[peripheralUnit.scala 78:37 79:34 76:45]
-  wire [4:0] _T_4 = requestBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 62:31]
-  wire [4:0] _readRequestBuffer_branch_mask_T = requestBuffer_branch_mask ^ branchOps_branchMask; // @[utils.scala 63:42]
-  wire [4:0] _GEN_1 = |_T_4 ? _readRequestBuffer_branch_mask_T : requestBuffer_branch_mask; // @[utils.scala 62:60 63:23 65:23]
-  wire [4:0] _T_6 = readRequestBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 70:27]
-  wire  _GEN_2 = |_T_6 ? 1'h0 : requestBuffer_branch_valid; // @[utils.scala 70:56 71:24 74:24]
-  wire [4:0] _GEN_3 = |_T_6 ? 5'h0 : requestBuffer_branch_mask; // @[utils.scala 70:56 72:23 75:23]
-  wire [4:0] _GEN_4 = branchOps_passed ? _GEN_1 : _GEN_3; // @[utils.scala 60:30]
+  wire [4:0] _T_6 = requestBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 70:31]
+  wire  _GEN_2 = |_T_6 ? 1'h0 : requestBuffer_branch_valid; // @[utils.scala 70:60 71:24 74:24]
   wire  _GEN_5 = branchOps_passed ? requestBuffer_branch_valid : _GEN_2; // @[utils.scala 60:30 67:22]
-  wire [4:0] _T_13 = writeRequestBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 70:27]
-  wire  _GEN_9 = |_T_13 ? 1'h0 : requestBuffer_branch_valid; // @[utils.scala 70:56 71:24 74:24]
-  wire [4:0] _GEN_10 = |_T_13 ? 5'h0 : requestBuffer_branch_mask; // @[utils.scala 70:56 72:23 75:23]
-  wire [4:0] _GEN_11 = branchOps_passed ? _GEN_1 : _GEN_10; // @[utils.scala 60:30]
-  wire  _GEN_12 = branchOps_passed ? requestBuffer_branch_valid : _GEN_9; // @[utils.scala 60:30 67:22]
-  wire [4:0] _GEN_13 = branchOps_valid ? _GEN_11 : requestBuffer_branch_mask; // @[utils.scala 59:26 80:21]
-  wire  _GEN_14 = branchOps_valid ? _GEN_12 : requestBuffer_branch_valid; // @[utils.scala 59:26 79:22]
+  wire  _GEN_7 = branchOps_valid ? _GEN_5 : requestBuffer_branch_valid; // @[utils.scala 59:26 79:22]
   wire  _GEN_15 = ~writeRequestBuffer_valid & requestBuffer_writeData_valid & requestBuffer_branch_valid ?
     requestBuffer_valid : writeRequestBuffer_valid; // @[peripheralUnit.scala 97:105 99:26 71:35]
   wire  _GEN_30 = ~readRequestBuffer_valid & ~requestBuffer_writeData_valid ? requestBuffer_valid :
@@ -42704,7 +46136,7 @@ module peripheralUnit(
   wire  _GEN_74 = requestBuffer_valid & requestBuffer_branch_valid ? _GEN_30 : readRequestBuffer_valid; // @[peripheralUnit.scala 70:34 90:58]
   wire  _GEN_89 = requestBuffer_valid & requestBuffer_branch_valid ? _GEN_45 : writeRequestBuffer_valid; // @[peripheralUnit.scala 71:35 90:58]
   reg [1:0] writeAXIState; // @[peripheralUnit.scala 113:30]
-  wire [7:0] _GEN_17 = {{7'd0}, writeCounter_count}; // @[peripheralUnit.scala 139:39]
+  wire [7:0] _GEN_1 = {{7'd0}, writeCounter_count}; // @[peripheralUnit.scala 139:39]
   wire [31:0] writeChunks_0 = writeRequestBuffer_writeData_data[31:0]; // @[peripheralUnit.scala 143:42]
   wire [31:0] writeChunks_1 = writeRequestBuffer_writeData_data[63:32]; // @[peripheralUnit.scala 143:42]
   wire  _T_18 = bus_WREADY & bus_AWREADY; // @[peripheralUnit.scala 145:23]
@@ -42712,7 +46144,7 @@ module peripheralUnit(
   wire [1:0] _writeAXIState_T_9 = bus_BVALID ? 2'h0 : 2'h2; // @[peripheralUnit.scala 155:27]
   wire  _GEN_121 = 2'h2 == writeAXIState | _GEN_0; // @[peripheralUnit.scala 117:25 154:36]
   wire [31:0] _GEN_125 = 2'h1 == writeAXIState ? writeRequestBuffer_address : 32'h0; // @[peripheralUnit.scala 117:25 128:18 38:14]
-  wire  _GEN_130 = 2'h1 == writeAXIState & _GEN_17 == bus_ARLEN; // @[peripheralUnit.scala 117:25 139:17 50:13]
+  wire  _GEN_130 = 2'h1 == writeAXIState & _GEN_1 == bus_ARLEN; // @[peripheralUnit.scala 117:25 139:17 50:13]
   wire [31:0] _GEN_132 = 2'h1 == writeAXIState ? _GEN_118 : 32'h0; // @[peripheralUnit.scala 117:25 148:17 48:13]
   reg  readAXIRequestState; // @[peripheralUnit.scala 163:36]
   wire [1:0] sizeByIns_1 = readRequestBuffer_core_instruction[13:12]; // @[peripheralUnit.scala 169:57]
@@ -42952,17 +46384,6 @@ module peripheralUnit(
       end
     end
     if (reset) begin // @[peripheralUnit.scala 70:34]
-      readRequestBuffer_branch_mask <= 5'h0; // @[peripheralUnit.scala 70:34]
-    end else if (requestBuffer_valid & requestBuffer_branch_valid) begin // @[peripheralUnit.scala 90:58]
-      if (~readRequestBuffer_valid & ~requestBuffer_writeData_valid) begin // @[peripheralUnit.scala 92:69]
-        if (branchOps_valid) begin // @[utils.scala 59:26]
-          readRequestBuffer_branch_mask <= _GEN_4;
-        end else begin
-          readRequestBuffer_branch_mask <= requestBuffer_branch_mask; // @[utils.scala 80:21]
-        end
-      end
-    end
-    if (reset) begin // @[peripheralUnit.scala 70:34]
       readRequestBuffer_writeData_data <= 64'h0; // @[peripheralUnit.scala 70:34]
     end else if (requestBuffer_valid & requestBuffer_branch_valid) begin // @[peripheralUnit.scala 90:58]
       if (~readRequestBuffer_valid & ~requestBuffer_writeData_valid) begin // @[peripheralUnit.scala 92:69]
@@ -42994,16 +46415,7 @@ module peripheralUnit(
     end else if (requestBuffer_valid & requestBuffer_branch_valid) begin // @[peripheralUnit.scala 90:58]
       if (!(~readRequestBuffer_valid & ~requestBuffer_writeData_valid)) begin // @[peripheralUnit.scala 92:69]
         if (~writeRequestBuffer_valid & requestBuffer_writeData_valid & requestBuffer_branch_valid) begin // @[peripheralUnit.scala 97:105]
-          writeRequestBuffer_branch_valid <= _GEN_14;
-        end
-      end
-    end
-    if (reset) begin // @[peripheralUnit.scala 71:35]
-      writeRequestBuffer_branch_mask <= 5'h0; // @[peripheralUnit.scala 71:35]
-    end else if (requestBuffer_valid & requestBuffer_branch_valid) begin // @[peripheralUnit.scala 90:58]
-      if (!(~readRequestBuffer_valid & ~requestBuffer_writeData_valid)) begin // @[peripheralUnit.scala 92:69]
-        if (~writeRequestBuffer_valid & requestBuffer_writeData_valid & requestBuffer_branch_valid) begin // @[peripheralUnit.scala 97:105]
-          writeRequestBuffer_branch_mask <= _GEN_13;
+          writeRequestBuffer_branch_valid <= _GEN_7;
         end
       end
     end
@@ -43198,42 +46610,38 @@ initial begin
   readRequestBuffer_core_prfDest = _RAND_13[5:0];
   _RAND_14 = {1{`RANDOM}};
   readRequestBuffer_branch_valid = _RAND_14[0:0];
-  _RAND_15 = {1{`RANDOM}};
-  readRequestBuffer_branch_mask = _RAND_15[4:0];
-  _RAND_16 = {2{`RANDOM}};
-  readRequestBuffer_writeData_data = _RAND_16[63:0];
+  _RAND_15 = {2{`RANDOM}};
+  readRequestBuffer_writeData_data = _RAND_15[63:0];
+  _RAND_16 = {1{`RANDOM}};
+  writeRequestBuffer_valid = _RAND_16[0:0];
   _RAND_17 = {1{`RANDOM}};
-  writeRequestBuffer_valid = _RAND_17[0:0];
+  writeRequestBuffer_address = _RAND_17[31:0];
   _RAND_18 = {1{`RANDOM}};
-  writeRequestBuffer_address = _RAND_18[31:0];
-  _RAND_19 = {1{`RANDOM}};
-  writeRequestBuffer_branch_valid = _RAND_19[0:0];
+  writeRequestBuffer_branch_valid = _RAND_18[0:0];
+  _RAND_19 = {2{`RANDOM}};
+  writeRequestBuffer_writeData_data = _RAND_19[63:0];
   _RAND_20 = {1{`RANDOM}};
-  writeRequestBuffer_branch_mask = _RAND_20[4:0];
-  _RAND_21 = {2{`RANDOM}};
-  writeRequestBuffer_writeData_data = _RAND_21[63:0];
+  responseOutBuffer_valid = _RAND_20[0:0];
+  _RAND_21 = {1{`RANDOM}};
+  responseOutBuffer_core_instruction = _RAND_21[31:0];
   _RAND_22 = {1{`RANDOM}};
-  responseOutBuffer_valid = _RAND_22[0:0];
+  responseOutBuffer_core_robAddr = _RAND_22[3:0];
   _RAND_23 = {1{`RANDOM}};
-  responseOutBuffer_core_instruction = _RAND_23[31:0];
-  _RAND_24 = {1{`RANDOM}};
-  responseOutBuffer_core_robAddr = _RAND_24[3:0];
+  responseOutBuffer_core_prfDest = _RAND_23[5:0];
+  _RAND_24 = {2{`RANDOM}};
+  responseOutBuffer_writeData_data = _RAND_24[63:0];
   _RAND_25 = {1{`RANDOM}};
-  responseOutBuffer_core_prfDest = _RAND_25[5:0];
-  _RAND_26 = {2{`RANDOM}};
-  responseOutBuffer_writeData_data = _RAND_26[63:0];
+  writeCommitInstructionBuffer = _RAND_25[0:0];
+  _RAND_26 = {1{`RANDOM}};
+  writeAXIState = _RAND_26[1:0];
   _RAND_27 = {1{`RANDOM}};
-  writeCommitInstructionBuffer = _RAND_27[0:0];
+  readAXIRequestState = _RAND_27[0:0];
   _RAND_28 = {1{`RANDOM}};
-  writeAXIState = _RAND_28[1:0];
+  readAXIResponseState = _RAND_28[1:0];
   _RAND_29 = {1{`RANDOM}};
-  readAXIRequestState = _RAND_29[0:0];
+  readDataVec_0 = _RAND_29[31:0];
   _RAND_30 = {1{`RANDOM}};
-  readAXIResponseState = _RAND_30[1:0];
-  _RAND_31 = {1{`RANDOM}};
-  readDataVec_0 = _RAND_31[31:0];
-  _RAND_32 = {1{`RANDOM}};
-  readDataVec_1 = _RAND_32[31:0];
+  readDataVec_1 = _RAND_30[31:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -43501,12 +46909,11 @@ module ACEUnit(
   reg  readBuffer_cacheLine_invalidated; // @[ACEUnit.scala 104:28]
   wire  _readRequest_ready_T = ~readBuffer_valid; // @[ACEUnit.scala 105:24]
   wire [4:0] _T_2 = readRequest_request_branch_mask & branchOps_branchMask; // @[utils.scala 62:31]
+  wire  _T_3 = |_T_2; // @[utils.scala 62:55]
   wire [4:0] _readBuffer_branch_mask_T = readRequest_request_branch_mask ^ branchOps_branchMask; // @[utils.scala 63:42]
   wire [4:0] _GEN_0 = |_T_2 ? _readBuffer_branch_mask_T : readRequest_request_branch_mask; // @[utils.scala 62:60 63:23 65:23]
-  wire [4:0] _T_4 = readBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 70:27]
-  wire  _T_5 = |_T_4; // @[utils.scala 70:51]
-  wire  _GEN_1 = |_T_4 ? 1'h0 : readRequest_request_branch_valid; // @[utils.scala 70:56 71:24 74:24]
-  wire [4:0] _GEN_2 = |_T_4 ? 5'h0 : readRequest_request_branch_mask; // @[utils.scala 70:56 72:23 75:23]
+  wire  _GEN_1 = _T_3 ? 1'h0 : readRequest_request_branch_valid; // @[utils.scala 70:60 71:24 74:24]
+  wire [4:0] _GEN_2 = _T_3 ? 5'h0 : readRequest_request_branch_mask; // @[utils.scala 70:60 72:23 75:23]
   wire [4:0] _GEN_3 = branchOps_passed ? _GEN_0 : _GEN_2; // @[utils.scala 60:30]
   wire  _GEN_4 = branchOps_passed ? readRequest_request_branch_valid : _GEN_1; // @[utils.scala 60:30 67:22]
   wire [4:0] _GEN_5 = branchOps_valid ? _GEN_3 : readRequest_request_branch_mask; // @[utils.scala 59:26 80:21]
@@ -43517,10 +46924,12 @@ module ACEUnit(
     readBuffer_branch_valid; // @[ACEUnit.scala 104:28 106:91]
   wire [4:0] _GEN_13 = readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready ? _GEN_5 :
     readBuffer_branch_mask; // @[ACEUnit.scala 104:28 106:91]
+  wire [4:0] _T_6 = readBuffer_branch_mask & branchOps_branchMask; // @[utils.scala 122:29]
+  wire  _T_7 = |_T_6; // @[utils.scala 122:53]
   wire [4:0] _readBuffer_branch_mask_T_1 = readBuffer_branch_mask ^ branchOps_branchMask; // @[utils.scala 123:40]
-  wire [4:0] _GEN_21 = _T_5 ? _readBuffer_branch_mask_T_1 : _GEN_13; // @[utils.scala 122:58 123:25]
-  wire  _GEN_22 = _T_5 ? 1'h0 : _GEN_12; // @[utils.scala 127:58 128:26]
-  wire [4:0] _GEN_23 = _T_5 ? 5'h0 : _GEN_13; // @[utils.scala 127:58 129:25]
+  wire [4:0] _GEN_21 = |_T_6 ? _readBuffer_branch_mask_T_1 : _GEN_13; // @[utils.scala 122:58 123:25]
+  wire  _GEN_22 = _T_7 ? 1'h0 : _GEN_12; // @[utils.scala 127:58 128:26]
+  wire [4:0] _GEN_23 = _T_7 ? 5'h0 : _GEN_13; // @[utils.scala 127:58 129:25]
   wire [4:0] _GEN_24 = branchOps_passed ? _GEN_21 : _GEN_23; // @[utils.scala 121:32]
   wire  _GEN_25 = branchOps_passed ? readBuffer_branch_valid : _GEN_22; // @[utils.scala 121:32 125:24]
   reg  responseBuffer_valid; // @[ACEUnit.scala 113:31]
@@ -43594,9 +47003,9 @@ module ACEUnit(
   wire [3:0] _GEN_93 = 2'h3 == readBuffer_cacheLine_response ? 4'hb : 4'h1; // @[ACEUnit.scala 217:19 218:49 221:34]
   wire [3:0] _GEN_94 = 2'h1 == readBuffer_cacheLine_response ? 4'h7 : _GEN_93; // @[ACEUnit.scala 218:49 220:34]
   wire [3:0] _GEN_95 = 2'h0 == readBuffer_cacheLine_response ? 4'h1 : _GEN_94; // @[ACEUnit.scala 218:49 219:34]
-  wire [4:0] _GEN_96 = _T_5 ? _readBuffer_branch_mask_T_1 : readBuffer_branch_mask; // @[utils.scala 92:56 93:27 96:27]
-  wire [4:0] _GEN_97 = _T_5 ? 5'h0 : readBuffer_branch_mask; // @[utils.scala 101:56 102:27 106:27]
-  wire  _GEN_98 = _T_5 ? 1'h0 : readBuffer_branch_valid; // @[utils.scala 101:56 103:28 107:28]
+  wire [4:0] _GEN_96 = _T_7 ? _readBuffer_branch_mask_T_1 : readBuffer_branch_mask; // @[utils.scala 92:56 93:27 96:27]
+  wire [4:0] _GEN_97 = _T_7 ? 5'h0 : readBuffer_branch_mask; // @[utils.scala 101:56 102:27 106:27]
+  wire  _GEN_98 = _T_7 ? 1'h0 : readBuffer_branch_valid; // @[utils.scala 101:56 103:28 107:28]
   wire [4:0] _GEN_99 = branchOps_passed ? _GEN_96 : _GEN_97; // @[utils.scala 90:30]
   wire  _GEN_100 = branchOps_passed ? readBuffer_branch_valid : _GEN_98; // @[utils.scala 90:30 98:26]
   wire [4:0] _GEN_101 = branchOps_valid ? _GEN_99 : readBuffer_branch_mask; // @[utils.scala 111:23 89:27]
@@ -45544,6 +48953,7 @@ module fifoRecordInvalidateI(
   wire [4:0] _GEN_2268 = 6'h3e == readPtr ? memReg_62_branch_mask : _GEN_2267; // @[fifo.scala 86:{13,13}]
   wire [4:0] _GEN_2269 = 6'h3f == readPtr ? memReg_63_branch_mask : _GEN_2268; // @[fifo.scala 86:{13,13}]
   wire [4:0] _T_8 = write_data_branch_mask & branchOps_branchMask; // @[utils.scala 62:31]
+  wire  _T_9 = |_T_8; // @[utils.scala 62:55]
   wire [4:0] _memReg_branch_mask_T = write_data_branch_mask ^ branchOps_branchMask; // @[utils.scala 63:42]
   wire [4:0] _GEN_2718 = 6'h0 == writePtr ? _memReg_branch_mask_T : _GEN_1310; // @[utils.scala 63:{23,23}]
   wire [4:0] _GEN_2719 = 6'h1 == writePtr ? _memReg_branch_mask_T : _GEN_1311; // @[utils.scala 63:{23,23}]
@@ -45801,710 +49211,646 @@ module fifoRecordInvalidateI(
   wire  _GEN_2971 = 6'h3d == writePtr ? write_data_branch_valid : _GEN_1307; // @[utils.scala 67:{22,22}]
   wire  _GEN_2972 = 6'h3e == writePtr ? write_data_branch_valid : _GEN_1308; // @[utils.scala 67:{22,22}]
   wire  _GEN_2973 = 6'h3f == writePtr ? write_data_branch_valid : _GEN_1309; // @[utils.scala 67:{22,22}]
-  wire [4:0] _GEN_2975 = 6'h1 == writePtr ? memReg_1_branch_mask : memReg_0_branch_mask; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2976 = 6'h2 == writePtr ? memReg_2_branch_mask : _GEN_2975; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2977 = 6'h3 == writePtr ? memReg_3_branch_mask : _GEN_2976; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2978 = 6'h4 == writePtr ? memReg_4_branch_mask : _GEN_2977; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2979 = 6'h5 == writePtr ? memReg_5_branch_mask : _GEN_2978; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2980 = 6'h6 == writePtr ? memReg_6_branch_mask : _GEN_2979; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2981 = 6'h7 == writePtr ? memReg_7_branch_mask : _GEN_2980; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2982 = 6'h8 == writePtr ? memReg_8_branch_mask : _GEN_2981; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2983 = 6'h9 == writePtr ? memReg_9_branch_mask : _GEN_2982; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2984 = 6'ha == writePtr ? memReg_10_branch_mask : _GEN_2983; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2985 = 6'hb == writePtr ? memReg_11_branch_mask : _GEN_2984; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2986 = 6'hc == writePtr ? memReg_12_branch_mask : _GEN_2985; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2987 = 6'hd == writePtr ? memReg_13_branch_mask : _GEN_2986; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2988 = 6'he == writePtr ? memReg_14_branch_mask : _GEN_2987; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2989 = 6'hf == writePtr ? memReg_15_branch_mask : _GEN_2988; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2990 = 6'h10 == writePtr ? memReg_16_branch_mask : _GEN_2989; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2991 = 6'h11 == writePtr ? memReg_17_branch_mask : _GEN_2990; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2992 = 6'h12 == writePtr ? memReg_18_branch_mask : _GEN_2991; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2993 = 6'h13 == writePtr ? memReg_19_branch_mask : _GEN_2992; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2994 = 6'h14 == writePtr ? memReg_20_branch_mask : _GEN_2993; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2995 = 6'h15 == writePtr ? memReg_21_branch_mask : _GEN_2994; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2996 = 6'h16 == writePtr ? memReg_22_branch_mask : _GEN_2995; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2997 = 6'h17 == writePtr ? memReg_23_branch_mask : _GEN_2996; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2998 = 6'h18 == writePtr ? memReg_24_branch_mask : _GEN_2997; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_2999 = 6'h19 == writePtr ? memReg_25_branch_mask : _GEN_2998; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3000 = 6'h1a == writePtr ? memReg_26_branch_mask : _GEN_2999; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3001 = 6'h1b == writePtr ? memReg_27_branch_mask : _GEN_3000; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3002 = 6'h1c == writePtr ? memReg_28_branch_mask : _GEN_3001; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3003 = 6'h1d == writePtr ? memReg_29_branch_mask : _GEN_3002; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3004 = 6'h1e == writePtr ? memReg_30_branch_mask : _GEN_3003; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3005 = 6'h1f == writePtr ? memReg_31_branch_mask : _GEN_3004; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3006 = 6'h20 == writePtr ? memReg_32_branch_mask : _GEN_3005; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3007 = 6'h21 == writePtr ? memReg_33_branch_mask : _GEN_3006; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3008 = 6'h22 == writePtr ? memReg_34_branch_mask : _GEN_3007; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3009 = 6'h23 == writePtr ? memReg_35_branch_mask : _GEN_3008; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3010 = 6'h24 == writePtr ? memReg_36_branch_mask : _GEN_3009; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3011 = 6'h25 == writePtr ? memReg_37_branch_mask : _GEN_3010; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3012 = 6'h26 == writePtr ? memReg_38_branch_mask : _GEN_3011; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3013 = 6'h27 == writePtr ? memReg_39_branch_mask : _GEN_3012; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3014 = 6'h28 == writePtr ? memReg_40_branch_mask : _GEN_3013; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3015 = 6'h29 == writePtr ? memReg_41_branch_mask : _GEN_3014; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3016 = 6'h2a == writePtr ? memReg_42_branch_mask : _GEN_3015; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3017 = 6'h2b == writePtr ? memReg_43_branch_mask : _GEN_3016; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3018 = 6'h2c == writePtr ? memReg_44_branch_mask : _GEN_3017; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3019 = 6'h2d == writePtr ? memReg_45_branch_mask : _GEN_3018; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3020 = 6'h2e == writePtr ? memReg_46_branch_mask : _GEN_3019; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3021 = 6'h2f == writePtr ? memReg_47_branch_mask : _GEN_3020; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3022 = 6'h30 == writePtr ? memReg_48_branch_mask : _GEN_3021; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3023 = 6'h31 == writePtr ? memReg_49_branch_mask : _GEN_3022; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3024 = 6'h32 == writePtr ? memReg_50_branch_mask : _GEN_3023; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3025 = 6'h33 == writePtr ? memReg_51_branch_mask : _GEN_3024; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3026 = 6'h34 == writePtr ? memReg_52_branch_mask : _GEN_3025; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3027 = 6'h35 == writePtr ? memReg_53_branch_mask : _GEN_3026; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3028 = 6'h36 == writePtr ? memReg_54_branch_mask : _GEN_3027; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3029 = 6'h37 == writePtr ? memReg_55_branch_mask : _GEN_3028; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3030 = 6'h38 == writePtr ? memReg_56_branch_mask : _GEN_3029; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3031 = 6'h39 == writePtr ? memReg_57_branch_mask : _GEN_3030; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3032 = 6'h3a == writePtr ? memReg_58_branch_mask : _GEN_3031; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3033 = 6'h3b == writePtr ? memReg_59_branch_mask : _GEN_3032; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3034 = 6'h3c == writePtr ? memReg_60_branch_mask : _GEN_3033; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3035 = 6'h3d == writePtr ? memReg_61_branch_mask : _GEN_3034; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3036 = 6'h3e == writePtr ? memReg_62_branch_mask : _GEN_3035; // @[utils.scala 70:{27,27}]
-  wire [4:0] _GEN_3037 = 6'h3f == writePtr ? memReg_63_branch_mask : _GEN_3036; // @[utils.scala 70:{27,27}]
-  wire [4:0] _T_10 = _GEN_3037 & branchOps_branchMask; // @[utils.scala 70:27]
-  wire  _GEN_3038 = 6'h0 == writePtr ? 1'h0 : _GEN_1246; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3039 = 6'h1 == writePtr ? 1'h0 : _GEN_1247; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3040 = 6'h2 == writePtr ? 1'h0 : _GEN_1248; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3041 = 6'h3 == writePtr ? 1'h0 : _GEN_1249; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3042 = 6'h4 == writePtr ? 1'h0 : _GEN_1250; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3043 = 6'h5 == writePtr ? 1'h0 : _GEN_1251; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3044 = 6'h6 == writePtr ? 1'h0 : _GEN_1252; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3045 = 6'h7 == writePtr ? 1'h0 : _GEN_1253; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3046 = 6'h8 == writePtr ? 1'h0 : _GEN_1254; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3047 = 6'h9 == writePtr ? 1'h0 : _GEN_1255; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3048 = 6'ha == writePtr ? 1'h0 : _GEN_1256; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3049 = 6'hb == writePtr ? 1'h0 : _GEN_1257; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3050 = 6'hc == writePtr ? 1'h0 : _GEN_1258; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3051 = 6'hd == writePtr ? 1'h0 : _GEN_1259; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3052 = 6'he == writePtr ? 1'h0 : _GEN_1260; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3053 = 6'hf == writePtr ? 1'h0 : _GEN_1261; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3054 = 6'h10 == writePtr ? 1'h0 : _GEN_1262; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3055 = 6'h11 == writePtr ? 1'h0 : _GEN_1263; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3056 = 6'h12 == writePtr ? 1'h0 : _GEN_1264; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3057 = 6'h13 == writePtr ? 1'h0 : _GEN_1265; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3058 = 6'h14 == writePtr ? 1'h0 : _GEN_1266; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3059 = 6'h15 == writePtr ? 1'h0 : _GEN_1267; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3060 = 6'h16 == writePtr ? 1'h0 : _GEN_1268; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3061 = 6'h17 == writePtr ? 1'h0 : _GEN_1269; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3062 = 6'h18 == writePtr ? 1'h0 : _GEN_1270; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3063 = 6'h19 == writePtr ? 1'h0 : _GEN_1271; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3064 = 6'h1a == writePtr ? 1'h0 : _GEN_1272; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3065 = 6'h1b == writePtr ? 1'h0 : _GEN_1273; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3066 = 6'h1c == writePtr ? 1'h0 : _GEN_1274; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3067 = 6'h1d == writePtr ? 1'h0 : _GEN_1275; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3068 = 6'h1e == writePtr ? 1'h0 : _GEN_1276; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3069 = 6'h1f == writePtr ? 1'h0 : _GEN_1277; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3070 = 6'h20 == writePtr ? 1'h0 : _GEN_1278; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3071 = 6'h21 == writePtr ? 1'h0 : _GEN_1279; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3072 = 6'h22 == writePtr ? 1'h0 : _GEN_1280; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3073 = 6'h23 == writePtr ? 1'h0 : _GEN_1281; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3074 = 6'h24 == writePtr ? 1'h0 : _GEN_1282; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3075 = 6'h25 == writePtr ? 1'h0 : _GEN_1283; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3076 = 6'h26 == writePtr ? 1'h0 : _GEN_1284; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3077 = 6'h27 == writePtr ? 1'h0 : _GEN_1285; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3078 = 6'h28 == writePtr ? 1'h0 : _GEN_1286; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3079 = 6'h29 == writePtr ? 1'h0 : _GEN_1287; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3080 = 6'h2a == writePtr ? 1'h0 : _GEN_1288; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3081 = 6'h2b == writePtr ? 1'h0 : _GEN_1289; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3082 = 6'h2c == writePtr ? 1'h0 : _GEN_1290; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3083 = 6'h2d == writePtr ? 1'h0 : _GEN_1291; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3084 = 6'h2e == writePtr ? 1'h0 : _GEN_1292; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3085 = 6'h2f == writePtr ? 1'h0 : _GEN_1293; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3086 = 6'h30 == writePtr ? 1'h0 : _GEN_1294; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3087 = 6'h31 == writePtr ? 1'h0 : _GEN_1295; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3088 = 6'h32 == writePtr ? 1'h0 : _GEN_1296; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3089 = 6'h33 == writePtr ? 1'h0 : _GEN_1297; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3090 = 6'h34 == writePtr ? 1'h0 : _GEN_1298; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3091 = 6'h35 == writePtr ? 1'h0 : _GEN_1299; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3092 = 6'h36 == writePtr ? 1'h0 : _GEN_1300; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3093 = 6'h37 == writePtr ? 1'h0 : _GEN_1301; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3094 = 6'h38 == writePtr ? 1'h0 : _GEN_1302; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3095 = 6'h39 == writePtr ? 1'h0 : _GEN_1303; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3096 = 6'h3a == writePtr ? 1'h0 : _GEN_1304; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3097 = 6'h3b == writePtr ? 1'h0 : _GEN_1305; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3098 = 6'h3c == writePtr ? 1'h0 : _GEN_1306; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3099 = 6'h3d == writePtr ? 1'h0 : _GEN_1307; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3100 = 6'h3e == writePtr ? 1'h0 : _GEN_1308; // @[utils.scala 71:{24,24}]
-  wire  _GEN_3101 = 6'h3f == writePtr ? 1'h0 : _GEN_1309; // @[utils.scala 71:{24,24}]
-  wire [4:0] _GEN_3102 = 6'h0 == writePtr ? 5'h0 : _GEN_1310; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3103 = 6'h1 == writePtr ? 5'h0 : _GEN_1311; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3104 = 6'h2 == writePtr ? 5'h0 : _GEN_1312; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3105 = 6'h3 == writePtr ? 5'h0 : _GEN_1313; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3106 = 6'h4 == writePtr ? 5'h0 : _GEN_1314; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3107 = 6'h5 == writePtr ? 5'h0 : _GEN_1315; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3108 = 6'h6 == writePtr ? 5'h0 : _GEN_1316; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3109 = 6'h7 == writePtr ? 5'h0 : _GEN_1317; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3110 = 6'h8 == writePtr ? 5'h0 : _GEN_1318; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3111 = 6'h9 == writePtr ? 5'h0 : _GEN_1319; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3112 = 6'ha == writePtr ? 5'h0 : _GEN_1320; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3113 = 6'hb == writePtr ? 5'h0 : _GEN_1321; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3114 = 6'hc == writePtr ? 5'h0 : _GEN_1322; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3115 = 6'hd == writePtr ? 5'h0 : _GEN_1323; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3116 = 6'he == writePtr ? 5'h0 : _GEN_1324; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3117 = 6'hf == writePtr ? 5'h0 : _GEN_1325; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3118 = 6'h10 == writePtr ? 5'h0 : _GEN_1326; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3119 = 6'h11 == writePtr ? 5'h0 : _GEN_1327; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3120 = 6'h12 == writePtr ? 5'h0 : _GEN_1328; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3121 = 6'h13 == writePtr ? 5'h0 : _GEN_1329; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3122 = 6'h14 == writePtr ? 5'h0 : _GEN_1330; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3123 = 6'h15 == writePtr ? 5'h0 : _GEN_1331; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3124 = 6'h16 == writePtr ? 5'h0 : _GEN_1332; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3125 = 6'h17 == writePtr ? 5'h0 : _GEN_1333; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3126 = 6'h18 == writePtr ? 5'h0 : _GEN_1334; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3127 = 6'h19 == writePtr ? 5'h0 : _GEN_1335; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3128 = 6'h1a == writePtr ? 5'h0 : _GEN_1336; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3129 = 6'h1b == writePtr ? 5'h0 : _GEN_1337; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3130 = 6'h1c == writePtr ? 5'h0 : _GEN_1338; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3131 = 6'h1d == writePtr ? 5'h0 : _GEN_1339; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3132 = 6'h1e == writePtr ? 5'h0 : _GEN_1340; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3133 = 6'h1f == writePtr ? 5'h0 : _GEN_1341; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3134 = 6'h20 == writePtr ? 5'h0 : _GEN_1342; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3135 = 6'h21 == writePtr ? 5'h0 : _GEN_1343; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3136 = 6'h22 == writePtr ? 5'h0 : _GEN_1344; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3137 = 6'h23 == writePtr ? 5'h0 : _GEN_1345; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3138 = 6'h24 == writePtr ? 5'h0 : _GEN_1346; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3139 = 6'h25 == writePtr ? 5'h0 : _GEN_1347; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3140 = 6'h26 == writePtr ? 5'h0 : _GEN_1348; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3141 = 6'h27 == writePtr ? 5'h0 : _GEN_1349; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3142 = 6'h28 == writePtr ? 5'h0 : _GEN_1350; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3143 = 6'h29 == writePtr ? 5'h0 : _GEN_1351; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3144 = 6'h2a == writePtr ? 5'h0 : _GEN_1352; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3145 = 6'h2b == writePtr ? 5'h0 : _GEN_1353; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3146 = 6'h2c == writePtr ? 5'h0 : _GEN_1354; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3147 = 6'h2d == writePtr ? 5'h0 : _GEN_1355; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3148 = 6'h2e == writePtr ? 5'h0 : _GEN_1356; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3149 = 6'h2f == writePtr ? 5'h0 : _GEN_1357; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3150 = 6'h30 == writePtr ? 5'h0 : _GEN_1358; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3151 = 6'h31 == writePtr ? 5'h0 : _GEN_1359; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3152 = 6'h32 == writePtr ? 5'h0 : _GEN_1360; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3153 = 6'h33 == writePtr ? 5'h0 : _GEN_1361; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3154 = 6'h34 == writePtr ? 5'h0 : _GEN_1362; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3155 = 6'h35 == writePtr ? 5'h0 : _GEN_1363; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3156 = 6'h36 == writePtr ? 5'h0 : _GEN_1364; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3157 = 6'h37 == writePtr ? 5'h0 : _GEN_1365; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3158 = 6'h38 == writePtr ? 5'h0 : _GEN_1366; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3159 = 6'h39 == writePtr ? 5'h0 : _GEN_1367; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3160 = 6'h3a == writePtr ? 5'h0 : _GEN_1368; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3161 = 6'h3b == writePtr ? 5'h0 : _GEN_1369; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3162 = 6'h3c == writePtr ? 5'h0 : _GEN_1370; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3163 = 6'h3d == writePtr ? 5'h0 : _GEN_1371; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3164 = 6'h3e == writePtr ? 5'h0 : _GEN_1372; // @[utils.scala 72:{23,23}]
-  wire [4:0] _GEN_3165 = 6'h3f == writePtr ? 5'h0 : _GEN_1373; // @[utils.scala 72:{23,23}]
-  wire  _GEN_3294 = |_T_10 ? _GEN_3038 : _GEN_2910; // @[utils.scala 70:56]
-  wire  _GEN_3295 = |_T_10 ? _GEN_3039 : _GEN_2911; // @[utils.scala 70:56]
-  wire  _GEN_3296 = |_T_10 ? _GEN_3040 : _GEN_2912; // @[utils.scala 70:56]
-  wire  _GEN_3297 = |_T_10 ? _GEN_3041 : _GEN_2913; // @[utils.scala 70:56]
-  wire  _GEN_3298 = |_T_10 ? _GEN_3042 : _GEN_2914; // @[utils.scala 70:56]
-  wire  _GEN_3299 = |_T_10 ? _GEN_3043 : _GEN_2915; // @[utils.scala 70:56]
-  wire  _GEN_3300 = |_T_10 ? _GEN_3044 : _GEN_2916; // @[utils.scala 70:56]
-  wire  _GEN_3301 = |_T_10 ? _GEN_3045 : _GEN_2917; // @[utils.scala 70:56]
-  wire  _GEN_3302 = |_T_10 ? _GEN_3046 : _GEN_2918; // @[utils.scala 70:56]
-  wire  _GEN_3303 = |_T_10 ? _GEN_3047 : _GEN_2919; // @[utils.scala 70:56]
-  wire  _GEN_3304 = |_T_10 ? _GEN_3048 : _GEN_2920; // @[utils.scala 70:56]
-  wire  _GEN_3305 = |_T_10 ? _GEN_3049 : _GEN_2921; // @[utils.scala 70:56]
-  wire  _GEN_3306 = |_T_10 ? _GEN_3050 : _GEN_2922; // @[utils.scala 70:56]
-  wire  _GEN_3307 = |_T_10 ? _GEN_3051 : _GEN_2923; // @[utils.scala 70:56]
-  wire  _GEN_3308 = |_T_10 ? _GEN_3052 : _GEN_2924; // @[utils.scala 70:56]
-  wire  _GEN_3309 = |_T_10 ? _GEN_3053 : _GEN_2925; // @[utils.scala 70:56]
-  wire  _GEN_3310 = |_T_10 ? _GEN_3054 : _GEN_2926; // @[utils.scala 70:56]
-  wire  _GEN_3311 = |_T_10 ? _GEN_3055 : _GEN_2927; // @[utils.scala 70:56]
-  wire  _GEN_3312 = |_T_10 ? _GEN_3056 : _GEN_2928; // @[utils.scala 70:56]
-  wire  _GEN_3313 = |_T_10 ? _GEN_3057 : _GEN_2929; // @[utils.scala 70:56]
-  wire  _GEN_3314 = |_T_10 ? _GEN_3058 : _GEN_2930; // @[utils.scala 70:56]
-  wire  _GEN_3315 = |_T_10 ? _GEN_3059 : _GEN_2931; // @[utils.scala 70:56]
-  wire  _GEN_3316 = |_T_10 ? _GEN_3060 : _GEN_2932; // @[utils.scala 70:56]
-  wire  _GEN_3317 = |_T_10 ? _GEN_3061 : _GEN_2933; // @[utils.scala 70:56]
-  wire  _GEN_3318 = |_T_10 ? _GEN_3062 : _GEN_2934; // @[utils.scala 70:56]
-  wire  _GEN_3319 = |_T_10 ? _GEN_3063 : _GEN_2935; // @[utils.scala 70:56]
-  wire  _GEN_3320 = |_T_10 ? _GEN_3064 : _GEN_2936; // @[utils.scala 70:56]
-  wire  _GEN_3321 = |_T_10 ? _GEN_3065 : _GEN_2937; // @[utils.scala 70:56]
-  wire  _GEN_3322 = |_T_10 ? _GEN_3066 : _GEN_2938; // @[utils.scala 70:56]
-  wire  _GEN_3323 = |_T_10 ? _GEN_3067 : _GEN_2939; // @[utils.scala 70:56]
-  wire  _GEN_3324 = |_T_10 ? _GEN_3068 : _GEN_2940; // @[utils.scala 70:56]
-  wire  _GEN_3325 = |_T_10 ? _GEN_3069 : _GEN_2941; // @[utils.scala 70:56]
-  wire  _GEN_3326 = |_T_10 ? _GEN_3070 : _GEN_2942; // @[utils.scala 70:56]
-  wire  _GEN_3327 = |_T_10 ? _GEN_3071 : _GEN_2943; // @[utils.scala 70:56]
-  wire  _GEN_3328 = |_T_10 ? _GEN_3072 : _GEN_2944; // @[utils.scala 70:56]
-  wire  _GEN_3329 = |_T_10 ? _GEN_3073 : _GEN_2945; // @[utils.scala 70:56]
-  wire  _GEN_3330 = |_T_10 ? _GEN_3074 : _GEN_2946; // @[utils.scala 70:56]
-  wire  _GEN_3331 = |_T_10 ? _GEN_3075 : _GEN_2947; // @[utils.scala 70:56]
-  wire  _GEN_3332 = |_T_10 ? _GEN_3076 : _GEN_2948; // @[utils.scala 70:56]
-  wire  _GEN_3333 = |_T_10 ? _GEN_3077 : _GEN_2949; // @[utils.scala 70:56]
-  wire  _GEN_3334 = |_T_10 ? _GEN_3078 : _GEN_2950; // @[utils.scala 70:56]
-  wire  _GEN_3335 = |_T_10 ? _GEN_3079 : _GEN_2951; // @[utils.scala 70:56]
-  wire  _GEN_3336 = |_T_10 ? _GEN_3080 : _GEN_2952; // @[utils.scala 70:56]
-  wire  _GEN_3337 = |_T_10 ? _GEN_3081 : _GEN_2953; // @[utils.scala 70:56]
-  wire  _GEN_3338 = |_T_10 ? _GEN_3082 : _GEN_2954; // @[utils.scala 70:56]
-  wire  _GEN_3339 = |_T_10 ? _GEN_3083 : _GEN_2955; // @[utils.scala 70:56]
-  wire  _GEN_3340 = |_T_10 ? _GEN_3084 : _GEN_2956; // @[utils.scala 70:56]
-  wire  _GEN_3341 = |_T_10 ? _GEN_3085 : _GEN_2957; // @[utils.scala 70:56]
-  wire  _GEN_3342 = |_T_10 ? _GEN_3086 : _GEN_2958; // @[utils.scala 70:56]
-  wire  _GEN_3343 = |_T_10 ? _GEN_3087 : _GEN_2959; // @[utils.scala 70:56]
-  wire  _GEN_3344 = |_T_10 ? _GEN_3088 : _GEN_2960; // @[utils.scala 70:56]
-  wire  _GEN_3345 = |_T_10 ? _GEN_3089 : _GEN_2961; // @[utils.scala 70:56]
-  wire  _GEN_3346 = |_T_10 ? _GEN_3090 : _GEN_2962; // @[utils.scala 70:56]
-  wire  _GEN_3347 = |_T_10 ? _GEN_3091 : _GEN_2963; // @[utils.scala 70:56]
-  wire  _GEN_3348 = |_T_10 ? _GEN_3092 : _GEN_2964; // @[utils.scala 70:56]
-  wire  _GEN_3349 = |_T_10 ? _GEN_3093 : _GEN_2965; // @[utils.scala 70:56]
-  wire  _GEN_3350 = |_T_10 ? _GEN_3094 : _GEN_2966; // @[utils.scala 70:56]
-  wire  _GEN_3351 = |_T_10 ? _GEN_3095 : _GEN_2967; // @[utils.scala 70:56]
-  wire  _GEN_3352 = |_T_10 ? _GEN_3096 : _GEN_2968; // @[utils.scala 70:56]
-  wire  _GEN_3353 = |_T_10 ? _GEN_3097 : _GEN_2969; // @[utils.scala 70:56]
-  wire  _GEN_3354 = |_T_10 ? _GEN_3098 : _GEN_2970; // @[utils.scala 70:56]
-  wire  _GEN_3355 = |_T_10 ? _GEN_3099 : _GEN_2971; // @[utils.scala 70:56]
-  wire  _GEN_3356 = |_T_10 ? _GEN_3100 : _GEN_2972; // @[utils.scala 70:56]
-  wire  _GEN_3357 = |_T_10 ? _GEN_3101 : _GEN_2973; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3358 = |_T_10 ? _GEN_3102 : _GEN_2782; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3359 = |_T_10 ? _GEN_3103 : _GEN_2783; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3360 = |_T_10 ? _GEN_3104 : _GEN_2784; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3361 = |_T_10 ? _GEN_3105 : _GEN_2785; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3362 = |_T_10 ? _GEN_3106 : _GEN_2786; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3363 = |_T_10 ? _GEN_3107 : _GEN_2787; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3364 = |_T_10 ? _GEN_3108 : _GEN_2788; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3365 = |_T_10 ? _GEN_3109 : _GEN_2789; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3366 = |_T_10 ? _GEN_3110 : _GEN_2790; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3367 = |_T_10 ? _GEN_3111 : _GEN_2791; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3368 = |_T_10 ? _GEN_3112 : _GEN_2792; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3369 = |_T_10 ? _GEN_3113 : _GEN_2793; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3370 = |_T_10 ? _GEN_3114 : _GEN_2794; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3371 = |_T_10 ? _GEN_3115 : _GEN_2795; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3372 = |_T_10 ? _GEN_3116 : _GEN_2796; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3373 = |_T_10 ? _GEN_3117 : _GEN_2797; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3374 = |_T_10 ? _GEN_3118 : _GEN_2798; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3375 = |_T_10 ? _GEN_3119 : _GEN_2799; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3376 = |_T_10 ? _GEN_3120 : _GEN_2800; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3377 = |_T_10 ? _GEN_3121 : _GEN_2801; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3378 = |_T_10 ? _GEN_3122 : _GEN_2802; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3379 = |_T_10 ? _GEN_3123 : _GEN_2803; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3380 = |_T_10 ? _GEN_3124 : _GEN_2804; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3381 = |_T_10 ? _GEN_3125 : _GEN_2805; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3382 = |_T_10 ? _GEN_3126 : _GEN_2806; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3383 = |_T_10 ? _GEN_3127 : _GEN_2807; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3384 = |_T_10 ? _GEN_3128 : _GEN_2808; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3385 = |_T_10 ? _GEN_3129 : _GEN_2809; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3386 = |_T_10 ? _GEN_3130 : _GEN_2810; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3387 = |_T_10 ? _GEN_3131 : _GEN_2811; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3388 = |_T_10 ? _GEN_3132 : _GEN_2812; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3389 = |_T_10 ? _GEN_3133 : _GEN_2813; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3390 = |_T_10 ? _GEN_3134 : _GEN_2814; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3391 = |_T_10 ? _GEN_3135 : _GEN_2815; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3392 = |_T_10 ? _GEN_3136 : _GEN_2816; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3393 = |_T_10 ? _GEN_3137 : _GEN_2817; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3394 = |_T_10 ? _GEN_3138 : _GEN_2818; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3395 = |_T_10 ? _GEN_3139 : _GEN_2819; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3396 = |_T_10 ? _GEN_3140 : _GEN_2820; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3397 = |_T_10 ? _GEN_3141 : _GEN_2821; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3398 = |_T_10 ? _GEN_3142 : _GEN_2822; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3399 = |_T_10 ? _GEN_3143 : _GEN_2823; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3400 = |_T_10 ? _GEN_3144 : _GEN_2824; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3401 = |_T_10 ? _GEN_3145 : _GEN_2825; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3402 = |_T_10 ? _GEN_3146 : _GEN_2826; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3403 = |_T_10 ? _GEN_3147 : _GEN_2827; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3404 = |_T_10 ? _GEN_3148 : _GEN_2828; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3405 = |_T_10 ? _GEN_3149 : _GEN_2829; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3406 = |_T_10 ? _GEN_3150 : _GEN_2830; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3407 = |_T_10 ? _GEN_3151 : _GEN_2831; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3408 = |_T_10 ? _GEN_3152 : _GEN_2832; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3409 = |_T_10 ? _GEN_3153 : _GEN_2833; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3410 = |_T_10 ? _GEN_3154 : _GEN_2834; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3411 = |_T_10 ? _GEN_3155 : _GEN_2835; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3412 = |_T_10 ? _GEN_3156 : _GEN_2836; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3413 = |_T_10 ? _GEN_3157 : _GEN_2837; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3414 = |_T_10 ? _GEN_3158 : _GEN_2838; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3415 = |_T_10 ? _GEN_3159 : _GEN_2839; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3416 = |_T_10 ? _GEN_3160 : _GEN_2840; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3417 = |_T_10 ? _GEN_3161 : _GEN_2841; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3418 = |_T_10 ? _GEN_3162 : _GEN_2842; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3419 = |_T_10 ? _GEN_3163 : _GEN_2843; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3420 = |_T_10 ? _GEN_3164 : _GEN_2844; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3421 = |_T_10 ? _GEN_3165 : _GEN_2845; // @[utils.scala 70:56]
-  wire [4:0] _GEN_3422 = branchOps_passed ? _GEN_2846 : _GEN_3358; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3423 = branchOps_passed ? _GEN_2847 : _GEN_3359; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3424 = branchOps_passed ? _GEN_2848 : _GEN_3360; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3425 = branchOps_passed ? _GEN_2849 : _GEN_3361; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3426 = branchOps_passed ? _GEN_2850 : _GEN_3362; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3427 = branchOps_passed ? _GEN_2851 : _GEN_3363; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3428 = branchOps_passed ? _GEN_2852 : _GEN_3364; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3429 = branchOps_passed ? _GEN_2853 : _GEN_3365; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3430 = branchOps_passed ? _GEN_2854 : _GEN_3366; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3431 = branchOps_passed ? _GEN_2855 : _GEN_3367; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3432 = branchOps_passed ? _GEN_2856 : _GEN_3368; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3433 = branchOps_passed ? _GEN_2857 : _GEN_3369; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3434 = branchOps_passed ? _GEN_2858 : _GEN_3370; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3435 = branchOps_passed ? _GEN_2859 : _GEN_3371; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3436 = branchOps_passed ? _GEN_2860 : _GEN_3372; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3437 = branchOps_passed ? _GEN_2861 : _GEN_3373; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3438 = branchOps_passed ? _GEN_2862 : _GEN_3374; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3439 = branchOps_passed ? _GEN_2863 : _GEN_3375; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3440 = branchOps_passed ? _GEN_2864 : _GEN_3376; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3441 = branchOps_passed ? _GEN_2865 : _GEN_3377; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3442 = branchOps_passed ? _GEN_2866 : _GEN_3378; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3443 = branchOps_passed ? _GEN_2867 : _GEN_3379; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3444 = branchOps_passed ? _GEN_2868 : _GEN_3380; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3445 = branchOps_passed ? _GEN_2869 : _GEN_3381; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3446 = branchOps_passed ? _GEN_2870 : _GEN_3382; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3447 = branchOps_passed ? _GEN_2871 : _GEN_3383; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3448 = branchOps_passed ? _GEN_2872 : _GEN_3384; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3449 = branchOps_passed ? _GEN_2873 : _GEN_3385; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3450 = branchOps_passed ? _GEN_2874 : _GEN_3386; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3451 = branchOps_passed ? _GEN_2875 : _GEN_3387; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3452 = branchOps_passed ? _GEN_2876 : _GEN_3388; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3453 = branchOps_passed ? _GEN_2877 : _GEN_3389; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3454 = branchOps_passed ? _GEN_2878 : _GEN_3390; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3455 = branchOps_passed ? _GEN_2879 : _GEN_3391; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3456 = branchOps_passed ? _GEN_2880 : _GEN_3392; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3457 = branchOps_passed ? _GEN_2881 : _GEN_3393; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3458 = branchOps_passed ? _GEN_2882 : _GEN_3394; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3459 = branchOps_passed ? _GEN_2883 : _GEN_3395; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3460 = branchOps_passed ? _GEN_2884 : _GEN_3396; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3461 = branchOps_passed ? _GEN_2885 : _GEN_3397; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3462 = branchOps_passed ? _GEN_2886 : _GEN_3398; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3463 = branchOps_passed ? _GEN_2887 : _GEN_3399; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3464 = branchOps_passed ? _GEN_2888 : _GEN_3400; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3465 = branchOps_passed ? _GEN_2889 : _GEN_3401; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3466 = branchOps_passed ? _GEN_2890 : _GEN_3402; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3467 = branchOps_passed ? _GEN_2891 : _GEN_3403; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3468 = branchOps_passed ? _GEN_2892 : _GEN_3404; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3469 = branchOps_passed ? _GEN_2893 : _GEN_3405; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3470 = branchOps_passed ? _GEN_2894 : _GEN_3406; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3471 = branchOps_passed ? _GEN_2895 : _GEN_3407; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3472 = branchOps_passed ? _GEN_2896 : _GEN_3408; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3473 = branchOps_passed ? _GEN_2897 : _GEN_3409; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3474 = branchOps_passed ? _GEN_2898 : _GEN_3410; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3475 = branchOps_passed ? _GEN_2899 : _GEN_3411; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3476 = branchOps_passed ? _GEN_2900 : _GEN_3412; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3477 = branchOps_passed ? _GEN_2901 : _GEN_3413; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3478 = branchOps_passed ? _GEN_2902 : _GEN_3414; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3479 = branchOps_passed ? _GEN_2903 : _GEN_3415; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3480 = branchOps_passed ? _GEN_2904 : _GEN_3416; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3481 = branchOps_passed ? _GEN_2905 : _GEN_3417; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3482 = branchOps_passed ? _GEN_2906 : _GEN_3418; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3483 = branchOps_passed ? _GEN_2907 : _GEN_3419; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3484 = branchOps_passed ? _GEN_2908 : _GEN_3420; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3485 = branchOps_passed ? _GEN_2909 : _GEN_3421; // @[utils.scala 60:30]
-  wire  _GEN_3486 = branchOps_passed ? _GEN_2910 : _GEN_3294; // @[utils.scala 60:30]
-  wire  _GEN_3487 = branchOps_passed ? _GEN_2911 : _GEN_3295; // @[utils.scala 60:30]
-  wire  _GEN_3488 = branchOps_passed ? _GEN_2912 : _GEN_3296; // @[utils.scala 60:30]
-  wire  _GEN_3489 = branchOps_passed ? _GEN_2913 : _GEN_3297; // @[utils.scala 60:30]
-  wire  _GEN_3490 = branchOps_passed ? _GEN_2914 : _GEN_3298; // @[utils.scala 60:30]
-  wire  _GEN_3491 = branchOps_passed ? _GEN_2915 : _GEN_3299; // @[utils.scala 60:30]
-  wire  _GEN_3492 = branchOps_passed ? _GEN_2916 : _GEN_3300; // @[utils.scala 60:30]
-  wire  _GEN_3493 = branchOps_passed ? _GEN_2917 : _GEN_3301; // @[utils.scala 60:30]
-  wire  _GEN_3494 = branchOps_passed ? _GEN_2918 : _GEN_3302; // @[utils.scala 60:30]
-  wire  _GEN_3495 = branchOps_passed ? _GEN_2919 : _GEN_3303; // @[utils.scala 60:30]
-  wire  _GEN_3496 = branchOps_passed ? _GEN_2920 : _GEN_3304; // @[utils.scala 60:30]
-  wire  _GEN_3497 = branchOps_passed ? _GEN_2921 : _GEN_3305; // @[utils.scala 60:30]
-  wire  _GEN_3498 = branchOps_passed ? _GEN_2922 : _GEN_3306; // @[utils.scala 60:30]
-  wire  _GEN_3499 = branchOps_passed ? _GEN_2923 : _GEN_3307; // @[utils.scala 60:30]
-  wire  _GEN_3500 = branchOps_passed ? _GEN_2924 : _GEN_3308; // @[utils.scala 60:30]
-  wire  _GEN_3501 = branchOps_passed ? _GEN_2925 : _GEN_3309; // @[utils.scala 60:30]
-  wire  _GEN_3502 = branchOps_passed ? _GEN_2926 : _GEN_3310; // @[utils.scala 60:30]
-  wire  _GEN_3503 = branchOps_passed ? _GEN_2927 : _GEN_3311; // @[utils.scala 60:30]
-  wire  _GEN_3504 = branchOps_passed ? _GEN_2928 : _GEN_3312; // @[utils.scala 60:30]
-  wire  _GEN_3505 = branchOps_passed ? _GEN_2929 : _GEN_3313; // @[utils.scala 60:30]
-  wire  _GEN_3506 = branchOps_passed ? _GEN_2930 : _GEN_3314; // @[utils.scala 60:30]
-  wire  _GEN_3507 = branchOps_passed ? _GEN_2931 : _GEN_3315; // @[utils.scala 60:30]
-  wire  _GEN_3508 = branchOps_passed ? _GEN_2932 : _GEN_3316; // @[utils.scala 60:30]
-  wire  _GEN_3509 = branchOps_passed ? _GEN_2933 : _GEN_3317; // @[utils.scala 60:30]
-  wire  _GEN_3510 = branchOps_passed ? _GEN_2934 : _GEN_3318; // @[utils.scala 60:30]
-  wire  _GEN_3511 = branchOps_passed ? _GEN_2935 : _GEN_3319; // @[utils.scala 60:30]
-  wire  _GEN_3512 = branchOps_passed ? _GEN_2936 : _GEN_3320; // @[utils.scala 60:30]
-  wire  _GEN_3513 = branchOps_passed ? _GEN_2937 : _GEN_3321; // @[utils.scala 60:30]
-  wire  _GEN_3514 = branchOps_passed ? _GEN_2938 : _GEN_3322; // @[utils.scala 60:30]
-  wire  _GEN_3515 = branchOps_passed ? _GEN_2939 : _GEN_3323; // @[utils.scala 60:30]
-  wire  _GEN_3516 = branchOps_passed ? _GEN_2940 : _GEN_3324; // @[utils.scala 60:30]
-  wire  _GEN_3517 = branchOps_passed ? _GEN_2941 : _GEN_3325; // @[utils.scala 60:30]
-  wire  _GEN_3518 = branchOps_passed ? _GEN_2942 : _GEN_3326; // @[utils.scala 60:30]
-  wire  _GEN_3519 = branchOps_passed ? _GEN_2943 : _GEN_3327; // @[utils.scala 60:30]
-  wire  _GEN_3520 = branchOps_passed ? _GEN_2944 : _GEN_3328; // @[utils.scala 60:30]
-  wire  _GEN_3521 = branchOps_passed ? _GEN_2945 : _GEN_3329; // @[utils.scala 60:30]
-  wire  _GEN_3522 = branchOps_passed ? _GEN_2946 : _GEN_3330; // @[utils.scala 60:30]
-  wire  _GEN_3523 = branchOps_passed ? _GEN_2947 : _GEN_3331; // @[utils.scala 60:30]
-  wire  _GEN_3524 = branchOps_passed ? _GEN_2948 : _GEN_3332; // @[utils.scala 60:30]
-  wire  _GEN_3525 = branchOps_passed ? _GEN_2949 : _GEN_3333; // @[utils.scala 60:30]
-  wire  _GEN_3526 = branchOps_passed ? _GEN_2950 : _GEN_3334; // @[utils.scala 60:30]
-  wire  _GEN_3527 = branchOps_passed ? _GEN_2951 : _GEN_3335; // @[utils.scala 60:30]
-  wire  _GEN_3528 = branchOps_passed ? _GEN_2952 : _GEN_3336; // @[utils.scala 60:30]
-  wire  _GEN_3529 = branchOps_passed ? _GEN_2953 : _GEN_3337; // @[utils.scala 60:30]
-  wire  _GEN_3530 = branchOps_passed ? _GEN_2954 : _GEN_3338; // @[utils.scala 60:30]
-  wire  _GEN_3531 = branchOps_passed ? _GEN_2955 : _GEN_3339; // @[utils.scala 60:30]
-  wire  _GEN_3532 = branchOps_passed ? _GEN_2956 : _GEN_3340; // @[utils.scala 60:30]
-  wire  _GEN_3533 = branchOps_passed ? _GEN_2957 : _GEN_3341; // @[utils.scala 60:30]
-  wire  _GEN_3534 = branchOps_passed ? _GEN_2958 : _GEN_3342; // @[utils.scala 60:30]
-  wire  _GEN_3535 = branchOps_passed ? _GEN_2959 : _GEN_3343; // @[utils.scala 60:30]
-  wire  _GEN_3536 = branchOps_passed ? _GEN_2960 : _GEN_3344; // @[utils.scala 60:30]
-  wire  _GEN_3537 = branchOps_passed ? _GEN_2961 : _GEN_3345; // @[utils.scala 60:30]
-  wire  _GEN_3538 = branchOps_passed ? _GEN_2962 : _GEN_3346; // @[utils.scala 60:30]
-  wire  _GEN_3539 = branchOps_passed ? _GEN_2963 : _GEN_3347; // @[utils.scala 60:30]
-  wire  _GEN_3540 = branchOps_passed ? _GEN_2964 : _GEN_3348; // @[utils.scala 60:30]
-  wire  _GEN_3541 = branchOps_passed ? _GEN_2965 : _GEN_3349; // @[utils.scala 60:30]
-  wire  _GEN_3542 = branchOps_passed ? _GEN_2966 : _GEN_3350; // @[utils.scala 60:30]
-  wire  _GEN_3543 = branchOps_passed ? _GEN_2967 : _GEN_3351; // @[utils.scala 60:30]
-  wire  _GEN_3544 = branchOps_passed ? _GEN_2968 : _GEN_3352; // @[utils.scala 60:30]
-  wire  _GEN_3545 = branchOps_passed ? _GEN_2969 : _GEN_3353; // @[utils.scala 60:30]
-  wire  _GEN_3546 = branchOps_passed ? _GEN_2970 : _GEN_3354; // @[utils.scala 60:30]
-  wire  _GEN_3547 = branchOps_passed ? _GEN_2971 : _GEN_3355; // @[utils.scala 60:30]
-  wire  _GEN_3548 = branchOps_passed ? _GEN_2972 : _GEN_3356; // @[utils.scala 60:30]
-  wire  _GEN_3549 = branchOps_passed ? _GEN_2973 : _GEN_3357; // @[utils.scala 60:30]
-  wire [4:0] _GEN_3678 = branchOps_valid ? _GEN_3422 : _GEN_2782; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3679 = branchOps_valid ? _GEN_3423 : _GEN_2783; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3680 = branchOps_valid ? _GEN_3424 : _GEN_2784; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3681 = branchOps_valid ? _GEN_3425 : _GEN_2785; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3682 = branchOps_valid ? _GEN_3426 : _GEN_2786; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3683 = branchOps_valid ? _GEN_3427 : _GEN_2787; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3684 = branchOps_valid ? _GEN_3428 : _GEN_2788; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3685 = branchOps_valid ? _GEN_3429 : _GEN_2789; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3686 = branchOps_valid ? _GEN_3430 : _GEN_2790; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3687 = branchOps_valid ? _GEN_3431 : _GEN_2791; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3688 = branchOps_valid ? _GEN_3432 : _GEN_2792; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3689 = branchOps_valid ? _GEN_3433 : _GEN_2793; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3690 = branchOps_valid ? _GEN_3434 : _GEN_2794; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3691 = branchOps_valid ? _GEN_3435 : _GEN_2795; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3692 = branchOps_valid ? _GEN_3436 : _GEN_2796; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3693 = branchOps_valid ? _GEN_3437 : _GEN_2797; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3694 = branchOps_valid ? _GEN_3438 : _GEN_2798; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3695 = branchOps_valid ? _GEN_3439 : _GEN_2799; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3696 = branchOps_valid ? _GEN_3440 : _GEN_2800; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3697 = branchOps_valid ? _GEN_3441 : _GEN_2801; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3698 = branchOps_valid ? _GEN_3442 : _GEN_2802; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3699 = branchOps_valid ? _GEN_3443 : _GEN_2803; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3700 = branchOps_valid ? _GEN_3444 : _GEN_2804; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3701 = branchOps_valid ? _GEN_3445 : _GEN_2805; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3702 = branchOps_valid ? _GEN_3446 : _GEN_2806; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3703 = branchOps_valid ? _GEN_3447 : _GEN_2807; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3704 = branchOps_valid ? _GEN_3448 : _GEN_2808; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3705 = branchOps_valid ? _GEN_3449 : _GEN_2809; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3706 = branchOps_valid ? _GEN_3450 : _GEN_2810; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3707 = branchOps_valid ? _GEN_3451 : _GEN_2811; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3708 = branchOps_valid ? _GEN_3452 : _GEN_2812; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3709 = branchOps_valid ? _GEN_3453 : _GEN_2813; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3710 = branchOps_valid ? _GEN_3454 : _GEN_2814; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3711 = branchOps_valid ? _GEN_3455 : _GEN_2815; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3712 = branchOps_valid ? _GEN_3456 : _GEN_2816; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3713 = branchOps_valid ? _GEN_3457 : _GEN_2817; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3714 = branchOps_valid ? _GEN_3458 : _GEN_2818; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3715 = branchOps_valid ? _GEN_3459 : _GEN_2819; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3716 = branchOps_valid ? _GEN_3460 : _GEN_2820; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3717 = branchOps_valid ? _GEN_3461 : _GEN_2821; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3718 = branchOps_valid ? _GEN_3462 : _GEN_2822; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3719 = branchOps_valid ? _GEN_3463 : _GEN_2823; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3720 = branchOps_valid ? _GEN_3464 : _GEN_2824; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3721 = branchOps_valid ? _GEN_3465 : _GEN_2825; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3722 = branchOps_valid ? _GEN_3466 : _GEN_2826; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3723 = branchOps_valid ? _GEN_3467 : _GEN_2827; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3724 = branchOps_valid ? _GEN_3468 : _GEN_2828; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3725 = branchOps_valid ? _GEN_3469 : _GEN_2829; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3726 = branchOps_valid ? _GEN_3470 : _GEN_2830; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3727 = branchOps_valid ? _GEN_3471 : _GEN_2831; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3728 = branchOps_valid ? _GEN_3472 : _GEN_2832; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3729 = branchOps_valid ? _GEN_3473 : _GEN_2833; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3730 = branchOps_valid ? _GEN_3474 : _GEN_2834; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3731 = branchOps_valid ? _GEN_3475 : _GEN_2835; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3732 = branchOps_valid ? _GEN_3476 : _GEN_2836; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3733 = branchOps_valid ? _GEN_3477 : _GEN_2837; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3734 = branchOps_valid ? _GEN_3478 : _GEN_2838; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3735 = branchOps_valid ? _GEN_3479 : _GEN_2839; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3736 = branchOps_valid ? _GEN_3480 : _GEN_2840; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3737 = branchOps_valid ? _GEN_3481 : _GEN_2841; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3738 = branchOps_valid ? _GEN_3482 : _GEN_2842; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3739 = branchOps_valid ? _GEN_3483 : _GEN_2843; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3740 = branchOps_valid ? _GEN_3484 : _GEN_2844; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3741 = branchOps_valid ? _GEN_3485 : _GEN_2845; // @[utils.scala 59:26]
-  wire  _GEN_3742 = branchOps_valid ? _GEN_3486 : _GEN_2910; // @[utils.scala 59:26]
-  wire  _GEN_3743 = branchOps_valid ? _GEN_3487 : _GEN_2911; // @[utils.scala 59:26]
-  wire  _GEN_3744 = branchOps_valid ? _GEN_3488 : _GEN_2912; // @[utils.scala 59:26]
-  wire  _GEN_3745 = branchOps_valid ? _GEN_3489 : _GEN_2913; // @[utils.scala 59:26]
-  wire  _GEN_3746 = branchOps_valid ? _GEN_3490 : _GEN_2914; // @[utils.scala 59:26]
-  wire  _GEN_3747 = branchOps_valid ? _GEN_3491 : _GEN_2915; // @[utils.scala 59:26]
-  wire  _GEN_3748 = branchOps_valid ? _GEN_3492 : _GEN_2916; // @[utils.scala 59:26]
-  wire  _GEN_3749 = branchOps_valid ? _GEN_3493 : _GEN_2917; // @[utils.scala 59:26]
-  wire  _GEN_3750 = branchOps_valid ? _GEN_3494 : _GEN_2918; // @[utils.scala 59:26]
-  wire  _GEN_3751 = branchOps_valid ? _GEN_3495 : _GEN_2919; // @[utils.scala 59:26]
-  wire  _GEN_3752 = branchOps_valid ? _GEN_3496 : _GEN_2920; // @[utils.scala 59:26]
-  wire  _GEN_3753 = branchOps_valid ? _GEN_3497 : _GEN_2921; // @[utils.scala 59:26]
-  wire  _GEN_3754 = branchOps_valid ? _GEN_3498 : _GEN_2922; // @[utils.scala 59:26]
-  wire  _GEN_3755 = branchOps_valid ? _GEN_3499 : _GEN_2923; // @[utils.scala 59:26]
-  wire  _GEN_3756 = branchOps_valid ? _GEN_3500 : _GEN_2924; // @[utils.scala 59:26]
-  wire  _GEN_3757 = branchOps_valid ? _GEN_3501 : _GEN_2925; // @[utils.scala 59:26]
-  wire  _GEN_3758 = branchOps_valid ? _GEN_3502 : _GEN_2926; // @[utils.scala 59:26]
-  wire  _GEN_3759 = branchOps_valid ? _GEN_3503 : _GEN_2927; // @[utils.scala 59:26]
-  wire  _GEN_3760 = branchOps_valid ? _GEN_3504 : _GEN_2928; // @[utils.scala 59:26]
-  wire  _GEN_3761 = branchOps_valid ? _GEN_3505 : _GEN_2929; // @[utils.scala 59:26]
-  wire  _GEN_3762 = branchOps_valid ? _GEN_3506 : _GEN_2930; // @[utils.scala 59:26]
-  wire  _GEN_3763 = branchOps_valid ? _GEN_3507 : _GEN_2931; // @[utils.scala 59:26]
-  wire  _GEN_3764 = branchOps_valid ? _GEN_3508 : _GEN_2932; // @[utils.scala 59:26]
-  wire  _GEN_3765 = branchOps_valid ? _GEN_3509 : _GEN_2933; // @[utils.scala 59:26]
-  wire  _GEN_3766 = branchOps_valid ? _GEN_3510 : _GEN_2934; // @[utils.scala 59:26]
-  wire  _GEN_3767 = branchOps_valid ? _GEN_3511 : _GEN_2935; // @[utils.scala 59:26]
-  wire  _GEN_3768 = branchOps_valid ? _GEN_3512 : _GEN_2936; // @[utils.scala 59:26]
-  wire  _GEN_3769 = branchOps_valid ? _GEN_3513 : _GEN_2937; // @[utils.scala 59:26]
-  wire  _GEN_3770 = branchOps_valid ? _GEN_3514 : _GEN_2938; // @[utils.scala 59:26]
-  wire  _GEN_3771 = branchOps_valid ? _GEN_3515 : _GEN_2939; // @[utils.scala 59:26]
-  wire  _GEN_3772 = branchOps_valid ? _GEN_3516 : _GEN_2940; // @[utils.scala 59:26]
-  wire  _GEN_3773 = branchOps_valid ? _GEN_3517 : _GEN_2941; // @[utils.scala 59:26]
-  wire  _GEN_3774 = branchOps_valid ? _GEN_3518 : _GEN_2942; // @[utils.scala 59:26]
-  wire  _GEN_3775 = branchOps_valid ? _GEN_3519 : _GEN_2943; // @[utils.scala 59:26]
-  wire  _GEN_3776 = branchOps_valid ? _GEN_3520 : _GEN_2944; // @[utils.scala 59:26]
-  wire  _GEN_3777 = branchOps_valid ? _GEN_3521 : _GEN_2945; // @[utils.scala 59:26]
-  wire  _GEN_3778 = branchOps_valid ? _GEN_3522 : _GEN_2946; // @[utils.scala 59:26]
-  wire  _GEN_3779 = branchOps_valid ? _GEN_3523 : _GEN_2947; // @[utils.scala 59:26]
-  wire  _GEN_3780 = branchOps_valid ? _GEN_3524 : _GEN_2948; // @[utils.scala 59:26]
-  wire  _GEN_3781 = branchOps_valid ? _GEN_3525 : _GEN_2949; // @[utils.scala 59:26]
-  wire  _GEN_3782 = branchOps_valid ? _GEN_3526 : _GEN_2950; // @[utils.scala 59:26]
-  wire  _GEN_3783 = branchOps_valid ? _GEN_3527 : _GEN_2951; // @[utils.scala 59:26]
-  wire  _GEN_3784 = branchOps_valid ? _GEN_3528 : _GEN_2952; // @[utils.scala 59:26]
-  wire  _GEN_3785 = branchOps_valid ? _GEN_3529 : _GEN_2953; // @[utils.scala 59:26]
-  wire  _GEN_3786 = branchOps_valid ? _GEN_3530 : _GEN_2954; // @[utils.scala 59:26]
-  wire  _GEN_3787 = branchOps_valid ? _GEN_3531 : _GEN_2955; // @[utils.scala 59:26]
-  wire  _GEN_3788 = branchOps_valid ? _GEN_3532 : _GEN_2956; // @[utils.scala 59:26]
-  wire  _GEN_3789 = branchOps_valid ? _GEN_3533 : _GEN_2957; // @[utils.scala 59:26]
-  wire  _GEN_3790 = branchOps_valid ? _GEN_3534 : _GEN_2958; // @[utils.scala 59:26]
-  wire  _GEN_3791 = branchOps_valid ? _GEN_3535 : _GEN_2959; // @[utils.scala 59:26]
-  wire  _GEN_3792 = branchOps_valid ? _GEN_3536 : _GEN_2960; // @[utils.scala 59:26]
-  wire  _GEN_3793 = branchOps_valid ? _GEN_3537 : _GEN_2961; // @[utils.scala 59:26]
-  wire  _GEN_3794 = branchOps_valid ? _GEN_3538 : _GEN_2962; // @[utils.scala 59:26]
-  wire  _GEN_3795 = branchOps_valid ? _GEN_3539 : _GEN_2963; // @[utils.scala 59:26]
-  wire  _GEN_3796 = branchOps_valid ? _GEN_3540 : _GEN_2964; // @[utils.scala 59:26]
-  wire  _GEN_3797 = branchOps_valid ? _GEN_3541 : _GEN_2965; // @[utils.scala 59:26]
-  wire  _GEN_3798 = branchOps_valid ? _GEN_3542 : _GEN_2966; // @[utils.scala 59:26]
-  wire  _GEN_3799 = branchOps_valid ? _GEN_3543 : _GEN_2967; // @[utils.scala 59:26]
-  wire  _GEN_3800 = branchOps_valid ? _GEN_3544 : _GEN_2968; // @[utils.scala 59:26]
-  wire  _GEN_3801 = branchOps_valid ? _GEN_3545 : _GEN_2969; // @[utils.scala 59:26]
-  wire  _GEN_3802 = branchOps_valid ? _GEN_3546 : _GEN_2970; // @[utils.scala 59:26]
-  wire  _GEN_3803 = branchOps_valid ? _GEN_3547 : _GEN_2971; // @[utils.scala 59:26]
-  wire  _GEN_3804 = branchOps_valid ? _GEN_3548 : _GEN_2972; // @[utils.scala 59:26]
-  wire  _GEN_3805 = branchOps_valid ? _GEN_3549 : _GEN_2973; // @[utils.scala 59:26]
-  wire [4:0] _GEN_3806 = incrWrite ? _GEN_3678 : _GEN_1310; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3807 = incrWrite ? _GEN_3679 : _GEN_1311; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3808 = incrWrite ? _GEN_3680 : _GEN_1312; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3809 = incrWrite ? _GEN_3681 : _GEN_1313; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3810 = incrWrite ? _GEN_3682 : _GEN_1314; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3811 = incrWrite ? _GEN_3683 : _GEN_1315; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3812 = incrWrite ? _GEN_3684 : _GEN_1316; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3813 = incrWrite ? _GEN_3685 : _GEN_1317; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3814 = incrWrite ? _GEN_3686 : _GEN_1318; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3815 = incrWrite ? _GEN_3687 : _GEN_1319; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3816 = incrWrite ? _GEN_3688 : _GEN_1320; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3817 = incrWrite ? _GEN_3689 : _GEN_1321; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3818 = incrWrite ? _GEN_3690 : _GEN_1322; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3819 = incrWrite ? _GEN_3691 : _GEN_1323; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3820 = incrWrite ? _GEN_3692 : _GEN_1324; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3821 = incrWrite ? _GEN_3693 : _GEN_1325; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3822 = incrWrite ? _GEN_3694 : _GEN_1326; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3823 = incrWrite ? _GEN_3695 : _GEN_1327; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3824 = incrWrite ? _GEN_3696 : _GEN_1328; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3825 = incrWrite ? _GEN_3697 : _GEN_1329; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3826 = incrWrite ? _GEN_3698 : _GEN_1330; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3827 = incrWrite ? _GEN_3699 : _GEN_1331; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3828 = incrWrite ? _GEN_3700 : _GEN_1332; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3829 = incrWrite ? _GEN_3701 : _GEN_1333; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3830 = incrWrite ? _GEN_3702 : _GEN_1334; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3831 = incrWrite ? _GEN_3703 : _GEN_1335; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3832 = incrWrite ? _GEN_3704 : _GEN_1336; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3833 = incrWrite ? _GEN_3705 : _GEN_1337; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3834 = incrWrite ? _GEN_3706 : _GEN_1338; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3835 = incrWrite ? _GEN_3707 : _GEN_1339; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3836 = incrWrite ? _GEN_3708 : _GEN_1340; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3837 = incrWrite ? _GEN_3709 : _GEN_1341; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3838 = incrWrite ? _GEN_3710 : _GEN_1342; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3839 = incrWrite ? _GEN_3711 : _GEN_1343; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3840 = incrWrite ? _GEN_3712 : _GEN_1344; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3841 = incrWrite ? _GEN_3713 : _GEN_1345; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3842 = incrWrite ? _GEN_3714 : _GEN_1346; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3843 = incrWrite ? _GEN_3715 : _GEN_1347; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3844 = incrWrite ? _GEN_3716 : _GEN_1348; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3845 = incrWrite ? _GEN_3717 : _GEN_1349; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3846 = incrWrite ? _GEN_3718 : _GEN_1350; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3847 = incrWrite ? _GEN_3719 : _GEN_1351; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3848 = incrWrite ? _GEN_3720 : _GEN_1352; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3849 = incrWrite ? _GEN_3721 : _GEN_1353; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3850 = incrWrite ? _GEN_3722 : _GEN_1354; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3851 = incrWrite ? _GEN_3723 : _GEN_1355; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3852 = incrWrite ? _GEN_3724 : _GEN_1356; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3853 = incrWrite ? _GEN_3725 : _GEN_1357; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3854 = incrWrite ? _GEN_3726 : _GEN_1358; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3855 = incrWrite ? _GEN_3727 : _GEN_1359; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3856 = incrWrite ? _GEN_3728 : _GEN_1360; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3857 = incrWrite ? _GEN_3729 : _GEN_1361; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3858 = incrWrite ? _GEN_3730 : _GEN_1362; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3859 = incrWrite ? _GEN_3731 : _GEN_1363; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3860 = incrWrite ? _GEN_3732 : _GEN_1364; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3861 = incrWrite ? _GEN_3733 : _GEN_1365; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3862 = incrWrite ? _GEN_3734 : _GEN_1366; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3863 = incrWrite ? _GEN_3735 : _GEN_1367; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3864 = incrWrite ? _GEN_3736 : _GEN_1368; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3865 = incrWrite ? _GEN_3737 : _GEN_1369; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3866 = incrWrite ? _GEN_3738 : _GEN_1370; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3867 = incrWrite ? _GEN_3739 : _GEN_1371; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3868 = incrWrite ? _GEN_3740 : _GEN_1372; // @[fifo.scala 96:16]
-  wire [4:0] _GEN_3869 = incrWrite ? _GEN_3741 : _GEN_1373; // @[fifo.scala 96:16]
-  wire  _GEN_3870 = incrWrite ? _GEN_3742 : _GEN_1246; // @[fifo.scala 96:16]
-  wire  _GEN_3871 = incrWrite ? _GEN_3743 : _GEN_1247; // @[fifo.scala 96:16]
-  wire  _GEN_3872 = incrWrite ? _GEN_3744 : _GEN_1248; // @[fifo.scala 96:16]
-  wire  _GEN_3873 = incrWrite ? _GEN_3745 : _GEN_1249; // @[fifo.scala 96:16]
-  wire  _GEN_3874 = incrWrite ? _GEN_3746 : _GEN_1250; // @[fifo.scala 96:16]
-  wire  _GEN_3875 = incrWrite ? _GEN_3747 : _GEN_1251; // @[fifo.scala 96:16]
-  wire  _GEN_3876 = incrWrite ? _GEN_3748 : _GEN_1252; // @[fifo.scala 96:16]
-  wire  _GEN_3877 = incrWrite ? _GEN_3749 : _GEN_1253; // @[fifo.scala 96:16]
-  wire  _GEN_3878 = incrWrite ? _GEN_3750 : _GEN_1254; // @[fifo.scala 96:16]
-  wire  _GEN_3879 = incrWrite ? _GEN_3751 : _GEN_1255; // @[fifo.scala 96:16]
-  wire  _GEN_3880 = incrWrite ? _GEN_3752 : _GEN_1256; // @[fifo.scala 96:16]
-  wire  _GEN_3881 = incrWrite ? _GEN_3753 : _GEN_1257; // @[fifo.scala 96:16]
-  wire  _GEN_3882 = incrWrite ? _GEN_3754 : _GEN_1258; // @[fifo.scala 96:16]
-  wire  _GEN_3883 = incrWrite ? _GEN_3755 : _GEN_1259; // @[fifo.scala 96:16]
-  wire  _GEN_3884 = incrWrite ? _GEN_3756 : _GEN_1260; // @[fifo.scala 96:16]
-  wire  _GEN_3885 = incrWrite ? _GEN_3757 : _GEN_1261; // @[fifo.scala 96:16]
-  wire  _GEN_3886 = incrWrite ? _GEN_3758 : _GEN_1262; // @[fifo.scala 96:16]
-  wire  _GEN_3887 = incrWrite ? _GEN_3759 : _GEN_1263; // @[fifo.scala 96:16]
-  wire  _GEN_3888 = incrWrite ? _GEN_3760 : _GEN_1264; // @[fifo.scala 96:16]
-  wire  _GEN_3889 = incrWrite ? _GEN_3761 : _GEN_1265; // @[fifo.scala 96:16]
-  wire  _GEN_3890 = incrWrite ? _GEN_3762 : _GEN_1266; // @[fifo.scala 96:16]
-  wire  _GEN_3891 = incrWrite ? _GEN_3763 : _GEN_1267; // @[fifo.scala 96:16]
-  wire  _GEN_3892 = incrWrite ? _GEN_3764 : _GEN_1268; // @[fifo.scala 96:16]
-  wire  _GEN_3893 = incrWrite ? _GEN_3765 : _GEN_1269; // @[fifo.scala 96:16]
-  wire  _GEN_3894 = incrWrite ? _GEN_3766 : _GEN_1270; // @[fifo.scala 96:16]
-  wire  _GEN_3895 = incrWrite ? _GEN_3767 : _GEN_1271; // @[fifo.scala 96:16]
-  wire  _GEN_3896 = incrWrite ? _GEN_3768 : _GEN_1272; // @[fifo.scala 96:16]
-  wire  _GEN_3897 = incrWrite ? _GEN_3769 : _GEN_1273; // @[fifo.scala 96:16]
-  wire  _GEN_3898 = incrWrite ? _GEN_3770 : _GEN_1274; // @[fifo.scala 96:16]
-  wire  _GEN_3899 = incrWrite ? _GEN_3771 : _GEN_1275; // @[fifo.scala 96:16]
-  wire  _GEN_3900 = incrWrite ? _GEN_3772 : _GEN_1276; // @[fifo.scala 96:16]
-  wire  _GEN_3901 = incrWrite ? _GEN_3773 : _GEN_1277; // @[fifo.scala 96:16]
-  wire  _GEN_3902 = incrWrite ? _GEN_3774 : _GEN_1278; // @[fifo.scala 96:16]
-  wire  _GEN_3903 = incrWrite ? _GEN_3775 : _GEN_1279; // @[fifo.scala 96:16]
-  wire  _GEN_3904 = incrWrite ? _GEN_3776 : _GEN_1280; // @[fifo.scala 96:16]
-  wire  _GEN_3905 = incrWrite ? _GEN_3777 : _GEN_1281; // @[fifo.scala 96:16]
-  wire  _GEN_3906 = incrWrite ? _GEN_3778 : _GEN_1282; // @[fifo.scala 96:16]
-  wire  _GEN_3907 = incrWrite ? _GEN_3779 : _GEN_1283; // @[fifo.scala 96:16]
-  wire  _GEN_3908 = incrWrite ? _GEN_3780 : _GEN_1284; // @[fifo.scala 96:16]
-  wire  _GEN_3909 = incrWrite ? _GEN_3781 : _GEN_1285; // @[fifo.scala 96:16]
-  wire  _GEN_3910 = incrWrite ? _GEN_3782 : _GEN_1286; // @[fifo.scala 96:16]
-  wire  _GEN_3911 = incrWrite ? _GEN_3783 : _GEN_1287; // @[fifo.scala 96:16]
-  wire  _GEN_3912 = incrWrite ? _GEN_3784 : _GEN_1288; // @[fifo.scala 96:16]
-  wire  _GEN_3913 = incrWrite ? _GEN_3785 : _GEN_1289; // @[fifo.scala 96:16]
-  wire  _GEN_3914 = incrWrite ? _GEN_3786 : _GEN_1290; // @[fifo.scala 96:16]
-  wire  _GEN_3915 = incrWrite ? _GEN_3787 : _GEN_1291; // @[fifo.scala 96:16]
-  wire  _GEN_3916 = incrWrite ? _GEN_3788 : _GEN_1292; // @[fifo.scala 96:16]
-  wire  _GEN_3917 = incrWrite ? _GEN_3789 : _GEN_1293; // @[fifo.scala 96:16]
-  wire  _GEN_3918 = incrWrite ? _GEN_3790 : _GEN_1294; // @[fifo.scala 96:16]
-  wire  _GEN_3919 = incrWrite ? _GEN_3791 : _GEN_1295; // @[fifo.scala 96:16]
-  wire  _GEN_3920 = incrWrite ? _GEN_3792 : _GEN_1296; // @[fifo.scala 96:16]
-  wire  _GEN_3921 = incrWrite ? _GEN_3793 : _GEN_1297; // @[fifo.scala 96:16]
-  wire  _GEN_3922 = incrWrite ? _GEN_3794 : _GEN_1298; // @[fifo.scala 96:16]
-  wire  _GEN_3923 = incrWrite ? _GEN_3795 : _GEN_1299; // @[fifo.scala 96:16]
-  wire  _GEN_3924 = incrWrite ? _GEN_3796 : _GEN_1300; // @[fifo.scala 96:16]
-  wire  _GEN_3925 = incrWrite ? _GEN_3797 : _GEN_1301; // @[fifo.scala 96:16]
-  wire  _GEN_3926 = incrWrite ? _GEN_3798 : _GEN_1302; // @[fifo.scala 96:16]
-  wire  _GEN_3927 = incrWrite ? _GEN_3799 : _GEN_1303; // @[fifo.scala 96:16]
-  wire  _GEN_3928 = incrWrite ? _GEN_3800 : _GEN_1304; // @[fifo.scala 96:16]
-  wire  _GEN_3929 = incrWrite ? _GEN_3801 : _GEN_1305; // @[fifo.scala 96:16]
-  wire  _GEN_3930 = incrWrite ? _GEN_3802 : _GEN_1306; // @[fifo.scala 96:16]
-  wire  _GEN_3931 = incrWrite ? _GEN_3803 : _GEN_1307; // @[fifo.scala 96:16]
-  wire  _GEN_3932 = incrWrite ? _GEN_3804 : _GEN_1308; // @[fifo.scala 96:16]
-  wire  _GEN_3933 = incrWrite ? _GEN_3805 : _GEN_1309; // @[fifo.scala 96:16]
+  wire  _GEN_2974 = 6'h0 == writePtr ? 1'h0 : _GEN_1246; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2975 = 6'h1 == writePtr ? 1'h0 : _GEN_1247; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2976 = 6'h2 == writePtr ? 1'h0 : _GEN_1248; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2977 = 6'h3 == writePtr ? 1'h0 : _GEN_1249; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2978 = 6'h4 == writePtr ? 1'h0 : _GEN_1250; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2979 = 6'h5 == writePtr ? 1'h0 : _GEN_1251; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2980 = 6'h6 == writePtr ? 1'h0 : _GEN_1252; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2981 = 6'h7 == writePtr ? 1'h0 : _GEN_1253; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2982 = 6'h8 == writePtr ? 1'h0 : _GEN_1254; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2983 = 6'h9 == writePtr ? 1'h0 : _GEN_1255; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2984 = 6'ha == writePtr ? 1'h0 : _GEN_1256; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2985 = 6'hb == writePtr ? 1'h0 : _GEN_1257; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2986 = 6'hc == writePtr ? 1'h0 : _GEN_1258; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2987 = 6'hd == writePtr ? 1'h0 : _GEN_1259; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2988 = 6'he == writePtr ? 1'h0 : _GEN_1260; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2989 = 6'hf == writePtr ? 1'h0 : _GEN_1261; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2990 = 6'h10 == writePtr ? 1'h0 : _GEN_1262; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2991 = 6'h11 == writePtr ? 1'h0 : _GEN_1263; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2992 = 6'h12 == writePtr ? 1'h0 : _GEN_1264; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2993 = 6'h13 == writePtr ? 1'h0 : _GEN_1265; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2994 = 6'h14 == writePtr ? 1'h0 : _GEN_1266; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2995 = 6'h15 == writePtr ? 1'h0 : _GEN_1267; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2996 = 6'h16 == writePtr ? 1'h0 : _GEN_1268; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2997 = 6'h17 == writePtr ? 1'h0 : _GEN_1269; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2998 = 6'h18 == writePtr ? 1'h0 : _GEN_1270; // @[utils.scala 71:{24,24}]
+  wire  _GEN_2999 = 6'h19 == writePtr ? 1'h0 : _GEN_1271; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3000 = 6'h1a == writePtr ? 1'h0 : _GEN_1272; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3001 = 6'h1b == writePtr ? 1'h0 : _GEN_1273; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3002 = 6'h1c == writePtr ? 1'h0 : _GEN_1274; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3003 = 6'h1d == writePtr ? 1'h0 : _GEN_1275; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3004 = 6'h1e == writePtr ? 1'h0 : _GEN_1276; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3005 = 6'h1f == writePtr ? 1'h0 : _GEN_1277; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3006 = 6'h20 == writePtr ? 1'h0 : _GEN_1278; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3007 = 6'h21 == writePtr ? 1'h0 : _GEN_1279; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3008 = 6'h22 == writePtr ? 1'h0 : _GEN_1280; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3009 = 6'h23 == writePtr ? 1'h0 : _GEN_1281; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3010 = 6'h24 == writePtr ? 1'h0 : _GEN_1282; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3011 = 6'h25 == writePtr ? 1'h0 : _GEN_1283; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3012 = 6'h26 == writePtr ? 1'h0 : _GEN_1284; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3013 = 6'h27 == writePtr ? 1'h0 : _GEN_1285; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3014 = 6'h28 == writePtr ? 1'h0 : _GEN_1286; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3015 = 6'h29 == writePtr ? 1'h0 : _GEN_1287; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3016 = 6'h2a == writePtr ? 1'h0 : _GEN_1288; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3017 = 6'h2b == writePtr ? 1'h0 : _GEN_1289; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3018 = 6'h2c == writePtr ? 1'h0 : _GEN_1290; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3019 = 6'h2d == writePtr ? 1'h0 : _GEN_1291; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3020 = 6'h2e == writePtr ? 1'h0 : _GEN_1292; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3021 = 6'h2f == writePtr ? 1'h0 : _GEN_1293; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3022 = 6'h30 == writePtr ? 1'h0 : _GEN_1294; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3023 = 6'h31 == writePtr ? 1'h0 : _GEN_1295; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3024 = 6'h32 == writePtr ? 1'h0 : _GEN_1296; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3025 = 6'h33 == writePtr ? 1'h0 : _GEN_1297; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3026 = 6'h34 == writePtr ? 1'h0 : _GEN_1298; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3027 = 6'h35 == writePtr ? 1'h0 : _GEN_1299; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3028 = 6'h36 == writePtr ? 1'h0 : _GEN_1300; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3029 = 6'h37 == writePtr ? 1'h0 : _GEN_1301; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3030 = 6'h38 == writePtr ? 1'h0 : _GEN_1302; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3031 = 6'h39 == writePtr ? 1'h0 : _GEN_1303; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3032 = 6'h3a == writePtr ? 1'h0 : _GEN_1304; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3033 = 6'h3b == writePtr ? 1'h0 : _GEN_1305; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3034 = 6'h3c == writePtr ? 1'h0 : _GEN_1306; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3035 = 6'h3d == writePtr ? 1'h0 : _GEN_1307; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3036 = 6'h3e == writePtr ? 1'h0 : _GEN_1308; // @[utils.scala 71:{24,24}]
+  wire  _GEN_3037 = 6'h3f == writePtr ? 1'h0 : _GEN_1309; // @[utils.scala 71:{24,24}]
+  wire [4:0] _GEN_3038 = 6'h0 == writePtr ? 5'h0 : _GEN_1310; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3039 = 6'h1 == writePtr ? 5'h0 : _GEN_1311; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3040 = 6'h2 == writePtr ? 5'h0 : _GEN_1312; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3041 = 6'h3 == writePtr ? 5'h0 : _GEN_1313; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3042 = 6'h4 == writePtr ? 5'h0 : _GEN_1314; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3043 = 6'h5 == writePtr ? 5'h0 : _GEN_1315; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3044 = 6'h6 == writePtr ? 5'h0 : _GEN_1316; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3045 = 6'h7 == writePtr ? 5'h0 : _GEN_1317; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3046 = 6'h8 == writePtr ? 5'h0 : _GEN_1318; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3047 = 6'h9 == writePtr ? 5'h0 : _GEN_1319; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3048 = 6'ha == writePtr ? 5'h0 : _GEN_1320; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3049 = 6'hb == writePtr ? 5'h0 : _GEN_1321; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3050 = 6'hc == writePtr ? 5'h0 : _GEN_1322; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3051 = 6'hd == writePtr ? 5'h0 : _GEN_1323; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3052 = 6'he == writePtr ? 5'h0 : _GEN_1324; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3053 = 6'hf == writePtr ? 5'h0 : _GEN_1325; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3054 = 6'h10 == writePtr ? 5'h0 : _GEN_1326; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3055 = 6'h11 == writePtr ? 5'h0 : _GEN_1327; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3056 = 6'h12 == writePtr ? 5'h0 : _GEN_1328; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3057 = 6'h13 == writePtr ? 5'h0 : _GEN_1329; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3058 = 6'h14 == writePtr ? 5'h0 : _GEN_1330; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3059 = 6'h15 == writePtr ? 5'h0 : _GEN_1331; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3060 = 6'h16 == writePtr ? 5'h0 : _GEN_1332; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3061 = 6'h17 == writePtr ? 5'h0 : _GEN_1333; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3062 = 6'h18 == writePtr ? 5'h0 : _GEN_1334; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3063 = 6'h19 == writePtr ? 5'h0 : _GEN_1335; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3064 = 6'h1a == writePtr ? 5'h0 : _GEN_1336; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3065 = 6'h1b == writePtr ? 5'h0 : _GEN_1337; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3066 = 6'h1c == writePtr ? 5'h0 : _GEN_1338; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3067 = 6'h1d == writePtr ? 5'h0 : _GEN_1339; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3068 = 6'h1e == writePtr ? 5'h0 : _GEN_1340; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3069 = 6'h1f == writePtr ? 5'h0 : _GEN_1341; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3070 = 6'h20 == writePtr ? 5'h0 : _GEN_1342; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3071 = 6'h21 == writePtr ? 5'h0 : _GEN_1343; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3072 = 6'h22 == writePtr ? 5'h0 : _GEN_1344; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3073 = 6'h23 == writePtr ? 5'h0 : _GEN_1345; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3074 = 6'h24 == writePtr ? 5'h0 : _GEN_1346; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3075 = 6'h25 == writePtr ? 5'h0 : _GEN_1347; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3076 = 6'h26 == writePtr ? 5'h0 : _GEN_1348; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3077 = 6'h27 == writePtr ? 5'h0 : _GEN_1349; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3078 = 6'h28 == writePtr ? 5'h0 : _GEN_1350; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3079 = 6'h29 == writePtr ? 5'h0 : _GEN_1351; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3080 = 6'h2a == writePtr ? 5'h0 : _GEN_1352; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3081 = 6'h2b == writePtr ? 5'h0 : _GEN_1353; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3082 = 6'h2c == writePtr ? 5'h0 : _GEN_1354; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3083 = 6'h2d == writePtr ? 5'h0 : _GEN_1355; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3084 = 6'h2e == writePtr ? 5'h0 : _GEN_1356; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3085 = 6'h2f == writePtr ? 5'h0 : _GEN_1357; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3086 = 6'h30 == writePtr ? 5'h0 : _GEN_1358; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3087 = 6'h31 == writePtr ? 5'h0 : _GEN_1359; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3088 = 6'h32 == writePtr ? 5'h0 : _GEN_1360; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3089 = 6'h33 == writePtr ? 5'h0 : _GEN_1361; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3090 = 6'h34 == writePtr ? 5'h0 : _GEN_1362; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3091 = 6'h35 == writePtr ? 5'h0 : _GEN_1363; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3092 = 6'h36 == writePtr ? 5'h0 : _GEN_1364; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3093 = 6'h37 == writePtr ? 5'h0 : _GEN_1365; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3094 = 6'h38 == writePtr ? 5'h0 : _GEN_1366; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3095 = 6'h39 == writePtr ? 5'h0 : _GEN_1367; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3096 = 6'h3a == writePtr ? 5'h0 : _GEN_1368; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3097 = 6'h3b == writePtr ? 5'h0 : _GEN_1369; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3098 = 6'h3c == writePtr ? 5'h0 : _GEN_1370; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3099 = 6'h3d == writePtr ? 5'h0 : _GEN_1371; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3100 = 6'h3e == writePtr ? 5'h0 : _GEN_1372; // @[utils.scala 72:{23,23}]
+  wire [4:0] _GEN_3101 = 6'h3f == writePtr ? 5'h0 : _GEN_1373; // @[utils.scala 72:{23,23}]
+  wire  _GEN_3230 = _T_9 ? _GEN_2974 : _GEN_2910; // @[utils.scala 70:60]
+  wire  _GEN_3231 = _T_9 ? _GEN_2975 : _GEN_2911; // @[utils.scala 70:60]
+  wire  _GEN_3232 = _T_9 ? _GEN_2976 : _GEN_2912; // @[utils.scala 70:60]
+  wire  _GEN_3233 = _T_9 ? _GEN_2977 : _GEN_2913; // @[utils.scala 70:60]
+  wire  _GEN_3234 = _T_9 ? _GEN_2978 : _GEN_2914; // @[utils.scala 70:60]
+  wire  _GEN_3235 = _T_9 ? _GEN_2979 : _GEN_2915; // @[utils.scala 70:60]
+  wire  _GEN_3236 = _T_9 ? _GEN_2980 : _GEN_2916; // @[utils.scala 70:60]
+  wire  _GEN_3237 = _T_9 ? _GEN_2981 : _GEN_2917; // @[utils.scala 70:60]
+  wire  _GEN_3238 = _T_9 ? _GEN_2982 : _GEN_2918; // @[utils.scala 70:60]
+  wire  _GEN_3239 = _T_9 ? _GEN_2983 : _GEN_2919; // @[utils.scala 70:60]
+  wire  _GEN_3240 = _T_9 ? _GEN_2984 : _GEN_2920; // @[utils.scala 70:60]
+  wire  _GEN_3241 = _T_9 ? _GEN_2985 : _GEN_2921; // @[utils.scala 70:60]
+  wire  _GEN_3242 = _T_9 ? _GEN_2986 : _GEN_2922; // @[utils.scala 70:60]
+  wire  _GEN_3243 = _T_9 ? _GEN_2987 : _GEN_2923; // @[utils.scala 70:60]
+  wire  _GEN_3244 = _T_9 ? _GEN_2988 : _GEN_2924; // @[utils.scala 70:60]
+  wire  _GEN_3245 = _T_9 ? _GEN_2989 : _GEN_2925; // @[utils.scala 70:60]
+  wire  _GEN_3246 = _T_9 ? _GEN_2990 : _GEN_2926; // @[utils.scala 70:60]
+  wire  _GEN_3247 = _T_9 ? _GEN_2991 : _GEN_2927; // @[utils.scala 70:60]
+  wire  _GEN_3248 = _T_9 ? _GEN_2992 : _GEN_2928; // @[utils.scala 70:60]
+  wire  _GEN_3249 = _T_9 ? _GEN_2993 : _GEN_2929; // @[utils.scala 70:60]
+  wire  _GEN_3250 = _T_9 ? _GEN_2994 : _GEN_2930; // @[utils.scala 70:60]
+  wire  _GEN_3251 = _T_9 ? _GEN_2995 : _GEN_2931; // @[utils.scala 70:60]
+  wire  _GEN_3252 = _T_9 ? _GEN_2996 : _GEN_2932; // @[utils.scala 70:60]
+  wire  _GEN_3253 = _T_9 ? _GEN_2997 : _GEN_2933; // @[utils.scala 70:60]
+  wire  _GEN_3254 = _T_9 ? _GEN_2998 : _GEN_2934; // @[utils.scala 70:60]
+  wire  _GEN_3255 = _T_9 ? _GEN_2999 : _GEN_2935; // @[utils.scala 70:60]
+  wire  _GEN_3256 = _T_9 ? _GEN_3000 : _GEN_2936; // @[utils.scala 70:60]
+  wire  _GEN_3257 = _T_9 ? _GEN_3001 : _GEN_2937; // @[utils.scala 70:60]
+  wire  _GEN_3258 = _T_9 ? _GEN_3002 : _GEN_2938; // @[utils.scala 70:60]
+  wire  _GEN_3259 = _T_9 ? _GEN_3003 : _GEN_2939; // @[utils.scala 70:60]
+  wire  _GEN_3260 = _T_9 ? _GEN_3004 : _GEN_2940; // @[utils.scala 70:60]
+  wire  _GEN_3261 = _T_9 ? _GEN_3005 : _GEN_2941; // @[utils.scala 70:60]
+  wire  _GEN_3262 = _T_9 ? _GEN_3006 : _GEN_2942; // @[utils.scala 70:60]
+  wire  _GEN_3263 = _T_9 ? _GEN_3007 : _GEN_2943; // @[utils.scala 70:60]
+  wire  _GEN_3264 = _T_9 ? _GEN_3008 : _GEN_2944; // @[utils.scala 70:60]
+  wire  _GEN_3265 = _T_9 ? _GEN_3009 : _GEN_2945; // @[utils.scala 70:60]
+  wire  _GEN_3266 = _T_9 ? _GEN_3010 : _GEN_2946; // @[utils.scala 70:60]
+  wire  _GEN_3267 = _T_9 ? _GEN_3011 : _GEN_2947; // @[utils.scala 70:60]
+  wire  _GEN_3268 = _T_9 ? _GEN_3012 : _GEN_2948; // @[utils.scala 70:60]
+  wire  _GEN_3269 = _T_9 ? _GEN_3013 : _GEN_2949; // @[utils.scala 70:60]
+  wire  _GEN_3270 = _T_9 ? _GEN_3014 : _GEN_2950; // @[utils.scala 70:60]
+  wire  _GEN_3271 = _T_9 ? _GEN_3015 : _GEN_2951; // @[utils.scala 70:60]
+  wire  _GEN_3272 = _T_9 ? _GEN_3016 : _GEN_2952; // @[utils.scala 70:60]
+  wire  _GEN_3273 = _T_9 ? _GEN_3017 : _GEN_2953; // @[utils.scala 70:60]
+  wire  _GEN_3274 = _T_9 ? _GEN_3018 : _GEN_2954; // @[utils.scala 70:60]
+  wire  _GEN_3275 = _T_9 ? _GEN_3019 : _GEN_2955; // @[utils.scala 70:60]
+  wire  _GEN_3276 = _T_9 ? _GEN_3020 : _GEN_2956; // @[utils.scala 70:60]
+  wire  _GEN_3277 = _T_9 ? _GEN_3021 : _GEN_2957; // @[utils.scala 70:60]
+  wire  _GEN_3278 = _T_9 ? _GEN_3022 : _GEN_2958; // @[utils.scala 70:60]
+  wire  _GEN_3279 = _T_9 ? _GEN_3023 : _GEN_2959; // @[utils.scala 70:60]
+  wire  _GEN_3280 = _T_9 ? _GEN_3024 : _GEN_2960; // @[utils.scala 70:60]
+  wire  _GEN_3281 = _T_9 ? _GEN_3025 : _GEN_2961; // @[utils.scala 70:60]
+  wire  _GEN_3282 = _T_9 ? _GEN_3026 : _GEN_2962; // @[utils.scala 70:60]
+  wire  _GEN_3283 = _T_9 ? _GEN_3027 : _GEN_2963; // @[utils.scala 70:60]
+  wire  _GEN_3284 = _T_9 ? _GEN_3028 : _GEN_2964; // @[utils.scala 70:60]
+  wire  _GEN_3285 = _T_9 ? _GEN_3029 : _GEN_2965; // @[utils.scala 70:60]
+  wire  _GEN_3286 = _T_9 ? _GEN_3030 : _GEN_2966; // @[utils.scala 70:60]
+  wire  _GEN_3287 = _T_9 ? _GEN_3031 : _GEN_2967; // @[utils.scala 70:60]
+  wire  _GEN_3288 = _T_9 ? _GEN_3032 : _GEN_2968; // @[utils.scala 70:60]
+  wire  _GEN_3289 = _T_9 ? _GEN_3033 : _GEN_2969; // @[utils.scala 70:60]
+  wire  _GEN_3290 = _T_9 ? _GEN_3034 : _GEN_2970; // @[utils.scala 70:60]
+  wire  _GEN_3291 = _T_9 ? _GEN_3035 : _GEN_2971; // @[utils.scala 70:60]
+  wire  _GEN_3292 = _T_9 ? _GEN_3036 : _GEN_2972; // @[utils.scala 70:60]
+  wire  _GEN_3293 = _T_9 ? _GEN_3037 : _GEN_2973; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3294 = _T_9 ? _GEN_3038 : _GEN_2782; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3295 = _T_9 ? _GEN_3039 : _GEN_2783; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3296 = _T_9 ? _GEN_3040 : _GEN_2784; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3297 = _T_9 ? _GEN_3041 : _GEN_2785; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3298 = _T_9 ? _GEN_3042 : _GEN_2786; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3299 = _T_9 ? _GEN_3043 : _GEN_2787; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3300 = _T_9 ? _GEN_3044 : _GEN_2788; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3301 = _T_9 ? _GEN_3045 : _GEN_2789; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3302 = _T_9 ? _GEN_3046 : _GEN_2790; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3303 = _T_9 ? _GEN_3047 : _GEN_2791; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3304 = _T_9 ? _GEN_3048 : _GEN_2792; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3305 = _T_9 ? _GEN_3049 : _GEN_2793; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3306 = _T_9 ? _GEN_3050 : _GEN_2794; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3307 = _T_9 ? _GEN_3051 : _GEN_2795; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3308 = _T_9 ? _GEN_3052 : _GEN_2796; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3309 = _T_9 ? _GEN_3053 : _GEN_2797; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3310 = _T_9 ? _GEN_3054 : _GEN_2798; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3311 = _T_9 ? _GEN_3055 : _GEN_2799; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3312 = _T_9 ? _GEN_3056 : _GEN_2800; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3313 = _T_9 ? _GEN_3057 : _GEN_2801; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3314 = _T_9 ? _GEN_3058 : _GEN_2802; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3315 = _T_9 ? _GEN_3059 : _GEN_2803; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3316 = _T_9 ? _GEN_3060 : _GEN_2804; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3317 = _T_9 ? _GEN_3061 : _GEN_2805; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3318 = _T_9 ? _GEN_3062 : _GEN_2806; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3319 = _T_9 ? _GEN_3063 : _GEN_2807; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3320 = _T_9 ? _GEN_3064 : _GEN_2808; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3321 = _T_9 ? _GEN_3065 : _GEN_2809; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3322 = _T_9 ? _GEN_3066 : _GEN_2810; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3323 = _T_9 ? _GEN_3067 : _GEN_2811; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3324 = _T_9 ? _GEN_3068 : _GEN_2812; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3325 = _T_9 ? _GEN_3069 : _GEN_2813; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3326 = _T_9 ? _GEN_3070 : _GEN_2814; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3327 = _T_9 ? _GEN_3071 : _GEN_2815; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3328 = _T_9 ? _GEN_3072 : _GEN_2816; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3329 = _T_9 ? _GEN_3073 : _GEN_2817; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3330 = _T_9 ? _GEN_3074 : _GEN_2818; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3331 = _T_9 ? _GEN_3075 : _GEN_2819; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3332 = _T_9 ? _GEN_3076 : _GEN_2820; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3333 = _T_9 ? _GEN_3077 : _GEN_2821; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3334 = _T_9 ? _GEN_3078 : _GEN_2822; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3335 = _T_9 ? _GEN_3079 : _GEN_2823; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3336 = _T_9 ? _GEN_3080 : _GEN_2824; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3337 = _T_9 ? _GEN_3081 : _GEN_2825; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3338 = _T_9 ? _GEN_3082 : _GEN_2826; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3339 = _T_9 ? _GEN_3083 : _GEN_2827; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3340 = _T_9 ? _GEN_3084 : _GEN_2828; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3341 = _T_9 ? _GEN_3085 : _GEN_2829; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3342 = _T_9 ? _GEN_3086 : _GEN_2830; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3343 = _T_9 ? _GEN_3087 : _GEN_2831; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3344 = _T_9 ? _GEN_3088 : _GEN_2832; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3345 = _T_9 ? _GEN_3089 : _GEN_2833; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3346 = _T_9 ? _GEN_3090 : _GEN_2834; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3347 = _T_9 ? _GEN_3091 : _GEN_2835; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3348 = _T_9 ? _GEN_3092 : _GEN_2836; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3349 = _T_9 ? _GEN_3093 : _GEN_2837; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3350 = _T_9 ? _GEN_3094 : _GEN_2838; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3351 = _T_9 ? _GEN_3095 : _GEN_2839; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3352 = _T_9 ? _GEN_3096 : _GEN_2840; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3353 = _T_9 ? _GEN_3097 : _GEN_2841; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3354 = _T_9 ? _GEN_3098 : _GEN_2842; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3355 = _T_9 ? _GEN_3099 : _GEN_2843; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3356 = _T_9 ? _GEN_3100 : _GEN_2844; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3357 = _T_9 ? _GEN_3101 : _GEN_2845; // @[utils.scala 70:60]
+  wire [4:0] _GEN_3358 = branchOps_passed ? _GEN_2846 : _GEN_3294; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3359 = branchOps_passed ? _GEN_2847 : _GEN_3295; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3360 = branchOps_passed ? _GEN_2848 : _GEN_3296; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3361 = branchOps_passed ? _GEN_2849 : _GEN_3297; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3362 = branchOps_passed ? _GEN_2850 : _GEN_3298; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3363 = branchOps_passed ? _GEN_2851 : _GEN_3299; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3364 = branchOps_passed ? _GEN_2852 : _GEN_3300; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3365 = branchOps_passed ? _GEN_2853 : _GEN_3301; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3366 = branchOps_passed ? _GEN_2854 : _GEN_3302; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3367 = branchOps_passed ? _GEN_2855 : _GEN_3303; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3368 = branchOps_passed ? _GEN_2856 : _GEN_3304; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3369 = branchOps_passed ? _GEN_2857 : _GEN_3305; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3370 = branchOps_passed ? _GEN_2858 : _GEN_3306; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3371 = branchOps_passed ? _GEN_2859 : _GEN_3307; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3372 = branchOps_passed ? _GEN_2860 : _GEN_3308; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3373 = branchOps_passed ? _GEN_2861 : _GEN_3309; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3374 = branchOps_passed ? _GEN_2862 : _GEN_3310; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3375 = branchOps_passed ? _GEN_2863 : _GEN_3311; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3376 = branchOps_passed ? _GEN_2864 : _GEN_3312; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3377 = branchOps_passed ? _GEN_2865 : _GEN_3313; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3378 = branchOps_passed ? _GEN_2866 : _GEN_3314; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3379 = branchOps_passed ? _GEN_2867 : _GEN_3315; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3380 = branchOps_passed ? _GEN_2868 : _GEN_3316; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3381 = branchOps_passed ? _GEN_2869 : _GEN_3317; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3382 = branchOps_passed ? _GEN_2870 : _GEN_3318; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3383 = branchOps_passed ? _GEN_2871 : _GEN_3319; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3384 = branchOps_passed ? _GEN_2872 : _GEN_3320; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3385 = branchOps_passed ? _GEN_2873 : _GEN_3321; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3386 = branchOps_passed ? _GEN_2874 : _GEN_3322; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3387 = branchOps_passed ? _GEN_2875 : _GEN_3323; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3388 = branchOps_passed ? _GEN_2876 : _GEN_3324; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3389 = branchOps_passed ? _GEN_2877 : _GEN_3325; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3390 = branchOps_passed ? _GEN_2878 : _GEN_3326; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3391 = branchOps_passed ? _GEN_2879 : _GEN_3327; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3392 = branchOps_passed ? _GEN_2880 : _GEN_3328; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3393 = branchOps_passed ? _GEN_2881 : _GEN_3329; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3394 = branchOps_passed ? _GEN_2882 : _GEN_3330; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3395 = branchOps_passed ? _GEN_2883 : _GEN_3331; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3396 = branchOps_passed ? _GEN_2884 : _GEN_3332; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3397 = branchOps_passed ? _GEN_2885 : _GEN_3333; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3398 = branchOps_passed ? _GEN_2886 : _GEN_3334; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3399 = branchOps_passed ? _GEN_2887 : _GEN_3335; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3400 = branchOps_passed ? _GEN_2888 : _GEN_3336; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3401 = branchOps_passed ? _GEN_2889 : _GEN_3337; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3402 = branchOps_passed ? _GEN_2890 : _GEN_3338; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3403 = branchOps_passed ? _GEN_2891 : _GEN_3339; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3404 = branchOps_passed ? _GEN_2892 : _GEN_3340; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3405 = branchOps_passed ? _GEN_2893 : _GEN_3341; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3406 = branchOps_passed ? _GEN_2894 : _GEN_3342; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3407 = branchOps_passed ? _GEN_2895 : _GEN_3343; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3408 = branchOps_passed ? _GEN_2896 : _GEN_3344; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3409 = branchOps_passed ? _GEN_2897 : _GEN_3345; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3410 = branchOps_passed ? _GEN_2898 : _GEN_3346; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3411 = branchOps_passed ? _GEN_2899 : _GEN_3347; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3412 = branchOps_passed ? _GEN_2900 : _GEN_3348; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3413 = branchOps_passed ? _GEN_2901 : _GEN_3349; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3414 = branchOps_passed ? _GEN_2902 : _GEN_3350; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3415 = branchOps_passed ? _GEN_2903 : _GEN_3351; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3416 = branchOps_passed ? _GEN_2904 : _GEN_3352; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3417 = branchOps_passed ? _GEN_2905 : _GEN_3353; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3418 = branchOps_passed ? _GEN_2906 : _GEN_3354; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3419 = branchOps_passed ? _GEN_2907 : _GEN_3355; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3420 = branchOps_passed ? _GEN_2908 : _GEN_3356; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3421 = branchOps_passed ? _GEN_2909 : _GEN_3357; // @[utils.scala 60:30]
+  wire  _GEN_3422 = branchOps_passed ? _GEN_2910 : _GEN_3230; // @[utils.scala 60:30]
+  wire  _GEN_3423 = branchOps_passed ? _GEN_2911 : _GEN_3231; // @[utils.scala 60:30]
+  wire  _GEN_3424 = branchOps_passed ? _GEN_2912 : _GEN_3232; // @[utils.scala 60:30]
+  wire  _GEN_3425 = branchOps_passed ? _GEN_2913 : _GEN_3233; // @[utils.scala 60:30]
+  wire  _GEN_3426 = branchOps_passed ? _GEN_2914 : _GEN_3234; // @[utils.scala 60:30]
+  wire  _GEN_3427 = branchOps_passed ? _GEN_2915 : _GEN_3235; // @[utils.scala 60:30]
+  wire  _GEN_3428 = branchOps_passed ? _GEN_2916 : _GEN_3236; // @[utils.scala 60:30]
+  wire  _GEN_3429 = branchOps_passed ? _GEN_2917 : _GEN_3237; // @[utils.scala 60:30]
+  wire  _GEN_3430 = branchOps_passed ? _GEN_2918 : _GEN_3238; // @[utils.scala 60:30]
+  wire  _GEN_3431 = branchOps_passed ? _GEN_2919 : _GEN_3239; // @[utils.scala 60:30]
+  wire  _GEN_3432 = branchOps_passed ? _GEN_2920 : _GEN_3240; // @[utils.scala 60:30]
+  wire  _GEN_3433 = branchOps_passed ? _GEN_2921 : _GEN_3241; // @[utils.scala 60:30]
+  wire  _GEN_3434 = branchOps_passed ? _GEN_2922 : _GEN_3242; // @[utils.scala 60:30]
+  wire  _GEN_3435 = branchOps_passed ? _GEN_2923 : _GEN_3243; // @[utils.scala 60:30]
+  wire  _GEN_3436 = branchOps_passed ? _GEN_2924 : _GEN_3244; // @[utils.scala 60:30]
+  wire  _GEN_3437 = branchOps_passed ? _GEN_2925 : _GEN_3245; // @[utils.scala 60:30]
+  wire  _GEN_3438 = branchOps_passed ? _GEN_2926 : _GEN_3246; // @[utils.scala 60:30]
+  wire  _GEN_3439 = branchOps_passed ? _GEN_2927 : _GEN_3247; // @[utils.scala 60:30]
+  wire  _GEN_3440 = branchOps_passed ? _GEN_2928 : _GEN_3248; // @[utils.scala 60:30]
+  wire  _GEN_3441 = branchOps_passed ? _GEN_2929 : _GEN_3249; // @[utils.scala 60:30]
+  wire  _GEN_3442 = branchOps_passed ? _GEN_2930 : _GEN_3250; // @[utils.scala 60:30]
+  wire  _GEN_3443 = branchOps_passed ? _GEN_2931 : _GEN_3251; // @[utils.scala 60:30]
+  wire  _GEN_3444 = branchOps_passed ? _GEN_2932 : _GEN_3252; // @[utils.scala 60:30]
+  wire  _GEN_3445 = branchOps_passed ? _GEN_2933 : _GEN_3253; // @[utils.scala 60:30]
+  wire  _GEN_3446 = branchOps_passed ? _GEN_2934 : _GEN_3254; // @[utils.scala 60:30]
+  wire  _GEN_3447 = branchOps_passed ? _GEN_2935 : _GEN_3255; // @[utils.scala 60:30]
+  wire  _GEN_3448 = branchOps_passed ? _GEN_2936 : _GEN_3256; // @[utils.scala 60:30]
+  wire  _GEN_3449 = branchOps_passed ? _GEN_2937 : _GEN_3257; // @[utils.scala 60:30]
+  wire  _GEN_3450 = branchOps_passed ? _GEN_2938 : _GEN_3258; // @[utils.scala 60:30]
+  wire  _GEN_3451 = branchOps_passed ? _GEN_2939 : _GEN_3259; // @[utils.scala 60:30]
+  wire  _GEN_3452 = branchOps_passed ? _GEN_2940 : _GEN_3260; // @[utils.scala 60:30]
+  wire  _GEN_3453 = branchOps_passed ? _GEN_2941 : _GEN_3261; // @[utils.scala 60:30]
+  wire  _GEN_3454 = branchOps_passed ? _GEN_2942 : _GEN_3262; // @[utils.scala 60:30]
+  wire  _GEN_3455 = branchOps_passed ? _GEN_2943 : _GEN_3263; // @[utils.scala 60:30]
+  wire  _GEN_3456 = branchOps_passed ? _GEN_2944 : _GEN_3264; // @[utils.scala 60:30]
+  wire  _GEN_3457 = branchOps_passed ? _GEN_2945 : _GEN_3265; // @[utils.scala 60:30]
+  wire  _GEN_3458 = branchOps_passed ? _GEN_2946 : _GEN_3266; // @[utils.scala 60:30]
+  wire  _GEN_3459 = branchOps_passed ? _GEN_2947 : _GEN_3267; // @[utils.scala 60:30]
+  wire  _GEN_3460 = branchOps_passed ? _GEN_2948 : _GEN_3268; // @[utils.scala 60:30]
+  wire  _GEN_3461 = branchOps_passed ? _GEN_2949 : _GEN_3269; // @[utils.scala 60:30]
+  wire  _GEN_3462 = branchOps_passed ? _GEN_2950 : _GEN_3270; // @[utils.scala 60:30]
+  wire  _GEN_3463 = branchOps_passed ? _GEN_2951 : _GEN_3271; // @[utils.scala 60:30]
+  wire  _GEN_3464 = branchOps_passed ? _GEN_2952 : _GEN_3272; // @[utils.scala 60:30]
+  wire  _GEN_3465 = branchOps_passed ? _GEN_2953 : _GEN_3273; // @[utils.scala 60:30]
+  wire  _GEN_3466 = branchOps_passed ? _GEN_2954 : _GEN_3274; // @[utils.scala 60:30]
+  wire  _GEN_3467 = branchOps_passed ? _GEN_2955 : _GEN_3275; // @[utils.scala 60:30]
+  wire  _GEN_3468 = branchOps_passed ? _GEN_2956 : _GEN_3276; // @[utils.scala 60:30]
+  wire  _GEN_3469 = branchOps_passed ? _GEN_2957 : _GEN_3277; // @[utils.scala 60:30]
+  wire  _GEN_3470 = branchOps_passed ? _GEN_2958 : _GEN_3278; // @[utils.scala 60:30]
+  wire  _GEN_3471 = branchOps_passed ? _GEN_2959 : _GEN_3279; // @[utils.scala 60:30]
+  wire  _GEN_3472 = branchOps_passed ? _GEN_2960 : _GEN_3280; // @[utils.scala 60:30]
+  wire  _GEN_3473 = branchOps_passed ? _GEN_2961 : _GEN_3281; // @[utils.scala 60:30]
+  wire  _GEN_3474 = branchOps_passed ? _GEN_2962 : _GEN_3282; // @[utils.scala 60:30]
+  wire  _GEN_3475 = branchOps_passed ? _GEN_2963 : _GEN_3283; // @[utils.scala 60:30]
+  wire  _GEN_3476 = branchOps_passed ? _GEN_2964 : _GEN_3284; // @[utils.scala 60:30]
+  wire  _GEN_3477 = branchOps_passed ? _GEN_2965 : _GEN_3285; // @[utils.scala 60:30]
+  wire  _GEN_3478 = branchOps_passed ? _GEN_2966 : _GEN_3286; // @[utils.scala 60:30]
+  wire  _GEN_3479 = branchOps_passed ? _GEN_2967 : _GEN_3287; // @[utils.scala 60:30]
+  wire  _GEN_3480 = branchOps_passed ? _GEN_2968 : _GEN_3288; // @[utils.scala 60:30]
+  wire  _GEN_3481 = branchOps_passed ? _GEN_2969 : _GEN_3289; // @[utils.scala 60:30]
+  wire  _GEN_3482 = branchOps_passed ? _GEN_2970 : _GEN_3290; // @[utils.scala 60:30]
+  wire  _GEN_3483 = branchOps_passed ? _GEN_2971 : _GEN_3291; // @[utils.scala 60:30]
+  wire  _GEN_3484 = branchOps_passed ? _GEN_2972 : _GEN_3292; // @[utils.scala 60:30]
+  wire  _GEN_3485 = branchOps_passed ? _GEN_2973 : _GEN_3293; // @[utils.scala 60:30]
+  wire [4:0] _GEN_3614 = branchOps_valid ? _GEN_3358 : _GEN_2782; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3615 = branchOps_valid ? _GEN_3359 : _GEN_2783; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3616 = branchOps_valid ? _GEN_3360 : _GEN_2784; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3617 = branchOps_valid ? _GEN_3361 : _GEN_2785; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3618 = branchOps_valid ? _GEN_3362 : _GEN_2786; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3619 = branchOps_valid ? _GEN_3363 : _GEN_2787; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3620 = branchOps_valid ? _GEN_3364 : _GEN_2788; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3621 = branchOps_valid ? _GEN_3365 : _GEN_2789; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3622 = branchOps_valid ? _GEN_3366 : _GEN_2790; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3623 = branchOps_valid ? _GEN_3367 : _GEN_2791; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3624 = branchOps_valid ? _GEN_3368 : _GEN_2792; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3625 = branchOps_valid ? _GEN_3369 : _GEN_2793; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3626 = branchOps_valid ? _GEN_3370 : _GEN_2794; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3627 = branchOps_valid ? _GEN_3371 : _GEN_2795; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3628 = branchOps_valid ? _GEN_3372 : _GEN_2796; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3629 = branchOps_valid ? _GEN_3373 : _GEN_2797; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3630 = branchOps_valid ? _GEN_3374 : _GEN_2798; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3631 = branchOps_valid ? _GEN_3375 : _GEN_2799; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3632 = branchOps_valid ? _GEN_3376 : _GEN_2800; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3633 = branchOps_valid ? _GEN_3377 : _GEN_2801; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3634 = branchOps_valid ? _GEN_3378 : _GEN_2802; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3635 = branchOps_valid ? _GEN_3379 : _GEN_2803; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3636 = branchOps_valid ? _GEN_3380 : _GEN_2804; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3637 = branchOps_valid ? _GEN_3381 : _GEN_2805; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3638 = branchOps_valid ? _GEN_3382 : _GEN_2806; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3639 = branchOps_valid ? _GEN_3383 : _GEN_2807; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3640 = branchOps_valid ? _GEN_3384 : _GEN_2808; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3641 = branchOps_valid ? _GEN_3385 : _GEN_2809; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3642 = branchOps_valid ? _GEN_3386 : _GEN_2810; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3643 = branchOps_valid ? _GEN_3387 : _GEN_2811; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3644 = branchOps_valid ? _GEN_3388 : _GEN_2812; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3645 = branchOps_valid ? _GEN_3389 : _GEN_2813; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3646 = branchOps_valid ? _GEN_3390 : _GEN_2814; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3647 = branchOps_valid ? _GEN_3391 : _GEN_2815; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3648 = branchOps_valid ? _GEN_3392 : _GEN_2816; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3649 = branchOps_valid ? _GEN_3393 : _GEN_2817; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3650 = branchOps_valid ? _GEN_3394 : _GEN_2818; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3651 = branchOps_valid ? _GEN_3395 : _GEN_2819; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3652 = branchOps_valid ? _GEN_3396 : _GEN_2820; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3653 = branchOps_valid ? _GEN_3397 : _GEN_2821; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3654 = branchOps_valid ? _GEN_3398 : _GEN_2822; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3655 = branchOps_valid ? _GEN_3399 : _GEN_2823; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3656 = branchOps_valid ? _GEN_3400 : _GEN_2824; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3657 = branchOps_valid ? _GEN_3401 : _GEN_2825; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3658 = branchOps_valid ? _GEN_3402 : _GEN_2826; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3659 = branchOps_valid ? _GEN_3403 : _GEN_2827; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3660 = branchOps_valid ? _GEN_3404 : _GEN_2828; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3661 = branchOps_valid ? _GEN_3405 : _GEN_2829; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3662 = branchOps_valid ? _GEN_3406 : _GEN_2830; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3663 = branchOps_valid ? _GEN_3407 : _GEN_2831; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3664 = branchOps_valid ? _GEN_3408 : _GEN_2832; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3665 = branchOps_valid ? _GEN_3409 : _GEN_2833; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3666 = branchOps_valid ? _GEN_3410 : _GEN_2834; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3667 = branchOps_valid ? _GEN_3411 : _GEN_2835; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3668 = branchOps_valid ? _GEN_3412 : _GEN_2836; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3669 = branchOps_valid ? _GEN_3413 : _GEN_2837; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3670 = branchOps_valid ? _GEN_3414 : _GEN_2838; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3671 = branchOps_valid ? _GEN_3415 : _GEN_2839; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3672 = branchOps_valid ? _GEN_3416 : _GEN_2840; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3673 = branchOps_valid ? _GEN_3417 : _GEN_2841; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3674 = branchOps_valid ? _GEN_3418 : _GEN_2842; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3675 = branchOps_valid ? _GEN_3419 : _GEN_2843; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3676 = branchOps_valid ? _GEN_3420 : _GEN_2844; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3677 = branchOps_valid ? _GEN_3421 : _GEN_2845; // @[utils.scala 59:26]
+  wire  _GEN_3678 = branchOps_valid ? _GEN_3422 : _GEN_2910; // @[utils.scala 59:26]
+  wire  _GEN_3679 = branchOps_valid ? _GEN_3423 : _GEN_2911; // @[utils.scala 59:26]
+  wire  _GEN_3680 = branchOps_valid ? _GEN_3424 : _GEN_2912; // @[utils.scala 59:26]
+  wire  _GEN_3681 = branchOps_valid ? _GEN_3425 : _GEN_2913; // @[utils.scala 59:26]
+  wire  _GEN_3682 = branchOps_valid ? _GEN_3426 : _GEN_2914; // @[utils.scala 59:26]
+  wire  _GEN_3683 = branchOps_valid ? _GEN_3427 : _GEN_2915; // @[utils.scala 59:26]
+  wire  _GEN_3684 = branchOps_valid ? _GEN_3428 : _GEN_2916; // @[utils.scala 59:26]
+  wire  _GEN_3685 = branchOps_valid ? _GEN_3429 : _GEN_2917; // @[utils.scala 59:26]
+  wire  _GEN_3686 = branchOps_valid ? _GEN_3430 : _GEN_2918; // @[utils.scala 59:26]
+  wire  _GEN_3687 = branchOps_valid ? _GEN_3431 : _GEN_2919; // @[utils.scala 59:26]
+  wire  _GEN_3688 = branchOps_valid ? _GEN_3432 : _GEN_2920; // @[utils.scala 59:26]
+  wire  _GEN_3689 = branchOps_valid ? _GEN_3433 : _GEN_2921; // @[utils.scala 59:26]
+  wire  _GEN_3690 = branchOps_valid ? _GEN_3434 : _GEN_2922; // @[utils.scala 59:26]
+  wire  _GEN_3691 = branchOps_valid ? _GEN_3435 : _GEN_2923; // @[utils.scala 59:26]
+  wire  _GEN_3692 = branchOps_valid ? _GEN_3436 : _GEN_2924; // @[utils.scala 59:26]
+  wire  _GEN_3693 = branchOps_valid ? _GEN_3437 : _GEN_2925; // @[utils.scala 59:26]
+  wire  _GEN_3694 = branchOps_valid ? _GEN_3438 : _GEN_2926; // @[utils.scala 59:26]
+  wire  _GEN_3695 = branchOps_valid ? _GEN_3439 : _GEN_2927; // @[utils.scala 59:26]
+  wire  _GEN_3696 = branchOps_valid ? _GEN_3440 : _GEN_2928; // @[utils.scala 59:26]
+  wire  _GEN_3697 = branchOps_valid ? _GEN_3441 : _GEN_2929; // @[utils.scala 59:26]
+  wire  _GEN_3698 = branchOps_valid ? _GEN_3442 : _GEN_2930; // @[utils.scala 59:26]
+  wire  _GEN_3699 = branchOps_valid ? _GEN_3443 : _GEN_2931; // @[utils.scala 59:26]
+  wire  _GEN_3700 = branchOps_valid ? _GEN_3444 : _GEN_2932; // @[utils.scala 59:26]
+  wire  _GEN_3701 = branchOps_valid ? _GEN_3445 : _GEN_2933; // @[utils.scala 59:26]
+  wire  _GEN_3702 = branchOps_valid ? _GEN_3446 : _GEN_2934; // @[utils.scala 59:26]
+  wire  _GEN_3703 = branchOps_valid ? _GEN_3447 : _GEN_2935; // @[utils.scala 59:26]
+  wire  _GEN_3704 = branchOps_valid ? _GEN_3448 : _GEN_2936; // @[utils.scala 59:26]
+  wire  _GEN_3705 = branchOps_valid ? _GEN_3449 : _GEN_2937; // @[utils.scala 59:26]
+  wire  _GEN_3706 = branchOps_valid ? _GEN_3450 : _GEN_2938; // @[utils.scala 59:26]
+  wire  _GEN_3707 = branchOps_valid ? _GEN_3451 : _GEN_2939; // @[utils.scala 59:26]
+  wire  _GEN_3708 = branchOps_valid ? _GEN_3452 : _GEN_2940; // @[utils.scala 59:26]
+  wire  _GEN_3709 = branchOps_valid ? _GEN_3453 : _GEN_2941; // @[utils.scala 59:26]
+  wire  _GEN_3710 = branchOps_valid ? _GEN_3454 : _GEN_2942; // @[utils.scala 59:26]
+  wire  _GEN_3711 = branchOps_valid ? _GEN_3455 : _GEN_2943; // @[utils.scala 59:26]
+  wire  _GEN_3712 = branchOps_valid ? _GEN_3456 : _GEN_2944; // @[utils.scala 59:26]
+  wire  _GEN_3713 = branchOps_valid ? _GEN_3457 : _GEN_2945; // @[utils.scala 59:26]
+  wire  _GEN_3714 = branchOps_valid ? _GEN_3458 : _GEN_2946; // @[utils.scala 59:26]
+  wire  _GEN_3715 = branchOps_valid ? _GEN_3459 : _GEN_2947; // @[utils.scala 59:26]
+  wire  _GEN_3716 = branchOps_valid ? _GEN_3460 : _GEN_2948; // @[utils.scala 59:26]
+  wire  _GEN_3717 = branchOps_valid ? _GEN_3461 : _GEN_2949; // @[utils.scala 59:26]
+  wire  _GEN_3718 = branchOps_valid ? _GEN_3462 : _GEN_2950; // @[utils.scala 59:26]
+  wire  _GEN_3719 = branchOps_valid ? _GEN_3463 : _GEN_2951; // @[utils.scala 59:26]
+  wire  _GEN_3720 = branchOps_valid ? _GEN_3464 : _GEN_2952; // @[utils.scala 59:26]
+  wire  _GEN_3721 = branchOps_valid ? _GEN_3465 : _GEN_2953; // @[utils.scala 59:26]
+  wire  _GEN_3722 = branchOps_valid ? _GEN_3466 : _GEN_2954; // @[utils.scala 59:26]
+  wire  _GEN_3723 = branchOps_valid ? _GEN_3467 : _GEN_2955; // @[utils.scala 59:26]
+  wire  _GEN_3724 = branchOps_valid ? _GEN_3468 : _GEN_2956; // @[utils.scala 59:26]
+  wire  _GEN_3725 = branchOps_valid ? _GEN_3469 : _GEN_2957; // @[utils.scala 59:26]
+  wire  _GEN_3726 = branchOps_valid ? _GEN_3470 : _GEN_2958; // @[utils.scala 59:26]
+  wire  _GEN_3727 = branchOps_valid ? _GEN_3471 : _GEN_2959; // @[utils.scala 59:26]
+  wire  _GEN_3728 = branchOps_valid ? _GEN_3472 : _GEN_2960; // @[utils.scala 59:26]
+  wire  _GEN_3729 = branchOps_valid ? _GEN_3473 : _GEN_2961; // @[utils.scala 59:26]
+  wire  _GEN_3730 = branchOps_valid ? _GEN_3474 : _GEN_2962; // @[utils.scala 59:26]
+  wire  _GEN_3731 = branchOps_valid ? _GEN_3475 : _GEN_2963; // @[utils.scala 59:26]
+  wire  _GEN_3732 = branchOps_valid ? _GEN_3476 : _GEN_2964; // @[utils.scala 59:26]
+  wire  _GEN_3733 = branchOps_valid ? _GEN_3477 : _GEN_2965; // @[utils.scala 59:26]
+  wire  _GEN_3734 = branchOps_valid ? _GEN_3478 : _GEN_2966; // @[utils.scala 59:26]
+  wire  _GEN_3735 = branchOps_valid ? _GEN_3479 : _GEN_2967; // @[utils.scala 59:26]
+  wire  _GEN_3736 = branchOps_valid ? _GEN_3480 : _GEN_2968; // @[utils.scala 59:26]
+  wire  _GEN_3737 = branchOps_valid ? _GEN_3481 : _GEN_2969; // @[utils.scala 59:26]
+  wire  _GEN_3738 = branchOps_valid ? _GEN_3482 : _GEN_2970; // @[utils.scala 59:26]
+  wire  _GEN_3739 = branchOps_valid ? _GEN_3483 : _GEN_2971; // @[utils.scala 59:26]
+  wire  _GEN_3740 = branchOps_valid ? _GEN_3484 : _GEN_2972; // @[utils.scala 59:26]
+  wire  _GEN_3741 = branchOps_valid ? _GEN_3485 : _GEN_2973; // @[utils.scala 59:26]
+  wire [4:0] _GEN_3742 = incrWrite ? _GEN_3614 : _GEN_1310; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3743 = incrWrite ? _GEN_3615 : _GEN_1311; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3744 = incrWrite ? _GEN_3616 : _GEN_1312; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3745 = incrWrite ? _GEN_3617 : _GEN_1313; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3746 = incrWrite ? _GEN_3618 : _GEN_1314; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3747 = incrWrite ? _GEN_3619 : _GEN_1315; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3748 = incrWrite ? _GEN_3620 : _GEN_1316; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3749 = incrWrite ? _GEN_3621 : _GEN_1317; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3750 = incrWrite ? _GEN_3622 : _GEN_1318; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3751 = incrWrite ? _GEN_3623 : _GEN_1319; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3752 = incrWrite ? _GEN_3624 : _GEN_1320; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3753 = incrWrite ? _GEN_3625 : _GEN_1321; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3754 = incrWrite ? _GEN_3626 : _GEN_1322; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3755 = incrWrite ? _GEN_3627 : _GEN_1323; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3756 = incrWrite ? _GEN_3628 : _GEN_1324; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3757 = incrWrite ? _GEN_3629 : _GEN_1325; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3758 = incrWrite ? _GEN_3630 : _GEN_1326; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3759 = incrWrite ? _GEN_3631 : _GEN_1327; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3760 = incrWrite ? _GEN_3632 : _GEN_1328; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3761 = incrWrite ? _GEN_3633 : _GEN_1329; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3762 = incrWrite ? _GEN_3634 : _GEN_1330; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3763 = incrWrite ? _GEN_3635 : _GEN_1331; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3764 = incrWrite ? _GEN_3636 : _GEN_1332; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3765 = incrWrite ? _GEN_3637 : _GEN_1333; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3766 = incrWrite ? _GEN_3638 : _GEN_1334; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3767 = incrWrite ? _GEN_3639 : _GEN_1335; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3768 = incrWrite ? _GEN_3640 : _GEN_1336; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3769 = incrWrite ? _GEN_3641 : _GEN_1337; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3770 = incrWrite ? _GEN_3642 : _GEN_1338; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3771 = incrWrite ? _GEN_3643 : _GEN_1339; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3772 = incrWrite ? _GEN_3644 : _GEN_1340; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3773 = incrWrite ? _GEN_3645 : _GEN_1341; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3774 = incrWrite ? _GEN_3646 : _GEN_1342; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3775 = incrWrite ? _GEN_3647 : _GEN_1343; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3776 = incrWrite ? _GEN_3648 : _GEN_1344; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3777 = incrWrite ? _GEN_3649 : _GEN_1345; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3778 = incrWrite ? _GEN_3650 : _GEN_1346; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3779 = incrWrite ? _GEN_3651 : _GEN_1347; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3780 = incrWrite ? _GEN_3652 : _GEN_1348; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3781 = incrWrite ? _GEN_3653 : _GEN_1349; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3782 = incrWrite ? _GEN_3654 : _GEN_1350; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3783 = incrWrite ? _GEN_3655 : _GEN_1351; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3784 = incrWrite ? _GEN_3656 : _GEN_1352; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3785 = incrWrite ? _GEN_3657 : _GEN_1353; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3786 = incrWrite ? _GEN_3658 : _GEN_1354; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3787 = incrWrite ? _GEN_3659 : _GEN_1355; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3788 = incrWrite ? _GEN_3660 : _GEN_1356; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3789 = incrWrite ? _GEN_3661 : _GEN_1357; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3790 = incrWrite ? _GEN_3662 : _GEN_1358; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3791 = incrWrite ? _GEN_3663 : _GEN_1359; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3792 = incrWrite ? _GEN_3664 : _GEN_1360; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3793 = incrWrite ? _GEN_3665 : _GEN_1361; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3794 = incrWrite ? _GEN_3666 : _GEN_1362; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3795 = incrWrite ? _GEN_3667 : _GEN_1363; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3796 = incrWrite ? _GEN_3668 : _GEN_1364; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3797 = incrWrite ? _GEN_3669 : _GEN_1365; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3798 = incrWrite ? _GEN_3670 : _GEN_1366; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3799 = incrWrite ? _GEN_3671 : _GEN_1367; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3800 = incrWrite ? _GEN_3672 : _GEN_1368; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3801 = incrWrite ? _GEN_3673 : _GEN_1369; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3802 = incrWrite ? _GEN_3674 : _GEN_1370; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3803 = incrWrite ? _GEN_3675 : _GEN_1371; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3804 = incrWrite ? _GEN_3676 : _GEN_1372; // @[fifo.scala 96:16]
+  wire [4:0] _GEN_3805 = incrWrite ? _GEN_3677 : _GEN_1373; // @[fifo.scala 96:16]
+  wire  _GEN_3806 = incrWrite ? _GEN_3678 : _GEN_1246; // @[fifo.scala 96:16]
+  wire  _GEN_3807 = incrWrite ? _GEN_3679 : _GEN_1247; // @[fifo.scala 96:16]
+  wire  _GEN_3808 = incrWrite ? _GEN_3680 : _GEN_1248; // @[fifo.scala 96:16]
+  wire  _GEN_3809 = incrWrite ? _GEN_3681 : _GEN_1249; // @[fifo.scala 96:16]
+  wire  _GEN_3810 = incrWrite ? _GEN_3682 : _GEN_1250; // @[fifo.scala 96:16]
+  wire  _GEN_3811 = incrWrite ? _GEN_3683 : _GEN_1251; // @[fifo.scala 96:16]
+  wire  _GEN_3812 = incrWrite ? _GEN_3684 : _GEN_1252; // @[fifo.scala 96:16]
+  wire  _GEN_3813 = incrWrite ? _GEN_3685 : _GEN_1253; // @[fifo.scala 96:16]
+  wire  _GEN_3814 = incrWrite ? _GEN_3686 : _GEN_1254; // @[fifo.scala 96:16]
+  wire  _GEN_3815 = incrWrite ? _GEN_3687 : _GEN_1255; // @[fifo.scala 96:16]
+  wire  _GEN_3816 = incrWrite ? _GEN_3688 : _GEN_1256; // @[fifo.scala 96:16]
+  wire  _GEN_3817 = incrWrite ? _GEN_3689 : _GEN_1257; // @[fifo.scala 96:16]
+  wire  _GEN_3818 = incrWrite ? _GEN_3690 : _GEN_1258; // @[fifo.scala 96:16]
+  wire  _GEN_3819 = incrWrite ? _GEN_3691 : _GEN_1259; // @[fifo.scala 96:16]
+  wire  _GEN_3820 = incrWrite ? _GEN_3692 : _GEN_1260; // @[fifo.scala 96:16]
+  wire  _GEN_3821 = incrWrite ? _GEN_3693 : _GEN_1261; // @[fifo.scala 96:16]
+  wire  _GEN_3822 = incrWrite ? _GEN_3694 : _GEN_1262; // @[fifo.scala 96:16]
+  wire  _GEN_3823 = incrWrite ? _GEN_3695 : _GEN_1263; // @[fifo.scala 96:16]
+  wire  _GEN_3824 = incrWrite ? _GEN_3696 : _GEN_1264; // @[fifo.scala 96:16]
+  wire  _GEN_3825 = incrWrite ? _GEN_3697 : _GEN_1265; // @[fifo.scala 96:16]
+  wire  _GEN_3826 = incrWrite ? _GEN_3698 : _GEN_1266; // @[fifo.scala 96:16]
+  wire  _GEN_3827 = incrWrite ? _GEN_3699 : _GEN_1267; // @[fifo.scala 96:16]
+  wire  _GEN_3828 = incrWrite ? _GEN_3700 : _GEN_1268; // @[fifo.scala 96:16]
+  wire  _GEN_3829 = incrWrite ? _GEN_3701 : _GEN_1269; // @[fifo.scala 96:16]
+  wire  _GEN_3830 = incrWrite ? _GEN_3702 : _GEN_1270; // @[fifo.scala 96:16]
+  wire  _GEN_3831 = incrWrite ? _GEN_3703 : _GEN_1271; // @[fifo.scala 96:16]
+  wire  _GEN_3832 = incrWrite ? _GEN_3704 : _GEN_1272; // @[fifo.scala 96:16]
+  wire  _GEN_3833 = incrWrite ? _GEN_3705 : _GEN_1273; // @[fifo.scala 96:16]
+  wire  _GEN_3834 = incrWrite ? _GEN_3706 : _GEN_1274; // @[fifo.scala 96:16]
+  wire  _GEN_3835 = incrWrite ? _GEN_3707 : _GEN_1275; // @[fifo.scala 96:16]
+  wire  _GEN_3836 = incrWrite ? _GEN_3708 : _GEN_1276; // @[fifo.scala 96:16]
+  wire  _GEN_3837 = incrWrite ? _GEN_3709 : _GEN_1277; // @[fifo.scala 96:16]
+  wire  _GEN_3838 = incrWrite ? _GEN_3710 : _GEN_1278; // @[fifo.scala 96:16]
+  wire  _GEN_3839 = incrWrite ? _GEN_3711 : _GEN_1279; // @[fifo.scala 96:16]
+  wire  _GEN_3840 = incrWrite ? _GEN_3712 : _GEN_1280; // @[fifo.scala 96:16]
+  wire  _GEN_3841 = incrWrite ? _GEN_3713 : _GEN_1281; // @[fifo.scala 96:16]
+  wire  _GEN_3842 = incrWrite ? _GEN_3714 : _GEN_1282; // @[fifo.scala 96:16]
+  wire  _GEN_3843 = incrWrite ? _GEN_3715 : _GEN_1283; // @[fifo.scala 96:16]
+  wire  _GEN_3844 = incrWrite ? _GEN_3716 : _GEN_1284; // @[fifo.scala 96:16]
+  wire  _GEN_3845 = incrWrite ? _GEN_3717 : _GEN_1285; // @[fifo.scala 96:16]
+  wire  _GEN_3846 = incrWrite ? _GEN_3718 : _GEN_1286; // @[fifo.scala 96:16]
+  wire  _GEN_3847 = incrWrite ? _GEN_3719 : _GEN_1287; // @[fifo.scala 96:16]
+  wire  _GEN_3848 = incrWrite ? _GEN_3720 : _GEN_1288; // @[fifo.scala 96:16]
+  wire  _GEN_3849 = incrWrite ? _GEN_3721 : _GEN_1289; // @[fifo.scala 96:16]
+  wire  _GEN_3850 = incrWrite ? _GEN_3722 : _GEN_1290; // @[fifo.scala 96:16]
+  wire  _GEN_3851 = incrWrite ? _GEN_3723 : _GEN_1291; // @[fifo.scala 96:16]
+  wire  _GEN_3852 = incrWrite ? _GEN_3724 : _GEN_1292; // @[fifo.scala 96:16]
+  wire  _GEN_3853 = incrWrite ? _GEN_3725 : _GEN_1293; // @[fifo.scala 96:16]
+  wire  _GEN_3854 = incrWrite ? _GEN_3726 : _GEN_1294; // @[fifo.scala 96:16]
+  wire  _GEN_3855 = incrWrite ? _GEN_3727 : _GEN_1295; // @[fifo.scala 96:16]
+  wire  _GEN_3856 = incrWrite ? _GEN_3728 : _GEN_1296; // @[fifo.scala 96:16]
+  wire  _GEN_3857 = incrWrite ? _GEN_3729 : _GEN_1297; // @[fifo.scala 96:16]
+  wire  _GEN_3858 = incrWrite ? _GEN_3730 : _GEN_1298; // @[fifo.scala 96:16]
+  wire  _GEN_3859 = incrWrite ? _GEN_3731 : _GEN_1299; // @[fifo.scala 96:16]
+  wire  _GEN_3860 = incrWrite ? _GEN_3732 : _GEN_1300; // @[fifo.scala 96:16]
+  wire  _GEN_3861 = incrWrite ? _GEN_3733 : _GEN_1301; // @[fifo.scala 96:16]
+  wire  _GEN_3862 = incrWrite ? _GEN_3734 : _GEN_1302; // @[fifo.scala 96:16]
+  wire  _GEN_3863 = incrWrite ? _GEN_3735 : _GEN_1303; // @[fifo.scala 96:16]
+  wire  _GEN_3864 = incrWrite ? _GEN_3736 : _GEN_1304; // @[fifo.scala 96:16]
+  wire  _GEN_3865 = incrWrite ? _GEN_3737 : _GEN_1305; // @[fifo.scala 96:16]
+  wire  _GEN_3866 = incrWrite ? _GEN_3738 : _GEN_1306; // @[fifo.scala 96:16]
+  wire  _GEN_3867 = incrWrite ? _GEN_3739 : _GEN_1307; // @[fifo.scala 96:16]
+  wire  _GEN_3868 = incrWrite ? _GEN_3740 : _GEN_1308; // @[fifo.scala 96:16]
+  wire  _GEN_3869 = incrWrite ? _GEN_3741 : _GEN_1309; // @[fifo.scala 96:16]
   wire [5:0] startPointer = read_ready ? _nextVal_T_2 : readPtr; // @[fifo.scala 101:25]
   wire [5:0] endPointer = writePtr - 6'h1; // @[fifo.scala 102:29]
   wire [4:0] _T_15 = memReg_0_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
@@ -46513,321 +49859,321 @@ module fifoRecordInvalidateI(
   wire [4:0] _T_22 = memReg_1_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_23 = |_T_22; // @[fifo.scala 108:63]
   wire [4:0] _memReg_1_branch_mask_T = memReg_1_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3940 = |_T_22 ? _memReg_1_branch_mask_T : _GEN_3807; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3941 = _T_23 ? 1'h0 : _GEN_3871; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3876 = |_T_22 ? _memReg_1_branch_mask_T : _GEN_3743; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3877 = _T_23 ? 1'h0 : _GEN_3807; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_29 = memReg_2_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_30 = |_T_29; // @[fifo.scala 108:63]
   wire [4:0] _memReg_2_branch_mask_T = memReg_2_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3946 = |_T_29 ? _memReg_2_branch_mask_T : _GEN_3808; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3947 = _T_30 ? 1'h0 : _GEN_3872; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3882 = |_T_29 ? _memReg_2_branch_mask_T : _GEN_3744; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3883 = _T_30 ? 1'h0 : _GEN_3808; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_36 = memReg_3_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_37 = |_T_36; // @[fifo.scala 108:63]
   wire [4:0] _memReg_3_branch_mask_T = memReg_3_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3952 = |_T_36 ? _memReg_3_branch_mask_T : _GEN_3809; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3953 = _T_37 ? 1'h0 : _GEN_3873; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3888 = |_T_36 ? _memReg_3_branch_mask_T : _GEN_3745; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3889 = _T_37 ? 1'h0 : _GEN_3809; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_43 = memReg_4_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_44 = |_T_43; // @[fifo.scala 108:63]
   wire [4:0] _memReg_4_branch_mask_T = memReg_4_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3958 = |_T_43 ? _memReg_4_branch_mask_T : _GEN_3810; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3959 = _T_44 ? 1'h0 : _GEN_3874; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3894 = |_T_43 ? _memReg_4_branch_mask_T : _GEN_3746; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3895 = _T_44 ? 1'h0 : _GEN_3810; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_50 = memReg_5_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_51 = |_T_50; // @[fifo.scala 108:63]
   wire [4:0] _memReg_5_branch_mask_T = memReg_5_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3964 = |_T_50 ? _memReg_5_branch_mask_T : _GEN_3811; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3965 = _T_51 ? 1'h0 : _GEN_3875; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3900 = |_T_50 ? _memReg_5_branch_mask_T : _GEN_3747; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3901 = _T_51 ? 1'h0 : _GEN_3811; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_57 = memReg_6_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_58 = |_T_57; // @[fifo.scala 108:63]
   wire [4:0] _memReg_6_branch_mask_T = memReg_6_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3970 = |_T_57 ? _memReg_6_branch_mask_T : _GEN_3812; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3971 = _T_58 ? 1'h0 : _GEN_3876; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3906 = |_T_57 ? _memReg_6_branch_mask_T : _GEN_3748; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3907 = _T_58 ? 1'h0 : _GEN_3812; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_64 = memReg_7_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_65 = |_T_64; // @[fifo.scala 108:63]
   wire [4:0] _memReg_7_branch_mask_T = memReg_7_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3976 = |_T_64 ? _memReg_7_branch_mask_T : _GEN_3813; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3977 = _T_65 ? 1'h0 : _GEN_3877; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3912 = |_T_64 ? _memReg_7_branch_mask_T : _GEN_3749; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3913 = _T_65 ? 1'h0 : _GEN_3813; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_71 = memReg_8_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_72 = |_T_71; // @[fifo.scala 108:63]
   wire [4:0] _memReg_8_branch_mask_T = memReg_8_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3982 = |_T_71 ? _memReg_8_branch_mask_T : _GEN_3814; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3983 = _T_72 ? 1'h0 : _GEN_3878; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3918 = |_T_71 ? _memReg_8_branch_mask_T : _GEN_3750; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3919 = _T_72 ? 1'h0 : _GEN_3814; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_78 = memReg_9_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_79 = |_T_78; // @[fifo.scala 108:63]
   wire [4:0] _memReg_9_branch_mask_T = memReg_9_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3988 = |_T_78 ? _memReg_9_branch_mask_T : _GEN_3815; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3989 = _T_79 ? 1'h0 : _GEN_3879; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3924 = |_T_78 ? _memReg_9_branch_mask_T : _GEN_3751; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3925 = _T_79 ? 1'h0 : _GEN_3815; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_85 = memReg_10_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_86 = |_T_85; // @[fifo.scala 108:63]
   wire [4:0] _memReg_10_branch_mask_T = memReg_10_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_3994 = |_T_85 ? _memReg_10_branch_mask_T : _GEN_3816; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_3995 = _T_86 ? 1'h0 : _GEN_3880; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3930 = |_T_85 ? _memReg_10_branch_mask_T : _GEN_3752; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3931 = _T_86 ? 1'h0 : _GEN_3816; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_92 = memReg_11_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_93 = |_T_92; // @[fifo.scala 108:63]
   wire [4:0] _memReg_11_branch_mask_T = memReg_11_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4000 = |_T_92 ? _memReg_11_branch_mask_T : _GEN_3817; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4001 = _T_93 ? 1'h0 : _GEN_3881; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3936 = |_T_92 ? _memReg_11_branch_mask_T : _GEN_3753; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3937 = _T_93 ? 1'h0 : _GEN_3817; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_99 = memReg_12_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_100 = |_T_99; // @[fifo.scala 108:63]
   wire [4:0] _memReg_12_branch_mask_T = memReg_12_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4006 = |_T_99 ? _memReg_12_branch_mask_T : _GEN_3818; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4007 = _T_100 ? 1'h0 : _GEN_3882; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3942 = |_T_99 ? _memReg_12_branch_mask_T : _GEN_3754; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3943 = _T_100 ? 1'h0 : _GEN_3818; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_106 = memReg_13_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_107 = |_T_106; // @[fifo.scala 108:63]
   wire [4:0] _memReg_13_branch_mask_T = memReg_13_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4012 = |_T_106 ? _memReg_13_branch_mask_T : _GEN_3819; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4013 = _T_107 ? 1'h0 : _GEN_3883; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3948 = |_T_106 ? _memReg_13_branch_mask_T : _GEN_3755; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3949 = _T_107 ? 1'h0 : _GEN_3819; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_113 = memReg_14_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_114 = |_T_113; // @[fifo.scala 108:63]
   wire [4:0] _memReg_14_branch_mask_T = memReg_14_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4018 = |_T_113 ? _memReg_14_branch_mask_T : _GEN_3820; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4019 = _T_114 ? 1'h0 : _GEN_3884; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3954 = |_T_113 ? _memReg_14_branch_mask_T : _GEN_3756; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3955 = _T_114 ? 1'h0 : _GEN_3820; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_120 = memReg_15_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_121 = |_T_120; // @[fifo.scala 108:63]
   wire [4:0] _memReg_15_branch_mask_T = memReg_15_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4024 = |_T_120 ? _memReg_15_branch_mask_T : _GEN_3821; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4025 = _T_121 ? 1'h0 : _GEN_3885; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3960 = |_T_120 ? _memReg_15_branch_mask_T : _GEN_3757; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3961 = _T_121 ? 1'h0 : _GEN_3821; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_127 = memReg_16_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_128 = |_T_127; // @[fifo.scala 108:63]
   wire [4:0] _memReg_16_branch_mask_T = memReg_16_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4030 = |_T_127 ? _memReg_16_branch_mask_T : _GEN_3822; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4031 = _T_128 ? 1'h0 : _GEN_3886; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3966 = |_T_127 ? _memReg_16_branch_mask_T : _GEN_3758; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3967 = _T_128 ? 1'h0 : _GEN_3822; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_134 = memReg_17_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_135 = |_T_134; // @[fifo.scala 108:63]
   wire [4:0] _memReg_17_branch_mask_T = memReg_17_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4036 = |_T_134 ? _memReg_17_branch_mask_T : _GEN_3823; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4037 = _T_135 ? 1'h0 : _GEN_3887; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3972 = |_T_134 ? _memReg_17_branch_mask_T : _GEN_3759; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3973 = _T_135 ? 1'h0 : _GEN_3823; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_141 = memReg_18_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_142 = |_T_141; // @[fifo.scala 108:63]
   wire [4:0] _memReg_18_branch_mask_T = memReg_18_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4042 = |_T_141 ? _memReg_18_branch_mask_T : _GEN_3824; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4043 = _T_142 ? 1'h0 : _GEN_3888; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3978 = |_T_141 ? _memReg_18_branch_mask_T : _GEN_3760; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3979 = _T_142 ? 1'h0 : _GEN_3824; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_148 = memReg_19_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_149 = |_T_148; // @[fifo.scala 108:63]
   wire [4:0] _memReg_19_branch_mask_T = memReg_19_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4048 = |_T_148 ? _memReg_19_branch_mask_T : _GEN_3825; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4049 = _T_149 ? 1'h0 : _GEN_3889; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3984 = |_T_148 ? _memReg_19_branch_mask_T : _GEN_3761; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3985 = _T_149 ? 1'h0 : _GEN_3825; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_155 = memReg_20_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_156 = |_T_155; // @[fifo.scala 108:63]
   wire [4:0] _memReg_20_branch_mask_T = memReg_20_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4054 = |_T_155 ? _memReg_20_branch_mask_T : _GEN_3826; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4055 = _T_156 ? 1'h0 : _GEN_3890; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3990 = |_T_155 ? _memReg_20_branch_mask_T : _GEN_3762; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3991 = _T_156 ? 1'h0 : _GEN_3826; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_162 = memReg_21_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_163 = |_T_162; // @[fifo.scala 108:63]
   wire [4:0] _memReg_21_branch_mask_T = memReg_21_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4060 = |_T_162 ? _memReg_21_branch_mask_T : _GEN_3827; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4061 = _T_163 ? 1'h0 : _GEN_3891; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_3996 = |_T_162 ? _memReg_21_branch_mask_T : _GEN_3763; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_3997 = _T_163 ? 1'h0 : _GEN_3827; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_169 = memReg_22_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_170 = |_T_169; // @[fifo.scala 108:63]
   wire [4:0] _memReg_22_branch_mask_T = memReg_22_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4066 = |_T_169 ? _memReg_22_branch_mask_T : _GEN_3828; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4067 = _T_170 ? 1'h0 : _GEN_3892; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4002 = |_T_169 ? _memReg_22_branch_mask_T : _GEN_3764; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4003 = _T_170 ? 1'h0 : _GEN_3828; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_176 = memReg_23_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_177 = |_T_176; // @[fifo.scala 108:63]
   wire [4:0] _memReg_23_branch_mask_T = memReg_23_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4072 = |_T_176 ? _memReg_23_branch_mask_T : _GEN_3829; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4073 = _T_177 ? 1'h0 : _GEN_3893; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4008 = |_T_176 ? _memReg_23_branch_mask_T : _GEN_3765; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4009 = _T_177 ? 1'h0 : _GEN_3829; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_183 = memReg_24_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_184 = |_T_183; // @[fifo.scala 108:63]
   wire [4:0] _memReg_24_branch_mask_T = memReg_24_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4078 = |_T_183 ? _memReg_24_branch_mask_T : _GEN_3830; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4079 = _T_184 ? 1'h0 : _GEN_3894; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4014 = |_T_183 ? _memReg_24_branch_mask_T : _GEN_3766; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4015 = _T_184 ? 1'h0 : _GEN_3830; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_190 = memReg_25_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_191 = |_T_190; // @[fifo.scala 108:63]
   wire [4:0] _memReg_25_branch_mask_T = memReg_25_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4084 = |_T_190 ? _memReg_25_branch_mask_T : _GEN_3831; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4085 = _T_191 ? 1'h0 : _GEN_3895; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4020 = |_T_190 ? _memReg_25_branch_mask_T : _GEN_3767; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4021 = _T_191 ? 1'h0 : _GEN_3831; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_197 = memReg_26_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_198 = |_T_197; // @[fifo.scala 108:63]
   wire [4:0] _memReg_26_branch_mask_T = memReg_26_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4090 = |_T_197 ? _memReg_26_branch_mask_T : _GEN_3832; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4091 = _T_198 ? 1'h0 : _GEN_3896; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4026 = |_T_197 ? _memReg_26_branch_mask_T : _GEN_3768; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4027 = _T_198 ? 1'h0 : _GEN_3832; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_204 = memReg_27_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_205 = |_T_204; // @[fifo.scala 108:63]
   wire [4:0] _memReg_27_branch_mask_T = memReg_27_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4096 = |_T_204 ? _memReg_27_branch_mask_T : _GEN_3833; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4097 = _T_205 ? 1'h0 : _GEN_3897; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4032 = |_T_204 ? _memReg_27_branch_mask_T : _GEN_3769; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4033 = _T_205 ? 1'h0 : _GEN_3833; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_211 = memReg_28_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_212 = |_T_211; // @[fifo.scala 108:63]
   wire [4:0] _memReg_28_branch_mask_T = memReg_28_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4102 = |_T_211 ? _memReg_28_branch_mask_T : _GEN_3834; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4103 = _T_212 ? 1'h0 : _GEN_3898; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4038 = |_T_211 ? _memReg_28_branch_mask_T : _GEN_3770; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4039 = _T_212 ? 1'h0 : _GEN_3834; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_218 = memReg_29_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_219 = |_T_218; // @[fifo.scala 108:63]
   wire [4:0] _memReg_29_branch_mask_T = memReg_29_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4108 = |_T_218 ? _memReg_29_branch_mask_T : _GEN_3835; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4109 = _T_219 ? 1'h0 : _GEN_3899; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4044 = |_T_218 ? _memReg_29_branch_mask_T : _GEN_3771; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4045 = _T_219 ? 1'h0 : _GEN_3835; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_225 = memReg_30_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_226 = |_T_225; // @[fifo.scala 108:63]
   wire [4:0] _memReg_30_branch_mask_T = memReg_30_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4114 = |_T_225 ? _memReg_30_branch_mask_T : _GEN_3836; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4115 = _T_226 ? 1'h0 : _GEN_3900; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4050 = |_T_225 ? _memReg_30_branch_mask_T : _GEN_3772; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4051 = _T_226 ? 1'h0 : _GEN_3836; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_232 = memReg_31_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_233 = |_T_232; // @[fifo.scala 108:63]
   wire [4:0] _memReg_31_branch_mask_T = memReg_31_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4120 = |_T_232 ? _memReg_31_branch_mask_T : _GEN_3837; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4121 = _T_233 ? 1'h0 : _GEN_3901; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4056 = |_T_232 ? _memReg_31_branch_mask_T : _GEN_3773; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4057 = _T_233 ? 1'h0 : _GEN_3837; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_239 = memReg_32_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_240 = |_T_239; // @[fifo.scala 108:63]
   wire [4:0] _memReg_32_branch_mask_T = memReg_32_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4126 = |_T_239 ? _memReg_32_branch_mask_T : _GEN_3838; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4127 = _T_240 ? 1'h0 : _GEN_3902; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4062 = |_T_239 ? _memReg_32_branch_mask_T : _GEN_3774; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4063 = _T_240 ? 1'h0 : _GEN_3838; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_246 = memReg_33_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_247 = |_T_246; // @[fifo.scala 108:63]
   wire [4:0] _memReg_33_branch_mask_T = memReg_33_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4132 = |_T_246 ? _memReg_33_branch_mask_T : _GEN_3839; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4133 = _T_247 ? 1'h0 : _GEN_3903; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4068 = |_T_246 ? _memReg_33_branch_mask_T : _GEN_3775; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4069 = _T_247 ? 1'h0 : _GEN_3839; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_253 = memReg_34_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_254 = |_T_253; // @[fifo.scala 108:63]
   wire [4:0] _memReg_34_branch_mask_T = memReg_34_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4138 = |_T_253 ? _memReg_34_branch_mask_T : _GEN_3840; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4139 = _T_254 ? 1'h0 : _GEN_3904; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4074 = |_T_253 ? _memReg_34_branch_mask_T : _GEN_3776; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4075 = _T_254 ? 1'h0 : _GEN_3840; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_260 = memReg_35_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_261 = |_T_260; // @[fifo.scala 108:63]
   wire [4:0] _memReg_35_branch_mask_T = memReg_35_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4144 = |_T_260 ? _memReg_35_branch_mask_T : _GEN_3841; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4145 = _T_261 ? 1'h0 : _GEN_3905; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4080 = |_T_260 ? _memReg_35_branch_mask_T : _GEN_3777; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4081 = _T_261 ? 1'h0 : _GEN_3841; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_267 = memReg_36_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_268 = |_T_267; // @[fifo.scala 108:63]
   wire [4:0] _memReg_36_branch_mask_T = memReg_36_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4150 = |_T_267 ? _memReg_36_branch_mask_T : _GEN_3842; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4151 = _T_268 ? 1'h0 : _GEN_3906; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4086 = |_T_267 ? _memReg_36_branch_mask_T : _GEN_3778; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4087 = _T_268 ? 1'h0 : _GEN_3842; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_274 = memReg_37_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_275 = |_T_274; // @[fifo.scala 108:63]
   wire [4:0] _memReg_37_branch_mask_T = memReg_37_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4156 = |_T_274 ? _memReg_37_branch_mask_T : _GEN_3843; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4157 = _T_275 ? 1'h0 : _GEN_3907; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4092 = |_T_274 ? _memReg_37_branch_mask_T : _GEN_3779; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4093 = _T_275 ? 1'h0 : _GEN_3843; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_281 = memReg_38_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_282 = |_T_281; // @[fifo.scala 108:63]
   wire [4:0] _memReg_38_branch_mask_T = memReg_38_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4162 = |_T_281 ? _memReg_38_branch_mask_T : _GEN_3844; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4163 = _T_282 ? 1'h0 : _GEN_3908; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4098 = |_T_281 ? _memReg_38_branch_mask_T : _GEN_3780; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4099 = _T_282 ? 1'h0 : _GEN_3844; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_288 = memReg_39_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_289 = |_T_288; // @[fifo.scala 108:63]
   wire [4:0] _memReg_39_branch_mask_T = memReg_39_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4168 = |_T_288 ? _memReg_39_branch_mask_T : _GEN_3845; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4169 = _T_289 ? 1'h0 : _GEN_3909; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4104 = |_T_288 ? _memReg_39_branch_mask_T : _GEN_3781; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4105 = _T_289 ? 1'h0 : _GEN_3845; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_295 = memReg_40_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_296 = |_T_295; // @[fifo.scala 108:63]
   wire [4:0] _memReg_40_branch_mask_T = memReg_40_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4174 = |_T_295 ? _memReg_40_branch_mask_T : _GEN_3846; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4175 = _T_296 ? 1'h0 : _GEN_3910; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4110 = |_T_295 ? _memReg_40_branch_mask_T : _GEN_3782; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4111 = _T_296 ? 1'h0 : _GEN_3846; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_302 = memReg_41_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_303 = |_T_302; // @[fifo.scala 108:63]
   wire [4:0] _memReg_41_branch_mask_T = memReg_41_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4180 = |_T_302 ? _memReg_41_branch_mask_T : _GEN_3847; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4181 = _T_303 ? 1'h0 : _GEN_3911; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4116 = |_T_302 ? _memReg_41_branch_mask_T : _GEN_3783; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4117 = _T_303 ? 1'h0 : _GEN_3847; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_309 = memReg_42_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_310 = |_T_309; // @[fifo.scala 108:63]
   wire [4:0] _memReg_42_branch_mask_T = memReg_42_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4186 = |_T_309 ? _memReg_42_branch_mask_T : _GEN_3848; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4187 = _T_310 ? 1'h0 : _GEN_3912; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4122 = |_T_309 ? _memReg_42_branch_mask_T : _GEN_3784; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4123 = _T_310 ? 1'h0 : _GEN_3848; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_316 = memReg_43_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_317 = |_T_316; // @[fifo.scala 108:63]
   wire [4:0] _memReg_43_branch_mask_T = memReg_43_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4192 = |_T_316 ? _memReg_43_branch_mask_T : _GEN_3849; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4193 = _T_317 ? 1'h0 : _GEN_3913; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4128 = |_T_316 ? _memReg_43_branch_mask_T : _GEN_3785; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4129 = _T_317 ? 1'h0 : _GEN_3849; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_323 = memReg_44_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_324 = |_T_323; // @[fifo.scala 108:63]
   wire [4:0] _memReg_44_branch_mask_T = memReg_44_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4198 = |_T_323 ? _memReg_44_branch_mask_T : _GEN_3850; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4199 = _T_324 ? 1'h0 : _GEN_3914; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4134 = |_T_323 ? _memReg_44_branch_mask_T : _GEN_3786; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4135 = _T_324 ? 1'h0 : _GEN_3850; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_330 = memReg_45_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_331 = |_T_330; // @[fifo.scala 108:63]
   wire [4:0] _memReg_45_branch_mask_T = memReg_45_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4204 = |_T_330 ? _memReg_45_branch_mask_T : _GEN_3851; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4205 = _T_331 ? 1'h0 : _GEN_3915; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4140 = |_T_330 ? _memReg_45_branch_mask_T : _GEN_3787; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4141 = _T_331 ? 1'h0 : _GEN_3851; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_337 = memReg_46_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_338 = |_T_337; // @[fifo.scala 108:63]
   wire [4:0] _memReg_46_branch_mask_T = memReg_46_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4210 = |_T_337 ? _memReg_46_branch_mask_T : _GEN_3852; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4211 = _T_338 ? 1'h0 : _GEN_3916; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4146 = |_T_337 ? _memReg_46_branch_mask_T : _GEN_3788; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4147 = _T_338 ? 1'h0 : _GEN_3852; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_344 = memReg_47_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_345 = |_T_344; // @[fifo.scala 108:63]
   wire [4:0] _memReg_47_branch_mask_T = memReg_47_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4216 = |_T_344 ? _memReg_47_branch_mask_T : _GEN_3853; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4217 = _T_345 ? 1'h0 : _GEN_3917; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4152 = |_T_344 ? _memReg_47_branch_mask_T : _GEN_3789; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4153 = _T_345 ? 1'h0 : _GEN_3853; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_351 = memReg_48_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_352 = |_T_351; // @[fifo.scala 108:63]
   wire [4:0] _memReg_48_branch_mask_T = memReg_48_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4222 = |_T_351 ? _memReg_48_branch_mask_T : _GEN_3854; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4223 = _T_352 ? 1'h0 : _GEN_3918; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4158 = |_T_351 ? _memReg_48_branch_mask_T : _GEN_3790; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4159 = _T_352 ? 1'h0 : _GEN_3854; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_358 = memReg_49_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_359 = |_T_358; // @[fifo.scala 108:63]
   wire [4:0] _memReg_49_branch_mask_T = memReg_49_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4228 = |_T_358 ? _memReg_49_branch_mask_T : _GEN_3855; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4229 = _T_359 ? 1'h0 : _GEN_3919; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4164 = |_T_358 ? _memReg_49_branch_mask_T : _GEN_3791; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4165 = _T_359 ? 1'h0 : _GEN_3855; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_365 = memReg_50_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_366 = |_T_365; // @[fifo.scala 108:63]
   wire [4:0] _memReg_50_branch_mask_T = memReg_50_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4234 = |_T_365 ? _memReg_50_branch_mask_T : _GEN_3856; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4235 = _T_366 ? 1'h0 : _GEN_3920; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4170 = |_T_365 ? _memReg_50_branch_mask_T : _GEN_3792; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4171 = _T_366 ? 1'h0 : _GEN_3856; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_372 = memReg_51_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_373 = |_T_372; // @[fifo.scala 108:63]
   wire [4:0] _memReg_51_branch_mask_T = memReg_51_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4240 = |_T_372 ? _memReg_51_branch_mask_T : _GEN_3857; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4241 = _T_373 ? 1'h0 : _GEN_3921; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4176 = |_T_372 ? _memReg_51_branch_mask_T : _GEN_3793; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4177 = _T_373 ? 1'h0 : _GEN_3857; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_379 = memReg_52_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_380 = |_T_379; // @[fifo.scala 108:63]
   wire [4:0] _memReg_52_branch_mask_T = memReg_52_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4246 = |_T_379 ? _memReg_52_branch_mask_T : _GEN_3858; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4247 = _T_380 ? 1'h0 : _GEN_3922; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4182 = |_T_379 ? _memReg_52_branch_mask_T : _GEN_3794; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4183 = _T_380 ? 1'h0 : _GEN_3858; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_386 = memReg_53_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_387 = |_T_386; // @[fifo.scala 108:63]
   wire [4:0] _memReg_53_branch_mask_T = memReg_53_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4252 = |_T_386 ? _memReg_53_branch_mask_T : _GEN_3859; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4253 = _T_387 ? 1'h0 : _GEN_3923; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4188 = |_T_386 ? _memReg_53_branch_mask_T : _GEN_3795; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4189 = _T_387 ? 1'h0 : _GEN_3859; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_393 = memReg_54_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_394 = |_T_393; // @[fifo.scala 108:63]
   wire [4:0] _memReg_54_branch_mask_T = memReg_54_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4258 = |_T_393 ? _memReg_54_branch_mask_T : _GEN_3860; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4259 = _T_394 ? 1'h0 : _GEN_3924; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4194 = |_T_393 ? _memReg_54_branch_mask_T : _GEN_3796; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4195 = _T_394 ? 1'h0 : _GEN_3860; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_400 = memReg_55_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_401 = |_T_400; // @[fifo.scala 108:63]
   wire [4:0] _memReg_55_branch_mask_T = memReg_55_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4264 = |_T_400 ? _memReg_55_branch_mask_T : _GEN_3861; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4265 = _T_401 ? 1'h0 : _GEN_3925; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4200 = |_T_400 ? _memReg_55_branch_mask_T : _GEN_3797; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4201 = _T_401 ? 1'h0 : _GEN_3861; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_407 = memReg_56_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_408 = |_T_407; // @[fifo.scala 108:63]
   wire [4:0] _memReg_56_branch_mask_T = memReg_56_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4270 = |_T_407 ? _memReg_56_branch_mask_T : _GEN_3862; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4271 = _T_408 ? 1'h0 : _GEN_3926; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4206 = |_T_407 ? _memReg_56_branch_mask_T : _GEN_3798; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4207 = _T_408 ? 1'h0 : _GEN_3862; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_414 = memReg_57_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_415 = |_T_414; // @[fifo.scala 108:63]
   wire [4:0] _memReg_57_branch_mask_T = memReg_57_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4276 = |_T_414 ? _memReg_57_branch_mask_T : _GEN_3863; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4277 = _T_415 ? 1'h0 : _GEN_3927; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4212 = |_T_414 ? _memReg_57_branch_mask_T : _GEN_3799; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4213 = _T_415 ? 1'h0 : _GEN_3863; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_421 = memReg_58_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_422 = |_T_421; // @[fifo.scala 108:63]
   wire [4:0] _memReg_58_branch_mask_T = memReg_58_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4282 = |_T_421 ? _memReg_58_branch_mask_T : _GEN_3864; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4283 = _T_422 ? 1'h0 : _GEN_3928; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4218 = |_T_421 ? _memReg_58_branch_mask_T : _GEN_3800; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4219 = _T_422 ? 1'h0 : _GEN_3864; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_428 = memReg_59_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_429 = |_T_428; // @[fifo.scala 108:63]
   wire [4:0] _memReg_59_branch_mask_T = memReg_59_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4288 = |_T_428 ? _memReg_59_branch_mask_T : _GEN_3865; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4289 = _T_429 ? 1'h0 : _GEN_3929; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4224 = |_T_428 ? _memReg_59_branch_mask_T : _GEN_3801; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4225 = _T_429 ? 1'h0 : _GEN_3865; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_435 = memReg_60_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_436 = |_T_435; // @[fifo.scala 108:63]
   wire [4:0] _memReg_60_branch_mask_T = memReg_60_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4294 = |_T_435 ? _memReg_60_branch_mask_T : _GEN_3866; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4295 = _T_436 ? 1'h0 : _GEN_3930; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4230 = |_T_435 ? _memReg_60_branch_mask_T : _GEN_3802; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4231 = _T_436 ? 1'h0 : _GEN_3866; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_442 = memReg_61_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_443 = |_T_442; // @[fifo.scala 108:63]
   wire [4:0] _memReg_61_branch_mask_T = memReg_61_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4300 = |_T_442 ? _memReg_61_branch_mask_T : _GEN_3867; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4301 = _T_443 ? 1'h0 : _GEN_3931; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4236 = |_T_442 ? _memReg_61_branch_mask_T : _GEN_3803; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4237 = _T_443 ? 1'h0 : _GEN_3867; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_449 = memReg_62_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_450 = |_T_449; // @[fifo.scala 108:63]
   wire [4:0] _memReg_62_branch_mask_T = memReg_62_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
-  wire [4:0] _GEN_4306 = |_T_449 ? _memReg_62_branch_mask_T : _GEN_3868; // @[fifo.scala 108:68 109:35]
-  wire  _GEN_4307 = _T_450 ? 1'h0 : _GEN_3932; // @[fifo.scala 112:68 113:36]
+  wire [4:0] _GEN_4242 = |_T_449 ? _memReg_62_branch_mask_T : _GEN_3804; // @[fifo.scala 108:68 109:35]
+  wire  _GEN_4243 = _T_450 ? 1'h0 : _GEN_3868; // @[fifo.scala 112:68 113:36]
   wire [4:0] _T_456 = memReg_63_branch_mask & branchOps_branchMask; // @[fifo.scala 108:39]
   wire  _T_457 = |_T_456; // @[fifo.scala 108:63]
   wire [4:0] _memReg_63_branch_mask_T = memReg_63_branch_mask ^ branchOps_branchMask; // @[fifo.scala 109:60]
   wire [4:0] _T_462 = _GEN_2269 & branchOps_branchMask; // @[utils.scala 101:27]
-  wire  _GEN_4448 = |_T_462 ? 1'h0 : _GEN_2205; // @[utils.scala 101:56 103:28 107:28]
-  wire  _GEN_4450 = branchOps_passed ? _GEN_2205 : _GEN_4448; // @[utils.scala 90:30 98:26]
+  wire  _GEN_4384 = |_T_462 ? 1'h0 : _GEN_2205; // @[utils.scala 101:56 103:28 107:28]
+  wire  _GEN_4386 = branchOps_passed ? _GEN_2205 : _GEN_4384; // @[utils.scala 90:30 98:26]
   assign read_data_valid = _T_2 & _GEN_1885; // @[fifo.scala 121:32]
-  assign read_data_branch_valid = branchOps_valid ? _GEN_4450 : _GEN_2205; // @[utils.scala 112:24 89:27]
+  assign read_data_branch_valid = branchOps_valid ? _GEN_4386 : _GEN_2205; // @[utils.scala 112:24 89:27]
   assign isEmpty = emptyReg; // @[fifo.scala 88:11]
   always @(posedge clock) begin
     if (reset) begin // @[fifo.scala 27:33]
@@ -46852,14 +50198,14 @@ module fifoRecordInvalidateI(
       memReg_0_branch_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (branchOps_passed) begin // @[fifo.scala 107:32]
-        memReg_0_branch_valid <= _GEN_3870;
+        memReg_0_branch_valid <= _GEN_3806;
       end else if (_T_16) begin // @[fifo.scala 112:68]
         memReg_0_branch_valid <= 1'h0; // @[fifo.scala 113:36]
       end else begin
-        memReg_0_branch_valid <= _GEN_3870;
+        memReg_0_branch_valid <= _GEN_3806;
       end
     end else begin
-      memReg_0_branch_valid <= _GEN_3870;
+      memReg_0_branch_valid <= _GEN_3806;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_0_branch_mask <= 5'h0; // @[fifo.scala 27:33]
@@ -46868,13 +50214,13 @@ module fifoRecordInvalidateI(
         if (|_T_15) begin // @[fifo.scala 108:68]
           memReg_0_branch_mask <= _memReg_0_branch_mask_T; // @[fifo.scala 109:35]
         end else begin
-          memReg_0_branch_mask <= _GEN_3806;
+          memReg_0_branch_mask <= _GEN_3742;
         end
       end else begin
-        memReg_0_branch_mask <= _GEN_3806;
+        memReg_0_branch_mask <= _GEN_3742;
       end
     end else begin
-      memReg_0_branch_mask <= _GEN_3806;
+      memReg_0_branch_mask <= _GEN_3742;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_1_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -46899,30 +50245,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1 | 6'h1 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_1_branch_valid <= _GEN_3871;
+          memReg_1_branch_valid <= _GEN_3807;
         end else begin
-          memReg_1_branch_valid <= _GEN_3941;
+          memReg_1_branch_valid <= _GEN_3877;
         end
       end else begin
-        memReg_1_branch_valid <= _GEN_3871;
+        memReg_1_branch_valid <= _GEN_3807;
       end
     end else begin
-      memReg_1_branch_valid <= _GEN_3871;
+      memReg_1_branch_valid <= _GEN_3807;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_1_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1 | 6'h1 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_1_branch_mask <= _GEN_3940;
+          memReg_1_branch_mask <= _GEN_3876;
         end else begin
-          memReg_1_branch_mask <= _GEN_3807;
+          memReg_1_branch_mask <= _GEN_3743;
         end
       end else begin
-        memReg_1_branch_mask <= _GEN_3807;
+        memReg_1_branch_mask <= _GEN_3743;
       end
     end else begin
-      memReg_1_branch_mask <= _GEN_3807;
+      memReg_1_branch_mask <= _GEN_3743;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_2_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -46947,30 +50293,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2 | 6'h2 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_2_branch_valid <= _GEN_3872;
+          memReg_2_branch_valid <= _GEN_3808;
         end else begin
-          memReg_2_branch_valid <= _GEN_3947;
+          memReg_2_branch_valid <= _GEN_3883;
         end
       end else begin
-        memReg_2_branch_valid <= _GEN_3872;
+        memReg_2_branch_valid <= _GEN_3808;
       end
     end else begin
-      memReg_2_branch_valid <= _GEN_3872;
+      memReg_2_branch_valid <= _GEN_3808;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_2_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2 | 6'h2 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_2_branch_mask <= _GEN_3946;
+          memReg_2_branch_mask <= _GEN_3882;
         end else begin
-          memReg_2_branch_mask <= _GEN_3808;
+          memReg_2_branch_mask <= _GEN_3744;
         end
       end else begin
-        memReg_2_branch_mask <= _GEN_3808;
+        memReg_2_branch_mask <= _GEN_3744;
       end
     end else begin
-      memReg_2_branch_mask <= _GEN_3808;
+      memReg_2_branch_mask <= _GEN_3744;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_3_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -46995,30 +50341,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3 | 6'h3 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_3_branch_valid <= _GEN_3873;
+          memReg_3_branch_valid <= _GEN_3809;
         end else begin
-          memReg_3_branch_valid <= _GEN_3953;
+          memReg_3_branch_valid <= _GEN_3889;
         end
       end else begin
-        memReg_3_branch_valid <= _GEN_3873;
+        memReg_3_branch_valid <= _GEN_3809;
       end
     end else begin
-      memReg_3_branch_valid <= _GEN_3873;
+      memReg_3_branch_valid <= _GEN_3809;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_3_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3 | 6'h3 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_3_branch_mask <= _GEN_3952;
+          memReg_3_branch_mask <= _GEN_3888;
         end else begin
-          memReg_3_branch_mask <= _GEN_3809;
+          memReg_3_branch_mask <= _GEN_3745;
         end
       end else begin
-        memReg_3_branch_mask <= _GEN_3809;
+        memReg_3_branch_mask <= _GEN_3745;
       end
     end else begin
-      memReg_3_branch_mask <= _GEN_3809;
+      memReg_3_branch_mask <= _GEN_3745;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_4_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47043,30 +50389,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h4 | 6'h4 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_4_branch_valid <= _GEN_3874;
+          memReg_4_branch_valid <= _GEN_3810;
         end else begin
-          memReg_4_branch_valid <= _GEN_3959;
+          memReg_4_branch_valid <= _GEN_3895;
         end
       end else begin
-        memReg_4_branch_valid <= _GEN_3874;
+        memReg_4_branch_valid <= _GEN_3810;
       end
     end else begin
-      memReg_4_branch_valid <= _GEN_3874;
+      memReg_4_branch_valid <= _GEN_3810;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_4_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h4 | 6'h4 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_4_branch_mask <= _GEN_3958;
+          memReg_4_branch_mask <= _GEN_3894;
         end else begin
-          memReg_4_branch_mask <= _GEN_3810;
+          memReg_4_branch_mask <= _GEN_3746;
         end
       end else begin
-        memReg_4_branch_mask <= _GEN_3810;
+        memReg_4_branch_mask <= _GEN_3746;
       end
     end else begin
-      memReg_4_branch_mask <= _GEN_3810;
+      memReg_4_branch_mask <= _GEN_3746;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_5_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47091,30 +50437,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h5 | 6'h5 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_5_branch_valid <= _GEN_3875;
+          memReg_5_branch_valid <= _GEN_3811;
         end else begin
-          memReg_5_branch_valid <= _GEN_3965;
+          memReg_5_branch_valid <= _GEN_3901;
         end
       end else begin
-        memReg_5_branch_valid <= _GEN_3875;
+        memReg_5_branch_valid <= _GEN_3811;
       end
     end else begin
-      memReg_5_branch_valid <= _GEN_3875;
+      memReg_5_branch_valid <= _GEN_3811;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_5_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h5 | 6'h5 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_5_branch_mask <= _GEN_3964;
+          memReg_5_branch_mask <= _GEN_3900;
         end else begin
-          memReg_5_branch_mask <= _GEN_3811;
+          memReg_5_branch_mask <= _GEN_3747;
         end
       end else begin
-        memReg_5_branch_mask <= _GEN_3811;
+        memReg_5_branch_mask <= _GEN_3747;
       end
     end else begin
-      memReg_5_branch_mask <= _GEN_3811;
+      memReg_5_branch_mask <= _GEN_3747;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_6_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47139,30 +50485,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h6 | 6'h6 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_6_branch_valid <= _GEN_3876;
+          memReg_6_branch_valid <= _GEN_3812;
         end else begin
-          memReg_6_branch_valid <= _GEN_3971;
+          memReg_6_branch_valid <= _GEN_3907;
         end
       end else begin
-        memReg_6_branch_valid <= _GEN_3876;
+        memReg_6_branch_valid <= _GEN_3812;
       end
     end else begin
-      memReg_6_branch_valid <= _GEN_3876;
+      memReg_6_branch_valid <= _GEN_3812;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_6_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h6 | 6'h6 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_6_branch_mask <= _GEN_3970;
+          memReg_6_branch_mask <= _GEN_3906;
         end else begin
-          memReg_6_branch_mask <= _GEN_3812;
+          memReg_6_branch_mask <= _GEN_3748;
         end
       end else begin
-        memReg_6_branch_mask <= _GEN_3812;
+        memReg_6_branch_mask <= _GEN_3748;
       end
     end else begin
-      memReg_6_branch_mask <= _GEN_3812;
+      memReg_6_branch_mask <= _GEN_3748;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_7_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47187,30 +50533,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h7 | 6'h7 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_7_branch_valid <= _GEN_3877;
+          memReg_7_branch_valid <= _GEN_3813;
         end else begin
-          memReg_7_branch_valid <= _GEN_3977;
+          memReg_7_branch_valid <= _GEN_3913;
         end
       end else begin
-        memReg_7_branch_valid <= _GEN_3877;
+        memReg_7_branch_valid <= _GEN_3813;
       end
     end else begin
-      memReg_7_branch_valid <= _GEN_3877;
+      memReg_7_branch_valid <= _GEN_3813;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_7_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h7 | 6'h7 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_7_branch_mask <= _GEN_3976;
+          memReg_7_branch_mask <= _GEN_3912;
         end else begin
-          memReg_7_branch_mask <= _GEN_3813;
+          memReg_7_branch_mask <= _GEN_3749;
         end
       end else begin
-        memReg_7_branch_mask <= _GEN_3813;
+        memReg_7_branch_mask <= _GEN_3749;
       end
     end else begin
-      memReg_7_branch_mask <= _GEN_3813;
+      memReg_7_branch_mask <= _GEN_3749;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_8_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47235,30 +50581,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h8 | 6'h8 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_8_branch_valid <= _GEN_3878;
+          memReg_8_branch_valid <= _GEN_3814;
         end else begin
-          memReg_8_branch_valid <= _GEN_3983;
+          memReg_8_branch_valid <= _GEN_3919;
         end
       end else begin
-        memReg_8_branch_valid <= _GEN_3878;
+        memReg_8_branch_valid <= _GEN_3814;
       end
     end else begin
-      memReg_8_branch_valid <= _GEN_3878;
+      memReg_8_branch_valid <= _GEN_3814;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_8_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h8 | 6'h8 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_8_branch_mask <= _GEN_3982;
+          memReg_8_branch_mask <= _GEN_3918;
         end else begin
-          memReg_8_branch_mask <= _GEN_3814;
+          memReg_8_branch_mask <= _GEN_3750;
         end
       end else begin
-        memReg_8_branch_mask <= _GEN_3814;
+        memReg_8_branch_mask <= _GEN_3750;
       end
     end else begin
-      memReg_8_branch_mask <= _GEN_3814;
+      memReg_8_branch_mask <= _GEN_3750;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_9_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47283,30 +50629,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h9 | 6'h9 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_9_branch_valid <= _GEN_3879;
+          memReg_9_branch_valid <= _GEN_3815;
         end else begin
-          memReg_9_branch_valid <= _GEN_3989;
+          memReg_9_branch_valid <= _GEN_3925;
         end
       end else begin
-        memReg_9_branch_valid <= _GEN_3879;
+        memReg_9_branch_valid <= _GEN_3815;
       end
     end else begin
-      memReg_9_branch_valid <= _GEN_3879;
+      memReg_9_branch_valid <= _GEN_3815;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_9_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h9 | 6'h9 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_9_branch_mask <= _GEN_3988;
+          memReg_9_branch_mask <= _GEN_3924;
         end else begin
-          memReg_9_branch_mask <= _GEN_3815;
+          memReg_9_branch_mask <= _GEN_3751;
         end
       end else begin
-        memReg_9_branch_mask <= _GEN_3815;
+        memReg_9_branch_mask <= _GEN_3751;
       end
     end else begin
-      memReg_9_branch_mask <= _GEN_3815;
+      memReg_9_branch_mask <= _GEN_3751;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_10_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47331,30 +50677,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'ha | 6'ha <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_10_branch_valid <= _GEN_3880;
+          memReg_10_branch_valid <= _GEN_3816;
         end else begin
-          memReg_10_branch_valid <= _GEN_3995;
+          memReg_10_branch_valid <= _GEN_3931;
         end
       end else begin
-        memReg_10_branch_valid <= _GEN_3880;
+        memReg_10_branch_valid <= _GEN_3816;
       end
     end else begin
-      memReg_10_branch_valid <= _GEN_3880;
+      memReg_10_branch_valid <= _GEN_3816;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_10_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'ha | 6'ha <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_10_branch_mask <= _GEN_3994;
+          memReg_10_branch_mask <= _GEN_3930;
         end else begin
-          memReg_10_branch_mask <= _GEN_3816;
+          memReg_10_branch_mask <= _GEN_3752;
         end
       end else begin
-        memReg_10_branch_mask <= _GEN_3816;
+        memReg_10_branch_mask <= _GEN_3752;
       end
     end else begin
-      memReg_10_branch_mask <= _GEN_3816;
+      memReg_10_branch_mask <= _GEN_3752;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_11_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47379,30 +50725,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'hb | 6'hb <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_11_branch_valid <= _GEN_3881;
+          memReg_11_branch_valid <= _GEN_3817;
         end else begin
-          memReg_11_branch_valid <= _GEN_4001;
+          memReg_11_branch_valid <= _GEN_3937;
         end
       end else begin
-        memReg_11_branch_valid <= _GEN_3881;
+        memReg_11_branch_valid <= _GEN_3817;
       end
     end else begin
-      memReg_11_branch_valid <= _GEN_3881;
+      memReg_11_branch_valid <= _GEN_3817;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_11_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'hb | 6'hb <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_11_branch_mask <= _GEN_4000;
+          memReg_11_branch_mask <= _GEN_3936;
         end else begin
-          memReg_11_branch_mask <= _GEN_3817;
+          memReg_11_branch_mask <= _GEN_3753;
         end
       end else begin
-        memReg_11_branch_mask <= _GEN_3817;
+        memReg_11_branch_mask <= _GEN_3753;
       end
     end else begin
-      memReg_11_branch_mask <= _GEN_3817;
+      memReg_11_branch_mask <= _GEN_3753;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_12_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47427,30 +50773,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'hc | 6'hc <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_12_branch_valid <= _GEN_3882;
+          memReg_12_branch_valid <= _GEN_3818;
         end else begin
-          memReg_12_branch_valid <= _GEN_4007;
+          memReg_12_branch_valid <= _GEN_3943;
         end
       end else begin
-        memReg_12_branch_valid <= _GEN_3882;
+        memReg_12_branch_valid <= _GEN_3818;
       end
     end else begin
-      memReg_12_branch_valid <= _GEN_3882;
+      memReg_12_branch_valid <= _GEN_3818;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_12_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'hc | 6'hc <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_12_branch_mask <= _GEN_4006;
+          memReg_12_branch_mask <= _GEN_3942;
         end else begin
-          memReg_12_branch_mask <= _GEN_3818;
+          memReg_12_branch_mask <= _GEN_3754;
         end
       end else begin
-        memReg_12_branch_mask <= _GEN_3818;
+        memReg_12_branch_mask <= _GEN_3754;
       end
     end else begin
-      memReg_12_branch_mask <= _GEN_3818;
+      memReg_12_branch_mask <= _GEN_3754;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_13_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47475,30 +50821,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'hd | 6'hd <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_13_branch_valid <= _GEN_3883;
+          memReg_13_branch_valid <= _GEN_3819;
         end else begin
-          memReg_13_branch_valid <= _GEN_4013;
+          memReg_13_branch_valid <= _GEN_3949;
         end
       end else begin
-        memReg_13_branch_valid <= _GEN_3883;
+        memReg_13_branch_valid <= _GEN_3819;
       end
     end else begin
-      memReg_13_branch_valid <= _GEN_3883;
+      memReg_13_branch_valid <= _GEN_3819;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_13_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'hd | 6'hd <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_13_branch_mask <= _GEN_4012;
+          memReg_13_branch_mask <= _GEN_3948;
         end else begin
-          memReg_13_branch_mask <= _GEN_3819;
+          memReg_13_branch_mask <= _GEN_3755;
         end
       end else begin
-        memReg_13_branch_mask <= _GEN_3819;
+        memReg_13_branch_mask <= _GEN_3755;
       end
     end else begin
-      memReg_13_branch_mask <= _GEN_3819;
+      memReg_13_branch_mask <= _GEN_3755;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_14_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47523,30 +50869,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'he | 6'he <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_14_branch_valid <= _GEN_3884;
+          memReg_14_branch_valid <= _GEN_3820;
         end else begin
-          memReg_14_branch_valid <= _GEN_4019;
+          memReg_14_branch_valid <= _GEN_3955;
         end
       end else begin
-        memReg_14_branch_valid <= _GEN_3884;
+        memReg_14_branch_valid <= _GEN_3820;
       end
     end else begin
-      memReg_14_branch_valid <= _GEN_3884;
+      memReg_14_branch_valid <= _GEN_3820;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_14_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'he | 6'he <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_14_branch_mask <= _GEN_4018;
+          memReg_14_branch_mask <= _GEN_3954;
         end else begin
-          memReg_14_branch_mask <= _GEN_3820;
+          memReg_14_branch_mask <= _GEN_3756;
         end
       end else begin
-        memReg_14_branch_mask <= _GEN_3820;
+        memReg_14_branch_mask <= _GEN_3756;
       end
     end else begin
-      memReg_14_branch_mask <= _GEN_3820;
+      memReg_14_branch_mask <= _GEN_3756;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_15_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47571,30 +50917,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'hf | 6'hf <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_15_branch_valid <= _GEN_3885;
+          memReg_15_branch_valid <= _GEN_3821;
         end else begin
-          memReg_15_branch_valid <= _GEN_4025;
+          memReg_15_branch_valid <= _GEN_3961;
         end
       end else begin
-        memReg_15_branch_valid <= _GEN_3885;
+        memReg_15_branch_valid <= _GEN_3821;
       end
     end else begin
-      memReg_15_branch_valid <= _GEN_3885;
+      memReg_15_branch_valid <= _GEN_3821;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_15_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'hf | 6'hf <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_15_branch_mask <= _GEN_4024;
+          memReg_15_branch_mask <= _GEN_3960;
         end else begin
-          memReg_15_branch_mask <= _GEN_3821;
+          memReg_15_branch_mask <= _GEN_3757;
         end
       end else begin
-        memReg_15_branch_mask <= _GEN_3821;
+        memReg_15_branch_mask <= _GEN_3757;
       end
     end else begin
-      memReg_15_branch_mask <= _GEN_3821;
+      memReg_15_branch_mask <= _GEN_3757;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_16_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47619,30 +50965,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h10 | 6'h10 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_16_branch_valid <= _GEN_3886;
+          memReg_16_branch_valid <= _GEN_3822;
         end else begin
-          memReg_16_branch_valid <= _GEN_4031;
+          memReg_16_branch_valid <= _GEN_3967;
         end
       end else begin
-        memReg_16_branch_valid <= _GEN_3886;
+        memReg_16_branch_valid <= _GEN_3822;
       end
     end else begin
-      memReg_16_branch_valid <= _GEN_3886;
+      memReg_16_branch_valid <= _GEN_3822;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_16_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h10 | 6'h10 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_16_branch_mask <= _GEN_4030;
+          memReg_16_branch_mask <= _GEN_3966;
         end else begin
-          memReg_16_branch_mask <= _GEN_3822;
+          memReg_16_branch_mask <= _GEN_3758;
         end
       end else begin
-        memReg_16_branch_mask <= _GEN_3822;
+        memReg_16_branch_mask <= _GEN_3758;
       end
     end else begin
-      memReg_16_branch_mask <= _GEN_3822;
+      memReg_16_branch_mask <= _GEN_3758;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_17_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47667,30 +51013,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h11 | 6'h11 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_17_branch_valid <= _GEN_3887;
+          memReg_17_branch_valid <= _GEN_3823;
         end else begin
-          memReg_17_branch_valid <= _GEN_4037;
+          memReg_17_branch_valid <= _GEN_3973;
         end
       end else begin
-        memReg_17_branch_valid <= _GEN_3887;
+        memReg_17_branch_valid <= _GEN_3823;
       end
     end else begin
-      memReg_17_branch_valid <= _GEN_3887;
+      memReg_17_branch_valid <= _GEN_3823;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_17_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h11 | 6'h11 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_17_branch_mask <= _GEN_4036;
+          memReg_17_branch_mask <= _GEN_3972;
         end else begin
-          memReg_17_branch_mask <= _GEN_3823;
+          memReg_17_branch_mask <= _GEN_3759;
         end
       end else begin
-        memReg_17_branch_mask <= _GEN_3823;
+        memReg_17_branch_mask <= _GEN_3759;
       end
     end else begin
-      memReg_17_branch_mask <= _GEN_3823;
+      memReg_17_branch_mask <= _GEN_3759;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_18_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47715,30 +51061,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h12 | 6'h12 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_18_branch_valid <= _GEN_3888;
+          memReg_18_branch_valid <= _GEN_3824;
         end else begin
-          memReg_18_branch_valid <= _GEN_4043;
+          memReg_18_branch_valid <= _GEN_3979;
         end
       end else begin
-        memReg_18_branch_valid <= _GEN_3888;
+        memReg_18_branch_valid <= _GEN_3824;
       end
     end else begin
-      memReg_18_branch_valid <= _GEN_3888;
+      memReg_18_branch_valid <= _GEN_3824;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_18_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h12 | 6'h12 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_18_branch_mask <= _GEN_4042;
+          memReg_18_branch_mask <= _GEN_3978;
         end else begin
-          memReg_18_branch_mask <= _GEN_3824;
+          memReg_18_branch_mask <= _GEN_3760;
         end
       end else begin
-        memReg_18_branch_mask <= _GEN_3824;
+        memReg_18_branch_mask <= _GEN_3760;
       end
     end else begin
-      memReg_18_branch_mask <= _GEN_3824;
+      memReg_18_branch_mask <= _GEN_3760;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_19_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47763,30 +51109,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h13 | 6'h13 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_19_branch_valid <= _GEN_3889;
+          memReg_19_branch_valid <= _GEN_3825;
         end else begin
-          memReg_19_branch_valid <= _GEN_4049;
+          memReg_19_branch_valid <= _GEN_3985;
         end
       end else begin
-        memReg_19_branch_valid <= _GEN_3889;
+        memReg_19_branch_valid <= _GEN_3825;
       end
     end else begin
-      memReg_19_branch_valid <= _GEN_3889;
+      memReg_19_branch_valid <= _GEN_3825;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_19_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h13 | 6'h13 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_19_branch_mask <= _GEN_4048;
+          memReg_19_branch_mask <= _GEN_3984;
         end else begin
-          memReg_19_branch_mask <= _GEN_3825;
+          memReg_19_branch_mask <= _GEN_3761;
         end
       end else begin
-        memReg_19_branch_mask <= _GEN_3825;
+        memReg_19_branch_mask <= _GEN_3761;
       end
     end else begin
-      memReg_19_branch_mask <= _GEN_3825;
+      memReg_19_branch_mask <= _GEN_3761;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_20_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47811,30 +51157,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h14 | 6'h14 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_20_branch_valid <= _GEN_3890;
+          memReg_20_branch_valid <= _GEN_3826;
         end else begin
-          memReg_20_branch_valid <= _GEN_4055;
+          memReg_20_branch_valid <= _GEN_3991;
         end
       end else begin
-        memReg_20_branch_valid <= _GEN_3890;
+        memReg_20_branch_valid <= _GEN_3826;
       end
     end else begin
-      memReg_20_branch_valid <= _GEN_3890;
+      memReg_20_branch_valid <= _GEN_3826;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_20_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h14 | 6'h14 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_20_branch_mask <= _GEN_4054;
+          memReg_20_branch_mask <= _GEN_3990;
         end else begin
-          memReg_20_branch_mask <= _GEN_3826;
+          memReg_20_branch_mask <= _GEN_3762;
         end
       end else begin
-        memReg_20_branch_mask <= _GEN_3826;
+        memReg_20_branch_mask <= _GEN_3762;
       end
     end else begin
-      memReg_20_branch_mask <= _GEN_3826;
+      memReg_20_branch_mask <= _GEN_3762;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_21_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47859,30 +51205,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h15 | 6'h15 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_21_branch_valid <= _GEN_3891;
+          memReg_21_branch_valid <= _GEN_3827;
         end else begin
-          memReg_21_branch_valid <= _GEN_4061;
+          memReg_21_branch_valid <= _GEN_3997;
         end
       end else begin
-        memReg_21_branch_valid <= _GEN_3891;
+        memReg_21_branch_valid <= _GEN_3827;
       end
     end else begin
-      memReg_21_branch_valid <= _GEN_3891;
+      memReg_21_branch_valid <= _GEN_3827;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_21_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h15 | 6'h15 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_21_branch_mask <= _GEN_4060;
+          memReg_21_branch_mask <= _GEN_3996;
         end else begin
-          memReg_21_branch_mask <= _GEN_3827;
+          memReg_21_branch_mask <= _GEN_3763;
         end
       end else begin
-        memReg_21_branch_mask <= _GEN_3827;
+        memReg_21_branch_mask <= _GEN_3763;
       end
     end else begin
-      memReg_21_branch_mask <= _GEN_3827;
+      memReg_21_branch_mask <= _GEN_3763;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_22_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47907,30 +51253,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h16 | 6'h16 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_22_branch_valid <= _GEN_3892;
+          memReg_22_branch_valid <= _GEN_3828;
         end else begin
-          memReg_22_branch_valid <= _GEN_4067;
+          memReg_22_branch_valid <= _GEN_4003;
         end
       end else begin
-        memReg_22_branch_valid <= _GEN_3892;
+        memReg_22_branch_valid <= _GEN_3828;
       end
     end else begin
-      memReg_22_branch_valid <= _GEN_3892;
+      memReg_22_branch_valid <= _GEN_3828;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_22_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h16 | 6'h16 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_22_branch_mask <= _GEN_4066;
+          memReg_22_branch_mask <= _GEN_4002;
         end else begin
-          memReg_22_branch_mask <= _GEN_3828;
+          memReg_22_branch_mask <= _GEN_3764;
         end
       end else begin
-        memReg_22_branch_mask <= _GEN_3828;
+        memReg_22_branch_mask <= _GEN_3764;
       end
     end else begin
-      memReg_22_branch_mask <= _GEN_3828;
+      memReg_22_branch_mask <= _GEN_3764;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_23_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -47955,30 +51301,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h17 | 6'h17 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_23_branch_valid <= _GEN_3893;
+          memReg_23_branch_valid <= _GEN_3829;
         end else begin
-          memReg_23_branch_valid <= _GEN_4073;
+          memReg_23_branch_valid <= _GEN_4009;
         end
       end else begin
-        memReg_23_branch_valid <= _GEN_3893;
+        memReg_23_branch_valid <= _GEN_3829;
       end
     end else begin
-      memReg_23_branch_valid <= _GEN_3893;
+      memReg_23_branch_valid <= _GEN_3829;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_23_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h17 | 6'h17 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_23_branch_mask <= _GEN_4072;
+          memReg_23_branch_mask <= _GEN_4008;
         end else begin
-          memReg_23_branch_mask <= _GEN_3829;
+          memReg_23_branch_mask <= _GEN_3765;
         end
       end else begin
-        memReg_23_branch_mask <= _GEN_3829;
+        memReg_23_branch_mask <= _GEN_3765;
       end
     end else begin
-      memReg_23_branch_mask <= _GEN_3829;
+      memReg_23_branch_mask <= _GEN_3765;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_24_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48003,30 +51349,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h18 | 6'h18 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_24_branch_valid <= _GEN_3894;
+          memReg_24_branch_valid <= _GEN_3830;
         end else begin
-          memReg_24_branch_valid <= _GEN_4079;
+          memReg_24_branch_valid <= _GEN_4015;
         end
       end else begin
-        memReg_24_branch_valid <= _GEN_3894;
+        memReg_24_branch_valid <= _GEN_3830;
       end
     end else begin
-      memReg_24_branch_valid <= _GEN_3894;
+      memReg_24_branch_valid <= _GEN_3830;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_24_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h18 | 6'h18 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_24_branch_mask <= _GEN_4078;
+          memReg_24_branch_mask <= _GEN_4014;
         end else begin
-          memReg_24_branch_mask <= _GEN_3830;
+          memReg_24_branch_mask <= _GEN_3766;
         end
       end else begin
-        memReg_24_branch_mask <= _GEN_3830;
+        memReg_24_branch_mask <= _GEN_3766;
       end
     end else begin
-      memReg_24_branch_mask <= _GEN_3830;
+      memReg_24_branch_mask <= _GEN_3766;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_25_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48051,30 +51397,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h19 | 6'h19 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_25_branch_valid <= _GEN_3895;
+          memReg_25_branch_valid <= _GEN_3831;
         end else begin
-          memReg_25_branch_valid <= _GEN_4085;
+          memReg_25_branch_valid <= _GEN_4021;
         end
       end else begin
-        memReg_25_branch_valid <= _GEN_3895;
+        memReg_25_branch_valid <= _GEN_3831;
       end
     end else begin
-      memReg_25_branch_valid <= _GEN_3895;
+      memReg_25_branch_valid <= _GEN_3831;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_25_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h19 | 6'h19 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_25_branch_mask <= _GEN_4084;
+          memReg_25_branch_mask <= _GEN_4020;
         end else begin
-          memReg_25_branch_mask <= _GEN_3831;
+          memReg_25_branch_mask <= _GEN_3767;
         end
       end else begin
-        memReg_25_branch_mask <= _GEN_3831;
+        memReg_25_branch_mask <= _GEN_3767;
       end
     end else begin
-      memReg_25_branch_mask <= _GEN_3831;
+      memReg_25_branch_mask <= _GEN_3767;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_26_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48099,30 +51445,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1a | 6'h1a <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_26_branch_valid <= _GEN_3896;
+          memReg_26_branch_valid <= _GEN_3832;
         end else begin
-          memReg_26_branch_valid <= _GEN_4091;
+          memReg_26_branch_valid <= _GEN_4027;
         end
       end else begin
-        memReg_26_branch_valid <= _GEN_3896;
+        memReg_26_branch_valid <= _GEN_3832;
       end
     end else begin
-      memReg_26_branch_valid <= _GEN_3896;
+      memReg_26_branch_valid <= _GEN_3832;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_26_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1a | 6'h1a <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_26_branch_mask <= _GEN_4090;
+          memReg_26_branch_mask <= _GEN_4026;
         end else begin
-          memReg_26_branch_mask <= _GEN_3832;
+          memReg_26_branch_mask <= _GEN_3768;
         end
       end else begin
-        memReg_26_branch_mask <= _GEN_3832;
+        memReg_26_branch_mask <= _GEN_3768;
       end
     end else begin
-      memReg_26_branch_mask <= _GEN_3832;
+      memReg_26_branch_mask <= _GEN_3768;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_27_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48147,30 +51493,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1b | 6'h1b <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_27_branch_valid <= _GEN_3897;
+          memReg_27_branch_valid <= _GEN_3833;
         end else begin
-          memReg_27_branch_valid <= _GEN_4097;
+          memReg_27_branch_valid <= _GEN_4033;
         end
       end else begin
-        memReg_27_branch_valid <= _GEN_3897;
+        memReg_27_branch_valid <= _GEN_3833;
       end
     end else begin
-      memReg_27_branch_valid <= _GEN_3897;
+      memReg_27_branch_valid <= _GEN_3833;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_27_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1b | 6'h1b <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_27_branch_mask <= _GEN_4096;
+          memReg_27_branch_mask <= _GEN_4032;
         end else begin
-          memReg_27_branch_mask <= _GEN_3833;
+          memReg_27_branch_mask <= _GEN_3769;
         end
       end else begin
-        memReg_27_branch_mask <= _GEN_3833;
+        memReg_27_branch_mask <= _GEN_3769;
       end
     end else begin
-      memReg_27_branch_mask <= _GEN_3833;
+      memReg_27_branch_mask <= _GEN_3769;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_28_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48195,30 +51541,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1c | 6'h1c <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_28_branch_valid <= _GEN_3898;
+          memReg_28_branch_valid <= _GEN_3834;
         end else begin
-          memReg_28_branch_valid <= _GEN_4103;
+          memReg_28_branch_valid <= _GEN_4039;
         end
       end else begin
-        memReg_28_branch_valid <= _GEN_3898;
+        memReg_28_branch_valid <= _GEN_3834;
       end
     end else begin
-      memReg_28_branch_valid <= _GEN_3898;
+      memReg_28_branch_valid <= _GEN_3834;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_28_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1c | 6'h1c <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_28_branch_mask <= _GEN_4102;
+          memReg_28_branch_mask <= _GEN_4038;
         end else begin
-          memReg_28_branch_mask <= _GEN_3834;
+          memReg_28_branch_mask <= _GEN_3770;
         end
       end else begin
-        memReg_28_branch_mask <= _GEN_3834;
+        memReg_28_branch_mask <= _GEN_3770;
       end
     end else begin
-      memReg_28_branch_mask <= _GEN_3834;
+      memReg_28_branch_mask <= _GEN_3770;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_29_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48243,30 +51589,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1d | 6'h1d <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_29_branch_valid <= _GEN_3899;
+          memReg_29_branch_valid <= _GEN_3835;
         end else begin
-          memReg_29_branch_valid <= _GEN_4109;
+          memReg_29_branch_valid <= _GEN_4045;
         end
       end else begin
-        memReg_29_branch_valid <= _GEN_3899;
+        memReg_29_branch_valid <= _GEN_3835;
       end
     end else begin
-      memReg_29_branch_valid <= _GEN_3899;
+      memReg_29_branch_valid <= _GEN_3835;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_29_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1d | 6'h1d <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_29_branch_mask <= _GEN_4108;
+          memReg_29_branch_mask <= _GEN_4044;
         end else begin
-          memReg_29_branch_mask <= _GEN_3835;
+          memReg_29_branch_mask <= _GEN_3771;
         end
       end else begin
-        memReg_29_branch_mask <= _GEN_3835;
+        memReg_29_branch_mask <= _GEN_3771;
       end
     end else begin
-      memReg_29_branch_mask <= _GEN_3835;
+      memReg_29_branch_mask <= _GEN_3771;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_30_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48291,30 +51637,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1e | 6'h1e <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_30_branch_valid <= _GEN_3900;
+          memReg_30_branch_valid <= _GEN_3836;
         end else begin
-          memReg_30_branch_valid <= _GEN_4115;
+          memReg_30_branch_valid <= _GEN_4051;
         end
       end else begin
-        memReg_30_branch_valid <= _GEN_3900;
+        memReg_30_branch_valid <= _GEN_3836;
       end
     end else begin
-      memReg_30_branch_valid <= _GEN_3900;
+      memReg_30_branch_valid <= _GEN_3836;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_30_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1e | 6'h1e <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_30_branch_mask <= _GEN_4114;
+          memReg_30_branch_mask <= _GEN_4050;
         end else begin
-          memReg_30_branch_mask <= _GEN_3836;
+          memReg_30_branch_mask <= _GEN_3772;
         end
       end else begin
-        memReg_30_branch_mask <= _GEN_3836;
+        memReg_30_branch_mask <= _GEN_3772;
       end
     end else begin
-      memReg_30_branch_mask <= _GEN_3836;
+      memReg_30_branch_mask <= _GEN_3772;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_31_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48339,30 +51685,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1f | 6'h1f <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_31_branch_valid <= _GEN_3901;
+          memReg_31_branch_valid <= _GEN_3837;
         end else begin
-          memReg_31_branch_valid <= _GEN_4121;
+          memReg_31_branch_valid <= _GEN_4057;
         end
       end else begin
-        memReg_31_branch_valid <= _GEN_3901;
+        memReg_31_branch_valid <= _GEN_3837;
       end
     end else begin
-      memReg_31_branch_valid <= _GEN_3901;
+      memReg_31_branch_valid <= _GEN_3837;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_31_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h1f | 6'h1f <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_31_branch_mask <= _GEN_4120;
+          memReg_31_branch_mask <= _GEN_4056;
         end else begin
-          memReg_31_branch_mask <= _GEN_3837;
+          memReg_31_branch_mask <= _GEN_3773;
         end
       end else begin
-        memReg_31_branch_mask <= _GEN_3837;
+        memReg_31_branch_mask <= _GEN_3773;
       end
     end else begin
-      memReg_31_branch_mask <= _GEN_3837;
+      memReg_31_branch_mask <= _GEN_3773;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_32_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48387,30 +51733,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h20 | 6'h20 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_32_branch_valid <= _GEN_3902;
+          memReg_32_branch_valid <= _GEN_3838;
         end else begin
-          memReg_32_branch_valid <= _GEN_4127;
+          memReg_32_branch_valid <= _GEN_4063;
         end
       end else begin
-        memReg_32_branch_valid <= _GEN_3902;
+        memReg_32_branch_valid <= _GEN_3838;
       end
     end else begin
-      memReg_32_branch_valid <= _GEN_3902;
+      memReg_32_branch_valid <= _GEN_3838;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_32_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h20 | 6'h20 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_32_branch_mask <= _GEN_4126;
+          memReg_32_branch_mask <= _GEN_4062;
         end else begin
-          memReg_32_branch_mask <= _GEN_3838;
+          memReg_32_branch_mask <= _GEN_3774;
         end
       end else begin
-        memReg_32_branch_mask <= _GEN_3838;
+        memReg_32_branch_mask <= _GEN_3774;
       end
     end else begin
-      memReg_32_branch_mask <= _GEN_3838;
+      memReg_32_branch_mask <= _GEN_3774;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_33_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48435,30 +51781,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h21 | 6'h21 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_33_branch_valid <= _GEN_3903;
+          memReg_33_branch_valid <= _GEN_3839;
         end else begin
-          memReg_33_branch_valid <= _GEN_4133;
+          memReg_33_branch_valid <= _GEN_4069;
         end
       end else begin
-        memReg_33_branch_valid <= _GEN_3903;
+        memReg_33_branch_valid <= _GEN_3839;
       end
     end else begin
-      memReg_33_branch_valid <= _GEN_3903;
+      memReg_33_branch_valid <= _GEN_3839;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_33_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h21 | 6'h21 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_33_branch_mask <= _GEN_4132;
+          memReg_33_branch_mask <= _GEN_4068;
         end else begin
-          memReg_33_branch_mask <= _GEN_3839;
+          memReg_33_branch_mask <= _GEN_3775;
         end
       end else begin
-        memReg_33_branch_mask <= _GEN_3839;
+        memReg_33_branch_mask <= _GEN_3775;
       end
     end else begin
-      memReg_33_branch_mask <= _GEN_3839;
+      memReg_33_branch_mask <= _GEN_3775;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_34_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48483,30 +51829,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h22 | 6'h22 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_34_branch_valid <= _GEN_3904;
+          memReg_34_branch_valid <= _GEN_3840;
         end else begin
-          memReg_34_branch_valid <= _GEN_4139;
+          memReg_34_branch_valid <= _GEN_4075;
         end
       end else begin
-        memReg_34_branch_valid <= _GEN_3904;
+        memReg_34_branch_valid <= _GEN_3840;
       end
     end else begin
-      memReg_34_branch_valid <= _GEN_3904;
+      memReg_34_branch_valid <= _GEN_3840;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_34_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h22 | 6'h22 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_34_branch_mask <= _GEN_4138;
+          memReg_34_branch_mask <= _GEN_4074;
         end else begin
-          memReg_34_branch_mask <= _GEN_3840;
+          memReg_34_branch_mask <= _GEN_3776;
         end
       end else begin
-        memReg_34_branch_mask <= _GEN_3840;
+        memReg_34_branch_mask <= _GEN_3776;
       end
     end else begin
-      memReg_34_branch_mask <= _GEN_3840;
+      memReg_34_branch_mask <= _GEN_3776;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_35_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48531,30 +51877,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h23 | 6'h23 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_35_branch_valid <= _GEN_3905;
+          memReg_35_branch_valid <= _GEN_3841;
         end else begin
-          memReg_35_branch_valid <= _GEN_4145;
+          memReg_35_branch_valid <= _GEN_4081;
         end
       end else begin
-        memReg_35_branch_valid <= _GEN_3905;
+        memReg_35_branch_valid <= _GEN_3841;
       end
     end else begin
-      memReg_35_branch_valid <= _GEN_3905;
+      memReg_35_branch_valid <= _GEN_3841;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_35_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h23 | 6'h23 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_35_branch_mask <= _GEN_4144;
+          memReg_35_branch_mask <= _GEN_4080;
         end else begin
-          memReg_35_branch_mask <= _GEN_3841;
+          memReg_35_branch_mask <= _GEN_3777;
         end
       end else begin
-        memReg_35_branch_mask <= _GEN_3841;
+        memReg_35_branch_mask <= _GEN_3777;
       end
     end else begin
-      memReg_35_branch_mask <= _GEN_3841;
+      memReg_35_branch_mask <= _GEN_3777;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_36_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48579,30 +51925,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h24 | 6'h24 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_36_branch_valid <= _GEN_3906;
+          memReg_36_branch_valid <= _GEN_3842;
         end else begin
-          memReg_36_branch_valid <= _GEN_4151;
+          memReg_36_branch_valid <= _GEN_4087;
         end
       end else begin
-        memReg_36_branch_valid <= _GEN_3906;
+        memReg_36_branch_valid <= _GEN_3842;
       end
     end else begin
-      memReg_36_branch_valid <= _GEN_3906;
+      memReg_36_branch_valid <= _GEN_3842;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_36_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h24 | 6'h24 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_36_branch_mask <= _GEN_4150;
+          memReg_36_branch_mask <= _GEN_4086;
         end else begin
-          memReg_36_branch_mask <= _GEN_3842;
+          memReg_36_branch_mask <= _GEN_3778;
         end
       end else begin
-        memReg_36_branch_mask <= _GEN_3842;
+        memReg_36_branch_mask <= _GEN_3778;
       end
     end else begin
-      memReg_36_branch_mask <= _GEN_3842;
+      memReg_36_branch_mask <= _GEN_3778;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_37_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48627,30 +51973,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h25 | 6'h25 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_37_branch_valid <= _GEN_3907;
+          memReg_37_branch_valid <= _GEN_3843;
         end else begin
-          memReg_37_branch_valid <= _GEN_4157;
+          memReg_37_branch_valid <= _GEN_4093;
         end
       end else begin
-        memReg_37_branch_valid <= _GEN_3907;
+        memReg_37_branch_valid <= _GEN_3843;
       end
     end else begin
-      memReg_37_branch_valid <= _GEN_3907;
+      memReg_37_branch_valid <= _GEN_3843;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_37_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h25 | 6'h25 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_37_branch_mask <= _GEN_4156;
+          memReg_37_branch_mask <= _GEN_4092;
         end else begin
-          memReg_37_branch_mask <= _GEN_3843;
+          memReg_37_branch_mask <= _GEN_3779;
         end
       end else begin
-        memReg_37_branch_mask <= _GEN_3843;
+        memReg_37_branch_mask <= _GEN_3779;
       end
     end else begin
-      memReg_37_branch_mask <= _GEN_3843;
+      memReg_37_branch_mask <= _GEN_3779;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_38_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48675,30 +52021,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h26 | 6'h26 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_38_branch_valid <= _GEN_3908;
+          memReg_38_branch_valid <= _GEN_3844;
         end else begin
-          memReg_38_branch_valid <= _GEN_4163;
+          memReg_38_branch_valid <= _GEN_4099;
         end
       end else begin
-        memReg_38_branch_valid <= _GEN_3908;
+        memReg_38_branch_valid <= _GEN_3844;
       end
     end else begin
-      memReg_38_branch_valid <= _GEN_3908;
+      memReg_38_branch_valid <= _GEN_3844;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_38_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h26 | 6'h26 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_38_branch_mask <= _GEN_4162;
+          memReg_38_branch_mask <= _GEN_4098;
         end else begin
-          memReg_38_branch_mask <= _GEN_3844;
+          memReg_38_branch_mask <= _GEN_3780;
         end
       end else begin
-        memReg_38_branch_mask <= _GEN_3844;
+        memReg_38_branch_mask <= _GEN_3780;
       end
     end else begin
-      memReg_38_branch_mask <= _GEN_3844;
+      memReg_38_branch_mask <= _GEN_3780;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_39_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48723,30 +52069,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h27 | 6'h27 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_39_branch_valid <= _GEN_3909;
+          memReg_39_branch_valid <= _GEN_3845;
         end else begin
-          memReg_39_branch_valid <= _GEN_4169;
+          memReg_39_branch_valid <= _GEN_4105;
         end
       end else begin
-        memReg_39_branch_valid <= _GEN_3909;
+        memReg_39_branch_valid <= _GEN_3845;
       end
     end else begin
-      memReg_39_branch_valid <= _GEN_3909;
+      memReg_39_branch_valid <= _GEN_3845;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_39_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h27 | 6'h27 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_39_branch_mask <= _GEN_4168;
+          memReg_39_branch_mask <= _GEN_4104;
         end else begin
-          memReg_39_branch_mask <= _GEN_3845;
+          memReg_39_branch_mask <= _GEN_3781;
         end
       end else begin
-        memReg_39_branch_mask <= _GEN_3845;
+        memReg_39_branch_mask <= _GEN_3781;
       end
     end else begin
-      memReg_39_branch_mask <= _GEN_3845;
+      memReg_39_branch_mask <= _GEN_3781;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_40_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48771,30 +52117,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h28 | 6'h28 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_40_branch_valid <= _GEN_3910;
+          memReg_40_branch_valid <= _GEN_3846;
         end else begin
-          memReg_40_branch_valid <= _GEN_4175;
+          memReg_40_branch_valid <= _GEN_4111;
         end
       end else begin
-        memReg_40_branch_valid <= _GEN_3910;
+        memReg_40_branch_valid <= _GEN_3846;
       end
     end else begin
-      memReg_40_branch_valid <= _GEN_3910;
+      memReg_40_branch_valid <= _GEN_3846;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_40_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h28 | 6'h28 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_40_branch_mask <= _GEN_4174;
+          memReg_40_branch_mask <= _GEN_4110;
         end else begin
-          memReg_40_branch_mask <= _GEN_3846;
+          memReg_40_branch_mask <= _GEN_3782;
         end
       end else begin
-        memReg_40_branch_mask <= _GEN_3846;
+        memReg_40_branch_mask <= _GEN_3782;
       end
     end else begin
-      memReg_40_branch_mask <= _GEN_3846;
+      memReg_40_branch_mask <= _GEN_3782;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_41_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48819,30 +52165,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h29 | 6'h29 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_41_branch_valid <= _GEN_3911;
+          memReg_41_branch_valid <= _GEN_3847;
         end else begin
-          memReg_41_branch_valid <= _GEN_4181;
+          memReg_41_branch_valid <= _GEN_4117;
         end
       end else begin
-        memReg_41_branch_valid <= _GEN_3911;
+        memReg_41_branch_valid <= _GEN_3847;
       end
     end else begin
-      memReg_41_branch_valid <= _GEN_3911;
+      memReg_41_branch_valid <= _GEN_3847;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_41_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h29 | 6'h29 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_41_branch_mask <= _GEN_4180;
+          memReg_41_branch_mask <= _GEN_4116;
         end else begin
-          memReg_41_branch_mask <= _GEN_3847;
+          memReg_41_branch_mask <= _GEN_3783;
         end
       end else begin
-        memReg_41_branch_mask <= _GEN_3847;
+        memReg_41_branch_mask <= _GEN_3783;
       end
     end else begin
-      memReg_41_branch_mask <= _GEN_3847;
+      memReg_41_branch_mask <= _GEN_3783;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_42_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48867,30 +52213,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2a | 6'h2a <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_42_branch_valid <= _GEN_3912;
+          memReg_42_branch_valid <= _GEN_3848;
         end else begin
-          memReg_42_branch_valid <= _GEN_4187;
+          memReg_42_branch_valid <= _GEN_4123;
         end
       end else begin
-        memReg_42_branch_valid <= _GEN_3912;
+        memReg_42_branch_valid <= _GEN_3848;
       end
     end else begin
-      memReg_42_branch_valid <= _GEN_3912;
+      memReg_42_branch_valid <= _GEN_3848;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_42_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2a | 6'h2a <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_42_branch_mask <= _GEN_4186;
+          memReg_42_branch_mask <= _GEN_4122;
         end else begin
-          memReg_42_branch_mask <= _GEN_3848;
+          memReg_42_branch_mask <= _GEN_3784;
         end
       end else begin
-        memReg_42_branch_mask <= _GEN_3848;
+        memReg_42_branch_mask <= _GEN_3784;
       end
     end else begin
-      memReg_42_branch_mask <= _GEN_3848;
+      memReg_42_branch_mask <= _GEN_3784;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_43_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48915,30 +52261,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2b | 6'h2b <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_43_branch_valid <= _GEN_3913;
+          memReg_43_branch_valid <= _GEN_3849;
         end else begin
-          memReg_43_branch_valid <= _GEN_4193;
+          memReg_43_branch_valid <= _GEN_4129;
         end
       end else begin
-        memReg_43_branch_valid <= _GEN_3913;
+        memReg_43_branch_valid <= _GEN_3849;
       end
     end else begin
-      memReg_43_branch_valid <= _GEN_3913;
+      memReg_43_branch_valid <= _GEN_3849;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_43_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2b | 6'h2b <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_43_branch_mask <= _GEN_4192;
+          memReg_43_branch_mask <= _GEN_4128;
         end else begin
-          memReg_43_branch_mask <= _GEN_3849;
+          memReg_43_branch_mask <= _GEN_3785;
         end
       end else begin
-        memReg_43_branch_mask <= _GEN_3849;
+        memReg_43_branch_mask <= _GEN_3785;
       end
     end else begin
-      memReg_43_branch_mask <= _GEN_3849;
+      memReg_43_branch_mask <= _GEN_3785;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_44_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -48963,30 +52309,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2c | 6'h2c <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_44_branch_valid <= _GEN_3914;
+          memReg_44_branch_valid <= _GEN_3850;
         end else begin
-          memReg_44_branch_valid <= _GEN_4199;
+          memReg_44_branch_valid <= _GEN_4135;
         end
       end else begin
-        memReg_44_branch_valid <= _GEN_3914;
+        memReg_44_branch_valid <= _GEN_3850;
       end
     end else begin
-      memReg_44_branch_valid <= _GEN_3914;
+      memReg_44_branch_valid <= _GEN_3850;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_44_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2c | 6'h2c <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_44_branch_mask <= _GEN_4198;
+          memReg_44_branch_mask <= _GEN_4134;
         end else begin
-          memReg_44_branch_mask <= _GEN_3850;
+          memReg_44_branch_mask <= _GEN_3786;
         end
       end else begin
-        memReg_44_branch_mask <= _GEN_3850;
+        memReg_44_branch_mask <= _GEN_3786;
       end
     end else begin
-      memReg_44_branch_mask <= _GEN_3850;
+      memReg_44_branch_mask <= _GEN_3786;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_45_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49011,30 +52357,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2d | 6'h2d <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_45_branch_valid <= _GEN_3915;
+          memReg_45_branch_valid <= _GEN_3851;
         end else begin
-          memReg_45_branch_valid <= _GEN_4205;
+          memReg_45_branch_valid <= _GEN_4141;
         end
       end else begin
-        memReg_45_branch_valid <= _GEN_3915;
+        memReg_45_branch_valid <= _GEN_3851;
       end
     end else begin
-      memReg_45_branch_valid <= _GEN_3915;
+      memReg_45_branch_valid <= _GEN_3851;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_45_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2d | 6'h2d <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_45_branch_mask <= _GEN_4204;
+          memReg_45_branch_mask <= _GEN_4140;
         end else begin
-          memReg_45_branch_mask <= _GEN_3851;
+          memReg_45_branch_mask <= _GEN_3787;
         end
       end else begin
-        memReg_45_branch_mask <= _GEN_3851;
+        memReg_45_branch_mask <= _GEN_3787;
       end
     end else begin
-      memReg_45_branch_mask <= _GEN_3851;
+      memReg_45_branch_mask <= _GEN_3787;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_46_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49059,30 +52405,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2e | 6'h2e <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_46_branch_valid <= _GEN_3916;
+          memReg_46_branch_valid <= _GEN_3852;
         end else begin
-          memReg_46_branch_valid <= _GEN_4211;
+          memReg_46_branch_valid <= _GEN_4147;
         end
       end else begin
-        memReg_46_branch_valid <= _GEN_3916;
+        memReg_46_branch_valid <= _GEN_3852;
       end
     end else begin
-      memReg_46_branch_valid <= _GEN_3916;
+      memReg_46_branch_valid <= _GEN_3852;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_46_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2e | 6'h2e <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_46_branch_mask <= _GEN_4210;
+          memReg_46_branch_mask <= _GEN_4146;
         end else begin
-          memReg_46_branch_mask <= _GEN_3852;
+          memReg_46_branch_mask <= _GEN_3788;
         end
       end else begin
-        memReg_46_branch_mask <= _GEN_3852;
+        memReg_46_branch_mask <= _GEN_3788;
       end
     end else begin
-      memReg_46_branch_mask <= _GEN_3852;
+      memReg_46_branch_mask <= _GEN_3788;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_47_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49107,30 +52453,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2f | 6'h2f <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_47_branch_valid <= _GEN_3917;
+          memReg_47_branch_valid <= _GEN_3853;
         end else begin
-          memReg_47_branch_valid <= _GEN_4217;
+          memReg_47_branch_valid <= _GEN_4153;
         end
       end else begin
-        memReg_47_branch_valid <= _GEN_3917;
+        memReg_47_branch_valid <= _GEN_3853;
       end
     end else begin
-      memReg_47_branch_valid <= _GEN_3917;
+      memReg_47_branch_valid <= _GEN_3853;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_47_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h2f | 6'h2f <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_47_branch_mask <= _GEN_4216;
+          memReg_47_branch_mask <= _GEN_4152;
         end else begin
-          memReg_47_branch_mask <= _GEN_3853;
+          memReg_47_branch_mask <= _GEN_3789;
         end
       end else begin
-        memReg_47_branch_mask <= _GEN_3853;
+        memReg_47_branch_mask <= _GEN_3789;
       end
     end else begin
-      memReg_47_branch_mask <= _GEN_3853;
+      memReg_47_branch_mask <= _GEN_3789;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_48_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49155,30 +52501,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h30 | 6'h30 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_48_branch_valid <= _GEN_3918;
+          memReg_48_branch_valid <= _GEN_3854;
         end else begin
-          memReg_48_branch_valid <= _GEN_4223;
+          memReg_48_branch_valid <= _GEN_4159;
         end
       end else begin
-        memReg_48_branch_valid <= _GEN_3918;
+        memReg_48_branch_valid <= _GEN_3854;
       end
     end else begin
-      memReg_48_branch_valid <= _GEN_3918;
+      memReg_48_branch_valid <= _GEN_3854;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_48_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h30 | 6'h30 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_48_branch_mask <= _GEN_4222;
+          memReg_48_branch_mask <= _GEN_4158;
         end else begin
-          memReg_48_branch_mask <= _GEN_3854;
+          memReg_48_branch_mask <= _GEN_3790;
         end
       end else begin
-        memReg_48_branch_mask <= _GEN_3854;
+        memReg_48_branch_mask <= _GEN_3790;
       end
     end else begin
-      memReg_48_branch_mask <= _GEN_3854;
+      memReg_48_branch_mask <= _GEN_3790;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_49_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49203,30 +52549,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h31 | 6'h31 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_49_branch_valid <= _GEN_3919;
+          memReg_49_branch_valid <= _GEN_3855;
         end else begin
-          memReg_49_branch_valid <= _GEN_4229;
+          memReg_49_branch_valid <= _GEN_4165;
         end
       end else begin
-        memReg_49_branch_valid <= _GEN_3919;
+        memReg_49_branch_valid <= _GEN_3855;
       end
     end else begin
-      memReg_49_branch_valid <= _GEN_3919;
+      memReg_49_branch_valid <= _GEN_3855;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_49_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h31 | 6'h31 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_49_branch_mask <= _GEN_4228;
+          memReg_49_branch_mask <= _GEN_4164;
         end else begin
-          memReg_49_branch_mask <= _GEN_3855;
+          memReg_49_branch_mask <= _GEN_3791;
         end
       end else begin
-        memReg_49_branch_mask <= _GEN_3855;
+        memReg_49_branch_mask <= _GEN_3791;
       end
     end else begin
-      memReg_49_branch_mask <= _GEN_3855;
+      memReg_49_branch_mask <= _GEN_3791;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_50_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49251,30 +52597,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h32 | 6'h32 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_50_branch_valid <= _GEN_3920;
+          memReg_50_branch_valid <= _GEN_3856;
         end else begin
-          memReg_50_branch_valid <= _GEN_4235;
+          memReg_50_branch_valid <= _GEN_4171;
         end
       end else begin
-        memReg_50_branch_valid <= _GEN_3920;
+        memReg_50_branch_valid <= _GEN_3856;
       end
     end else begin
-      memReg_50_branch_valid <= _GEN_3920;
+      memReg_50_branch_valid <= _GEN_3856;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_50_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h32 | 6'h32 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_50_branch_mask <= _GEN_4234;
+          memReg_50_branch_mask <= _GEN_4170;
         end else begin
-          memReg_50_branch_mask <= _GEN_3856;
+          memReg_50_branch_mask <= _GEN_3792;
         end
       end else begin
-        memReg_50_branch_mask <= _GEN_3856;
+        memReg_50_branch_mask <= _GEN_3792;
       end
     end else begin
-      memReg_50_branch_mask <= _GEN_3856;
+      memReg_50_branch_mask <= _GEN_3792;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_51_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49299,30 +52645,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h33 | 6'h33 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_51_branch_valid <= _GEN_3921;
+          memReg_51_branch_valid <= _GEN_3857;
         end else begin
-          memReg_51_branch_valid <= _GEN_4241;
+          memReg_51_branch_valid <= _GEN_4177;
         end
       end else begin
-        memReg_51_branch_valid <= _GEN_3921;
+        memReg_51_branch_valid <= _GEN_3857;
       end
     end else begin
-      memReg_51_branch_valid <= _GEN_3921;
+      memReg_51_branch_valid <= _GEN_3857;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_51_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h33 | 6'h33 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_51_branch_mask <= _GEN_4240;
+          memReg_51_branch_mask <= _GEN_4176;
         end else begin
-          memReg_51_branch_mask <= _GEN_3857;
+          memReg_51_branch_mask <= _GEN_3793;
         end
       end else begin
-        memReg_51_branch_mask <= _GEN_3857;
+        memReg_51_branch_mask <= _GEN_3793;
       end
     end else begin
-      memReg_51_branch_mask <= _GEN_3857;
+      memReg_51_branch_mask <= _GEN_3793;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_52_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49347,30 +52693,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h34 | 6'h34 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_52_branch_valid <= _GEN_3922;
+          memReg_52_branch_valid <= _GEN_3858;
         end else begin
-          memReg_52_branch_valid <= _GEN_4247;
+          memReg_52_branch_valid <= _GEN_4183;
         end
       end else begin
-        memReg_52_branch_valid <= _GEN_3922;
+        memReg_52_branch_valid <= _GEN_3858;
       end
     end else begin
-      memReg_52_branch_valid <= _GEN_3922;
+      memReg_52_branch_valid <= _GEN_3858;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_52_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h34 | 6'h34 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_52_branch_mask <= _GEN_4246;
+          memReg_52_branch_mask <= _GEN_4182;
         end else begin
-          memReg_52_branch_mask <= _GEN_3858;
+          memReg_52_branch_mask <= _GEN_3794;
         end
       end else begin
-        memReg_52_branch_mask <= _GEN_3858;
+        memReg_52_branch_mask <= _GEN_3794;
       end
     end else begin
-      memReg_52_branch_mask <= _GEN_3858;
+      memReg_52_branch_mask <= _GEN_3794;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_53_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49395,30 +52741,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h35 | 6'h35 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_53_branch_valid <= _GEN_3923;
+          memReg_53_branch_valid <= _GEN_3859;
         end else begin
-          memReg_53_branch_valid <= _GEN_4253;
+          memReg_53_branch_valid <= _GEN_4189;
         end
       end else begin
-        memReg_53_branch_valid <= _GEN_3923;
+        memReg_53_branch_valid <= _GEN_3859;
       end
     end else begin
-      memReg_53_branch_valid <= _GEN_3923;
+      memReg_53_branch_valid <= _GEN_3859;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_53_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h35 | 6'h35 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_53_branch_mask <= _GEN_4252;
+          memReg_53_branch_mask <= _GEN_4188;
         end else begin
-          memReg_53_branch_mask <= _GEN_3859;
+          memReg_53_branch_mask <= _GEN_3795;
         end
       end else begin
-        memReg_53_branch_mask <= _GEN_3859;
+        memReg_53_branch_mask <= _GEN_3795;
       end
     end else begin
-      memReg_53_branch_mask <= _GEN_3859;
+      memReg_53_branch_mask <= _GEN_3795;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_54_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49443,30 +52789,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h36 | 6'h36 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_54_branch_valid <= _GEN_3924;
+          memReg_54_branch_valid <= _GEN_3860;
         end else begin
-          memReg_54_branch_valid <= _GEN_4259;
+          memReg_54_branch_valid <= _GEN_4195;
         end
       end else begin
-        memReg_54_branch_valid <= _GEN_3924;
+        memReg_54_branch_valid <= _GEN_3860;
       end
     end else begin
-      memReg_54_branch_valid <= _GEN_3924;
+      memReg_54_branch_valid <= _GEN_3860;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_54_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h36 | 6'h36 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_54_branch_mask <= _GEN_4258;
+          memReg_54_branch_mask <= _GEN_4194;
         end else begin
-          memReg_54_branch_mask <= _GEN_3860;
+          memReg_54_branch_mask <= _GEN_3796;
         end
       end else begin
-        memReg_54_branch_mask <= _GEN_3860;
+        memReg_54_branch_mask <= _GEN_3796;
       end
     end else begin
-      memReg_54_branch_mask <= _GEN_3860;
+      memReg_54_branch_mask <= _GEN_3796;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_55_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49491,30 +52837,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h37 | 6'h37 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_55_branch_valid <= _GEN_3925;
+          memReg_55_branch_valid <= _GEN_3861;
         end else begin
-          memReg_55_branch_valid <= _GEN_4265;
+          memReg_55_branch_valid <= _GEN_4201;
         end
       end else begin
-        memReg_55_branch_valid <= _GEN_3925;
+        memReg_55_branch_valid <= _GEN_3861;
       end
     end else begin
-      memReg_55_branch_valid <= _GEN_3925;
+      memReg_55_branch_valid <= _GEN_3861;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_55_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h37 | 6'h37 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_55_branch_mask <= _GEN_4264;
+          memReg_55_branch_mask <= _GEN_4200;
         end else begin
-          memReg_55_branch_mask <= _GEN_3861;
+          memReg_55_branch_mask <= _GEN_3797;
         end
       end else begin
-        memReg_55_branch_mask <= _GEN_3861;
+        memReg_55_branch_mask <= _GEN_3797;
       end
     end else begin
-      memReg_55_branch_mask <= _GEN_3861;
+      memReg_55_branch_mask <= _GEN_3797;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_56_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49539,30 +52885,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h38 | 6'h38 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_56_branch_valid <= _GEN_3926;
+          memReg_56_branch_valid <= _GEN_3862;
         end else begin
-          memReg_56_branch_valid <= _GEN_4271;
+          memReg_56_branch_valid <= _GEN_4207;
         end
       end else begin
-        memReg_56_branch_valid <= _GEN_3926;
+        memReg_56_branch_valid <= _GEN_3862;
       end
     end else begin
-      memReg_56_branch_valid <= _GEN_3926;
+      memReg_56_branch_valid <= _GEN_3862;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_56_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h38 | 6'h38 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_56_branch_mask <= _GEN_4270;
+          memReg_56_branch_mask <= _GEN_4206;
         end else begin
-          memReg_56_branch_mask <= _GEN_3862;
+          memReg_56_branch_mask <= _GEN_3798;
         end
       end else begin
-        memReg_56_branch_mask <= _GEN_3862;
+        memReg_56_branch_mask <= _GEN_3798;
       end
     end else begin
-      memReg_56_branch_mask <= _GEN_3862;
+      memReg_56_branch_mask <= _GEN_3798;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_57_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49587,30 +52933,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h39 | 6'h39 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_57_branch_valid <= _GEN_3927;
+          memReg_57_branch_valid <= _GEN_3863;
         end else begin
-          memReg_57_branch_valid <= _GEN_4277;
+          memReg_57_branch_valid <= _GEN_4213;
         end
       end else begin
-        memReg_57_branch_valid <= _GEN_3927;
+        memReg_57_branch_valid <= _GEN_3863;
       end
     end else begin
-      memReg_57_branch_valid <= _GEN_3927;
+      memReg_57_branch_valid <= _GEN_3863;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_57_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h39 | 6'h39 <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_57_branch_mask <= _GEN_4276;
+          memReg_57_branch_mask <= _GEN_4212;
         end else begin
-          memReg_57_branch_mask <= _GEN_3863;
+          memReg_57_branch_mask <= _GEN_3799;
         end
       end else begin
-        memReg_57_branch_mask <= _GEN_3863;
+        memReg_57_branch_mask <= _GEN_3799;
       end
     end else begin
-      memReg_57_branch_mask <= _GEN_3863;
+      memReg_57_branch_mask <= _GEN_3799;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_58_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49635,30 +52981,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3a | 6'h3a <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_58_branch_valid <= _GEN_3928;
+          memReg_58_branch_valid <= _GEN_3864;
         end else begin
-          memReg_58_branch_valid <= _GEN_4283;
+          memReg_58_branch_valid <= _GEN_4219;
         end
       end else begin
-        memReg_58_branch_valid <= _GEN_3928;
+        memReg_58_branch_valid <= _GEN_3864;
       end
     end else begin
-      memReg_58_branch_valid <= _GEN_3928;
+      memReg_58_branch_valid <= _GEN_3864;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_58_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3a | 6'h3a <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_58_branch_mask <= _GEN_4282;
+          memReg_58_branch_mask <= _GEN_4218;
         end else begin
-          memReg_58_branch_mask <= _GEN_3864;
+          memReg_58_branch_mask <= _GEN_3800;
         end
       end else begin
-        memReg_58_branch_mask <= _GEN_3864;
+        memReg_58_branch_mask <= _GEN_3800;
       end
     end else begin
-      memReg_58_branch_mask <= _GEN_3864;
+      memReg_58_branch_mask <= _GEN_3800;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_59_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49683,30 +53029,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3b | 6'h3b <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_59_branch_valid <= _GEN_3929;
+          memReg_59_branch_valid <= _GEN_3865;
         end else begin
-          memReg_59_branch_valid <= _GEN_4289;
+          memReg_59_branch_valid <= _GEN_4225;
         end
       end else begin
-        memReg_59_branch_valid <= _GEN_3929;
+        memReg_59_branch_valid <= _GEN_3865;
       end
     end else begin
-      memReg_59_branch_valid <= _GEN_3929;
+      memReg_59_branch_valid <= _GEN_3865;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_59_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3b | 6'h3b <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_59_branch_mask <= _GEN_4288;
+          memReg_59_branch_mask <= _GEN_4224;
         end else begin
-          memReg_59_branch_mask <= _GEN_3865;
+          memReg_59_branch_mask <= _GEN_3801;
         end
       end else begin
-        memReg_59_branch_mask <= _GEN_3865;
+        memReg_59_branch_mask <= _GEN_3801;
       end
     end else begin
-      memReg_59_branch_mask <= _GEN_3865;
+      memReg_59_branch_mask <= _GEN_3801;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_60_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49731,30 +53077,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3c | 6'h3c <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_60_branch_valid <= _GEN_3930;
+          memReg_60_branch_valid <= _GEN_3866;
         end else begin
-          memReg_60_branch_valid <= _GEN_4295;
+          memReg_60_branch_valid <= _GEN_4231;
         end
       end else begin
-        memReg_60_branch_valid <= _GEN_3930;
+        memReg_60_branch_valid <= _GEN_3866;
       end
     end else begin
-      memReg_60_branch_valid <= _GEN_3930;
+      memReg_60_branch_valid <= _GEN_3866;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_60_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3c | 6'h3c <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_60_branch_mask <= _GEN_4294;
+          memReg_60_branch_mask <= _GEN_4230;
         end else begin
-          memReg_60_branch_mask <= _GEN_3866;
+          memReg_60_branch_mask <= _GEN_3802;
         end
       end else begin
-        memReg_60_branch_mask <= _GEN_3866;
+        memReg_60_branch_mask <= _GEN_3802;
       end
     end else begin
-      memReg_60_branch_mask <= _GEN_3866;
+      memReg_60_branch_mask <= _GEN_3802;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_61_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49779,30 +53125,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3d | 6'h3d <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_61_branch_valid <= _GEN_3931;
+          memReg_61_branch_valid <= _GEN_3867;
         end else begin
-          memReg_61_branch_valid <= _GEN_4301;
+          memReg_61_branch_valid <= _GEN_4237;
         end
       end else begin
-        memReg_61_branch_valid <= _GEN_3931;
+        memReg_61_branch_valid <= _GEN_3867;
       end
     end else begin
-      memReg_61_branch_valid <= _GEN_3931;
+      memReg_61_branch_valid <= _GEN_3867;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_61_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3d | 6'h3d <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_61_branch_mask <= _GEN_4300;
+          memReg_61_branch_mask <= _GEN_4236;
         end else begin
-          memReg_61_branch_mask <= _GEN_3867;
+          memReg_61_branch_mask <= _GEN_3803;
         end
       end else begin
-        memReg_61_branch_mask <= _GEN_3867;
+        memReg_61_branch_mask <= _GEN_3803;
       end
     end else begin
-      memReg_61_branch_mask <= _GEN_3867;
+      memReg_61_branch_mask <= _GEN_3803;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_62_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49827,30 +53173,30 @@ module fifoRecordInvalidateI(
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3e | 6'h3e <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_62_branch_valid <= _GEN_3932;
+          memReg_62_branch_valid <= _GEN_3868;
         end else begin
-          memReg_62_branch_valid <= _GEN_4307;
+          memReg_62_branch_valid <= _GEN_4243;
         end
       end else begin
-        memReg_62_branch_valid <= _GEN_3932;
+        memReg_62_branch_valid <= _GEN_3868;
       end
     end else begin
-      memReg_62_branch_valid <= _GEN_3932;
+      memReg_62_branch_valid <= _GEN_3868;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_62_branch_mask <= 5'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (startPointer <= 6'h3e | 6'h3e <= endPointer) begin // @[fifo.scala 106:54]
         if (branchOps_passed) begin // @[fifo.scala 107:32]
-          memReg_62_branch_mask <= _GEN_4306;
+          memReg_62_branch_mask <= _GEN_4242;
         end else begin
-          memReg_62_branch_mask <= _GEN_3868;
+          memReg_62_branch_mask <= _GEN_3804;
         end
       end else begin
-        memReg_62_branch_mask <= _GEN_3868;
+        memReg_62_branch_mask <= _GEN_3804;
       end
     end else begin
-      memReg_62_branch_mask <= _GEN_3868;
+      memReg_62_branch_mask <= _GEN_3804;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_63_valid <= 1'h0; // @[fifo.scala 27:33]
@@ -49874,14 +53220,14 @@ module fifoRecordInvalidateI(
       memReg_63_branch_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (branchOps_valid) begin // @[fifo.scala 104:25]
       if (branchOps_passed) begin // @[fifo.scala 107:32]
-        memReg_63_branch_valid <= _GEN_3933;
+        memReg_63_branch_valid <= _GEN_3869;
       end else if (_T_457) begin // @[fifo.scala 112:68]
         memReg_63_branch_valid <= 1'h0; // @[fifo.scala 113:36]
       end else begin
-        memReg_63_branch_valid <= _GEN_3933;
+        memReg_63_branch_valid <= _GEN_3869;
       end
     end else begin
-      memReg_63_branch_valid <= _GEN_3933;
+      memReg_63_branch_valid <= _GEN_3869;
     end
     if (reset) begin // @[fifo.scala 27:33]
       memReg_63_branch_mask <= 5'h0; // @[fifo.scala 27:33]
@@ -49890,13 +53236,13 @@ module fifoRecordInvalidateI(
         if (|_T_456) begin // @[fifo.scala 108:68]
           memReg_63_branch_mask <= _memReg_63_branch_mask_T; // @[fifo.scala 109:35]
         end else begin
-          memReg_63_branch_mask <= _GEN_3869;
+          memReg_63_branch_mask <= _GEN_3805;
         end
       end else begin
-        memReg_63_branch_mask <= _GEN_3869;
+        memReg_63_branch_mask <= _GEN_3805;
       end
     end else begin
-      memReg_63_branch_mask <= _GEN_3869;
+      memReg_63_branch_mask <= _GEN_3805;
     end
     if (reset) begin // @[fifo.scala 33:25]
       readPtr <= 6'h0; // @[fifo.scala 33:25]
@@ -50800,6 +54146,8 @@ module core_Anon_1(
   wire  replayUnit_branchOps_valid; // @[cacheModule.scala 51:26]
   wire [4:0] replayUnit_branchOps_branchMask; // @[cacheModule.scala 51:26]
   wire  replayUnit_branchOps_passed; // @[cacheModule.scala 51:26]
+  wire  replayUnit_coherencyRequest_valid; // @[cacheModule.scala 51:26]
+  wire [31:0] replayUnit_coherencyRequest_address; // @[cacheModule.scala 51:26]
   wire  replayUnit_fenceReady; // @[cacheModule.scala 51:26]
   wire  peripheralUnit_clock; // @[cacheModule.scala 52:30]
   wire  peripheralUnit_reset; // @[cacheModule.scala 52:30]
@@ -51169,6 +54517,8 @@ module core_Anon_1(
     .branchOps_valid(replayUnit_branchOps_valid),
     .branchOps_branchMask(replayUnit_branchOps_branchMask),
     .branchOps_passed(replayUnit_branchOps_passed),
+    .coherencyRequest_valid(replayUnit_coherencyRequest_valid),
+    .coherencyRequest_address(replayUnit_coherencyRequest_address),
     .fenceReady(replayUnit_fenceReady)
   );
   peripheralUnit peripheralUnit ( // @[cacheModule.scala 52:30]
@@ -51467,6 +54817,8 @@ module core_Anon_1(
   assign replayUnit_branchOps_valid = branchOps_valid; // @[cacheModule.scala 115:24]
   assign replayUnit_branchOps_branchMask = branchOps_branchMask; // @[cacheModule.scala 115:24]
   assign replayUnit_branchOps_passed = branchOps_passed; // @[cacheModule.scala 115:24]
+  assign replayUnit_coherencyRequest_valid = aceUnit_coherencyRequest_request_valid; // @[cacheModule.scala 120:31]
+  assign replayUnit_coherencyRequest_address = aceUnit_coherencyRequest_request_address; // @[cacheModule.scala 120:31]
   assign peripheralUnit_clock = clock;
   assign peripheralUnit_reset = reset;
   assign peripheralUnit_request_request_valid = arbiter_toPeripheral_request_valid; // @[cacheModule.scala 134:26]

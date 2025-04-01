@@ -81,7 +81,7 @@ class replayUnit extends Module{
   }
   when(requestIn.request.valid && requestIn.request.branch.valid){
     requestWaitFIFO.write.data := requestIn.request
-    regReadUpdate(requestWaitFIFO.write.data.branch, branchOps, requestIn.request.branch)
+    regWriteUpdate(requestWaitFIFO.write.data.branch, branchOps, requestIn.request.branch)
   }
   requestOut.request := requestWaitFIFO.read.data
 
@@ -92,7 +92,7 @@ class replayUnit extends Module{
   }
   when(responseIn.request.valid && responseIn.request.branch.valid){
     responseWaitFIFO.write.data := responseIn.request
-    regReadUpdate(responseWaitFIFO.write.data.branch, branchOps, requestIn.request.branch)
+    regWriteUpdate(responseWaitFIFO.write.data.branch, branchOps, responseIn.request.branch)
   }
   responseOut.request := responseWaitFIFO.read.data
   when(coherencyRequest.valid){

@@ -67,7 +67,7 @@ object ChiselUtils {
         buffer.valid := wireBundle.valid 
       }.otherwise {
         // BranchFail and match
-        when((buffer.mask & branchOps.branchMask).orR) {
+        when((wireBundle.mask & branchOps.branchMask).orR) {
           buffer.valid := false.B
           buffer.mask := 0.U
         }.otherwise {
