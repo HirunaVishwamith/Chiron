@@ -16402,10 +16402,7 @@ circuit system :
     reg readBuffer : { valid : UInt<1>, address : UInt<32>, core : { instruction : UInt<32>, robAddr : UInt<4>, prfDest : UInt<6>}, branch : { valid : UInt<1>, mask : UInt<5>}, writeData : { valid : UInt<1>, data : UInt<64>}, cacheLine : { valid : UInt<1>, cacheLine : UInt<512>, response : UInt<2>, required : UInt<1>, invalidated : UInt<1>}}, clock with :
       reset => (reset, _readBuffer_WIRE) @[ACEUnit.scala 104:28]
     node _readRequest_ready_T = eq(readBuffer.valid, UInt<1>("h0")) @[ACEUnit.scala 105:24]
-    node _readRequest_ready_T_1 = eq(readBuffer.branch.valid, UInt<1>("h0")) @[ACEUnit.scala 105:66]
-    node _readRequest_ready_T_2 = and(readBuffer.valid, _readRequest_ready_T_1) @[ACEUnit.scala 105:63]
-    node _readRequest_ready_T_3 = or(_readRequest_ready_T, _readRequest_ready_T_2) @[ACEUnit.scala 105:42]
-    readRequest.ready <= _readRequest_ready_T_3 @[ACEUnit.scala 105:21]
+    readRequest.ready <= _readRequest_ready_T @[ACEUnit.scala 105:21]
     node _T = and(readRequest.request.valid, readRequest.request.branch.valid) @[ACEUnit.scala 106:34]
     node _T_1 = and(_T, readRequest.ready) @[ACEUnit.scala 106:70]
     when _T_1 : @[ACEUnit.scala 106:91]

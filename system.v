@@ -47179,7 +47179,7 @@ module ACEUnit(
     .count(coherentCounter_count),
     .incrm(coherentCounter_incrm)
   );
-  assign readRequest_ready = ~readBuffer_valid | readBuffer_valid & ~readBuffer_branch_valid; // @[ACEUnit.scala 105:42]
+  assign readRequest_ready = ~readBuffer_valid; // @[ACEUnit.scala 105:24]
   assign readResponse_request_valid = responseBuffer_valid; // @[ACEUnit.scala 114:24]
   assign readResponse_request_address = responseBuffer_address; // @[ACEUnit.scala 114:24]
   assign readResponse_request_core_instruction = responseBuffer_core_instruction; // @[ACEUnit.scala 114:24]

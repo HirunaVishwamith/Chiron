@@ -102,7 +102,7 @@ class ACEUnit(
   bus.CDLAST := false.B
 
   val readBuffer =  RegInit(0.U.asTypeOf(new requestPipelineWire))
-  readRequest.ready := !readBuffer.valid || (readBuffer.valid && !readBuffer.branch.valid)
+  readRequest.ready := !readBuffer.valid //|| (readBuffer.valid && !readBuffer.branch.valid)
   when(readRequest.request.valid && readRequest.request.branch.valid && readRequest.ready){
     readBuffer := readRequest.request
     regWriteUpdate(readBuffer.branch, branchOps, readRequest.request.branch)

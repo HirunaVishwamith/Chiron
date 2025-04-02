@@ -85,5 +85,5 @@ fyp18-riscv-emulator/riscv-tests/images/rv64um-p-remw.bin: test pass
 vvadd: test pass
 matmul: test pass
 filter: test pass
-csaxpy: test fail
+csaxpy: test pass
 histo: test pass
