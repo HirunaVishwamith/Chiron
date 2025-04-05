@@ -12072,11 +12072,11 @@ circuit system :
       writeCommitInstructionBuffer <= UInt<1>("h0") @[cacheLookupUnit.scala 187:34]
     node _request_ready_T = and(toReplay.ready, toWriteBack.ready) @[cacheLookupUnit.scala 193:35]
     node _request_ready_T_1 = and(_request_ready_T, toCoherency.ready) @[cacheLookupUnit.scala 193:56]
-    node _request_ready_T_2 = eq(writeCommitInstructionBuffer, UInt<1>("h0")) @[cacheLookupUnit.scala 193:80]
-    node _request_ready_T_3 = and(_request_ready_T_1, _request_ready_T_2) @[cacheLookupUnit.scala 193:77]
-    request.ready <= _request_ready_T_3 @[cacheLookupUnit.scala 193:17]
+    request.ready <= _request_ready_T_1 @[cacheLookupUnit.scala 193:17]
     node _request_holdInOrder_T = and(lastMissRecordRegister.valid, lastMissRecordRegister.branch.valid) @[cacheLookupUnit.scala 194:55]
-    request.holdInOrder <= _request_holdInOrder_T @[cacheLookupUnit.scala 194:23]
+    node _request_holdInOrder_T_1 = eq(writeCommitInstructionBuffer, UInt<1>("h0")) @[cacheLookupUnit.scala 194:97]
+    node _request_holdInOrder_T_2 = and(_request_holdInOrder_T, _request_holdInOrder_T_1) @[cacheLookupUnit.scala 194:94]
+    request.holdInOrder <= _request_holdInOrder_T_2 @[cacheLookupUnit.scala 194:23]
     dataBRAMVec[0].rdAddr <= UInt<1>("h0") @[cacheLookupUnit.scala 199:45]
     dataBRAMVec[1].rdAddr <= UInt<1>("h0") @[cacheLookupUnit.scala 199:45]
     dataBRAMVec[2].rdAddr <= UInt<1>("h0") @[cacheLookupUnit.scala 199:45]
@@ -12151,8 +12151,8 @@ circuit system :
       node _isSCWriteWire_T = and(isSCWire, readBuffer.writeData.valid) @[cacheLookupUnit.scala 225:46]
       wire isSCWriteWire : UInt<1>
       isSCWriteWire <= _isSCWriteWire_T
-      reg requiredResponseReg : UInt<2>, clock with :
-        reset => (reset, UInt<2>("h0")) @[cacheLookupUnit.scala 226:38]
+      wire requiredResponseWire : UInt<2>
+      requiredResponseWire <= UInt<2>("h0")
       node _tagChunks_T = bits(tagBRAM.rdData, 22, 0) @[cacheLookupUnit.scala 230:21]
       node _tagChunks_T_1 = bits(tagBRAM.rdData, 45, 23) @[cacheLookupUnit.scala 230:21]
       node _tagChunks_T_2 = bits(tagBRAM.rdData, 68, 46) @[cacheLookupUnit.scala 230:21]
@@ -12866,9 +12866,9 @@ circuit system :
           dataBRAMUpdateWire <= _dataBRAMUpdateWire_T @[cacheLookupUnit.scala 407:28]
         else :
           toReplayValidWire <= UInt<1>("h1") @[cacheLookupUnit.scala 409:27]
-          node _requiredResponseReg_T = or(isLRReadWire, isAtmoicReadWire) @[cacheLookupUnit.scala 410:49]
-          node _requiredResponseReg_T_1 = mux(_requiredResponseReg_T, UInt<1>("h1"), UInt<1>("h0")) @[cacheLookupUnit.scala 410:35]
-          requiredResponseReg <= _requiredResponseReg_T_1 @[cacheLookupUnit.scala 410:29]
+          node _requiredResponseWire_T = or(isLRReadWire, isAtmoicReadWire) @[cacheLookupUnit.scala 410:50]
+          node _requiredResponseWire_T_1 = mux(_requiredResponseWire_T, UInt<1>("h1"), UInt<1>("h0")) @[cacheLookupUnit.scala 410:36]
+          requiredResponseWire <= _requiredResponseWire_T_1 @[cacheLookupUnit.scala 410:30]
           node _toLastMissRecordRegister_T = eq(isReadWire, UInt<1>("h0")) @[cacheLookupUnit.scala 411:37]
           toLastMissRecordRegister <= _toLastMissRecordRegister_T @[cacheLookupUnit.scala 411:34]
       when isLRWriteWire : @[cacheLookupUnit.scala 414:24]
@@ -12893,10 +12893,10 @@ circuit system :
           writeCommitInstructionBuffer <= UInt<1>("h1") @[cacheLookupUnit.scala 424:38]
         else :
           toReplayValidWire <= UInt<1>("h1") @[cacheLookupUnit.scala 426:27]
-          node _requiredResponseReg_T_2 = eq(isDataMissWire, UInt<1>("h0")) @[cacheLookupUnit.scala 427:56]
-          node _requiredResponseReg_T_3 = and(isPermissionMiss, _requiredResponseReg_T_2) @[cacheLookupUnit.scala 427:53]
-          node _requiredResponseReg_T_4 = mux(_requiredResponseReg_T_3, UInt<2>("h3"), UInt<1>("h1")) @[cacheLookupUnit.scala 427:35]
-          requiredResponseReg <= _requiredResponseReg_T_4 @[cacheLookupUnit.scala 427:29]
+          node _requiredResponseWire_T_2 = eq(isDataMissWire, UInt<1>("h0")) @[cacheLookupUnit.scala 427:57]
+          node _requiredResponseWire_T_3 = and(isPermissionMiss, _requiredResponseWire_T_2) @[cacheLookupUnit.scala 427:54]
+          node _requiredResponseWire_T_4 = mux(_requiredResponseWire_T_3, UInt<2>("h3"), UInt<1>("h1")) @[cacheLookupUnit.scala 427:36]
+          requiredResponseWire <= _requiredResponseWire_T_4 @[cacheLookupUnit.scala 427:30]
           toLastMissRecordRegister <= UInt<1>("h1") @[cacheLookupUnit.scala 428:34]
       when isSCReadWire : @[cacheLookupUnit.scala 431:23]
         toMemoryResponseValidWire <= UInt<1>("h1") @[cacheLookupUnit.scala 431:50]
@@ -13027,7 +13027,7 @@ circuit system :
       node _T_129 = and(toReplayValidWire, readBuffer.branch.valid) @[cacheLookupUnit.scala 476:28]
       when _T_129 : @[cacheLookupUnit.scala 476:55]
         replayBuffer <= readBuffer @[cacheLookupUnit.scala 477:20]
-        replayBuffer.cacheLine.response <= requiredResponseReg @[cacheLookupUnit.scala 478:39]
+        replayBuffer.cacheLine.response <= requiredResponseWire @[cacheLookupUnit.scala 478:39]
         replayBuffer.cacheLine.invalidated <= UInt<1>("h0") @[cacheLookupUnit.scala 479:42]
       node _T_130 = and(toMemoryResponseValidWire, readBuffer.branch.valid) @[cacheLookupUnit.scala 483:36]
       when _T_130 : @[cacheLookupUnit.scala 483:63]

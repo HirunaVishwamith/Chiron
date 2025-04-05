@@ -38553,7 +38553,6 @@ module cacheLookupUnit(
   reg [31:0] _RAND_50;
   reg [511:0] _RAND_51;
   reg [31:0] _RAND_52;
-  reg [31:0] _RAND_53;
 `endif // RANDOMIZE_REG_INIT
   wire  dataBRAM_0_clock; // @[cacheLookupUnit.scala 60:39]
   wire [6:0] dataBRAM_0_rdAddr; // @[cacheLookupUnit.scala 60:39]
@@ -38682,7 +38681,6 @@ module cacheLookupUnit(
   wire  isLRWriteWire = isLRWire & readBuffer_writeData_valid; // @[cacheLookupUnit.scala 223:46]
   wire  isSCReadWire = isSCWire & _isAtmoicReadWire_T; // @[cacheLookupUnit.scala 224:45]
   wire  isSCWriteWire = isSCWire & readBuffer_writeData_valid; // @[cacheLookupUnit.scala 225:46]
-  reg [1:0] requiredResponseReg; // @[cacheLookupUnit.scala 226:38]
   wire [22:0] tagChunks_0 = tagBRAM_rdData[22:0]; // @[cacheLookupUnit.scala 230:21]
   wire [22:0] tagChunks_1 = tagBRAM_rdData[45:23]; // @[cacheLookupUnit.scala 230:21]
   wire [22:0] tagChunks_2 = tagBRAM_rdData[68:46]; // @[cacheLookupUnit.scala 230:21]
@@ -39300,26 +39298,27 @@ module cacheLookupUnit(
   wire [6:0] _GEN_553 = 2'h2 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 398:{37,37} 75:28]
   wire [6:0] _GEN_554 = 2'h3 == updatingSet ? readBuffer_address[12:6] : 7'h0; // @[cacheLookupUnit.scala 398:{37,37} 75:28]
   wire  _toWriteBackValidWire_T_2 = isUpdateDirtyWire & isUpdateValidWire & isReplayValidWire & isDataMissWire; // @[cacheLookupUnit.scala 406:95]
-  wire  _requiredResponseReg_T = isLRReadWire | isAtmoicReadWire; // @[cacheLookupUnit.scala 410:49]
+  wire  _requiredResponseWire_T = isLRReadWire | isAtmoicReadWire; // @[cacheLookupUnit.scala 410:50]
   wire  _GEN_556 = (_cacheLineChoosen_T | _isPermissionMiss_T) & isLRReadWire; // @[cacheLookupUnit.scala 402:67 405:35]
   wire  _GEN_557 = (_cacheLineChoosen_T | _isPermissionMiss_T) & (isUpdateDirtyWire & isUpdateValidWire &
     isReplayValidWire & isDataMissWire); // @[cacheLookupUnit.scala 402:67 406:30]
   wire  _GEN_559 = _cacheLineChoosen_T | _isPermissionMiss_T ? 1'h0 : 1'h1; // @[cacheLookupUnit.scala 402:67 409:27]
-  wire [1:0] _GEN_560 = _cacheLineChoosen_T | _isPermissionMiss_T ? requiredResponseReg : {{1'd0},
-    _requiredResponseReg_T}; // @[cacheLookupUnit.scala 226:38 402:67 410:29]
+  wire [1:0] _GEN_560 = _cacheLineChoosen_T | _isPermissionMiss_T ? 2'h0 : {{1'd0}, _requiredResponseWire_T}; // @[cacheLookupUnit.scala 402:67 410:30]
   wire  _GEN_561 = _cacheLineChoosen_T | _isPermissionMiss_T ? 1'h0 : ~isReadWire; // @[cacheLookupUnit.scala 402:67 411:34]
   wire  _GEN_562 = _T_10 & _T_117; // @[cacheLookupUnit.scala 401:57]
   wire  _GEN_563 = _T_10 & _GEN_556; // @[cacheLookupUnit.scala 401:57]
   wire  _GEN_564 = _T_10 & _GEN_557; // @[cacheLookupUnit.scala 401:57]
   wire  _GEN_566 = _T_10 & _GEN_559; // @[cacheLookupUnit.scala 401:57]
-  wire [1:0] _GEN_567 = _T_10 ? _GEN_560 : requiredResponseReg; // @[cacheLookupUnit.scala 226:38 401:57]
+  wire [1:0] _GEN_567 = _T_10 ? _GEN_560 : 2'h0; // @[cacheLookupUnit.scala 401:57]
   wire  _GEN_568 = _T_10 & _GEN_561; // @[cacheLookupUnit.scala 401:57]
   wire  _GEN_569 = isLRWriteWire | _GEN_49; // @[cacheLookupUnit.scala 414:{24,54}]
   wire  _GEN_571 = isCoherentWire ? _isPermissionMiss_T : _GEN_562; // @[cacheLookupUnit.scala 415:25 417:24]
+  wire [1:0] _requiredResponseWire_T_4 = isPermissionMiss & _isPermissionMiss_T ? 2'h3 : 2'h1; // @[cacheLookupUnit.scala 427:36]
   wire  _GEN_572 = isReplayValidWire | _T_17 ? _toWriteBackValidWire_T_2 : _GEN_564; // @[cacheLookupUnit.scala 420:72 421:30]
   wire  _GEN_573 = isReplayValidWire | _T_17 | _GEN_571; // @[cacheLookupUnit.scala 420:72 422:26]
   wire  _GEN_575 = isReplayValidWire | _T_17 | _GEN_569; // @[cacheLookupUnit.scala 420:72 424:38]
   wire  _GEN_576 = isReplayValidWire | _T_17 ? _GEN_566 : 1'h1; // @[cacheLookupUnit.scala 420:72 426:27]
+  wire [1:0] _GEN_577 = isReplayValidWire | _T_17 ? _GEN_567 : _requiredResponseWire_T_4; // @[cacheLookupUnit.scala 420:72 427:30]
   wire  _GEN_578 = isReplayValidWire | _T_17 ? _GEN_568 : 1'h1; // @[cacheLookupUnit.scala 420:72 428:34]
   wire  _GEN_579 = _T_13 ? _GEN_572 : _GEN_564; // @[cacheLookupUnit.scala 419:43]
   wire  _GEN_580 = _T_13 ? _GEN_573 : _GEN_571; // @[cacheLookupUnit.scala 419:43]
@@ -39541,8 +39540,9 @@ module cacheLookupUnit(
     .wrData(tagBRAM_wrData),
     .wrEna(tagBRAM_wrEna)
   );
-  assign request_ready = toReplay_ready & toWriteBack_ready & toCoherency_ready & ~writeCommitInstructionBuffer; // @[cacheLookupUnit.scala 193:77]
-  assign request_holdInOrder = lastMissRecordRegister_valid & lastMissRecordRegister_branch_valid; // @[cacheLookupUnit.scala 194:55]
+  assign request_ready = toReplay_ready & toWriteBack_ready & toCoherency_ready; // @[cacheLookupUnit.scala 193:56]
+  assign request_holdInOrder = lastMissRecordRegister_valid & lastMissRecordRegister_branch_valid & ~
+    writeCommitInstructionBuffer; // @[cacheLookupUnit.scala 194:94]
   assign toReplay_request_valid = toReplay_ready & replayBuffer_valid; // @[cacheLookupUnit.scala 155:23 156:22 utils.scala 48:41]
   assign toReplay_request_address = toReplay_ready ? replayBuffer_address : 32'h0; // @[cacheLookupUnit.scala 155:23 156:22 utils.scala 49:41]
   assign toReplay_request_core_instruction = toReplay_ready ? replayBuffer_core_instruction : 32'h0; // @[cacheLookupUnit.scala 155:23 156:22 utils.scala 49:41]
@@ -39898,7 +39898,11 @@ module cacheLookupUnit(
       replayBuffer_cacheLine_response <= 2'h0; // @[cacheLookupUnit.scala 153:29]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 212:23]
       if (toReplayValidWire & readBuffer_branch_valid) begin // @[cacheLookupUnit.scala 476:55]
-        replayBuffer_cacheLine_response <= requiredResponseReg; // @[cacheLookupUnit.scala 478:39]
+        if (_T_13) begin // @[cacheLookupUnit.scala 419:43]
+          replayBuffer_cacheLine_response <= _GEN_577;
+        end else begin
+          replayBuffer_cacheLine_response <= _GEN_567;
+        end
       end
     end
     if (reset) begin // @[cacheLookupUnit.scala 160:37]
@@ -40049,19 +40053,6 @@ module cacheLookupUnit(
     end else if (writeInstructionCommit_fired) begin // @[cacheLookupUnit.scala 186:37]
       writeCommitInstructionBuffer <= 1'h0; // @[cacheLookupUnit.scala 187:34]
     end
-    if (reset) begin // @[cacheLookupUnit.scala 226:38]
-      requiredResponseReg <= 2'h0; // @[cacheLookupUnit.scala 226:38]
-    end else if (_T_13) begin // @[cacheLookupUnit.scala 419:43]
-      if (isReplayValidWire | _T_17) begin // @[cacheLookupUnit.scala 420:72]
-        requiredResponseReg <= _GEN_567;
-      end else if (isPermissionMiss & _isPermissionMiss_T) begin // @[cacheLookupUnit.scala 427:35]
-        requiredResponseReg <= 2'h3;
-      end else begin
-        requiredResponseReg <= 2'h1;
-      end
-    end else begin
-      requiredResponseReg <= _GEN_567;
-    end
   end
 // Register and memory initialization
 `ifdef RANDOMIZE_GARBAGE_ASSIGN
@@ -40205,8 +40196,6 @@ initial begin
   writeBackBuffer_data = _RAND_51[511:0];
   _RAND_52 = {1{`RANDOM}};
   writeCommitInstructionBuffer = _RAND_52[0:0];
-  _RAND_53 = {1{`RANDOM}};
-  requiredResponseReg = _RAND_53[1:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial

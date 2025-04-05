@@ -190,8 +190,8 @@ class cacheLookupUnit extends Module{
   //____________________Functional description_________________________//
 
   //Response out is always release in one clock cycle, so no ready signal
-  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready && !writeCommitInstructionBuffer
-  request.holdInOrder := lastMissRecordRegister.valid && lastMissRecordRegister.branch.valid
+  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready 
+  request.holdInOrder := lastMissRecordRegister.valid && lastMissRecordRegister.branch.valid && !writeCommitInstructionBuffer
 
   //Assigning addresses to the BRAMs
   val addrBeg = log2Ceil(lineSize)
@@ -223,7 +223,7 @@ class cacheLookupUnit extends Module{
     val isLRWriteWire = WireDefault(isLRWire && readBuffer.writeData.valid)
     val isSCReadWire = WireDefault(isSCWire && !readBuffer.writeData.valid)
     val isSCWriteWire = WireDefault(isSCWire && readBuffer.writeData.valid)
-    val requiredResponseReg = RegInit(0.U(2.W))
+    val requiredResponseWire = WireInit(0.U(2.W))
 
     //Getting tagBRAM results
     val tagChunks = VecInit(Seq.tabulate(nway) { i =>
@@ -407,7 +407,7 @@ class cacheLookupUnit extends Module{
         dataBRAMUpdateWire := isDataMissWire && isReplayValidWire
       } .otherwise {
         toReplayValidWire := true.B
-        requiredResponseReg := Mux(isLRReadWire || isAtmoicReadWire, "b01".U, "b00".U)
+        requiredResponseWire := Mux(isLRReadWire || isAtmoicReadWire, "b01".U, "b00".U)
         toLastMissRecordRegister := !isReadWire
       }
     }
@@ -424,7 +424,7 @@ class cacheLookupUnit extends Module{
         writeCommitInstructionBuffer := true.B
       } .otherwise {
         toReplayValidWire := true.B
-        requiredResponseReg := Mux(isPermissionMiss && !isDataMissWire, "b11".U, "b01".U)
+        requiredResponseWire := Mux(isPermissionMiss && !isDataMissWire, "b11".U, "b01".U)
         toLastMissRecordRegister := true.B
       }
     }
@@ -475,7 +475,7 @@ class cacheLookupUnit extends Module{
     //Replay
     when(toReplayValidWire && readBuffer.branch.valid){
       replayBuffer := readBuffer
-      replayBuffer.cacheLine.response := requiredResponseReg
+      replayBuffer.cacheLine.response := requiredResponseWire
       replayBuffer.cacheLine.invalidated := false.B
     }
 
