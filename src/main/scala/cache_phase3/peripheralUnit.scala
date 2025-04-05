@@ -205,6 +205,7 @@ class peripheralUnit(
         peripheralMSHR.read.ready := true.B
         responseOutBuffer := peripheralMSHR.read.data
       }
+      responseOutBuffer.valid := false.B
       readAXIResponseState := Mux(peripheralMSHR.read.data.valid && peripheralMSHR.read.data.branch.valid && !peripheralMSHR.isEmpty, readResponseState, readDataInState)
     }
     is(readResponseState){
@@ -214,7 +215,7 @@ class peripheralUnit(
         readDataVec(readCounter.count) := bus.RDATA
         responseValid := Mux(bus.RRESP === "b00".U, responseValid, false.B)
       }
-      responseOutBuffer.valid := bus.RLAST && bus.RVALID && responseValid
+      // responseOutBuffer.valid := bus.RLAST && bus.RVALID && responseValid
       readAXIResponseState := Mux(bus.RLAST && bus.RVALID && responseValid, readDataOutState, readResponseState)
     }
     is(readDataOutState){
@@ -237,8 +238,11 @@ class peripheralUnit(
         is("b11".U){responseOutBuffer.writeData.data := Mux(responseOutBuffer.core.instruction(14),"x0".U,
                                       doubleWordChoosen)}
       }
-      responseOutBuffer.valid := !responseOut.ready
-      readAXIResponseState := Mux(responseOut.ready, readDataInState, readDataOutState)
+      responseOutBuffer.valid := true.B // !responseOut.ready
+      when(responseOutBuffer.valid && responseOut.ready){
+        responseOutBuffer.valid := false.B
+      }
+      readAXIResponseState := Mux(responseOut.ready && responseOutBuffer.valid, readDataInState, readDataOutState)
     }
   }
 }
