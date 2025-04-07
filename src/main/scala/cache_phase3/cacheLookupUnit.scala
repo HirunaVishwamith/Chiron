@@ -190,7 +190,7 @@ class cacheLookupUnit extends Module{
   //____________________Functional description_________________________//
 
   //Response out is always release in one clock cycle, so no ready signal
-  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready 
+  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready
   request.holdInOrder := lastMissRecordRegister.valid && lastMissRecordRegister.branch.valid && !writeCommitInstructionBuffer
 
   //Assigning addresses to the BRAMs

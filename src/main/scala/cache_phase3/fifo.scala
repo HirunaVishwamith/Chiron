@@ -84,6 +84,7 @@ class fifoBaseModule[T <: baseTrait](depth: Int, traitType: T) extends Module {
 
   //----------------------Output-----------------------//
   read.data := memReg(readPtr) // Bulk assign from memory
+  read.data.valid := !emptyReg
   write.ready := !fullReg
   isEmpty := emptyReg
 }

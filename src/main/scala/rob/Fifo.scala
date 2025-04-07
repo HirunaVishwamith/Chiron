@@ -94,7 +94,7 @@ class robFifo[T <: Data ]( gen: T, depth: Int) extends Fifo(gen:
     //val nextval = modifyVal
     writeReg := nextval
     fullReg := nextval === readPtr
-    //emptyReg := nextval === readPtr  //leon
+    // emptyReg := nextval === readPtr  //leon
   }.elsewhen(incrWrite){
     writeReg := nextWrite
   }

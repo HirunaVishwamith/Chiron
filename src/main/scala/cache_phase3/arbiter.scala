@@ -44,6 +44,7 @@ class arbiter extends Module {
   val branchOps = IO(new branchOps)
   val responseOut = IO(Flipped(new responseOut))
   val fenceReady = IO(Output(Bool()))
+  val writeInstuctionCommitFired = IO(Input(Bool()))
 
   //!Debug only
   val isPauseForBoolean = WireDefault(pauseForBranch.B)
@@ -91,7 +92,7 @@ class arbiter extends Module {
   replayRequest.ready := !replayRequestBuffer.valid
 
   //--------------------Operations State Machine-----------------//
-  val idleState :: commitReadyState :: commitFiredState :: waitState :: hollowState :: Nil = Enum(5)
+  val idleState :: commitReadyState :: commitFiredState :: waitState :: hollowState :: writeInstructionFiredState :: Nil = Enum(6)
   val operationState = RegInit(idleState)
 
   val operationWires = Wire(new Bundle{
@@ -158,7 +159,7 @@ class arbiter extends Module {
         inorderBuffer.writeData.data := writeDataIn.data
         inorderBuffer.writeData.valid := writeDataIn.valid
         operationBuffer.valid := false.B
-        operationState := idleState
+        operationState := writeInstructionFiredState
       }
     }
     is(hollowState){ 
@@ -169,7 +170,9 @@ class arbiter extends Module {
       operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.core.instruction, 
                                 commitReadyState, waitState)
     }
-
+    is(writeInstructionFiredState){
+      operationState := Mux(writeInstuctionCommitFired, idleState, writeInstructionFiredState)
+    }
   }
 
   when(requestTypeWire =/= 1.U){ 
@@ -241,7 +244,7 @@ class arbiter extends Module {
       when(isSCReadWire){
         rAtmoicsWritePending := true.B
       }
-    }.elsewhen(speculativeBuffer.valid && !(operationBuffer.valid && operationBuffer.address(addrWidth - 1, 3) === speculativeBuffer.address(addrWidth - 1, 3))) {
+    }.elsewhen(speculativeBuffer.valid ) { //&& !(operationBuffer.valid && operationBuffer.address(addrWidth - 1, 3) === speculativeBuffer.address(addrWidth - 1, 3))) {
       speculativeBuffer.valid := false.B
 
       toCacheLookup.request := speculativeBuffer

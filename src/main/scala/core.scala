@@ -711,7 +711,7 @@ class core (
 
   //leon coherency
   Seq(decode.writeBackResult.fired, rob.commit.fired).foreach{ 
-    _ := ((!rob.commit.instruction(6,2).orR===0.U || !coherentLoadInvalid) && decode.writeBackResult.ready && rob.commit.ready && (memAccess.writeInstructionCommit.ready || (rob.commit.instruction(6, 4) =/= "b010".U)))
+    _ := ((!rob.commit.instruction(6,2).orR===0.U || (!coherentLoadInvalid && memAccess.loadCommit.valid)) && decode.writeBackResult.ready && rob.commit.ready && (memAccess.writeInstructionCommit.ready || (rob.commit.instruction(6, 4) =/= "b010".U)))
   }
 
   memAccess.writeInstructionCommit.fired := memAccess.writeInstructionCommit.ready && (rob.commit.instruction(6, 4) === "b010".U)  && rob.commit.fired

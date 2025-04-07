@@ -102,7 +102,7 @@ class ACEUnit(
   bus.CDLAST := false.B
 
   val readBuffer =  RegInit(0.U.asTypeOf(new requestPipelineWire))
-  readRequest.ready := !readBuffer.valid //|| (readBuffer.valid && !readBuffer.branch.valid)
+  readRequest.ready := !readBuffer.valid
   when(readRequest.request.valid && readRequest.request.branch.valid && readRequest.ready){
     readBuffer := readRequest.request
     regWriteUpdate(readBuffer.branch, branchOps, readRequest.request.branch)
@@ -197,9 +197,10 @@ class ACEUnit(
   //-----------------------AXI ReadRequest--------------------------------//
   val readIdleState :: readRequestState :: Nil = Enum(2)
   val readACERequestState = RegInit(readIdleState)
+  val isCoherencyIdle = WireDefault(false.B)  //! Because interconnect is pipelined
   switch(readACERequestState) {
     is(readIdleState){
-      readACERequestState := Mux(readBuffer.valid, readRequestState, readIdleState)
+      readACERequestState := Mux(readBuffer.valid && isCoherencyIdle, readRequestState, readIdleState)
     }
     is(readRequestState){
       bus.ARVALID := true.B
@@ -293,6 +294,7 @@ class ACEUnit(
   val responseValidReg = RegInit(false.B)
   val coherentAXIState = RegInit(coherentIdleState)
   val coherentCounter = Module(new moduleCounter(length))
+  isCoherencyIdle := (coherentAXIState === coherentIdleState)
   coherentCounter.incrm := false.B
   coherentCounter.reset := false.B
   switch(coherentAXIState){

@@ -70,7 +70,7 @@ class CacheModule (
 
   //Scheduler connections
   requestScheduler.branchOps := branchOps
-  canAllocate := requestScheduler.canAllocate && commitFifo.isEmpty
+  canAllocate := requestScheduler.canAllocate && !commitFifo.isFull
   
   requestScheduler.requestIn.valid := request.valid
   requestScheduler.requestIn.address := request.address
@@ -101,6 +101,7 @@ class CacheModule (
   arbiter.request.request := requestScheduler.requestOut
   arbiter.replayRequest <> replayUnit.responseOut
   arbiter.coherencyRequest <> aceUnit.coherencyRequest
+  arbiter.writeInstuctionCommitFired := writeInstructionCommit.fired
 
   //Cachelookup
   cacheLookup.branchOps := branchOps
@@ -155,14 +156,15 @@ class CacheModule (
   commitFifo.invalidateEnable := false.B
 
   //Enqueue from responseOut of cacheLookup
-  when(cacheLookup.toResponse.request.valid && cacheLookup.toResponse.request.core.instruction(6,0) === "b0000000".U){
+  when(cacheLookup.toResponse.request.valid && cacheLookup.toResponse.request.branch.valid && cacheLookup.toResponse.request.core.instruction(6,0) === "b0000011".U){
     commitFifo.write.data := cacheLookup.toResponse.request
-    commitFifo.write.data.valid := true.B
+  } .elsewhen(peripheralUnit.responseOut.request.valid){
+    commitFifo.write.data := peripheralUnit.responseOut.request
   }
   //BranchOps
   commitFifo.branchOps := branchOps
   //Invalidate from the coherentRequest from aceUnit
-  when(aceUnit.coherencyRequest.request.valid){
+  when(aceUnit.coherencyRequest.request.valid && aceUnit.coherencyRequest.request.response(1)){
     commitFifo.invalidateAddr := aceUnit.coherencyRequest.request.address
     commitFifo.invalidateEnable := true.B
   }
@@ -171,6 +173,10 @@ class CacheModule (
     commitFifo.read.ready := true.B
     loadCommit.state := commitFifo.read.data.valid
     loadCommit.valid := !commitFifo.isEmpty && commitFifo.read.data.branch.valid
+    when(commitFifo.isEmpty){
+      loadCommit.state := false.B
+      loadCommit.valid := true.B
+    }
   }
 
   //-----------------Initiate Fence----------------------//
