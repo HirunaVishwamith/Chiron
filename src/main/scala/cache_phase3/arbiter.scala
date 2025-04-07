@@ -207,14 +207,6 @@ class arbiter extends Module {
         regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
         
         rAtmoicsWritePending := false.B
-      } .otherwise{
-        coherencyRequestBuffer.valid := false.B
-
-        toCacheLookup.request.valid := coherencyRequestBuffer.valid
-        toCacheLookup.request.address := coherencyRequestBuffer.address
-        toCacheLookup.request.cacheLine.response := coherencyRequestBuffer.response
-        toCacheLookup.request.branch.valid := true.B
-        requestTypeWire := "b11".U
       }
     }.elsewhen(coherencyRequestBuffer.valid) {
       coherencyRequestBuffer.valid := false.B
@@ -238,10 +230,14 @@ class arbiter extends Module {
       toCacheLookup.request := inorderBuffer
       requestTypeWire := "b01".U
       regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
-
-      val isSCWire = WireDefault(toCacheLookup.request.core.instruction(31,27) === "b00011".U && (toCacheLookup.request.core.instruction(6,0) === "b0101111".U))
-      val isSCReadWire = WireDefault(isSCWire && !toCacheLookup.request.writeData.valid)
-      when(isSCReadWire){
+      
+      val isAtomicsWire = WireDefault((toCacheLookup.request.core.instruction(6,0) === "b0101111".U))
+      // val isLRWire = WireDefault(toCacheLookup.request.core.instruction(31,27) === "b00010".U && isAtomicsWire)
+      // val isSCWire = WireDefault(toCacheLookup.request.core.instruction(31,27) === "b00011".U && isAtomicsWire)
+      val isAtmoicReadWire = WireDefault(isAtomicsWire && !toCacheLookup.request.writeData.valid)// && !(isSCWire || isLRWire))
+      // val isLRReadWire = WireDefault(isLRWire && !toCacheLookup.request.writeData.valid)
+      // val isSCReadWire = WireDefault(isSCWire && !toCacheLookup.request.writeData.valid)
+      when(isAtmoicReadWire){
         rAtmoicsWritePending := true.B
       }
     }.elsewhen(speculativeBuffer.valid ) { //&& !(operationBuffer.valid && operationBuffer.address(addrWidth - 1, 3) === speculativeBuffer.address(addrWidth - 1, 3))) {

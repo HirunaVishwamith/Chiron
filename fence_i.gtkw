@@ -1,0 +1,80 @@
+[*]
+[*] GTKWave Analyzer v3.3.116 (w)1999-2023 BSI
+[*] Mon Apr  7 11:17:52 2025
+[*]
+[dumpfile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/system_trace.vcd"
+[dumpfile_mtime] "Mon Apr  7 11:11:20 2025"
+[dumpfile_size] 4963833
+[savefile] "/mnt/Uni/FYP/Cache/Phase3/Main_core/fence_i.gtkw"
+[timestart] 33972
+[size] 1920 998
+[pos] -961 -1
+*-3.600000 33990 33880 33920 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[markername] ASH commit wait
+[markername] BSH ins in
+[treeopen] TOP.
+[treeopen] TOP.system.
+[treeopen] TOP.system.core0.
+[treeopen] TOP.system.core0.memAccess.
+[sst_width] 209
+[signals_width] 366
+[sst_expanded] 1
+[sst_vpaned_height] 293
+@28
+TOP.clock
+@800200
+-ROB
+@28
+TOP.system.core0.rob.commit_ready
+TOP.system.core0.rob.commit_fired
+@22
+TOP.system.core0.rob.commit_instruction[31:0]
+TOP.system.core0.rob.commit_pc[63:0]
+TOP.system.core0.rob.commit_prfDest[5:0]
+TOP.system.core0.rob.commit_robAddr[3:0]
+@1000200
+-ROB
+@800200
+-RequestSche
+-RequestIn
+@28
+TOP.system.core0.memAccess.requestScheduler.requestIn_valid
+@22
+TOP.system.core0.memAccess.requestScheduler.requestIn_core_instruction[31:0]
+TOP.system.core0.memAccess.requestScheduler.requestIn_address[31:0]
+TOP.system.core0.memAccess.requestScheduler.requestIn_branch_mask[4:0]
+TOP.system.core0.memAccess.requestScheduler.requestIn_core_prfDest[5:0]
+TOP.system.core0.memAccess.requestScheduler.requestIn_core_robAddr[3:0]
+@1000200
+-RequestIn
+-RequestSche
+@800200
+-CacheLookup
+@800201
+-RequestIn
+@29
+TOP.system.core0.memAccess.cacheLookup.request_request_valid
+@23
+TOP.system.core0.memAccess.cacheLookup.request_request_core_instruction[31:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_address[31:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_branch_mask[4:0]
+@29
+TOP.system.core0.memAccess.cacheLookup.request_request_branch_valid
+@23
+TOP.system.core0.memAccess.cacheLookup.request_request_cacheLine_cacheLine[511:0]
+@29
+TOP.system.core0.memAccess.cacheLookup.request_request_cacheLine_invalidated
+TOP.system.core0.memAccess.cacheLookup.request_request_cacheLine_response[1:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_cacheLine_valid
+@23
+TOP.system.core0.memAccess.cacheLookup.request_request_core_prfDest[5:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_core_robAddr[3:0]
+TOP.system.core0.memAccess.cacheLookup.request_request_writeData_data[63:0]
+@29
+TOP.system.core0.memAccess.cacheLookup.request_request_writeData_valid
+@1000201
+-RequestIn
+@1000200
+-CacheLookup
+[pattern_trace] 1
+[pattern_trace] 0

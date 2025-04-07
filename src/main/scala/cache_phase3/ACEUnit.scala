@@ -281,6 +281,7 @@ class ACEUnit(
       responseBuffer.valid := true.B
       responseBuffer.cacheLine.cacheLine := Cat(readDataVec.reverse)
       responseBuffer.cacheLine.response := readResponseReg
+      responseBuffer.cacheLine.valid := true.B
       
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }
