@@ -38,11 +38,11 @@ trait writeDataTrait extends Bundle {
 }
 
 trait cacheLineTrait extends Bundle {
-  val valid = Bool()
+  // val valid = Bool()
   val cacheLine = UInt((lineSize*8).W)
   val response = UInt(2.W)
   val required = Bool()
-  val invalidated = Bool()
+  // val invalidated = Bool()
 }
 
 trait requestPipelineTrait extends baseTrait {
@@ -64,6 +64,6 @@ class coherencyRequestWire extends coherencyRequestTrait
 trait  coherencyResponseTrait extends coherencyRequestTrait{
 	val cacheLine = UInt((lineSize*8).W)
 	val dataValid = Bool()
-  //response(1) : isClean, response(0) : isUnique
+  //response(1) : isShared, response(0) : passDirty
 }
 class coherencyResponseWire extends coherencyResponseTrait

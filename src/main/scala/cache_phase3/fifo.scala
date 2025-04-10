@@ -148,15 +148,104 @@ class fifoRecordInvalidateI[T <: requestPipelineTrait](depth: Int, traitType: T)
   isFull := fullReg
 }
 
-class fifoRecordInvalidateII[T <: requestPipelineTrait](depth: Int, traitType: T) extends fifoWithBranchOps(depth: Int, traitType: T){
-  val invalidateAddr = IO(Input(UInt(addrWidth.W)))
-  val invalidateEnable = IO(Input(Bool()))
+// class fifoRecordInvalidateII[T <: requestPipelineTrait](depth: Int, traitType: T) extends fifoWithBranchOps(depth: Int, traitType: T){
+//   val invalidateAddr = IO(Input(UInt(addrWidth.W)))
+//   val invalidateEnable = IO(Input(Bool()))
 
-  when(invalidateEnable) {
-    for (i <- 0 until depth) {
-      when(memReg(i).address(addrWidth - 1, log2Ceil(lineSize)) === invalidateAddr(addrWidth - 1, log2Ceil(lineSize))) {
-        memReg(i).cacheLine.invalidated := true.B
+//   when(invalidateEnable) {
+//     for (i <- 0 until depth) {
+//       when(memReg(i).address(addrWidth - 1, log2Ceil(lineSize)) === invalidateAddr(addrWidth - 1, log2Ceil(lineSize))) {
+//         memReg(i).cacheLine.invalidated := true.B
+//       }
+//     }
+//   }
+// }
+
+class fifoBypassModule[T <: baseTrait](depth: Int, traitType: T) extends Module {
+  val write = IO(new Bundle{
+    val ready = Output(Bool())
+    val data = Input(traitType.cloneType)
+  })
+  val read = IO(new Bundle{
+    val ready = Input(Bool())
+    val data = Output(traitType.cloneType)
+  })
+  val isEmpty = IO(Output(Bool()))
+
+  zeroInit(read.data)
+  isEmpty := false.B
+  write.ready := false.B
+
+  protected val memReg = RegInit(0.U.asTypeOf(Vec(depth, traitType.cloneType)))
+
+  val incrRead = WireInit(false.B)
+  val incrWrite = WireInit(false.B)
+
+  def counter(size: Int, inc: Bool): (UInt, UInt) = {
+    val cntReg = RegInit(0.U(log2Ceil(size).W))
+    val nextVal = Mux(cntReg === (size - 1).U, 0.U, cntReg + 1.U)
+    when(inc) { cntReg := nextVal }
+    (cntReg, nextVal)
+  }
+
+  val (readPtr, nextRead) = counter(depth, incrRead)
+  val (writePtr, nextWrite) = counter(depth, incrWrite)
+
+  val emptyReg = RegInit(true.B)
+  protected val fullReg = RegInit(false.B)
+
+  val op = write.data.valid ## read.ready
+  val bypass = emptyReg && (op === "b11".U)
+  protected val doWrite = WireDefault(false.B)
+
+  switch(op) {
+    is("b00".U) {}
+    is("b01".U) { // read
+      when(!emptyReg) {
+        fullReg := false.B
+        emptyReg := nextRead === writePtr
+        incrRead := true.B
+      }
+    }
+    is("b10".U) { // write
+      when(!fullReg) {
+        doWrite := true.B
+        emptyReg := false.B
+        fullReg := nextWrite === readPtr
+        incrWrite := true.B
+      }
+    }
+    is("b11".U) { // write and read
+      when(!fullReg) {
+        doWrite := true.B
+        emptyReg := false.B
+        fullReg := Mux(emptyReg, false.B, nextWrite === nextRead)
+        incrWrite := true.B
+      }
+      when(!emptyReg) {
+        fullReg := false.B
+        emptyReg := Mux(fullReg, false.B, nextRead === nextWrite)
+        incrRead := true.B
       }
     }
   }
+
+  // Override control signals if bypassing
+  when(bypass) {
+    doWrite := false.B
+    incrRead := false.B
+    incrWrite := false.B
+    emptyReg := true.B
+    fullReg := false.B
+  }
+
+  when(doWrite) {
+    memReg(writePtr) := write.data
+  }
+
+  // Bypass write data to read when FIFO is empty and both read/write are ready
+  read.data := Mux(bypass, write.data, memReg(readPtr))
+  read.data.valid := Mux(bypass, true.B, !emptyReg)
+  write.ready := !fullReg
+  isEmpty := emptyReg
 }

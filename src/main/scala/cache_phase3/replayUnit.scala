@@ -53,7 +53,7 @@ class replayUnit extends Module{
   //   depth = schedulerDepth,
   //   traitType = new requestPipelineWire
   // ))
-  val writeBackFIFO = Module(new fifoBaseModule(
+  val writeBackFIFO = Module(new fifoBypassModule(
     depth = schedulerDepth,
     traitType = new writeBackWire
   ))

@@ -102,6 +102,29 @@ class ACEUnit(
   bus.CDLAST := false.B
 
   val readBuffer =  RegInit(0.U.asTypeOf(new requestPipelineWire))
+  val responseBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+    val ACEMSHR = Module(new fifoWithBranchOps(
+    depth = schedulerDepth,
+    traitType = new requestPipelineWire
+  ))
+  zeroInit(ACEMSHR.write.data)
+  val writeBuffer = RegInit(0.U.asTypeOf(new writeBackWire))
+  val coherencyRequestBuffer = RegInit(0.U.asTypeOf(new coherencyRequestWire))  
+  val coherencyResponseBuffer = RegInit(0.U.asTypeOf(new coherencyResponseWire))
+
+  //-----------------------Ordering--------------------------------//
+  val isCoherencyIdle = WireDefault(false.B)  //! Because interconnect is pipelined
+  val isReadRespBusy = WireDefault(false.B)
+  val isWireACEBusy = WireDefault(false.B)
+  val isCoherencyAddressMatchWire = WireDefault(responseBuffer.address(addrWidth - 1, log2Ceil(lineSize)) === coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize)))
+  val isWriteAddressMatchWire = WireDefault(false.B)
+  when(writeRequest.request.valid && !writeBuffer.valid){
+    isWriteAddressMatchWire := writeRequest.request.address(addrWidth - 1, log2Ceil(lineSize)) === coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize))
+  } .elsewhen(writeBuffer.valid){
+    isWriteAddressMatchWire  := writeBuffer.address(addrWidth - 1, log2Ceil(lineSize)) === coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize))
+  }
+
+  //ReadBuffer operations
   readRequest.ready := !readBuffer.valid
   when(readRequest.request.valid && readRequest.request.branch.valid && readRequest.ready){
     readBuffer := readRequest.request
@@ -110,34 +133,35 @@ class ACEUnit(
   when(readBuffer.valid){
     regRecordUpdate(readBuffer.branch, branchOps)
   }
-  val responseBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+
+  //ResponseBuffer operations
   readResponse.request := responseBuffer
   regReadUpdate(readResponse.request.branch, branchOps, responseBuffer.branch)
 
-
-  val ACEMSHR = Module(new fifoWithBranchOps(
-    depth = schedulerDepth,
-    traitType = new requestPipelineWire
-  ))
-  zeroInit(ACEMSHR.write.data)
+  //ACEMSHR operations
   ACEMSHR.read.ready := false.B
   ACEMSHR.branchOps := branchOps
 
-  //WriteRequests
-  val writeBuffer = RegInit(0.U.asTypeOf(new writeBackWire))
+  //WriteRequests operations
   writeRequest.ready := !writeBuffer.valid
   when(!writeBuffer.valid && writeRequest.request.valid){
     writeBuffer := writeRequest.request
   }
 
-
-  //CoherentRequests
-  val coherencyRequestBuffer = RegInit(0.U.asTypeOf(new coherencyRequestWire))  
+  //CoherentRequests operations
   coherencyRequest.request := coherencyRequestBuffer
 
-  val coherencyResponseBuffer = RegInit(0.U.asTypeOf(new coherencyResponseWire))
+  //COherentResponse operations
   coherencyResponse.ready := !coherencyResponseBuffer.valid
-  coherencyResponseBuffer := Mux(!coherencyResponseBuffer.valid, coherencyResponse.request, coherencyResponseBuffer)
+  when(!coherencyResponseBuffer.valid){
+    when(isWriteAddressMatchWire && isWireACEBusy){
+      coherencyResponseBuffer.valid := writeBuffer.valid
+      coherencyResponseBuffer.address := writeBuffer.address
+      coherencyResponseBuffer.cacheLine := writeBuffer.data
+      coherencyResponseBuffer.response := "b01".U
+    }
+    coherencyResponseBuffer := coherencyResponse.request
+  }
 
   //-----------------------AXI Write-------------------------------//
   val writeIdleState :: writeRequestState :: writeDataState :: writeResponseState :: Nil = Enum(4)
@@ -146,6 +170,7 @@ class ACEUnit(
   val writeCounter = Module(new moduleCounter(length))
   writeCounter.incrm := false.B
   writeCounter.reset := false.B
+  isWireACEBusy := writeRequest.request.valid && !writeBuffer.valid || writeBuffer.valid
   switch(writeACEState) {
     is(writeIdleState){
         writeCounter.reset := true.B
@@ -197,7 +222,6 @@ class ACEUnit(
   //-----------------------AXI ReadRequest--------------------------------//
   val readIdleState :: readRequestState :: Nil = Enum(2)
   val readACERequestState = RegInit(readIdleState)
-  val isCoherencyIdle = WireDefault(false.B)  //! Because interconnect is pipelined
   switch(readACERequestState) {
     is(readIdleState){
       readACERequestState := Mux(readBuffer.valid && isCoherencyIdle, readRequestState, readIdleState)
@@ -260,16 +284,18 @@ class ACEUnit(
       when(isCleanUniqueWire){
         readResponseReg := bus.RRESP(3,2)
         readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
-        responseBuffer.cacheLine.valid := false.B
+        // responseBuffer.cacheLine.valid := false.B
       } .otherwise{
         when(bus.RVALID & bus.RID === id.U){
           readCounter.incrm := true.B
           readDataVec(readCounter.count) := bus.RDATA 
           readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
           readResponseReg :=  bus.RRESP(3,2) //Not checking for response validity in isShared and passDirty 
-          responseBuffer.cacheLine.valid := true.B
+          // responseBuffer.cacheLine.valid := true.B
         }
       }
+
+      isReadRespBusy := true.B
 
       when(isCleanUniqueWire){
         readACEResponseState := Mux(bus.RVALID & bus.RID === id.U, readDataOutState, readResponseState)
@@ -281,10 +307,12 @@ class ACEUnit(
       responseBuffer.valid := true.B
       responseBuffer.cacheLine.cacheLine := Cat(readDataVec.reverse)
       responseBuffer.cacheLine.response := readResponseReg
-      responseBuffer.cacheLine.valid := true.B
+      // responseBuffer.cacheLine.valid := true.B
       when(responseBuffer.valid && readResponse.ready){
         responseBuffer.valid := false.B
       }
+
+      isReadRespBusy := true.B
 
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }
@@ -306,23 +334,32 @@ class ACEUnit(
       bus.ACREADY := true.B
       coherencyResponseBuffer.valid := false.B
       val coherencyReceived = bus.ACVALID && bus.ACPROT === dPort_PROT.U
-      coherencyRequestBuffer.valid := coherencyReceived
+      coherencyRequestBuffer.valid := false.B
       coherencyRequestBuffer.address := bus.ACADDR
       coherencyRequestBuffer.response := Cat(((bus.ACSNOOP === "b1001".U) || (bus.ACSNOOP === "b0111".U)), 
                                               ((bus.ACSNOOP === "b0001".U) || (bus.ACSNOOP === "b0111".U)))
       coherentAXIState := Mux(coherencyReceived , coherentRequestState, coherentIdleState)
     }
     is(coherentRequestState){
-      coherencyRequestBuffer.valid:= Mux(coherencyRequestBuffer.valid && coherencyRequest.ready, false.B, coherencyRequestBuffer.valid)
+
+      when(coherencyRequestBuffer.valid){
+        coherencyRequestBuffer.valid:= Mux(coherencyRequest.ready, false.B, true.B)
+      }.otherwise{
+        coherencyRequestBuffer.valid := Mux(isReadRespBusy && isCoherencyAddressMatchWire, false.B, true.B)
+      }
       
-      coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestState)
+      when(isWriteAddressMatchWire && isWireACEBusy){
+        coherentAXIState := Mux(writeBuffer.valid, coherentResponseState, coherentRequestState)
+      } .otherwise{
+        coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestState)
+      }
     }
     is(coherentResponseState){
       bus.CRVALID := true.B
 
       coherentCounter.reset := true.B
 
-      bus.CRRESP := Mux(coherencyResponseBuffer.valid, Cat(0.U(1.W), !coherencyResponseBuffer.response(0), !coherencyResponseBuffer.response(1) , 0.U(1.W), coherencyResponseBuffer.dataValid.asUInt),
+      bus.CRRESP := Mux(coherencyResponseBuffer.valid, Cat(0.U(1.W), coherencyResponseBuffer.response(1), coherencyResponseBuffer.response(0) , 0.U(1.W), coherencyResponseBuffer.dataValid.asUInt),
                         0.U)
       when(bus.CRREADY){
         coherentAXIState := Mux(coherencyResponseBuffer.dataValid, coherentDataOutState, coherentIdleState)    
