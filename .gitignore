@@ -55,3 +55,4 @@ prog.h
 !vivado.tcl
 .stamp.*
 run.log
+Makefile

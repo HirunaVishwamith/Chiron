@@ -62,8 +62,8 @@ class arbiter extends Module {
   val speculativeBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val inorderBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val operationBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
-  val coherencyRequestBuffer = RegInit(0.U.asTypeOf(new coherencyRequestWire))
-  val replayRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  // val coherencyRequestBuffer = RegInit(0.U.asTypeOf(new coherencyRequestWire))
+  // val replayRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   
   val requestTypeWire = WireInit(0.U(arbiterReqTypesWidth.W))
   val speculativeBufferReadyWire = WireDefault(!speculativeBuffer.valid || (speculativeBuffer.valid && !speculativeBuffer.branch.valid))
@@ -81,15 +81,15 @@ class arbiter extends Module {
       operationBuffer := request.request
     }
   } 
-  when(!coherencyRequestBuffer.valid && coherencyRequest.request.valid){
-    coherencyRequestBuffer := coherencyRequest.request
-  }
-  coherencyRequest.ready := !coherencyRequestBuffer.valid
+  // when(!coherencyRequestBuffer.valid && coherencyRequest.request.valid){
+  //   coherencyRequestBuffer := coherencyRequest.request
+  // }
+  // coherencyRequest.ready := !coherencyRequestBuffer.valid
 
-  when(!replayRequestBuffer.valid && replayRequest.request.valid && replayRequest.request.branch.valid){
-    replayRequestBuffer := replayRequest.request
-  }
-  replayRequest.ready := !replayRequestBuffer.valid
+  // when(!replayRequestBuffer.valid && replayRequest.request.valid && replayRequest.request.branch.valid){
+  //   replayRequestBuffer := replayRequest.request
+  // }
+  // replayRequest.ready := !replayRequestBuffer.valid
 
   //--------------------Operations State Machine-----------------//
   val idleState :: commitReadyState :: commitFiredState :: waitState :: hollowState :: writeInstructionFiredState :: Nil = Enum(6)
@@ -186,9 +186,9 @@ class arbiter extends Module {
       regRecordUpdate(inorderBuffer.branch, branchOps)
     }
   }
-  when(requestTypeWire =/= 2.U && replayRequestBuffer.valid){
-    regRecordUpdate(replayRequestBuffer.branch, branchOps)
-  }
+  // when(requestTypeWire =/= 2.U && replayRequestBuffer.valid){
+  //   regRecordUpdate(replayRequestBuffer.branch, branchOps)
+  // }
 
   //---------------------Request Dequeue---------------------//
   //* Priority Order
@@ -208,22 +208,35 @@ class arbiter extends Module {
         
         rAtmoicsWritePending := false.B
       }
-    }.elsewhen(coherencyRequestBuffer.valid) {
-      coherencyRequestBuffer.valid := false.B
+    // }.elsewhen(coherencyRequestBuffer.valid) {
+    //   coherencyRequestBuffer.valid := false.B
 
-      toCacheLookup.request.valid := coherencyRequestBuffer.valid
-      toCacheLookup.request.address := coherencyRequestBuffer.address
-      toCacheLookup.request.cacheLine.response := coherencyRequestBuffer.response
+    //   toCacheLookup.request.valid := coherencyRequestBuffer.valid
+    //   toCacheLookup.request.address := coherencyRequestBuffer.address
+    //   toCacheLookup.request.cacheLine.response := coherencyRequestBuffer.response
+    //   toCacheLookup.request.branch.valid := true.B
+    //   requestTypeWire := "b11".U
+    // }.elsewhen(replayRequestBuffer.valid) {
+    //   replayRequestBuffer.valid := false.B
+      
+    //   toCacheLookup.request := replayRequestBuffer
+    //   requestTypeWire := "b10".U
+      
+    //   regReadUpdate(toCacheLookup.request.branch, branchOps, replayRequestBuffer.branch)
+      
+    }.elsewhen(replayRequest.request.valid){
+      replayRequest.ready := true.B
+      toCacheLookup.request := replayRequest.request
+      requestTypeWire := "b10".U
+
+    } .elsewhen(coherencyRequest.request.valid){
+      coherencyRequest.ready := true.B
+
+      toCacheLookup.request.valid := coherencyRequest.request.valid
+      toCacheLookup.request.address := coherencyRequest.request.address
+      toCacheLookup.request.cacheLine.response := coherencyRequest.request.response
       toCacheLookup.request.branch.valid := true.B
       requestTypeWire := "b11".U
-    }.elsewhen(replayRequestBuffer.valid) {
-      replayRequestBuffer.valid := false.B
-      
-      toCacheLookup.request := replayRequestBuffer
-      requestTypeWire := "b10".U
-      
-      regReadUpdate(toCacheLookup.request.branch, branchOps, replayRequestBuffer.branch)
-      
     }.elsewhen(inorderBuffer.valid && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
       inorderBuffer.valid := false.B
 
@@ -260,6 +273,6 @@ class arbiter extends Module {
     regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
 
   }
-  fenceReady := (!speculativeBuffer.valid && !inorderBuffer.valid && !operationBuffer.valid 
-                  && !replayRequestBuffer.valid)
+  fenceReady := (!speculativeBuffer.valid && !inorderBuffer.valid && !operationBuffer.valid )
+                  // && !replayRequestBuffer.valid)
 }

@@ -126,7 +126,7 @@ class ACEUnit(
   //WriteRequests
   val writeBuffer = RegInit(0.U.asTypeOf(new writeBackWire))
   writeRequest.ready := !writeBuffer.valid
-  when(!writeBuffer.valid){
+  when(!writeBuffer.valid && writeRequest.request.valid){
     writeBuffer := writeRequest.request
   }
 
@@ -282,7 +282,10 @@ class ACEUnit(
       responseBuffer.cacheLine.cacheLine := Cat(readDataVec.reverse)
       responseBuffer.cacheLine.response := readResponseReg
       responseBuffer.cacheLine.valid := true.B
-      
+      when(responseBuffer.valid && readResponse.ready){
+        responseBuffer.valid := false.B
+      }
+
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }
   } 

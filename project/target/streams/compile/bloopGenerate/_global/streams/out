@@ -1,4 +1,4 @@
-[debug] [main-core-build] Classpath dependencies List()
-[debug] [main-core-build] Dependencies from configurations List()
-[debug] Bloop wrote the configuration of project 'main-core-build' to '/mnt/Uni/FYP/Cache/Phase3/Main core/project/.bloop/main-core-build.json'
-[success] Generated .bloop/main-core-build.json
+[debug] [fyp18-riscv-ooo-single_core-build] Classpath dependencies List()
+[debug] [fyp18-riscv-ooo-single_core-build] Dependencies from configurations List()
+[debug] Bloop wrote the configuration of project 'fyp18-riscv-ooo-single_core-build' to '/home/mewanthakshana/FYP/FYP18-RISCV-OOO-single_core/project/.bloop/fyp18-riscv-ooo-single_core-build.json'
+[success] Generated .bloop/fyp18-riscv-ooo-single_core-build.json

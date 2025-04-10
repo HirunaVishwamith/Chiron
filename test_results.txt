@@ -82,13 +82,13 @@ fyp18-riscv-emulator/riscv-tests/images/rv64um-p-rem.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64um-p-remu.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64um-p-remuw.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64um-p-remw.bin: test pass
-Time : Apr  7 2025 17:32:10
+Time : Apr 10 2025 15:13:13
 vvadd: test pass
-Time : Apr  7 2025 17:33:22
+Time : Apr 10 2025 15:13:38
 matmul: test pass
-Time : Apr  7 2025 17:35:44
+Time : Apr 10 2025 15:14:28
 filter: test pass
-Time : Apr  7 2025 17:38:44
+Time : Apr 10 2025 15:15:27
 csaxpy: test pass
-Time : Apr  7 2025 17:52:25
+Time : Apr 10 2025 15:19:42
 histo: test pass
