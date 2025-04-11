@@ -284,18 +284,17 @@ class ACEUnit(
       when(isCleanUniqueWire){
         readResponseReg := bus.RRESP(3,2)
         readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
-        // responseBuffer.cacheLine.valid := false.B
+        isReadRespBusy := true.B
       } .otherwise{
-        when(bus.RVALID & bus.RID === id.U){
+        when(bus.RVALID && bus.RID === id.U){
           readCounter.incrm := true.B
           readDataVec(readCounter.count) := bus.RDATA 
           readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
           readResponseReg :=  bus.RRESP(3,2) //Not checking for response validity in isShared and passDirty 
-          // responseBuffer.cacheLine.valid := true.B
         }
-      }
+        isReadRespBusy := (readCounter.count =/= 0.U) || bus.RVALID && bus.RID === id.U && readCounter.count === 0.U
 
-      isReadRespBusy := true.B
+      }
 
       when(isCleanUniqueWire){
         readACEResponseState := Mux(bus.RVALID & bus.RID === id.U, readDataOutState, readResponseState)
@@ -326,11 +325,14 @@ class ACEUnit(
   val responseValidReg = RegInit(false.B)
   val coherentAXIState = RegInit(coherentIdleState)
   val coherentCounter = Module(new moduleCounter(length))
+  val coherentRequestSend = RegInit(false.B)
   isCoherencyIdle := (coherentAXIState === coherentIdleState)
   coherentCounter.incrm := false.B
   coherentCounter.reset := false.B
   switch(coherentAXIState){
     is(coherentIdleState){
+      coherentRequestSend := false.B
+
       bus.ACREADY := true.B
       coherencyResponseBuffer.valid := false.B
       val coherencyReceived = bus.ACVALID && bus.ACPROT === dPort_PROT.U
@@ -345,7 +347,10 @@ class ACEUnit(
       when(coherencyRequestBuffer.valid){
         coherencyRequestBuffer.valid:= Mux(coherencyRequest.ready, false.B, true.B)
       }.otherwise{
-        coherencyRequestBuffer.valid := Mux(isReadRespBusy && isCoherencyAddressMatchWire, false.B, true.B)
+        when(!coherentRequestSend){
+          coherencyRequestBuffer.valid := Mux(isReadRespBusy && isCoherencyAddressMatchWire, false.B, true.B)
+          coherentRequestSend := Mux(isReadRespBusy && isCoherencyAddressMatchWire, false.B, true.B)
+        }
       }
       
       when(isWriteAddressMatchWire && isWireACEBusy){
@@ -355,6 +360,7 @@ class ACEUnit(
       }
     }
     is(coherentResponseState){
+      coherentRequestSend := false.B
       bus.CRVALID := true.B
 
       coherentCounter.reset := true.B

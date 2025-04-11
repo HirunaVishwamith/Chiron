@@ -62,8 +62,6 @@ class arbiter extends Module {
   val speculativeBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val inorderBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val operationBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
-  // val coherencyRequestBuffer = RegInit(0.U.asTypeOf(new coherencyRequestWire))
-  // val replayRequestBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   
   val requestTypeWire = WireInit(0.U(arbiterReqTypesWidth.W))
   val speculativeBufferReadyWire = WireDefault(!speculativeBuffer.valid || (speculativeBuffer.valid && !speculativeBuffer.branch.valid))
@@ -81,18 +79,9 @@ class arbiter extends Module {
       operationBuffer := request.request
     }
   } 
-  // when(!coherencyRequestBuffer.valid && coherencyRequest.request.valid){
-  //   coherencyRequestBuffer := coherencyRequest.request
-  // }
-  // coherencyRequest.ready := !coherencyRequestBuffer.valid
-
-  // when(!replayRequestBuffer.valid && replayRequest.request.valid && replayRequest.request.branch.valid){
-  //   replayRequestBuffer := replayRequest.request
-  // }
-  // replayRequest.ready := !replayRequestBuffer.valid
 
   //--------------------Operations State Machine-----------------//
-  val idleState :: commitReadyState :: commitFiredState :: waitState :: hollowState :: writeInstructionFiredState :: Nil = Enum(6)
+  val idleState :: commitReadyState :: commitFiredState :: waitState :: writeInstructionFiredState :: Nil = Enum(5)
   val operationState = RegInit(idleState)
 
   val operationWires = Wire(new Bundle{
@@ -126,17 +115,7 @@ class arbiter extends Module {
         } .elsewhen(operationWires.isWrite){
 
           operationState := commitReadyState
-        } .elsewhen(operationWires.isLR){
-
-          inorderBuffer := operationBuffer
-          inorderBuffer.writeData.valid := false.B
-          operationState := waitState
-        } .elsewhen(operationWires.isSC){
-
-          inorderBuffer := operationBuffer
-          inorderBuffer.writeData.valid := false.B
-          operationState := hollowState
-        } .elsewhen(operationWires.rAtomics){
+        } .elsewhen(operationWires.isLR || operationWires.isSC || operationWires.rAtomics){
 
           inorderBuffer := operationBuffer
           inorderBuffer.writeData.valid := false.B
@@ -162,10 +141,6 @@ class arbiter extends Module {
         operationState := writeInstructionFiredState
       }
     }
-    is(hollowState){ 
-      operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.core.instruction, 
-                                commitReadyState, hollowState)
-    }
     is(waitState){
       operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.core.instruction, 
                                 commitReadyState, waitState)
@@ -186,9 +161,6 @@ class arbiter extends Module {
       regRecordUpdate(inorderBuffer.branch, branchOps)
     }
   }
-  // when(requestTypeWire =/= 2.U && replayRequestBuffer.valid){
-  //   regRecordUpdate(replayRequestBuffer.branch, branchOps)
-  // }
 
   //---------------------Request Dequeue---------------------//
   //* Priority Order
@@ -196,40 +168,24 @@ class arbiter extends Module {
   //*    2.  Replay
   //*    3.  Inorder
   //*    4.  Speculative
-  val rAtmoicsWritePending = RegInit(false.B)
+  // val rAtmoicsWritePending = RegInit(false.B)
+  // val isAtomicsWire = WireDefault((inorderBuffer.core.instruction(6,0) === "b0101111".U))
+  // val isAtmoicReadWire = WireDefault(isAtomicsWire && !inorderBuffer.writeData.valid)// && !(isSCWire || isLRWire))
+  // val isAtomicBusyWire = WireDefault(operationWires.rAtomics && (operationState =/= idleState))
+  val atomicBusyState = RegInit(false.B)
+
   when(toCacheLookup.ready && !(isPauseForBoolean && branchOps.valid)) {
-    when(rAtmoicsWritePending){
-      when(!toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
+    when(atomicBusyState && !toCacheLookup.holdInOrder){
+      when(inorderBuffer.valid && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
         inorderBuffer.valid := false.B
         
         toCacheLookup.request := inorderBuffer
         requestTypeWire := "b01".U
         regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
         
-        rAtmoicsWritePending := false.B
-      }
-    // }.elsewhen(coherencyRequestBuffer.valid) {
-    //   coherencyRequestBuffer.valid := false.B
-
-    //   toCacheLookup.request.valid := coherencyRequestBuffer.valid
-    //   toCacheLookup.request.address := coherencyRequestBuffer.address
-    //   toCacheLookup.request.cacheLine.response := coherencyRequestBuffer.response
-    //   toCacheLookup.request.branch.valid := true.B
-    //   requestTypeWire := "b11".U
-    // }.elsewhen(replayRequestBuffer.valid) {
-    //   replayRequestBuffer.valid := false.B
-      
-    //   toCacheLookup.request := replayRequestBuffer
-    //   requestTypeWire := "b10".U
-      
-    //   regReadUpdate(toCacheLookup.request.branch, branchOps, replayRequestBuffer.branch)
-      
-    }.elsewhen(replayRequest.request.valid){
-      replayRequest.ready := true.B
-      toCacheLookup.request := replayRequest.request
-      requestTypeWire := "b10".U
-
-    } .elsewhen(coherencyRequest.request.valid){
+        atomicBusyState := false.B
+      } 
+    }.elsewhen(coherencyRequest.request.valid){
       coherencyRequest.ready := true.B
 
       toCacheLookup.request.valid := coherencyRequest.request.valid
@@ -237,22 +193,20 @@ class arbiter extends Module {
       toCacheLookup.request.cacheLine.response := coherencyRequest.request.response
       toCacheLookup.request.branch.valid := true.B
       requestTypeWire := "b11".U
-    }.elsewhen(inorderBuffer.valid && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
+    }.elsewhen(replayRequest.request.valid){
+      replayRequest.ready := true.B
+      toCacheLookup.request := replayRequest.request
+      requestTypeWire := "b10".U
+
+    } .elsewhen(inorderBuffer.valid && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
       inorderBuffer.valid := false.B
 
       toCacheLookup.request := inorderBuffer
       requestTypeWire := "b01".U
       regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
       
-      val isAtomicsWire = WireDefault((toCacheLookup.request.core.instruction(6,0) === "b0101111".U))
-      // val isLRWire = WireDefault(toCacheLookup.request.core.instruction(31,27) === "b00010".U && isAtomicsWire)
-      // val isSCWire = WireDefault(toCacheLookup.request.core.instruction(31,27) === "b00011".U && isAtomicsWire)
-      val isAtmoicReadWire = WireDefault(isAtomicsWire && !toCacheLookup.request.writeData.valid)// && !(isSCWire || isLRWire))
-      // val isLRReadWire = WireDefault(isLRWire && !toCacheLookup.request.writeData.valid)
-      // val isSCReadWire = WireDefault(isSCWire && !toCacheLookup.request.writeData.valid)
-      when(isAtmoicReadWire){
-        rAtmoicsWritePending := true.B
-      }
+      atomicBusyState := Mux(operationWires.rAtomics && !inorderBuffer.writeData.valid, true.B, false.B)
+
     }.elsewhen(speculativeBuffer.valid ) { //&& !(operationBuffer.valid && operationBuffer.address(addrWidth - 1, 3) === speculativeBuffer.address(addrWidth - 1, 3))) {
       speculativeBuffer.valid := false.B
 
@@ -274,5 +228,4 @@ class arbiter extends Module {
 
   }
   fenceReady := (!speculativeBuffer.valid && !inorderBuffer.valid && !operationBuffer.valid )
-                  // && !replayRequestBuffer.valid)
 }
