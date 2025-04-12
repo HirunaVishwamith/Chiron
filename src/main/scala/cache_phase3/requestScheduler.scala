@@ -119,4 +119,13 @@ class requestScheduler extends Module{
   // Output connections
   canAllocate := inorderQueue.write.ready && speculativeQueue.write.ready
   fenceReady := inorderQueue.isEmpty && speculativeQueue.isEmpty
+
+  //Resource optimization
+  speculativeQueue.write.data.cacheLine.cacheLine := 0.U
+  speculativeQueue.write.data.cacheLine.required := false.B
+  speculativeQueue.write.data.cacheLine.response := 0.U
+
+  inorderQueue.write.data.cacheLine.cacheLine := 0.U
+  inorderQueue.write.data.cacheLine.required := false.B
+  inorderQueue.write.data.cacheLine.response := 0.U
 }

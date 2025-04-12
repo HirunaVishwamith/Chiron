@@ -228,4 +228,19 @@ class arbiter extends Module {
 
   }
   fenceReady := (!speculativeBuffer.valid && !inorderBuffer.valid && !operationBuffer.valid )
+
+  //Resource optimization
+  speculativeBuffer.cacheLine.cacheLine := 0.U
+  speculativeBuffer.cacheLine.required := false.B
+  speculativeBuffer.cacheLine.response := 0.U
+  speculativeBuffer.writeData.data := 0.U
+  speculativeBuffer.writeData.valid := false.B
+
+  operationBuffer.cacheLine.cacheLine := 0.U
+  operationBuffer.cacheLine.required := false.B
+  operationBuffer.cacheLine.response := 0.U
+  
+  inorderBuffer.cacheLine.cacheLine := 0.U
+  inorderBuffer.cacheLine.required := false.B
+  inorderBuffer.cacheLine.response := 0.U
 }

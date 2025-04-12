@@ -118,4 +118,9 @@ class replayUnit extends Module{
 
   // fenceReady := requestWaitFIFO.isEmpty && responseWaitFIFO.isEmpty
   fenceReady := requestWaitFIFO.isEmpty
+
+  //Resource Utilization
+  requestWaitFIFO.write.data.cacheLine.cacheLine := 0.U
+  requestWaitFIFO.write.data.cacheLine.required := false.B
+  requestWaitFIFO.write.data.cacheLine.response := 0.U
 }

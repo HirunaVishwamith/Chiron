@@ -11012,6 +11012,12 @@ circuit system :
     canAllocate <= _canAllocate_T @[requestScheduler.scala 120:15]
     node _fenceReady_T = and(inorderQueue.isEmpty, speculativeQueue.isEmpty) @[requestScheduler.scala 121:38]
     fenceReady <= _fenceReady_T @[requestScheduler.scala 121:14]
+    speculativeQueue.write.data.cacheLine.cacheLine <= UInt<1>("h0") @[requestScheduler.scala 124:51]
+    speculativeQueue.write.data.cacheLine.required <= UInt<1>("h0") @[requestScheduler.scala 125:50]
+    speculativeQueue.write.data.cacheLine.response <= UInt<1>("h0") @[requestScheduler.scala 126:50]
+    inorderQueue.write.data.cacheLine.cacheLine <= UInt<1>("h0") @[requestScheduler.scala 128:47]
+    inorderQueue.write.data.cacheLine.required <= UInt<1>("h0") @[requestScheduler.scala 129:46]
+    inorderQueue.write.data.cacheLine.response <= UInt<1>("h0") @[requestScheduler.scala 130:46]
 
   module arbiter :
     input clock : Clock
@@ -11423,6 +11429,17 @@ circuit system :
     node _fenceReady_T_3 = eq(operationBuffer.valid, UInt<1>("h0")) @[arbiter.scala 230:70]
     node _fenceReady_T_4 = and(_fenceReady_T_2, _fenceReady_T_3) @[arbiter.scala 230:67]
     fenceReady <= _fenceReady_T_4 @[arbiter.scala 230:14]
+    speculativeBuffer.cacheLine.cacheLine <= UInt<1>("h0") @[arbiter.scala 233:41]
+    speculativeBuffer.cacheLine.required <= UInt<1>("h0") @[arbiter.scala 234:40]
+    speculativeBuffer.cacheLine.response <= UInt<1>("h0") @[arbiter.scala 235:40]
+    speculativeBuffer.writeData.data <= UInt<1>("h0") @[arbiter.scala 236:36]
+    speculativeBuffer.writeData.valid <= UInt<1>("h0") @[arbiter.scala 237:37]
+    operationBuffer.cacheLine.cacheLine <= UInt<1>("h0") @[arbiter.scala 239:39]
+    operationBuffer.cacheLine.required <= UInt<1>("h0") @[arbiter.scala 240:38]
+    operationBuffer.cacheLine.response <= UInt<1>("h0") @[arbiter.scala 241:38]
+    inorderBuffer.cacheLine.cacheLine <= UInt<1>("h0") @[arbiter.scala 243:37]
+    inorderBuffer.cacheLine.required <= UInt<1>("h0") @[arbiter.scala 244:36]
+    inorderBuffer.cacheLine.response <= UInt<1>("h0") @[arbiter.scala 245:36]
 
   module moduleForwardingMemory :
     input clock : Clock
@@ -13871,6 +13888,9 @@ circuit system :
       writeBackFIFO.write.data.valid <= writeBackIn.request.valid @[replayUnit.scala 112:30]
     writeBackOut.request <= writeBackFIFO.read.data @[replayUnit.scala 114:24]
     fenceReady <= requestWaitFIFO.isEmpty @[replayUnit.scala 120:14]
+    requestWaitFIFO.write.data.cacheLine.cacheLine <= UInt<1>("h0") @[replayUnit.scala 123:50]
+    requestWaitFIFO.write.data.cacheLine.required <= UInt<1>("h0") @[replayUnit.scala 124:49]
+    requestWaitFIFO.write.data.cacheLine.response <= UInt<1>("h0") @[replayUnit.scala 125:49]
 
   module fifoBaseModule :
     input clock : Clock
@@ -14658,6 +14678,18 @@ circuit system :
           node _readAXIResponseState_T_7 = and(responseOut.ready, responseOutBuffer.valid) @[peripheralUnit.scala 245:53]
           node _readAXIResponseState_T_8 = mux(_readAXIResponseState_T_7, UInt<2>("h0"), UInt<2>("h2")) @[peripheralUnit.scala 245:34]
           readAXIResponseState <= _readAXIResponseState_T_8 @[peripheralUnit.scala 245:28]
+    peripheralMSHR.write.data.cacheLine.cacheLine <= UInt<1>("h0") @[peripheralUnit.scala 250:49]
+    peripheralMSHR.write.data.cacheLine.required <= UInt<1>("h0") @[peripheralUnit.scala 251:48]
+    peripheralMSHR.write.data.cacheLine.response <= UInt<1>("h0") @[peripheralUnit.scala 252:48]
+    readRequestBuffer.cacheLine.cacheLine <= UInt<1>("h0") @[peripheralUnit.scala 254:41]
+    readRequestBuffer.cacheLine.required <= UInt<1>("h0") @[peripheralUnit.scala 255:40]
+    readRequestBuffer.cacheLine.response <= UInt<1>("h0") @[peripheralUnit.scala 256:40]
+    requestBuffer.cacheLine.cacheLine <= UInt<1>("h0") @[peripheralUnit.scala 258:37]
+    requestBuffer.cacheLine.required <= UInt<1>("h0") @[peripheralUnit.scala 259:36]
+    requestBuffer.cacheLine.response <= UInt<1>("h0") @[peripheralUnit.scala 260:36]
+    writeRequestBuffer.cacheLine.cacheLine <= UInt<1>("h0") @[peripheralUnit.scala 262:42]
+    writeRequestBuffer.cacheLine.required <= UInt<1>("h0") @[peripheralUnit.scala 263:41]
+    writeRequestBuffer.cacheLine.response <= UInt<1>("h0") @[peripheralUnit.scala 264:41]
 
   module fifoWithBranchOps_2 :
     input clock : Clock
@@ -15918,6 +15950,12 @@ circuit system :
     node _fenceReady_T_2 = and(_fenceReady_T, _fenceReady_T_1) @[ACEUnit.scala 392:35]
     node _fenceReady_T_3 = and(_fenceReady_T_2, ACEMSHR.isEmpty) @[ACEUnit.scala 392:60]
     fenceReady <= _fenceReady_T_3 @[ACEUnit.scala 392:14]
+    readBuffer.cacheLine.cacheLine <= UInt<1>("h0") @[ACEUnit.scala 395:34]
+    readBuffer.cacheLine.required <= UInt<1>("h0") @[ACEUnit.scala 396:33]
+    readBuffer.cacheLine.response <= UInt<1>("h0") @[ACEUnit.scala 397:33]
+    ACEMSHR.write.data.cacheLine.cacheLine <= UInt<1>("h0") @[ACEUnit.scala 399:42]
+    ACEMSHR.write.data.cacheLine.required <= UInt<1>("h0") @[ACEUnit.scala 400:41]
+    ACEMSHR.write.data.cacheLine.response <= UInt<1>("h0") @[ACEUnit.scala 401:41]
 
   module fifoRecordInvalidateI :
     input clock : Clock

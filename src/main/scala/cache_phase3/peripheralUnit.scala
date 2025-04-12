@@ -245,4 +245,21 @@ class peripheralUnit(
       readAXIResponseState := Mux(responseOut.ready && responseOutBuffer.valid, readDataInState, readDataOutState)
     }
   }
+
+  //Resource Utilization
+  peripheralMSHR.write.data.cacheLine.cacheLine := 0.U
+  peripheralMSHR.write.data.cacheLine.required := false.B
+  peripheralMSHR.write.data.cacheLine.response := 0.U
+
+  readRequestBuffer.cacheLine.cacheLine := 0.U
+  readRequestBuffer.cacheLine.required := false.B
+  readRequestBuffer.cacheLine.response := 0.U
+
+  requestBuffer.cacheLine.cacheLine := 0.U
+  requestBuffer.cacheLine.required := false.B
+  requestBuffer.cacheLine.response := 0.U
+
+  writeRequestBuffer.cacheLine.cacheLine := 0.U
+  writeRequestBuffer.cacheLine.required := false.B
+  writeRequestBuffer.cacheLine.response := 0.U
 }
