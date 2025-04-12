@@ -13890,7 +13890,6 @@ circuit system :
     fenceReady <= requestWaitFIFO.isEmpty @[replayUnit.scala 120:14]
     requestWaitFIFO.write.data.cacheLine.cacheLine <= UInt<1>("h0") @[replayUnit.scala 123:50]
     requestWaitFIFO.write.data.cacheLine.required <= UInt<1>("h0") @[replayUnit.scala 124:49]
-    requestWaitFIFO.write.data.cacheLine.response <= UInt<1>("h0") @[replayUnit.scala 125:49]
 
   module fifoBaseModule :
     input clock : Clock
@@ -15952,10 +15951,8 @@ circuit system :
     fenceReady <= _fenceReady_T_3 @[ACEUnit.scala 392:14]
     readBuffer.cacheLine.cacheLine <= UInt<1>("h0") @[ACEUnit.scala 395:34]
     readBuffer.cacheLine.required <= UInt<1>("h0") @[ACEUnit.scala 396:33]
-    readBuffer.cacheLine.response <= UInt<1>("h0") @[ACEUnit.scala 397:33]
     ACEMSHR.write.data.cacheLine.cacheLine <= UInt<1>("h0") @[ACEUnit.scala 399:42]
     ACEMSHR.write.data.cacheLine.required <= UInt<1>("h0") @[ACEUnit.scala 400:41]
-    ACEMSHR.write.data.cacheLine.response <= UInt<1>("h0") @[ACEUnit.scala 401:41]
 
   module fifoRecordInvalidateI :
     input clock : Clock
@@ -18377,6 +18374,11 @@ circuit system :
       fenceInititatedReg <= _fenceInititatedReg_T_1 @[cacheModule.scala 200:24]
       node _canInititatedFenceReg_T_2 = mux(fenceInstructions.fired, UInt<1>("h0"), UInt<1>("h1")) @[cacheModule.scala 201:33]
       canInititatedFenceReg <= _canInititatedFenceReg_T_2 @[cacheModule.scala 201:27]
+    commitFifo.write.data.cacheLine.cacheLine <= UInt<1>("h0") @[cacheModule.scala 204:45]
+    commitFifo.write.data.cacheLine.required <= UInt<1>("h0") @[cacheModule.scala 205:44]
+    commitFifo.write.data.cacheLine.response <= UInt<1>("h0") @[cacheModule.scala 206:44]
+    commitFifo.write.data.writeData.valid <= UInt<1>("h0") @[cacheModule.scala 207:41]
+    commitFifo.write.data.writeData.data <= UInt<1>("h0") @[cacheModule.scala 208:40]
     decrCounter <= UInt<1>("h0") @[core.scala 70:17]
     reg writeToMemoryPending : UInt<32>, clock with :
       reset => (reset, UInt<32>("h0")) @[core.scala 72:39]

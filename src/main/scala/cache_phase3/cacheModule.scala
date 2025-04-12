@@ -200,6 +200,12 @@ class CacheModule (
     fenceInititatedReg := Mux(fenceInstructions.fired, false.B, true.B)
     canInititatedFenceReg := Mux(fenceInstructions.fired, false.B, true.B)
   }
+
+  commitFifo.write.data.cacheLine.cacheLine := 0.U
+  commitFifo.write.data.cacheLine.required := false.B
+  commitFifo.write.data.cacheLine.response := 0.U
+  commitFifo.write.data.writeData.valid := false.B
+  commitFifo.write.data.writeData.data := 0.U
 }
 
 object CacheModuleMain extends App {

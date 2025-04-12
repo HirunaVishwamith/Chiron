@@ -394,9 +394,9 @@ class ACEUnit(
   //Resource Utilization
   readBuffer.cacheLine.cacheLine := 0.U
   readBuffer.cacheLine.required := false.B
-  readBuffer.cacheLine.response := 0.U
+  // readBuffer.cacheLine.response := 0.U
 
   ACEMSHR.write.data.cacheLine.cacheLine := 0.U
   ACEMSHR.write.data.cacheLine.required := false.B
-  ACEMSHR.write.data.cacheLine.response := 0.U
+  // ACEMSHR.write.data.cacheLine.response := 0.U
 }

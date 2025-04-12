@@ -33288,6 +33288,7 @@ module fifoWithBranchOps(
   input  [4:0]  write_data_branch_mask,
   input         write_data_writeData_valid,
   input  [63:0] write_data_writeData_data,
+  input  [1:0]  write_data_cacheLine_response,
   input         read_ready,
   output        read_data_valid,
   output [31:0] read_data_address,
@@ -33298,6 +33299,7 @@ module fifoWithBranchOps(
   output [4:0]  read_data_branch_mask,
   output        read_data_writeData_valid,
   output [63:0] read_data_writeData_data,
+  output [1:0]  read_data_cacheLine_response,
   output        isEmpty,
   input         branchOps_valid,
   input  [4:0]  branchOps_branchMask,
@@ -33321,8 +33323,8 @@ module fifoWithBranchOps(
   reg [31:0] _RAND_14;
   reg [31:0] _RAND_15;
   reg [31:0] _RAND_16;
-  reg [63:0] _RAND_17;
-  reg [31:0] _RAND_18;
+  reg [31:0] _RAND_17;
+  reg [63:0] _RAND_18;
   reg [31:0] _RAND_19;
   reg [31:0] _RAND_20;
   reg [31:0] _RAND_21;
@@ -33330,61 +33332,61 @@ module fifoWithBranchOps(
   reg [31:0] _RAND_23;
   reg [31:0] _RAND_24;
   reg [31:0] _RAND_25;
-  reg [63:0] _RAND_26;
+  reg [31:0] _RAND_26;
   reg [31:0] _RAND_27;
-  reg [31:0] _RAND_28;
+  reg [63:0] _RAND_28;
   reg [31:0] _RAND_29;
   reg [31:0] _RAND_30;
   reg [31:0] _RAND_31;
   reg [31:0] _RAND_32;
   reg [31:0] _RAND_33;
   reg [31:0] _RAND_34;
-  reg [63:0] _RAND_35;
+  reg [31:0] _RAND_35;
   reg [31:0] _RAND_36;
   reg [31:0] _RAND_37;
-  reg [31:0] _RAND_38;
+  reg [63:0] _RAND_38;
   reg [31:0] _RAND_39;
   reg [31:0] _RAND_40;
   reg [31:0] _RAND_41;
   reg [31:0] _RAND_42;
   reg [31:0] _RAND_43;
-  reg [63:0] _RAND_44;
+  reg [31:0] _RAND_44;
   reg [31:0] _RAND_45;
   reg [31:0] _RAND_46;
   reg [31:0] _RAND_47;
-  reg [31:0] _RAND_48;
+  reg [63:0] _RAND_48;
   reg [31:0] _RAND_49;
   reg [31:0] _RAND_50;
   reg [31:0] _RAND_51;
   reg [31:0] _RAND_52;
-  reg [63:0] _RAND_53;
+  reg [31:0] _RAND_53;
   reg [31:0] _RAND_54;
   reg [31:0] _RAND_55;
   reg [31:0] _RAND_56;
   reg [31:0] _RAND_57;
-  reg [31:0] _RAND_58;
+  reg [63:0] _RAND_58;
   reg [31:0] _RAND_59;
   reg [31:0] _RAND_60;
   reg [31:0] _RAND_61;
-  reg [63:0] _RAND_62;
+  reg [31:0] _RAND_62;
   reg [31:0] _RAND_63;
   reg [31:0] _RAND_64;
   reg [31:0] _RAND_65;
   reg [31:0] _RAND_66;
   reg [31:0] _RAND_67;
-  reg [31:0] _RAND_68;
+  reg [63:0] _RAND_68;
   reg [31:0] _RAND_69;
   reg [31:0] _RAND_70;
-  reg [63:0] _RAND_71;
+  reg [31:0] _RAND_71;
   reg [31:0] _RAND_72;
   reg [31:0] _RAND_73;
   reg [31:0] _RAND_74;
   reg [31:0] _RAND_75;
   reg [31:0] _RAND_76;
   reg [31:0] _RAND_77;
-  reg [31:0] _RAND_78;
+  reg [63:0] _RAND_78;
   reg [31:0] _RAND_79;
-  reg [63:0] _RAND_80;
+  reg [31:0] _RAND_80;
   reg [31:0] _RAND_81;
   reg [31:0] _RAND_82;
   reg [31:0] _RAND_83;
@@ -33392,8 +33394,8 @@ module fifoWithBranchOps(
   reg [31:0] _RAND_85;
   reg [31:0] _RAND_86;
   reg [31:0] _RAND_87;
-  reg [31:0] _RAND_88;
-  reg [63:0] _RAND_89;
+  reg [63:0] _RAND_88;
+  reg [31:0] _RAND_89;
   reg [31:0] _RAND_90;
   reg [31:0] _RAND_91;
   reg [31:0] _RAND_92;
@@ -33411,8 +33413,8 @@ module fifoWithBranchOps(
   reg [31:0] _RAND_104;
   reg [31:0] _RAND_105;
   reg [31:0] _RAND_106;
-  reg [63:0] _RAND_107;
-  reg [31:0] _RAND_108;
+  reg [31:0] _RAND_107;
+  reg [63:0] _RAND_108;
   reg [31:0] _RAND_109;
   reg [31:0] _RAND_110;
   reg [31:0] _RAND_111;
@@ -33420,38 +33422,54 @@ module fifoWithBranchOps(
   reg [31:0] _RAND_113;
   reg [31:0] _RAND_114;
   reg [31:0] _RAND_115;
-  reg [63:0] _RAND_116;
+  reg [31:0] _RAND_116;
   reg [31:0] _RAND_117;
-  reg [31:0] _RAND_118;
+  reg [63:0] _RAND_118;
   reg [31:0] _RAND_119;
   reg [31:0] _RAND_120;
   reg [31:0] _RAND_121;
   reg [31:0] _RAND_122;
   reg [31:0] _RAND_123;
   reg [31:0] _RAND_124;
-  reg [63:0] _RAND_125;
+  reg [31:0] _RAND_125;
   reg [31:0] _RAND_126;
   reg [31:0] _RAND_127;
-  reg [31:0] _RAND_128;
+  reg [63:0] _RAND_128;
   reg [31:0] _RAND_129;
   reg [31:0] _RAND_130;
   reg [31:0] _RAND_131;
   reg [31:0] _RAND_132;
   reg [31:0] _RAND_133;
-  reg [63:0] _RAND_134;
+  reg [31:0] _RAND_134;
   reg [31:0] _RAND_135;
   reg [31:0] _RAND_136;
   reg [31:0] _RAND_137;
-  reg [31:0] _RAND_138;
+  reg [63:0] _RAND_138;
   reg [31:0] _RAND_139;
   reg [31:0] _RAND_140;
   reg [31:0] _RAND_141;
   reg [31:0] _RAND_142;
-  reg [63:0] _RAND_143;
+  reg [31:0] _RAND_143;
   reg [31:0] _RAND_144;
   reg [31:0] _RAND_145;
   reg [31:0] _RAND_146;
   reg [31:0] _RAND_147;
+  reg [63:0] _RAND_148;
+  reg [31:0] _RAND_149;
+  reg [31:0] _RAND_150;
+  reg [31:0] _RAND_151;
+  reg [31:0] _RAND_152;
+  reg [31:0] _RAND_153;
+  reg [31:0] _RAND_154;
+  reg [31:0] _RAND_155;
+  reg [31:0] _RAND_156;
+  reg [31:0] _RAND_157;
+  reg [63:0] _RAND_158;
+  reg [31:0] _RAND_159;
+  reg [31:0] _RAND_160;
+  reg [31:0] _RAND_161;
+  reg [31:0] _RAND_162;
+  reg [31:0] _RAND_163;
 `endif // RANDOMIZE_REG_INIT
   reg  memReg_0_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_0_address; // @[fifo.scala 27:33]
@@ -33462,6 +33480,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_0_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_0_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_0_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_0_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_1_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_1_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_1_core_instruction; // @[fifo.scala 27:33]
@@ -33471,6 +33490,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_1_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_1_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_1_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_1_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_2_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_2_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_2_core_instruction; // @[fifo.scala 27:33]
@@ -33480,6 +33500,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_2_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_2_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_2_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_2_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_3_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_3_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_3_core_instruction; // @[fifo.scala 27:33]
@@ -33489,6 +33510,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_3_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_3_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_3_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_3_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_4_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_4_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_4_core_instruction; // @[fifo.scala 27:33]
@@ -33498,6 +33520,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_4_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_4_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_4_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_4_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_5_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_5_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_5_core_instruction; // @[fifo.scala 27:33]
@@ -33507,6 +33530,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_5_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_5_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_5_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_5_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_6_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_6_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_6_core_instruction; // @[fifo.scala 27:33]
@@ -33516,6 +33540,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_6_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_6_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_6_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_6_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_7_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_7_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_7_core_instruction; // @[fifo.scala 27:33]
@@ -33525,6 +33550,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_7_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_7_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_7_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_7_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_8_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_8_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_8_core_instruction; // @[fifo.scala 27:33]
@@ -33534,6 +33560,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_8_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_8_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_8_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_8_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_9_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_9_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_9_core_instruction; // @[fifo.scala 27:33]
@@ -33543,6 +33570,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_9_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_9_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_9_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_9_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_10_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_10_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_10_core_instruction; // @[fifo.scala 27:33]
@@ -33552,6 +33580,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_10_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_10_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_10_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_10_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_11_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_11_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_11_core_instruction; // @[fifo.scala 27:33]
@@ -33561,6 +33590,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_11_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_11_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_11_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_11_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_12_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_12_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_12_core_instruction; // @[fifo.scala 27:33]
@@ -33570,6 +33600,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_12_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_12_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_12_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_12_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_13_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_13_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_13_core_instruction; // @[fifo.scala 27:33]
@@ -33579,6 +33610,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_13_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_13_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_13_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_13_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_14_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_14_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_14_core_instruction; // @[fifo.scala 27:33]
@@ -33588,6 +33620,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_14_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_14_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_14_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_14_cacheLine_response; // @[fifo.scala 27:33]
   reg  memReg_15_valid; // @[fifo.scala 27:33]
   reg [31:0] memReg_15_address; // @[fifo.scala 27:33]
   reg [31:0] memReg_15_core_instruction; // @[fifo.scala 27:33]
@@ -33597,6 +33630,7 @@ module fifoWithBranchOps(
   reg [4:0] memReg_15_branch_mask; // @[fifo.scala 27:33]
   reg  memReg_15_writeData_valid; // @[fifo.scala 27:33]
   reg [63:0] memReg_15_writeData_data; // @[fifo.scala 27:33]
+  reg [1:0] memReg_15_cacheLine_response; // @[fifo.scala 27:33]
   reg [3:0] readPtr; // @[fifo.scala 33:25]
   wire [3:0] _nextVal_T_2 = readPtr + 4'h1; // @[fifo.scala 34:60]
   wire [3:0] nextRead = readPtr == 4'hf ? 4'h0 : _nextVal_T_2; // @[fifo.scala 34:22]
@@ -33820,6 +33854,20 @@ module fifoWithBranchOps(
   wire [63:0] _GEN_554 = 4'hc == readPtr ? memReg_12_writeData_data : _GEN_553; // @[fifo.scala 86:{13,13}]
   wire [63:0] _GEN_555 = 4'hd == readPtr ? memReg_13_writeData_data : _GEN_554; // @[fifo.scala 86:{13,13}]
   wire [63:0] _GEN_556 = 4'he == readPtr ? memReg_14_writeData_data : _GEN_555; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_575 = 4'h1 == readPtr ? memReg_1_cacheLine_response : memReg_0_cacheLine_response; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_576 = 4'h2 == readPtr ? memReg_2_cacheLine_response : _GEN_575; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_577 = 4'h3 == readPtr ? memReg_3_cacheLine_response : _GEN_576; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_578 = 4'h4 == readPtr ? memReg_4_cacheLine_response : _GEN_577; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_579 = 4'h5 == readPtr ? memReg_5_cacheLine_response : _GEN_578; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_580 = 4'h6 == readPtr ? memReg_6_cacheLine_response : _GEN_579; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_581 = 4'h7 == readPtr ? memReg_7_cacheLine_response : _GEN_580; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_582 = 4'h8 == readPtr ? memReg_8_cacheLine_response : _GEN_581; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_583 = 4'h9 == readPtr ? memReg_9_cacheLine_response : _GEN_582; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_584 = 4'ha == readPtr ? memReg_10_cacheLine_response : _GEN_583; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_585 = 4'hb == readPtr ? memReg_11_cacheLine_response : _GEN_584; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_586 = 4'hc == readPtr ? memReg_12_cacheLine_response : _GEN_585; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_587 = 4'hd == readPtr ? memReg_13_cacheLine_response : _GEN_586; // @[fifo.scala 86:{13,13}]
+  wire [1:0] _GEN_588 = 4'he == readPtr ? memReg_14_cacheLine_response : _GEN_587; // @[fifo.scala 86:{13,13}]
   wire [4:0] _T_8 = write_data_branch_mask & branchOps_branchMask; // @[utils.scala 62:31]
   wire  _T_9 = |_T_8; // @[utils.scala 62:55]
   wire [4:0] _memReg_branch_mask_T = write_data_branch_mask ^ branchOps_branchMask; // @[utils.scala 63:42]
@@ -34143,6 +34191,7 @@ module fifoWithBranchOps(
   assign read_data_branch_mask = branchOps_valid ? _GEN_1025 : _GEN_525; // @[utils.scala 111:23 89:27]
   assign read_data_writeData_valid = 4'hf == readPtr ? memReg_15_writeData_valid : _GEN_540; // @[fifo.scala 86:{13,13}]
   assign read_data_writeData_data = 4'hf == readPtr ? memReg_15_writeData_data : _GEN_556; // @[fifo.scala 86:{13,13}]
+  assign read_data_cacheLine_response = 4'hf == readPtr ? memReg_15_cacheLine_response : _GEN_588; // @[fifo.scala 86:{13,13}]
   assign isEmpty = emptyReg; // @[fifo.scala 89:11]
   always @(posedge clock) begin
     if (reset) begin // @[fifo.scala 27:33]
@@ -34220,6 +34269,13 @@ module fifoWithBranchOps(
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
         memReg_0_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_0_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h0 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_0_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
@@ -34302,6 +34358,13 @@ module fifoWithBranchOps(
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
+      memReg_1_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h1 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_1_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
       memReg_2_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
@@ -34378,6 +34441,13 @@ module fifoWithBranchOps(
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
         memReg_2_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_2_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h2 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_2_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
@@ -34460,6 +34530,13 @@ module fifoWithBranchOps(
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
+      memReg_3_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h3 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_3_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
       memReg_4_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
@@ -34536,6 +34613,13 @@ module fifoWithBranchOps(
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
         memReg_4_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_4_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h4 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_4_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
@@ -34618,6 +34702,13 @@ module fifoWithBranchOps(
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
+      memReg_5_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h5 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_5_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
       memReg_6_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
@@ -34694,6 +34785,13 @@ module fifoWithBranchOps(
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
         memReg_6_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_6_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h6 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_6_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
@@ -34776,6 +34874,13 @@ module fifoWithBranchOps(
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
+      memReg_7_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h7 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_7_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
       memReg_8_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
@@ -34852,6 +34957,13 @@ module fifoWithBranchOps(
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
         memReg_8_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_8_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h8 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_8_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
@@ -34934,6 +35046,13 @@ module fifoWithBranchOps(
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
+      memReg_9_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'h9 == writePtr) begin // @[fifo.scala 82:22]
+        memReg_9_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
       memReg_10_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'ha == writePtr) begin // @[fifo.scala 82:22]
@@ -35010,6 +35129,13 @@ module fifoWithBranchOps(
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'ha == writePtr) begin // @[fifo.scala 82:22]
         memReg_10_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_10_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'ha == writePtr) begin // @[fifo.scala 82:22]
+        memReg_10_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
@@ -35092,6 +35218,13 @@ module fifoWithBranchOps(
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
+      memReg_11_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hb == writePtr) begin // @[fifo.scala 82:22]
+        memReg_11_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
       memReg_12_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'hc == writePtr) begin // @[fifo.scala 82:22]
@@ -35168,6 +35301,13 @@ module fifoWithBranchOps(
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'hc == writePtr) begin // @[fifo.scala 82:22]
         memReg_12_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_12_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hc == writePtr) begin // @[fifo.scala 82:22]
+        memReg_12_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
@@ -35250,6 +35390,13 @@ module fifoWithBranchOps(
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
+      memReg_13_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hd == writePtr) begin // @[fifo.scala 82:22]
+        memReg_13_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
       memReg_14_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'he == writePtr) begin // @[fifo.scala 82:22]
@@ -35329,6 +35476,13 @@ module fifoWithBranchOps(
       end
     end
     if (reset) begin // @[fifo.scala 27:33]
+      memReg_14_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'he == writePtr) begin // @[fifo.scala 82:22]
+        memReg_14_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
       memReg_15_valid <= 1'h0; // @[fifo.scala 27:33]
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'hf == writePtr) begin // @[fifo.scala 82:22]
@@ -35403,6 +35557,13 @@ module fifoWithBranchOps(
     end else if (incrWrite) begin // @[fifo.scala 81:17]
       if (4'hf == writePtr) begin // @[fifo.scala 82:22]
         memReg_15_writeData_data <= write_data_writeData_data; // @[fifo.scala 82:22]
+      end
+    end
+    if (reset) begin // @[fifo.scala 27:33]
+      memReg_15_cacheLine_response <= 2'h0; // @[fifo.scala 27:33]
+    end else if (incrWrite) begin // @[fifo.scala 81:17]
+      if (4'hf == writePtr) begin // @[fifo.scala 82:22]
+        memReg_15_cacheLine_response <= write_data_cacheLine_response; // @[fifo.scala 82:22]
       end
     end
     if (reset) begin // @[fifo.scala 33:25]
@@ -35493,283 +35654,315 @@ initial begin
   _RAND_8 = {2{`RANDOM}};
   memReg_0_writeData_data = _RAND_8[63:0];
   _RAND_9 = {1{`RANDOM}};
-  memReg_1_valid = _RAND_9[0:0];
+  memReg_0_cacheLine_response = _RAND_9[1:0];
   _RAND_10 = {1{`RANDOM}};
-  memReg_1_address = _RAND_10[31:0];
+  memReg_1_valid = _RAND_10[0:0];
   _RAND_11 = {1{`RANDOM}};
-  memReg_1_core_instruction = _RAND_11[31:0];
+  memReg_1_address = _RAND_11[31:0];
   _RAND_12 = {1{`RANDOM}};
-  memReg_1_core_robAddr = _RAND_12[3:0];
+  memReg_1_core_instruction = _RAND_12[31:0];
   _RAND_13 = {1{`RANDOM}};
-  memReg_1_core_prfDest = _RAND_13[5:0];
+  memReg_1_core_robAddr = _RAND_13[3:0];
   _RAND_14 = {1{`RANDOM}};
-  memReg_1_branch_valid = _RAND_14[0:0];
+  memReg_1_core_prfDest = _RAND_14[5:0];
   _RAND_15 = {1{`RANDOM}};
-  memReg_1_branch_mask = _RAND_15[4:0];
+  memReg_1_branch_valid = _RAND_15[0:0];
   _RAND_16 = {1{`RANDOM}};
-  memReg_1_writeData_valid = _RAND_16[0:0];
-  _RAND_17 = {2{`RANDOM}};
-  memReg_1_writeData_data = _RAND_17[63:0];
-  _RAND_18 = {1{`RANDOM}};
-  memReg_2_valid = _RAND_18[0:0];
+  memReg_1_branch_mask = _RAND_16[4:0];
+  _RAND_17 = {1{`RANDOM}};
+  memReg_1_writeData_valid = _RAND_17[0:0];
+  _RAND_18 = {2{`RANDOM}};
+  memReg_1_writeData_data = _RAND_18[63:0];
   _RAND_19 = {1{`RANDOM}};
-  memReg_2_address = _RAND_19[31:0];
+  memReg_1_cacheLine_response = _RAND_19[1:0];
   _RAND_20 = {1{`RANDOM}};
-  memReg_2_core_instruction = _RAND_20[31:0];
+  memReg_2_valid = _RAND_20[0:0];
   _RAND_21 = {1{`RANDOM}};
-  memReg_2_core_robAddr = _RAND_21[3:0];
+  memReg_2_address = _RAND_21[31:0];
   _RAND_22 = {1{`RANDOM}};
-  memReg_2_core_prfDest = _RAND_22[5:0];
+  memReg_2_core_instruction = _RAND_22[31:0];
   _RAND_23 = {1{`RANDOM}};
-  memReg_2_branch_valid = _RAND_23[0:0];
+  memReg_2_core_robAddr = _RAND_23[3:0];
   _RAND_24 = {1{`RANDOM}};
-  memReg_2_branch_mask = _RAND_24[4:0];
+  memReg_2_core_prfDest = _RAND_24[5:0];
   _RAND_25 = {1{`RANDOM}};
-  memReg_2_writeData_valid = _RAND_25[0:0];
-  _RAND_26 = {2{`RANDOM}};
-  memReg_2_writeData_data = _RAND_26[63:0];
+  memReg_2_branch_valid = _RAND_25[0:0];
+  _RAND_26 = {1{`RANDOM}};
+  memReg_2_branch_mask = _RAND_26[4:0];
   _RAND_27 = {1{`RANDOM}};
-  memReg_3_valid = _RAND_27[0:0];
-  _RAND_28 = {1{`RANDOM}};
-  memReg_3_address = _RAND_28[31:0];
+  memReg_2_writeData_valid = _RAND_27[0:0];
+  _RAND_28 = {2{`RANDOM}};
+  memReg_2_writeData_data = _RAND_28[63:0];
   _RAND_29 = {1{`RANDOM}};
-  memReg_3_core_instruction = _RAND_29[31:0];
+  memReg_2_cacheLine_response = _RAND_29[1:0];
   _RAND_30 = {1{`RANDOM}};
-  memReg_3_core_robAddr = _RAND_30[3:0];
+  memReg_3_valid = _RAND_30[0:0];
   _RAND_31 = {1{`RANDOM}};
-  memReg_3_core_prfDest = _RAND_31[5:0];
+  memReg_3_address = _RAND_31[31:0];
   _RAND_32 = {1{`RANDOM}};
-  memReg_3_branch_valid = _RAND_32[0:0];
+  memReg_3_core_instruction = _RAND_32[31:0];
   _RAND_33 = {1{`RANDOM}};
-  memReg_3_branch_mask = _RAND_33[4:0];
+  memReg_3_core_robAddr = _RAND_33[3:0];
   _RAND_34 = {1{`RANDOM}};
-  memReg_3_writeData_valid = _RAND_34[0:0];
-  _RAND_35 = {2{`RANDOM}};
-  memReg_3_writeData_data = _RAND_35[63:0];
+  memReg_3_core_prfDest = _RAND_34[5:0];
+  _RAND_35 = {1{`RANDOM}};
+  memReg_3_branch_valid = _RAND_35[0:0];
   _RAND_36 = {1{`RANDOM}};
-  memReg_4_valid = _RAND_36[0:0];
+  memReg_3_branch_mask = _RAND_36[4:0];
   _RAND_37 = {1{`RANDOM}};
-  memReg_4_address = _RAND_37[31:0];
-  _RAND_38 = {1{`RANDOM}};
-  memReg_4_core_instruction = _RAND_38[31:0];
+  memReg_3_writeData_valid = _RAND_37[0:0];
+  _RAND_38 = {2{`RANDOM}};
+  memReg_3_writeData_data = _RAND_38[63:0];
   _RAND_39 = {1{`RANDOM}};
-  memReg_4_core_robAddr = _RAND_39[3:0];
+  memReg_3_cacheLine_response = _RAND_39[1:0];
   _RAND_40 = {1{`RANDOM}};
-  memReg_4_core_prfDest = _RAND_40[5:0];
+  memReg_4_valid = _RAND_40[0:0];
   _RAND_41 = {1{`RANDOM}};
-  memReg_4_branch_valid = _RAND_41[0:0];
+  memReg_4_address = _RAND_41[31:0];
   _RAND_42 = {1{`RANDOM}};
-  memReg_4_branch_mask = _RAND_42[4:0];
+  memReg_4_core_instruction = _RAND_42[31:0];
   _RAND_43 = {1{`RANDOM}};
-  memReg_4_writeData_valid = _RAND_43[0:0];
-  _RAND_44 = {2{`RANDOM}};
-  memReg_4_writeData_data = _RAND_44[63:0];
+  memReg_4_core_robAddr = _RAND_43[3:0];
+  _RAND_44 = {1{`RANDOM}};
+  memReg_4_core_prfDest = _RAND_44[5:0];
   _RAND_45 = {1{`RANDOM}};
-  memReg_5_valid = _RAND_45[0:0];
+  memReg_4_branch_valid = _RAND_45[0:0];
   _RAND_46 = {1{`RANDOM}};
-  memReg_5_address = _RAND_46[31:0];
+  memReg_4_branch_mask = _RAND_46[4:0];
   _RAND_47 = {1{`RANDOM}};
-  memReg_5_core_instruction = _RAND_47[31:0];
-  _RAND_48 = {1{`RANDOM}};
-  memReg_5_core_robAddr = _RAND_48[3:0];
+  memReg_4_writeData_valid = _RAND_47[0:0];
+  _RAND_48 = {2{`RANDOM}};
+  memReg_4_writeData_data = _RAND_48[63:0];
   _RAND_49 = {1{`RANDOM}};
-  memReg_5_core_prfDest = _RAND_49[5:0];
+  memReg_4_cacheLine_response = _RAND_49[1:0];
   _RAND_50 = {1{`RANDOM}};
-  memReg_5_branch_valid = _RAND_50[0:0];
+  memReg_5_valid = _RAND_50[0:0];
   _RAND_51 = {1{`RANDOM}};
-  memReg_5_branch_mask = _RAND_51[4:0];
+  memReg_5_address = _RAND_51[31:0];
   _RAND_52 = {1{`RANDOM}};
-  memReg_5_writeData_valid = _RAND_52[0:0];
-  _RAND_53 = {2{`RANDOM}};
-  memReg_5_writeData_data = _RAND_53[63:0];
+  memReg_5_core_instruction = _RAND_52[31:0];
+  _RAND_53 = {1{`RANDOM}};
+  memReg_5_core_robAddr = _RAND_53[3:0];
   _RAND_54 = {1{`RANDOM}};
-  memReg_6_valid = _RAND_54[0:0];
+  memReg_5_core_prfDest = _RAND_54[5:0];
   _RAND_55 = {1{`RANDOM}};
-  memReg_6_address = _RAND_55[31:0];
+  memReg_5_branch_valid = _RAND_55[0:0];
   _RAND_56 = {1{`RANDOM}};
-  memReg_6_core_instruction = _RAND_56[31:0];
+  memReg_5_branch_mask = _RAND_56[4:0];
   _RAND_57 = {1{`RANDOM}};
-  memReg_6_core_robAddr = _RAND_57[3:0];
-  _RAND_58 = {1{`RANDOM}};
-  memReg_6_core_prfDest = _RAND_58[5:0];
+  memReg_5_writeData_valid = _RAND_57[0:0];
+  _RAND_58 = {2{`RANDOM}};
+  memReg_5_writeData_data = _RAND_58[63:0];
   _RAND_59 = {1{`RANDOM}};
-  memReg_6_branch_valid = _RAND_59[0:0];
+  memReg_5_cacheLine_response = _RAND_59[1:0];
   _RAND_60 = {1{`RANDOM}};
-  memReg_6_branch_mask = _RAND_60[4:0];
+  memReg_6_valid = _RAND_60[0:0];
   _RAND_61 = {1{`RANDOM}};
-  memReg_6_writeData_valid = _RAND_61[0:0];
-  _RAND_62 = {2{`RANDOM}};
-  memReg_6_writeData_data = _RAND_62[63:0];
+  memReg_6_address = _RAND_61[31:0];
+  _RAND_62 = {1{`RANDOM}};
+  memReg_6_core_instruction = _RAND_62[31:0];
   _RAND_63 = {1{`RANDOM}};
-  memReg_7_valid = _RAND_63[0:0];
+  memReg_6_core_robAddr = _RAND_63[3:0];
   _RAND_64 = {1{`RANDOM}};
-  memReg_7_address = _RAND_64[31:0];
+  memReg_6_core_prfDest = _RAND_64[5:0];
   _RAND_65 = {1{`RANDOM}};
-  memReg_7_core_instruction = _RAND_65[31:0];
+  memReg_6_branch_valid = _RAND_65[0:0];
   _RAND_66 = {1{`RANDOM}};
-  memReg_7_core_robAddr = _RAND_66[3:0];
+  memReg_6_branch_mask = _RAND_66[4:0];
   _RAND_67 = {1{`RANDOM}};
-  memReg_7_core_prfDest = _RAND_67[5:0];
-  _RAND_68 = {1{`RANDOM}};
-  memReg_7_branch_valid = _RAND_68[0:0];
+  memReg_6_writeData_valid = _RAND_67[0:0];
+  _RAND_68 = {2{`RANDOM}};
+  memReg_6_writeData_data = _RAND_68[63:0];
   _RAND_69 = {1{`RANDOM}};
-  memReg_7_branch_mask = _RAND_69[4:0];
+  memReg_6_cacheLine_response = _RAND_69[1:0];
   _RAND_70 = {1{`RANDOM}};
-  memReg_7_writeData_valid = _RAND_70[0:0];
-  _RAND_71 = {2{`RANDOM}};
-  memReg_7_writeData_data = _RAND_71[63:0];
+  memReg_7_valid = _RAND_70[0:0];
+  _RAND_71 = {1{`RANDOM}};
+  memReg_7_address = _RAND_71[31:0];
   _RAND_72 = {1{`RANDOM}};
-  memReg_8_valid = _RAND_72[0:0];
+  memReg_7_core_instruction = _RAND_72[31:0];
   _RAND_73 = {1{`RANDOM}};
-  memReg_8_address = _RAND_73[31:0];
+  memReg_7_core_robAddr = _RAND_73[3:0];
   _RAND_74 = {1{`RANDOM}};
-  memReg_8_core_instruction = _RAND_74[31:0];
+  memReg_7_core_prfDest = _RAND_74[5:0];
   _RAND_75 = {1{`RANDOM}};
-  memReg_8_core_robAddr = _RAND_75[3:0];
+  memReg_7_branch_valid = _RAND_75[0:0];
   _RAND_76 = {1{`RANDOM}};
-  memReg_8_core_prfDest = _RAND_76[5:0];
+  memReg_7_branch_mask = _RAND_76[4:0];
   _RAND_77 = {1{`RANDOM}};
-  memReg_8_branch_valid = _RAND_77[0:0];
-  _RAND_78 = {1{`RANDOM}};
-  memReg_8_branch_mask = _RAND_78[4:0];
+  memReg_7_writeData_valid = _RAND_77[0:0];
+  _RAND_78 = {2{`RANDOM}};
+  memReg_7_writeData_data = _RAND_78[63:0];
   _RAND_79 = {1{`RANDOM}};
-  memReg_8_writeData_valid = _RAND_79[0:0];
-  _RAND_80 = {2{`RANDOM}};
-  memReg_8_writeData_data = _RAND_80[63:0];
+  memReg_7_cacheLine_response = _RAND_79[1:0];
+  _RAND_80 = {1{`RANDOM}};
+  memReg_8_valid = _RAND_80[0:0];
   _RAND_81 = {1{`RANDOM}};
-  memReg_9_valid = _RAND_81[0:0];
+  memReg_8_address = _RAND_81[31:0];
   _RAND_82 = {1{`RANDOM}};
-  memReg_9_address = _RAND_82[31:0];
+  memReg_8_core_instruction = _RAND_82[31:0];
   _RAND_83 = {1{`RANDOM}};
-  memReg_9_core_instruction = _RAND_83[31:0];
+  memReg_8_core_robAddr = _RAND_83[3:0];
   _RAND_84 = {1{`RANDOM}};
-  memReg_9_core_robAddr = _RAND_84[3:0];
+  memReg_8_core_prfDest = _RAND_84[5:0];
   _RAND_85 = {1{`RANDOM}};
-  memReg_9_core_prfDest = _RAND_85[5:0];
+  memReg_8_branch_valid = _RAND_85[0:0];
   _RAND_86 = {1{`RANDOM}};
-  memReg_9_branch_valid = _RAND_86[0:0];
+  memReg_8_branch_mask = _RAND_86[4:0];
   _RAND_87 = {1{`RANDOM}};
-  memReg_9_branch_mask = _RAND_87[4:0];
-  _RAND_88 = {1{`RANDOM}};
-  memReg_9_writeData_valid = _RAND_88[0:0];
-  _RAND_89 = {2{`RANDOM}};
-  memReg_9_writeData_data = _RAND_89[63:0];
+  memReg_8_writeData_valid = _RAND_87[0:0];
+  _RAND_88 = {2{`RANDOM}};
+  memReg_8_writeData_data = _RAND_88[63:0];
+  _RAND_89 = {1{`RANDOM}};
+  memReg_8_cacheLine_response = _RAND_89[1:0];
   _RAND_90 = {1{`RANDOM}};
-  memReg_10_valid = _RAND_90[0:0];
+  memReg_9_valid = _RAND_90[0:0];
   _RAND_91 = {1{`RANDOM}};
-  memReg_10_address = _RAND_91[31:0];
+  memReg_9_address = _RAND_91[31:0];
   _RAND_92 = {1{`RANDOM}};
-  memReg_10_core_instruction = _RAND_92[31:0];
+  memReg_9_core_instruction = _RAND_92[31:0];
   _RAND_93 = {1{`RANDOM}};
-  memReg_10_core_robAddr = _RAND_93[3:0];
+  memReg_9_core_robAddr = _RAND_93[3:0];
   _RAND_94 = {1{`RANDOM}};
-  memReg_10_core_prfDest = _RAND_94[5:0];
+  memReg_9_core_prfDest = _RAND_94[5:0];
   _RAND_95 = {1{`RANDOM}};
-  memReg_10_branch_valid = _RAND_95[0:0];
+  memReg_9_branch_valid = _RAND_95[0:0];
   _RAND_96 = {1{`RANDOM}};
-  memReg_10_branch_mask = _RAND_96[4:0];
+  memReg_9_branch_mask = _RAND_96[4:0];
   _RAND_97 = {1{`RANDOM}};
-  memReg_10_writeData_valid = _RAND_97[0:0];
+  memReg_9_writeData_valid = _RAND_97[0:0];
   _RAND_98 = {2{`RANDOM}};
-  memReg_10_writeData_data = _RAND_98[63:0];
+  memReg_9_writeData_data = _RAND_98[63:0];
   _RAND_99 = {1{`RANDOM}};
-  memReg_11_valid = _RAND_99[0:0];
+  memReg_9_cacheLine_response = _RAND_99[1:0];
   _RAND_100 = {1{`RANDOM}};
-  memReg_11_address = _RAND_100[31:0];
+  memReg_10_valid = _RAND_100[0:0];
   _RAND_101 = {1{`RANDOM}};
-  memReg_11_core_instruction = _RAND_101[31:0];
+  memReg_10_address = _RAND_101[31:0];
   _RAND_102 = {1{`RANDOM}};
-  memReg_11_core_robAddr = _RAND_102[3:0];
+  memReg_10_core_instruction = _RAND_102[31:0];
   _RAND_103 = {1{`RANDOM}};
-  memReg_11_core_prfDest = _RAND_103[5:0];
+  memReg_10_core_robAddr = _RAND_103[3:0];
   _RAND_104 = {1{`RANDOM}};
-  memReg_11_branch_valid = _RAND_104[0:0];
+  memReg_10_core_prfDest = _RAND_104[5:0];
   _RAND_105 = {1{`RANDOM}};
-  memReg_11_branch_mask = _RAND_105[4:0];
+  memReg_10_branch_valid = _RAND_105[0:0];
   _RAND_106 = {1{`RANDOM}};
-  memReg_11_writeData_valid = _RAND_106[0:0];
-  _RAND_107 = {2{`RANDOM}};
-  memReg_11_writeData_data = _RAND_107[63:0];
-  _RAND_108 = {1{`RANDOM}};
-  memReg_12_valid = _RAND_108[0:0];
+  memReg_10_branch_mask = _RAND_106[4:0];
+  _RAND_107 = {1{`RANDOM}};
+  memReg_10_writeData_valid = _RAND_107[0:0];
+  _RAND_108 = {2{`RANDOM}};
+  memReg_10_writeData_data = _RAND_108[63:0];
   _RAND_109 = {1{`RANDOM}};
-  memReg_12_address = _RAND_109[31:0];
+  memReg_10_cacheLine_response = _RAND_109[1:0];
   _RAND_110 = {1{`RANDOM}};
-  memReg_12_core_instruction = _RAND_110[31:0];
+  memReg_11_valid = _RAND_110[0:0];
   _RAND_111 = {1{`RANDOM}};
-  memReg_12_core_robAddr = _RAND_111[3:0];
+  memReg_11_address = _RAND_111[31:0];
   _RAND_112 = {1{`RANDOM}};
-  memReg_12_core_prfDest = _RAND_112[5:0];
+  memReg_11_core_instruction = _RAND_112[31:0];
   _RAND_113 = {1{`RANDOM}};
-  memReg_12_branch_valid = _RAND_113[0:0];
+  memReg_11_core_robAddr = _RAND_113[3:0];
   _RAND_114 = {1{`RANDOM}};
-  memReg_12_branch_mask = _RAND_114[4:0];
+  memReg_11_core_prfDest = _RAND_114[5:0];
   _RAND_115 = {1{`RANDOM}};
-  memReg_12_writeData_valid = _RAND_115[0:0];
-  _RAND_116 = {2{`RANDOM}};
-  memReg_12_writeData_data = _RAND_116[63:0];
+  memReg_11_branch_valid = _RAND_115[0:0];
+  _RAND_116 = {1{`RANDOM}};
+  memReg_11_branch_mask = _RAND_116[4:0];
   _RAND_117 = {1{`RANDOM}};
-  memReg_13_valid = _RAND_117[0:0];
-  _RAND_118 = {1{`RANDOM}};
-  memReg_13_address = _RAND_118[31:0];
+  memReg_11_writeData_valid = _RAND_117[0:0];
+  _RAND_118 = {2{`RANDOM}};
+  memReg_11_writeData_data = _RAND_118[63:0];
   _RAND_119 = {1{`RANDOM}};
-  memReg_13_core_instruction = _RAND_119[31:0];
+  memReg_11_cacheLine_response = _RAND_119[1:0];
   _RAND_120 = {1{`RANDOM}};
-  memReg_13_core_robAddr = _RAND_120[3:0];
+  memReg_12_valid = _RAND_120[0:0];
   _RAND_121 = {1{`RANDOM}};
-  memReg_13_core_prfDest = _RAND_121[5:0];
+  memReg_12_address = _RAND_121[31:0];
   _RAND_122 = {1{`RANDOM}};
-  memReg_13_branch_valid = _RAND_122[0:0];
+  memReg_12_core_instruction = _RAND_122[31:0];
   _RAND_123 = {1{`RANDOM}};
-  memReg_13_branch_mask = _RAND_123[4:0];
+  memReg_12_core_robAddr = _RAND_123[3:0];
   _RAND_124 = {1{`RANDOM}};
-  memReg_13_writeData_valid = _RAND_124[0:0];
-  _RAND_125 = {2{`RANDOM}};
-  memReg_13_writeData_data = _RAND_125[63:0];
+  memReg_12_core_prfDest = _RAND_124[5:0];
+  _RAND_125 = {1{`RANDOM}};
+  memReg_12_branch_valid = _RAND_125[0:0];
   _RAND_126 = {1{`RANDOM}};
-  memReg_14_valid = _RAND_126[0:0];
+  memReg_12_branch_mask = _RAND_126[4:0];
   _RAND_127 = {1{`RANDOM}};
-  memReg_14_address = _RAND_127[31:0];
-  _RAND_128 = {1{`RANDOM}};
-  memReg_14_core_instruction = _RAND_128[31:0];
+  memReg_12_writeData_valid = _RAND_127[0:0];
+  _RAND_128 = {2{`RANDOM}};
+  memReg_12_writeData_data = _RAND_128[63:0];
   _RAND_129 = {1{`RANDOM}};
-  memReg_14_core_robAddr = _RAND_129[3:0];
+  memReg_12_cacheLine_response = _RAND_129[1:0];
   _RAND_130 = {1{`RANDOM}};
-  memReg_14_core_prfDest = _RAND_130[5:0];
+  memReg_13_valid = _RAND_130[0:0];
   _RAND_131 = {1{`RANDOM}};
-  memReg_14_branch_valid = _RAND_131[0:0];
+  memReg_13_address = _RAND_131[31:0];
   _RAND_132 = {1{`RANDOM}};
-  memReg_14_branch_mask = _RAND_132[4:0];
+  memReg_13_core_instruction = _RAND_132[31:0];
   _RAND_133 = {1{`RANDOM}};
-  memReg_14_writeData_valid = _RAND_133[0:0];
-  _RAND_134 = {2{`RANDOM}};
-  memReg_14_writeData_data = _RAND_134[63:0];
+  memReg_13_core_robAddr = _RAND_133[3:0];
+  _RAND_134 = {1{`RANDOM}};
+  memReg_13_core_prfDest = _RAND_134[5:0];
   _RAND_135 = {1{`RANDOM}};
-  memReg_15_valid = _RAND_135[0:0];
+  memReg_13_branch_valid = _RAND_135[0:0];
   _RAND_136 = {1{`RANDOM}};
-  memReg_15_address = _RAND_136[31:0];
+  memReg_13_branch_mask = _RAND_136[4:0];
   _RAND_137 = {1{`RANDOM}};
-  memReg_15_core_instruction = _RAND_137[31:0];
-  _RAND_138 = {1{`RANDOM}};
-  memReg_15_core_robAddr = _RAND_138[3:0];
+  memReg_13_writeData_valid = _RAND_137[0:0];
+  _RAND_138 = {2{`RANDOM}};
+  memReg_13_writeData_data = _RAND_138[63:0];
   _RAND_139 = {1{`RANDOM}};
-  memReg_15_core_prfDest = _RAND_139[5:0];
+  memReg_13_cacheLine_response = _RAND_139[1:0];
   _RAND_140 = {1{`RANDOM}};
-  memReg_15_branch_valid = _RAND_140[0:0];
+  memReg_14_valid = _RAND_140[0:0];
   _RAND_141 = {1{`RANDOM}};
-  memReg_15_branch_mask = _RAND_141[4:0];
+  memReg_14_address = _RAND_141[31:0];
   _RAND_142 = {1{`RANDOM}};
-  memReg_15_writeData_valid = _RAND_142[0:0];
-  _RAND_143 = {2{`RANDOM}};
-  memReg_15_writeData_data = _RAND_143[63:0];
+  memReg_14_core_instruction = _RAND_142[31:0];
+  _RAND_143 = {1{`RANDOM}};
+  memReg_14_core_robAddr = _RAND_143[3:0];
   _RAND_144 = {1{`RANDOM}};
-  readPtr = _RAND_144[3:0];
+  memReg_14_core_prfDest = _RAND_144[5:0];
   _RAND_145 = {1{`RANDOM}};
-  emptyReg = _RAND_145[0:0];
+  memReg_14_branch_valid = _RAND_145[0:0];
   _RAND_146 = {1{`RANDOM}};
-  writePtr = _RAND_146[3:0];
+  memReg_14_branch_mask = _RAND_146[4:0];
   _RAND_147 = {1{`RANDOM}};
-  fullReg = _RAND_147[0:0];
+  memReg_14_writeData_valid = _RAND_147[0:0];
+  _RAND_148 = {2{`RANDOM}};
+  memReg_14_writeData_data = _RAND_148[63:0];
+  _RAND_149 = {1{`RANDOM}};
+  memReg_14_cacheLine_response = _RAND_149[1:0];
+  _RAND_150 = {1{`RANDOM}};
+  memReg_15_valid = _RAND_150[0:0];
+  _RAND_151 = {1{`RANDOM}};
+  memReg_15_address = _RAND_151[31:0];
+  _RAND_152 = {1{`RANDOM}};
+  memReg_15_core_instruction = _RAND_152[31:0];
+  _RAND_153 = {1{`RANDOM}};
+  memReg_15_core_robAddr = _RAND_153[3:0];
+  _RAND_154 = {1{`RANDOM}};
+  memReg_15_core_prfDest = _RAND_154[5:0];
+  _RAND_155 = {1{`RANDOM}};
+  memReg_15_branch_valid = _RAND_155[0:0];
+  _RAND_156 = {1{`RANDOM}};
+  memReg_15_branch_mask = _RAND_156[4:0];
+  _RAND_157 = {1{`RANDOM}};
+  memReg_15_writeData_valid = _RAND_157[0:0];
+  _RAND_158 = {2{`RANDOM}};
+  memReg_15_writeData_data = _RAND_158[63:0];
+  _RAND_159 = {1{`RANDOM}};
+  memReg_15_cacheLine_response = _RAND_159[1:0];
+  _RAND_160 = {1{`RANDOM}};
+  readPtr = _RAND_160[3:0];
+  _RAND_161 = {1{`RANDOM}};
+  emptyReg = _RAND_161[0:0];
+  _RAND_162 = {1{`RANDOM}};
+  writePtr = _RAND_162[3:0];
+  _RAND_163 = {1{`RANDOM}};
+  fullReg = _RAND_163[0:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -35841,6 +36034,7 @@ module requestScheduler(
   wire [4:0] speculativeQueue_write_data_branch_mask; // @[requestScheduler.scala 35:32]
   wire  speculativeQueue_write_data_writeData_valid; // @[requestScheduler.scala 35:32]
   wire [63:0] speculativeQueue_write_data_writeData_data; // @[requestScheduler.scala 35:32]
+  wire [1:0] speculativeQueue_write_data_cacheLine_response; // @[requestScheduler.scala 35:32]
   wire  speculativeQueue_read_ready; // @[requestScheduler.scala 35:32]
   wire  speculativeQueue_read_data_valid; // @[requestScheduler.scala 35:32]
   wire [31:0] speculativeQueue_read_data_address; // @[requestScheduler.scala 35:32]
@@ -35851,6 +36045,7 @@ module requestScheduler(
   wire [4:0] speculativeQueue_read_data_branch_mask; // @[requestScheduler.scala 35:32]
   wire  speculativeQueue_read_data_writeData_valid; // @[requestScheduler.scala 35:32]
   wire [63:0] speculativeQueue_read_data_writeData_data; // @[requestScheduler.scala 35:32]
+  wire [1:0] speculativeQueue_read_data_cacheLine_response; // @[requestScheduler.scala 35:32]
   wire  speculativeQueue_isEmpty; // @[requestScheduler.scala 35:32]
   wire  speculativeQueue_branchOps_valid; // @[requestScheduler.scala 35:32]
   wire [4:0] speculativeQueue_branchOps_branchMask; // @[requestScheduler.scala 35:32]
@@ -36052,6 +36247,7 @@ module requestScheduler(
     .write_data_branch_mask(speculativeQueue_write_data_branch_mask),
     .write_data_writeData_valid(speculativeQueue_write_data_writeData_valid),
     .write_data_writeData_data(speculativeQueue_write_data_writeData_data),
+    .write_data_cacheLine_response(speculativeQueue_write_data_cacheLine_response),
     .read_ready(speculativeQueue_read_ready),
     .read_data_valid(speculativeQueue_read_data_valid),
     .read_data_address(speculativeQueue_read_data_address),
@@ -36062,6 +36258,7 @@ module requestScheduler(
     .read_data_branch_mask(speculativeQueue_read_data_branch_mask),
     .read_data_writeData_valid(speculativeQueue_read_data_writeData_valid),
     .read_data_writeData_data(speculativeQueue_read_data_writeData_data),
+    .read_data_cacheLine_response(speculativeQueue_read_data_cacheLine_response),
     .isEmpty(speculativeQueue_isEmpty),
     .branchOps_valid(speculativeQueue_branchOps_valid),
     .branchOps_branchMask(speculativeQueue_branchOps_branchMask),
@@ -36104,6 +36301,7 @@ module requestScheduler(
   assign speculativeQueue_write_data_branch_mask = requestIn_valid ? _GEN_62 : 5'h0; // @[requestScheduler.scala 50:50 utils.scala 49:41]
   assign speculativeQueue_write_data_writeData_valid = 1'h0; // @[requestScheduler.scala 50:50 utils.scala 48:41]
   assign speculativeQueue_write_data_writeData_data = 64'h0; // @[requestScheduler.scala 50:50 utils.scala 49:41]
+  assign speculativeQueue_write_data_cacheLine_response = 2'h0; // @[requestScheduler.scala 126:50]
   assign speculativeQueue_read_ready = (controlSignal_inorderReady | controlSignal_speculativeReady) & _GEN_211; // @[requestScheduler.scala 78:113 44:31]
   assign speculativeQueue_branchOps_valid = branchOps_valid; // @[requestScheduler.scala 66:30]
   assign speculativeQueue_branchOps_branchMask = branchOps_branchMask; // @[requestScheduler.scala 66:30]
@@ -37153,6 +37351,7 @@ module cacheLookupUnit(
   output [4:0]   toReplay_request_branch_mask,
   output         toReplay_request_writeData_valid,
   output [63:0]  toReplay_request_writeData_data,
+  output [1:0]   toReplay_request_cacheLine_response,
   input          toWriteBack_ready,
   output         toWriteBack_request_valid,
   output [31:0]  toWriteBack_request_address,
@@ -37216,15 +37415,16 @@ module cacheLookupUnit(
   reg [31:0] _RAND_36;
   reg [31:0] _RAND_37;
   reg [31:0] _RAND_38;
-  reg [63:0] _RAND_39;
-  reg [31:0] _RAND_40;
+  reg [31:0] _RAND_39;
+  reg [63:0] _RAND_40;
   reg [31:0] _RAND_41;
-  reg [511:0] _RAND_42;
-  reg [31:0] _RAND_43;
+  reg [31:0] _RAND_42;
+  reg [511:0] _RAND_43;
   reg [31:0] _RAND_44;
   reg [31:0] _RAND_45;
-  reg [511:0] _RAND_46;
-  reg [31:0] _RAND_47;
+  reg [31:0] _RAND_46;
+  reg [511:0] _RAND_47;
+  reg [31:0] _RAND_48;
 `endif // RANDOMIZE_REG_INIT
   wire  dataBRAM_0_clock; // @[cacheLookupUnit.scala 60:39]
   wire [6:0] dataBRAM_0_rdAddr; // @[cacheLookupUnit.scala 60:39]
@@ -37297,6 +37497,7 @@ module cacheLookupUnit(
   reg [4:0] replayBuffer_branch_mask; // @[cacheLookupUnit.scala 153:29]
   reg  replayBuffer_writeData_valid; // @[cacheLookupUnit.scala 153:29]
   reg [63:0] replayBuffer_writeData_data; // @[cacheLookupUnit.scala 153:29]
+  reg [1:0] replayBuffer_cacheLine_response; // @[cacheLookupUnit.scala 153:29]
   wire  _GEN_14 = toReplay_ready ? 1'h0 : replayBuffer_valid; // @[cacheLookupUnit.scala 155:23 157:24 153:29]
   reg  memoryResponseBuffer_valid; // @[cacheLookupUnit.scala 160:37]
   reg [31:0] memoryResponseBuffer_address; // @[cacheLookupUnit.scala 160:37]
@@ -38047,18 +38248,22 @@ module cacheLookupUnit(
   wire  _GEN_661 = _T_125 | _GEN_656; // @[cacheLookupUnit.scala 425:72 426:35]
   wire  _GEN_663 = _T_125 ? _toWriteBackValidWire_T_1 : _GEN_657; // @[cacheLookupUnit.scala 425:72 429:30]
   wire  _GEN_665 = _T_125 ? _GEN_659 : 1'h1; // @[cacheLookupUnit.scala 425:72 432:27]
+  wire [1:0] _GEN_666 = _T_125 ? 2'h0 : 2'h1; // @[cacheLookupUnit.scala 425:72 433:30]
   wire  _GEN_667 = _T_125 ? 1'h0 : 1'h1; // @[cacheLookupUnit.scala 425:72 434:34]
   wire  _GEN_668 = _T_10 ? _GEN_661 : _GEN_656; // @[cacheLookupUnit.scala 424:43]
   wire  _GEN_669 = _T_10 & _T_125; // @[cacheLookupUnit.scala 424:43]
   wire  _GEN_670 = _T_10 ? _GEN_663 : _GEN_657; // @[cacheLookupUnit.scala 424:43]
   wire  _GEN_672 = _T_10 ? _GEN_665 : _GEN_659; // @[cacheLookupUnit.scala 424:43]
+  wire [1:0] _GEN_673 = _T_10 ? _GEN_666 : 2'h0; // @[cacheLookupUnit.scala 424:43]
   wire  _GEN_674 = _T_10 & _GEN_667; // @[cacheLookupUnit.scala 424:43]
   wire  _GEN_675 = isLRWriteWire | _GEN_45; // @[cacheLookupUnit.scala 437:{24,54}]
   wire  _GEN_677 = isCoherentWire ? _isPermissionMiss_T : _GEN_668; // @[cacheLookupUnit.scala 438:25 440:24]
+  wire [1:0] _requiredResponseWire_T_2 = isPermissionMiss & _isPermissionMiss_T ? 2'h3 : 2'h1; // @[cacheLookupUnit.scala 450:36]
   wire  _GEN_678 = isReplayValidWire | _T_18 ? _toWriteBackValidWire_T_1 : _GEN_670; // @[cacheLookupUnit.scala 443:72 444:30]
   wire  _GEN_679 = isReplayValidWire | _T_18 | _GEN_677; // @[cacheLookupUnit.scala 443:72 445:26]
   wire  _GEN_681 = isReplayValidWire | _T_18 | _GEN_675; // @[cacheLookupUnit.scala 443:72 447:38]
   wire  _GEN_682 = isReplayValidWire | _T_18 ? _GEN_672 : 1'h1; // @[cacheLookupUnit.scala 443:72 449:27]
+  wire [1:0] _GEN_683 = isReplayValidWire | _T_18 ? _GEN_673 : _requiredResponseWire_T_2; // @[cacheLookupUnit.scala 443:72 450:30]
   wire  _GEN_684 = isReplayValidWire | _T_18 ? _GEN_674 : 1'h1; // @[cacheLookupUnit.scala 443:72 451:34]
   wire  _GEN_685 = _T_14 ? _GEN_678 : _GEN_670; // @[cacheLookupUnit.scala 442:43]
   wire  _GEN_686 = _T_14 ? _GEN_679 : _GEN_677; // @[cacheLookupUnit.scala 442:43]
@@ -38237,7 +38442,7 @@ module cacheLookupUnit(
   wire  _GEN_943 = branchOps_passed ? lastMissRecordRegister_branch_valid : _GEN_940; // @[utils.scala 121:32 125:24]
   wire [4:0] _GEN_944 = branchOps_valid ? _GEN_942 : _GEN_891; // @[utils.scala 120:29]
   wire  _GEN_945 = branchOps_valid ? _GEN_943 : _GEN_890; // @[utils.scala 120:29]
-  wire [35:0] _GEN_31 = reset ? 36'h0 : _GEN_883; // @[cacheLookupUnit.scala 177:{32,32}]
+  wire [35:0] _GEN_32 = reset ? 36'h0 : _GEN_883; // @[cacheLookupUnit.scala 177:{32,32}]
   moduleForwardingMemory dataBRAM_0 ( // @[cacheLookupUnit.scala 60:39]
     .clock(dataBRAM_0_clock),
     .rdAddr(dataBRAM_0_rdAddr),
@@ -38290,6 +38495,7 @@ module cacheLookupUnit(
   assign toReplay_request_branch_mask = toReplay_ready ? replayBuffer_branch_mask : 5'h0; // @[cacheLookupUnit.scala 155:23 156:22 utils.scala 49:41]
   assign toReplay_request_writeData_valid = toReplay_ready & replayBuffer_writeData_valid; // @[cacheLookupUnit.scala 155:23 156:22 utils.scala 48:41]
   assign toReplay_request_writeData_data = toReplay_ready ? replayBuffer_writeData_data : 64'h0; // @[cacheLookupUnit.scala 155:23 156:22 utils.scala 49:41]
+  assign toReplay_request_cacheLine_response = toReplay_ready ? replayBuffer_cacheLine_response : 2'h0; // @[cacheLookupUnit.scala 155:23 156:22 utils.scala 49:41]
   assign toWriteBack_request_valid = toWriteBack_ready & writeBackBuffer_valid; // @[cacheLookupUnit.scala 179:26 180:25 utils.scala 48:41]
   assign toWriteBack_request_address = toWriteBack_ready ? writeBackBuffer_address : 32'h0; // @[cacheLookupUnit.scala 179:26 180:25 utils.scala 49:41]
   assign toWriteBack_request_data = toWriteBack_ready ? writeBackBuffer_data : 512'h0; // @[cacheLookupUnit.scala 179:26 180:25 utils.scala 49:41]
@@ -38605,6 +38811,17 @@ module cacheLookupUnit(
         replayBuffer_writeData_data <= readBuffer_writeData_data; // @[cacheLookupUnit.scala 500:20]
       end
     end
+    if (reset) begin // @[cacheLookupUnit.scala 153:29]
+      replayBuffer_cacheLine_response <= 2'h0; // @[cacheLookupUnit.scala 153:29]
+    end else if (operationValid) begin // @[cacheLookupUnit.scala 212:23]
+      if (toReplayValidWire & readBuffer_branch_valid) begin // @[cacheLookupUnit.scala 499:55]
+        if (_T_14) begin // @[cacheLookupUnit.scala 442:43]
+          replayBuffer_cacheLine_response <= _GEN_683;
+        end else begin
+          replayBuffer_cacheLine_response <= _GEN_673;
+        end
+      end
+    end
     if (reset) begin // @[cacheLookupUnit.scala 160:37]
       memoryResponseBuffer_valid <= 1'h0; // @[cacheLookupUnit.scala 160:37]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 212:23]
@@ -38734,7 +38951,7 @@ module cacheLookupUnit(
     end else begin
       writeBackBuffer_valid <= _GEN_44;
     end
-    writeBackBuffer_address <= _GEN_31[31:0]; // @[cacheLookupUnit.scala 177:{32,32}]
+    writeBackBuffer_address <= _GEN_32[31:0]; // @[cacheLookupUnit.scala 177:{32,32}]
     if (reset) begin // @[cacheLookupUnit.scala 177:32]
       writeBackBuffer_data <= 512'h0; // @[cacheLookupUnit.scala 177:32]
     end else if (operationValid) begin // @[cacheLookupUnit.scala 212:23]
@@ -38855,37 +39072,39 @@ initial begin
   _RAND_31 = {2{`RANDOM}};
   replayBuffer_writeData_data = _RAND_31[63:0];
   _RAND_32 = {1{`RANDOM}};
-  memoryResponseBuffer_valid = _RAND_32[0:0];
+  replayBuffer_cacheLine_response = _RAND_32[1:0];
   _RAND_33 = {1{`RANDOM}};
-  memoryResponseBuffer_address = _RAND_33[31:0];
+  memoryResponseBuffer_valid = _RAND_33[0:0];
   _RAND_34 = {1{`RANDOM}};
-  memoryResponseBuffer_core_instruction = _RAND_34[31:0];
+  memoryResponseBuffer_address = _RAND_34[31:0];
   _RAND_35 = {1{`RANDOM}};
-  memoryResponseBuffer_core_robAddr = _RAND_35[3:0];
+  memoryResponseBuffer_core_instruction = _RAND_35[31:0];
   _RAND_36 = {1{`RANDOM}};
-  memoryResponseBuffer_core_prfDest = _RAND_36[5:0];
+  memoryResponseBuffer_core_robAddr = _RAND_36[3:0];
   _RAND_37 = {1{`RANDOM}};
-  memoryResponseBuffer_branch_valid = _RAND_37[0:0];
+  memoryResponseBuffer_core_prfDest = _RAND_37[5:0];
   _RAND_38 = {1{`RANDOM}};
-  memoryResponseBuffer_branch_mask = _RAND_38[4:0];
-  _RAND_39 = {2{`RANDOM}};
-  memoryResponseBuffer_writeData_data = _RAND_39[63:0];
-  _RAND_40 = {1{`RANDOM}};
-  coherencyResponseBuffer_valid = _RAND_40[0:0];
+  memoryResponseBuffer_branch_valid = _RAND_38[0:0];
+  _RAND_39 = {1{`RANDOM}};
+  memoryResponseBuffer_branch_mask = _RAND_39[4:0];
+  _RAND_40 = {2{`RANDOM}};
+  memoryResponseBuffer_writeData_data = _RAND_40[63:0];
   _RAND_41 = {1{`RANDOM}};
-  coherencyResponseBuffer_response = _RAND_41[1:0];
-  _RAND_42 = {16{`RANDOM}};
-  coherencyResponseBuffer_cacheLine = _RAND_42[511:0];
-  _RAND_43 = {1{`RANDOM}};
-  coherencyResponseBuffer_dataValid = _RAND_43[0:0];
+  coherencyResponseBuffer_valid = _RAND_41[0:0];
+  _RAND_42 = {1{`RANDOM}};
+  coherencyResponseBuffer_response = _RAND_42[1:0];
+  _RAND_43 = {16{`RANDOM}};
+  coherencyResponseBuffer_cacheLine = _RAND_43[511:0];
   _RAND_44 = {1{`RANDOM}};
-  writeBackBuffer_valid = _RAND_44[0:0];
+  coherencyResponseBuffer_dataValid = _RAND_44[0:0];
   _RAND_45 = {1{`RANDOM}};
-  writeBackBuffer_address = _RAND_45[31:0];
-  _RAND_46 = {16{`RANDOM}};
-  writeBackBuffer_data = _RAND_46[511:0];
-  _RAND_47 = {1{`RANDOM}};
-  writeCommitInstructionBuffer = _RAND_47[0:0];
+  writeBackBuffer_valid = _RAND_45[0:0];
+  _RAND_46 = {1{`RANDOM}};
+  writeBackBuffer_address = _RAND_46[31:0];
+  _RAND_47 = {16{`RANDOM}};
+  writeBackBuffer_data = _RAND_47[511:0];
+  _RAND_48 = {1{`RANDOM}};
+  writeCommitInstructionBuffer = _RAND_48[0:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -39431,6 +39650,7 @@ module replayUnit(
   input  [4:0]   requestIn_request_branch_mask,
   input          requestIn_request_writeData_valid,
   input  [63:0]  requestIn_request_writeData_data,
+  input  [1:0]   requestIn_request_cacheLine_response,
   input          requestOut_ready,
   output         requestOut_request_valid,
   output [31:0]  requestOut_request_address,
@@ -39441,6 +39661,7 @@ module replayUnit(
   output [4:0]   requestOut_request_branch_mask,
   output         requestOut_request_writeData_valid,
   output [63:0]  requestOut_request_writeData_data,
+  output [1:0]   requestOut_request_cacheLine_response,
   output         responseIn_ready,
   input          responseIn_request_valid,
   input  [31:0]  responseIn_request_address,
@@ -39490,6 +39711,7 @@ module replayUnit(
   wire [4:0] requestWaitFIFO_write_data_branch_mask; // @[replayUnit.scala 48:31]
   wire  requestWaitFIFO_write_data_writeData_valid; // @[replayUnit.scala 48:31]
   wire [63:0] requestWaitFIFO_write_data_writeData_data; // @[replayUnit.scala 48:31]
+  wire [1:0] requestWaitFIFO_write_data_cacheLine_response; // @[replayUnit.scala 48:31]
   wire  requestWaitFIFO_read_ready; // @[replayUnit.scala 48:31]
   wire  requestWaitFIFO_read_data_valid; // @[replayUnit.scala 48:31]
   wire [31:0] requestWaitFIFO_read_data_address; // @[replayUnit.scala 48:31]
@@ -39500,6 +39722,7 @@ module replayUnit(
   wire [4:0] requestWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 48:31]
   wire  requestWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 48:31]
   wire [63:0] requestWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 48:31]
+  wire [1:0] requestWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 48:31]
   wire  requestWaitFIFO_isEmpty; // @[replayUnit.scala 48:31]
   wire  requestWaitFIFO_branchOps_valid; // @[replayUnit.scala 48:31]
   wire [4:0] requestWaitFIFO_branchOps_branchMask; // @[replayUnit.scala 48:31]
@@ -39537,6 +39760,7 @@ module replayUnit(
     .write_data_branch_mask(requestWaitFIFO_write_data_branch_mask),
     .write_data_writeData_valid(requestWaitFIFO_write_data_writeData_valid),
     .write_data_writeData_data(requestWaitFIFO_write_data_writeData_data),
+    .write_data_cacheLine_response(requestWaitFIFO_write_data_cacheLine_response),
     .read_ready(requestWaitFIFO_read_ready),
     .read_data_valid(requestWaitFIFO_read_data_valid),
     .read_data_address(requestWaitFIFO_read_data_address),
@@ -39547,6 +39771,7 @@ module replayUnit(
     .read_data_branch_mask(requestWaitFIFO_read_data_branch_mask),
     .read_data_writeData_valid(requestWaitFIFO_read_data_writeData_valid),
     .read_data_writeData_data(requestWaitFIFO_read_data_writeData_data),
+    .read_data_cacheLine_response(requestWaitFIFO_read_data_cacheLine_response),
     .isEmpty(requestWaitFIFO_isEmpty),
     .branchOps_valid(requestWaitFIFO_branchOps_valid),
     .branchOps_branchMask(requestWaitFIFO_branchOps_branchMask),
@@ -39574,6 +39799,7 @@ module replayUnit(
   assign requestOut_request_branch_mask = requestWaitFIFO_read_data_branch_mask; // @[replayUnit.scala 86:22]
   assign requestOut_request_writeData_valid = requestWaitFIFO_read_data_writeData_valid; // @[replayUnit.scala 86:22]
   assign requestOut_request_writeData_data = requestWaitFIFO_read_data_writeData_data; // @[replayUnit.scala 86:22]
+  assign requestOut_request_cacheLine_response = requestWaitFIFO_read_data_cacheLine_response; // @[replayUnit.scala 86:22]
   assign responseIn_ready = responseOut_ready; // @[replayUnit.scala 104:14]
   assign responseOut_request_valid = responseIn_request_valid; // @[replayUnit.scala 104:14]
   assign responseOut_request_address = responseIn_request_address; // @[replayUnit.scala 104:14]
@@ -39610,6 +39836,8 @@ module replayUnit(
     requestIn_request_writeData_valid; // @[replayUnit.scala 82:66 83:32 utils.scala 48:41]
   assign requestWaitFIFO_write_data_writeData_data = requestIn_request_valid & requestIn_request_branch_valid ?
     requestIn_request_writeData_data : 64'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 49:41]
+  assign requestWaitFIFO_write_data_cacheLine_response = requestIn_request_valid & requestIn_request_branch_valid ?
+    requestIn_request_cacheLine_response : 2'h0; // @[replayUnit.scala 82:66 83:32 utils.scala 49:41]
   assign requestWaitFIFO_read_ready = requestOut_ready; // @[replayUnit.scala 64:30 78:48 80:32]
   assign requestWaitFIFO_branchOps_valid = branchOps_valid; // @[replayUnit.scala 74:29]
   assign requestWaitFIFO_branchOps_branchMask = branchOps_branchMask; // @[replayUnit.scala 74:29]
@@ -41975,6 +42203,7 @@ module ACEUnit(
   input  [4:0]   readRequest_request_branch_mask,
   input          readRequest_request_writeData_valid,
   input  [63:0]  readRequest_request_writeData_data,
+  input  [1:0]   readRequest_request_cacheLine_response,
   input          readResponse_ready,
   output         readResponse_request_valid,
   output [31:0]  readResponse_request_address,
@@ -42053,24 +42282,24 @@ module ACEUnit(
   reg [31:0] _RAND_14;
   reg [31:0] _RAND_15;
   reg [31:0] _RAND_16;
-  reg [63:0] _RAND_17;
-  reg [511:0] _RAND_18;
-  reg [31:0] _RAND_19;
+  reg [31:0] _RAND_17;
+  reg [63:0] _RAND_18;
+  reg [511:0] _RAND_19;
   reg [31:0] _RAND_20;
   reg [31:0] _RAND_21;
-  reg [511:0] _RAND_22;
-  reg [31:0] _RAND_23;
+  reg [31:0] _RAND_22;
+  reg [511:0] _RAND_23;
   reg [31:0] _RAND_24;
   reg [31:0] _RAND_25;
   reg [31:0] _RAND_26;
   reg [31:0] _RAND_27;
-  reg [511:0] _RAND_28;
-  reg [31:0] _RAND_29;
+  reg [31:0] _RAND_28;
+  reg [511:0] _RAND_29;
   reg [31:0] _RAND_30;
   reg [31:0] _RAND_31;
   reg [31:0] _RAND_32;
   reg [31:0] _RAND_33;
-  reg [63:0] _RAND_34;
+  reg [31:0] _RAND_34;
   reg [63:0] _RAND_35;
   reg [63:0] _RAND_36;
   reg [63:0] _RAND_37;
@@ -42078,9 +42307,10 @@ module ACEUnit(
   reg [63:0] _RAND_39;
   reg [63:0] _RAND_40;
   reg [63:0] _RAND_41;
-  reg [31:0] _RAND_42;
+  reg [63:0] _RAND_42;
   reg [31:0] _RAND_43;
   reg [31:0] _RAND_44;
+  reg [31:0] _RAND_45;
 `endif // RANDOMIZE_REG_INIT
   wire  ACEMSHR_clock; // @[ACEUnit.scala 106:25]
   wire  ACEMSHR_reset; // @[ACEUnit.scala 106:25]
@@ -42094,6 +42324,7 @@ module ACEUnit(
   wire [4:0] ACEMSHR_write_data_branch_mask; // @[ACEUnit.scala 106:25]
   wire  ACEMSHR_write_data_writeData_valid; // @[ACEUnit.scala 106:25]
   wire [63:0] ACEMSHR_write_data_writeData_data; // @[ACEUnit.scala 106:25]
+  wire [1:0] ACEMSHR_write_data_cacheLine_response; // @[ACEUnit.scala 106:25]
   wire  ACEMSHR_read_ready; // @[ACEUnit.scala 106:25]
   wire  ACEMSHR_read_data_valid; // @[ACEUnit.scala 106:25]
   wire [31:0] ACEMSHR_read_data_address; // @[ACEUnit.scala 106:25]
@@ -42104,6 +42335,7 @@ module ACEUnit(
   wire [4:0] ACEMSHR_read_data_branch_mask; // @[ACEUnit.scala 106:25]
   wire  ACEMSHR_read_data_writeData_valid; // @[ACEUnit.scala 106:25]
   wire [63:0] ACEMSHR_read_data_writeData_data; // @[ACEUnit.scala 106:25]
+  wire [1:0] ACEMSHR_read_data_cacheLine_response; // @[ACEUnit.scala 106:25]
   wire  ACEMSHR_isEmpty; // @[ACEUnit.scala 106:25]
   wire  ACEMSHR_branchOps_valid; // @[ACEUnit.scala 106:25]
   wire [4:0] ACEMSHR_branchOps_branchMask; // @[ACEUnit.scala 106:25]
@@ -42129,6 +42361,7 @@ module ACEUnit(
   reg [4:0] readBuffer_branch_mask; // @[ACEUnit.scala 104:28]
   reg  readBuffer_writeData_valid; // @[ACEUnit.scala 104:28]
   reg [63:0] readBuffer_writeData_data; // @[ACEUnit.scala 104:28]
+  reg [1:0] readBuffer_cacheLine_response; // @[ACEUnit.scala 104:28]
   reg  responseBuffer_valid; // @[ACEUnit.scala 105:31]
   reg [31:0] responseBuffer_address; // @[ACEUnit.scala 105:31]
   reg [31:0] responseBuffer_core_instruction; // @[ACEUnit.scala 105:31]
@@ -42228,6 +42461,9 @@ module ACEUnit(
   reg [1:0] coherentAXIState; // @[ACEUnit.scala 326:33]
   wire  isCoherencyIdle = coherentAXIState == 2'h0; // @[ACEUnit.scala 329:40]
   wire [31:0] _bus_ARADDR_T_1 = {readBuffer_address[31:6],6'h0}; // @[Cat.scala 33:92]
+  wire [3:0] _GEN_102 = 2'h3 == readBuffer_cacheLine_response ? 4'hb : 4'h1; // @[ACEUnit.scala 242:19 243:49 246:34]
+  wire [3:0] _GEN_103 = 2'h1 == readBuffer_cacheLine_response ? 4'h7 : _GEN_102; // @[ACEUnit.scala 243:49 245:34]
+  wire [3:0] _GEN_104 = 2'h0 == readBuffer_cacheLine_response ? 4'h1 : _GEN_103; // @[ACEUnit.scala 243:49 244:34]
   wire [4:0] _GEN_105 = _T_9 ? _readBuffer_branch_mask_T_1 : readBuffer_branch_mask; // @[utils.scala 92:56 93:27 96:27]
   wire [4:0] _GEN_106 = _T_9 ? 5'h0 : readBuffer_branch_mask; // @[utils.scala 101:56 102:27 106:27]
   wire  _GEN_107 = _T_9 ? 1'h0 : readBuffer_branch_valid; // @[utils.scala 101:56 103:28 107:28]
@@ -42235,6 +42471,7 @@ module ACEUnit(
   wire  _GEN_109 = branchOps_passed ? readBuffer_branch_valid : _GEN_107; // @[utils.scala 90:30 98:26]
   wire [4:0] _GEN_110 = branchOps_valid ? _GEN_108 : readBuffer_branch_mask; // @[utils.scala 111:23 89:27]
   wire  _GEN_111 = branchOps_valid ? _GEN_109 : readBuffer_branch_valid; // @[utils.scala 112:24 89:27]
+  wire [1:0] _GEN_113 = bus_ARREADY ? readBuffer_cacheLine_response : 2'h0; // @[ACEUnit.scala 251:24 252:28 utils.scala 49:41]
   wire [63:0] _GEN_115 = bus_ARREADY ? readBuffer_writeData_data : 64'h0; // @[ACEUnit.scala 251:24 252:28 utils.scala 49:41]
   wire  _GEN_116 = bus_ARREADY & readBuffer_writeData_valid; // @[ACEUnit.scala 251:24 252:28 utils.scala 48:41]
   wire [4:0] _GEN_117 = bus_ARREADY ? _GEN_110 : 5'h0; // @[ACEUnit.scala 251:24 utils.scala 49:41]
@@ -42245,7 +42482,8 @@ module ACEUnit(
   wire [31:0] _GEN_122 = bus_ARREADY ? readBuffer_address : 32'h0; // @[ACEUnit.scala 251:24 252:28 utils.scala 49:41]
   wire  _GEN_123 = bus_ARREADY & readBuffer_valid; // @[ACEUnit.scala 251:24 252:28 utils.scala 48:41]
   wire [31:0] _GEN_127 = readACERequestState ? _bus_ARADDR_T_1 : 32'h0; // @[ACEUnit.scala 225:31 232:18 74:14]
-  wire [3:0] _GEN_132 = readACERequestState ? 4'h1 : 4'h0; // @[ACEUnit.scala 225:31 92:15]
+  wire [3:0] _GEN_132 = readACERequestState ? _GEN_104 : 4'h0; // @[ACEUnit.scala 225:31 92:15]
+  wire [1:0] _GEN_134 = readACERequestState ? _GEN_113 : 2'h0; // @[ACEUnit.scala 225:31 utils.scala 49:41]
   wire [63:0] _GEN_136 = readACERequestState ? _GEN_115 : 64'h0; // @[ACEUnit.scala 225:31 utils.scala 49:41]
   wire [4:0] _GEN_138 = readACERequestState ? _GEN_117 : 5'h0; // @[ACEUnit.scala 225:31 utils.scala 49:41]
   wire [5:0] _GEN_140 = readACERequestState ? _GEN_119 : 6'h0; // @[ACEUnit.scala 225:31 utils.scala 49:41]
@@ -42364,6 +42602,7 @@ module ACEUnit(
     .write_data_branch_mask(ACEMSHR_write_data_branch_mask),
     .write_data_writeData_valid(ACEMSHR_write_data_writeData_valid),
     .write_data_writeData_data(ACEMSHR_write_data_writeData_data),
+    .write_data_cacheLine_response(ACEMSHR_write_data_cacheLine_response),
     .read_ready(ACEMSHR_read_ready),
     .read_data_valid(ACEMSHR_read_data_valid),
     .read_data_address(ACEMSHR_read_data_address),
@@ -42374,6 +42613,7 @@ module ACEUnit(
     .read_data_branch_mask(ACEMSHR_read_data_branch_mask),
     .read_data_writeData_valid(ACEMSHR_read_data_writeData_valid),
     .read_data_writeData_data(ACEMSHR_read_data_writeData_data),
+    .read_data_cacheLine_response(ACEMSHR_read_data_cacheLine_response),
     .isEmpty(ACEMSHR_isEmpty),
     .branchOps_valid(ACEMSHR_branchOps_valid),
     .branchOps_branchMask(ACEMSHR_branchOps_branchMask),
@@ -42443,6 +42683,7 @@ module ACEUnit(
   assign ACEMSHR_write_data_branch_mask = ~readACERequestState ? 5'h0 : _GEN_138; // @[ACEUnit.scala 225:31 utils.scala 49:41]
   assign ACEMSHR_write_data_writeData_valid = ~readACERequestState ? 1'h0 : readACERequestState & _GEN_116; // @[ACEUnit.scala 225:31 utils.scala 48:41]
   assign ACEMSHR_write_data_writeData_data = ~readACERequestState ? 64'h0 : _GEN_136; // @[ACEUnit.scala 225:31 utils.scala 49:41]
+  assign ACEMSHR_write_data_cacheLine_response = ~readACERequestState ? 2'h0 : _GEN_134; // @[ACEUnit.scala 225:31 utils.scala 49:41]
   assign ACEMSHR_read_ready = 2'h0 == readACEResponseState & _T_34; // @[ACEUnit.scala 142:22 268:32]
   assign ACEMSHR_branchOps_valid = branchOps_valid; // @[ACEUnit.scala 143:21]
   assign ACEMSHR_branchOps_branchMask = branchOps_branchMask; // @[ACEUnit.scala 143:21]
@@ -42529,6 +42770,11 @@ module ACEUnit(
       readBuffer_writeData_data <= 64'h0; // @[ACEUnit.scala 104:28]
     end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 129:91]
       readBuffer_writeData_data <= readRequest_request_writeData_data; // @[ACEUnit.scala 130:16]
+    end
+    if (reset) begin // @[ACEUnit.scala 104:28]
+      readBuffer_cacheLine_response <= 2'h0; // @[ACEUnit.scala 104:28]
+    end else if (readRequest_request_valid & readRequest_request_branch_valid & readRequest_ready) begin // @[ACEUnit.scala 129:91]
+      readBuffer_cacheLine_response <= readRequest_request_cacheLine_response; // @[ACEUnit.scala 130:16]
     end
     if (reset) begin // @[ACEUnit.scala 105:31]
       responseBuffer_valid <= 1'h0; // @[ACEUnit.scala 105:31]
@@ -42624,7 +42870,7 @@ module ACEUnit(
       responseBuffer_cacheLine_response <= 2'h0; // @[ACEUnit.scala 105:31]
     end else if (2'h0 == readACEResponseState) begin // @[ACEUnit.scala 268:32]
       if (~ACEMSHR_isEmpty) begin // @[ACEUnit.scala 272:29]
-        responseBuffer_cacheLine_response <= 2'h0; // @[ACEUnit.scala 274:24]
+        responseBuffer_cacheLine_response <= ACEMSHR_read_data_cacheLine_response; // @[ACEUnit.scala 274:24]
       end
     end else if (!(2'h1 == readACEResponseState)) begin // @[ACEUnit.scala 268:32]
       if (2'h2 == readACEResponseState) begin // @[ACEUnit.scala 268:32]
@@ -42912,77 +43158,79 @@ initial begin
   _RAND_8 = {2{`RANDOM}};
   readBuffer_writeData_data = _RAND_8[63:0];
   _RAND_9 = {1{`RANDOM}};
-  responseBuffer_valid = _RAND_9[0:0];
+  readBuffer_cacheLine_response = _RAND_9[1:0];
   _RAND_10 = {1{`RANDOM}};
-  responseBuffer_address = _RAND_10[31:0];
+  responseBuffer_valid = _RAND_10[0:0];
   _RAND_11 = {1{`RANDOM}};
-  responseBuffer_core_instruction = _RAND_11[31:0];
+  responseBuffer_address = _RAND_11[31:0];
   _RAND_12 = {1{`RANDOM}};
-  responseBuffer_core_robAddr = _RAND_12[3:0];
+  responseBuffer_core_instruction = _RAND_12[31:0];
   _RAND_13 = {1{`RANDOM}};
-  responseBuffer_core_prfDest = _RAND_13[5:0];
+  responseBuffer_core_robAddr = _RAND_13[3:0];
   _RAND_14 = {1{`RANDOM}};
-  responseBuffer_branch_valid = _RAND_14[0:0];
+  responseBuffer_core_prfDest = _RAND_14[5:0];
   _RAND_15 = {1{`RANDOM}};
-  responseBuffer_branch_mask = _RAND_15[4:0];
+  responseBuffer_branch_valid = _RAND_15[0:0];
   _RAND_16 = {1{`RANDOM}};
-  responseBuffer_writeData_valid = _RAND_16[0:0];
-  _RAND_17 = {2{`RANDOM}};
-  responseBuffer_writeData_data = _RAND_17[63:0];
-  _RAND_18 = {16{`RANDOM}};
-  responseBuffer_cacheLine_cacheLine = _RAND_18[511:0];
-  _RAND_19 = {1{`RANDOM}};
-  responseBuffer_cacheLine_response = _RAND_19[1:0];
+  responseBuffer_branch_mask = _RAND_16[4:0];
+  _RAND_17 = {1{`RANDOM}};
+  responseBuffer_writeData_valid = _RAND_17[0:0];
+  _RAND_18 = {2{`RANDOM}};
+  responseBuffer_writeData_data = _RAND_18[63:0];
+  _RAND_19 = {16{`RANDOM}};
+  responseBuffer_cacheLine_cacheLine = _RAND_19[511:0];
   _RAND_20 = {1{`RANDOM}};
-  writeBuffer_valid = _RAND_20[0:0];
+  responseBuffer_cacheLine_response = _RAND_20[1:0];
   _RAND_21 = {1{`RANDOM}};
-  writeBuffer_address = _RAND_21[31:0];
-  _RAND_22 = {16{`RANDOM}};
-  writeBuffer_data = _RAND_22[511:0];
-  _RAND_23 = {1{`RANDOM}};
-  coherencyRequestBuffer_valid = _RAND_23[0:0];
+  writeBuffer_valid = _RAND_21[0:0];
+  _RAND_22 = {1{`RANDOM}};
+  writeBuffer_address = _RAND_22[31:0];
+  _RAND_23 = {16{`RANDOM}};
+  writeBuffer_data = _RAND_23[511:0];
   _RAND_24 = {1{`RANDOM}};
-  coherencyRequestBuffer_address = _RAND_24[31:0];
+  coherencyRequestBuffer_valid = _RAND_24[0:0];
   _RAND_25 = {1{`RANDOM}};
-  coherencyRequestBuffer_response = _RAND_25[1:0];
+  coherencyRequestBuffer_address = _RAND_25[31:0];
   _RAND_26 = {1{`RANDOM}};
-  coherencyResponseBuffer_valid = _RAND_26[0:0];
+  coherencyRequestBuffer_response = _RAND_26[1:0];
   _RAND_27 = {1{`RANDOM}};
-  coherencyResponseBuffer_response = _RAND_27[1:0];
-  _RAND_28 = {16{`RANDOM}};
-  coherencyResponseBuffer_cacheLine = _RAND_28[511:0];
-  _RAND_29 = {1{`RANDOM}};
-  coherencyResponseBuffer_dataValid = _RAND_29[0:0];
+  coherencyResponseBuffer_valid = _RAND_27[0:0];
+  _RAND_28 = {1{`RANDOM}};
+  coherencyResponseBuffer_response = _RAND_28[1:0];
+  _RAND_29 = {16{`RANDOM}};
+  coherencyResponseBuffer_cacheLine = _RAND_29[511:0];
   _RAND_30 = {1{`RANDOM}};
-  writeACEState = _RAND_30[1:0];
+  coherencyResponseBuffer_dataValid = _RAND_30[0:0];
   _RAND_31 = {1{`RANDOM}};
-  readACERequestState = _RAND_31[0:0];
+  writeACEState = _RAND_31[1:0];
   _RAND_32 = {1{`RANDOM}};
-  coherentAXIState = _RAND_32[1:0];
+  readACERequestState = _RAND_32[0:0];
   _RAND_33 = {1{`RANDOM}};
-  readACEResponseState = _RAND_33[1:0];
-  _RAND_34 = {2{`RANDOM}};
-  readDataVec_0 = _RAND_34[63:0];
+  coherentAXIState = _RAND_33[1:0];
+  _RAND_34 = {1{`RANDOM}};
+  readACEResponseState = _RAND_34[1:0];
   _RAND_35 = {2{`RANDOM}};
-  readDataVec_1 = _RAND_35[63:0];
+  readDataVec_0 = _RAND_35[63:0];
   _RAND_36 = {2{`RANDOM}};
-  readDataVec_2 = _RAND_36[63:0];
+  readDataVec_1 = _RAND_36[63:0];
   _RAND_37 = {2{`RANDOM}};
-  readDataVec_3 = _RAND_37[63:0];
+  readDataVec_2 = _RAND_37[63:0];
   _RAND_38 = {2{`RANDOM}};
-  readDataVec_4 = _RAND_38[63:0];
+  readDataVec_3 = _RAND_38[63:0];
   _RAND_39 = {2{`RANDOM}};
-  readDataVec_5 = _RAND_39[63:0];
+  readDataVec_4 = _RAND_39[63:0];
   _RAND_40 = {2{`RANDOM}};
-  readDataVec_6 = _RAND_40[63:0];
+  readDataVec_5 = _RAND_40[63:0];
   _RAND_41 = {2{`RANDOM}};
-  readDataVec_7 = _RAND_41[63:0];
-  _RAND_42 = {1{`RANDOM}};
-  readResponseValid = _RAND_42[0:0];
+  readDataVec_6 = _RAND_41[63:0];
+  _RAND_42 = {2{`RANDOM}};
+  readDataVec_7 = _RAND_42[63:0];
   _RAND_43 = {1{`RANDOM}};
-  readResponseReg = _RAND_43[1:0];
+  readResponseValid = _RAND_43[0:0];
   _RAND_44 = {1{`RANDOM}};
-  coherentRequestSend = _RAND_44[0:0];
+  readResponseReg = _RAND_44[1:0];
+  _RAND_45 = {1{`RANDOM}};
+  coherentRequestSend = _RAND_45[0:0];
 `endif // RANDOMIZE_REG_INIT
   `endif // RANDOMIZE
 end // initial
@@ -49219,6 +49467,7 @@ module core_Anon_1(
   wire [4:0] cacheLookup_toReplay_request_branch_mask; // @[cacheModule.scala 50:27]
   wire  cacheLookup_toReplay_request_writeData_valid; // @[cacheModule.scala 50:27]
   wire [63:0] cacheLookup_toReplay_request_writeData_data; // @[cacheModule.scala 50:27]
+  wire [1:0] cacheLookup_toReplay_request_cacheLine_response; // @[cacheModule.scala 50:27]
   wire  cacheLookup_toWriteBack_ready; // @[cacheModule.scala 50:27]
   wire  cacheLookup_toWriteBack_request_valid; // @[cacheModule.scala 50:27]
   wire [31:0] cacheLookup_toWriteBack_request_address; // @[cacheModule.scala 50:27]
@@ -49253,6 +49502,7 @@ module core_Anon_1(
   wire [4:0] replayUnit_requestIn_request_branch_mask; // @[cacheModule.scala 51:26]
   wire  replayUnit_requestIn_request_writeData_valid; // @[cacheModule.scala 51:26]
   wire [63:0] replayUnit_requestIn_request_writeData_data; // @[cacheModule.scala 51:26]
+  wire [1:0] replayUnit_requestIn_request_cacheLine_response; // @[cacheModule.scala 51:26]
   wire  replayUnit_requestOut_ready; // @[cacheModule.scala 51:26]
   wire  replayUnit_requestOut_request_valid; // @[cacheModule.scala 51:26]
   wire [31:0] replayUnit_requestOut_request_address; // @[cacheModule.scala 51:26]
@@ -49263,6 +49513,7 @@ module core_Anon_1(
   wire [4:0] replayUnit_requestOut_request_branch_mask; // @[cacheModule.scala 51:26]
   wire  replayUnit_requestOut_request_writeData_valid; // @[cacheModule.scala 51:26]
   wire [63:0] replayUnit_requestOut_request_writeData_data; // @[cacheModule.scala 51:26]
+  wire [1:0] replayUnit_requestOut_request_cacheLine_response; // @[cacheModule.scala 51:26]
   wire  replayUnit_responseIn_ready; // @[cacheModule.scala 51:26]
   wire  replayUnit_responseIn_request_valid; // @[cacheModule.scala 51:26]
   wire [31:0] replayUnit_responseIn_request_address; // @[cacheModule.scala 51:26]
@@ -49353,6 +49604,7 @@ module core_Anon_1(
   wire [4:0] aceUnit_readRequest_request_branch_mask; // @[cacheModule.scala 59:23]
   wire  aceUnit_readRequest_request_writeData_valid; // @[cacheModule.scala 59:23]
   wire [63:0] aceUnit_readRequest_request_writeData_data; // @[cacheModule.scala 59:23]
+  wire [1:0] aceUnit_readRequest_request_cacheLine_response; // @[cacheModule.scala 59:23]
   wire  aceUnit_readResponse_ready; // @[cacheModule.scala 59:23]
   wire  aceUnit_readResponse_request_valid; // @[cacheModule.scala 59:23]
   wire [31:0] aceUnit_readResponse_request_address; // @[cacheModule.scala 59:23]
@@ -49564,6 +49816,7 @@ module core_Anon_1(
     .toReplay_request_branch_mask(cacheLookup_toReplay_request_branch_mask),
     .toReplay_request_writeData_valid(cacheLookup_toReplay_request_writeData_valid),
     .toReplay_request_writeData_data(cacheLookup_toReplay_request_writeData_data),
+    .toReplay_request_cacheLine_response(cacheLookup_toReplay_request_cacheLine_response),
     .toWriteBack_ready(cacheLookup_toWriteBack_ready),
     .toWriteBack_request_valid(cacheLookup_toWriteBack_request_valid),
     .toWriteBack_request_address(cacheLookup_toWriteBack_request_address),
@@ -49600,6 +49853,7 @@ module core_Anon_1(
     .requestIn_request_branch_mask(replayUnit_requestIn_request_branch_mask),
     .requestIn_request_writeData_valid(replayUnit_requestIn_request_writeData_valid),
     .requestIn_request_writeData_data(replayUnit_requestIn_request_writeData_data),
+    .requestIn_request_cacheLine_response(replayUnit_requestIn_request_cacheLine_response),
     .requestOut_ready(replayUnit_requestOut_ready),
     .requestOut_request_valid(replayUnit_requestOut_request_valid),
     .requestOut_request_address(replayUnit_requestOut_request_address),
@@ -49610,6 +49864,7 @@ module core_Anon_1(
     .requestOut_request_branch_mask(replayUnit_requestOut_request_branch_mask),
     .requestOut_request_writeData_valid(replayUnit_requestOut_request_writeData_valid),
     .requestOut_request_writeData_data(replayUnit_requestOut_request_writeData_data),
+    .requestOut_request_cacheLine_response(replayUnit_requestOut_request_cacheLine_response),
     .responseIn_ready(replayUnit_responseIn_ready),
     .responseIn_request_valid(replayUnit_responseIn_request_valid),
     .responseIn_request_address(replayUnit_responseIn_request_address),
@@ -49704,6 +49959,7 @@ module core_Anon_1(
     .readRequest_request_branch_mask(aceUnit_readRequest_request_branch_mask),
     .readRequest_request_writeData_valid(aceUnit_readRequest_request_writeData_valid),
     .readRequest_request_writeData_data(aceUnit_readRequest_request_writeData_data),
+    .readRequest_request_cacheLine_response(aceUnit_readRequest_request_cacheLine_response),
     .readResponse_ready(aceUnit_readResponse_ready),
     .readResponse_request_valid(aceUnit_readResponse_request_valid),
     .readResponse_request_address(aceUnit_readResponse_request_address),
@@ -49909,6 +50165,7 @@ module core_Anon_1(
   assign replayUnit_requestIn_request_branch_mask = cacheLookup_toReplay_request_branch_mask; // @[cacheModule.scala 118:24]
   assign replayUnit_requestIn_request_writeData_valid = cacheLookup_toReplay_request_writeData_valid; // @[cacheModule.scala 118:24]
   assign replayUnit_requestIn_request_writeData_data = cacheLookup_toReplay_request_writeData_data; // @[cacheModule.scala 118:24]
+  assign replayUnit_requestIn_request_cacheLine_response = cacheLookup_toReplay_request_cacheLine_response; // @[cacheModule.scala 118:24]
   assign replayUnit_requestOut_ready = aceUnit_readRequest_ready; // @[cacheModule.scala 127:23]
   assign replayUnit_responseIn_request_valid = aceUnit_readResponse_request_valid; // @[cacheModule.scala 119:25]
   assign replayUnit_responseIn_request_address = aceUnit_readResponse_request_address; // @[cacheModule.scala 119:25]
@@ -49964,6 +50221,7 @@ module core_Anon_1(
   assign aceUnit_readRequest_request_branch_mask = replayUnit_requestOut_request_branch_mask; // @[cacheModule.scala 127:23]
   assign aceUnit_readRequest_request_writeData_valid = replayUnit_requestOut_request_writeData_valid; // @[cacheModule.scala 127:23]
   assign aceUnit_readRequest_request_writeData_data = replayUnit_requestOut_request_writeData_data; // @[cacheModule.scala 127:23]
+  assign aceUnit_readRequest_request_cacheLine_response = replayUnit_requestOut_request_cacheLine_response; // @[cacheModule.scala 127:23]
   assign aceUnit_readResponse_ready = replayUnit_responseIn_ready; // @[cacheModule.scala 119:25]
   assign aceUnit_writeRequest_request_valid = replayUnit_writeBackOut_request_valid; // @[cacheModule.scala 129:24]
   assign aceUnit_writeRequest_request_address = replayUnit_writeBackOut_request_address; // @[cacheModule.scala 129:24]
