@@ -153,15 +153,6 @@ class ACEUnit(
 
   //COherentResponse operations
   coherencyResponse.ready := !coherencyResponseBuffer.valid
-  when(!coherencyResponseBuffer.valid){
-    when(isWriteAddressMatchWire && isWireACEBusy){
-      coherencyResponseBuffer.valid := writeBuffer.valid
-      coherencyResponseBuffer.address := writeBuffer.address
-      coherencyResponseBuffer.cacheLine := writeBuffer.data
-      coherencyResponseBuffer.response := "b01".U
-    }
-    coherencyResponseBuffer := coherencyResponse.request
-  }
 
   //-----------------------AXI Write-------------------------------//
   val writeIdleState :: writeRequestState :: writeDataState :: writeResponseState :: Nil = Enum(4)
@@ -325,6 +316,9 @@ class ACEUnit(
   val coherentAXIState = RegInit(coherentIdleState)
   val coherentCounter = Module(new moduleCounter(length))
   val coherentRequestSend = RegInit(false.B)
+  val toCoherentRequestInStateWire = WireDefault(isReadRespBusy && isCoherencyAddressMatchWire)
+  val chooseFromWriteBufferWire = WireDefault(isWriteAddressMatchWire && isWireACEBusy)
+
   isCoherencyIdle := (coherentAXIState === coherentIdleState)
   coherentCounter.incrm := false.B
   coherentCounter.reset := false.B
@@ -342,16 +336,25 @@ class ACEUnit(
       coherentAXIState := Mux(coherencyReceived , coherencyRequestWaitState, coherentIdleState)
     }
     is(coherencyRequestWaitState){
-      val toCoherentRequestInStateWire = WireDefault(isReadRespBusy && isCoherencyAddressMatchWire)
-      coherencyRequestBuffer.valid := Mux(toCoherentRequestInStateWire, false.B, true.B)
-      coherentAXIState := Mux(toCoherentRequestInStateWire, coherentRequestInState, coherentRequestInState)
+      when(chooseFromWriteBufferWire){
+        coherencyResponseBuffer.valid := writeBuffer.valid
+        coherencyResponseBuffer.address := writeBuffer.address
+        coherencyResponseBuffer.cacheLine := writeBuffer.data
+        coherencyResponseBuffer.response := "b01".U
+      }.otherwise{
+        coherencyRequestBuffer.valid := Mux(toCoherentRequestInStateWire, false.B, true.B)
+      }
+
+      when(chooseFromWriteBufferWire){
+        coherentAXIState := Mux(writeBuffer.valid, coherentResponseState, coherencyRequestWaitState)
+      }.otherwise{
+        coherentAXIState := Mux(toCoherentRequestInStateWire, coherencyRequestWaitState, coherentRequestInState)
+      }
     }
     is(coherentRequestInState){
-      when(isWriteAddressMatchWire && isWireACEBusy){
-        coherentAXIState := Mux(writeBuffer.valid, coherentResponseState, coherentRequestInState)
-      } .otherwise{
-        coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestInState)
-      }
+      coherencyResponseBuffer := coherencyResponse.request
+      
+      coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestInState)
     }
     is(coherentResponseState){
       coherentRequestSend := false.B
