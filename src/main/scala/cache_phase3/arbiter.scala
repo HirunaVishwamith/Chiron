@@ -6,12 +6,9 @@ import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import cache_phase3.ChiselUtils._
 
-//* A hollow load signal is sent to cacheLookup unit as a SC with writeDataValue.valid deasserted 
-//* -To satisfy requirements of atomics
-//* The rAtmoics situation cannot be optmizied with simple redesign with current work breakdown-
-//* -First read response must come for write data to be released, hence core request pipeline stop
-//* -Is the best way to follow
-//? After testing
+//* All atomic instructions, runs as a load followed by a store
+//* Load(read) is passed with writeDataValid deasserted
+//* Store(write) is passed with writeDataValid asserted
 //TODO : Pipeline the module
 
 class arbiter extends Module {
@@ -45,9 +42,6 @@ class arbiter extends Module {
   val responseOut = IO(Flipped(new responseOut))
   val fenceReady = IO(Output(Bool()))
   val writeInstuctionCommitFired = IO(Input(Bool()))
-
-  //!Debug only
-  val isPauseForBoolean = WireDefault(pauseForBranch.B)
   
   request.speculativeReady := false.B
   request.inorderReady := false.B
@@ -168,13 +162,8 @@ class arbiter extends Module {
   //*    2.  Replay
   //*    3.  Inorder
   //*    4.  Speculative
-  // val rAtmoicsWritePending = RegInit(false.B)
-  // val isAtomicsWire = WireDefault((inorderBuffer.core.instruction(6,0) === "b0101111".U))
-  // val isAtmoicReadWire = WireDefault(isAtomicsWire && !inorderBuffer.writeData.valid)// && !(isSCWire || isLRWire))
-  // val isAtomicBusyWire = WireDefault(operationWires.rAtomics && (operationState =/= idleState))
   val atomicBusyState = RegInit(false.B)
-
-  when(toCacheLookup.ready && !(isPauseForBoolean && branchOps.valid)) {
+  when(toCacheLookup.ready) {
     when(atomicBusyState && !toCacheLookup.holdInOrder){
       when(inorderBuffer.valid && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
         inorderBuffer.valid := false.B
@@ -207,7 +196,7 @@ class arbiter extends Module {
       
       atomicBusyState := Mux(operationWires.rAtomics && !inorderBuffer.writeData.valid, true.B, false.B)
 
-    }.elsewhen(speculativeBuffer.valid ) { //&& !(operationBuffer.valid && operationBuffer.address(addrWidth - 1, 3) === speculativeBuffer.address(addrWidth - 1, 3))) {
+    }.elsewhen(speculativeBuffer.valid ) {
       speculativeBuffer.valid := false.B
 
       toCacheLookup.request := speculativeBuffer

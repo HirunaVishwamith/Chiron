@@ -148,19 +148,6 @@ class fifoRecordInvalidateI[T <: requestPipelineTrait](depth: Int, traitType: T)
   isFull := fullReg
 }
 
-// class fifoRecordInvalidateII[T <: requestPipelineTrait](depth: Int, traitType: T) extends fifoWithBranchOps(depth: Int, traitType: T){
-//   val invalidateAddr = IO(Input(UInt(addrWidth.W)))
-//   val invalidateEnable = IO(Input(Bool()))
-
-//   when(invalidateEnable) {
-//     for (i <- 0 until depth) {
-//       when(memReg(i).address(addrWidth - 1, log2Ceil(lineSize)) === invalidateAddr(addrWidth - 1, log2Ceil(lineSize))) {
-//         memReg(i).cacheLine.invalidated := true.B
-//       }
-//     }
-//   }
-// }
-
 class fifoBypassModule[T <: baseTrait](depth: Int, traitType: T) extends Module {
   val write = IO(new Bundle{
     val ready = Output(Bool())

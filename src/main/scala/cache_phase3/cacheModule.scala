@@ -82,11 +82,9 @@ class CacheModule (
   requestScheduler.requestIn.branch.valid := true.B
   requestScheduler.requestIn.writeData.valid := false.B
   requestScheduler.requestIn.writeData.data := 0.U
-  // requestScheduler.requestIn.cacheLine.valid := false.B
   requestScheduler.requestIn.cacheLine.cacheLine := 0.U
   requestScheduler.requestIn.cacheLine.response := 0.U
   requestScheduler.requestIn.cacheLine.required := false.B
-  // requestScheduler.requestIn.cacheLine.invalidated := false.B
   
   //Arbiter connections
   arbiter.writeDataIn <> writeDataIn
@@ -94,7 +92,6 @@ class CacheModule (
   arbiter.responseOut := responseOut
   arbiter.branchOps <> branchOps
   
-  // arbiter.request <> requestScheduler.requestOut
   requestScheduler.controlSignal.inorderReady := arbiter.request.inorderReady
   requestScheduler.controlSignal.speculativeReady := arbiter.request.speculativeReady
   arbiter.request.isSpeculative := requestScheduler.controlSignal.isSpeculative

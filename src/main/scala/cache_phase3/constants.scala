@@ -39,7 +39,4 @@ object constants{
 
   val cacheResponseWidth : Int = 2
   val arbiterReqTypesWidth : Int = 2
-
-  //!Debug only
-  val pauseForBranch : Boolean = false
 }

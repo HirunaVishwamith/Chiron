@@ -19,9 +19,6 @@ class requestScheduler extends Module{
   val fenceReady = IO(Output(Bool()))
   val branchOps = IO(new branchOps())
 
-  //!Debug only
-  val isPauseForBranch = WireDefault(pauseForBranch.B)
-
   canAllocate := false.B
   zeroInit(requestOut)
   controlSignal.isSpeculative := false.B
@@ -75,7 +72,7 @@ class requestScheduler extends Module{
   val inorderBranchResolved = WireDefault(!inorderQueue.read.data.branch.mask(3,0).orR && !inorderQueue.isEmpty)
   val inorderBranchInvalidated = WireDefault(!inorderQueue.read.data.branch.valid && inorderQueue.read.data.branch.mask(3,0).orR && !inorderQueue.isEmpty)
 
-  when((controlSignal.inorderReady || controlSignal.speculativeReady) && !(isPauseForBranch && branchOps.valid)){
+  when((controlSignal.inorderReady || controlSignal.speculativeReady)){
     switch(controlSignal.inorderReady ## controlSignal.speculativeReady){
       is("b00".U){}
       is("b01".U){

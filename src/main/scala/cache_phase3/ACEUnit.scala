@@ -113,7 +113,7 @@ class ACEUnit(
   val coherencyResponseBuffer = RegInit(0.U.asTypeOf(new coherencyResponseWire))
 
   //-----------------------Ordering--------------------------------//
-  val isCoherencyIdle = WireDefault(false.B)  //! Because interconnect is pipelined
+  val isCoherencyIdle = WireDefault(false.B)
   val isReadRespBusy = WireDefault(false.B)
   val isWireACEBusy = WireDefault(false.B)
   val isCoherencyAddressMatchWire = WireDefault(responseBuffer.address(addrWidth - 1, log2Ceil(lineSize)) === coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize)))
@@ -239,13 +239,12 @@ class ACEUnit(
       bus.ARQOS := "b0000".U
 
       bus.ARDOMAIN := "b10".U
-      bus.ARSNOOP := "b0001".U    //!Not implemented yet
+      bus.ARSNOOP := "b0001".U
       switch(Cat(readBuffer.cacheLine.response)){
         is("b00".U){ bus.ARSNOOP := "b0001".U}  //ReadShared
         is("b01".U){ bus.ARSNOOP := "b0111".U}  //ReadUnique
         is("b11".U){ bus.ARSNOOP := "b1011".U}  //CleanUnique
       }
-      // bus.ARSNOOP := "b0111".U //ReadUnique
       bus.ARBAR := "b00".U
 
       when(bus.ARREADY){
@@ -321,7 +320,7 @@ class ACEUnit(
   //--------------------Coherent state----------------------------//
   //* Since a new coherent request comes after the previous request's response is released-
   //* -the request and response are kept in the same state machine without pipelining
-  val coherentIdleState :: coherentRequestState :: coherentResponseState :: coherentDataOutState :: Nil = Enum(4)
+  val coherentIdleState :: coherencyRequestWaitState :: coherentRequestInState :: coherentResponseState :: coherentDataOutState :: Nil = Enum(5)
   val responseValidReg = RegInit(false.B)
   val coherentAXIState = RegInit(coherentIdleState)
   val coherentCounter = Module(new moduleCounter(length))
@@ -340,23 +339,18 @@ class ACEUnit(
       coherencyRequestBuffer.address := bus.ACADDR
       coherencyRequestBuffer.response := Cat(((bus.ACSNOOP === "b1001".U) || (bus.ACSNOOP === "b0111".U)), 
                                               ((bus.ACSNOOP === "b0001".U) || (bus.ACSNOOP === "b0111".U)))
-      coherentAXIState := Mux(coherencyReceived , coherentRequestState, coherentIdleState)
+      coherentAXIState := Mux(coherencyReceived , coherencyRequestWaitState, coherentIdleState)
     }
-    is(coherentRequestState){
-
-      when(coherencyRequestBuffer.valid){
-        coherencyRequestBuffer.valid:= Mux(coherencyRequest.ready, false.B, true.B)
-      }.otherwise{
-        when(!coherentRequestSend){
-          coherencyRequestBuffer.valid := Mux(isReadRespBusy && isCoherencyAddressMatchWire, false.B, true.B)
-          coherentRequestSend := Mux(isReadRespBusy && isCoherencyAddressMatchWire, false.B, true.B)
-        }
-      }
-      
+    is(coherencyRequestWaitState){
+      val toCoherentRequestInStateWire = WireDefault(isReadRespBusy && isCoherencyAddressMatchWire)
+      coherencyRequestBuffer.valid := Mux(toCoherentRequestInStateWire, false.B, true.B)
+      coherentAXIState := Mux(toCoherentRequestInStateWire, coherentRequestInState, coherentRequestInState)
+    }
+    is(coherentRequestInState){
       when(isWriteAddressMatchWire && isWireACEBusy){
-        coherentAXIState := Mux(writeBuffer.valid, coherentResponseState, coherentRequestState)
+        coherentAXIState := Mux(writeBuffer.valid, coherentResponseState, coherentRequestInState)
       } .otherwise{
-        coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestState)
+        coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestInState)
       }
     }
     is(coherentResponseState){

@@ -157,15 +157,15 @@ class cacheLookupUnit extends Module{
     replayBuffer.valid := false.B
   }
 
-  val memoryResponseBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  // val memoryResponseBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val toMemoryResponseValidWire = WireDefault(false.B)
-  when(memoryResponseBuffer.valid && memoryResponseBuffer.branch.valid){
-    toResponse.request := memoryResponseBuffer
-    regReadUpdate(toResponse.request.branch, branchOps, memoryResponseBuffer.branch)
-  }
-  when(memoryResponseBuffer.valid){
-    memoryResponseBuffer.valid := false.B
-  }
+  // when(memoryResponseBuffer.valid && memoryResponseBuffer.branch.valid){
+  //   toResponse.request := memoryResponseBuffer
+  //   regReadUpdate(toResponse.request.branch, branchOps, memoryResponseBuffer.branch)
+  // }
+  // when(memoryResponseBuffer.valid){
+  //   memoryResponseBuffer.valid := false.B
+  // }
 
   val coherencyResponseBuffer = RegInit(0.U.asTypeOf(new coherencyResponseWire))
   val toCoherencyResponseValidWire = WireDefault(false.B)
@@ -504,8 +504,9 @@ class cacheLookupUnit extends Module{
 
     //Response
     when(toMemoryResponseValidWire && readBuffer.branch.valid){
-      memoryResponseBuffer := readBuffer
-      memoryResponseBuffer.writeData.data := responseResultWire
+      toResponse.request := readBuffer
+      toResponse.request.writeData.data := responseResultWire
+      regReadUpdate(toResponse.request.branch, branchOps, readBuffer.branch)
     }
 
     //Coherency
@@ -545,9 +546,6 @@ class cacheLookupUnit extends Module{
   when(operationValid){
     when(toReplayValidWire){
       regReadUpdate(replayBuffer.branch, branchOps, readBuffer.branch)
-    }
-    when(toMemoryResponseValidWire){
-      regReadUpdate(memoryResponseBuffer.branch, branchOps, readBuffer.branch)
     }
   } .otherwise { 
     //Else need to update the input buffer and the output buffers as well
