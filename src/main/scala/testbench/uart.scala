@@ -190,7 +190,7 @@ class uart extends Module {
   client.BVALID := writeRequestBuffer.address.valid && writeRequestBuffer.data.valid && writeRequestBuffer.data.last
 
   val MTIP = IO(Output(Bool()))
-  MTIP := (mtime > mtimecmp)
+  MTIP := false.B //(mtime > mtimecmp)
 }
 
 object uart extends App {

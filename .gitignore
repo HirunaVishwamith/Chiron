@@ -21,6 +21,7 @@ project/
 target/
 verilator-tests/scheduler/obj_dir/*
 *.vcd
+*.vcd.fst
 verilator-tests/scheduler/instrIssue
 verilator-tests/instrIssue/instrIssue
 verilator-tests/decode/obj_dir/*

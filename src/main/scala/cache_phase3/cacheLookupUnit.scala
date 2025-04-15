@@ -127,18 +127,33 @@ class cacheLookupUnit extends Module{
   val toReservationRegisterWire = WireDefault(false.B)
 
   //-----------------------Last Miss record-----------------------//
-  val lastMissRecordRegister = RegInit(0.U.asTypeOf(new requestPipelineWire))
+  val lastInorderMissRecordRegister = RegInit(0.U.asTypeOf(new requestPipelineWire))
 
-  val toLastMissRecordRegister = WireDefault(false.B)  
-  when(request.ready && request.request.valid && request.request.branch.valid && lastMissRecordRegister.valid){
+  val toLastInorderMissRecordRegisterWire = WireDefault(false.B)  
+  when(request.ready && request.request.valid && request.request.branch.valid && lastInorderMissRecordRegister.valid && lastInorderMissRecordRegister.branch.valid){
     val replayMatch = WireDefault(
-      (request.request.address === lastMissRecordRegister.address) &&
-      (request.request.core.instruction === lastMissRecordRegister.core.instruction) &&
-      (request.request.core.robAddr === lastMissRecordRegister.core.robAddr) &&
-      (request.request.core.prfDest === lastMissRecordRegister.core.prfDest) 
+      (request.request.address === lastInorderMissRecordRegister.address) &&
+      (request.request.core.instruction === lastInorderMissRecordRegister.core.instruction) &&
+      (request.request.core.robAddr === lastInorderMissRecordRegister.core.robAddr) &&
+      (request.request.core.prfDest === lastInorderMissRecordRegister.core.prfDest) 
     )
     when(replayMatch){
-      lastMissRecordRegister.valid := false.B
+      lastInorderMissRecordRegister.valid := false.B
+    }
+  }
+
+  val lastSpeculativeMissRecordRegister = RegInit(0.U.asTypeOf(new requestPipelineWire))
+
+  val toLastSpeculativetMissRecordRegisterWire = WireDefault(false.B)  
+  when(request.ready && request.request.valid && request.request.branch.valid && lastSpeculativeMissRecordRegister.valid && lastSpeculativeMissRecordRegister.branch.valid){
+    val replayMatch = WireDefault(
+      (request.request.address === lastSpeculativeMissRecordRegister.address) &&
+      (request.request.core.instruction === lastSpeculativeMissRecordRegister.core.instruction) &&
+      (request.request.core.robAddr === lastSpeculativeMissRecordRegister.core.robAddr) &&
+      (request.request.core.prfDest === lastSpeculativeMissRecordRegister.core.prfDest) 
+    )
+    when(replayMatch){
+      lastSpeculativeMissRecordRegister.valid := false.B
     }
   }
 
@@ -157,15 +172,7 @@ class cacheLookupUnit extends Module{
     replayBuffer.valid := false.B
   }
 
-  // val memoryResponseBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   val toMemoryResponseValidWire = WireDefault(false.B)
-  // when(memoryResponseBuffer.valid && memoryResponseBuffer.branch.valid){
-  //   toResponse.request := memoryResponseBuffer
-  //   regReadUpdate(toResponse.request.branch, branchOps, memoryResponseBuffer.branch)
-  // }
-  // when(memoryResponseBuffer.valid){
-  //   memoryResponseBuffer.valid := false.B
-  // }
 
   val coherencyResponseBuffer = RegInit(0.U.asTypeOf(new coherencyResponseWire))
   val toCoherencyResponseValidWire = WireDefault(false.B)
@@ -188,10 +195,11 @@ class cacheLookupUnit extends Module{
   }
 
   //____________________Functional description_________________________//
-
   //Response out is always release in one clock cycle, so no ready signal
   request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready
-  request.holdInOrder := lastMissRecordRegister.valid && lastMissRecordRegister.branch.valid && !writeCommitInstructionBuffer
+  val islastInorderMissRecordRegisterValid = toLastInorderMissRecordRegisterWire || lastInorderMissRecordRegister.valid && lastInorderMissRecordRegister.branch.valid
+  val islastSpeculativeMissRecordRegisterValid = toLastSpeculativetMissRecordRegisterWire || lastSpeculativeMissRecordRegister.valid && lastSpeculativeMissRecordRegister.branch.valid
+  request.holdInOrder := (islastInorderMissRecordRegisterValid || islastSpeculativeMissRecordRegisterValid) && !writeCommitInstructionBuffer
 
   //Assigning addresses to the BRAMs
   val addrBeg = log2Ceil(lineSize)
@@ -205,10 +213,29 @@ class cacheLookupUnit extends Module{
     tagBRAM.rdAddr := request.request.address(addrEnd, addrBeg)
 
     readBuffer := request.request
+    regWriteUpdate(readBuffer.branch, branchOps, request.request.branch)
     requestType := request.requestType
   } .otherwise {
     readBuffer.valid := false.B
   }
+
+  //BranchOps of valid registers
+    //BranchOps for valid registers
+  when(replayBuffer.valid && replayBuffer.branch.valid){
+    regRecordUpdate(replayBuffer.branch, branchOps)
+  }
+  //Input buffers
+  when(readBuffer.valid && readBuffer.branch.valid){
+    regRecordUpdate(readBuffer.branch, branchOps)
+  }
+  when(lastInorderMissRecordRegister.valid && lastInorderMissRecordRegister.branch.valid){
+    regRecordUpdate(lastInorderMissRecordRegister.branch, branchOps)
+  }
+  when(lastSpeculativeMissRecordRegister.valid && lastSpeculativeMissRecordRegister.branch.valid){
+    regRecordUpdate(lastSpeculativeMissRecordRegister.branch, branchOps)
+  }
+
+  //Main functions
   when(operationValid){
     //Setting control wires for request types
     val isReadWire = WireDefault(readBuffer.core.instruction(6,0) === "b0000011".U)
@@ -419,6 +446,7 @@ class cacheLookupUnit extends Module{
       } .otherwise {
         toReplayValidWire := true.B
         requiredResponseWire := "b00".U
+        toLastSpeculativetMissRecordRegisterWire := true.B
       }
     }
     when(isLRReadWire || isAtmoicReadWire){
@@ -431,7 +459,7 @@ class cacheLookupUnit extends Module{
       } .otherwise {
         toReplayValidWire := true.B
         requiredResponseWire := "b01".U
-        toLastMissRecordRegister := true.B
+        toLastInorderMissRecordRegisterWire := true.B
       }
     }
     when(isLRWriteWire){writeCommitInstructionBuffer := true.B}
@@ -448,7 +476,7 @@ class cacheLookupUnit extends Module{
       } .otherwise {
         toReplayValidWire := true.B
         requiredResponseWire := Mux(isPermissionMiss && !isDataMissWire, "b11".U, "b01".U)
-        toLastMissRecordRegister := true.B
+        toLastInorderMissRecordRegisterWire := true.B
       }
     }
     when(isSCReadWire){toMemoryResponseValidWire := true.B}
@@ -499,14 +527,14 @@ class cacheLookupUnit extends Module{
     when(toReplayValidWire && readBuffer.branch.valid){
       replayBuffer := readBuffer
       replayBuffer.cacheLine.response := requiredResponseWire
-      // replayBuffer.cacheLine.invalidated := false.B
+      regWriteUpdate(replayBuffer.branch, branchOps, readBuffer.branch)
     }
 
     //Response
     when(toMemoryResponseValidWire && readBuffer.branch.valid){
       toResponse.request := readBuffer
       toResponse.request.writeData.data := responseResultWire
-      regReadUpdate(toResponse.request.branch, branchOps, readBuffer.branch)
+      regWriteUpdate(toResponse.request.branch, branchOps, readBuffer.branch)
     }
 
     //Coherency
@@ -530,8 +558,13 @@ class cacheLookupUnit extends Module{
     }
     
     //Last Miss Memory Record
-    when(toLastMissRecordRegister && readBuffer.branch.valid){  
-      lastMissRecordRegister := readBuffer
+    when(toLastInorderMissRecordRegisterWire && readBuffer.branch.valid){  
+      lastInorderMissRecordRegister := readBuffer
+      regWriteUpdate(lastInorderMissRecordRegister.branch, branchOps, readBuffer.branch)
+    }
+    when(toLastSpeculativetMissRecordRegisterWire && readBuffer.branch.valid){  
+      lastSpeculativeMissRecordRegister := readBuffer
+      regWriteUpdate(lastSpeculativeMissRecordRegister.branch, branchOps, readBuffer.branch)
     }
 
     //Reservation register
@@ -542,25 +575,6 @@ class cacheLookupUnit extends Module{
     }
   }
 
-  //If pipeline is running, Only need to update the output buffers when getting updated
-  when(operationValid){
-    when(toReplayValidWire){
-      regReadUpdate(replayBuffer.branch, branchOps, readBuffer.branch)
-    }
-  } .otherwise { 
-    //Else need to update the input buffer and the output buffers as well
-    //Output Buffers
-    when(replayBuffer.valid && !toReplay.request.valid){
-      regRecordUpdate(replayBuffer.branch, branchOps)
-    }
-    //Input buffers
-    when(readBuffer.valid && readBuffer.branch.valid){
-      regRecordUpdate(readBuffer.branch, branchOps)
-    }
-    when(lastMissRecordRegister.valid && lastMissRecordRegister.branch.valid){
-      regRecordUpdate(lastMissRecordRegister.branch, branchOps)
-    }
-  }
   //! Debug only
   debug.request := readBuffer
   debug.isServicing := operationValid

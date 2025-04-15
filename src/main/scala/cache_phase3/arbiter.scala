@@ -144,17 +144,16 @@ class arbiter extends Module {
     }
   }
 
-  when(requestTypeWire =/= 1.U){ 
-    when(speculativeBuffer.valid){
-      regRecordUpdate(speculativeBuffer.branch, branchOps)
-    }
-    when(operationBuffer.valid){
-      regRecordUpdate(operationBuffer.branch, branchOps)
-    }
-    when(inorderBuffer.valid){
-      regRecordUpdate(inorderBuffer.branch, branchOps)
-    }
+  when(speculativeBuffer.valid){
+    regRecordUpdate(speculativeBuffer.branch, branchOps)
   }
+  when(operationBuffer.valid){
+    regRecordUpdate(operationBuffer.branch, branchOps)
+  }
+  when(inorderBuffer.valid){
+    regRecordUpdate(inorderBuffer.branch, branchOps)
+  }
+  
 
   //---------------------Request Dequeue---------------------//
   //* Priority Order
@@ -186,6 +185,7 @@ class arbiter extends Module {
       replayRequest.ready := true.B
       toCacheLookup.request := replayRequest.request
       requestTypeWire := "b10".U
+      regReadUpdate(toCacheLookup.request.branch, branchOps, replayRequest.request.branch)
 
     } .elsewhen(inorderBuffer.valid && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
       inorderBuffer.valid := false.B
