@@ -5,6 +5,7 @@ import chisel3.util._
 import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import cache_phase3.ChiselUtils._
+import cache_phase3.AddrChecker._
 
 //* All atomic instructions, runs as a load followed by a store
 //* Load(read) is passed with writeDataValid deasserted
@@ -95,8 +96,8 @@ class arbiter extends Module {
   operationWires.rAtomics := operationBuffer.core.instruction(6,0) === "b0101111".U
   operationWires.isLR := operationBuffer.core.instruction(31,27) === "b00010".U && operationWires.rAtomics
   operationWires.isSC := operationBuffer.core.instruction(31,27) === "b00011".U && operationWires.rAtomics
-  operationWires.isPeriRead := operationBuffer.core.instruction(6,0) === "b0000011".U && operationBuffer.address === FIFO_ADDR_RX.U
-  operationWires.isPeriWrite := operationBuffer.core.instruction(6,0) === "b0100011".U && operationBuffer.address === FIFO_ADDR_TX.U
+  operationWires.isPeriRead := operationBuffer.core.instruction(6,0) === "b0000011".U && !isMainMemory(operationBuffer.address)
+  operationWires.isPeriWrite := operationBuffer.core.instruction(6,0) === "b0100011".U && !isMainMemory(operationBuffer.address)
 
   switch(operationState){
     is(idleState){

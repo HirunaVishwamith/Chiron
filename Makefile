@@ -9,39 +9,70 @@ matmul: .stamp.matmul
 .PHONY: filter
 filter: .stamp.filter
 
+.PHONY: csaxpy
+csaxpy: .stamp.csaxpy
+
+.PHONY: histo
+histo: .stamp.histo
+
+.PHONY: linux
+linux: .stamp.linux
+
 .PHONY: test_all_images
 test_all_images: .stamp.test_all_images
+
+.PHONY : bulk_test
+bulk_test : .stamp.bulk_test
 
 .PHONY: runLockStep
 runLockStep: .stamp.runLockStep
 
-.PHONY: runLockStepTest
-runLockStepTest: .stamp.runLockStepTest
-
 .PHONY: sim
 sim: .stamp.sim
 
-.stamp.vvadd: .stamp.sim
+.stamp.vvadd: .stamp.vvadd .stamp.sim
+	cp lock_step_files/lock_step_run_vvadd.cpp lock_step_run.cpp
 	cp benchmark/mt-vvadd.bin fyp18-riscv-emulator/src/Image 
 	$(MAKE) runLockStep; 
 	@touch .stamp.vvadd
 
-.stamp.matmul: .stamp.matmul
+.stamp.matmul: .stamp.matmul .stamp.sim
+	cp lock_step_files/lock_step_run_matmul.cpp lock_step_run.cpp
 	cp benchmark/mt-matmul.bin fyp18-riscv-emulator/src/Image 
 	$(MAKE) runLockStep; 
 	@touch .stamp.matmul
 
-.stamp.filter: .stamp.filter
+.stamp.filter: .stamp.filter .stamp.sim
+	cp lock_step_files/lock_step_run_filter.cpp lock_step_run.cpp
 	cp benchmark/mt-mask-sfilter.bin fyp18-riscv-emulator/src/Image 
 	$(MAKE) runLockStep; 
 	@touch .stamp.filter
 
+.stamp.csaxpy: .stamp.csaxpy .stamp.sim
+	cp lock_step_files/lock_step_run_csaxpy.cpp lock_step_run.cpp
+	cp benchmark/mt-csaxpy.bin fyp18-riscv-emulator/src/Image 
+	$(MAKE) runLockStep; 
+	@touch .stamp.csaxpy
+
+.stamp.histo: .stamp.histo .stamp.sim
+	cp lock_step_files/lock_step_run_histo.cpp lock_step_run.cpp
+	cp benchmark/mt-histo.bin fyp18-riscv-emulator/src/Image 
+	$(MAKE) runLockStep; 
+	@touch .stamp.histo
+
+.stamp.linux: .stamp.linux .stamp.sim
+	cp lock_step_files/lock_step_run.cpp lock_step_run.cpp
+	cp Image fyp18-riscv-emulator/src/Image
+	$(MAKE) runLockStep;
+	@touch .stamp.linux
+	
 .stamp.test_all_images: .stamp.sim
+	cp lock_step_files/lock_step_run_test.cpp lock_step_run.cpp
 	@rm -f test_results.txt
 	@for img in fyp18-riscv-emulator/riscv-tests/images/*; do \
 		echo "Processing $$img..."; \
 		cp $$img fyp18-riscv-emulator/src/Image; \
-		$(MAKE) runLockStepTest; \
+		$(MAKE) runLockStep; \
 		STATUS=$$?; \
 		if [ $$STATUS -eq 0 ]; then \
 			echo "$$img: test pass" >> test_results.txt; \
@@ -50,8 +81,58 @@ sim: .stamp.sim
 		fi; \
 		rm fyp18-riscv-emulator/src/Image; \
 	done
+	@touch .stamp.test_all_images
 
-VERILATOR_INCLUDE = /home/mcrparadox/verilator/include
+.stamp.bulk_test : .stamp.sim
+	@rm -f test_results.txt
+	$(MAKE) test_all_images;
+
+	@date +"Time : %b %_d %Y %H:%M:%S" >> test_results.txt 
+	$(MAKE) vvadd; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "vvadd: test pass" >> test_results.txt; \
+	else \
+		echo "vvadd: test fail" >> test_results.txt; \
+	fi; \
+
+	@date +"Time : %b %_d %Y %H:%M:%S" >> test_results.txt 
+	$(MAKE) matmul; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "matmul: test pass" >> test_results.txt; \
+	else \
+		echo "matmul: test fail" >> test_results.txt; \
+	fi; \
+
+	@date +"Time : %b %_d %Y %H:%M:%S" >> test_results.txt 
+	$(MAKE) filter; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "filter: test pass" >> test_results.txt; \
+	else \
+		echo "filter: test fail" >> test_results.txt; \
+	fi; \
+
+	@date +"Time : %b %_d %Y %H:%M:%S" >> test_results.txt 
+	$(MAKE) csaxpy; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "csaxpy: test pass" >> test_results.txt; \
+	else \
+		echo "csaxpy: test fail" >> test_results.txt; \
+	fi; \
+
+	@date +"Time : %b %_d %Y %H:%M:%S" >> test_results.txt 
+	$(MAKE) histo; \
+	STATUS=$$?; \
+	if [ $$STATUS -eq 0 ]; then \
+		echo "histo: test pass" >> test_results.txt; \
+	else \
+		echo "histo: test fail" >> test_results.txt; \
+	fi; \
+
+VERILATOR_INCLUDE = /usr/share/verilator/share/verilator/include
 
 .stamp.runLockStep: .stamp.lock_step_run.out fyp18-riscv-emulator/src/Image
 	./lock_step_run.out
@@ -61,15 +142,6 @@ VERILATOR_INCLUDE = /home/mcrparadox/verilator/include
 		$(VERILATOR_INCLUDE)/verilated.cpp $(VERILATOR_INCLUDE)/verilated_vcd_c.cpp \
 		lock_step_run.cpp simulator/src/obj_dir/Vsystem__ALL.a -o lock_step_run.out
 		@touch .stamp.lock_step_run.out
-
-.stamp.runLockStepTest: .stamp.lock_step_run_test.out fyp18-riscv-emulator/src/Image
-	./lock_step_run_test.out
-
-.stamp.lock_step_run_test.out: lock_step_run_test.cpp fyp18-riscv-emulator/src/emulator.h fyp18-riscv-emulator/src/constants.h simulator/src/simulator.h simulator/src/obj_dir
-	g++ -O3 -I $(VERILATOR_INCLUDE) -I simulator/src/obj_dir \
-		$(VERILATOR_INCLUDE)/verilated.cpp $(VERILATOR_INCLUDE)/verilated_vcd_c.cpp \
-		lock_step_run_test.cpp simulator/src/obj_dir/Vsystem__ALL.a -o lock_step_run_test.out
-		@touch .stamp.lock_step_run_test.out
 
 simulator/src/obj_dir: .stamp.sim simulator/src/system.v simulator/src/iCacheRegisters.v
 	cd simulator/src/; \
@@ -109,7 +181,7 @@ simulator/src/obj_dir: .stamp.sim simulator/src/system.v simulator/src/iCacheReg
 
 simulator/src/bench.out: simulator/src/obj_dir simulator/src/simulator.h simulator/src/bench.cpp
 	cd simulator/src; \
-	g++ -O3 -I /usr/share/verilator/include -I obj_dir /usr/share/verilator/include/verilated.cpp /usr/share/verilator/include/verilated_vcd_c.cpp bench.cpp obj_dir/Vsystem__ALL.a -o bench.out
+	g++ -O3 -I $(VERILATOR_INCLUDE) -I obj_dir $(VERILATOR_INCLUDE)/verilated.cpp $(VERILATOR_INCLUDE)/verilated_vcd_c.cpp bench.cpp obj_dir/Vsystem__ALL.a -o bench.out
 
 runSim: simulator/src/bench.out
 	cd simulator/src/; \

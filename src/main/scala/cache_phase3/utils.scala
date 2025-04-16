@@ -40,6 +40,12 @@ class moduleForwardingMemory (addrWidth : Int, dataWidth : Int, depth : Int) ext
   rdData:= Mux( doForwardReg , wrDataReg , memData )
 }
 
+object AddrChecker{
+    def isMainMemory(addr: UInt): Bool = {
+    addr >= DRAM_BASE.U && addr <= (DRAM_BASE.U + DRAM_RANGE.U)
+  }
+}
+
 object ChiselUtils {
   //To initalize given object fields to zero, or false
   def zeroInit[T <: Bundle](bundle: T): Unit = {

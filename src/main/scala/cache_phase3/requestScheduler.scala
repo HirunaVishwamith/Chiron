@@ -6,6 +6,7 @@ import chisel3.experimental.BundleLiterals._
 import cache_phase3.constants._
 import cache_phase3._
 import cache_phase3.ChiselUtils._
+import cache_phase3.AddrChecker._
 
 class requestScheduler extends Module{
   val requestIn = IO(Input(new requestPipelineWire))
@@ -41,7 +42,7 @@ class requestScheduler extends Module{
   speculativeQueue.read.ready := false.B
   zeroInit(speculativeQueue.write.data)
 
-  val speculativeEntryWire = WireDefault(requestIn.core.instruction(6,2) === "b00000".U && requestIn.address =/= FIFO_ADDR_RX.U)
+  val speculativeEntryWire = WireDefault(requestIn.core.instruction(6,2) === "b00000".U && isMainMemory(requestIn.address))
 
   //-------------Enqueue----------------//
   when(requestIn.valid && requestIn.branch.valid){
