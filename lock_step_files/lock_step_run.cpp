@@ -276,7 +276,7 @@ int main(int argc, char* argv[]) {
       } else {
         x = bench.step_nodump();
       } 
-      // printf("Taking interrupt\n");
+      printf("Taking interrupt\n");
       // golden_model.show_state();
       if (x == 1) { return 1; }
       if (golden_model.is_peripheral_read()) {

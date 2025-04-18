@@ -165,7 +165,6 @@ class ACEUnit(
   switch(writeACEState) {
     is(writeIdleState){
         writeCounter.reset := true.B
-
         writeACEState := Mux(writeBuffer.valid, writeRequestState, writeIdleState)
     }
     is(writeRequestState){

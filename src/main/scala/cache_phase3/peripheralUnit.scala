@@ -114,39 +114,41 @@ class peripheralUnit(
   val writeCounter = Module(new moduleCounter(length))
   writeCounter.incrm := false.B
   writeCounter.reset := false.B
+  val sizeByIns = WireDefault(writeRequestBuffer.core.instruction(13,12))
+  val sizePerBurst = WireDefault((1.U << sizeByIns) * 8.U)
+  val numOfBeats = WireDefault(((sizePerBurst + busWidth.U - 1.U) / busWidth.U) - 1.U)
   switch(writeAXIState) {
     is(writeIdleState){
         writeCounter.reset := true.B
         writeAXIState := Mux(writeRequestBuffer.valid && writeRequestBuffer.branch.valid, writeRequestState, writeIdleState)
     }
     is(writeRequestState){
-      val sizeByIns = writeRequestBuffer.core.instruction(13,12)
-      val sizePerBeat = (1.U << sizeByIns) * 8.U
-
-      bus.AWVALID := true.B
+      bus.AWVALID := writeCounter.count === 0.U
       bus.AWID := id.U
       bus.AWADDR := writeRequestBuffer.address
-      bus.AWLEN := ((sizePerBeat + busWidth.U - 1.U) / busWidth.U) - 1.U
-      bus.AWSIZE := Mux(sizePerBeat <= busWidth.U, sizeByIns, Log2(busWidth.U / 8.U) )
+      bus.AWLEN := numOfBeats
+      bus.AWSIZE := Mux(sizePerBurst <= busWidth.U, sizeByIns, Log2(busWidth.U / 8.U) )
       bus.AWBURST := "b01".U
       bus.AWLOCK := "b0".U
       bus.AWCACHE := "b0000".U
       bus.AWPROT := "b010".U
       bus.AWQOS := "b0000".U
-
+  
       bus.WVALID := true.B
       bus.WSTRB := Fill(busWidth/8, 1.U)
-      bus.WLAST := writeCounter.count === bus.ARLEN
+      bus.WLAST := writeCounter.count === numOfBeats
 
       val numSlices = length + 1
       val writeChunks = VecInit(Seq.tabulate(numSlices)(i => 
         writeRequestBuffer.writeData.data((i + 1) * busWidth - 1, i * busWidth)
       ))
-      when(bus.WREADY && bus.AWREADY){
+      when(bus.WREADY && bus.AWREADY && writeCounter.count === 0.U){
+        writeCounter.incrm := true.B 
+      }.elsewhen(bus.WREADY){
         writeCounter.incrm := true.B 
       }
       bus.WDATA := writeChunks(writeCounter.count)
-      writeAXIState := Mux(bus.WLAST && bus.WREADY && bus.AWREADY, writeResponseState, writeRequestState)
+      writeAXIState := Mux(bus.WLAST && bus.WREADY, writeResponseState, writeRequestState)
     }
     is(writeResponseState){
       bus.BREADY := true.B
@@ -167,13 +169,13 @@ class peripheralUnit(
     }
     is(readRequestState){
       val sizeByIns = readRequestBuffer.core.instruction(13,12)
-      val sizePerBeat = (1.U << sizeByIns) * 8.U
+      val sizePerBurst = (1.U << sizeByIns) * 8.U
 
       bus.ARVALID := true.B
       bus.ARID := id.U
       bus.ARADDR := readRequestBuffer.address
-      bus.ARLEN := ((sizePerBeat + busWidth.U - 1.U) / busWidth.U) - 1.U
-      bus.ARSIZE := Mux(sizePerBeat <= busWidth.U, sizeByIns, Log2(busWidth.U / 8.U) )
+      bus.ARLEN := ((sizePerBurst + busWidth.U - 1.U) / busWidth.U) - 1.U
+      bus.ARSIZE := Mux(sizePerBurst <= busWidth.U, sizeByIns, Log2(busWidth.U / 8.U) )
       bus.ARBURST := "b01".U
       bus.ARLOCK := "b0".U
       bus.ARCACHE := "b0000".U
