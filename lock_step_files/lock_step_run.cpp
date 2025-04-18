@@ -19,10 +19,11 @@ using namespace std;
 using namespace std::chrono;
 
 #define LOGGING
-#define DUMP_CONDITION 0 && (bench.tickcount > 15878305144UL)
+//#define DUMP_CONDITION 0 && (bench.tickcount > 15878305144UL)
 #define PROBE_DOUBLE (0x2004000UL+0x0UL) & (~7UL)
 
 emulator golden_model;
+bool DUMP_CONDITION=false;
 
 struct keystroke_buffer {
   unsigned char reader, writer, char_buffer[128];
@@ -137,17 +138,22 @@ int main(int argc, char* argv[]) {
   unsigned long gprs[32];
   bench.set_probe(PROBE_DOUBLE);
   bench.step_nodump();
+  uint64_t i = 0;
   unsigned long sim_prev = 0x80100000UL;
 	printf("Simulation start time: %s %s\n", __DATE__, __TIME__);
   while (1 || (bench.tickcount + bench.dump_tick) < 800351768UL) {
     // golden_model.show_state();
     //cin >> x;
+    i++;
     if (kbhit()) {
       // printf("detected input, %c\n", getchar());
       keys_rx.char_buffer[keys_rx.writer++] = getchar();
       keys_rx.reader += (keys_rx.reader == keys_rx.writer); // overflow
       outFile << "keyhit\n";
     }
+    // if(i%80000000==0){
+    //   DUMP_CONDITION=true;
+    // }
     
     // if (keys_rx.reader != keys_rx.writer) { keys_rx.reader += golden_model.load_rx_char(keys_rx.char_buffer[keys_rx.reader]); }
 
@@ -276,7 +282,7 @@ int main(int argc, char* argv[]) {
       } else {
         x = bench.step_nodump();
       } 
-      printf("Taking interrupt\n");
+      // printf("Taking interrupt\n");
       // golden_model.show_state();
       if (x == 1) { return 1; }
       if (golden_model.is_peripheral_read()) {

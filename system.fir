@@ -22497,11 +22497,11 @@ circuit system :
       node _T_133 = eq(UInt<1>("h1"), stateReg_8) @[ccu.scala 634:27]
       when _T_133 : @[ccu.scala 634:27]
         stateReg_8 <= UInt<2>("h2") @[ccu.scala 645:36]
-        node _T_134 = bits(crpbuf_3_0, 3, 3) @[ccu.scala 646:40]
+        node _T_134 = bits(crpbuf_3_0, 0, 0) @[ccu.scala 646:40]
         when _T_134 : @[ccu.scala 646:44]
           select_buff <= UInt<3>("h0") @[ccu.scala 647:45]
         else :
-          node _T_135 = bits(crpbuf_3_1, 3, 3) @[ccu.scala 648:46]
+          node _T_135 = bits(crpbuf_3_1, 0, 0) @[ccu.scala 648:46]
           when _T_135 : @[ccu.scala 648:50]
             select_buff <= UInt<3>("h1") @[ccu.scala 649:45]
           else :

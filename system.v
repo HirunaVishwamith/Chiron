@@ -58965,7 +58965,7 @@ module ccu(
       select_buff <= 3'h0; // @[ccu.scala 618:38]
     end else if (!(3'h0 == stateReg_8)) begin // @[ccu.scala 634:27]
       if (3'h1 == stateReg_8) begin // @[ccu.scala 634:27]
-        if (crpbuf_3_0[3]) begin // @[ccu.scala 646:44]
+        if (crpbuf_3_0[0]) begin // @[ccu.scala 646:44]
           select_buff <= 3'h0; // @[ccu.scala 647:45]
         end else begin
           select_buff <= 3'h4;

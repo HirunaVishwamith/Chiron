@@ -643,9 +643,9 @@ class ccu extends Module {
 		}
 		is(1.U){//SELECT
 			stateReg_8 := 2.U
-			when(crpbuf_3_0(3)){ //here i am only checking it is shared or not because according to MOESI protocol.
+			when(crpbuf_3_0(0)){ //here i am only checking it is shared or not because according to MOESI protocol.
 				select_buff := "b000".U(3.W)
-			}.elsewhen(crpbuf_3_1(3)){
+			}.elsewhen(crpbuf_3_1(0)){
 				select_buff := "b001".U(3.W)
 			}.otherwise{          //if it is data is not shared even if it is in the other local caches i take from L2
 				select_buff := "b100".U(3.W)
