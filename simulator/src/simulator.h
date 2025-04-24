@@ -10,8 +10,9 @@
 #include <string>
 #include <stdint.h>
 #include <typeinfo>
+#include <sstream>
 
-#define STEP_TIMEOUT 100000
+#define STEP_TIMEOUT 1000
 
 using namespace std;
 
@@ -130,7 +131,7 @@ class simulator {
       printf("ERROR: Core should be waiting during the process of programming DRAM");
       return 1;
     }
-    for (;tb -> waitingForCore_waiting;tick_nodump(++tickcount, tb, tfp))
+    for (;tb -> waitingForCore_waiting;tick(++dump_tick, tb, tfp))
       printf("Cycles remaining waiting: %016lx \r", tb -> waitingForCore_timeRemaining);
 
     printf("\n");
@@ -156,11 +157,11 @@ class simulator {
 
     tb -> reset = 1;
     for(int i = 0; i < 20; i++){
-      tick_nodump(++tickcount, tb, tfp);
+      tick(++dump_tick, tb, tfp); //here it is tick_nodump
     }
     tb -> reset = 0;
     for(int i = 0; i < 20; i++){
-      tick_nodump(++tickcount, tb, tfp);
+      tick(++dump_tick, tb, tfp); //here it is tick_nodump
     }
 
     printf("*********************************Loading kernel image*********************************\n");
@@ -178,7 +179,7 @@ class simulator {
 			tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&buffer.at(i));
       tb -> programmer_offset = i;
 			//cout << buffer.at(i)&255 << endl;
-			tick_nodump(++tickcount, tb, tfp);	
+			tick(++dump_tick, tb, tfp);	//here it is tick_nodump
       // if (progress != (i*100)/buffer.size()) 
       printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
 		}
@@ -194,7 +195,7 @@ class simulator {
 			tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&dtb_buffer.at(i));
       tb -> programmer_offset = (i+0x07e00000UL);
 			//cout << buffer.at(i)&255 << endl;
-			tick_nodump(++tickcount, tb, tfp);	
+			tick(++dump_tick, tb, tfp);	//here it is tick_nodump
       // if (progress != (i*100)/buffer.size()) 
       printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
 		}
@@ -210,17 +211,17 @@ class simulator {
 			tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&boot_buffer.at(i));
       tb -> programmer_offset = (i+0x07ffff00UL);
 			//cout << buffer.at(i)&255 << endl;
-			tick_nodump(++tickcount, tb, tfp);	
+			tick(++dump_tick, tb, tfp);	//here it is tick_nodump
       // if (progress != (i*100)/buffer.size()) 
       printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
 		}
     printf("done\n");
 		tb ->finishedProgramming = 1;
     tb ->programmer_valid = 0;
-    tick_nodump(++tickcount, tb, tfp);
+    tick(++dump_tick, tb, tfp);//here it is tick_nodump
 		tb ->finishedProgramming = 0;
     tb ->programmer_valid = 0;
-    tick_nodump(++tickcount, tb, tfp);
+    tick(++dump_tick, tb, tfp); //here it is tick_nodump
     prev_pc = 0x80000000UL;
   }
 
@@ -271,7 +272,7 @@ class simulator {
 
       if (tb ->putChar_valid) { cout << (char)(tb -> putChar_byte) << flush; }
     } */
-    tick_nodump(++tickcount, tb, tfp);
+    tick(++dump_tick, tb, tfp);
     #ifndef STEP_TIMEOUT
     while (!(tb -> robOut_commitFired)) {
     #else
@@ -280,7 +281,7 @@ class simulator {
     #ifdef SHOW_TERMINAL
       //if (tb ->putChar_valid) { cout << tb -> putChar_byte << flush; }
     #endif
-      tick_nodump(++tickcount, tb, tfp);
+      tick(++dump_tick, tb, tfp);
           }
     
     #ifdef SHOW_TERMINAL
@@ -328,7 +329,53 @@ class simulator {
     return 0;
   }
 
-  
+string return_registers() {
+    std::ostringstream output;
+
+    output << "x0:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_0  << " "
+           << "x1:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_1  << " "
+           << "x2:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_2  << " "
+           << "x3:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_3  << " "
+           << "x4:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_4  << " "
+           << "x5:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_5  << " "
+           << "x6:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_6  << " "
+           << "x7:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_7  << "\n";
+
+    output << "x8:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_8  << " "
+           << "x9:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_9  << " "
+           << "x10: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_10 << " "
+           << "x11: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_11 << " "
+           << "x12: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_12 << " "
+           << "x13: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_13 << " "
+           << "x14: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_14 << " "
+           << "x15: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_15 << "\n";
+
+    output << "x16: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_16 << " "
+           << "x17: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_17 << " "
+           << "x18: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_18 << " "
+           << "x19: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_19 << " "
+           << "x20: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_20 << " "
+           << "x21: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_21 << " "
+           << "x22: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_22 << " "
+           << "x23: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_23 << "\n";
+
+    output << "x24: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_24 << " "
+           << "x25: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_25 << " "
+           << "x26: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_26 << " "
+           << "x27: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_27 << " "
+           << "x28: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_28 << " "
+           << "x29: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_29 << " "
+           << "x30: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_30 << " "
+           << "x31: " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_31 << "\n";
+
+    return output.str();
+}
+
+
+int return_instruction() {
+    return tb->robOut_pc;
+}
+
 
   void set_probe(unsigned long address) { tb -> prober_offset = address; }
   unsigned long get_probe() { return tb -> prober_accessLong; }
