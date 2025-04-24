@@ -70,7 +70,7 @@ class CacheModule (
 
   //Scheduler connections
   requestScheduler.branchOps := branchOps
-  canAllocate := requestScheduler.canAllocate && !commitFifo.isFull
+  canAllocate := requestScheduler.canAllocate // && !commitFifo.isFull
   
   requestScheduler.requestIn.valid := request.valid
   requestScheduler.requestIn.address := request.address
@@ -175,6 +175,10 @@ class CacheModule (
       loadCommit.valid := true.B
     }
   }
+        loadCommit.valid := true.B
+        loadCommit.state := true.B
+
+
 
   //-----------------Initiate Fence----------------------//
   val fenceInititatedReg = RegInit(false.B)

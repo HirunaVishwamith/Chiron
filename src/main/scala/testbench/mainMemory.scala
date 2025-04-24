@@ -13,7 +13,6 @@ import decode.constants
 import os.read
 import dataclass.data
 
-
 class mainMemory(
   addressBitSize:Int = 28,
   latency:Int = 1 // this variable changes nothing for now!!!
@@ -39,8 +38,7 @@ class mainMemory(
   // (0 to 7).foreach { i => memory.write(programmer.offset + i.U, programmer.byte(8*i + 7, 8*i)) }
 
   // connection with core pipeline
-  val clients = IO(Flipped(Vec(2, (new AXI(1,32,256)))))
-
+  val clients = IO(Flipped(Vec(2, (new AXI(2,32,256)))))
 
   val instruction :: data :: Nil = Enum(2)
 
@@ -53,13 +51,13 @@ class mainMemory(
 
   // accepting read requests
   (clients zip servicing)
-  .foreach{ case(client, buffer) => 
-    when(client.ARREADY && client.ARVALID) { 
+  .foreach{ case(client, buffer) =>
+    when(client.ARREADY && client.ARVALID) {
       buffer.valid := true.B
-      buffer.address := (client.ARADDR&(~(3.U(32.W)))) + 8.U //leon changed
+      buffer.address := (client.ARADDR&(~(3.U(32.W)))) + 32.U //leon changed
       buffer.id := client.ARID
       buffer.beatsRemaining := client.ARLEN
-    } 
+    }
   }
 
   // read response buffer
@@ -75,7 +73,7 @@ class mainMemory(
   .foreach{ case(client, (request, response)) =>
     when(client.RREADY || !response.valid) {
       response.valid := request.valid
-      response.data := Cat(Seq.tabulate(8)(i => memory.read(i.U + Mux(request.valid, request.address, (client.ARADDR&(~(3.U(32.W))))))).reverse) //leon
+      response.data := Cat(Seq.tabulate(32)(i => memory.read(i.U + Mux(request.valid, request.address, (client.ARADDR&(~(3.U(32.W))))))).reverse) //leon
       response.last := Mux(!response.last, request.valid && !(request.beatsRemaining.orR), !(client.RVALID && client.RREADY))
       response.id := request.id
 
@@ -83,9 +81,9 @@ class mainMemory(
         when(!request.beatsRemaining.orR) { request.valid := false.B }
         .otherwise { request.beatsRemaining := (request.beatsRemaining - 1.U) }
 
-        request.address := request.address + 8.U //leon changed
+        request.address := request.address + 32.U //leon changed
       }
-    }  
+    }
     client.RVALID := response.valid
     client.ARREADY := Seq(programmed, !response.valid, !request.valid).reduce(_ && _)
 
@@ -109,7 +107,7 @@ class mainMemory(
   // finish writing memory
   when(writeBuffers.addressValid && writeBuffers.dataValid) {
    writeBuffers.dataValid := false.B
-   when(writeBuffers.dataLast) { writeBuffers.addressValid := false.B } 
+   when(writeBuffers.dataLast) { writeBuffers.addressValid := false.B }
   }
 
   // accepting a new write request
@@ -129,12 +127,12 @@ class mainMemory(
 
   // writing to memory
   when(writeBuffers.addressValid && writeBuffers.dataValid) {
-    Seq.tabulate(8)(i => (i, (writeBuffers.data >> (i*8))(7, 0), writeBuffers.dataMask(i))) //leon
+    Seq.tabulate(32)(i => (i, (writeBuffers.data >> (i*8))(7, 0), true.B)) //leon
     .foreach{ case(offset, data, maskBit) => when(maskBit.asBool) { memory.write(writeBuffers.address + offset.U, data) } }
 
-    writeBuffers.address := writeBuffers.address + 8.U //leon changed
+    writeBuffers.address := writeBuffers.address + 32.U //leon changed
   }
-  
+
   // write response buffer
   val writeFinished = RegInit(false.B)
   when(writeBuffers.addressValid && writeBuffers.dataLast && writeBuffers.dataValid) { writeFinished := true.B }
@@ -154,7 +152,7 @@ class mainMemory(
       clients(data).AWREADY := false.B
       when(
         (!servicing(data).valid && !clients(data).ARVALID) ||
-        Seq(clients(data).RREADY, clients(data).RVALID, clients(data).RLAST).reduce(_ && _) 
+        Seq(clients(data).RREADY, clients(data).RVALID, clients(data).RLAST).reduce(_ && _)
       ) {
         arbiter := writing
       }
@@ -163,7 +161,7 @@ class mainMemory(
       clients(data).ARREADY := false.B
       when(
         (!writeBuffers.addressValid && !clients(data).AWVALID) ||
-        (clients(data).WVALID && clients(data).WREADY) 
+        (clients(data).WVALID && clients(data).WREADY)
       ) {
         arbiter := reading
       }
@@ -206,7 +204,7 @@ case class noWritePriority() extends writeArbitrationParam
 /**
   * A main memory for testbench use cases, with parameterized latencies
   *
-  * @param totalConcurrent Maximum number of requests that can be 
+  * @param totalConcurrent Maximum number of requests that can be
   *   outstanding at anytime
   * @param totalReads Maximum number of read requests that can be
   *   outstanding at anytime
@@ -216,7 +214,7 @@ case class noWritePriority() extends writeArbitrationParam
   *   after the request has been fired
   * @param readAddressWait Number of cycles a read address will remain valid
   *   until it is accepted
-  * @param readResponseGap Number cycles between a read response beat being 
+  * @param readResponseGap Number cycles between a read response beat being
   *   fired and the next one being accepted
   * @param writeAddressWait Number of cycles a write address will remain valid
   *   until it is accepted
@@ -244,10 +242,10 @@ class simulatedMemory(
   val memory = SyncReadMem ((1 << addressBitSize) , UInt (8.W))
 
   // Once the kernel image has been loaded to memory, this bit will
-  // be toggled on 
+  // be toggled on
   val programmed = RegInit(false.B)
 
-  // single cycle logic high to indicate that the memory has been programmed by the 
+  // single cycle logic high to indicate that the memory has been programmed by the
   // external programmer
   val finishedProgramming = IO(Input(Bool()))
   when(finishedProgramming) { programmed := true.B }
@@ -256,7 +254,7 @@ class simulatedMemory(
   val programmer = IO(Input(new Bundle {
     // Programmed when this bit is high
     val valid   = Bool()
-    // Data that will be writter (Name needs changing) 
+    // Data that will be writter (Name needs changing)
     val byte    = UInt(64.W)
     // Location of programming
     val offset  = UInt(addressBitSize.W)
@@ -264,8 +262,8 @@ class simulatedMemory(
 
   when (!programmed && programmer.valid) {
     // The external program can only load image when 'programmed' is low
-    // There are 8 bytes in the programmed data 
-    (0 to 7).foreach { i => memory.write(programmer.offset + i.U, programmer.byte(8*i + 7, 8*i)) } 
+    // There are 8 bytes in the programmed data
+    (0 to 7).foreach { i => memory.write(programmer.offset + i.U, programmer.byte(8*i + 7, 8*i)) }
   }
 
   // This will be used by an external observer to look at a particular
@@ -323,22 +321,22 @@ class simulatedMemory(
   // Moving entries ahead
   readPipes.foreach { pipe => {
     pipe.zip(pipe.drop(1)).foreach { case(curr, next) => {
-      when(!curr.valid) { 
+      when(!curr.valid) {
         curr := next
-        next.valid := false.B 
+        next.valid := false.B
       }
     }}
   } }
   writeAddressPipe.zip(writeAddressPipe.drop(1)).foreach { case(curr, next) => {
-    when(!curr.valid) { 
+    when(!curr.valid) {
       curr := next
-      next.valid := false.B 
+      next.valid := false.B
     }
   }}
   writeDataPipe.zip(writeDataPipe.drop(1)).foreach { case(curr, next) => {
-    when(!curr.valid) { 
+    when(!curr.valid) {
       curr := next
-      next.valid := false.B 
+      next.valid := false.B
     }
   }}
 
@@ -358,7 +356,7 @@ class simulatedMemory(
     val getFromBuffer = Bool() // specify where to get data from
   } Lit(_.valid -> false.B))))
 
-  val ramReadData = 
+  val ramReadData =
     readPipes.map(_.head.addr & ((1 << addressBitSize)-4).U(32.W)) // get the base offset of the word access
     .map(baseAddr => Cat(Seq.tabulate(4)(i => memory.read(baseAddr + i.U)).reverse)) // reading the word
 
@@ -462,10 +460,10 @@ class simulatedMemory(
     */
   val writeAcceptTracker = RegInit(0.U((log2Ceil(totalWrites) + 2).W))
   val nextDataIsFirst = RegInit(true.B)
-  when(clients(clientData).WREADY && clients(clientData).WVALID) { 
-    nextDataIsFirst := clients(clientData).WLAST 
+  when(clients(clientData).WREADY && clients(clientData).WVALID) {
+    nextDataIsFirst := clients(clientData).WLAST
   }
-  writeAcceptTracker := writeAcceptTracker +& 
+  writeAcceptTracker := writeAcceptTracker +&
     (clients(1).AWVALID && clients(1).AWREADY).asUInt -&
     (clients(1).WVALID && clients(1).WREADY && nextDataIsFirst).asUInt
   val acceptDataWrite = Wire(Bool())
@@ -495,7 +493,7 @@ class simulatedMemory(
     finishInstRead.asUInt +& finishDataRead.asUInt +& finishDataWrite -&
     acceptInstRead.asUInt -& acceptDataRead.asUInt -& acceptDataWrite
 
-  // Counters to count the wait time 
+  // Counters to count the wait time
   val instrWaitAddr = RegInit(readAddressWait.U(log2Ceil(readAddressWait+1).W))
   val dataWaitReadAddr  = RegInit(readAddressWait.U(log2Ceil(readAddressWait+1).W))
   val dataWaitWriteAddr = RegInit(writeAddressWait.U(log2Ceil(writeAddressWait+1).W))
@@ -520,7 +518,7 @@ class simulatedMemory(
     when(counter === 0.U) {
       when(resetCond) { counter := resetValue.U }
     }
-  }} 
+  }}
 
   // write FSM
   // noWrite: Wait for a write(address and all data beats)
@@ -534,10 +532,10 @@ class simulatedMemory(
     val id = clients(0).BID.cloneType
   } Lit(_.valid -> false.B))
   switch(writeFSM) {
-    is(noWrite) { 
+    is(noWrite) {
       when(writeAddressPipe.head.valid && VecInit(writeDataPipe)(writeAddressPipe.head.len).last) {
         writeFSM := waitForReads
-      } 
+      }
     }
     is(waitForReads) {
       // waiting for all the inprogress reads to finish
@@ -576,7 +574,7 @@ class simulatedMemory(
         writeAddressPipe.head.valid := false.B
       }
       // Must remove to get next data
-      writeDataPipe.head.valid := false.B  
+      writeDataPipe.head.valid := false.B
     }
   }
   // Signalling ready to master
@@ -606,7 +604,7 @@ class simulatedMemory(
       clients(0).ARREADY := !readPipes(0).reverse.head.valid
     }
   }
-  
+
   clients(1).ARREADY := false.B
   when(dataWaitReadAddr === 0.U && programmed) {
     when((totalReadsAvailable > 1.U) && (totalConcurrentAvailable > 2.U)) {
@@ -646,7 +644,7 @@ class simulatedMemory(
   clients(1).WREADY := false.B
   when(dataWaitWriteData === 0.U && programmed) {
     when(
-      (checkWritesReady) && (totalWriteAvailable > 0.U && totalConcurrentAvailable > 0.U) 
+      (checkWritesReady) && (totalWriteAvailable > 0.U && totalConcurrentAvailable > 0.U)
       ) {
       clients(1).WREADY := { writeOpArbitration match {
         case addressFirst() => writeCompleteTracker.asSInt > 0.S && !writeDataPipe.reverse.head.valid
