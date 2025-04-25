@@ -10,9 +10,8 @@
 #include <string>
 #include <stdint.h>
 #include <typeinfo>
-#include <sstream>
 
-#define STEP_TIMEOUT 1000
+#define STEP_TIMEOUT 100000
 
 using namespace std;
 
@@ -131,7 +130,7 @@ class simulator {
       printf("ERROR: Core should be waiting during the process of programming DRAM");
       return 1;
     }
-    for (;tb -> waitingForCore_waiting;tick(++dump_tick, tb, tfp))
+    for (;tb -> waitingForCore_waiting;tick_nodump(++tickcount, tb, tfp))
       printf("Cycles remaining waiting: %016lx \r", tb -> waitingForCore_timeRemaining);
 
     printf("\n");
@@ -157,11 +156,11 @@ class simulator {
 
     tb -> reset = 1;
     for(int i = 0; i < 20; i++){
-      tick(++dump_tick, tb, tfp); //here it is tick_nodump
+      tick_nodump(++tickcount, tb, tfp);
     }
     tb -> reset = 0;
     for(int i = 0; i < 20; i++){
-      tick(++dump_tick, tb, tfp); //here it is tick_nodump
+      tick_nodump(++tickcount, tb, tfp);
     }
 
     printf("*********************************Loading kernel image*********************************\n");
@@ -179,7 +178,7 @@ class simulator {
 			tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&buffer.at(i));
       tb -> programmer_offset = i;
 			//cout << buffer.at(i)&255 << endl;
-			tick(++dump_tick, tb, tfp);	//here it is tick_nodump
+			tick_nodump(++tickcount, tb, tfp);	
       // if (progress != (i*100)/buffer.size()) 
       printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
 		}
@@ -195,7 +194,7 @@ class simulator {
 			tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&dtb_buffer.at(i));
       tb -> programmer_offset = (i+0x07e00000UL);
 			//cout << buffer.at(i)&255 << endl;
-			tick(++dump_tick, tb, tfp);	//here it is tick_nodump
+			tick_nodump(++tickcount, tb, tfp);	
       // if (progress != (i*100)/buffer.size()) 
       printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
 		}
@@ -211,17 +210,17 @@ class simulator {
 			tb -> programmer_byte = *reinterpret_cast<unsigned long*>(&boot_buffer.at(i));
       tb -> programmer_offset = (i+0x07ffff00UL);
 			//cout << buffer.at(i)&255 << endl;
-			tick(++dump_tick, tb, tfp);	//here it is tick_nodump
+			tick_nodump(++tickcount, tb, tfp);	
       // if (progress != (i*100)/buffer.size()) 
       printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
 		}
     printf("done\n");
 		tb ->finishedProgramming = 1;
     tb ->programmer_valid = 0;
-    tick(++dump_tick, tb, tfp);//here it is tick_nodump
+    tick_nodump(++tickcount, tb, tfp);
 		tb ->finishedProgramming = 0;
     tb ->programmer_valid = 0;
-    tick(++dump_tick, tb, tfp); //here it is tick_nodump
+    tick_nodump(++tickcount, tb, tfp);
     prev_pc = 0x80000000UL;
   }
 
@@ -272,7 +271,7 @@ class simulator {
 
       if (tb ->putChar_valid) { cout << (char)(tb -> putChar_byte) << flush; }
     } */
-    tick(++dump_tick, tb, tfp);
+    tick_nodump(++tickcount, tb, tfp);
     #ifndef STEP_TIMEOUT
     while (!(tb -> robOut_commitFired)) {
     #else
@@ -281,7 +280,7 @@ class simulator {
     #ifdef SHOW_TERMINAL
       //if (tb ->putChar_valid) { cout << tb -> putChar_byte << flush; }
     #endif
-      tick(++dump_tick, tb, tfp);
+      tick_nodump(++tickcount, tb, tfp);
           }
     
     #ifdef SHOW_TERMINAL
@@ -329,7 +328,7 @@ class simulator {
     return 0;
   }
 
-string return_registers() {
+  string return_registers() {
     std::ostringstream output;
 
     output << "x0:  " << std::hex << std::setw(16) << std::setw(16) << tb->registersOut_0  << " "
@@ -375,7 +374,6 @@ string return_registers() {
 int return_instruction() {
     return tb->robOut_pc;
 }
-
 
   void set_probe(unsigned long address) { tb -> prober_offset = address; }
   unsigned long get_probe() { return tb -> prober_accessLong; }
