@@ -153,7 +153,7 @@ class peripheralUnit(
     is(writeResponseState){
       bus.BREADY := true.B
       writeRequestBuffer.valid := !(bus.BVALID && bus.BID === id.U && bus.BRESP === "b00".U)
-      writeCommitInstructionBuffer := true.B
+      writeCommitInstructionBuffer := bus.BVALID && (bus.BID === id.U) && bus.BRESP === "b00".U
       writeAXIState := Mux(bus.BVALID && (bus.BID === id.U), 
                         Mux(bus.BRESP === "b00".U, writeIdleState, writeRequestState),
                           writeResponseState)
