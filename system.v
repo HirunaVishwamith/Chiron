@@ -42556,7 +42556,7 @@ module ACEUnit(
   wire  _GEN_190 = bus_RVALID ? _readResponseValid_T_2 : readResponseValid; // @[ACEUnit.scala 278:45 281:29 252:34]
   wire [1:0] _GEN_191 = bus_RVALID ? bus_RRESP[3:2] : readResponseReg; // @[ACEUnit.scala 278:45 282:27 253:32]
   wire  _GEN_193 = isCleanUniqueWire ? bus_RRESP[1:0] == 2'h0 & readResponseValid : _GEN_190; // @[ACEUnit.scala 273:30 275:27]
-  wire  _GEN_194 = isCleanUniqueWire | (readCounter_count != 3'h0 | bus_RVALID & readCounter_count == 3'h0); // @[ACEUnit.scala 273:30 276:24 284:24]
+  wire  _GEN_194 = isCleanUniqueWire ? bus_RVALID : readCounter_count != 3'h0 | bus_RVALID & readCounter_count == 3'h0; // @[ACEUnit.scala 273:30 276:24 284:24]
   wire  _GEN_195 = isCleanUniqueWire ? 1'h0 : bus_RVALID; // @[ACEUnit.scala 255:21 273:30]
   wire [1:0] _readACEResponseState_T_5 = bus_RVALID ? 2'h2 : 2'h1; // @[ACEUnit.scala 289:36]
   wire [1:0] _readACEResponseState_T_8 = bus_RLAST & bus_RVALID & readResponseValid ? 2'h2 : 2'h1; // @[ACEUnit.scala 291:36]

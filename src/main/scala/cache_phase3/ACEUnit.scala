@@ -273,7 +273,7 @@ class ACEUnit(
       when(isCleanUniqueWire){
         readResponseReg := bus.RRESP(3,2)
         readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
-        isReadRespBusy := true.B
+        isReadRespBusy := bus.RVALID & bus.RID === id.U
       } .otherwise{
         when(bus.RVALID && bus.RID === id.U){
           readCounter.incrm := true.B
