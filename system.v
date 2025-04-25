@@ -41586,7 +41586,6 @@ module peripheralUnit(
   wire  _GEN_103 = bus_WREADY & bus_AWREADY & _bus_AWVALID_T | bus_WREADY; // @[peripheralUnit.scala 145:68 146:28]
   wire [31:0] _GEN_105 = writeCounter_count ? writeChunks_1 : writeChunks_0; // @[peripheralUnit.scala 150:{17,17}]
   wire [1:0] _writeAXIState_T_8 = bus_BVALID ? 2'h0 : 2'h2; // @[peripheralUnit.scala 157:27]
-  wire  _GEN_108 = 2'h2 == writeAXIState | _GEN_0; // @[peripheralUnit.scala 120:25 156:36]
   wire  _GEN_110 = 2'h1 == writeAXIState & ~writeCounter_count; // @[peripheralUnit.scala 120:25 126:19 46:15]
   wire [31:0] _GEN_112 = 2'h1 == writeAXIState ? writeRequestBuffer_address : 32'h0; // @[peripheralUnit.scala 120:25 128:18 38:14]
   wire  _GEN_118 = 2'h1 == writeAXIState & _GEN_8 == numOfBeats; // @[peripheralUnit.scala 120:25 139:17 50:13]
@@ -41974,8 +41973,10 @@ module peripheralUnit(
       writeCommitInstructionBuffer <= _GEN_0;
     end else if (2'h1 == writeAXIState) begin // @[peripheralUnit.scala 120:25]
       writeCommitInstructionBuffer <= _GEN_0;
+    end else if (2'h2 == writeAXIState) begin // @[peripheralUnit.scala 120:25]
+      writeCommitInstructionBuffer <= bus_BVALID; // @[peripheralUnit.scala 156:36]
     end else begin
-      writeCommitInstructionBuffer <= _GEN_108;
+      writeCommitInstructionBuffer <= _GEN_0;
     end
     if (reset) begin // @[peripheralUnit.scala 113:30]
       writeAXIState <= 2'h0; // @[peripheralUnit.scala 113:30]
