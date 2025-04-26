@@ -225,7 +225,7 @@ class cacheLookupUnit extends Module{
     regRecordUpdate(replayBuffer.branch, branchOps)
   }
   //Input buffers
-  when(readBuffer.valid && readBuffer.branch.valid){
+  when(readBuffer.valid && readBuffer.branch.valid && !operationValid){
     regRecordUpdate(readBuffer.branch, branchOps)
   }
   when(lastInorderMissRecordRegister.valid && lastInorderMissRecordRegister.branch.valid){
