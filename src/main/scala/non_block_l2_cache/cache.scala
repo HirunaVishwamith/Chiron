@@ -118,7 +118,7 @@ class Memory (
   val matchedWay = OHToUInt(matchVec.asUInt)
 
   val repl_way = pseudoLRU.get_replace_way(cacheLineRead.state)
-  val replace = inputBuffer.valid && delay_input_valid && cacheLineRead.valid(repl_way) && !(cacheLineRead.tag(repl_way)===tag) && cacheLineRead.dirty(repl_way)
+  val replace = !hit && inputBuffer.valid && delay_input_valid && cacheLineRead.valid(repl_way) && !(cacheLineRead.tag(repl_way)===tag) && cacheLineRead.dirty(repl_way)
 
   val cache_hit_write = !inputBuffer.is_R && hit && !inputBuffer.from_MSHR
   val delay_MSHR_write = inputBuffer.from_MSHR && inputBuffer.valid && delay_input_valid && hit && !inputBuffer.is_R
@@ -235,7 +235,7 @@ class Memory (
     io.cache_miss_out.replace := replaceBuffer.valid
     io.cache_miss_out.rep_data := replaceBuffer.data
     //io.cache_miss_out.replaWire := outputBuffer.replace && outputBuffer.valid
-    io.cache_miss_out.replaWire := replace
+    io.cache_miss_out.replaWire := replace && cache_miss_write
 
     io.cache_miss_out.ready := (outputBuffer.valid && !outputBuffer.hit) || replaceBuffer.valid //replace
 

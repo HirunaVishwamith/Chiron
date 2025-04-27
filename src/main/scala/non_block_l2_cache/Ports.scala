@@ -66,7 +66,7 @@ import chisel3.experimental.IO
       val BREADY = Input(Bool())
       val BVALID = Output(Bool())
       val BRESP = Output(Bool())
-      val BID = Output(Bool())
+      val BID = Output(UInt(idWidth.W))
   }
 
 
@@ -105,7 +105,7 @@ import chisel3.experimental.IO
       val BREADY = Input(Bool())
       val BVALID = Output(Bool())
       val BRESP = Output(Bool())
-      val BID = Output(Bool())
+      val BID = Output(UInt(idWidth.W))
 
   }
 
