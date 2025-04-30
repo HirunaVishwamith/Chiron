@@ -48,7 +48,7 @@ class composableInterface extends Bundle {
 // val writeInstructionCommit = IO(new composableInterface)
 
 class AXI(
-  idWidth: Int = 2,
+  idWidth: Int = idWidth,
   addressWidth: Int = 32,
   busWidth: Int //32
 )extends Bundle {
@@ -96,7 +96,7 @@ class AXI(
 }
 
 class ACE(
-  idWidth: Int = 2,
+  idWidth: Int = idWidth,
   addressWidth: Int = 32,
   busWidth: Int
 ) extends AXI(idWidth, addressWidth, busWidth){

@@ -21,7 +21,7 @@ class peripheralUnit(
     val ready = Input(Bool())
     val request = Output(new requestPipelineWire)})
   val bus = IO(new AXI(
-    idWidth = 2,
+    idWidth = idWidth,
     addressWidth = addrWidth,
     busWidth = peripheral_WIDTH, //32
   ))

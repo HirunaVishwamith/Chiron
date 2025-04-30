@@ -10,7 +10,7 @@ object constants{
   val cacheDataWidth : Int = 64*8  //8*8 
   // val depth : Int = 1
   val nway : Int = 4 
-  val idWidth: Int = 2
+  val idWidth: Int = 3
   val fifoDepth : Int = 8
 
   val addrWidth : Int = 32

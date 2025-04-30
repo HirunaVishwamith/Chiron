@@ -39,7 +39,7 @@ class ACEUnit(
   val branchOps = IO(Input(new branchOps))
 
   val bus = IO(new ACE(
-    idWidth = 2,
+    idWidth = idWidth,
     addressWidth = addrWidth,
     busWidth = dPort_WIDTH, 
   ))
