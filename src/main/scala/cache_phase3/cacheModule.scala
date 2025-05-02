@@ -82,6 +82,7 @@ class CacheModule (
   requestScheduler.requestIn.branch.valid := true.B
   requestScheduler.requestIn.writeData.valid := false.B
   requestScheduler.requestIn.writeData.data := 0.U
+  requestScheduler.requestIn.cacheLine.valid := false.B
   requestScheduler.requestIn.cacheLine.cacheLine := 0.U
   requestScheduler.requestIn.cacheLine.response := 0.U
   requestScheduler.requestIn.cacheLine.required := false.B

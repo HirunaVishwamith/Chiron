@@ -115,7 +115,7 @@ class ACEUnit(
   //-----------------------Ordering--------------------------------//
   val isCoherencyIdle = WireDefault(false.B)
   val isReadRespBusy = WireDefault(false.B)
-  val isWireACEBusy = WireDefault(false.B)
+  val isWriteACEBusyWire = WireDefault(false.B)
   val isCoherencyAddressMatchWire = WireDefault(responseBuffer.address(addrWidth - 1, log2Ceil(lineSize)) === coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize)))
   val isWriteAddressMatchWire = WireDefault(false.B)
   when(writeRequest.request.valid && !writeBuffer.valid){
@@ -161,7 +161,7 @@ class ACEUnit(
   val writeCounter = Module(new moduleCounter(length))
   writeCounter.incrm := false.B
   writeCounter.reset := false.B
-  isWireACEBusy := writeRequest.request.valid && !writeBuffer.valid || writeBuffer.valid
+  isWriteACEBusyWire := writeRequest.request.valid && !writeBuffer.valid || writeBuffer.valid
   switch(writeACEState) {
     is(writeIdleState){
         writeCounter.reset := true.B
@@ -214,7 +214,7 @@ class ACEUnit(
   val readACERequestState = RegInit(readIdleState)
   switch(readACERequestState) {
     is(readIdleState){
-      readACERequestState := Mux(readBuffer.valid && isCoherencyIdle, readRequestState, readIdleState)
+      readACERequestState := Mux(readBuffer.valid && isCoherencyIdle&& !isWriteACEBusyWire, readRequestState, readIdleState)
     }
     is(readRequestState){
       bus.ARVALID := true.B
@@ -252,6 +252,7 @@ class ACEUnit(
   val readResponseValid = RegInit(true.B)
   val readResponseReg = RegInit(0.U(2.W))
   val readCounter = Module(new moduleCounter(length))
+  val wasCleanUniqueReg = RegInit(false.B)
   readCounter.incrm := false.B
   readCounter.reset := false.B
   switch(readACEResponseState) {
@@ -267,35 +268,28 @@ class ACEUnit(
       readACEResponseState := Mux(ACEMSHR.read.data.valid && !ACEMSHR.isEmpty, readResponseState, readDataInState)
     }
     is(readResponseState){
-      val isCleanUniqueWire = responseBuffer.cacheLine.response === "b11".U
-      
+      val isCleanUniqueWire = WireDefault(responseBuffer.cacheLine.response === "b11".U)
+      wasCleanUniqueReg := isCleanUniqueWire
       bus.RREADY := true.B
-      when(isCleanUniqueWire){
-        readResponseReg := bus.RRESP(3,2)
+      
+      when(bus.RVALID && bus.RID === id.U){
+        readCounter.incrm := true.B
+        readDataVec(readCounter.count) := bus.RDATA 
         readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
-        isReadRespBusy := bus.RVALID & bus.RID === id.U
-      } .otherwise{
-        when(bus.RVALID && bus.RID === id.U){
-          readCounter.incrm := true.B
-          readDataVec(readCounter.count) := bus.RDATA 
-          readResponseValid := Mux(bus.RRESP(1,0) === "b00".U, readResponseValid, false.B)
-          readResponseReg :=  bus.RRESP(3,2) //Not checking for response validity in isShared and passDirty 
-        }
-        isReadRespBusy := (readCounter.count =/= 0.U) || bus.RVALID && bus.RID === id.U && readCounter.count === 0.U
-
+        readResponseReg :=  bus.RRESP(3,2) //Not checking for response validity in isShared and passDirty 
       }
-
+      isReadRespBusy := (readCounter.count =/= 0.U) || bus.RVALID && bus.RID === id.U && readCounter.count === 0.U
       when(isCleanUniqueWire){
-        readACEResponseState := Mux(bus.RVALID & bus.RID === id.U, readDataOutState, readResponseState)
-      } .otherwise  {
-        readACEResponseState := Mux(bus.RLAST && bus.RVALID && readResponseValid, readDataOutState, readResponseState)
+        wasCleanUniqueReg := Mux(readCounter.count === length.U, false.B, isCleanUniqueWire)
       }
+
+      readACEResponseState := Mux(bus.RLAST && bus.RVALID && readResponseValid, readDataOutState, readResponseState)
     }
     is(readDataOutState){
       responseBuffer.valid := true.B
       responseBuffer.cacheLine.cacheLine := Cat(readDataVec.reverse)
       responseBuffer.cacheLine.response := readResponseReg
-      // responseBuffer.cacheLine.valid := true.B
+      responseBuffer.cacheLine.valid := !wasCleanUniqueReg
       when(responseBuffer.valid && readResponse.ready){
         responseBuffer.valid := false.B
       }
@@ -316,7 +310,7 @@ class ACEUnit(
   val coherentCounter = Module(new moduleCounter(length))
   val coherentRequestSend = RegInit(false.B)
   val toCoherentRequestInStateWire = WireDefault(isReadRespBusy && isCoherencyAddressMatchWire)
-  val chooseFromWriteBufferWire = WireDefault(isWriteAddressMatchWire && isWireACEBusy)
+  val chooseFromWriteBufferWire = WireDefault(isWriteAddressMatchWire && isWriteACEBusyWire)
 
   isCoherencyIdle := (coherentAXIState === coherentIdleState)
   coherentCounter.incrm := false.B

@@ -58,6 +58,8 @@ sim: .stamp.sim
 	cp lock_step_files/lock_step_run_histo.cpp lock_step_run.cpp
 	cp benchmark/mt-histo.bin fyp18-riscv-emulator/src/Image 
 	$(MAKE) runLockStep; 
+	STATUS=$$?; \
+	$(MAKE) python_decode;
 	@touch .stamp.histo
 
 .stamp.linux: .stamp.linux .stamp.sim
@@ -214,6 +216,15 @@ make zynq:
 fix_inotify_instances_reached:
 	# java.io.IOException: User limit of inotify instances reached or too many open files
 	echo 512 | sudo tee /proc/sys/fs/inotify/max_user_instances
+
+python_decode:
+	if [ $$STATUS -eq 0 ]; then \
+		echo "$$No errors yet"; \
+	else \
+    	. ~/.venv/bin/activate; \
+      	python decoder.py run.log -o run-decoded.log; \
+      	deactivate;\
+	fi; \
 
 .PHONY: clean
 clean:

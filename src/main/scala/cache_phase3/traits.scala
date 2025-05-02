@@ -38,7 +38,7 @@ trait writeDataTrait extends Bundle {
 }
 
 trait cacheLineTrait extends Bundle {
-  // val valid = Bool()
+  val valid = Bool()
   val cacheLine = UInt((lineSize*8).W)
   val response = UInt(2.W)
   val required = Bool()

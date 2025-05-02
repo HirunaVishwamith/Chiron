@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
       keys_rx.reader += (keys_rx.reader == keys_rx.writer); // overflow
       outFile << "keyhit\n";
     }
-    // if(i%80000000==0){
+    // if(i%84260000==0){
     //   DUMP_CONDITION=true;
     // }
     
