@@ -178,7 +178,9 @@ class cacheLookupUnit extends Module{
   val toCoherencyResponseValidWire = WireDefault(false.B)
   when(toCoherency.ready){
     toCoherency.request := coherencyResponseBuffer
-    coherencyResponseBuffer.valid := false.B
+    when(coherencyResponseBuffer.valid){
+      coherencyResponseBuffer.valid := false.B
+    }
   }
 
   val writeBackBuffer = RegInit(0.U.asTypeOf(new writeBackWire) )

@@ -308,7 +308,6 @@ class ACEUnit(
   val responseValidReg = RegInit(false.B)
   val coherentAXIState = RegInit(coherentIdleState)
   val coherentCounter = Module(new moduleCounter(length))
-  val coherentRequestSend = RegInit(false.B)
   val toCoherentRequestInStateWire = WireDefault(isReadRespBusy && isCoherencyAddressMatchWire)
   val chooseFromWriteBufferWire = WireDefault(isWriteAddressMatchWire && isWriteACEBusyWire)
 
@@ -317,7 +316,6 @@ class ACEUnit(
   coherentCounter.reset := false.B
   switch(coherentAXIState){
     is(coherentIdleState){
-      coherentRequestSend := false.B
 
       bus.ACREADY := true.B
       coherencyResponseBuffer.valid := false.B
@@ -345,12 +343,14 @@ class ACEUnit(
       }
     }
     is(coherentRequestInState){
+      when(coherencyRequestBuffer.valid){
+        coherencyRequestBuffer.valid := Mux(coherencyRequest.ready, false.B, coherencyRequestBuffer.valid)
+      }
       coherencyResponseBuffer := coherencyResponse.request
       
       coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestInState)
     }
     is(coherentResponseState){
-      coherentRequestSend := false.B
       bus.CRVALID := true.B
 
       coherentCounter.reset := true.B
