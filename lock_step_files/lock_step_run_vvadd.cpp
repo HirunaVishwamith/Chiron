@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -139,6 +140,11 @@ int main(int argc, char* argv[]) {
   bench.step_nodump();
   unsigned long sim_prev = 0x80100000UL;
 	printf("Simulation start time: %s %s\n", __DATE__, __TIME__);
+
+  //Performance check
+  int prog_count = 0;
+  bool prog_count_true = false;
+
   while (1 || (bench.tickcount + bench.dump_tick) < 800351768UL) {
     // golden_model.show_state();
     //cin >> x;
@@ -295,9 +301,24 @@ int main(int argc, char* argv[]) {
         golden_model.step();
       }
     }
+    //Performance check
+    //thread_entry
+    if (bench.prev_pc == 0x100002a8) {
+      prog_count_true = true;
+    //barrier
+    } else if (bench.prev_pc == 0x10000248) {
+      prog_count_true = false;
+    }
+    if (prog_count_true) {
+      prog_count += 1;
+    }
     // Check for test completion
     if (bench.prev_pc == 0x100007f0) {
       printf("Test complete \n");
+      FILE *file = fopen("test_results.txt", "a");
+      printf("Program cycles: %d\n",prog_count);
+      fprintf(file, "Program cycles: %d\n", prog_count);
+      fclose(file);
       #ifdef LOGGING
             outFile.close();
       #endif
