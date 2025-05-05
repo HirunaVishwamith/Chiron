@@ -364,7 +364,8 @@ class cacheLookupUnit extends Module{
         //The data available but permission miss situation
       } .elsewhen(isReplayValidWire && isPermissionMiss){
         newValidBitWire := 1.U
-        newShareBitWire := 0.U //readBuffer.cacheLine.response(1)         
+        newShareBitWire := 0.U //readBuffer.cacheLine.response(1)       
+        newDirtyBitWire := 1.U
         newAddrWire := readBuffer.address(addrWidth - 1, dataAddrWidth + log2Ceil(lineSize))
       }
       when(isAtmoicWriteWire){
@@ -415,7 +416,7 @@ class cacheLookupUnit extends Module{
         newShareBitWire := 0.U
         newDirtyBitWire := 0.U
       } .otherwise{
-        newShareBitWire := Mux(readBuffer.cacheLine.response(0) && !isDataMissWire, 1.U, shareBitWire)
+        newShareBitWire := Mux(readBuffer.cacheLine.response(0) && !isDataMissWire, 1.U, isSharedWire) //Changed anew
       }
     }
     val isReservationMatch32 = WireDefault((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))
@@ -555,7 +556,11 @@ class cacheLookupUnit extends Module{
         coherencyResponseBuffer.cacheLine := Mux(!isDataMissWire, dataBRAMVec(hitTagWire).rdData, 0.U)
         coherencyResponseBuffer.dataValid := !isDataMissWire
         coherencyResponseBuffer.response := newShareBitWire ## Mux(readBuffer.cacheLine.response(1), isDirtyWire, 0.U)
-      } .otherwise{
+      } .elsewhen(readBuffer.cacheLine.response(1) && isDirtyWire && !isSharedWire){
+        coherencyResponseBuffer.cacheLine := Mux(!isDataMissWire, dataBRAMVec(hitTagWire).rdData, 0.U)
+        coherencyResponseBuffer.dataValid := !isDataMissWire
+        coherencyResponseBuffer.response := Mux(!isDataMissWire, newShareBitWire ## Mux(readBuffer.cacheLine.response(1), isDirtyWire, 0.U), 0.U)
+      }.otherwise{
         coherencyResponseBuffer.cacheLine := 0.U
         coherencyResponseBuffer.dataValid := false.B
       }

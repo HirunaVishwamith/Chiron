@@ -62,29 +62,32 @@ object ChiselUtils {
       branchOps: branchOps, 
       wireBundle: branchTrait
   ): Unit = {
-    when(branchOps.valid){
-      when(branchOps.passed) {
-        // BranchPass and match
-        when((wireBundle.mask & branchOps.branchMask).orR) {
-          buffer.mask := wireBundle.mask ^ branchOps.branchMask
+    when(wireBundle.valid) {
+      when(branchOps.valid){
+        when(branchOps.passed) {
+          // BranchPass and match
+          when((wireBundle.mask & branchOps.branchMask).orR) {
+            buffer.mask := wireBundle.mask ^ branchOps.branchMask
+          }.otherwise {
+            buffer.mask := wireBundle.mask
+          }
+          buffer.valid := wireBundle.valid 
         }.otherwise {
-          buffer.mask := wireBundle.mask
-        }
-        buffer.valid := wireBundle.valid 
-      }.otherwise {
-        // BranchFail and match
-        when((wireBundle.mask & branchOps.branchMask).orR) {
-          buffer.valid := false.B
-          buffer.mask := 0.U
-        }.otherwise {
-          buffer.valid := wireBundle.valid
-          buffer.mask := wireBundle.mask
+          // BranchFail and match
+          when((wireBundle.mask & branchOps.branchMask).orR) {
+            buffer.valid := false.B
+            buffer.mask := 0.U
+          }.otherwise {
+            buffer.valid := wireBundle.valid
+            buffer.mask := wireBundle.mask
+          }
         }
       }
-    } .otherwise {
-        buffer.valid := wireBundle.valid 
-        buffer.mask := wireBundle.mask
     }
+    // } .otherwise {
+    //     buffer.valid := wireBundle.valid 
+    //     buffer.mask := wireBundle.mask
+    // }
   }
 
   def regReadUpdate[T <: branchTrait](
@@ -92,31 +95,34 @@ object ChiselUtils {
     branchOps: branchOps,
     buffer: branchTrait
   ): Unit = {
-    when(branchOps.valid) {
-      when(branchOps.passed) {
-        //BranchPass and match
-        when((buffer.mask & branchOps.branchMask).orR) {
-          wireBundle.mask := buffer.mask ^ branchOps.branchMask
-        }.otherwise {
-          //BranchPass and no match
-          wireBundle.mask := buffer.mask
-        }
-        wireBundle.valid := buffer.valid
-      }.otherwise {
-        //BranchFail and match
-        when((buffer.mask & branchOps.branchMask).orR) {
-          wireBundle.mask := 0.U
-          wireBundle.valid := false.B
-        } .otherwise{
-          //BranchFail and no match
-          wireBundle.mask := buffer.mask
+    when(buffer.valid) {
+      when(branchOps.valid) {
+        when(branchOps.passed) {
+          //BranchPass and match
+          when((buffer.mask & branchOps.branchMask).orR) {
+            wireBundle.mask := buffer.mask ^ branchOps.branchMask
+          }.otherwise {
+            //BranchPass and no match
+            wireBundle.mask := buffer.mask
+          }
           wireBundle.valid := buffer.valid
+        }.otherwise {
+          //BranchFail and match
+          when((buffer.mask & branchOps.branchMask).orR) {
+            wireBundle.mask := 0.U
+            wireBundle.valid := false.B
+          } .otherwise{
+            //BranchFail and no match
+            wireBundle.mask := buffer.mask
+            wireBundle.valid := buffer.valid
+          }
         }
       }
-    }.otherwise {
-      wireBundle.mask := buffer.mask
-      wireBundle.valid := buffer.valid
-    }    
+    }
+    // }.otherwise {
+    //   wireBundle.mask := buffer.mask
+    //   wireBundle.valid := buffer.valid
+    // }    
   }
 
   def regRecordUpdate[T <: branchTrait](
