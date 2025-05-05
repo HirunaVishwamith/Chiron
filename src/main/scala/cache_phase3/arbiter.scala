@@ -155,6 +155,9 @@ class arbiter extends Module {
     regRecordUpdate(inorderBuffer.branch, branchOps)
   }
   
+  val inorderBufferValidWire = WireDefault(inorderBuffer.valid && inorderBuffer.branch.valid)
+  val speculativeBufferValidWire = WireDefault(speculativeBuffer.valid && speculativeBuffer.branch.valid)
+  // val replayRequestValidWire = WireDefault(replayRequest.request.valid && replayRequest.request.branch.valid)
 
   //---------------------Request Dequeue---------------------//
   //* Priority Order
@@ -165,7 +168,7 @@ class arbiter extends Module {
   val atomicBusyState = RegInit(false.B)
   when(toCacheLookup.ready) {
     when(atomicBusyState && !toCacheLookup.holdInOrder){
-      when(inorderBuffer.valid && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
+      when(inorderBufferValidWire && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
         inorderBuffer.valid := false.B
         
         toCacheLookup.request := inorderBuffer
@@ -182,13 +185,13 @@ class arbiter extends Module {
       toCacheLookup.request.cacheLine.response := coherencyRequest.request.response
       toCacheLookup.request.branch.valid := true.B
       requestTypeWire := "b11".U
-    }.elsewhen(replayRequest.request.valid){
+    }.elsewhen(replayRequest.request.valid ){
       replayRequest.ready := true.B
       toCacheLookup.request := replayRequest.request
       requestTypeWire := "b10".U
       regReadUpdate(toCacheLookup.request.branch, branchOps, replayRequest.request.branch)
 
-    } .elsewhen(inorderBuffer.valid && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
+    } .elsewhen(inorderBufferValidWire && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
       inorderBuffer.valid := false.B
 
       toCacheLookup.request := inorderBuffer
@@ -197,7 +200,7 @@ class arbiter extends Module {
       
       atomicBusyState := Mux(operationWires.rAtomics && !inorderBuffer.writeData.valid, true.B, false.B)
 
-    }.elsewhen(speculativeBuffer.valid ) {
+    }.elsewhen(speculativeBufferValidWire) {
       speculativeBuffer.valid := false.B
 
       toCacheLookup.request := speculativeBuffer
@@ -210,14 +213,14 @@ class arbiter extends Module {
     }
     toCacheLookup.requestType := requestTypeWire
   }
-  when(toPeripheral.ready && (operationWires.isPeriRead || operationWires.isPeriWrite) && inorderBuffer.valid) {
+  when(toPeripheral.ready && (operationWires.isPeriRead || operationWires.isPeriWrite) && inorderBufferValidWire) {
     inorderBuffer.valid := false.B
     toPeripheral.request := inorderBuffer
 
     regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
 
   }
-  fenceReady := (!speculativeBuffer.valid && !inorderBuffer.valid && !operationBuffer.valid )
+  fenceReady := (!speculativeBufferValidWire && !inorderBufferValidWire && !(operationBuffer.valid && operationBuffer.branch.valid) )
 
   //Resource optimization
   speculativeBuffer.cacheLine.cacheLine := 0.U
