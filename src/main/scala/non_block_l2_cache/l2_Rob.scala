@@ -107,10 +107,6 @@ class l2_Rob(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 2, add
             memReg(writePort.addr).valid := writePort.data_valid 
         }
 
-        
-
-
-
     })
 
 
