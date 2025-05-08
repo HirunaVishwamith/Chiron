@@ -528,7 +528,6 @@ class decode (
     csrAddrReg    := outputBuffer.immediate
     csrImmReg     := outputBuffer.instruction(19,15) & "h0000_0000_0000_001f".U
     csrInsReg     := outputBuffer.instruction
-
   }
 
   when(opcode === system.U && fun3 =/= 0.U && validInputBuf && readyOutputBuf) {

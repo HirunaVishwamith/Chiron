@@ -21,7 +21,7 @@ using namespace std;
 using namespace std::chrono;
 
 #define LOGGING
-#define DUMP_CONDITION 1 //&& (bench.tickcount > 533771995UL)
+#define DUMP_CONDITION 0 //&& (bench.tickcount > 533771995UL)
 #define PROBE_DOUBLE ((0xCA3BF0UL+(-136)) & (~7UL))
 
 emulator golden_model;
@@ -193,9 +193,9 @@ int main(int argc, char* argv[]) {
     } */
     outFile <<  setfill('0') << setw(16) << dec <<  (bench.dump_tick)  << " ";
     outFile <<  setfill('0') << setw(16) << hex << golden_model.get_pc() << " ";
-    outFile <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << " ";
-    outFile <<  setfill('0') << setw(16) << hex << golden_model.fetch_long(PROBE_DOUBLE) << " ";
-    outFile <<  setfill('0') << setw(16) << hex << bench.get_probe() << endl;
+    outFile <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
+    //outFile <<  setfill('0') << setw(16) << hex << golden_model.fetch_long(PROBE_DOUBLE) << " ";
+    //outFile <<  setfill('0') << setw(16) << hex << bench.get_probe() << endl;
 
 
     outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
@@ -269,9 +269,9 @@ int main(int argc, char* argv[]) {
       cout << "time out reached" << endl;
       golden_model.show_state(); break;
     } */
-    if (bench.check_registers(golden_model.reg_file, golden_model.get_mstatus())) { 
-      cout << "Register mismatch at register " << dec << bench.check_registers(golden_model.reg_file, golden_model.get_mstatus());
-      cout << " simulator value: " << setfill('0') << setw(16) << hex << bench.read_register(bench.check_registers(golden_model.reg_file, golden_model.get_mstatus())) << endl;
+    if (bench.check_registers(golden_model.reg_file(), golden_model.get_mstatus())) { 
+      cout << "Register mismatch at register " << dec << bench.check_registers(golden_model.reg_file(), golden_model.get_mstatus());
+      cout << " simulator value: " << setfill('0') << setw(16) << hex << bench.read_register(bench.check_registers(golden_model.reg_file(), golden_model.get_mstatus())) << endl;
       golden_model.show_state();
       cout << dec << (bench.tickcount + bench.dump_tick) << endl;bench.step(); bench.step(); bench.step(); bench.step(); bench.step(); break;
     }
@@ -285,11 +285,11 @@ int main(int argc, char* argv[]) {
     if (x == 1) { break; }
     // bench.step();
     if (x == 0) {
-      if (golden_model.is_peripheral_read()) {
+      if (0){//golden_model.is_peripheral_read()) {
         // cout << "peripheral read" << endl;
         __uint32_t p_instruction = golden_model.get_instruction();
         golden_model.step();
-        golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f));
+        //golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f));
       } else{
         golden_model.step();
       }
@@ -300,13 +300,13 @@ int main(int argc, char* argv[]) {
       {
         golden_model.step();
       }
-    } else if ((x == 2) && (golden_model.set_interrupts(bench.get_register_value((golden_model.get_instruction()>>7)&0x1f), 0/*don't care*/)))
-    {
-      cout << "Setting interrupts failed in emulator" << endl;
-      cout << "tickcount: " << dec << (bench.tickcount + bench.dump_tick) << endl;
-      golden_model.show_state();
-      break;
-    }
+    } //else if ((x == 2) && (golden_model.set_interrupts(bench.get_register_value((golden_model.get_instruction()>>7)&0x1f), 0/*don't care*/)))
+    //{
+     // cout << "Setting interrupts failed in emulator" << endl;
+      //cout << "tickcount: " << dec << (bench.tickcount + bench.dump_tick) << endl;
+     // golden_model.show_state();
+     // break;
+    //}
     if (x == 2) { 
       if (DUMP_CONDITION) {
         x = bench.step();
@@ -320,7 +320,7 @@ int main(int argc, char* argv[]) {
         // cout << "peripheral read" << endl;
         __uint32_t p_instruction = golden_model.get_instruction();
         golden_model.step();
-        golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f));
+        //golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f));
       } else{
         golden_model.step();
       }
@@ -339,7 +339,7 @@ int main(int argc, char* argv[]) {
       #ifdef LOGGING
             outFile.close();
       #endif
-      tcflush(0, TCIFLUSH); 
+      tcflush(0, TCIFLUSH);
       return 0; // Exit the program here with success.
     }
     if (bench.read_register(17) == 93) {
@@ -347,9 +347,18 @@ int main(int argc, char* argv[]) {
       #ifdef LOGGING
             outFile.close();
       #endif
-      tcflush(0, TCIFLUSH); 
+      tcflush(0, TCIFLUSH);
       return 1; // Exit the program here with success.
     }
+    // Check for test completion
+    // if (bench.prev_pc == 0x10000854) {
+    //   printf("Test complete \n");
+    //   #ifdef LOGGING
+    //         outFile.close();
+    //   #endif
+    //   tcflush(0, TCIFLUSH);
+    //   return 0; // Exit the program here with success.
+    // }
     
   }
   

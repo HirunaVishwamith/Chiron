@@ -40,6 +40,6 @@ object constants{
   val cacheResponseWidth : Int = 2
   val arbiterReqTypesWidth : Int = 2
 
-  val DRAM_BASE = "h10000000"
+  val DRAM_BASE = "h80000000"
   val DRAM_RANGE = "h9000000"
 }

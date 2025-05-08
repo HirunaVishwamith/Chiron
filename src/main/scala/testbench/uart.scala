@@ -70,7 +70,7 @@ class uart extends Module {
   client.RDATA := 8.U
   switch(readRequestBuffer.address) {
     is("he000002c".U) { client.RDATA := 2.U }
-    is("he000102c".U) { client.RDATA := 2.U }
+    is("h40600008".U) { client.RDATA := 4096.U }
     is("h0200bff8".U) { client.RDATA := Mux(readRequestBuffer.len.orR, mtimeRead(31, 0), mtimeRead(63, 32)) }
     is("h04000000".U) { client.RDATA := ps_stat }
   }
@@ -83,7 +83,7 @@ class uart extends Module {
     val valid = Bool()
     val byte = UInt(8.W)
   })
-  putChar.valid := Seq((writeRequestBuffer.address.offset&("hff".U)) === ("h30".U), writeRequestBuffer.address.valid, writeRequestBuffer.data.valid).reduce(_ && _)
+  putChar.valid := Seq((writeRequestBuffer.address.offset&("hff".U)) === ("h04".U), writeRequestBuffer.address.valid, writeRequestBuffer.data.valid).reduce(_ && _)
   putChar.byte := writeRequestBuffer.data.data(7, 0)
 
   val lastUartChars = RegInit(VecInit(Seq.fill(17)(0.U(8.W))))
@@ -113,14 +113,14 @@ class uart extends Module {
   } Lit(_.valid -> true.B, _.char -> c.U))))
 
   when(
-    ((readRequestBuffer.address & "hffff0fff".U) === "he000002c".U) && 
+    ((readRequestBuffer.address & "hffff0fff".U) === "h40600000".U) && 
     readRequestBuffer.valid && terminalReady && !afterLogin
   ) {
     client.RDATA := (8.U(32.W) | Cat(!(hardInput(0).valid.asUInt),0.U(1.W)))
   }
 
   when(
-    ((readRequestBuffer.address & "hffff0fff".U) === "he0000030".U) && 
+    ((readRequestBuffer.address & "hffff0fff".U) === "h40600004".U) && 
     readRequestBuffer.valid && terminalReady && !afterLogin
   ) {
     client.RDATA := hardInput(0).char
@@ -131,14 +131,14 @@ class uart extends Module {
   }
 
   when(
-    ((readRequestBuffer.address & "hffff0fff".U) === "he000002c".U) && 
+    ((readRequestBuffer.address & "hffff0fff".U) === "h40600000".U) && 
     readRequestBuffer.valid && afterLogin
   ) {
     client.RDATA := (8.U(32.W) | Cat(!(command(0).valid.asUInt),0.U(1.W)))
   }
 
   when(
-    ((readRequestBuffer.address & "hffff0fff".U) === "he0000030".U) && 
+    ((readRequestBuffer.address & "hffff0fff".U) === "h40600004".U) && 
     readRequestBuffer.valid && afterLogin
   ) {
     client.RDATA := command(0).char

@@ -19,7 +19,7 @@ using namespace std;
 using namespace std::chrono;
 
 #define LOGGING
-#define DUMP_CONDITION 1 && (bench.tickcount > 74061920UL)
+#define DUMP_CONDITION 0 && (bench.tickcount > 74061920UL)
 #define PROBE_DOUBLE (0x2004000UL+0x0UL) & (~7UL)
 
 emulator golden_model;

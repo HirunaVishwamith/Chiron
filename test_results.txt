@@ -82,18 +82,42 @@ fyp18-riscv-emulator/riscv-tests/images/rv64um-p-rem.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64um-p-remu.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64um-p-remuw.bin: test pass
 fyp18-riscv-emulator/riscv-tests/images/rv64um-p-remw.bin: test pass
-Time : May  5 2025 19:16:01
-Program cycles: 9033
-vvadd: test pass
-Time : May  5 2025 19:16:10
-Program cycles: 300423
-matmul: test pass
-Time : May  5 2025 19:16:25
-Program cycles: 197762
-filter: test pass
-Time : May  5 2025 19:16:43
-Program cycles: 85220
-csaxpy: test pass
-Time : May  5 2025 19:17:41
-Program cycles: 806009
-histo: test pass
+Time : May  8 2025 20:02:17
+vvadd-s1: test pass
+vvadd-s2: test pass
+vvadd-s3: test pass
+vvadd-s4: test pass
+vvadd-s5: test pass
+Time : May  8 2025 20:09:11
+Program cycles: 0
+matmul-s1: test pass
+Program cycles: 0
+matmul-s2: test pass
+Time : May  8 2025 20:11:37
+Program cycles: 0
+filter-s1: test pass
+Program cycles: 0
+filter-s2: test pass
+Time : May  8 2025 20:13:13
+Program cycles: 0
+csaxpy-s1: test pass
+Program cycles: 0
+csaxpy-s2: test pass
+Program cycles: 0
+csaxpy-s3: test pass
+Program cycles: 0
+csaxpy-s4: test pass
+Program cycles: 0
+csaxpy-s5: test pass
+Time : May  8 2025 20:16:19
+Program cycles: 0
+histo-s1: test pass
+Program cycles: 0
+histo-s2: test pass
+Program cycles: 0
+histo-s3: test pass
+Program cycles: 0
+histo-s4: test pass
+Program cycles: 0
+histo-s5: test pass
+Time : May  8 2025 20:19:55
