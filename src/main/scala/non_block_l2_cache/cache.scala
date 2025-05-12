@@ -92,6 +92,7 @@ class Memory (
 
   // Create a memory of 1024 cache lines
   val mem = SyncReadMem(1 << (mem_size-log2Ceil(n_way)), new CacheLine(n_way,mem_size))
+
   val pseudoLRU = Module(new PseudoLRU(n_way))
 
   //this delay is due to SYNCREADMEM one cycle delay
@@ -123,6 +124,7 @@ class Memory (
   val cache_hit_write = !inputBuffer.is_R && hit && !inputBuffer.from_MSHR
   val delay_MSHR_write = inputBuffer.from_MSHR && inputBuffer.valid && delay_input_valid && hit && !inputBuffer.is_R
   val cache_miss_write = inputBuffer.valid && inputBuffer.from_MSHR && delay_input_valid && !hit
+  val cache_hit_read = hit && !inputBuffer.from_MSHR && inputBuffer.is_R
 
 
   when(inputBuffer.from_MSHR){
@@ -134,10 +136,10 @@ class Memory (
   }
 
 
-  when(hit && !inputBuffer.from_MSHR && inputBuffer.is_R){
-    cacheLineRead.state := pseudoLRU.get_next_state(cacheLineRead.state,matchedWay)
-    mem.write(index, cacheLineRead)
-  }
+  //when(hit && !inputBuffer.from_MSHR && inputBuffer.is_R){
+   // cacheLineRead.state := pseudoLRU.get_next_state(cacheLineRead.state,matchedWay)
+   // mem.write(index, cacheLineRead)
+ // }
 
   
   
@@ -247,7 +249,7 @@ class Memory (
   val newCacheLine = Wire(new CacheLine(n_way,mem_size))
   newCacheLine := cacheLineRead
   //when there is a cache hit
-  when(cache_hit_write || cache_miss_write || delay_MSHR_write) {
+  when(cache_hit_write || cache_miss_write || delay_MSHR_write || cache_hit_read) {
   
     when(cache_hit_write || delay_MSHR_write){
       when(cache_hit_write){
@@ -258,6 +260,8 @@ class Memory (
       newCacheLine.dirty(matchedWay) := true.B
       newCacheLine.tag(matchedWay) := tag
       newCacheLine.valid(matchedWay) := true.B
+      newCacheLine.state := pseudoLRU.get_next_state(cacheLineRead.state,matchedWay)
+    }.elsewhen(cache_hit_read){
       newCacheLine.state := pseudoLRU.get_next_state(cacheLineRead.state,matchedWay)
     }.otherwise{
       newCacheLine.state := pseudoLRU.get_next_state(cacheLineRead.state,repl_way)
@@ -271,8 +275,15 @@ class Memory (
       }
     }
 
+
     mem.write(index, newCacheLine)
 
   }
 
+}
+
+object L2Main extends App {
+  println("Generating the CacheModule hardware")
+  //Hardware files will be out into generated
+  emitVerilog(new l2_mem, Array("--target-dir", "generated"))
 }
