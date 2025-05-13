@@ -27,6 +27,7 @@ class arbiter extends Module {
     val ready = Input(Bool())
     val holdInOrder = Input(Bool())
     val requestType = Output(UInt(2.W))
+    val inorderPending = Input(Bool())
     val request = Output(new requestPipelineWire)
   })
   val replayRequest = IO(new Bundle {
@@ -167,7 +168,7 @@ class arbiter extends Module {
   //*    4.  Speculative
   val atomicBusyState = RegInit(false.B)
   when(toCacheLookup.ready) {
-    when(atomicBusyState && !toCacheLookup.holdInOrder){
+    when(atomicBusyState && !toCacheLookup.inorderPending){
       when(inorderBufferValidWire && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
         inorderBuffer.valid := false.B
         

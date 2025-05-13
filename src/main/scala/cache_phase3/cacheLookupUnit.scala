@@ -18,6 +18,7 @@ class cacheLookupUnit extends Module{
   val request = IO(new Bundle {
     val ready = Output(Bool())
     val holdInOrder = Output(Bool())
+    val inorderPending = Output(Bool())
     val requestType = Input(UInt(2.W))
     val request = Input(new requestPipelineWire)
   })
@@ -202,6 +203,7 @@ class cacheLookupUnit extends Module{
   val islastInorderMissRecordRegisterValid = toLastInorderMissRecordRegisterWire || lastInorderMissRecordRegister.valid && lastInorderMissRecordRegister.branch.valid
   val islastSpeculativeMissRecordRegisterValid = toLastSpeculativetMissRecordRegisterWire || lastSpeculativeMissRecordRegister.valid && lastSpeculativeMissRecordRegister.branch.valid
   request.holdInOrder := (islastInorderMissRecordRegisterValid || islastSpeculativeMissRecordRegisterValid) && !writeCommitInstructionBuffer
+  request.inorderPending := islastInorderMissRecordRegisterValid
 
   //Assigning addresses to the BRAMs
   val addrBeg = log2Ceil(lineSize)
