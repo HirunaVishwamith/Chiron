@@ -171,6 +171,8 @@ int main(int argc, char* argv[]) {
      //Performance check
   int prog_count = 0;
   bool prog_count_true = false;
+  unsigned long count_start = 0UL;
+  unsigned long count_stop = 0UL;
   while (1 || (bench.tickcount + bench.dump_tick) < 800351768UL) {
     // golden_model.show_state();
     //cin >> x;
@@ -356,11 +358,13 @@ int main(int argc, char* argv[]) {
     // }
     //Performance check
     //thread_entry
-    if (bench.prev_pc == 0x100002dc) {
+    if (bench.prev_pc == 0x800002dc) {
       prog_count_true = true;
+      count_start = bench.dump_tick;
     //barrier
-    } else if (bench.prev_pc == 0x1000025c) {
+    } else if (bench.prev_pc == 0x8000025c) {
       prog_count_true = false;
+      count_stop = bench.dump_tick;
     }
     if (prog_count_true) {
       prog_count += 1;
@@ -369,8 +373,9 @@ int main(int argc, char* argv[]) {
     if (bench.prev_pc == 0x80000a40) {
       printf("Test complete \n");
       FILE *file = fopen("test_results.txt", "a");
-      printf("Program cycles: %d\n",prog_count);
-      fprintf(file, "Program cycles: %d\n", prog_count);
+      // printf("Program cycles: %d\n",prog_count);
+      // fprintf(file, "Program cycles: %d\n", prog_count);
+      fprintf(file, "Program cycles new: %ld\n", count_stop - count_start);
       fclose(file);
       #ifdef LOGGING
             outFile.close();
