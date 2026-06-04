@@ -174,7 +174,8 @@ sim: .stamp.sim
 
 	@date +"Time : %b %_d %Y %H:%M:%S" >> test_results.txt
 
-VERILATOR_INCLUDE = /usr/share/verilator/share/verilator/include
+# VERILATOR_INCLUDE = /usr/share/verilator/share/verilator/include
+VERILATOR_INCLUDE = /usr/share/verilator/include
 
 .stamp.runLockStep: .stamp.lock_step_run.out fyp18-riscv-emulator/src/Image
 	./lock_step_run.out
@@ -199,13 +200,10 @@ simulator/src/obj_dir: .stamp.sim simulator/src/system.v simulator/src/iCacheReg
 	make -f Vsystem.mk; \
 
 .stamp.sim:$(shell find src/main/scala/ -type f -name '*.scala')
-	# Change instructionBase in configuration file
-	mv src/main/scala/common/configuration.scala configuration.txt
-	sed 's/instructionBase/instructionBase = 0x0000000080000000L\/\//' configuration.txt > src/main/scala/common/configuration.scala
-	# sbt "clean; compile; runMain system"
-	sbt "runMain system"
-	# Restoring the original configuration
-	mv configuration.txt src/main/scala/common/configuration.scala
+	# Patch instructionBase, run sbt, then unconditionally restore original
+	mv src/main/scala/common/configuration.scala configuration.txt && \
+	sed 's/instructionBase/instructionBase = 0x0000000080000000L\/\//' configuration.txt > src/main/scala/common/configuration.scala && \
+	(sbt "runMain system"; mv configuration.txt src/main/scala/common/configuration.scala)
 	cp system.v simulator/src/
 	cd simulator/src/; \
 	cp ../../iCacheRegisters.v .; \
@@ -240,12 +238,10 @@ prog.h : Image1 bintoh
 	#  dtc -I dts -O dtb -o sixtyfourmb.dtb sixtyfourmb.dts -S 1536
 
 make zynq:
-	# Change instructionBase in configuration file
-	mv src/main/scala/common/configuration.scala configuration.txt
-	sed 's/instructionBase/instructionBase = 0x0000000040000000L\/\//' configuration.txt > src/main/scala/common/configuration.scala
-	sbt "runMain core"
-	# Restoring the original configuration
-	mv configuration.txt src/main/scala/common/configuration.scala
+	# Patch instructionBase for FPGA base address, run sbt, then unconditionally restore original
+	mv src/main/scala/common/configuration.scala configuration.txt && \
+	sed 's/instructionBase/instructionBase = 0x0000000040000000L\/\//' configuration.txt > src/main/scala/common/configuration.scala && \
+	(sbt "runMain core"; mv configuration.txt src/main/scala/common/configuration.scala)
 	# Contains the program that is run until the PS sets up RAM
 	sbt "runMain bootROM"
 	# Contains the clint, and the register to signal to the core that the image is loaded to RAM
@@ -267,6 +263,75 @@ python_decode:
       	deactivate;\
 	fi; \
 
+# ── Profiling targets ────────────────────────────────────────────────────────
+.PHONY: profile_build profile_isa profile_benchmarks profile_all
+
+profile_build: .stamp.sim
+	g++ -O3 -I $(VERILATOR_INCLUDE) -I simulator/src/obj_dir -I simulator/src \
+		$(VERILATOR_INCLUDE)/verilated.cpp \
+		lock_step_files/profile_run.cpp \
+		simulator/src/obj_dir/Vsystem__ALL.a \
+		-o profile_run.out
+
+profile_isa: profile_build
+	mkdir -p profile_results
+	@for img in fyp18-riscv-emulator/riscv-tests/images/*.bin; do \
+		name=$$(basename $$img .bin); \
+		cp $$img fyp18-riscv-emulator/src/Image; \
+		./profile_run.out --image fyp18-riscv-emulator/src/Image \
+			--name isa_$$name \
+			--output profile_results/isa_$$name.json \
+			--timeout 50000000 || true; \
+	done
+	python3 scripts/profile_visualize.py profile_results/
+
+profile_benchmarks: profile_build
+	mkdir -p profile_results
+	@for s in 1 2 3 4 5; do \
+		if [ -f benchmark/mt-vvadd-s$$s.bin ]; then \
+			cp benchmark/mt-vvadd-s$$s.bin fyp18-riscv-emulator/src/Image; \
+			./profile_run.out --image fyp18-riscv-emulator/src/Image \
+				--name vvadd-s$$s --output profile_results/vvadd-s$$s.json \
+				--timeout 500000000 || true; \
+		fi; \
+	done
+	@for s in 1 2 3 4 5; do \
+		if [ -f benchmark/mt-matmul-s$$s.bin ]; then \
+			cp benchmark/mt-matmul-s$$s.bin fyp18-riscv-emulator/src/Image; \
+			./profile_run.out --image fyp18-riscv-emulator/src/Image \
+				--name matmul-s$$s --output profile_results/matmul-s$$s.json \
+				--timeout 500000000 || true; \
+		fi; \
+	done
+	@for s in 1 2 3 4 5; do \
+		if [ -f benchmark/mt-mask-sfilter-s$$s.bin ]; then \
+			cp benchmark/mt-mask-sfilter-s$$s.bin fyp18-riscv-emulator/src/Image; \
+			./profile_run.out --image fyp18-riscv-emulator/src/Image \
+				--name filter-s$$s --output profile_results/filter-s$$s.json \
+				--timeout 500000000 || true; \
+		fi; \
+	done
+	@for s in 1 2 3 4 5; do \
+		if [ -f benchmark/mt-csaxpy-s$$s.bin ]; then \
+			cp benchmark/mt-csaxpy-s$$s.bin fyp18-riscv-emulator/src/Image; \
+			./profile_run.out --image fyp18-riscv-emulator/src/Image \
+				--name csaxpy-s$$s --output profile_results/csaxpy-s$$s.json \
+				--timeout 500000000 || true; \
+		fi; \
+	done
+	@for s in 1 2 3 4 5; do \
+		if [ -f benchmark/mt-histo-s$$s.bin ]; then \
+			cp benchmark/mt-histo-s$$s.bin fyp18-riscv-emulator/src/Image; \
+			./profile_run.out --image fyp18-riscv-emulator/src/Image \
+				--name histo-s$$s --output profile_results/histo-s$$s.json \
+				--timeout 500000000 || true; \
+		fi; \
+	done
+	python3 scripts/profile_visualize.py profile_results/
+
+profile_all: profile_isa profile_benchmarks
+
+# ── Cleanup ──────────────────────────────────────────────────────────────────
 .PHONY: clean
 clean:
 	rm -rf .stamp.*;

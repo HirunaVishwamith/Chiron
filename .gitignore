@@ -2,8 +2,10 @@
 .metals/metals.lock.db
 .metals/metals.log
 .vscode/settings.json
-project/
-target/
+project/*
+profile_results/*
+CLAUDE.md
+target/*
 .bloop/*
 .metals/*
 *.v
@@ -17,8 +19,6 @@ vivado/*
 *.idea
 *.metals
 *.bloop
-project/
-target/
 verilator-tests/scheduler/obj_dir/*
 *.vcd
 *.vcd.fst

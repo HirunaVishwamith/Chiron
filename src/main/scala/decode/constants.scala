@@ -35,9 +35,9 @@ object constants {
   val rdWidth = 5
   val opcodeWidth = 7
   val robAddrWidth = configuration.robAddrWidth
-  val PRFAddrWidth = 6
-  val initialPC = common.configuration.instructionBase - 4
-  val PRFCount = 64
+  val PRFAddrWidth = configuration.prfAddrWidth
+  val initialPC    = configuration.instructionBase - 4
+  val PRFCount     = 1 << configuration.prfAddrWidth
 
   val MMODE = "h0000002200000000"
   val HMODE = "b01"

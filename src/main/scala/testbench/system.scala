@@ -12,7 +12,6 @@ import cache.AXI
 import _root_.testbench.mainMemory
 import _root_.testbench.uart
 import decode.constants
-import dataclass.data
 import _root_.testbench.simulatedMemory
 import Interconnect._
 import l2_cache._
@@ -43,6 +42,59 @@ class system extends Module {
 
     val allRobFiresOut = IO(Output(Bool()))
     allRobFiresOut := rob.commit.fired
+
+    // Ungated profiling counters — count the full simulation run without the
+    // programRunning gate (which closes after the first commit for Linux workloads).
+    val pc_cycles         = RegInit(0.U(64.W))
+    val pc_instRetired    = RegInit(0.U(64.W))
+    val pc_branchTotal    = RegInit(0.U(64.W))
+    val pc_branchesPassed = RegInit(0.U(64.W))
+    val pc_schedStalls    = RegInit(0.U(64.W))
+    val pc_robStalls      = RegInit(0.U(64.W))
+    val pc_decodeReady    = RegInit(0.U(64.W))
+    val pc_decodeFired    = RegInit(0.U(64.W))
+    val pc_icacheStalls   = RegInit(0.U(64.W))
+    val pc_dcacheReqs     = RegInit(0.U(64.W))
+
+    pc_cycles := pc_cycles + 1.U
+    when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
+    when(branchOps.valid) {
+      pc_branchTotal := pc_branchTotal + 1.U
+      when(branchOps.passed) { pc_branchesPassed := pc_branchesPassed + 1.U }
+    }
+    when(decode.toExec.ready) {
+      pc_decodeReady := pc_decodeReady + 1.U
+      when(decode.toExec.fired)    { pc_decodeFired  := pc_decodeFired  + 1.U }
+      when(!scheduler.allocate.ready) { pc_schedStalls := pc_schedStalls + 1.U }
+      when(!rob.allocate.ready)       { pc_robStalls   := pc_robStalls   + 1.U }
+    }
+    when(icache.fromFetch.req.valid && !icache.fromFetch.resp.valid) {
+      pc_icacheStalls := pc_icacheStalls + 1.U
+    }
+    when(memoryRequest.valid) { pc_dcacheReqs := pc_dcacheReqs + 1.U }
+
+    val perfCnt = IO(Output(new Bundle {
+      val cycles          = UInt(64.W)
+      val instRetired     = UInt(64.W)
+      val branchTotal     = UInt(64.W)
+      val branchesPassed  = UInt(64.W)
+      val schedulerStalls = UInt(64.W)
+      val robStalls       = UInt(64.W)
+      val decodeReady     = UInt(64.W)
+      val decodeFired     = UInt(64.W)
+      val icacheStalls    = UInt(64.W)
+      val dcacheReqs      = UInt(64.W)
+    }))
+    perfCnt.cycles          := pc_cycles
+    perfCnt.instRetired     := pc_instRetired
+    perfCnt.branchTotal     := pc_branchTotal
+    perfCnt.branchesPassed  := pc_branchesPassed
+    perfCnt.schedulerStalls := pc_schedStalls
+    perfCnt.robStalls       := pc_robStalls
+    perfCnt.decodeReady     := pc_decodeReady
+    perfCnt.decodeFired     := pc_decodeFired
+    perfCnt.icacheStalls    := pc_icacheStalls
+    perfCnt.dcacheReqs      := pc_dcacheReqs
   })
 
   val memory = Module(new mainMemory)
@@ -336,6 +388,48 @@ class system extends Module {
 
   //val robOfDataQueue = IO(Output(core0.dataQueueRobRelease.cloneType))
   //robOfDataQueue := core0.dataQueueRobRelease
+
+  // === System-level performance counters ===
+  // Counter IDs match profiler.h
+  val pc_dCacheMiss    = RegInit(0.U(64.W)) // 0: D-Cache→L2 read requests (= D-Cache read misses)
+  val pc_dCacheRdBeats = RegInit(0.U(64.W)) // 1: D-Cache read data beats received
+  val pc_dCacheWrBeats = RegInit(0.U(64.W)) // 2: D-Cache write data beats sent
+  val pc_iCacheMiss    = RegInit(0.U(64.W)) // 3: I-Cache→L2 read requests (= I-Cache misses)
+  val pc_iCacheRdBeats = RegInit(0.U(64.W)) // 4: I-Cache read data beats received
+  val pc_l2ToMemRdReqs = RegInit(0.U(64.W)) // 5: L2→DRAM read requests (= L2 read misses)
+  val pc_l2ToMemRdBeats= RegInit(0.U(64.W)) // 6: L2→DRAM read data beats
+  val pc_l2ToMemWrBeats= RegInit(0.U(64.W)) // 7: L2→DRAM write data beats
+
+  when(core0.dPort.ARVALID && interconnect.io.acePort0.ARREADY)  { pc_dCacheMiss    := pc_dCacheMiss    + 1.U }
+  when(interconnect.io.acePort0.RVALID && core0.dPort.RREADY)    { pc_dCacheRdBeats := pc_dCacheRdBeats + 1.U }
+  when(core0.dPort.WVALID && interconnect.io.acePort0.WREADY)    { pc_dCacheWrBeats := pc_dCacheWrBeats + 1.U }
+  when(core0.iPort.ARVALID && interconnect.io.acePort1.ARREADY)  { pc_iCacheMiss    := pc_iCacheMiss    + 1.U }
+  when(interconnect.io.acePort1.RVALID && core0.iPort.RREADY)    { pc_iCacheRdBeats := pc_iCacheRdBeats + 1.U }
+  when(LLC.io.mem_read_axi.ARVALID && memory.clients(1).ARREADY) { pc_l2ToMemRdReqs := pc_l2ToMemRdReqs + 1.U }
+  when(memory.clients(1).RVALID && LLC.io.mem_read_axi.RREADY)   { pc_l2ToMemRdBeats:= pc_l2ToMemRdBeats + 1.U }
+  when(LLC.io.mem_write_axi.WVALID && memory.clients(1).WREADY)  { pc_l2ToMemWrBeats:= pc_l2ToMemWrBeats + 1.U }
+
+  // Expose as a flat Vec for easy C++ access
+  // Total: 10 core counters + 8 system counters = 18
+  val perfCountersOut = IO(Output(Vec(18, UInt(64.W))))
+  perfCountersOut(0)  := core0.perfCnt.cycles
+  perfCountersOut(1)  := core0.perfCnt.instRetired
+  perfCountersOut(2)  := core0.perfCnt.branchTotal
+  perfCountersOut(3)  := core0.perfCnt.branchesPassed
+  perfCountersOut(4)  := core0.perfCnt.schedulerStalls
+  perfCountersOut(5)  := core0.perfCnt.robStalls
+  perfCountersOut(6)  := core0.perfCnt.decodeReady
+  perfCountersOut(7)  := core0.perfCnt.decodeFired
+  perfCountersOut(8)  := core0.perfCnt.icacheStalls
+  perfCountersOut(9)  := core0.perfCnt.dcacheReqs
+  perfCountersOut(10) := pc_dCacheMiss
+  perfCountersOut(11) := pc_dCacheRdBeats
+  perfCountersOut(12) := pc_dCacheWrBeats
+  perfCountersOut(13) := pc_iCacheMiss
+  perfCountersOut(14) := pc_iCacheRdBeats
+  perfCountersOut(15) := pc_l2ToMemRdReqs
+  perfCountersOut(16) := pc_l2ToMemRdBeats
+  perfCountersOut(17) := pc_l2ToMemWrBeats
 }
 
 object system extends App {

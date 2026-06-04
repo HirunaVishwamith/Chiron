@@ -5,7 +5,7 @@ import common.configuration
 class execRead extends Bundle {
   val valid = Input(Bool())
   val instruction  = Input(UInt(32.W))
-  val branchmask = Input(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
+  val branchMask = Input(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
   val rs1Addr = Input(UInt(6.W))
   val rs2Addr = Input(UInt(6.W))
   val robAddr = Input(UInt(6.W))
@@ -15,7 +15,7 @@ class execRead extends Bundle {
 class toexec extends Bundle {
   val valid = Output(Bool())
   val instruction  = Output(UInt(32.W))
-  val branchmask = Output(UInt(configuration.newBranchMaskWidth.W))  //leon coherency
+  val branchMask = Output(UInt(configuration.newBranchMaskWidth.W))  //leon coherency
   val rs1Addr = Output(UInt(6.W))
   val rs1Data = Output(UInt(64.W))
   val rs2Addr = Output(UInt(6.W))
@@ -27,7 +27,7 @@ class toexec extends Bundle {
 class fromStore extends Bundle {
   val valid = Input(Bool())
   val instruction = Input(UInt(32.W))
-  val branchmask = Input(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
+  val branchMask = Input(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
   val rs2Addr = Input(UInt(6.W))
   val prfDest = Input(UInt(6.W))
 }
@@ -35,14 +35,14 @@ class fromStore extends Bundle {
 class toStore extends Bundle {
   val valid = Output(Bool())
   val instruction = Output(UInt(32.W))
-  val branchmask = Output(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
+  val branchMask = Output(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
   val rs2Data = Output(UInt(64.W))
   val prfDest = Output(UInt(6.W))
 }
 
 class checkBranch extends Bundle {
   val pass = Input(Bool())
-  val branchmask = Input(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
+  val branchMask = Input(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
   val valid = Input(Bool())
 }
 
@@ -100,7 +100,7 @@ class PRF extends Module {
   prf.io.R3.addr := fromStore.rs2Addr
   toStore.rs2Data := prf.io.R3.data
 
-  // valid and branchmask logic
+  // valid and branchMask logic
   val toExec_valid = RegInit(false.B)
   val toStore_valid = RegInit(false.B)
 
@@ -111,34 +111,34 @@ class PRF extends Module {
     //pass case
     when (branchCheck.pass){
       toExec_valid := execRead.valid
-      toExec_mask := execRead.branchmask
-      when((branchCheck.branchmask & execRead.branchmask).orR) {
-        toExec_mask := branchCheck.branchmask ^ execRead.branchmask
+      toExec_mask := execRead.branchMask
+      when((branchCheck.branchMask & execRead.branchMask).orR) {
+        toExec_mask := branchCheck.branchMask ^ execRead.branchMask
       }
       toStore_valid := fromStore.valid
-      toStore_mask := branchCheck.branchmask ^ fromStore.branchmask
+      toStore_mask := branchCheck.branchMask ^ fromStore.branchMask
     }.otherwise{
       // fail case
-      toExec_valid := ((branchCheck.branchmask & execRead.branchmask) === 0.U && execRead.valid)
-      toExec_mask := execRead.branchmask
+      toExec_valid := ((branchCheck.branchMask & execRead.branchMask) === 0.U && execRead.valid)
+      toExec_mask := execRead.branchMask
 
       toStore_valid := fromStore.valid
-      toStore_mask := fromStore.branchmask
+      toStore_mask := fromStore.branchMask
     }
   }.otherwise{
     toExec_valid := execRead.valid
-    toExec_mask := execRead.branchmask
+    toExec_mask := execRead.branchMask
 
     toStore_valid := RegNext(fromStore.valid, false.B)
-    toStore_mask := fromStore.branchmask
+    toStore_mask := fromStore.branchMask
   }
 
   toExec.valid := toExec_valid
-  toExec.branchmask := toExec_mask
+  toExec.branchMask := toExec_mask
 
   // Only commited instructions should come through the write port
   toStore.valid := RegNext(fromStore.valid, false.B)
-  toStore.branchmask := toStore_mask
+  toStore.branchMask := toStore_mask
 
   val physicalRegisterFile = Reg(Vec(64, UInt(64.W)))
   val registerFileOutput = IO(Output(physicalRegisterFile.cloneType))
