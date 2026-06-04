@@ -21,7 +21,7 @@ using namespace std;
 using namespace std::chrono;
 
 #define LOGGING
-#define DUMP_CONDITION 0 //&& (bench.tickcount > 533771995UL)
+#define DUMP_CONDITION 1 //&& (bench.tickcount > 533771995UL)
 #define PROBE_DOUBLE ((0xCA3BF0UL+(-136)) & (~7UL))
 
 emulator golden_model;
@@ -370,7 +370,7 @@ int main(int argc, char* argv[]) {
       prog_count += 1;
     }
     // Check for test completion
-    if (bench.prev_pc == 0x80000bc8) {
+    if ((bench.prev_pc == 0x800009a0 && bench.get_register_value(10) == 2) || (bench.prev_pc == 0x800009ac && bench.get_register_value(10) == 2)) {
       printf("Test complete \n");
       FILE *file = fopen("test_results.txt", "a");
       // printf("Program cycles: %d\n",prog_count);

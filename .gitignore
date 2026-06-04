@@ -1,59 +1,78 @@
-.metals/metals.mv.db
-.metals/metals.lock.db
-.metals/metals.log
-.vscode/settings.json
-project/*
-profile_results/*
-CLAUDE.md
-target/*
-.bloop/*
-.metals/*
-*.v
-vivado/*
-*.json
-*.fir
-*.json
-*.fir
-*.v
-*.bsp
-*.idea
-*.metals
-*.bloop
-verilator-tests/scheduler/obj_dir/*
-*.vcd
-*.vcd.fst
-verilator-tests/scheduler/instrIssue
-verilator-tests/instrIssue/instrIssue
-verilator-tests/decode/obj_dir/*
-verilator-tests/decode/decode
-verilator-tests/missHandler/obj_dir/*
-verilator-tests/missHandler/missHandler
-firrtl_black_box_resource_files.f
-!src/main/resources/*
-*.text
-*.hex
-verilator-tests/testbench/testbench
-*.dump
-verilator-tests/testbench/elffiles/*
-verilator-tests/testbench/obj_dir/*
-verilator-tests/testbench/objectfiles/*
-verilator-tests/memAccess/obj_dir/*
-verilator-tests/memAccess/memAccess
-verilator-tests/coretest/testbench
-verilator-tests/coretest/obj_dir/*
-verilator-tests/program_boot/obj_dir/*
-verilator-tests/program_boot/programs/build/*
-verilator-tests/program_boot/.fuse_hidden0001e54b00000190
-with_emulator/resources/riscv_test_images
+# =========================
+# Metals / Scala tooling
+# =========================
+.metals/
+*.metals*
+metals.mv.db
+metals.lock.db
+metals.log
+
+.bloop/
+
+# =========================
+# IDEs
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Build artifacts (general)
+# =========================
+target/
+*build/
 *.out
 *.log
-*build
-!with_emulator/resources/vmlinux.dump
+*.dump
+*.hex
+*.text
+*.bsp
+*.fir
+*.json
+*.vcd
+*.vcd.fst
+Image
+
+# =========================
+# Vivado / Vitis
+# =========================
+vivado/
 vivado*
 vitis*
+
+# =========================
+# Generated / FPGA artifacts
+# =========================
+*.v
+*.v.f
+
 bintoh*
 prog.h
-!vivado.tcl
+
+# =========================
+# Emulator / test resources
+# =========================
+with_emulator/resources/riscv_test_images/
+verilator-tests/program_boot/programs/build/
+
+# keep this explicitly tracked dump
+!with_emulator/resources/vmlinux.dump
+!src/main/resources/*
+
+# =========================
+# Test / profiling outputs
+# =========================
+profile_results/
+test_results.txt
 .stamp.*
 run.log
-Makefile
+
+# =========================
+# Misc project artifacts
+# =========================
+CLAUDE.md
+project/
+
+# =========================
+# Exception rules
+# =========================
+!vivado.tcl
