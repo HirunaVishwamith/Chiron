@@ -1,0 +1,109 @@
+name: RISC-V OOO Core CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    env:
+      SBT_OPTS: "-Xmx4G -Xss2M"
+
+    steps:
+    # =========================
+    # Checkout repo
+    # =========================
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # =========================
+    # System dependencies
+    # =========================
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          gcc \
+          g++ \
+          make \
+          verilator \
+          git \
+          python3 \
+          python3-pip \
+          libfl2 \
+          libfl-dev \
+          zlib1g-dev \
+          curl \
+          wget
+
+    # =========================
+    # Fix Verilator strict warning (EOF newline)
+    # =========================
+    - name: Fix Verilog formatting issues
+      run: |
+        find . -name "iCacheRegisters.v" -exec sed -i -e '$a\' {} \;
+
+    # =========================
+    # Install SBT safely (no deprecated apt-key)
+    # =========================
+    - name: Install SBT
+      run: |
+        curl -fsSL https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x99E82A75642AC823 \
+          | sudo gpg --dearmor -o /usr/share/keyrings/sbt.gpg
+
+        echo "deb [signed-by=/usr/share/keyrings/sbt.gpg] https://repo.scala-sbt.org/scalasbt/debian all main" \
+          | sudo tee /etc/apt/sources.list.d/sbt.list
+
+        sudo apt-get update
+        sudo apt-get install -y sbt
+
+    # =========================
+    # Cache SBT (important for speed)
+    # =========================
+    - name: Cache SBT
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.ivy2/cache
+          ~/.sbt
+          ~/.cache/coursier
+        key: sbt-${{ runner.os }}-${{ hashFiles('**/*.sbt') }}
+
+    # =========================
+    # Clean build
+    # =========================
+    - name: Clean
+      run: make clean
+
+    # =========================
+    # Build RTL from Scala
+    # =========================
+    - name: Build RTL (SBT + Verilator flow)
+      run: make sim
+
+    # =========================
+    # Run lockstep (FIXED TARGET NAME)
+    # =========================
+    - name: Run Lockstep
+      run: make runLockStep
+
+    # =========================
+    # Run tests
+    # =========================
+    - name: Run full test suite
+      run: make test_all_images
+
+    # =========================
+    # Upload results
+    # =========================
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      with:
+        name: riscv-test-results
+        path: |
+          test_results.txt
+          run.log
