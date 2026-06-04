@@ -48,14 +48,15 @@ jobs:
         find . -name "iCacheRegisters.v" -exec sed -i -e '$a\' {} \;
 
     # =========================
-    # Install SBT safely (no deprecated apt-key)
+    # Install SBT safely (Updated Key & Quotes)
     # =========================
     - name: Install SBT
       run: |
-        curl -fsSL https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x99E82A75642AC823 \
-          | sudo gpg --dearmor -o /usr/share/keyrings/sbt.gpg
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" \
+          | sudo gpg --dearmor -o /etc/apt/keyrings/scalasbt.gpg
 
-        echo "deb [signed-by=/usr/share/keyrings/sbt.gpg] https://repo.scala-sbt.org/scalasbt/debian all main" \
+        echo "deb [signed-by=/etc/apt/keyrings/scalasbt.gpg] https://repo.scala-sbt.org/scalasbt/debian all main" \
           | sudo tee /etc/apt/sources.list.d/sbt.list
 
         sudo apt-get update
