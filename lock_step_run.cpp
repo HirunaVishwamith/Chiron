@@ -21,7 +21,7 @@ using namespace std;
 using namespace std::chrono;
 
 #define LOGGING
-#define DUMP_CONDITION 1 //&& (bench.tickcount > 533771995UL)
+#define DUMP_CONDITION 0 //&& (bench.tickcount > 533771995UL)
 #define PROBE_DOUBLE ((0xCA3BF0UL+(-136)) & (~7UL))
 
 emulator golden_model;
@@ -167,12 +167,6 @@ int main(int argc, char* argv[]) {
     current_time.tm_hour,
     current_time.tm_min,
     current_time.tm_sec);
-
-  //Performance check
-  int prog_count = 0;
-  bool prog_count_true = false;
-  unsigned long count_start = 0UL;
-  unsigned long count_stop = 0UL;
   while (1 || (bench.tickcount + bench.dump_tick) < 800351768UL) {
     // golden_model.show_state();
     //cin >> x;
@@ -340,7 +334,24 @@ int main(int argc, char* argv[]) {
     }
 
     // Check for test completion
-    // if (bench.read_register(3) == 1 && bench.read_register(17) == 93) {
+    if (bench.read_register(3) == 1 && bench.read_register(17) == 93) {
+      printf("Test complete \n");
+      #ifdef LOGGING
+            outFile.close();
+      #endif
+      tcflush(0, TCIFLUSH);
+      return 0; // Exit the program here with success.
+    }
+    if (bench.read_register(17) == 93) {
+      printf("Test Failed \n");
+      #ifdef LOGGING
+            outFile.close();
+      #endif
+      tcflush(0, TCIFLUSH);
+      return 1; // Exit the program here with success.
+    }
+    // Check for test completion
+    // if (bench.prev_pc == 0x10000854) {
     //   printf("Test complete \n");
     //   #ifdef LOGGING
     //         outFile.close();
@@ -348,41 +359,6 @@ int main(int argc, char* argv[]) {
     //   tcflush(0, TCIFLUSH);
     //   return 0; // Exit the program here with success.
     // }
-    // if (bench.read_register(17) == 93) {
-    //   printf("Test Failed \n");
-    //   #ifdef LOGGING
-    //         outFile.close();
-    //   #endif
-    //   tcflush(0, TCIFLUSH);
-    //   return 1; // Exit the program here with success.
-    // }
-    //Performance check
-    //thread_entry
-    if (bench.prev_pc == 0x800002dc) {
-      prog_count_true = true;
-      count_start = bench.dump_tick;
-    //barrier
-    } else if (bench.prev_pc == 0x8000025c) {
-      prog_count_true = false;
-      count_stop = bench.dump_tick;
-    }
-    if (prog_count_true) {
-      prog_count += 1;
-    }
-    // Check for test completion
-    if ((bench.prev_pc == 0x800009a0 && bench.get_register_value(10) == 2) || (bench.prev_pc == 0x800009ac && bench.get_register_value(10) == 2)) {
-      printf("Test complete \n");
-      FILE *file = fopen("test_results.txt", "a");
-      // printf("Program cycles: %d\n",prog_count);
-      // fprintf(file, "Program cycles: %d\n", prog_count);
-      fprintf(file, "Program cycles new: %ld\n", count_stop - count_start);
-      fclose(file);
-      #ifdef LOGGING
-            outFile.close();
-      #endif
-      tcflush(0, TCIFLUSH);
-      return 0; // Exit the program here with success.
-    }
     
   }
   
@@ -404,8 +380,6 @@ int main(int argc, char* argv[]) {
   outFile.close();
   #endif
 
-  printf("Test failed: Time-out!\n");
-  printf("Total ticks: %ld \n", (bench.tickcount+bench.dump_tick));
   // disable_raw_mode();
   tcflush(0, TCIFLUSH); 
 

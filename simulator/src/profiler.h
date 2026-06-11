@@ -51,6 +51,14 @@ struct PerfMetrics {
     uint64_t l2_to_mem_rd_reqs;
     uint64_t l2_to_mem_rd_beats;
     uint64_t l2_to_mem_wr_beats;
+    // Frontend bubble decomposition (Stage 0 instrumentation)
+    uint64_t fe_fetch_not_ready;
+    uint64_t fe_decode_not_ready;
+    uint64_t fe_expected_block;
+    uint64_t fe_resp_valid_idle;
+    uint64_t fe_cache_not_prod;
+    uint64_t fe_req_fire;
+    uint64_t fe_req_refused;
 
     // Derived metrics
     double ipc;
@@ -100,6 +108,27 @@ public:
             case 15: return tb->perfCountersOut_15;
             case 16: return tb->perfCountersOut_16;
             case 17: return tb->perfCountersOut_17;
+            case 18: return tb->perfCountersOut_18;
+            case 19: return tb->perfCountersOut_19;
+            case 20: return tb->perfCountersOut_20;
+            case 21: return tb->perfCountersOut_21;
+            case 22: return tb->perfCountersOut_22;
+            case 23: return tb->perfCountersOut_23;
+            case 24: return tb->perfCountersOut_24;
+            case 25: return tb->perfCountersOut_25;
+            case 26: return tb->perfCountersOut_26;
+            case 27: return tb->perfCountersOut_27;
+            case 28: return tb->perfCountersOut_28;
+            case 29: return tb->perfCountersOut_29;
+            case 30: return tb->perfCountersOut_30;
+            case 31: return tb->perfCountersOut_31;
+            case 32: return tb->perfCountersOut_32;
+            case 33: return tb->perfCountersOut_33;
+            case 34: return tb->perfCountersOut_34;
+            case 35: return tb->perfCountersOut_35;
+            case 36: return tb->perfCountersOut_36;
+            case 37: return tb->perfCountersOut_37;
+            case 38: return tb->perfCountersOut_38;
             default: return 0ULL;
         }
     }
@@ -126,6 +155,13 @@ public:
         m.l2_to_mem_rd_reqs = get_perf_counter(15);
         m.l2_to_mem_rd_beats= get_perf_counter(16);
         m.l2_to_mem_wr_beats= get_perf_counter(17);
+        m.fe_fetch_not_ready  = get_perf_counter(18);
+        m.fe_decode_not_ready = get_perf_counter(19);
+        m.fe_expected_block   = get_perf_counter(20);
+        m.fe_resp_valid_idle  = get_perf_counter(21);
+        m.fe_cache_not_prod   = get_perf_counter(22);
+        m.fe_req_fire         = get_perf_counter(23);
+        m.fe_req_refused      = get_perf_counter(24);
 
         const double clock_hz = 75000000.0;
         const double bytes_per_beat = 8.0;
@@ -206,7 +242,14 @@ public:
         ss << "    \"icache_rd_beats\": "   << m.icache_rd_beats   << ",\n";
         ss << "    \"l2_to_mem_rd_reqs\": " << m.l2_to_mem_rd_reqs << ",\n";
         ss << "    \"l2_to_mem_rd_beats\": "<< m.l2_to_mem_rd_beats<< ",\n";
-        ss << "    \"l2_to_mem_wr_beats\": "<< m.l2_to_mem_wr_beats<< "\n";
+        ss << "    \"l2_to_mem_wr_beats\": "<< m.l2_to_mem_wr_beats<< ",\n";
+        ss << "    \"fe_fetch_not_ready\": " << m.fe_fetch_not_ready << ",\n";
+        ss << "    \"fe_decode_not_ready\": "<< m.fe_decode_not_ready<< ",\n";
+        ss << "    \"fe_expected_block\": "  << m.fe_expected_block  << ",\n";
+        ss << "    \"fe_resp_valid_idle\": " << m.fe_resp_valid_idle << ",\n";
+        ss << "    \"fe_cache_not_prod\": "  << m.fe_cache_not_prod  << ",\n";
+        ss << "    \"fe_req_fire\": "        << m.fe_req_fire        << ",\n";
+        ss << "    \"fe_req_refused\": "     << m.fe_req_refused     << "\n";
         ss << "  },\n";
         ss << "  \"derived\": {\n";
         ss << "    \"ipc\": "                             << m.ipc                           << ",\n";
@@ -273,6 +316,59 @@ public:
         printf("  ROB stalls:        %19.2f%%\n", m.rob_stall_pct);
         printf("  Decode efficiency: %19.2f%%\n", m.decode_efficiency_pct);
         printf("  D$ req/Mcyc:       %20.2f\n",   m.dcache_mem_reqs_per_million_cycles);
+        printf("\n--- Frontend Bubble Decomposition (%% of cycles) ---\n");
+        double sc = static_cast<double>(safe_max1(m.cycles));
+        printf("  Fetch not ready:   %19.2f%%  (%llu)\n",
+               100.0 * m.fe_fetch_not_ready / sc,  (unsigned long long)m.fe_fetch_not_ready);
+        printf("  Decode backpress:  %19.2f%%  (%llu)\n",
+               100.0 * m.fe_decode_not_ready / sc, (unsigned long long)m.fe_decode_not_ready);
+        printf("  Expected mismatch: %19.2f%%  (%llu)\n",
+               100.0 * m.fe_expected_block / sc,   (unsigned long long)m.fe_expected_block);
+        printf("  I$ resp idle:      %19.2f%%  (%llu)\n",
+               100.0 * m.fe_resp_valid_idle / sc,  (unsigned long long)m.fe_resp_valid_idle);
+        printf("  -- of which / I$ boundary --\n");
+        printf("  I$ not producing:  %19.2f%%  (%llu)\n",
+               100.0 * m.fe_cache_not_prod / sc,   (unsigned long long)m.fe_cache_not_prod);
+        printf("  Req fired:         %19.2f%%  (%llu)\n",
+               100.0 * m.fe_req_fire / sc,         (unsigned long long)m.fe_req_fire);
+        printf("  Req refused by I$: %19.2f%%  (%llu)\n",
+               100.0 * m.fe_req_refused / sc,      (unsigned long long)m.fe_req_refused);
+        printf("  -- streamer internals --\n");
+        printf("  curValid:          %19.2f%%  (%llu)\n",
+               100.0 * get_perf_counter(25) / sc, (unsigned long long)get_perf_counter(25));
+        printf("  validMiss(bug):    %19.2f%%  (%llu)\n",
+               100.0 * get_perf_counter(26) / sc, (unsigned long long)get_perf_counter(26));
+        {
+          unsigned long long fillActive = get_perf_counter(27);
+          unsigned long long fillStarts = get_perf_counter(28);
+          printf("  fill-active cyc:   %19.2f%%  (%llu)\n", 100.0 * fillActive / sc, fillActive);
+          printf("  fill starts:       %20llu   avg latency: %.1f cyc/fill\n",
+                 fillStarts, fillStarts ? (double)fillActive / fillStarts : 0.0);
+        }
+        printf("  -- ROB head stall split (B1) --\n");
+        {
+          unsigned long long headNotReady = get_perf_counter(29);
+          unsigned long long readyBlocked = get_perf_counter(30);
+          printf("  head not ready:    %19.2f%%  (%llu)  [latency-bound]\n",
+                 100.0 * headNotReady / sc, headNotReady);
+          printf("  ready, no retire:  %19.2f%%  (%llu)  [commit-width-bound]\n",
+                 100.0 * readyBlocked / sc, readyBlocked);
+          unsigned long long hnrL = get_perf_counter(31), hnrB = get_perf_counter(32),
+                             hnrM = get_perf_counter(33), hnrA = get_perf_counter(34),
+                             hnrO = get_perf_counter(35);
+          printf("  -- head-not-ready by class --\n");
+          printf("    load:            %19.2f%%  (%llu)\n", 100.0 * hnrL / sc, hnrL);
+          printf("    branch/jump:     %19.2f%%  (%llu)\n", 100.0 * hnrB / sc, hnrB);
+          printf("    M-ext (mul/div): %19.2f%%  (%llu)\n", 100.0 * hnrM / sc, hnrM);
+          printf("    AMO:             %19.2f%%  (%llu)\n", 100.0 * hnrA / sc, hnrA);
+          printf("    other (ALU/sys): %19.2f%%  (%llu)\n", 100.0 * hnrO / sc, hnrO);
+          unsigned long long rnrS = get_perf_counter(36), rnrW = get_perf_counter(37),
+                             rnrL = get_perf_counter(38);
+          printf("  -- ready-no-retire by gate --\n");
+          printf("    store wr-commit: %19.2f%%  (%llu)\n", 100.0 * rnrS / sc, rnrS);
+          printf("    writeback port:  %19.2f%%  (%llu)\n", 100.0 * rnrW / sc, rnrW);
+          printf("    load commit:     %19.2f%%  (%llu)\n", 100.0 * rnrL / sc, rnrL);
+        }
         printf("=========================================\n\n");
     }
 };

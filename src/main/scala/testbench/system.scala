@@ -56,6 +56,21 @@ class system extends Module {
     val pc_icacheStalls   = RegInit(0.U(64.W))
     val pc_dcacheReqs     = RegInit(0.U(64.W))
 
+    // ── Frontend bubble decomposition (Stage 0 instrumentation) ───────────
+    // The fetch->decode transfer fires when:
+    //   fetch.toDecode.ready && decode.fromFetch.ready &&
+    //   (!expected.valid || expected.pc === toDecode.pc)
+    // These counters split every NON-firing cycle into its single cause so we
+    // can prove where the per-instruction bubble lives before reworking fetch.
+    val pc_feFetchNotReady = RegInit(0.U(64.W)) // fetch not presenting a valid instruction
+    val pc_feDecodeNotReady= RegInit(0.U(64.W)) // fetch ready but decode backpressures
+    val pc_feExpectedBlock = RegInit(0.U(64.W)) // both ready but expected-PC mismatch (redirect bubble)
+    val pc_feRespValidIdle = RegInit(0.U(64.W)) // I$ has a response but it is not being consumed
+    // Split of "fetch not ready" at the I$<->fetch boundary (production vs request side)
+    val pc_feCacheNotProd  = RegInit(0.U(64.W)) // I$ is not presenting a valid response
+    val pc_feReqFire       = RegInit(0.U(64.W)) // a fetch request was accepted by the I$
+    val pc_feReqRefused    = RegInit(0.U(64.W)) // fetch wants to request but I$ refuses (req.ready low)
+
     pc_cycles := pc_cycles + 1.U
     when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
     when(branchOps.valid) {
@@ -73,6 +88,91 @@ class system extends Module {
     }
     when(memoryRequest.valid) { pc_dcacheReqs := pc_dcacheReqs + 1.U }
 
+    // Frontend bubble decomposition (mutually exclusive, counted every cycle).
+    val fe_expMismatch = decode.fromFetch.expected.valid &&
+                         (decode.fromFetch.expected.pc =/= fetch.toDecode.pc)
+    when(!fetch.toDecode.ready) {
+      pc_feFetchNotReady := pc_feFetchNotReady + 1.U
+    }.elsewhen(!decode.fromFetch.ready) {
+      pc_feDecodeNotReady := pc_feDecodeNotReady + 1.U
+    }.elsewhen(fe_expMismatch) {
+      pc_feExpectedBlock := pc_feExpectedBlock + 1.U
+    }
+    // F2 diagnostic: repointed to the streamer<->fetch boundary (the I$ side is
+    // now only active on line fills, so these measure the live path).
+    // feRespValidIdle = streamer produced a word but fetch isn't taking it
+    when(streamer.fromFetch.resp.valid && !streamer.fromFetch.resp.ready) {
+      pc_feRespValidIdle := pc_feRespValidIdle + 1.U
+    }
+    // feCacheNotProd = streamer is NOT presenting a word to fetch
+    when(!streamer.fromFetch.resp.valid) { pc_feCacheNotProd := pc_feCacheNotProd + 1.U }
+    // feReqFire = streamer accepted a fetch request (word served / fill started)
+    when(streamer.fromFetch.req.valid && streamer.fromFetch.req.ready)  { pc_feReqFire    := pc_feReqFire    + 1.U }
+    // feReqRefused = fetch wants a word but streamer is busy (filling)
+    when(streamer.fromFetch.req.valid && !streamer.fromFetch.req.ready) { pc_feReqRefused := pc_feReqRefused + 1.U }
+
+    // F2 streamer-internal diagnosis
+    val pc_strmCurValid = RegInit(0.U(64.W))
+    val pc_strmValidMiss = RegInit(0.U(64.W)) // line buffered but request misses it (the bug)
+    val pc_strmLastReqBase = RegInit(0.U(64.W))
+    val pc_strmLastCurBase = RegInit(0.U(64.W))
+    when(streamer.dbg.curValid) { pc_strmCurValid := pc_strmCurValid + 1.U }
+    when(streamer.dbg.reqValid && streamer.dbg.curValid && !streamer.dbg.baseMatch) {
+      pc_strmValidMiss := pc_strmValidMiss + 1.U
+    }
+    // Fill latency: active cycles / number of fill starts.
+    val fillingPrev = RegNext(streamer.dbg.filling)
+    when(streamer.dbg.filling) { pc_strmLastReqBase := pc_strmLastReqBase + 1.U }            // fill-active cycles
+    when(streamer.dbg.filling && !fillingPrev) { pc_strmLastCurBase := pc_strmLastCurBase + 1.U } // fill starts
+
+    // B1: split commit stalls at the ROB head into the two possible causes.
+    //   robHeadNotReady — oldest instruction is in the window but its result
+    //                     hasn't arrived yet → latency-bound (issue→wakeup→
+    //                     writeback loop is the wall).
+    //   robReadyBlocked — head result is ready but the commit port doesn't
+    //                     fire → commit-width / retire-port bound.
+    val pc_robHeadNotReady = RegInit(0.U(64.W))
+    val pc_robReadyBlocked = RegInit(0.U(64.W))
+    when(rob.headValid && !rob.commit.ready)  { pc_robHeadNotReady := pc_robHeadNotReady + 1.U }
+    when(rob.commit.ready && !rob.commit.fired) { pc_robReadyBlocked := pc_robReadyBlocked + 1.U }
+
+    // B1b: classify WHAT is holding the ROB head when its result isn't ready,
+    // by the head instruction's opcode. Stores can't appear here (they are
+    // commit-ready at allocation), so the buckets are load / branch-jump /
+    // M-extension / AMO / everything else (ALU, system, fence).
+    val headOp = rob.commit.instruction(6, 0)
+    val headIsLoad   = headOp === "b0000011".U
+    val headIsBranch = headOp === "b1100011".U || headOp === "b1101111".U || headOp === "b1100111".U
+    val headIsMext   = (headOp === "b0110011".U || headOp === "b0111011".U) && rob.commit.instruction(25)
+    val headIsAmo    = headOp === "b0101111".U
+    val pc_hnrLoad   = RegInit(0.U(64.W))
+    val pc_hnrBranch = RegInit(0.U(64.W))
+    val pc_hnrMext   = RegInit(0.U(64.W))
+    val pc_hnrAmo    = RegInit(0.U(64.W))
+    val pc_hnrOther  = RegInit(0.U(64.W))
+    when(rob.headValid && !rob.commit.ready) {
+      when(headIsLoad)        { pc_hnrLoad   := pc_hnrLoad   + 1.U }
+      .elsewhen(headIsBranch) { pc_hnrBranch := pc_hnrBranch + 1.U }
+      .elsewhen(headIsMext)   { pc_hnrMext   := pc_hnrMext   + 1.U }
+      .elsewhen(headIsAmo)    { pc_hnrAmo    := pc_hnrAmo    + 1.U }
+      .otherwise              { pc_hnrOther  := pc_hnrOther  + 1.U }
+    }
+
+    // B1c: when the head IS ready but commit doesn't fire, name the gate
+    // (the three conditions ANDed into rob.commit.fired in core.scala).
+    val pc_rnrStoreGate = RegInit(0.U(64.W)) // store head, cache write port not ready
+    val pc_rnrWbGate    = RegInit(0.U(64.W)) // decode.writeBackResult not ready
+    val pc_rnrLoadGate  = RegInit(0.U(64.W)) // load head, loadCommit/coherency gate
+    when(rob.commit.ready && !rob.commit.fired) {
+      when((rob.commit.instruction(6, 4) === "b010".U) && !memAccess.writeInstructionCommit.ready) {
+        pc_rnrStoreGate := pc_rnrStoreGate + 1.U
+      }
+      when(!decode.writeBackResult.ready) { pc_rnrWbGate := pc_rnrWbGate + 1.U }
+      when((rob.commit.instruction(6, 2).orR === 0.U) && (coherentLoadInvalid || !memAccess.loadCommit.valid)) {
+        pc_rnrLoadGate := pc_rnrLoadGate + 1.U
+      }
+    }
+
     val perfCnt = IO(Output(new Bundle {
       val cycles          = UInt(64.W)
       val instRetired     = UInt(64.W)
@@ -84,6 +184,27 @@ class system extends Module {
       val decodeFired     = UInt(64.W)
       val icacheStalls    = UInt(64.W)
       val dcacheReqs      = UInt(64.W)
+      val feFetchNotReady = UInt(64.W)
+      val feDecodeNotReady= UInt(64.W)
+      val feExpectedBlock = UInt(64.W)
+      val feRespValidIdle = UInt(64.W)
+      val feCacheNotProd  = UInt(64.W)
+      val feReqFire       = UInt(64.W)
+      val feReqRefused    = UInt(64.W)
+      val strmCurValid    = UInt(64.W)
+      val strmValidMiss   = UInt(64.W)
+      val strmLastReqBase = UInt(64.W)
+      val strmLastCurBase = UInt(64.W)
+      val robHeadNotReady = UInt(64.W)
+      val robReadyBlocked = UInt(64.W)
+      val hnrLoad         = UInt(64.W)
+      val hnrBranch       = UInt(64.W)
+      val hnrMext         = UInt(64.W)
+      val hnrAmo          = UInt(64.W)
+      val hnrOther        = UInt(64.W)
+      val rnrStoreGate    = UInt(64.W)
+      val rnrWbGate       = UInt(64.W)
+      val rnrLoadGate     = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -95,6 +216,27 @@ class system extends Module {
     perfCnt.decodeFired     := pc_decodeFired
     perfCnt.icacheStalls    := pc_icacheStalls
     perfCnt.dcacheReqs      := pc_dcacheReqs
+    perfCnt.feFetchNotReady := pc_feFetchNotReady
+    perfCnt.feDecodeNotReady:= pc_feDecodeNotReady
+    perfCnt.feExpectedBlock := pc_feExpectedBlock
+    perfCnt.feRespValidIdle := pc_feRespValidIdle
+    perfCnt.feCacheNotProd  := pc_feCacheNotProd
+    perfCnt.feReqFire       := pc_feReqFire
+    perfCnt.feReqRefused    := pc_feReqRefused
+    perfCnt.strmCurValid    := pc_strmCurValid
+    perfCnt.strmValidMiss   := pc_strmValidMiss
+    perfCnt.strmLastReqBase := pc_strmLastReqBase
+    perfCnt.strmLastCurBase := pc_strmLastCurBase
+    perfCnt.robHeadNotReady := pc_robHeadNotReady
+    perfCnt.robReadyBlocked := pc_robReadyBlocked
+    perfCnt.hnrLoad         := pc_hnrLoad
+    perfCnt.hnrBranch       := pc_hnrBranch
+    perfCnt.hnrMext         := pc_hnrMext
+    perfCnt.hnrAmo          := pc_hnrAmo
+    perfCnt.hnrOther        := pc_hnrOther
+    perfCnt.rnrStoreGate    := pc_rnrStoreGate
+    perfCnt.rnrWbGate       := pc_rnrWbGate
+    perfCnt.rnrLoadGate     := pc_rnrLoadGate
   })
 
   val memory = Module(new mainMemory)
@@ -410,8 +552,8 @@ class system extends Module {
   when(LLC.io.mem_write_axi.WVALID && memory.clients(1).WREADY)  { pc_l2ToMemWrBeats:= pc_l2ToMemWrBeats + 1.U }
 
   // Expose as a flat Vec for easy C++ access
-  // Total: 10 core counters + 8 system counters = 18
-  val perfCountersOut = IO(Output(Vec(18, UInt(64.W))))
+  // 10 core + 8 system + 4 frontend-bubble + 3 boundary + 4 streamer-diag + 2 rob-split + 5 head-class + 3 rnr-gate = 39
+  val perfCountersOut = IO(Output(Vec(39, UInt(64.W))))
   perfCountersOut(0)  := core0.perfCnt.cycles
   perfCountersOut(1)  := core0.perfCnt.instRetired
   perfCountersOut(2)  := core0.perfCnt.branchTotal
@@ -430,6 +572,27 @@ class system extends Module {
   perfCountersOut(15) := pc_l2ToMemRdReqs
   perfCountersOut(16) := pc_l2ToMemRdBeats
   perfCountersOut(17) := pc_l2ToMemWrBeats
+  perfCountersOut(18) := core0.perfCnt.feFetchNotReady
+  perfCountersOut(19) := core0.perfCnt.feDecodeNotReady
+  perfCountersOut(20) := core0.perfCnt.feExpectedBlock
+  perfCountersOut(21) := core0.perfCnt.feRespValidIdle
+  perfCountersOut(22) := core0.perfCnt.feCacheNotProd
+  perfCountersOut(23) := core0.perfCnt.feReqFire
+  perfCountersOut(24) := core0.perfCnt.feReqRefused
+  perfCountersOut(25) := core0.perfCnt.strmCurValid
+  perfCountersOut(26) := core0.perfCnt.strmValidMiss
+  perfCountersOut(27) := core0.perfCnt.strmLastReqBase
+  perfCountersOut(28) := core0.perfCnt.strmLastCurBase
+  perfCountersOut(29) := core0.perfCnt.robHeadNotReady
+  perfCountersOut(30) := core0.perfCnt.robReadyBlocked
+  perfCountersOut(31) := core0.perfCnt.hnrLoad
+  perfCountersOut(32) := core0.perfCnt.hnrBranch
+  perfCountersOut(33) := core0.perfCnt.hnrMext
+  perfCountersOut(34) := core0.perfCnt.hnrAmo
+  perfCountersOut(35) := core0.perfCnt.hnrOther
+  perfCountersOut(36) := core0.perfCnt.rnrStoreGate
+  perfCountersOut(37) := core0.perfCnt.rnrWbGate
+  perfCountersOut(38) := core0.perfCnt.rnrLoadGate
 }
 
 object system extends App {

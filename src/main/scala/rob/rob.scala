@@ -91,6 +91,13 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
   commit.is_fence := is_fence
   commit.robAddr := results.robAddrRelease
 
+  // B1 instrumentation: head present (oldest entry valid) regardless of whether
+  // its result is ready. Lets the testbench split commit stalls into
+  // latency-bound (head present, not ready) vs commit-width-bound (ready, not
+  // retiring) without inferring occupancy from the outside.
+  val headValid = IO(Output(Bool()))
+  headValid := fifo.io.deq.valid & results.io.deq.valid
+
   when (commit.fired){
     fifo.io.deq.ready := 1.U
     results.io.deq.ready := 1.U

@@ -7,6 +7,7 @@ module iCacheRegisters #(
 ) (
   input [31:0] address,
   output reg [31:0] instruction,
+  output reg [32*block_size-1:0] block_out, // F2: full indexed line (all words) for block fetch
   output reg [tag_width-1: 0] tag,
   output reg tag_valid,
   input [line_width-1:0] write_line_index,
@@ -19,8 +20,14 @@ module iCacheRegisters #(
   reg [tag_width-1:0] tags [cache_depth-1:0];
   reg validBits [cache_depth-1:0];
 
+  integer w;
   always@(posedge clock) begin
     instruction <= cache[address[line_width+offset_width+2-1:offset_width+2]][address[offset_width+2-1:2]];
+    // F2: synchronously read the whole indexed line so the wrapper can return all
+    // block_size instructions from one access (block fetch).
+    for (w = 0; w < block_size; w = w + 1) begin
+      block_out[32*w +: 32] <= cache[address[line_width+offset_width+2-1:offset_width+2]][w];
+    end
     tag <= tags[address[line_width+offset_width+2-1:offset_width+2]];
     tag_valid <= validBits[address[line_width+offset_width+2-1:offset_width+2]];
   end

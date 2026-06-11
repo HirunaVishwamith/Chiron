@@ -125,7 +125,7 @@ class simulator {
 
 
   __uint32_t waitForCore() {
-#ifdef CORE_BOOT_WAIT
+  #ifdef CORE_BOOT_WAIT
     if (!(tb -> waitingForCore_waiting)) {
       printf("ERROR: Core should be waiting during the process of programming DRAM");
       return 1;
@@ -134,7 +134,7 @@ class simulator {
       printf("Cycles remaining waiting: %016lx \r", tb -> waitingForCore_timeRemaining);
 
     printf("\n");
-#endif
+  #endif
 
     return 0;
   }
@@ -180,7 +180,7 @@ class simulator {
 			//cout << buffer.at(i)&255 << endl;
 			tick_nodump(++tickcount, tb, tfp);	
       // if (progress != (i*100)/buffer.size()) 
-      printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
+      printf("Kernel Loaded: %ld %%\r", (i*100)/buffer.size());	
 		}
     printf("done\n");
     printf("loading dtb\n");
@@ -196,7 +196,7 @@ class simulator {
 			//cout << buffer.at(i)&255 << endl;
 			tick_nodump(++tickcount, tb, tfp);	
       // if (progress != (i*100)/buffer.size()) 
-      printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
+      printf("Kernel Loaded: %ld %%\r", (i*100)/buffer.size());	
 		}
     printf("done\n");
     printf("loading boot rom\n");
@@ -212,7 +212,7 @@ class simulator {
 			//cout << buffer.at(i)&255 << endl;
 			tick_nodump(++tickcount, tb, tfp);	
       // if (progress != (i*100)/buffer.size()) 
-      printf("Kernel Loaded: %ld \%\r", (i*100)/buffer.size());		
+      printf("Kernel Loaded: %ld %%\r", (i*100)/buffer.size());	
 		}
     printf("done\n");
 		tb ->finishedProgramming = 1;

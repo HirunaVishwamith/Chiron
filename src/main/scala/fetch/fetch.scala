@@ -254,21 +254,36 @@ class fetch(val fifo_size: Int) extends Module {
 
 
   // initialize BHT and fifo buffer
-  val predictor = Module(new gshare_predictor(2048,256))
+  val predictor = Module(new gshareV2_predictor(4096, 512, 24))
   predictor.io.branchres <> branchRes
   predictor.io.curr_pc := PC
   val PC_fifo = Module(new regFifo(UInt(128.W), fifo_size))
+  // F1: decoupling instruction buffer. Each I$ response is paired with its
+  // in-flight PC (PC_fifo head) and pushed here, so cache.resp.ready no longer
+  // depends on decode firing. This frees the I$ pipeline to stream ~1 instr/cyc
+  // instead of stalling while the cache holds a result waiting for decode.
+  // Entry layout: bits(127,64)=PC, bits(31,0)=instruction.
+  val instrBuf = Module(new regFifo(UInt(128.W), fifo_size))
 
-  //Connect PC fifo
+  //Connect PC fifo. A response is "paired" once we have both the instruction
+  //(cache.resp.valid) and its PC (PC_fifo head).
+  val respPaired = cache.resp.valid && PC_fifo.io.deq.valid
   PC_fifo.io.enq.bits := PC
   PC_fifo.io.enq.valid := cache.req.valid & cache.req.ready
   PC_fifo.io.deq.ready := cache.resp.valid & cache.resp.ready
-  toDecode.pc := PC_fifo.io.deq.bits
+
+  //Push paired (PC, instruction) into the decoupling buffer. Nothing is pushed
+  //while squashing or handling a fence — those in-flight entries are discarded.
+  instrBuf.io.enq.valid := respPaired & redirect_bit === 0.U & !(handle_fenceI === 1.U)
+  instrBuf.io.enq.bits  := Cat(PC_fifo.io.deq.bits(63,0), 0.U(32.W), cache.resp.bits(31,0))
+  instrBuf.io.deq.ready := toDecode.fired
+  toDecode.pc := instrBuf.io.deq.bits(127,64)
 
   //fence.I
   val is_fenceI = (toDecode.instruction(6,2) === "b00011".U) & (toDecode.instruction(14,13) === 0.U) & (toDecode.fired)
   when (handle_fenceI===1.U){
     PC_fifo.reset:=1.U
+    instrBuf.reset:=1.U
   }
   when (handle_fenceI === 0.U){
     handle_fenceI := is_fenceI
@@ -305,11 +320,19 @@ class fetch(val fifo_size: Int) extends Module {
   redirect := !(toDecode.expected.pc === toDecode.pc) & toDecode.expected.valid
   coherent := toDecode.expected.coherency //leon coherency
 
-  //redirect bit logic
-  when(redirect_bit===0.U & PC_fifo.io.deq.valid){
+  //redirect bit logic. Redirect is detected at the instruction-buffer head; the
+  //squash drains the in-flight PC_fifo (and the I$ responses behind it) to empty
+  //and flushes the decoupling buffer of all wrong-path instructions.
+  when(redirect_bit===0.U & instrBuf.io.deq.valid){
     redirect_bit := redirect
   }.elsewhen (PC_fifo.io.deq.valid === 0.U){
     redirect_bit := 0.U
+  }
+  // Flush the buffer only in the registered squash state. Using the combinational
+  // `redirect` here would hold the FIFO in reset whenever a redirect is asserted
+  // (e.g. the start-up resync), preventing it from ever filling — a deadlock.
+  when(redirect_bit===1.U){
+    instrBuf.reset := 1.U
   }
 
 
@@ -317,7 +340,7 @@ class fetch(val fifo_size: Int) extends Module {
   when(redirect_bit===1.U) {
     PC := toDecode.expected.pc
   }.elsewhen(is_fenceI) {
-    PC := PC_fifo.io.deq.bits + 4.U
+    PC := instrBuf.io.deq.bits(127,64) + 4.U
   }.elsewhen(cache.req.valid & cache.req.ready) {
     PC := predictor.io.next_pc
   }
@@ -325,23 +348,26 @@ class fetch(val fifo_size: Int) extends Module {
 
   //ready valid signal logic
   cache.req.valid := redirect_bit === 0.U & PC_fifo.io.enq.ready & !is_fenceI & !(handle_fenceI===1.U)
-  cache.resp.ready := (redirect_bit===1.U || toDecode.fired) & !(handle_fenceI)
+  // F1: cache.resp.ready is now driven by buffer space, NOT decode firing, so the
+  // I$ pipeline streams freely. During squash we still drain (discard) responses.
+  cache.resp.ready := ((redirect_bit===1.U) || (PC_fifo.io.deq.valid && instrBuf.io.enq.ready)) & !(handle_fenceI)
   updateAllCachelines.ready := clear_cache_req
   cachelinesUpdatesResp.ready := cache_cleared
 
-  when (redirect || redirect_bit===1.U || !cache.resp.valid || !PC_fifo.io.deq.valid || handle_fenceI===1.U){
+  // Decode is fed from the decoupling buffer head.
+  when (redirect || redirect_bit===1.U || !instrBuf.io.deq.valid || handle_fenceI===1.U){
     toDecode.ready := 0.B
   }.otherwise{
     toDecode.ready := 1.B
   }
 
-  toDecode.instruction := cache.resp.bits
+  toDecode.instruction := instrBuf.io.deq.bits(31,0)
 
   predictor.requestSent := cache.req.valid && cache.req.ready
 
   // detect msprediction
   val misPredicted = RegInit(0.B)
-  when (redirect_bit===0.U & PC_fifo.io.deq.valid){
+  when (redirect_bit===0.U & instrBuf.io.deq.valid){
     misPredicted := redirect && !coherent  //leon coherency
   }.otherwise{
     misPredicted := 0.B

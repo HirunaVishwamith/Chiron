@@ -29,11 +29,23 @@ class core (
   icache.updateAllCachelines.fired := false.B
   icache.cachelinesUpdatesResp.fired := false.B
 
-  val fetch = Module(new fetch(4))
+  val fetch = Module(new fetch(8))
+  // F2: block fetch. The line streamer turns the iCache's per-line responses
+  // into the per-word stream the fetch unit expects, amortising one I$ access
+  // over a whole cache line. Fetch is otherwise unchanged.
+  val streamer = Module(new lineStreamer(common.coreConfiguration.iCacheOffsetWidth))
 
-  icache.fromFetch.req <> fetch.cache.req
-  icache.fromFetch.req.bits := Cat(0.U(32.W), fetch.cache.req.bits(31, 0))
-  fetch.cache.resp <> icache.fromFetch.resp
+  // fetch <-> streamer (per-word interface)
+  streamer.fromFetch.req <> fetch.cache.req
+  fetch.cache.resp <> streamer.fromFetch.resp
+
+  // streamer <-> icache (per-line interface)
+  icache.fromFetch.req <> streamer.toCache.req
+  icache.fromFetch.req.bits := Cat(0.U(32.W), streamer.toCache.req.bits(31, 0))
+  streamer.toCache.resp.valid     := icache.fromFetch.resp.valid
+  streamer.toCache.resp.bits.line := icache.fromFetch.resp.bits.line
+  streamer.toCache.resp.bits.base := icache.fromFetch.resp.bits.base
+  icache.fromFetch.resp.ready     := streamer.toCache.resp.ready
 
   // Fence functionality is ignored for now
   fetch.updateAllCachelines.fired := false.B
@@ -139,47 +151,13 @@ class core (
   prf.execRead.prfDest := scheduler.release.prfDest
   when(scheduler.release.instruction(1, 0) === "b00".U) { prf.execRead.valid := false.B }
 
-  val addressGenerationInput = RegInit(new Bundle {
-    val valid = Bool()
-    val rs1 = UInt(64.W)
-    val instruction = UInt(32.W)
-    val prfDest = UInt(configuration.prfAddrWidth.W)
-    val robAddr = UInt(configuration.robAddrWidth.W)
-    val branchMask = UInt(configuration.newBranchMaskWidth.W) //leon coherency
-  } Lit(_.valid -> false.B))
-
-  addressGenerationInput.valid := prf.toExec.valid && !Seq(6, 4).map(i => prf.toExec.instruction(i).asBool).reduce(_ || _)
-  
-  addressGenerationInput.instruction := prf.toExec.instruction
-  addressGenerationInput.prfDest := prf.toExec.prfDest
-  addressGenerationInput.robAddr := prf.toExec.robAddr
-  addressGenerationInput.branchMask := prf.toExec.branchMask
-
-  when(branchOps.valid) {
-    when((prf.toExec.branchMask & branchOps.branchMask).orR) {
-      addressGenerationInput.branchMask := prf.toExec.branchMask ^ branchOps.branchMask
-    }
-    when(!branchOps.passed && (prf.toExec.branchMask & branchOps.branchMask).orR) { addressGenerationInput.valid := false.B }
-  }
-
+  // B1: fused address generation. The old two-stage path (prf.toExec ->
+  // addressGenerationInput reg -> adder -> memoryRequest reg) spent a whole
+  // cycle just registering the adder inputs. The rs1 forwarding mux plus the
+  // 64-bit add fit in one cycle at the target clock, so memory ops now reach
+  // the cache one cycle earlier. Field assignments live further down, after
+  // the fwdFrom network is declared.
   val memoryRequest = RegInit(new pipelineMemoryRequest Lit(_.valid -> false.B))
-  memoryRequest.address := addressGenerationInput.rs1 + VecInit(
-    Cat(Fill(52, addressGenerationInput.instruction(31)), addressGenerationInput.instruction(31, 20)),
-    Cat(Fill(52, addressGenerationInput.instruction(31)), addressGenerationInput.instruction(31, 25), addressGenerationInput.instruction(11, 7)),
-    0.U, 0.U
-  )(Cat(addressGenerationInput.instruction(3), addressGenerationInput.instruction(5)))
-  memoryRequest.branchMask := addressGenerationInput.branchMask
-  memoryRequest.instruction := addressGenerationInput.instruction
-  memoryRequest.prfDest := addressGenerationInput.prfDest
-  memoryRequest.robAddr := addressGenerationInput.robAddr
-  memoryRequest.valid := addressGenerationInput.valid
-
-  when(branchOps.valid) {
-    when((addressGenerationInput.branchMask & branchOps.branchMask).orR) {
-      memoryRequest.branchMask := addressGenerationInput.branchMask ^ branchOps.branchMask
-    }
-    when(!branchOps.passed && (addressGenerationInput.branchMask & branchOps.branchMask).orR) { memoryRequest.valid := false.B }
-  }
 
   memAccess.request := memoryRequest
   memAccess.branchOps := branchOps
@@ -234,9 +212,27 @@ class core (
   fwdFrom(0).prfDest := singleCycleArithmeticRequest.prfDest
   fwdFrom(0).branchMask := singleCycleArithmeticRequest.branchMask
 
-  addressGenerationInput.rs1 := Mux(prf.toExec.instruction(19, 15).orR, MuxCase(prf.toExec.rs1Data,
-    fwdFrom.map(fwd => fwd.valid && (fwd.prfDest === prf.toExec.rs1Addr)) zip fwdFrom.map(_.result) map{ case(prfMatch, result ) => (prfMatch -> result)} 
+  // Fused address generation (see memoryRequest declaration above).
+  val addressGenRs1 = Mux(prf.toExec.instruction(19, 15).orR, MuxCase(prf.toExec.rs1Data,
+    fwdFrom.map(fwd => fwd.valid && (fwd.prfDest === prf.toExec.rs1Addr)) zip fwdFrom.map(_.result) map{ case(prfMatch, result ) => (prfMatch -> result)}
   ), 0.U)
+  memoryRequest.address := addressGenRs1 + VecInit(
+    Cat(Fill(52, prf.toExec.instruction(31)), prf.toExec.instruction(31, 20)),
+    Cat(Fill(52, prf.toExec.instruction(31)), prf.toExec.instruction(31, 25), prf.toExec.instruction(11, 7)),
+    0.U, 0.U
+  )(Cat(prf.toExec.instruction(3), prf.toExec.instruction(5)))
+  memoryRequest.branchMask := prf.toExec.branchMask
+  memoryRequest.instruction := prf.toExec.instruction
+  memoryRequest.prfDest := prf.toExec.prfDest
+  memoryRequest.robAddr := prf.toExec.robAddr
+  memoryRequest.valid := prf.toExec.valid && !Seq(6, 4).map(i => prf.toExec.instruction(i).asBool).reduce(_ || _)
+
+  when(branchOps.valid) {
+    when((prf.toExec.branchMask & branchOps.branchMask).orR) {
+      memoryRequest.branchMask := prf.toExec.branchMask ^ branchOps.branchMask
+    }
+    when(!branchOps.passed && (prf.toExec.branchMask & branchOps.branchMask).orR) { memoryRequest.valid := false.B }
+  }
 
   val arithmeticResult = {
     def result32bit(res: UInt) =
@@ -421,6 +417,30 @@ class core (
         when(extnMRequest.rs1(31).asBool) { division.quotient := Cat(0.U(33.W), (- extnMRequest.rs1(31, 0))(31, 0)) }
         when(extnMRequest.rs2(31).asBool) { division.divisor := Cat(0.U(33.W), (- extnMRequest.rs2(31, 0))(31, 0)) }
       }
+    }
+  }
+
+  // Divider early termination: the non-restoring loop consumes the dividend
+  // MSB-first out of the 65-bit quotient register, and leading-zero bits only
+  // produce quotient bits of 0 while the partial remainder stays 0. So the
+  // cycle after operand load we left-align the (already sign-corrected)
+  // dividend and run only the iterations that carry information. divw/remw on
+  // small values drop from 65 iterations to a handful. The zero-dividend and
+  // zero-divisor cases keep the full-length path: the all-ones quotient that
+  // RISC-V mandates for division by zero is produced by the iterations
+  // themselves, which normalization would skip.
+  val divNormalizePending = RegInit(false.B)
+  when(extnMRequest.valid && extnMRequest.instruction(14).asBool) { divNormalizePending := true.B }
+  when(divNormalizePending) {
+    divNormalizePending := false.B
+    division.remainder := 0.U
+    when(division.quotient.orR && division.divisor.orR) {
+      val leadingZeros = PriorityEncoder(Reverse(division.quotient))
+      division.quotient := (division.quotient << leadingZeros)(64, 0)
+      division.counter := 65.U - leadingZeros
+    }.otherwise {
+      division.quotient := division.quotient // hold: default iteration must not shift it
+      division.counter := 65.U
     }
   }
 
