@@ -141,7 +141,13 @@ class CacheModule (
   responseOut.result := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.writeData.data, peripheralUnit.responseOut.request.writeData.data)
   responseOut.instruction := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.core.instruction, peripheralUnit.responseOut.request.core.instruction)
 
-  when(cacheLookup.writeInstructionCommit.ready){
+  // B2: plain main-memory stores signal commit-ready from the arbiter as soon
+  // as their data is captured (the BRAM write completes asynchronously);
+  // atomics still report from the lookup, peripheral writes from the AXI unit.
+  // The arbiter sees the fired echo via writeInstuctionCommitFired.
+  when(arbiter.storeCommitEarly){
+    writeInstructionCommit.ready := true.B
+  } .elsewhen(cacheLookup.writeInstructionCommit.ready){
     cacheLookup.writeInstructionCommit <> writeInstructionCommit
   } .otherwise{
     peripheralUnit.writeInstructionCommit <> writeInstructionCommit

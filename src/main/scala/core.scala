@@ -762,10 +762,14 @@ class core (
   prf.branchCheck.pass := branchOps.passed
   prf.branchCheck.valid := branchOps.valid
 
-  prf.fromStore.branchMask := RegNext(RegNext(dataQueue.toPRF.branchMask))
-  prf.fromStore.instruction := RegNext(RegNext(dataQueue.toPRF.instruction))
-  prf.fromStore.rs2Addr := RegNext(RegNext(dataQueue.toPRF.rs2Addr))
-  prf.fromStore.valid := RegNext(RegNext(dataQueue.toPRF.valid && dataQueue.fromROB.readyNow, false.B), false.B)
+  // B3: single staging register on the store-data PRF read (was RegNext×2).
+  // The read is triggered only once the store is at the ROB head, so rs2 is
+  // architectural well before either delay; the arbiter captures writeDataIn
+  // whenever it arrives, so the extra cycle bought nothing.
+  prf.fromStore.branchMask := RegNext(dataQueue.toPRF.branchMask)
+  prf.fromStore.instruction := RegNext(dataQueue.toPRF.instruction)
+  prf.fromStore.rs2Addr := RegNext(dataQueue.toPRF.rs2Addr)
+  prf.fromStore.valid := RegNext(dataQueue.toPRF.valid && dataQueue.fromROB.readyNow, false.B)
   prf.fromStore.prfDest := 0.U
 
   dataQueue.fromBranch.robAddr := branchEvals.robAddr

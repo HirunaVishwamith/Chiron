@@ -80,6 +80,29 @@ class arbiter extends Module {
   val idleState :: commitReadyState :: commitFiredState :: waitState :: writeInstructionFiredState :: Nil = Enum(5)
   val operationState = RegInit(idleState)
 
+  // B2: early store commit. Once a plain main-memory store has its data
+  // captured (inorderBuffer loaded), the BRAM write is unconditional:
+  // inorderBuffer outranks speculative loads at dequeue, and a write miss
+  // carries the data through the replay path. So the ROB can retire the
+  // store at data-capture instead of waiting ~4 more cycles for the lookup
+  // walk. SC/AMO/peripheral writes keep fully blocking semantics.
+  // storeCommitEarly drives writeInstructionCommit.ready in the CacheModule.
+  val plainStorePending = RegInit(false.B)
+  val storeCommitEarly = IO(Output(Bool()))
+  storeCommitEarly := (operationState === writeInstructionFiredState) && plainStorePending
+
+  // The FSM may now be mid-handshake while inorderBuffer still drains the
+  // previous store, so a writeDataIn pulse can arrive when capture has to
+  // stall — hold it here until inorderBuffer frees up.
+  val earlyWriteData = RegInit(0.U.asTypeOf(new Bundle {
+    val valid = Bool()
+    val data = UInt(dataWidth.W)
+  }))
+  when(writeDataIn.valid) {
+    earlyWriteData.valid := true.B
+    earlyWriteData.data := writeDataIn.data
+  }
+
   val operationWires = Wire(new Bundle{
     val valid = Bool()
     val isRead = Bool()
@@ -103,19 +126,23 @@ class arbiter extends Module {
   switch(operationState){
     is(idleState){
       operationBuffer.writeData.valid:= false.B
+      // inorderBuffer may still be draining an early-committed store, so the
+      // arms that load it have to wait for it to free up.
       when(operationWires.valid){
         when(operationWires.isRead){
-
-          inorderBuffer := operationBuffer
-          operationBuffer.valid := false.B
+          when(inorderBufferReadyWire){
+            inorderBuffer := operationBuffer
+            operationBuffer.valid := false.B
+          }
         } .elsewhen(operationWires.isWrite){
 
           operationState := commitReadyState
         } .elsewhen(operationWires.isLR || operationWires.isSC || operationWires.rAtomics){
-
-          inorderBuffer := operationBuffer
-          inorderBuffer.writeData.valid := false.B
-          operationState := waitState
+          when(inorderBufferReadyWire){
+            inorderBuffer := operationBuffer
+            inorderBuffer.writeData.valid := false.B
+            operationState := waitState
+          }
         } .otherwise{
 
           operationBuffer.valid := false.B
@@ -128,20 +155,23 @@ class arbiter extends Module {
       operationState := Mux(writeCommit.fired, commitFiredState, commitReadyState)
     }
     is(commitFiredState){
-      when(writeDataIn.valid){
+      when((writeDataIn.valid || earlyWriteData.valid) && inorderBufferReadyWire){
 
         inorderBuffer := operationBuffer
-        inorderBuffer.writeData.data := writeDataIn.data
-        inorderBuffer.writeData.valid := writeDataIn.valid
+        inorderBuffer.writeData.data := Mux(writeDataIn.valid, writeDataIn.data, earlyWriteData.data)
+        inorderBuffer.writeData.valid := true.B
+        earlyWriteData.valid := false.B
         operationBuffer.valid := false.B
+        plainStorePending := operationWires.isWrite && !operationWires.isPeriWrite
         operationState := writeInstructionFiredState
       }
     }
     is(waitState){
-      operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.core.instruction, 
+      operationState := Mux(responseOut.valid && responseOut.instruction === operationBuffer.core.instruction,
                                 commitReadyState, waitState)
     }
     is(writeInstructionFiredState){
+      when(writeInstuctionCommitFired){ plainStorePending := false.B }
       operationState := Mux(writeInstuctionCommitFired, idleState, writeInstructionFiredState)
     }
   }

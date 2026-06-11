@@ -44,8 +44,18 @@ class requestScheduler extends Module{
 
   val speculativeEntryWire = WireDefault(requestIn.core.instruction(6,2) === "b00000".U && isMainMemory(requestIn.address))
 
+  // B4: queue-empty flow-through. A speculative-eligible load arriving while
+  // the speculative queue is empty is served straight to the arbiter this
+  // cycle instead of taking a register trip through the FIFO. It ranks
+  // exactly like a queue-resolved speculative entry, so ordering vs inorder
+  // ops is unchanged; the matchFound check still forces same-address loads
+  // behind pending stores, and regReadUpdate applies same-cycle squashes.
+  val flowThroughEligible = requestIn.valid && requestIn.branch.valid &&
+    speculativeEntryWire && !inorderQueue.matchFound && speculativeQueue.isEmpty
+  val flowThroughFired = WireDefault(false.B)
+
   //-------------Enqueue----------------//
-  when(requestIn.valid && requestIn.branch.valid){
+  when(requestIn.valid && requestIn.branch.valid && !flowThroughFired){
     when(speculativeEntryWire && inorderQueue.matchFound){
       inorderQueue.write.data := requestIn
       regReadUpdate(inorderQueue.write.data.branch, branchOps, requestIn.branch)
@@ -81,6 +91,11 @@ class requestScheduler extends Module{
           speculativeQueue.read.ready:= !speculativeQueue.isEmpty
           controlSignal.isSpeculative := true.B
           requestOut := speculativeQueue.read.data
+        } .elsewhen(flowThroughEligible){
+          controlSignal.isSpeculative := true.B
+          requestOut := requestIn
+          regReadUpdate(requestOut.branch, branchOps, requestIn.branch)
+          flowThroughFired := true.B
         }
       }
       is("b10".U){
@@ -106,10 +121,15 @@ class requestScheduler extends Module{
           speculativeQueue.read.ready:= !speculativeQueue.isEmpty
           controlSignal.isSpeculative  := true.B
           requestOut := speculativeQueue.read.data
+        } .elsewhen(flowThroughEligible){
+          controlSignal.isSpeculative := true.B
+          requestOut := requestIn
+          regReadUpdate(requestOut.branch, branchOps, requestIn.branch)
+          flowThroughFired := true.B
         }.otherwise{
-          
+
           inorderQueue.read.ready := false.B
-          speculativeQueue.read.ready := false.B  
+          speculativeQueue.read.ready := false.B
         }
       }
     }
