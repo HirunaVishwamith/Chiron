@@ -53,6 +53,13 @@ class scheduler extends Module {
     (!queue(i).opcodeMeta.isMemAccess || ((if (i == 0) true.B else !Seq.tabulate(i)(j => queue(j).valid && queue(j).opcodeMeta.isMemAccess).reduce(_ || _)) && memoryReady)) &&
     (!queue(i).opcodeMeta.isM || multuplyAndDivideReady)
   }).reverse)
+  // W0 (2-wide sizing): number of queue entries issuable THIS cycle under the
+  // current in-order constraints. >=2 means a second issue port could fire a
+  // second instruction; ~always <=1 means the core is latency-bound and 2-wide
+  // issue would buy nothing.
+  val readyCount = IO(Output(UInt(log2Ceil(instrIssueDepth + 1).W)))
+  readyCount := PopCount(readyVector)
+
   // picks the oldest ready instruction in the issue queue
   val dequeuedIndex = MuxCase(0.U, Seq.tabulate(instrIssueDepth)(i => (readyVector(i).asBool -> i.U)))
   val dequeued = MuxCase(queue(instrIssueDepth-1), Seq.tabulate(instrIssueDepth-1)(i => (readyVector(i).asBool -> queue(i)))) //queue(dequeuedIndex)

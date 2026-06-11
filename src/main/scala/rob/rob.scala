@@ -98,6 +98,10 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
   val headValid = IO(Output(Bool()))
   headValid := fifo.io.deq.valid & results.io.deq.valid
 
+  // W0 (2-wide commit sizing): head+1 entry present and result-ready.
+  val secondReady = IO(Output(Bool()))
+  secondReady := results.secondReady
+
   when (commit.fired){
     fifo.io.deq.ready := 1.U
     results.io.deq.ready := 1.U

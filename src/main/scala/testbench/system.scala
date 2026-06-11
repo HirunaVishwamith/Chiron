@@ -173,6 +173,19 @@ class system extends Module {
       }
     }
 
+    // W0: 2-wide superscalar opportunity sizing. The core is ~48% latency-bound,
+    // so width only pays off on cycles that actually have a second ready
+    // instruction. These ceilings decide whether to widen issue, commit, both,
+    // or neither before building any 2-wide datapath.
+    //   issueReadyGE2 — >=2 queue entries issuable this cycle (2-wide issue could
+    //                   fire a second op). Necessary condition for sustained >1 IPC.
+    //   commitTwoOpp  — head committed AND head+1 result-ready (2-wide commit
+    //                   would have retired two this cycle). Realized commit ceiling.
+    val pc_issueReadyGE2 = RegInit(0.U(64.W))
+    val pc_commitTwoOpp  = RegInit(0.U(64.W))
+    when(scheduler.readyCount >= 2.U) { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
+    when(rob.commit.fired && rob.secondReady) { pc_commitTwoOpp := pc_commitTwoOpp + 1.U }
+
     val perfCnt = IO(Output(new Bundle {
       val cycles          = UInt(64.W)
       val instRetired     = UInt(64.W)
@@ -205,6 +218,8 @@ class system extends Module {
       val rnrStoreGate    = UInt(64.W)
       val rnrWbGate       = UInt(64.W)
       val rnrLoadGate     = UInt(64.W)
+      val issueReadyGE2   = UInt(64.W)
+      val commitTwoOpp    = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -237,6 +252,8 @@ class system extends Module {
     perfCnt.rnrStoreGate    := pc_rnrStoreGate
     perfCnt.rnrWbGate       := pc_rnrWbGate
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
+    perfCnt.issueReadyGE2   := pc_issueReadyGE2
+    perfCnt.commitTwoOpp    := pc_commitTwoOpp
   })
 
   val memory = Module(new mainMemory)
@@ -553,7 +570,7 @@ class system extends Module {
 
   // Expose as a flat Vec for easy C++ access
   // 10 core + 8 system + 4 frontend-bubble + 3 boundary + 4 streamer-diag + 2 rob-split + 5 head-class + 3 rnr-gate = 39
-  val perfCountersOut = IO(Output(Vec(39, UInt(64.W))))
+  val perfCountersOut = IO(Output(Vec(41, UInt(64.W))))
   perfCountersOut(0)  := core0.perfCnt.cycles
   perfCountersOut(1)  := core0.perfCnt.instRetired
   perfCountersOut(2)  := core0.perfCnt.branchTotal
@@ -593,6 +610,8 @@ class system extends Module {
   perfCountersOut(36) := core0.perfCnt.rnrStoreGate
   perfCountersOut(37) := core0.perfCnt.rnrWbGate
   perfCountersOut(38) := core0.perfCnt.rnrLoadGate
+  perfCountersOut(39) := core0.perfCnt.issueReadyGE2
+  perfCountersOut(40) := core0.perfCnt.commitTwoOpp
 }
 
 object system extends App {

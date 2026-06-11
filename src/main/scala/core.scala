@@ -394,9 +394,22 @@ class core (
   }
   when(extnMResponse.valid && extnResponseInstruction(14).asBool) { mExtensionReady := true.B }
 
-  division.remainder := Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor)
-  division.quotient := Cat(division.quotient(63, 0), ~(Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor))(64))
-  division.counter := division.counter - 1.U
+  // Radix-4 (B5): unroll the proven non-restoring radix-2 recurrence TWICE per
+  // clock and decrement the counter by 2, halving the iteration cycles. The
+  // arithmetic of each sub-step is bit-identical to the original radix-2 loop,
+  // so the final quotient/remainder are unchanged after the same TOTAL step
+  // count. `doTwo` (counter >= 2) keeps step parity exact: an odd remaining
+  // count finishes with a single radix-2 step, landing the counter precisely on
+  // 0 just like before — never overshooting. The result-extraction path
+  // (counter == 0) makes no parity assumption, so it is untouched.
+  val remStep1 = (Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor))(64, 0)
+  val quoStep1 = Cat(division.quotient(63, 0), ~remStep1(64))
+  val remStep2 = (Cat(remStep1(63, 0), quoStep1(64)) + Mux(remStep1(64).asBool, division.divisor, - division.divisor))(64, 0)
+  val quoStep2 = Cat(quoStep1(63, 0), ~remStep2(64))
+  val doTwo    = division.counter >= 2.U
+  division.remainder := Mux(doTwo, remStep2, remStep1)
+  division.quotient  := Mux(doTwo, quoStep2, quoStep1)
+  division.counter   := Mux(doTwo, division.counter - 2.U, division.counter - 1.U)
 
   when(extnMRequest.valid && extnMRequest.instruction(14).asBool) {
     division.counter := 65.U

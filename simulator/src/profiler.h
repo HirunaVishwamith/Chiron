@@ -129,6 +129,8 @@ public:
             case 36: return tb->perfCountersOut_36;
             case 37: return tb->perfCountersOut_37;
             case 38: return tb->perfCountersOut_38;
+            case 39: return tb->perfCountersOut_39;
+            case 40: return tb->perfCountersOut_40;
             default: return 0ULL;
         }
     }
@@ -368,6 +370,12 @@ public:
           printf("    store wr-commit: %19.2f%%  (%llu)\n", 100.0 * rnrS / sc, rnrS);
           printf("    writeback port:  %19.2f%%  (%llu)\n", 100.0 * rnrW / sc, rnrW);
           printf("    load commit:     %19.2f%%  (%llu)\n", 100.0 * rnrL / sc, rnrL);
+          unsigned long long iss2 = get_perf_counter(39), com2 = get_perf_counter(40);
+          printf("  -- 2-wide opportunity (W0) --\n");
+          printf("    issue >=2 ready: %19.2f%%  (%llu)  [2-wide issue ceiling]\n",
+                 100.0 * iss2 / sc, iss2);
+          printf("    commit 2 ready:  %19.2f%%  (%llu)  [2-wide commit ceiling]\n",
+                 100.0 * com2 / sc, com2);
         }
         printf("=========================================\n\n");
     }

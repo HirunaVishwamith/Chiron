@@ -254,6 +254,12 @@ class fetch(val fifo_size: Int) extends Module {
 
 
   // initialize BHT and fifo buffer
+  // F3b NOTE: a full TAGE+RAS predictor exists in fetch/tage.scala and is a
+  // drop-in for this line (`new tage_predictor`). Measured on vvadd-s1 it
+  // lifts branch accuracy 58.9%->63.2% but REGRESSES IPC 0.2585->0.2406:
+  // branches are only ~2.9% of ROB-head stalls here, so the accuracy win is
+  // invisible while the RAS/return-table speculation surface costs net cycles.
+  // gshareV2 is retained as the IPC-optimal choice; swap the line to profile.
   val predictor = Module(new gshareV2_predictor(4096, 512, 24))
   predictor.io.branchres <> branchRes
   predictor.io.curr_pc := PC
