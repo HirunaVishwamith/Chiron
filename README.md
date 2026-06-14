@@ -25,7 +25,7 @@
 
 ---
 
-## ✨ Highlights
+##  Highlights
 
 - **Out-of-order, superscalar** RV64IMA pipeline — register renaming, a reorder
   buffer, a centralized issue queue with wake-up, and in-order commit.
@@ -42,20 +42,14 @@
 
 ---
 
-## 🔥 See it run
+##  See it run
 
-A bare-metal Doom-fire renders straight from the core's UART — an 80×50 grid
-drawn with half-block glyphs, scrolling embers rising from a hot bed:
+A bare-metal Doom-fire renders straight from the core's UART — 80×50 half-block
+glyphs, scrolling embers rising from a hot bed, running on real RTL:
 
-```text
-                                                ▁▂▃            ← cool tips
-                                  ▂▃▅      ▃▅▆▇█▇▆▅
-                        ▃▅▆▇█▇▆  ▅▆▇███████████▇▆▅
-              ▅▆▇██████████████████████████████████▇▆▅▃
-   ███████████████████████████████████████████████████████   ← ember bed
-```
-
-Run it live in your terminal — straight RTL (or the emulator), no framebuffer:
+<div align="center">
+<img src="docs/fire.gif" alt="Chiron fire demo" width="720"/>
+</div>
 
 ```bash
 make fire            # build + render live (Ctrl-C to stop)
@@ -63,7 +57,7 @@ make fire            # build + render live (Ctrl-C to stop)
 
 ---
 
-## 🧠 Microarchitecture
+##  Microarchitecture
 
 ```mermaid
 flowchart LR
@@ -113,7 +107,7 @@ flowchart LR
 
 ---
 
-## 📂 Repository layout
+##  Repository layout
 
 ```
 Chiron/
@@ -138,7 +132,7 @@ Chiron/
 
 ---
 
-## 🚀 Quick start
+##  Quick start
 
 ### Prerequisites
 
@@ -191,21 +185,20 @@ scales `s1`…`s5`. Defaults to `vvadd-s1`.
 
 ---
 
-## ✅ Verification — lock-step
+##  Verification — lock-step
 
 Correctness is proven by running the **RTL** and the **C++ golden model** in
 lock-step, comparing architectural state after **every committed instruction**:
 
 ```mermaid
-sequenceDiagram
-    participant R as RTL (Verilator)
-    participant G as Golden model
-    loop per committed instruction
-        R->>R: tick until commit
-        G->>G: step one instruction
-        R-->>G: compare 32 GPRs + CSRs + PC
-        Note over R,G: mismatch → dump states.log / regs.log, exit ≠ 0
-    end
+flowchart LR
+    RTL["RTL (Verilator)"] --> CMP{"compare 32 GPRs, CSRs, PC"}
+    GM["Golden Model (C++)"] --> CMP
+    CMP -- match --> NEXT[next instruction]
+    NEXT --> RTL
+    NEXT --> GM
+    CMP -- mismatch --> DUMP["dump states.log / regs.log / run.log"]
+    DUMP --> FAIL([exit != 0])
 ```
 
 `make test` runs the full official `riscv-tests` suite (**84/84 pass**) plus
@@ -214,7 +207,7 @@ full `system_trace.vcd` for waveform debugging.
 
 ---
 
-## 📈 Performance
+##  Performance
 
 Profiling (`make profile`) reports IPC, branch accuracy, cache miss rates and a
 ROB-head **stall decomposition** (latency-bound vs commit-width-bound, by
@@ -241,7 +234,7 @@ surface.
 
 ---
 
-## 🗺️ Roadmap
+##  Roadmap
 
 - Widen **commit** before 2-wide issue (ROB-only; same ~12% width ceiling, far
   cheaper) — measured as the better next step.
@@ -251,7 +244,7 @@ surface.
 
 ---
 
-## 🙏 Credits
+##  Credits
 
 Built as a final-year project at the **University of Moratuwa**. Chisel/FIRRTL by
 the Chisel community; verification leans on **Verilator** and the official
