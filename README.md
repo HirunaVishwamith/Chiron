@@ -191,14 +191,15 @@ Correctness is proven by running the **RTL** and the **C++ golden model** in
 lock-step, comparing architectural state after **every committed instruction**:
 
 ```mermaid
-flowchart LR
-    RTL["RTL (Verilator)"] --> CMP{"compare 32 GPRs, CSRs, PC"}
-    GM["Golden Model (C++)"] --> CMP
-    CMP -- match --> NEXT[next instruction]
-    NEXT --> RTL
-    NEXT --> GM
-    CMP -- mismatch --> DUMP["dump states.log / regs.log / run.log"]
-    DUMP --> FAIL([exit != 0])
+sequenceDiagram
+    participant R as RTL (Verilator)
+    participant G as Golden model
+    loop per committed instruction
+        R->>R: tick until commit
+        G->>G: step one instruction
+        R-->>G: compare 32 GPRs + CSRs + PC
+        Note over R,G: mismatch → dump states.log / regs.log, exit ≠ 0
+    end
 ```
 
 `make test` runs the full official `riscv-tests` suite (**84/84 pass**) plus
