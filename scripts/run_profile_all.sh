@@ -7,7 +7,7 @@
 #
 # Prerequisites:
 #   - profile_run.out must already be built (make profile_build)
-#   - fyp18-riscv-emulator/riscv-tests/images/ must contain .bin files
+#   - emulator/riscv-tests/images/ must contain .bin files
 #   - benchmark/ must contain mt-*.bin files
 #
 # Outputs:
@@ -18,8 +18,8 @@ set -euo pipefail
 
 PROFILE_BIN="./profile_run.out"
 RESULTS_DIR="profile_results"
-IMAGE_PATH="fyp18-riscv-emulator/src/Image"
-ISA_IMAGES_DIR="fyp18-riscv-emulator/riscv-tests/images"
+IMAGE_PATH="emulator/src/Image"
+ISA_IMAGES_DIR="emulator/riscv-tests/images"
 BENCHMARK_DIR="benchmark"
 VISUALIZE_SCRIPT="scripts/profile_visualize.py"
 

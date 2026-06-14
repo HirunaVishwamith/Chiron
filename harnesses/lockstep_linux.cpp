@@ -4,7 +4,7 @@
 #define LOCKSTEP
 #define MISA_SPEC (0b100000001000100000001 | (0b1llu << 63))
 // #define EMULATOR_LOGGING
-#include "fyp18-riscv-emulator/src/emulator.h"
+#include "emulator/src/emulator.h"
 #undef SHOW_TERMINAL
 #include "simulator/src/simulator.h"
 #include <chrono>
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
   } */
 
   simulator bench;
-  bench.init("fyp18-riscv-emulator/src/Image", argv[2], argv[3]);
+  bench.init("emulator/src/Image", argv[2], argv[3]);
   printf("bench inititated!\n");
   cout << endl;
 
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
   // golden_model.load_symbols("resources/symbol_names.txt", "resources/symbol_pointers.bin");
   char x;
   // golden_model.init();
-  golden_model.init("fyp18-riscv-emulator/src/Image");
+  golden_model.init("emulator/src/Image");
   //golden_model.print_symbols();
   /* golden_model.step();
   golden_model.step(); */

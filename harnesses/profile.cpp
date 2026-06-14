@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    const char *image_path = find_arg(argc, argv, "--image", "fyp18-riscv-emulator/src/Image");
+    const char *image_path = find_arg(argc, argv, "--image", "emulator/src/Image");
     const char *output_path = find_arg(argc, argv, "--output", "");
     const char *bench_name  = find_arg(argc, argv, "--name", nullptr);
     const char *timeout_str = find_arg(argc, argv, "--timeout", "2000000000");

@@ -2,10 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 #define LOCKSTEP
 #define MISA_SPEC (0b100000001000100000001 | (0b1llu << 63))
 // #define EMULATOR_LOGGING
-#include "fyp18-riscv-emulator/src/emulator.h"
+#include "emulator/src/emulator.h"
 #undef SHOW_TERMINAL
 #include "simulator/src/simulator.h"
 #include <chrono>
@@ -62,10 +63,19 @@ void signal_callback_handler(int signum) {
 
 // emulator emu;
 
+// Resolve --image <path> (default to the staged Image) so the ISA loop can run
+// any test binary directly, without copying it to a fixed filename first.
+static const char *find_image_arg(int argc, char **argv) {
+  for (int i = 1; i < argc - 1; ++i)
+    if (strcmp(argv[i], "--image") == 0) return argv[i + 1];
+  return "emulator/src/Image";
+}
+
 int main(int argc, char* argv[]) {
+  const char *image_path = find_image_arg(argc, argv);
   struct tm current_time;
   time_t now = time(NULL);
-    
+
   localtime_r(&now, &current_time);
     
   // Name of kernel image must be provided at run time
@@ -82,8 +92,8 @@ int main(int argc, char* argv[]) {
   } */
 
   simulator bench;
-  bench.init("fyp18-riscv-emulator/src/Image", argv[2], argv[3]);
-  printf("bench inititated!\n");
+  bench.init(image_path);
+  printf("bench inititated! image=%s\n", image_path);
   cout << endl;
 
   // golden_model.load_dtb(argv[2], 0x7e00000UL);
@@ -91,7 +101,7 @@ int main(int argc, char* argv[]) {
   // golden_model.load_symbols("resources/symbol_names.txt", "resources/symbol_pointers.bin");
   char x;
   // golden_model.init();
-  golden_model.init("fyp18-riscv-emulator/src/Image");
+  golden_model.init(image_path);
   //golden_model.print_symbols();
   /* golden_model.step();
   golden_model.step(); */

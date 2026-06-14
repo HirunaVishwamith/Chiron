@@ -87,13 +87,15 @@ jobs:
       run: make sim
 
     # =========================
-    # Run lockstep (FIXED TARGET NAME)
+    # Run lockstep
+    # (runLockStep = compatibility alias → unified harness, vvadd-s1)
     # =========================
     - name: Run Lockstep
       run: make runLockStep
 
     # =========================
     # Run tests
+    # (test_all_images = compatibility alias → full ISA regression, == `make isa`)
     # =========================
     - name: Run full test suite
       run: make test_all_images
