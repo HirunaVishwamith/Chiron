@@ -76,3 +76,7 @@ project/
 # Exception rules
 # =========================
 !vivado.tcl
+# Workload build artifacts (sources are tracked; outputs are regenerable)
+workloads/**/*.o
+workloads/**/*.riscv
+workloads/**/*.bin
