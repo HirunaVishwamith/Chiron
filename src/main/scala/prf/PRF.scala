@@ -6,30 +6,30 @@ class execRead extends Bundle {
   val valid = Input(Bool())
   val instruction  = Input(UInt(32.W))
   val branchMask = Input(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
-  val rs1Addr = Input(UInt(6.W))
-  val rs2Addr = Input(UInt(6.W))
-  val robAddr = Input(UInt(6.W))
-  val prfDest = Input(UInt(6.W))
+  val rs1Addr = Input(UInt(configuration.prfAddrWidth.W))
+  val rs2Addr = Input(UInt(configuration.prfAddrWidth.W))
+  val robAddr = Input(UInt(configuration.robAddrWidth.W))
+  val prfDest = Input(UInt(configuration.prfAddrWidth.W))
 }
 
 class toexec extends Bundle {
   val valid = Output(Bool())
   val instruction  = Output(UInt(32.W))
   val branchMask = Output(UInt(configuration.newBranchMaskWidth.W))  //leon coherency
-  val rs1Addr = Output(UInt(6.W))
+  val rs1Addr = Output(UInt(configuration.prfAddrWidth.W))
   val rs1Data = Output(UInt(64.W))
-  val rs2Addr = Output(UInt(6.W))
+  val rs2Addr = Output(UInt(configuration.prfAddrWidth.W))
   val rs2Data = Output(UInt(64.W))
-  val robAddr = Output(UInt(6.W))
-  val prfDest = Output(UInt(6.W))
+  val robAddr = Output(UInt(configuration.robAddrWidth.W))
+  val prfDest = Output(UInt(configuration.prfAddrWidth.W))
 }
 
 class fromStore extends Bundle {
   val valid = Input(Bool())
   val instruction = Input(UInt(32.W))
   val branchMask = Input(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
-  val rs2Addr = Input(UInt(6.W))
-  val prfDest = Input(UInt(6.W))
+  val rs2Addr = Input(UInt(configuration.prfAddrWidth.W))
+  val prfDest = Input(UInt(configuration.prfAddrWidth.W))
 }
 
 class toStore extends Bundle {
@@ -37,7 +37,7 @@ class toStore extends Bundle {
   val instruction = Output(UInt(32.W))
   val branchMask = Output(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
   val rs2Data = Output(UInt(64.W))
-  val prfDest = Output(UInt(6.W))
+  val prfDest = Output(UInt(configuration.prfAddrWidth.W))
 }
 
 class checkBranch extends Bundle {
@@ -140,7 +140,7 @@ class PRF extends Module {
   toStore.valid := RegNext(fromStore.valid, false.B)
   toStore.branchMask := toStore_mask
 
-  val physicalRegisterFile = Reg(Vec(64, UInt(64.W)))
+  val physicalRegisterFile = Reg(Vec(1 << configuration.prfAddrWidth, UInt(64.W)))
   val registerFileOutput = IO(Output(physicalRegisterFile.cloneType))
   Seq(w1, w2, w3, w4) foreach {port => when(port.en) { physicalRegisterFile(port.addr) := port.data } }
   registerFileOutput := physicalRegisterFile

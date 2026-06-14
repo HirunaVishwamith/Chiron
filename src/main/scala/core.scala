@@ -394,22 +394,27 @@ class core (
   }
   when(extnMResponse.valid && extnResponseInstruction(14).asBool) { mExtensionReady := true.B }
 
-  // Radix-4 (B5): unroll the proven non-restoring radix-2 recurrence TWICE per
-  // clock and decrement the counter by 2, halving the iteration cycles. The
-  // arithmetic of each sub-step is bit-identical to the original radix-2 loop,
-  // so the final quotient/remainder are unchanged after the same TOTAL step
-  // count. `doTwo` (counter >= 2) keeps step parity exact: an odd remaining
-  // count finishes with a single radix-2 step, landing the counter precisely on
-  // 0 just like before — never overshooting. The result-extraction path
-  // (counter == 0) makes no parity assumption, so it is untouched.
+  // Radix-8 (B6): unroll the proven non-restoring radix-2 recurrence THREE times
+  // per clock and decrement the counter by 3, cutting the iteration cycles to
+  // ceil(N/3). The arithmetic of each sub-step is bit-identical to the original
+  // radix-2 loop, so the final quotient/remainder are unchanged after the same
+  // TOTAL step count. The counter-parity select keeps the step count exact: it
+  // takes 3 steps while >=3 remain, then a 2-step or 1-step tail so the counter
+  // lands precisely on 0 — never overshooting. The result-extraction path
+  // (counter == 0) makes no parity assumption, so it is untouched. (B5 was the
+  // 2-step radix-4 form; the 3rd chained 65-bit add/sub lengthens the divider's
+  // combinational path — acceptable for the sim/IPC metric, watch FPGA timing.)
   val remStep1 = (Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor))(64, 0)
   val quoStep1 = Cat(division.quotient(63, 0), ~remStep1(64))
   val remStep2 = (Cat(remStep1(63, 0), quoStep1(64)) + Mux(remStep1(64).asBool, division.divisor, - division.divisor))(64, 0)
   val quoStep2 = Cat(quoStep1(63, 0), ~remStep2(64))
-  val doTwo    = division.counter >= 2.U
-  division.remainder := Mux(doTwo, remStep2, remStep1)
-  division.quotient  := Mux(doTwo, quoStep2, quoStep1)
-  division.counter   := Mux(doTwo, division.counter - 2.U, division.counter - 1.U)
+  val remStep3 = (Cat(remStep2(63, 0), quoStep2(64)) + Mux(remStep2(64).asBool, division.divisor, - division.divisor))(64, 0)
+  val quoStep3 = Cat(quoStep2(63, 0), ~remStep3(64))
+  val doThree  = division.counter >= 3.U
+  val doTwo    = division.counter === 2.U
+  division.remainder := Mux(doThree, remStep3, Mux(doTwo, remStep2, remStep1))
+  division.quotient  := Mux(doThree, quoStep3, Mux(doTwo, quoStep2, quoStep1))
+  division.counter   := Mux(doThree, division.counter - 3.U, Mux(doTwo, division.counter - 2.U, division.counter - 1.U))
 
   when(extnMRequest.valid && extnMRequest.instruction(14).asBool) {
     division.counter := 65.U
@@ -923,6 +928,15 @@ class core (
       counters.minstret := counters.minstret + 1.U
     }
   }
+
+  // Drive the architectural HPM counters in decode. These are free-running
+  // (not gated by `programRunning`) so software rdcycle/rdinstret/rdhpmcounterN
+  // reflect the whole program, not just the profiling window above.
+  decode.perfEvents.instRetire     := rob.commit.fired
+  decode.perfEvents.branchResolved := branchOps.valid
+  decode.perfEvents.branchMispred  := branchOps.valid && !branchOps.passed
+  decode.perfEvents.schedStall     := decode.toExec.ready && !scheduler.allocate.ready
+  decode.perfEvents.robStall       := decode.toExec.ready && !rob.allocate.ready
 
   val core_sample0, core_sample1 = IO(Output(UInt(1.W)))
   core_sample0 := decode.fromFetch.expected.valid.asUInt

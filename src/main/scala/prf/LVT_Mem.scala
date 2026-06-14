@@ -1,14 +1,15 @@
 import chisel3._
 import chisel3.util._
+import common.configuration
 
 class readPort extends Bundle{
-  val addr = Input(UInt(6.W))
+  val addr = Input(UInt(configuration.prfAddrWidth.W))
   val data = Output(UInt(64.W))
   val en = Input(Bool())
 }
 
 class writePort extends Bundle{
-  val addr = Input(UInt(6.W))
+  val addr = Input(UInt(configuration.prfAddrWidth.W))
   val data = Input(UInt(64.W))
   val en = Input(Bool())
 }
@@ -28,8 +29,8 @@ class LVT_Mem extends Module {
     val W4 = new writePort
   })
 
-  // define LVT
-  val LVT = Mem(64,UInt(2.W))
+  // define LVT — one 2-bit bank-select entry per physical register
+  val LVT = Mem(1 << configuration.prfAddrWidth, UInt(2.W))
 
   // define block memory sets
   val s1 = Module(new LVT_set)

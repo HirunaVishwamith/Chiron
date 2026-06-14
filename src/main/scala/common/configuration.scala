@@ -17,12 +17,13 @@ object configuration {
 
 
   val instrIssueDepth = 8
-  val robAddrWidth = 4
-  val prfAddrWidth = 6
+  val robAddrWidth = 4  // 16 ROB entries (validated baseline). Width path is fully parameterized now, but
+  val prfAddrWidth = 6  // 5/7 is NOT worth it: vvadd regressed -5.8% (latency-bound core) and matmul/csaxpy/histo
+                        // still hang on further latent truncations. See window-scaling memory before revisiting.
   val branchMaskWidth = 4
   val ramBaseAddress = 0x0000000080000000L
   val ramHighAddress = 0x00000000ffffffffL
-  val instructionBase = 0x0000000080000000L
+  val instructionBase = 0x0000000080000000L// = 0x0000000080000000L
   val bootBase = 0x0000000010000000L
   val bootHigh = 0x0000000010001f40L
   object cache {
@@ -87,7 +88,7 @@ object coreConfiguration {
     val dCacheLineWidth = 6
     val dCacheTagWidth = 32 - dCacheLineWidth - dCacheDoubleWordOffsetWidth - 3
     val dCacheBlockSize = (1 << dCacheDoubleWordOffsetWidth)
-    val instructionBase = 0x0000000080000000L
+    val instructionBase = 0x0000000080000000L// = 0x0000000080000000L
 }
 
 object constants {

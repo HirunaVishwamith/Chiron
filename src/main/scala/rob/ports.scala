@@ -10,6 +10,7 @@ package pipeline.ports
 
 import chisel3._
 import chisel3.util._
+import common.configuration
 
 
 class composableInterface extends Bundle {
@@ -20,7 +21,7 @@ class composableInterface extends Bundle {
 class robAllocate(addr_w :Int) extends composableInterface {
   val pc = Input(UInt(64.W))
   val instruction = Input(UInt(32.W))
-  val prfDest = Input(UInt(6.W))
+  val prfDest = Input(UInt(configuration.prfAddrWidth.W))
   val robAddr = Output(UInt(addr_w.W))
   val isReady = Input(Bool())
 }
@@ -34,7 +35,7 @@ class pullExecResult(addr_w :Int) extends Bundle {
 }
 
 class retireInstruction(addr_w :Int) extends composableInterface {
-  val prfDest = Output(UInt(6.W))
+  val prfDest = Output(UInt(configuration.prfAddrWidth.W))
   val pc = Output(UInt(64.W))
   val instruction = Output(UInt(32.W))
   val exceptionOccurred = Output(Bool())

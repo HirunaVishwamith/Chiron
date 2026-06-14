@@ -1,5 +1,7 @@
 package cache_phase3
 
+import common.configuration
+
 //AXI port ID is hard-coded
 
 object constants{
@@ -17,9 +19,12 @@ object constants{
   val dataWidth : Int = 64
   val insWidth : Int = 32
 
-  val branchMaskWidth : Int = 5
-  val robAddrWidth : Int = 4
-  val prfAddrWidth : Int = 6
+  // Derive from the central config — local copies here shadowed the global
+  // widths and silently truncated robAddr/prfDest in the D-cache path, waking
+  // the wrong ROB entry / wrong physical reg once the window grew past 16/64.
+  val branchMaskWidth : Int = configuration.newBranchMaskWidth
+  val robAddrWidth : Int = configuration.robAddrWidth
+  val prfAddrWidth : Int = configuration.prfAddrWidth
 
   val FIFO_ADDR_TX = "hE000_1030"
   val FIFO_ADDR_RX = "hE000_102C"

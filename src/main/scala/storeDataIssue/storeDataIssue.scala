@@ -105,7 +105,7 @@ class fromROBUnit extends Bundle{
 
 class fromBranchUnit extends Bundle{
   val passOrFail  = Input(Bool())
-  val robAddr   = Input(UInt(log2Ceil(fifo_depth).W))
+  val robAddr   = Input(UInt(robAddrWidth.W))  // architectural ROB address (indexes `map`)
   val valid       = Input(Bool())
 }
 
@@ -125,7 +125,7 @@ class fromDecodeUnit extends composableInterface{
 
 class fromDecodeRobAddr extends composableInterface {
   // Gives robaddr of all instuctions that leave decode
-  val robAddr = Input(UInt(4.W))
+  val robAddr = Input(UInt(robAddrWidth.W))
 }
 
 
@@ -148,8 +148,8 @@ class storeDataIssue extends Module{
     readPtrOut := readPtr
   })
 
-  // map each robaddr to a storedataqueue addr
-  val map = Mem(16, UInt(log2Ceil(fifo_depth).W))
+  // map each robaddr to a storedataqueue addr (one entry per ROB slot)
+  val map = Mem(1 << robAddrWidth, UInt(log2Ceil(fifo_depth).W))
   // map(robMapUpdate.robAddr) := sdiFifo.allocatedAddr
   when(robMapUpdate.valid) {
     map(robMapUpdate.robAddr) := sdiFifo.allocatedAddr
@@ -173,8 +173,8 @@ class storeDataIssue extends Module{
   //toStore_reg               := sdiFifo.io.deq.bits
 
   //Connecting the register to the outputs to PRF
-  toPRF.rs2Addr     := sdiFifo.io.deq.bits(5,0)
-  toPRF.branchMask  := sdiFifo.io.deq.bits(10,6) //leon coherency changed the bits to 5 bits
+  toPRF.rs2Addr     := sdiFifo.io.deq.bits(prfAddrWidth-1, 0)
+  toPRF.branchMask  := sdiFifo.io.deq.bits(prfAddrWidth+newBranchMaskWidth-1, prfAddrWidth) //leon coherency changed the bits to 5 bits
   toPRF.instruction := fromDecode.instruction
   toPRF.valid       := sdiFifo.io.deq.valid
 

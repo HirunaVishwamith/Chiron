@@ -303,8 +303,8 @@ class decode (
       PRFValidList   := (reservedValidList1 zip PRFValidList map{case(reserved, current) => reserved | current})
       }.otherwise{
         frontEndRegMap := architecturalRegMap
-        PRFFreeList    := VecInit(Seq.fill(64)(true.B))
-        PRFValidList   := VecInit(Seq.fill(64)(false.B))
+        PRFFreeList    := VecInit(Seq.fill(PRFCount)(true.B))
+        PRFValidList   := VecInit(Seq.fill(PRFCount)(false.B))
         coherency := true.B  //leon coherency
 
         for (i <- 0 until regCount){
@@ -438,6 +438,36 @@ class decode (
   val mimpid      = RegInit(0.U(dataWidth.W))
   val mhartid     = RegInit(mhart_id.U(dataWidth.W))
 
+  // === Hardware Performance-Monitoring (HPM) counters ===
+  // Architectural state, readable by software via rdcycle / rdinstret /
+  // rdhpmcounterN (and their M-mode mcycle/minstret/mhpmcounterN aliases).
+  // Driven by event pulses from the core (see core.scala perfEvents wiring).
+  // Unlike the simulation-only `counters` bundle in core.scala — which freezes
+  // at the benchmark-end PC marker — these are FREE-RUNNING so a program can
+  // read consistent counts of its own execution. They are read-only from
+  // software (CSR writes are ignored, WARL-style); resetting is done at reset.
+  val perfEvents = IO(Input(new Bundle {
+    val instRetire     = Bool() // an instruction committed this cycle
+    val branchResolved = Bool() // a branch resolved this cycle
+    val branchMispred  = Bool() // the resolved branch was mispredicted
+    val schedStall     = Bool() // decode had work but the issue queue was full
+    val robStall       = Bool() // decode had work but the ROB was full
+  }))
+
+  val mcycle       = RegInit(0.U(dataWidth.W)) // 0xB00 / 0xC00 cycle
+  val minstretCsr  = RegInit(0.U(dataWidth.W)) // 0xB02 / 0xC02 instret
+  val mhpmcounter3 = RegInit(0.U(dataWidth.W)) // branches retired
+  val mhpmcounter4 = RegInit(0.U(dataWidth.W)) // branch mispredictions
+  val mhpmcounter5 = RegInit(0.U(dataWidth.W)) // issue-queue-full stall cycles
+  val mhpmcounter6 = RegInit(0.U(dataWidth.W)) // ROB-full stall cycles
+
+  mcycle       := mcycle + 1.U
+  minstretCsr  := minstretCsr + perfEvents.instRetire.asUInt
+  mhpmcounter3 := mhpmcounter3 + perfEvents.branchResolved.asUInt
+  mhpmcounter4 := mhpmcounter4 + perfEvents.branchMispred.asUInt
+  mhpmcounter5 := mhpmcounter5 + perfEvents.schedStall.asUInt
+  mhpmcounter6 := mhpmcounter6 + perfEvents.robStall.asUInt
+
   mstatus := (mstatus & "h0000000000001888".U) | "h0000000a00000000".U // FIX ME: deasserting illegal bits should be blocked when bit calculating
   misa := "h101101".U | (1.U(64.W) << 63)
 
@@ -475,6 +505,21 @@ class decode (
       is("hf12".U) { csrReadDataReg := marchid }
       is("hf13".U) { csrReadDataReg := mimpid }
       is("hf14".U) { csrReadDataReg := mhartid }
+      // --- Machine-mode HPM counters ---
+      is("hb00".U) { csrReadDataReg := mcycle }       // mcycle
+      is("hb02".U) { csrReadDataReg := minstretCsr }  // minstret
+      is("hb03".U) { csrReadDataReg := mhpmcounter3 } // branches retired
+      is("hb04".U) { csrReadDataReg := mhpmcounter4 } // branch mispredictions
+      is("hb05".U) { csrReadDataReg := mhpmcounter5 } // issue-queue-full stalls
+      is("hb06".U) { csrReadDataReg := mhpmcounter6 } // ROB-full stalls
+      // --- User-mode read-only shadows (rdcycle/rdtime/rdinstret/rdhpmcounterN) ---
+      is("hc00".U) { csrReadDataReg := mcycle }       // cycle
+      is("hc01".U) { csrReadDataReg := mcycle }       // time (no separate timer; aliased to cycle)
+      is("hc02".U) { csrReadDataReg := minstretCsr }  // instret
+      is("hc03".U) { csrReadDataReg := mhpmcounter3 }
+      is("hc04".U) { csrReadDataReg := mhpmcounter4 }
+      is("hc05".U) { csrReadDataReg := mhpmcounter5 }
+      is("hc06".U) { csrReadDataReg := mhpmcounter6 }
     }
   }
 

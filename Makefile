@@ -292,6 +292,7 @@ profile_benchmarks: profile_build
 			cp benchmark/mt-vvadd-s$$s.bin fyp18-riscv-emulator/src/Image; \
 			./profile_run.out --image fyp18-riscv-emulator/src/Image \
 				--name vvadd-s$$s --output profile_results/vvadd-s$$s.json \
+				--done-pc 0x800009a0 --done-pc 0x800009ac --done-a0 2 \
 				--timeout 500000000 || true; \
 		fi; \
 	done
@@ -300,6 +301,7 @@ profile_benchmarks: profile_build
 			cp benchmark/mt-matmul-s$$s.bin fyp18-riscv-emulator/src/Image; \
 			./profile_run.out --image fyp18-riscv-emulator/src/Image \
 				--name matmul-s$$s --output profile_results/matmul-s$$s.json \
+				--done-pc 0x80000a04 \
 				--timeout 500000000 || true; \
 		fi; \
 	done
@@ -308,6 +310,7 @@ profile_benchmarks: profile_build
 			cp benchmark/mt-mask-sfilter-s$$s.bin fyp18-riscv-emulator/src/Image; \
 			./profile_run.out --image fyp18-riscv-emulator/src/Image \
 				--name filter-s$$s --output profile_results/filter-s$$s.json \
+				--done-pc 0x80000bc8 \
 				--timeout 500000000 || true; \
 		fi; \
 	done
@@ -316,6 +319,7 @@ profile_benchmarks: profile_build
 			cp benchmark/mt-csaxpy-s$$s.bin fyp18-riscv-emulator/src/Image; \
 			./profile_run.out --image fyp18-riscv-emulator/src/Image \
 				--name csaxpy-s$$s --output profile_results/csaxpy-s$$s.json \
+				--done-pc 0x800009a4 --done-pc 0x80000998 --done-a0 0 \
 				--timeout 500000000 || true; \
 		fi; \
 	done
@@ -324,6 +328,7 @@ profile_benchmarks: profile_build
 			cp benchmark/mt-histo-s$$s.bin fyp18-riscv-emulator/src/Image; \
 			./profile_run.out --image fyp18-riscv-emulator/src/Image \
 				--name histo-s$$s --output profile_results/histo-s$$s.json \
+				--done-pc 0x80000a40 \
 				--timeout 500000000 || true; \
 		fi; \
 	done

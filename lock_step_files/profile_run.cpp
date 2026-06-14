@@ -108,6 +108,16 @@ static bool has_flag(int argc, char **argv, const char *flag) {
     return false;
 }
 
+// Collect every value following a repeated flag, e.g. all --done-pc <hex>.
+static vector<uint64_t> collect_hex_args(int argc, char **argv, const char *flag) {
+    vector<uint64_t> out;
+    for (int i = 1; i < argc - 1; ++i) {
+        if (strcmp(argv[i], flag) == 0)
+            out.push_back(strtoull(argv[i + 1], nullptr, 0));
+    }
+    return out;
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────
 int main(int argc, char *argv[]) {
 
@@ -128,6 +138,16 @@ int main(int argc, char *argv[]) {
     const char *timeout_str = find_arg(argc, argv, "--timeout", "2000000000");
 
     uint64_t max_cycles = static_cast<uint64_t>(strtoull(timeout_str, nullptr, 10));
+
+    // Benchmark completion: each benchmark's exit/thread-join stub sits at a
+    // different PC, so the caller passes the right one(s) via --done-pc (may be
+    // repeated). An optional --done-a0 adds a register condition (a0 == val),
+    // matching the per-benchmark lock-step harnesses.
+    vector<uint64_t> done_pcs = collect_hex_args(argc, argv, "--done-pc");
+    const char *done_a0_str   = find_arg(argc, argv, "--done-a0", nullptr);
+    bool     have_a0_cond     = (done_a0_str != nullptr);
+    uint64_t done_a0_val      = have_a0_cond
+                                ? strtoull(done_a0_str, nullptr, 0) : 0;
 
     // Derive benchmark name from image path if not provided
     string benchmark_name;
@@ -201,6 +221,20 @@ int main(int argc, char *argv[]) {
         if (!tb->robOut_commitFired) continue;
 
         uint64_t pc = tb->robOut_pc;
+
+        // Benchmark completion (highest priority): caller-supplied --done-pc,
+        // optionally gated on a0. Checked before the ISA a7==93 heuristics so a
+        // benchmark's exit stub is never misread as an ISA-test failure.
+        if (!done_pcs.empty()) {
+            bool pc_hit = false;
+            for (uint64_t dpc : done_pcs) if (pc == dpc) { pc_hit = true; break; }
+            if (pc_hit && (!have_a0_cond || tb->registersOut_10 == done_a0_val)) {
+                printf("\n[profile_run] BENCHMARK COMPLETE (PC=0x%016llx)\n",
+                       (unsigned long long)pc);
+                exit_code = 0;
+                break;
+            }
+        }
 
         // ISA test: pass (gp/x3 == 1, a7/x17 == 93)
         if (tb->registersOut_3 == 1 && tb->registersOut_17 == 93) {
