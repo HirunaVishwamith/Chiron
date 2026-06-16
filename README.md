@@ -4,7 +4,7 @@
 
 # Chiron
 
-### An RV64IMA out-of-order superscalar processor, in Chisel
+### An RV64IMA out-of-order processor, in Chisel
 
 *In ancient lore **Chiron** (Kai-ron) was the wisest of the Centaurs — not a wild brute,*
 *but a gentle healer and the supreme teacher of heroes: Achilles, Heracles, Jason.*
