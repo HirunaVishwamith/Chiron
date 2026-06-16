@@ -27,7 +27,7 @@
 
 ##  Highlights
 
-- **Out-of-order, superscalar** RV64IMA pipeline — register renaming, a reorder
+- **Out-of-order** RV64IMA pipeline — register renaming, a reorder
   buffer, a centralized issue queue with wake-up, and in-order commit.
 - **Full memory hierarchy** — split L1 I/D caches, a **non-blocking L2** with
   MSHRs and pseudo-LRU, and an **ACE-style coherent interconnect**.
@@ -245,11 +245,20 @@ surface.
 
 ---
 
-##  Credits
 
-Built as a final-year project at the **University of Moratuwa**. Chisel/FIRRTL by
-the Chisel community; verification leans on **Verilator** and the official
-**riscv-tests**. The Chiron artwork crowns a core meant, above all, to teach.
+## Credits
+
+Built as a final-year project at the **University of Moratuwa**. 
+
+**Contributors** (in alphabetical order):
+* Ajith Pasquel
+* Hiruna Vishwamith
+* Kavieesha Yalegama
+* Leon Fernando
+* Mewan Rathnayaka
+* Yasiru Amarasinghe
+
+Chisel/FIRRTL by the Chisel community; verification leans on **Verilator** and the official **riscv-tests**. The Chiron artwork crowns a core meant, above all, to teach.
 
 <div align="center">
 <sub>“The wisest of the Centaurs taught heroes. This core teaches how an out-of-order machine really works.”</sub>
