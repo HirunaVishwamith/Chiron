@@ -175,7 +175,7 @@ object constants {
       val UNSUPPORTED = 0x7 
     }
 
-    def connectDefaultMaster(port: cache.AXI): Unit = {
+    def connectDefaultMaster(port: Icache.AXI): Unit = {
       port.ARVALID := false.B
       port.ARADDR := 0.U
       port.ARBURST := AXI.BURST.INCR.U

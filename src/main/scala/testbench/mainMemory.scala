@@ -7,9 +7,9 @@ import chisel3.experimental.IO
 
 import pipeline.ports._
 import common.coreConfiguration._
-import cache.AXI
+import Icache.AXI
 import os.write
-import decode.constants
+import Decode.constants
 import os.read
 import dataclass.data
 

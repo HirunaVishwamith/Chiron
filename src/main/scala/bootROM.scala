@@ -4,7 +4,7 @@ import chisel3.experimental.BundleLiterals._
 import chisel3.experimental.IO
 
 import pipeline.ports._
-import cache.AXI
+import Icache.AXI
 
 import java.io.FileInputStream
 

@@ -8,13 +8,13 @@ import chisel3.experimental.IO
 
 import pipeline.ports._
 import common.coreConfiguration._
-import cache.AXI
+import Icache.AXI
 import _root_.testbench.mainMemory
 import _root_.testbench.MultiUart
-import decode.constants
+import Decode.constants
 import _root_.testbench.simulatedMemory
 import Interconnect._
-import l2_cache._
+import L2_cache._
 
 // Shared perfCnt counter logic injected into each core's anonymous subclass.
 // Slots [21-28] are always 0 (no lineStreamer in quad-core fetch).

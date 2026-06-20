@@ -2,20 +2,22 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.BundleLiterals._
 
-import cache.iCache
-import decode._
-import pipeline.rob._
-import scheduler._
+import Icache.iCache
+import Decode._
+import Backend.rob._
+import Backend.scheduler._
 import common._
-import cache.AXI
-import storeDataIssue._
+import Icache.AXI
+import Backend.storeDataIssue._
 import os.proc
-import cache.pipelineMemoryRequest
+import Icache.pipelineMemoryRequest
 import dataclass.data
-import cache.peripheralHandler
+import Icache.peripheralHandler
 import chisel3.util.experimental.decode.decoder
-import cache_phase3.constants._
-import cache_phase3._
+import Dcache.constants._
+import Dcache._
+import Frontend._
+import Backend.prf._
 
 
 class core (
@@ -24,7 +26,7 @@ class core (
   iPort_id: Int,
   mhart_id: Int
 )extends Module {
-  val icache = Module(new cache.iCache(iPort_id = iPort_id))
+  val icache = Module(new Icache.iCache(iPort_id = iPort_id))
 
   val iPort = IO(new ACE(busWidth = 64))
   iPort <> icache.lowLevelMem
