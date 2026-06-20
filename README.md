@@ -18,7 +18,7 @@
 ![Chisel](https://img.shields.io/badge/Chisel-3.5.4-d22128)
 ![Scala](https://img.shields.io/badge/Scala-2.13.8-dc322f)
 ![Verilator](https://img.shields.io/badge/verified-Verilator%20lock--step-1f6feb)
-![ISA tests](https://img.shields.io/badge/riscv--tests-84%2F84-2ea44f)
+![ISA tests](https://img.shields.io/badge/riscv--tests-83%2F84-2ea44f)
 ![Target](https://img.shields.io/badge/clock-75%20MHz-555)
 
 </div>
@@ -163,39 +163,104 @@ sudo apt install verilator sbt make g++ python3
 make fix-inotify
 ```
 
-### Build
+### 1 — Build the RTL
 
 ```bash
-make sim        # Chisel → Verilog → Verilator library (one-time, ~5 min)
+make sim        # Chisel → Verilog → Verilator library (~5 min first time)
 ```
 
-### Verify (ISA regression + lock-step)
+> **Gotcha:** `make sim` always exits 0 even when `sbt` fails — it reuses a
+> stale `system.v`. Always verify by spot-checking the generated file:
+> ```bash
+> grep "WLAST" system.v   # should have > 0 hits
+> ```
+
+### 2 — Full regression (what CI runs)
 
 ```bash
-make test       # 84 ISA images + every benchmark, lock-step RTL vs emulator
+make test
 ```
 
-### Profile
+Runs in two stages:
+
+- **ISA suite** (`make isa`) — 84 official `riscv-tests` images, lock-step RTL
+  vs golden model. Expected result: **83/84** (`rv64ui-p-fence_i` is a known
+  I-cache coherence limitation).
+- **Quad-core vvadd** (`make test-q4`) — profile-based pass/fail on
+  `bins/mt-vvadd-q4.bin`.
+
+### 3 — Profiling
+
+#### Single quad-core benchmark
 
 ```bash
-# Single benchmark, single-core view (core 0)
-make profile        BENCH=vvadd-s1
+make profile-quad FAM=vvadd    # → build/profile_results/vvadd-q4.json
+make profile-quad FAM=csaxpy
+make profile-quad FAM=matmul
+make profile-quad FAM=filter
+make profile-quad FAM=histo
+```
 
-# All benchmarks at all scales, single-core
+#### All quad-core benchmarks + chart
+
+```bash
 make profile-all
-
-# Single benchmark, quad-core view (aggregate + per-core breakdown)
-make profile-quad   BENCH=vvadd-s1
-
-# All benchmarks, quad-core
-make profile-all-quad
+# → build/profile_results/<fam>-q4.json  (one per benchmark, 600 s timeout)
+# → build/profile_results/profile_report.png
 ```
 
-### Build quad-core binaries
+#### Single-core reference (all scales s1–s5)
 
 ```bash
-make bins-q4    # compiles all 5 benchmarks with NUM_CORES=4 → bins/mt-*-q4.bin
+make profile-all-sc
+# → build/profile_results/<fam>-s<N>.json
 ```
+
+#### Single benchmark, single-core, one scale
+
+```bash
+make profile BENCH=csaxpy-s2   # → build/profile_results/csaxpy-s2.json
+```
+
+### 4 — Debug a specific binary (lock-step with trace)
+
+```bash
+make lockstep BENCH=csaxpy-s2
+# Writes run.log  states.log  regs.log  to build/
+# Dumps VCD to   build/system_trace.vcd
+```
+
+Or directly with any image path:
+
+```bash
+./build/lockstep.out \
+    --image bins/mt-csaxpy-s2.bin \
+    --done-pc 0x800009a4 --done-pc 0x80000998 --done-a0 0 \
+    --logdir build
+```
+
+### 5 — Golden emulator (no RTL, < 1 second)
+
+```bash
+make emu BENCH=csaxpy-s3
+```
+
+### 6 — Rebuild workload binaries
+
+```bash
+make bins        # single-core s1–s5 bins for all 5 families
+make bins-q4     # quad-core -q4 bins (NUM_CORES=4) for all 5 families
+make bins-all    # both
+```
+
+### Timing reference (Verilator, ~6 500 RTL cycles/sec)
+
+| Benchmark | Approx wall time |
+|---|---|
+| vvadd-q4 | ~2 min |
+| csaxpy-s2 | ~5 min |
+| csaxpy-s5 / csaxpy-q4 | ~25 min |
+| matmul / filter / histo (q4) | 5–15 min |
 
 ### Make target reference
 
@@ -205,20 +270,22 @@ make bins-q4    # compiles all 5 benchmarks with NUM_CORES=4 → bins/mt-*-q4.bi
 | `make bins` | Build + stage single-core `.bin` images |
 | `make bins-q4` | Build + stage quad-core `.bin` images (`-DNUM_CORES=4`) |
 | `make bins-all` | Both of the above |
-| `make emu BENCH=…` | Run a benchmark on the golden emulator (fast) |
-| `make lockstep BENCH=…` | Lock-step RTL vs emulator (core 0) |
+| `make emu BENCH=…` | Run benchmark on the golden emulator (fast, no RTL) |
+| `make lockstep BENCH=…` | Lock-step RTL vs emulator; dumps logs + VCD |
+| `make isa` | Full RISC-V ISA regression suite (83/84 expected) |
+| `make test` | ISA suite + quad-core vvadd pass/fail |
 | `make profile BENCH=…` | Single-core cycle-accurate profile |
-| `make profile-all` | Profile every benchmark at every scale |
-| `make profile-quad BENCH=…` | Quad-core profile (aggregate + per-core) |
-| `make profile-all-quad` | Quad-core profile for all 5 benchmarks |
-| `make isa` | Full RISC-V ISA regression suite (84 images) |
-| `make test` | ISA suite + every benchmark, lock-step |
-| `make fire [FIRE_FRAMES=N]` | Bare-metal fire demo |
-| `make linux BENCH=…` | Linux-boot lock-step |
-| `make clean` / `make distclean` | Remove generated artifacts / + build trees |
-| `make help` | List all targets |
+| `make profile-quad FAM=…` | Quad-core profile for one benchmark family |
+| `make profile-all` | Quad-core profile for all benchmarks + chart |
+| `make profile-all-sc` | Single-core profile for all benchmarks, all scales |
+| `make fire [FIRE_FRAMES=N]` | Bare-metal Doom-fire demo |
+| `make linux BENCH=…` | Linux-boot lock-step harness |
+| `make clean` | Remove generated artifacts (`build/`, `obj_dir`, logs) |
+| `make distclean` | `clean` + drop sbt/Verilator build trees |
+| `make help` | List all targets with descriptions |
 
-`BENCH` is `<family>-s<scale>`. Families: `vvadd matmul filter csaxpy histo`. Scales `s1`–`s5`. Default: `vvadd-s1`.
+`BENCH` = `<family>-s<scale>`. `FAM` = `<family>` alone (no scale).  
+Families: `vvadd matmul filter csaxpy histo`. Scales: `s1`–`s5`. Default `BENCH`: `vvadd-s1`.
 
 > The benchmark manifest (`mk/benchmarks.mk`) is the single source of truth for
 > done-PCs and family names. Adding a workload is a one-line edit — no harness
