@@ -6,7 +6,7 @@ import chisel3.util._
 import java.rmi.server.UID
 
 
-class l2_mem(arlen:Int=7 ,addr_w: Int = 3,idWidth: Int = 2, addressWidth: Int = 32, dataWidth: Int = 64,mem_dataWidth : Int = 256)extends Module{
+class l2_mem(arlen:Int=7 ,addr_w: Int = 3,idWidth: Int = 3, addressWidth: Int = 32, dataWidth: Int = 64,mem_dataWidth : Int = 256)extends Module{
    val io = IO(new Bundle {  
     val cache_axi = new AXIlite(idWidth,addressWidth,dataWidth)
     val mem_read_axi = Flipped(new AXIlite1(idWidth, addressWidth, mem_dataWidth))
@@ -104,5 +104,11 @@ class l2_mem(arlen:Int=7 ,addr_w: Int = 3,idWidth: Int = 2, addressWidth: Int = 
 
   writeBackBuffer.io.replace_in.fired := writeBackBuffer.io.replace_in.ready && cache.io.cache_miss_out.ready && cache.io.cache_miss_out.replace 
 
+}
+
+object L2Main extends App {
+  println("Generating the CacheModule hardware")
+  //Hardware files will be out into generated
+  emitVerilog(new l2_mem, Array("--target-dir", "generated"))
 }
 

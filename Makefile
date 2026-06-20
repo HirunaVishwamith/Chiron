@@ -19,6 +19,7 @@ include mk/config.mk
 include mk/benchmarks.mk
 include mk/rtl.mk
 include mk/bins.mk
+include mk/bins_quad.mk
 include mk/run.mk
 
 .DEFAULT_GOAL := help
@@ -26,7 +27,7 @@ include mk/run.mk
 .PHONY: help
 help:   ## Show this help
 	@echo "Chiron — make targets:"
-	@grep -hE '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) \
+	@grep -hE '^[a-zA-Z0-9_-]+:.*?##' $(MAKEFILE_LIST) \
 	  | sort | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 	@echo
 	@echo "  BENCH=<family>-s<scale>  (default vvadd-s1; families: $(BENCHES))"

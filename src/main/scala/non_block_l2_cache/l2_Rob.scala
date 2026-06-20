@@ -6,7 +6,7 @@ import chisel3.experimental.BundleLiterals._
 import chisel3.util._
 
 
-class fifo_line (idWidth: Int = 2 , addressWidth: Int=32) extends Bundle{
+class fifo_line (idWidth: Int = 3 , addressWidth: Int=32) extends Bundle{
     val valid=Bool()
     val RW_address = UInt(addressWidth.W)
     val RW_data = UInt(512.W)
@@ -16,7 +16,7 @@ class fifo_line (idWidth: Int = 2 , addressWidth: Int=32) extends Bundle{
 
 
 
-class l2_Rob(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 2, addressWidth: Int = 32, dataWidth: Int = 64,mem_dataWidth : Int = 256) extends Module {
+class l2_Rob(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 3, addressWidth: Int = 32, dataWidth: Int = 64,mem_dataWidth : Int = 256) extends Module {
     val io = IO(new Bundle {  
     val axi = new AXIlite(idWidth,addressWidth,dataWidth)
     val Rob_out = new Rob_out(8,32)

@@ -7,7 +7,7 @@ import common.configuration
 import common.composableInterface
 
 class AXI(
-  idWidth: Int = 1,
+  idWidth: Int = 3,
   addressWidth: Int = 32,
   dataWidth: Int = 32
 )extends Bundle {

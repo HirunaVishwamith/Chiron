@@ -1,6 +1,5 @@
 import chisel3._
 import chisel3.util._
-import common.configuration
 
 class LVT_set extends Module {
   val io = IO(new Bundle {
@@ -8,10 +7,10 @@ class LVT_set extends Module {
     val r1enable = Input(Bool())
     val r2enable = Input(Bool())
     val r3enable = Input(Bool())
-    val r1addr = Input(UInt(configuration.prfAddrWidth.W))
-    val r2addr = Input(UInt(configuration.prfAddrWidth.W))
-    val r3addr = Input(UInt(configuration.prfAddrWidth.W))
-    val waddr = Input(UInt(configuration.prfAddrWidth.W))
+    val r1addr = Input(UInt(6.W))
+    val r2addr = Input(UInt(6.W))
+    val r3addr = Input(UInt(6.W))
+    val waddr = Input(UInt(6.W))
     val wdata = Input(UInt(64.W))
     val r1data = Output(UInt(64.W))
     val r2data = Output(UInt(64.W))

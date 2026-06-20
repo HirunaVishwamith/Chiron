@@ -39,7 +39,7 @@ EMU_IMAGE := $(EMU)/src/Image
 HARNESS_INCS  := -I . -I $(VINC) -I $(SIM)/obj_dir
 VERILATED     := $(VINC)/verilated.cpp
 VERILATED_VCD := $(VINC)/verilated_vcd_c.cpp
-CXX_TRACE     := g++ -O3 $(HARNESS_INCS) $(VERILATED) $(VERILATED_VCD)
+CXX_TRACE     := g++ -O3 $(HARNESS_INCS) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD)
 CXX_NOTRACE   := g++ -O3 $(HARNESS_INCS) -I $(SIM) $(VERILATED)
 
 $(BUILD):

@@ -6,7 +6,7 @@ import chisel3.experimental.BundleLiterals._
 
 
 class ace(
-  idWidth: Int = 2,
+  idWidth: Int = 3,
   addressWidth: Int = 64,
   dataWidth: Int = 64
 )extends Bundle {

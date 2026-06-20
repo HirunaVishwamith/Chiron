@@ -20,7 +20,9 @@
 #include "encoding.h"
 
 
-# define NUM_CORES 1 // Single-core target: barrier(nc) must complete with one hart.
+# ifndef NUM_CORES
+# define NUM_CORES 1 // Override via -DNUM_CORES=N on the compiler command line.
+# endif
 # define DATA_BASE 0x80040000 // Stack/TLS: must be >=0x80000000 (passes inRangeRAM) AND its low 28 bits
                                // (mainMemory addressBitSize=28) must clear the ~6KB image. Index 0x40000 is safe.
                                // Was 0x10040000 (Zynq PS-DDR): right index but fails inRangeRAM -> unmapped -> hang.

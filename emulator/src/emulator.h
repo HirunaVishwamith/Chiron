@@ -6,7 +6,7 @@
  */
 
 #define MEM_SIZE 28
-#define NUM_HARTS 1
+#define NUM_HARTS 4
 
 /* EMULATOR INCLUDE HEADER FILES */
 
@@ -22,8 +22,8 @@ private:
 vector<uint64_t> memory = vector<uint64_t>(1 << MEM_SIZE); // main memory
 vector<hart> harts;
 
+
 public:
-  std::ofstream emulog{"emu.log"};
   emulator():harts(NUM_HARTS,memory) // this Constructor will construct each harts
   {
     for(uint8_t i=0; i<NUM_HARTS; i++)
@@ -67,10 +67,10 @@ public:
     /// inittilize mem
   }
 
-  //void step()
-  //{
-    //for (auto &r : harts)
-     // r.hart_step(memory);
+  void step()
+  {
+    for (auto &r : harts)
+      r.hart_step(memory);
 
     // uint64_t loc0 = 10001600;
     // uint64_t loc1 = 10001604;
@@ -81,24 +81,21 @@ public:
     // printf("m0: %d m1: %d\n", m0, m1);
     // 0000000010001600
 
-  //}
+  }
 
-  void step(int i=0){
+  void step(int i){
     harts[i].hart_step(memory);
   }
 
-  //void set_heart_interrupts()
-  //{
-    //for (auto &r : harts)
-     //r.hart_set_interrupts();
-  //}
-
-  void set_interrupts(int i=0){
+  void set_interrupts(int i){
     harts[i].hart_set_interrupts(memory);
   }
 
-
-
+ // void set_interrupts()
+  //{
+    //for (auto &r : harts)
+    // r.hart_set_interrupts();
+  //}
 
   void show_registers()
   {
@@ -106,48 +103,33 @@ public:
       r.show_state();
   }
 
-  void return_registers()
-  {
-    for (auto &r : harts)
-      emulog << r.return_state();
-
-    emulog <<"****************************************************************************************************************************************"<<endl;
-  }
-
-
-  
-
   __uint64_t fetch_long(__uint64_t offset) { return memory.at(offset / 8); }
 
-  uint32_t get_instruction(int i=0){
+  uint32_t get_instruction(int i){
     return harts[i].get_instruction(memory);
   }
 
-  __uint64_t get_pc(int i=0){
+  __uint64_t get_pc(int i){
     return harts[i].get_pc();
   }
 
-  void show_state(int i=0){
+  void show_state(int i){
     return harts[i].show_state();
   }
 
-  string return_state(int i=0){
-    return harts[i].return_state();
-  }
-
-  uint64_t get_mstatus(int i=0){
+  uint64_t get_mstatus(int i){
     return harts[i].get_mstatus();
   }
 
-  vector<uint64_t> reg_file(int i=0){
+  vector<uint64_t> reg_file(int i){
     return harts[i].reg_file;
   }
 
-  void set_register_with_value(__uint8_t rd,__uint64_t value,int i=0){
+  void set_register_with_value(__uint8_t rd,__uint64_t value,int i){
     return harts[i].set_register_with_value(rd,value);
   }
 
-  int is_peripheral_read(int i=0){
+  int is_peripheral_read(int i){
     return harts[i].is_peripheral_read(memory);
   }
 

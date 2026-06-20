@@ -7,6 +7,7 @@ import pipeline.fifo._
 import common.configuration
 import decode.constants
 import decode.utils
+import os.truncate
 
 class rob(addr_w: Int, numWritePorts: Int) extends Module{
   // IO definitions
@@ -17,11 +18,10 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
   val branch = IO(new branchCheck(addr_w))
   val execPorts = IO(Vec(numWritePorts,new pullExecResult(addr_w)))
 
-  // Packed FIFO word layout: PC[63:0] || Instruction[31:0] || PRFDest[prfW-1:0]
-  val prfW = configuration.prfAddrWidth   // 6
-  val insW = constants.insAddrWidth        // 32
+  // Fifo Initialization
 
-  val fifo = Module(new robFifo(UInt((prfW + insW + 64).W), scala.math.pow(2,addr_w).asInstanceOf[Int]) {
+  // PC || Instruction || PRFDest(6)
+  val fifo = Module(new robFifo(UInt(102.W),scala.math.pow(2,addr_w).asInstanceOf[Int]) {
     val debugFIFO = Wire(Vec(depth, new Bundle {
       val valid = Bool()
       val instruction = UInt(32.W)
@@ -32,9 +32,9 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
 
     (Seq.tabulate(depth)(i => memReg(i)) zip debugFIFO)
     .foreach{ case (mem, debug) => {
-      debug.prfDest    := mem(prfW - 1, 0)
-      debug.instruction := mem(prfW + insW - 1, prfW)
-      debug.pc         := mem(prfW + insW + 63, prfW + insW)
+      debug.prfDest := mem(configuration.prfAddrWidth-1, 0)
+      debug.instruction := mem(configuration.prfAddrWidth + 31, configuration.prfAddrWidth)
+      debug.pc := mem(101, configuration.prfAddrWidth + 32)
     }}
     debugFIFO.foreach(_.valid := false.B)
     when(readPtr =/= writePtr) {
@@ -85,22 +85,11 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
   commit.mcause := results.io.deq.bits(64,1)
   commit.mtval := results.io.deq.bits(128,65)
   commit.exceptionOccurred := results.io.deq.bits(129)
-  commit.prfDest    := fifo.io.deq.bits(prfW - 1, 0)
-  commit.instruction := fifo.io.deq.bits(prfW + insW - 1, prfW)
-  commit.pc         := fifo.io.deq.bits(prfW + insW + 63, prfW + insW)
+  commit.prfDest := fifo.io.deq.bits(5,0)
+  commit.instruction := fifo.io.deq.bits(37,6)
+  commit.pc := fifo.io.deq.bits(101,38)
   commit.is_fence := is_fence
   commit.robAddr := results.robAddrRelease
-
-  // B1 instrumentation: head present (oldest entry valid) regardless of whether
-  // its result is ready. Lets the testbench split commit stalls into
-  // latency-bound (head present, not ready) vs commit-width-bound (ready, not
-  // retiring) without inferring occupancy from the outside.
-  val headValid = IO(Output(Bool()))
-  headValid := fifo.io.deq.valid & results.io.deq.valid
-
-  // W0 (2-wide commit sizing): head+1 entry present and result-ready.
-  val secondReady = IO(Output(Bool()))
-  secondReady := results.secondReady
 
   when (commit.fired){
     fifo.io.deq.ready := 1.U
@@ -110,7 +99,7 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
     results.io.deq.ready := 0.U
   }
 
-  commit.isStore := fifo.io.deq.bits(prfW + 6, prfW) === "b0100011".U
+  commit.isStore := fifo.io.deq.bits(12,6) === "b0100011".U
 
   // Branch Handling logic
   fifo.modify := branch.valid & !branch.pass
@@ -151,6 +140,12 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
   // (i.e. commit.ready and !commit.fired) from being prematurely
   // reused in a new instruction
   when(commit.ready && !commit.fired) { allocate.ready := false.B }
+
+  val headValid = IO(Output(Bool()))
+  headValid := fifo.io.deq.valid & results.io.deq.valid
+
+  val secondReady = IO(Output(Bool()))
+  secondReady := results.secondReady
 }
 
 object robVerilog extends App {

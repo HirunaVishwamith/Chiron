@@ -26,7 +26,7 @@
 #include "verilated.h"
 #include "Vsystem.h"
 
-// Profiler (reads perfCountersOut_* signals)
+// Profiler (reads perfCountersOut0_* signals)
 #include "profiler.h"
 
 using namespace std;
@@ -195,7 +195,9 @@ int main(int argc, char *argv[]) {
     uint64_t sim_cycles   = 0ULL;
     int      exit_code    = 2;        // default: timeout
     uint64_t last_print   = 0ULL;
-    const uint64_t PRINT_INTERVAL = 10000000ULL;
+    uint64_t stall_cycles = 0ULL;
+    const uint64_t PRINT_INTERVAL  = 10000000ULL;
+    const uint64_t MAX_STALL       = 500000ULL;  // 500K cycles with no commit = deadlock
 
     while (sim_cycles < max_cycles) {
         tick_nodump(tb);
@@ -206,21 +208,31 @@ int main(int argc, char *argv[]) {
         if (sim_cycles - last_print >= PRINT_INTERVAL) {
             printf("[profile_run] %llu M cycles, PC=0x%016llx\r",
                    (unsigned long long)(sim_cycles / 1000000),
-                   (unsigned long long)tb->robOut_pc);
+                   (unsigned long long)tb->robOut0_pc);
             fflush(stdout);
             last_print = sim_cycles;
         }
 
         // UART character output
-        if (tb->putChar_valid) {
-            putchar(static_cast<int>(tb->putChar_byte));
+        if (tb->core0OutChar_valid) {
+            putchar(static_cast<int>(tb->core0OutChar_byte));
             fflush(stdout);
         }
 
         // Check for committed instruction
-        if (!tb->robOut_commitFired) continue;
+        if (!tb->robOut0_commitFired) {
+            if (++stall_cycles >= MAX_STALL) {
+                printf("\n[profile_run] DEADLOCK: no commit for %llu cycles at PC=0x%016llx\n",
+                       (unsigned long long)stall_cycles,
+                       (unsigned long long)tb->robOut0_pc);
+                exit_code = 3;
+                break;
+            }
+            continue;
+        }
+        stall_cycles = 0;
 
-        uint64_t pc = tb->robOut_pc;
+        uint64_t pc = tb->robOut0_pc;
 
         // Benchmark completion (highest priority): caller-supplied --done-pc,
         // optionally gated on a0. Checked before the ISA a7==93 heuristics so a
@@ -228,7 +240,7 @@ int main(int argc, char *argv[]) {
         if (!done_pcs.empty()) {
             bool pc_hit = false;
             for (uint64_t dpc : done_pcs) if (pc == dpc) { pc_hit = true; break; }
-            if (pc_hit && (!have_a0_cond || tb->registersOut_10 == done_a0_val)) {
+            if (pc_hit && (!have_a0_cond || tb->registersOut0_10 == done_a0_val)) {
                 printf("\n[profile_run] BENCHMARK COMPLETE (PC=0x%016llx)\n",
                        (unsigned long long)pc);
                 exit_code = 0;
@@ -237,7 +249,7 @@ int main(int argc, char *argv[]) {
         }
 
         // ISA test: pass (gp/x3 == 1, a7/x17 == 93)
-        if (tb->registersOut_3 == 1 && tb->registersOut_17 == 93) {
+        if (tb->registersOut0_3 == 1 && tb->registersOut0_17 == 93) {
             printf("\n[profile_run] ISA TEST PASSED (gp=1, a7=93) at PC=0x%016llx\n",
                    (unsigned long long)pc);
             exit_code = 0;
@@ -245,9 +257,9 @@ int main(int argc, char *argv[]) {
         }
 
         // ISA test: fail (a7 == 93 but gp != 1)
-        if (tb->registersOut_17 == 93) {
+        if (tb->registersOut0_17 == 93) {
             printf("\n[profile_run] ISA TEST FAILED (gp=0x%llx, a7=93) at PC=0x%016llx\n",
-                   (unsigned long long)tb->registersOut_3,
+                   (unsigned long long)tb->registersOut0_3,
                    (unsigned long long)pc);
             exit_code = 1;
             break;
@@ -255,7 +267,7 @@ int main(int argc, char *argv[]) {
 
         // ISA pass PCs as secondary check
         if (pc == PASS_PC_0 || pc == PASS_PC_1) {
-            if (tb->registersOut_10 == 2 || tb->registersOut_3 == 1) {
+            if (tb->registersOut0_10 == 2 || tb->registersOut0_3 == 1) {
                 printf("\n[profile_run] PASS (PC=0x%016llx)\n", (unsigned long long)pc);
                 exit_code = 0;
                 break;
@@ -274,6 +286,8 @@ int main(int argc, char *argv[]) {
     if (exit_code == 2) {
         printf("\n[profile_run] TIMEOUT after %llu cycles\n",
                (unsigned long long)sim_cycles);
+    } else if (exit_code == 3) {
+        printf("[profile_run] DEADLOCK detected; partial profile written\n");
     }
 
     // ── Collect and report performance data ────────────────────────────

@@ -38,7 +38,7 @@ class mainMemory(
   // (0 to 7).foreach { i => memory.write(programmer.offset + i.U, programmer.byte(8*i + 7, 8*i)) }
 
   // connection with core pipeline
-  val clients = IO(Flipped(Vec(2, (new AXI(2,32,256)))))
+  val clients = IO(Flipped(Vec(2, (new AXI(3,32,256)))))
 
   val instruction :: data :: Nil = Enum(2)
 

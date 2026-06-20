@@ -112,8 +112,8 @@ int main(int argc, char *argv[]) {
         tick_nodump(tb);
         ++tickcount; ++sim_cycles;
 
-        if (tb->putChar_valid) {
-            unsigned char c = (unsigned char)tb->putChar_byte;
+        if (tb->core0OutChar_valid) {
+            unsigned char c = (unsigned char)tb->core0OutChar_byte;
             putchar(c);
             // Detect "\033[H": flush the completed frame and count it.
             if (w0 == 0x1b && w1 == '[' && c == 'H') {
@@ -129,8 +129,8 @@ int main(int argc, char *argv[]) {
             w0 = w1; w1 = c;
         }
 
-        if (have_done && tb->robOut_commitFired &&
-            (uint64_t)tb->robOut_pc == done_pc) {
+        if (have_done && tb->robOut0_commitFired &&
+            (uint64_t)tb->robOut0_pc == done_pc) {
             fflush(stdout);
             fprintf(stderr, "\n[fire_run] Program reached done-pc 0x%llx.\n",
                     (unsigned long long)done_pc);

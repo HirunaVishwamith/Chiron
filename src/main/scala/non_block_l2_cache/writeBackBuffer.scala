@@ -5,7 +5,7 @@ import chisel3.experimental.BundleLiterals._
 import chisel3.util._
 
 
-class writeBackFifo_line (idWidth: Int = 2 , addressWidth: Int=32) extends Bundle{
+class writeBackFifo_line (idWidth: Int = 3 , addressWidth: Int=32) extends Bundle{
     val Mem_addr = UInt(addressWidth.W)
     val data = Vec(4,UInt(512.W))
     val valid = Bool()
@@ -13,7 +13,7 @@ class writeBackFifo_line (idWidth: Int = 2 , addressWidth: Int=32) extends Bundl
 
 
 
-class writeBackBuffer(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 2, addressWidth: Int = 32, dataWidth: Int = 256,mem_dataWidth : Int = 256) extends Module {
+class writeBackBuffer(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 3, addressWidth: Int = 32, dataWidth: Int = 256,mem_dataWidth : Int = 256) extends Module {
     val io = IO(new Bundle {  
         val replace_in = new replace_in()
         val axi = Flipped(new AXIlite2(idWidth, addressWidth, dataWidth))

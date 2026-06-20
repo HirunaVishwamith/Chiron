@@ -5,7 +5,7 @@ import chisel3.experimental.BundleLiterals._
 import chisel3.util._
 
 
-class mem_fifo_line (idWidth: Int = 2 , addressWidth: Int=32) extends Bundle{
+class mem_fifo_line (idWidth: Int = 3 , addressWidth: Int=32) extends Bundle{
     val valid=Bool()
     val Mem_addr = UInt(addressWidth.W)
     val Rob_addr = UInt(3.W)
@@ -15,7 +15,7 @@ class mem_fifo_line (idWidth: Int = 2 , addressWidth: Int=32) extends Bundle{
 
 
 
-class MSHR(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 2, addressWidth: Int = 32, dataWidth: Int = 256,mem_dataWidth : Int = 256) extends Module {
+class MSHR(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 3, addressWidth: Int = 32, dataWidth: Int = 256,mem_dataWidth : Int = 256) extends Module {
     val io = IO(new Bundle {  
     val axi = Flipped(new AXIlite1(idWidth, addressWidth, dataWidth))
     val Mem_read_in = new Mem_read_in()

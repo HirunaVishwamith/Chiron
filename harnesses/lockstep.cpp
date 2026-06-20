@@ -56,7 +56,7 @@ struct keystroke_buffer {
 };
 
 void signal_callback_handler(int signum) {
-  golden_model.show_state();
+  golden_model.show_state(0);
   tcflush(0, TCIFLUSH);
   exit(signum);
 }
@@ -146,10 +146,10 @@ int main(int argc, char* argv[]) {
 
     #ifdef LOGGING
     outFile << setfill('0') << setw(16) << dec << (bench.dump_tick) << " ";
-    outFile << setfill('0') << setw(16) << hex << golden_model.get_pc() << " ";
-    outFile << setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
-    outState << setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
-    outState << golden_model.return_state();
+    outFile << setfill('0') << setw(16) << hex << golden_model.get_pc(0) << " ";
+    outFile << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
+    outState << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
+    golden_model.show_state(0);
     outregs << setfill('0') << setw(16) << hex << bench.return_instruction() << endl;
     outregs << bench.return_registers();
     outregs << "\n";
@@ -161,41 +161,41 @@ int main(int argc, char* argv[]) {
     (void)data; (void)sim_prev; (void)gprs;
 
     // ── Lock-step state comparison (unchanged) ─────────────────────────────
-    if (bench.prev_pc != golden_model.get_pc()) {
-      cout << "PC mismatech emulator: " << hex << golden_model.get_pc();
-      cout << " emulator instruction: " << setfill('0') << setw(8) << hex << golden_model.get_instruction();
+    if (bench.prev_pc != golden_model.get_pc(0)) {
+      cout << "PC mismatech emulator: " << hex << golden_model.get_pc(0);
+      cout << " emulator instruction: " << setfill('0') << setw(8) << hex << golden_model.get_instruction(0);
       cout << " simulator: " << hex << bench.prev_pc << endl;
-      golden_model.show_state();
+      golden_model.show_state(0);
       break;
     }
-    if (bench.check_registers(golden_model.reg_file(), golden_model.get_mstatus())) {
-      cout << "Register mismatch at register " << dec << bench.check_registers(golden_model.reg_file(), golden_model.get_mstatus());
-      cout << " simulator value: " << setfill('0') << setw(16) << hex << bench.read_register(bench.check_registers(golden_model.reg_file(), golden_model.get_mstatus())) << endl;
-      golden_model.show_state();
+    if (bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0))) {
+      cout << "Register mismatch at register " << dec << bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0));
+      cout << " simulator value: " << setfill('0') << setw(16) << hex << bench.read_register(bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0))) << endl;
+      golden_model.show_state(0);
       cout << dec << (bench.tickcount + bench.dump_tick) << endl;
       bench.step(); bench.step(); bench.step(); bench.step(); bench.step(); break;
     }
-    sim_prev = golden_model.get_pc();
+    sim_prev = golden_model.get_pc(0);
     int xx = 1;
     if (DUMP_CONDITION) { xx = bench.step(); } else { xx = bench.step_nodump(); }
     if (xx == 1) { break; }
     if (xx == 0) {
       golden_model.step();
-      while (((golden_model.get_instruction() & 0x0000007f) == 0x73) &&
-             (golden_model.get_instruction() & 0x00007000)) {
+      while (((golden_model.get_instruction(0) & 0x0000007f) == 0x73) &&
+             (golden_model.get_instruction(0) & 0x00007000)) {
         golden_model.step();
       }
     }
     if (xx == 2) {
       if (DUMP_CONDITION) { xx = bench.step(); } else { xx = bench.step_nodump(); }
       if (xx == 1) { return 1; }
-      if (golden_model.is_peripheral_read()) {
+      if (golden_model.is_peripheral_read(0)) {
         golden_model.step();
       } else {
         golden_model.step();
       }
-      while (((golden_model.get_instruction() & 0x0000007f) == 0x73) &&
-             (golden_model.get_instruction() & 0x00007000)) {
+      while (((golden_model.get_instruction(0) & 0x0000007f) == 0x73) &&
+             (golden_model.get_instruction(0) & 0x00007000)) {
         golden_model.step();
       }
     }
@@ -222,11 +222,9 @@ int main(int argc, char* argv[]) {
   printf("Test failed: Time-out!\n");
   printf("Total ticks: %ld \n", (bench.tickcount + bench.dump_tick));
   golden_model.step();
-  outState << setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
-  outState << golden_model.return_state();
+  outState << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
   golden_model.step();
-  outState << setfill('0') << setw(16) << hex << golden_model.get_instruction() << endl;
-  outState << golden_model.return_state();
+  outState << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
 
   #ifdef LOGGING
   outFile.close();

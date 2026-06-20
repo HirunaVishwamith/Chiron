@@ -1044,33 +1044,6 @@ public:
     mhartid, reg_file[24], reg_file[25], reg_file[26], reg_file[27], reg_file[28], reg_file[29], reg_file[30], reg_file[31]);
   }
 
-  std::string return_state() {
-    	
-		std::ostringstream out;
-
-    	// Print control/status registers
-		out << "pc: " << std::hex << std::setw(16) << std::setfill('0') << PC
-			<< " mstatus: " << std::hex << std::setw(16) << std::setfill('0') << mstatus.read_reg()
-			<< " mie: " << std::hex << std::setw(16) << std::setfill('0') << mie.read_reg()
-			<< " mcause: " << std::hex << std::setw(16) << std::setfill('0') << mcause.read_reg()
-			<< " mepc: " << std::hex << std::setw(16) << std::setfill('0') << mepc
-			<< " rx_ready: " << 1 << "\n";
-
-		// Print general-purpose registers (GPRs)
-		for (int i = 0; i < 32; i++) {
-    		out << "x" << std::setw(2) << std::setfill('0') << std::dec << i << ": "
-        	<< std::hex << std::setw(16) << std::setfill('0') << reg_file[i] << " ";
-    		if ((i + 1) % 8 == 0) out << "\n";
-		}
-
-
-		out << "\n \n";
-
-		return out.str();
-
-	}
-
-
   __uint64_t get_pc() { return PC; }
 
   //__uint64_t fetch_long(__uint64_t offset) { return memory.at(offset / 8); }
@@ -1079,11 +1052,7 @@ public:
      __uint32_t instruction = hart_fetch_instruction(PC,memory);
      __uint64_t load_addr = reg_file[(instruction >> 15) & 0x1f] + (((__uint64_t)((__int32_t) instruction)) >> 20);
      if ((instruction & 0x7f) != 0b0000011) { return 0; } 
-     if ((load_addr >= DRAM_BASE) & (load_addr <= (DRAM_BASE + 0x9000000))) { return 0; } else { 
-
-        return 1; 
-      
-      }
+     if ((load_addr >= DRAM_BASE) & (load_addr <= (DRAM_BASE + 0x9000000))) { return 0; } else { return 1; }
    }
 
   uint32_t get_instruction(vector<uint64_t> &memory) {
@@ -1238,7 +1207,6 @@ public:
   {
     reg_file[0] = 0;
 
-    //printf("instruction: %08x mem_content: %016lx \n", (uint32_t)instruction, memory.at((0x1007ffa3 - DRAM_BASE) / 8));
 
     gettimeofday(&tv, NULL);
     time_in_micros = 1000000 * tv.tv_sec + tv.tv_usec;
@@ -1421,10 +1389,8 @@ public:
               }
               else
               {
-                //printf("instruction: %08x mem_content: %016lx  mem_content: %016lx rd : %016lx \n", (uint32_t)instruction, memory.at((load_addr - DRAM_BASE) / 8),wb_data,rd);
                 wb_data = wb_data & 0xFF;
                 reg_file[rd] = wb_data;
-                //printf(" l1 instruction: %08x mem_content: %016lx  mem_content: %016lx rd : %016lx \n", (uint32_t)instruction, memory.at((load_addr - DRAM_BASE) / 8),reg_file[rd],rd);
               }
               break; // LBU zero extend  8 bit value
             case 0b101:
@@ -1463,13 +1429,12 @@ public:
             default:
               break;
             }
-            // printf("load_addr: %lu  wb_data: %016lx ",rd,wb_data);
+             //printf("load_address: %016lx, data: %lu , core: %lu \n", load_addr, load_data , rd);
           }
           else
           {
             if (load_addr == FIFO_ADDR_RX)
             {
-              
               if (kbhit())
               {
                 wb_data = 0;
@@ -1478,11 +1443,7 @@ public:
               {
                 wb_data = 2;
               }
-
-              //printf("load_addr: %016lx  wb_data: %016lx, rd: %lu, content_in_rd: %016lx ",load_addr,wb_data,rd, reg_file[rd]);
-
               reg_file[rd] = wb_data;
-
             }
             else if (load_addr == FIFO_ADDR_TX)
             {
@@ -1492,7 +1453,6 @@ public:
               reg_file[rd] = wb_data;
             }
           }
-          //printf(" l2 instruction: %08x mem_content: %016lx  mem_content: %016lx rd : %016lx \n", (uint32_t)instruction, memory.at((load_addr - DRAM_BASE) / 8),reg_file[rd],rd);
         }
         break;
       case store:
@@ -2341,6 +2301,6 @@ public:
         break;
       }
     }
-    //printf(" l2 instruction: %08x mem_content: %016lx  mem_content: %016lx rd : %016lx \n", (uint32_t)instruction, memory.at((load_addr - DRAM_BASE) / 8),reg_file[rd],rd);
+    //printf("leon load_address: %016lx, data: %lu , core: %lu , core: %lu \n", load_addr, load_data , rd ,reg_file[rd]);
   }
 };

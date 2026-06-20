@@ -486,9 +486,7 @@ class cacheLookupUnit extends Module{
         toWriteBackValidWire := (isUpdateDirtyWire && isUpdateValidWire) && isReplayValidWire && !isPermissionMiss
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
-        // B2: plain stores commit early at the arbiter (data capture); only
-        // atomic writes still hand their commit back from here.
-        writeCommitInstructionBuffer := isAtmoicWriteWire
+        writeCommitInstructionBuffer := true.B
       } .otherwise {
         toReplayValidWire := true.B
         requiredResponseWire := Mux(isPermissionMiss && !isDataMissWire, "b11".U, "b01".U)

@@ -281,9 +281,3 @@ class Memory (
   }
 
 }
-
-object L2Main extends App {
-  println("Generating the CacheModule hardware")
-  //Hardware files will be out into generated
-  emitVerilog(new l2_mem, Array("--target-dir", "generated"))
-}

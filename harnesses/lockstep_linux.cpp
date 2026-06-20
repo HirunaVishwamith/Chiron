@@ -44,7 +44,7 @@ void disable_raw_mode() {
 
 // Define the function to be called when ctrl-c (SIGINT) is sent to process
 void signal_callback_handler(int signum) {
-  golden_model.show_state();
+  golden_model.show_state(0);
   // disable_raw_mode();
   tcflush(0, TCIFLUSH); 
   // Terminate program
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
   unsigned long sim_prev = 0x80100000UL;
 	printf("Simulation start time: %s %s\n", __DATE__, __TIME__);
   while (1 || (bench.tickcount + bench.dump_tick) < 800351768UL) {
-    // golden_model.show_state();
+    // golden_model.show_state(0);
     //cin >> x;
     if (kbhit()) {
       // printf("detected input, %c\n", getchar());
@@ -152,20 +152,20 @@ int main(int argc, char* argv[]) {
     // if (keys_rx.reader != keys_rx.writer) { keys_rx.reader += golden_model.load_rx_char(keys_rx.char_buffer[keys_rx.reader]); }
 
     #ifdef LOGGING
-    /* if (golden_model.get_instruction() == 0x00100073) 
+    /* if (golden_model.get_instruction(0) == 0x00100073) 
       break; */
 
-    //unsigned long current_symbol = golden_model.get_symbom_index(golden_model.get_pc(), old_symbol);
+    //unsigned long current_symbol = golden_model.get_symbom_index(golden_model.get_pc(0), old_symbol);
 
     /* if (current_symbol != old_symbol)
     {
-      outFile << setfill('0') << setw(8) << hex << golden_model.get_pc() << " " << symbols[current_symbol];// << "\n";
+      outFile << setfill('0') << setw(8) << hex << golden_model.get_pc(0) << " " << symbols[current_symbol];// << "\n";
       outFile << setfill('0') << setw(8) << hex << golden_model.get_csr_value(MIE) << "\n";
       old_symbol = current_symbol;
     } */
     outFile <<  setfill('0') << setw(16) << dec <<  (bench.dump_tick)  << " ";
-    outFile <<  setfill('0') << setw(16) << hex << golden_model.get_pc() << " ";
-    outFile <<  setfill('0') << setw(16) << hex << golden_model.get_instruction() << " ";
+    outFile <<  setfill('0') << setw(16) << hex << golden_model.get_pc(0) << " ";
+    outFile <<  setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << " ";
     outFile <<  setfill('0') << setw(16) << hex << golden_model.fetch_long(PROBE_DOUBLE) << " ";
     outFile <<  setfill('0') << setw(16) << hex << bench.get_probe() << endl;
     /* switch (golden_model.check_for_mem_access(&mem_address, &data))
@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
     {
       break;
     } */
-    // golden_model.show_state();
+    // golden_model.show_state(0);
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
     /* if (timer_interr == 0)
@@ -222,23 +222,23 @@ int main(int argc, char* argv[]) {
      * This happens because we get bench.prev_pc after it is executed.
      * This needs to be fixed to have a common semantic for both pc values
     */
-    if (bench.prev_pc != golden_model.get_pc()) { 
-      cout << "PC mismatech emulator: " << hex << golden_model.get_pc();
-      cout << " emulator instruction: " << setfill('0') << setw(8) << hex << golden_model.get_instruction();      cout << " simulator: " << hex << bench.prev_pc << endl;
-      golden_model.show_state(); 
+    if (bench.prev_pc != golden_model.get_pc(0)) { 
+      cout << "PC mismatech emulator: " << hex << golden_model.get_pc(0);
+      cout << " emulator instruction: " << setfill('0') << setw(8) << hex << golden_model.get_instruction(0);      cout << " simulator: " << hex << bench.prev_pc << endl;
+      golden_model.show_state(0); 
       break;
     }
     /* if (1 || (bench.tickcount >= 856489UL)) {
       cout << "time out reached" << endl;
-      golden_model.show_state(); break;
+      golden_model.show_state(0); break;
     } */
-    if (bench.check_registers(golden_model.reg_file, golden_model.get_mstatus())) { 
-      cout << "Register mismatch at register " << dec << bench.check_registers(golden_model.reg_file, golden_model.get_mstatus());
-      cout << " simulator value: " << setfill('0') << setw(16) << hex << bench.read_register(bench.check_registers(golden_model.reg_file, golden_model.get_mstatus())) << endl;
-      golden_model.show_state();
+    if (bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0))) { 
+      cout << "Register mismatch at register " << dec << bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0));
+      cout << " simulator value: " << setfill('0') << setw(16) << hex << bench.read_register(bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0))) << endl;
+      golden_model.show_state(0);
       cout << dec << (bench.tickcount + bench.dump_tick) << endl;bench.step(); bench.step(); bench.step(); bench.step(); bench.step(); break;
     }
-    sim_prev = golden_model.get_pc();
+    sim_prev = golden_model.get_pc(0);
     int x = 1;
     if (DUMP_CONDITION) {
       x = bench.step();
@@ -248,48 +248,45 @@ int main(int argc, char* argv[]) {
     if (x == 1) { break; }
     // bench.step();
     if (x == 0) {
-      if (golden_model.is_peripheral_read()) {
+      if (golden_model.is_peripheral_read(0)) {
         // cout << "peripheral read" << endl;
-        __uint32_t p_instruction = golden_model.get_instruction();
+        __uint32_t p_instruction = golden_model.get_instruction(0);
         golden_model.step();
-        golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f));
+        golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f), 0);
       } else{
         golden_model.step();
       }
       while (
-        ((golden_model.get_instruction() & 0x0000007f) == 0x73) && 
-        (golden_model.get_instruction() & 0x00007000)
+        ((golden_model.get_instruction(0) & 0x0000007f) == 0x73) &&
+        (golden_model.get_instruction(0) & 0x00007000)
       )
       {
         golden_model.step();
       }
-    } else if ((x == 2) && (golden_model.set_interrupts(bench.get_register_value((golden_model.get_instruction()>>7)&0x1f), 0/*don't care*/)))
+    } else if (x == 2)
     {
-      cout << "Setting interrupts failed in emulator" << endl;
-      cout << "tickcount: " << dec << (bench.tickcount + bench.dump_tick) << endl;
-      golden_model.show_state();
-      break;
+      golden_model.set_interrupts(0);
     }
-    if (x == 2) { 
+    if (x == 2) {
       if (DUMP_CONDITION) {
         x = bench.step();
       } else {
         x = bench.step_nodump();
       } 
       // printf("Taking interrupt\n");
-      // golden_model.show_state();
+      // golden_model.show_state(0);
       if (x == 1) { return 1; }
-      if (golden_model.is_peripheral_read()) {
+      if (golden_model.is_peripheral_read(0)) {
         // cout << "peripheral read" << endl;
-        __uint32_t p_instruction = golden_model.get_instruction();
+        __uint32_t p_instruction = golden_model.get_instruction(0);
         golden_model.step();
-        golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f));
+        golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f), 0);
       } else{
         golden_model.step();
       }
       while (
-        ((golden_model.get_instruction() & 0x0000007f) == 0x73) && 
-        (golden_model.get_instruction() & 0x00007000)
+        ((golden_model.get_instruction(0) & 0x0000007f) == 0x73) && 
+        (golden_model.get_instruction(0) & 0x00007000)
       )
       {
         golden_model.step();

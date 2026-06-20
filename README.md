@@ -4,7 +4,7 @@
 
 # Chiron
 
-### An RV64IMA out-of-order processor, in Chisel
+### A quad-core RV64IMA out-of-order processor, in Chisel
 
 *In ancient lore **Chiron** (Kai-ron) was the wisest of the Centaurs — not a wild brute,*
 *but a gentle healer and the supreme teacher of heroes: Achilles, Heracles, Jason.*
@@ -14,81 +14,80 @@
 <br/>
 
 ![ISA](https://img.shields.io/badge/ISA-RV64IMA-5b2c6f)
+![Cores](https://img.shields.io/badge/cores-4-informational)
 ![Chisel](https://img.shields.io/badge/Chisel-3.5.4-d22128)
 ![Scala](https://img.shields.io/badge/Scala-2.13.8-dc322f)
 ![Verilator](https://img.shields.io/badge/verified-Verilator%20lock--step-1f6feb)
 ![ISA tests](https://img.shields.io/badge/riscv--tests-84%2F84-2ea44f)
-![IPC](https://img.shields.io/badge/IPC-0.272%20(2.18%C3%97)-f0883e)
 ![Target](https://img.shields.io/badge/clock-75%20MHz-555)
 
 </div>
 
 ---
 
-##  Highlights
+## Highlights
 
-- **Out-of-order** RV64IMA pipeline — register renaming, a reorder
-  buffer, a centralized issue queue with wake-up, and in-order commit.
-- **Full memory hierarchy** — split L1 I/D caches, a **non-blocking L2** with
-  MSHRs and pseudo-LRU, and an **ACE-style coherent interconnect**.
+- **Quad-core** RV64IMA — 4 independent OoO harts sharing a **non-blocking L2**
+  and an **ACE coherent interconnect** (8 ports, 2 per core).
+- **Out-of-order** pipeline per core — register renaming, a reorder buffer, a
+  centralized issue queue with wake-up, and in-order commit.
+- **Full memory hierarchy** — split L1 I/D caches, non-blocking L2 with MSHRs
+  and pseudo-LRU, ACE-style coherent interconnect.
 - **Modern branch prediction** — bimodal + BTB (64 sets, 2-way LRU) + a
   **4-table TAGE** predictor.
 - **Cycle-accurate, lock-step verified** against a C++ golden-model emulator,
   one committed instruction at a time — **84/84 official `riscv-tests` pass**.
 - **One command per task.** No copying files around: every harness loads images
   by path, driven from a single benchmark manifest.
-- **It boots Linux**, and runs bare-metal demos — including a real-time
-  terminal **fire** 🔥 (below).
+- **164 hardware performance counters** exposed from the RTL (41 per core ×4)
+  — IPC, branch accuracy, cache miss rates, ROB-head stall decomposition,
+  per-class latency attribution.
 
 ---
 
-##  See it run
+## See it run
 
-A bare-metal Doom-fire renders straight from the core's UART — 80×50 half-block
-glyphs, scrolling embers rising from a hot bed, running on real RTL:
+```bash
+make fire            # bare-metal Doom-fire demo, UART → terminal
+```
 
 <div align="center">
 <img src="docs/fire.gif" alt="Chiron fire demo" width="720"/>
 </div>
 
-```bash
-make fire            # build + render live (Ctrl-C to stop)
-```
-
 ---
 
-##  Microarchitecture
+## Microarchitecture
 
 ```mermaid
 flowchart LR
-    subgraph FE["Frontend"]
-      PC[PC Gen] --> IFU[IFU + Predecode]
-      IFU --> BPU["BPU: bimodal · BTB · TAGE"]
-      BPU -. redirect .-> PC
+    subgraph C0["Core 0"]
+      direction TB
+      FE0["Frontend\n(TAGE BPU)"] --> BE0["OoO Back-end\n(ROB · IQ · PRF)"]
+      BE0 <--> MH0["L1 I/D"]
     end
-    subgraph RN["Decode / Rename"]
-      DEC[Decoder] --> REN["Renamer (LVT)"]
+    subgraph C1["Core 1"]
+      direction TB
+      FE1["Frontend"] --> BE1["OoO Back-end"]
+      BE1 <--> MH1["L1 I/D"]
     end
-    subgraph BE["Out-of-order core"]
-      IQ["Issue Queue (8)"] --> EXE
-      subgraph EXE["Execution units"]
-        ALU[ALU] & MUL[Mul] & DIV["Radix-4 Div"] & LSU[Load/Store]
-      end
-      PRF["Phys Reg File (64)"]
-      ROB["Reorder Buffer (16)"]
+    subgraph C2["Core 2"]
+      direction TB
+      FE2["Frontend"] --> BE2["OoO Back-end"]
+      BE2 <--> MH2["L1 I/D"]
     end
-    subgraph MEM["Memory hierarchy"]
-      L1I[L1 I-cache] & L1D[L1 D-cache] --> L2["L2 non-blocking · MSHR"]
-      L2 --> IC["ACE Interconnect / CCU"] --> RAM[(Main Memory)]
+    subgraph C3["Core 3"]
+      direction TB
+      FE3["Frontend"] --> BE3["OoO Back-end"]
+      BE3 <--> MH3["L1 I/D"]
     end
 
-    FE --> RN --> IQ
-    EXE <--> PRF
-    EXE --> ROB --> CM[[In-order Commit · 4-wide]]
-    IFU <--> L1I
-    LSU <--> L1D
-    EXE -. forwarding/wakeup .-> IQ
+    MH0 & MH1 & MH2 & MH3 --> IC["ACE Interconnect\n(8 ports)"]
+    IC --> L2["L2 non-blocking · MSHR · pseudo-LRU"]
+    L2 --> RAM[(Main Memory)]
 ```
+
+### Per-core parameters
 
 | Property | Value |
 |---|---|
@@ -100,92 +99,134 @@ flowchart LR
 | Divider | Radix-4 (2 bits/cycle), clz-normalized |
 | L1 I-Cache | 2-way · 64 sets · 16-instr lines |
 | L1 D-Cache | 2-way · 64 sets · 8×8-byte lines |
-| L2 Cache | Non-blocking · MSHR · pseudo-LRU |
-| Branch predictor | Bimodal + BTB + 4-table TAGE (5/15/44/130-bit history) |
+| Branch predictor | Bimodal + BTB + 4-table TAGE |
 | Clock target | 75 MHz |
+
+### System parameters
+
+| Property | Value |
+|---|---|
+| Cores | 4 (hart IDs 0–3) |
+| Coherence | ACE — 2 ports per core (8 total) |
+| L2 Cache | Non-blocking · MSHR · pseudo-LRU |
+| UART | MultiUart (one per core) |
 | RAM base | `0x8000_0000` (sim) · `0x4000_0000` (Zynq) |
 
 ---
 
-##  Repository layout
+## Repository layout
 
 ```
-Chiron/
-├── src/main/scala/        # Chisel RTL (frontend, decode, scheduler, rob, prf, caches, …)
-├── emulator/              # C++ golden-model ISA simulator (lock-step reference)
-├── simulator/             # Verilator RTL wrapper (simulator.h)
+chiron/
+├── src/main/scala/        # Chisel RTL (4-core system, frontend, decode, scheduler,
+│                          #   rob, prf, caches, ACE interconnect, …)
+├── emulator/              # C++ golden-model ISA simulator (4-hart, lock-step ref)
+├── simulator/             # Verilator RTL wrapper
+│   └── src/
+│       ├── simulator.h    #   single-core signal accessors (core 0)
+│       └── profiler_quad.h#   quad-core profiler (164 perf-counter signals)
 ├── harnesses/             # Test/run drivers
-│   ├── lockstep.cpp       #   unified, arg-driven RTL-vs-emulator lock-step
-│   ├── lockstep_isa.cpp   #   ISA regression completion logic
-│   ├── lockstep_linux.cpp #   Linux-boot (dtb/bootrom) variant
-│   ├── profile.cpp        #   cycle-accurate IPC / stall profiler
+│   ├── lockstep.cpp       #   RTL-vs-emulator lock-step (core 0)
+│   ├── lockstep_isa.cpp   #   ISA regression completion
+│   ├── lockstep_linux.cpp #   Linux-boot variant
+│   ├── profile.cpp        #   single-core cycle-accurate profiler
+│   ├── profile_quad.cpp   #   quad-core profiler (all 4 cores + aggregate IPC)
 │   └── fire.cpp           #   bare-metal UART → terminal streamer
 ├── workloads/
-│   ├── benchmarks/        # benchmark sources (vvadd, matmul, filter, csaxpy, histo)
-│   └── demos/             # bare-metal demos (the fire 🔥)
-├── bins/                  # built + staged .bin images (loaded by path)
-├── mk/                    # modular makefiles (config · benchmarks · rtl · bins · run)
-├── scripts/               # profiling visualization, log decoders
+│   ├── benchmarks/        # benchmark sources (vvadd · matmul · filter · csaxpy · histo)
+│   └── demos/             # bare-metal demos (fire 🔥)
+├── bins/                  # staged .bin images
+│   ├── mt-*-s1..s5.bin    #   single-core scaled variants
+│   └── mt-*-q4.bin        #   quad-core (NUM_CORES=4) base variants
+├── mk/                    # modular makefiles
+│   ├── config.mk          #   paths, compiler flags
+│   ├── benchmarks.mk      #   benchmark manifest (done-PCs, families)
+│   ├── rtl.mk             #   Chisel → Verilog → Verilator
+│   ├── bins.mk            #   single-core .bin build + stage
+│   ├── bins_quad.mk       #   quad-core .bin build + stage (NUM_CORES=4)
+│   └── run.mk             #   all harness build + run targets
+├── scripts/               # profiling visualisation, log decoders
 ├── build/                 # all generated artifacts (gitignored)
 └── Makefile               # thin orchestrator — one entry point per task
 ```
 
 ---
 
-##  Quick start
+## Quick start
 
 ### Prerequisites
 
 ```bash
 sudo apt install verilator sbt make g++ python3
+# RISC-V toolchain must be on PATH (riscv64-unknown-elf-gcc)
 # If sbt hangs on file watches:
 make fix-inotify
 ```
 
-### Build & verify
+### Build
 
 ```bash
-make sim                       # Chisel → Verilog → Verilator library
-make test                      # ISA suite (84) + every benchmark, lock-step
+make sim        # Chisel → Verilog → Verilator library (one-time, ~5 min)
 ```
 
-### Run one thing
+### Verify (ISA regression + lock-step)
 
 ```bash
-make emu       BENCH=vvadd-s1  # golden emulator only (fast sanity check)
-make lockstep  BENCH=matmul-s2 # RTL vs emulator, cycle-exact
-make profile   BENCH=vvadd-s1  # IPC + stall decomposition
-make fire                      # the bare-metal fire demo
+make test       # 84 ISA images + every benchmark, lock-step RTL vs emulator
 ```
 
-`BENCH` is `<family>-s<scale>`; families are `vvadd matmul filter csaxpy histo`,
-scales `s1`…`s5`. Defaults to `vvadd-s1`.
+### Profile
+
+```bash
+# Single benchmark, single-core view (core 0)
+make profile        BENCH=vvadd-s1
+
+# All benchmarks at all scales, single-core
+make profile-all
+
+# Single benchmark, quad-core view (aggregate + per-core breakdown)
+make profile-quad   BENCH=vvadd-s1
+
+# All benchmarks, quad-core
+make profile-all-quad
+```
+
+### Build quad-core binaries
+
+```bash
+make bins-q4    # compiles all 5 benchmarks with NUM_CORES=4 → bins/mt-*-q4.bin
+```
 
 ### Make target reference
 
 | Target | What it does |
 |---|---|
 | `make sim` | Build the RTL (Chisel → Verilog → Verilator) |
-| `make bins` | Build + stage every workload `.bin` into `bins/` |
+| `make bins` | Build + stage single-core `.bin` images |
+| `make bins-q4` | Build + stage quad-core `.bin` images (`-DNUM_CORES=4`) |
+| `make bins-all` | Both of the above |
 | `make emu BENCH=…` | Run a benchmark on the golden emulator (fast) |
-| `make lockstep BENCH=…` | Lock-step the RTL against the emulator |
-| `make profile BENCH=…` | Cycle-accurate IPC / stall profile (one bench) |
-| `make profile-all` | Profile every benchmark at every scale + render report |
+| `make lockstep BENCH=…` | Lock-step RTL vs emulator (core 0) |
+| `make profile BENCH=…` | Single-core cycle-accurate profile |
+| `make profile-all` | Profile every benchmark at every scale |
+| `make profile-quad BENCH=…` | Quad-core profile (aggregate + per-core) |
+| `make profile-all-quad` | Quad-core profile for all 5 benchmarks |
 | `make isa` | Full RISC-V ISA regression suite (84 images) |
-| `make test` | ISA suite **and** every benchmark, via lock-step |
-| `make fire [FIRE_FRAMES=N]` | Render the bare-metal fire demo |
-| `make linux BENCH=…` | Linux-boot lock-step (dtb/bootrom harness) |
-| `make zynq` | FPGA Verilog (`0x4000_0000` base) + boot ROM + `vivado.tcl` |
+| `make test` | ISA suite + every benchmark, lock-step |
+| `make fire [FIRE_FRAMES=N]` | Bare-metal fire demo |
+| `make linux BENCH=…` | Linux-boot lock-step |
 | `make clean` / `make distclean` | Remove generated artifacts / + build trees |
-| `make help` | List everything |
+| `make help` | List all targets |
 
-> Everything is **table-driven** from `mk/benchmarks.mk` (the one place that
-> knows each benchmark's completion PC) — adding a workload is a one-line edit,
-> no harness copy-paste.
+`BENCH` is `<family>-s<scale>`. Families: `vvadd matmul filter csaxpy histo`. Scales `s1`–`s5`. Default: `vvadd-s1`.
+
+> The benchmark manifest (`mk/benchmarks.mk`) is the single source of truth for
+> done-PCs and family names. Adding a workload is a one-line edit — no harness
+> copy-paste required.
 
 ---
 
-##  Verification — lock-step
+## Verification — lock-step
 
 Correctness is proven by running the **RTL** and the **C++ golden model** in
 lock-step, comparing architectural state after **every committed instruction**:
@@ -193,9 +234,9 @@ lock-step, comparing architectural state after **every committed instruction**:
 ```mermaid
 sequenceDiagram
     participant R as RTL (Verilator)
-    participant G as Golden model
+    participant G as Golden model (hart 0)
     loop per committed instruction
-        R->>R: tick until commit
+        R->>R: tick until core 0 commits
         G->>G: step one instruction
         R-->>G: compare 32 GPRs + CSRs + PC
         Note over R,G: mismatch → dump states.log / regs.log, exit ≠ 0
@@ -203,52 +244,47 @@ sequenceDiagram
 ```
 
 `make test` runs the full official `riscv-tests` suite (**84/84 pass**) plus
-every benchmark. Divergences dump `run.log`, `states.log`, `regs.log` and the
-full `system_trace.vcd` for waveform debugging.
+every benchmark. Divergences dump `run.log`, `states.log`, `regs.log` for
+debugging.
 
 ---
 
-##  Performance
+## Performance counters
 
-Profiling (`make profile`) reports IPC, branch accuracy, cache miss rates and a
-ROB-head **stall decomposition** (latency-bound vs commit-width-bound, by
-instruction class). Steady-state IPC on `vvadd-s1`:
+The RTL exposes 41 counters per core (164 total). The profiler aggregates them
+into:
 
-| Stage | Optimization | IPC |
-|---|---|---:|
-| baseline | original design | 0.1250 |
-| B1 | divider clz-normalize + fused address-gen | 0.2525 |
-| B2 | early store commit at arbiter data-capture | 0.2564 |
-| B3/B4 | store-data trim + load-queue flow-through | 0.2585 |
-| **B5** | **radix-4 divider (2 bits/cycle)** | **0.2720** |
+| Metric | Source |
+|---|---|
+| IPC | `inst_retired / cycles` |
+| Aggregate IPC (quad) | `Σ(inst_retired) / max(cycles)` |
+| Branch accuracy | `branches_passed / branch_total` |
+| D-cache miss rate | `dcache_miss / dcache_reqs` |
+| I-cache miss rate | `icache_miss / decode_ready` |
+| Scheduler stall % | `scheduler_stalls / decode_ready` |
+| ROB stall % | `rob_stalls / decode_ready` |
+| Decode efficiency | `decode_fired / decode_ready` |
+| DRAM read BW | `l2_to_mem_rd_beats × 8 B × 75 MHz` |
 
-**2.18× over baseline**, every stage individually 84/84 ISA-clean. The remaining
-wall is **latency-bound** — the ROB head waits on a load or a divide ~45% of
-cycles — not issue/commit width, which is the analysis the profiler exists to
-surface.
-
-<div align="center">
-
-<img src="docs/profile_report.png" alt="profiling report" width="760"/>
-
-</div>
+JSON reports are written to `build/profile_results/`.
 
 ---
 
-##  Roadmap
+## Roadmap
 
-- Widen **commit** before 2-wide issue (ROB-only; same ~12% width ceiling, far
-  cheaper) — measured as the better next step.
-- Deepen the OoO window (ROB/PRF) — parameterized; one latent non-width hang to
-  bisect before re-enabling.
-- Re-evaluate TAGE once branches matter (currently <3% of stalls).
+- Profile all 5 benchmarks at s1–s5 scales on the quad-core to establish a
+  baseline IPC (currently ~0.125 — single-core IPC improvements not yet ported).
+- Port the single-core IPC optimisations (radix-4 divider, store-data trim,
+  load-queue flow-through) to the quad-core back-end.
+- Add **SPLASH-3** multi-threaded benchmarks for academically comparable results.
+- Target IPC approaching 1.0 per core (4× aggregate) through microarchitectural
+  tuning of the OoO window, commit width, and cache hierarchy.
 
 ---
-
 
 ## Credits
 
-Built as a final-year project at the **University of Moratuwa**. 
+Built as a final-year project at the **University of Moratuwa**.
 
 **Contributors** (in alphabetical order):
 * Ajith Pasquel
@@ -258,8 +294,10 @@ Built as a final-year project at the **University of Moratuwa**.
 * Mewan Rathnayaka
 * Yasiru Amarasinghe
 
-Chisel/FIRRTL by the Chisel community; verification leans on **Verilator** and the official **riscv-tests**. The Chiron artwork crowns a core meant, above all, to teach.
+Chisel/FIRRTL by the Chisel community; verification leans on **Verilator** and
+the official **riscv-tests**. The Chiron artwork crowns a core meant, above all,
+to teach.
 
 <div align="center">
-<sub>“The wisest of the Centaurs taught heroes. This core teaches how an out-of-order machine really works.”</sub>
+<sub>"The wisest of the Centaurs taught heroes. This core teaches how an out-of-order machine really works."</sub>
 </div>

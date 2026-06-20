@@ -16,11 +16,9 @@ void signal_callback_handler(int signum) {
   exit(signum);
 }
 
-int main(int argc, char *argv[]) {
-  // initiate registers and memory. Image path comes from argv[1] so the
-  // emulator can run any staged .bin directly (no copy to a fixed "Image").
-  const char *image_path = (argc > 1) ? argv[1] : "Image";
-  emu.init(image_path);
+int main() {
+  // initaite registers and memory
+  emu.init("Image");
 
   enable_raw_mode();
   while (1) {
@@ -29,7 +27,6 @@ int main(int argc, char *argv[]) {
     //emu.show_registers();
     // sets up interrupts to move to exception handler
     // in next step()
-    emu.return_registers();
     emu.set_interrupts();
   }
   disable_raw_mode();

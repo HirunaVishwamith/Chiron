@@ -9,7 +9,11 @@ import scheduler._
 import common._
 import cache.AXI
 import storeDataIssue._
+import os.proc
 import cache.pipelineMemoryRequest
+import dataclass.data
+import cache.peripheralHandler
+import chisel3.util.experimental.decode.decoder
 import cache_phase3.constants._
 import cache_phase3._
 
@@ -29,23 +33,11 @@ class core (
   icache.updateAllCachelines.fired := false.B
   icache.cachelinesUpdatesResp.fired := false.B
 
-  val fetch = Module(new fetch(8))
-  // F2: block fetch. The line streamer turns the iCache's per-line responses
-  // into the per-word stream the fetch unit expects, amortising one I$ access
-  // over a whole cache line. Fetch is otherwise unchanged.
-  val streamer = Module(new lineStreamer(common.coreConfiguration.iCacheOffsetWidth))
+  val fetch = Module(new fetch(4))
 
-  // fetch <-> streamer (per-word interface)
-  streamer.fromFetch.req <> fetch.cache.req
-  fetch.cache.resp <> streamer.fromFetch.resp
-
-  // streamer <-> icache (per-line interface)
-  icache.fromFetch.req <> streamer.toCache.req
-  icache.fromFetch.req.bits := Cat(0.U(32.W), streamer.toCache.req.bits(31, 0))
-  streamer.toCache.resp.valid     := icache.fromFetch.resp.valid
-  streamer.toCache.resp.bits.line := icache.fromFetch.resp.bits.line
-  streamer.toCache.resp.bits.base := icache.fromFetch.resp.bits.base
-  icache.fromFetch.resp.ready     := streamer.toCache.resp.ready
+  icache.fromFetch.req <> fetch.cache.req
+  icache.fromFetch.req.bits := Cat(0.U(32.W), fetch.cache.req.bits(31, 0))
+  fetch.cache.resp <> icache.fromFetch.resp
 
   // Fence functionality is ignored for now
   fetch.updateAllCachelines.fired := false.B
@@ -139,25 +131,66 @@ class core (
 
   val prf = Module(new PRF)
   scheduler.release.fired := (
-    scheduler.release.ready &&
+    scheduler.release.ready && 
+    /* ((scheduler.release.instruction(6).asBool || scheduler.release.instruction(4).asBool) || memAccess.canAllocate) && */
     (!(Cat(scheduler.release.instruction(25), scheduler.release.instruction(6, 4)) === "b1011".U) || mExtensionReady)
   )
   prf.execRead.instruction := scheduler.release.instruction
-  prf.execRead.branchMask := scheduler.release.branchMask
+  prf.execRead.branchmask := scheduler.release.branchMask
   prf.execRead.rs1Addr := scheduler.release.rs1prfAddr
   prf.execRead.rs2Addr := scheduler.release.rs2prfAddr
   prf.execRead.robAddr := scheduler.release.robAddr
   prf.execRead.valid := scheduler.release.fired
   prf.execRead.prfDest := scheduler.release.prfDest
   when(scheduler.release.instruction(1, 0) === "b00".U) { prf.execRead.valid := false.B }
+  /* when(branchOps.valid) {
+    prf.execRead.branchmask := scheduler.release.branchMask ^ branchOps.branchMask
+    when(!branchOps.passed && (scheduler.release.branchMask & branchOps.branchMask).orR) {
+      prf.execRead.valid := false.B
+    }
+  } */
 
-  // B1: fused address generation. The old two-stage path (prf.toExec ->
-  // addressGenerationInput reg -> adder -> memoryRequest reg) spent a whole
-  // cycle just registering the adder inputs. The rs1 forwarding mux plus the
-  // 64-bit add fit in one cycle at the target clock, so memory ops now reach
-  // the cache one cycle earlier. Field assignments live further down, after
-  // the fwdFrom network is declared.
+  val addressGenerationInput = RegInit(new Bundle {
+    val valid = Bool()
+    val rs1 = UInt(64.W)
+    val instruction = UInt(32.W)
+    val prfDest = UInt(configuration.prfAddrWidth.W)
+    val robAddr = UInt(configuration.robAddrWidth.W)
+    val branchMask = UInt(configuration.newBranchMaskWidth.W) //leon coherency
+  } Lit(_.valid -> false.B))
+
+  addressGenerationInput.valid := prf.toExec.valid && !Seq(6, 4).map(i => prf.toExec.instruction(i).asBool).reduce(_ || _)
+  
+  addressGenerationInput.instruction := prf.toExec.instruction
+  addressGenerationInput.prfDest := prf.toExec.prfDest
+  addressGenerationInput.robAddr := prf.toExec.robAddr
+  addressGenerationInput.branchMask := prf.toExec.branchmask
+
+  when(branchOps.valid) {
+    when((prf.toExec.branchmask & branchOps.branchMask).orR) {
+      addressGenerationInput.branchMask := prf.toExec.branchmask ^ branchOps.branchMask
+    }
+    when(!branchOps.passed && (prf.toExec.branchmask & branchOps.branchMask).orR) { addressGenerationInput.valid := false.B }
+  }
+
   val memoryRequest = RegInit(new pipelineMemoryRequest Lit(_.valid -> false.B))
+  memoryRequest.address := addressGenerationInput.rs1 + VecInit(
+    Cat(Fill(52, addressGenerationInput.instruction(31)), addressGenerationInput.instruction(31, 20)),
+    Cat(Fill(52, addressGenerationInput.instruction(31)), addressGenerationInput.instruction(31, 25), addressGenerationInput.instruction(11, 7)),
+    0.U, 0.U
+  )(Cat(addressGenerationInput.instruction(3), addressGenerationInput.instruction(5)))
+  memoryRequest.branchMask := addressGenerationInput.branchMask
+  memoryRequest.instruction := addressGenerationInput.instruction
+  memoryRequest.prfDest := addressGenerationInput.prfDest
+  memoryRequest.robAddr := addressGenerationInput.robAddr
+  memoryRequest.valid := addressGenerationInput.valid
+
+  when(branchOps.valid) {
+    when((addressGenerationInput.branchMask & branchOps.branchMask).orR) {
+      memoryRequest.branchMask := addressGenerationInput.branchMask ^ branchOps.branchMask
+    }
+    when(!branchOps.passed && (addressGenerationInput.branchMask & branchOps.branchMask).orR) { memoryRequest.valid := false.B }
+  }
 
   memAccess.request := memoryRequest
   memAccess.branchOps := branchOps
@@ -212,34 +245,16 @@ class core (
   fwdFrom(0).prfDest := singleCycleArithmeticRequest.prfDest
   fwdFrom(0).branchMask := singleCycleArithmeticRequest.branchMask
 
-  // Fused address generation (see memoryRequest declaration above).
-  val addressGenRs1 = Mux(prf.toExec.instruction(19, 15).orR, MuxCase(prf.toExec.rs1Data,
-    fwdFrom.map(fwd => fwd.valid && (fwd.prfDest === prf.toExec.rs1Addr)) zip fwdFrom.map(_.result) map{ case(prfMatch, result ) => (prfMatch -> result)}
+  addressGenerationInput.rs1 := Mux(prf.toExec.instruction(19, 15).orR, MuxCase(prf.toExec.rs1Data,
+    fwdFrom.map(fwd => fwd.valid && (fwd.prfDest === prf.toExec.rs1Addr)) zip fwdFrom.map(_.result) map{ case(prfMatch, result ) => (prfMatch -> result)} 
   ), 0.U)
-  memoryRequest.address := addressGenRs1 + VecInit(
-    Cat(Fill(52, prf.toExec.instruction(31)), prf.toExec.instruction(31, 20)),
-    Cat(Fill(52, prf.toExec.instruction(31)), prf.toExec.instruction(31, 25), prf.toExec.instruction(11, 7)),
-    0.U, 0.U
-  )(Cat(prf.toExec.instruction(3), prf.toExec.instruction(5)))
-  memoryRequest.branchMask := prf.toExec.branchMask
-  memoryRequest.instruction := prf.toExec.instruction
-  memoryRequest.prfDest := prf.toExec.prfDest
-  memoryRequest.robAddr := prf.toExec.robAddr
-  memoryRequest.valid := prf.toExec.valid && !Seq(6, 4).map(i => prf.toExec.instruction(i).asBool).reduce(_ || _)
-
-  when(branchOps.valid) {
-    when((prf.toExec.branchMask & branchOps.branchMask).orR) {
-      memoryRequest.branchMask := prf.toExec.branchMask ^ branchOps.branchMask
-    }
-    when(!branchOps.passed && (prf.toExec.branchMask & branchOps.branchMask).orR) { memoryRequest.valid := false.B }
-  }
 
   val arithmeticResult = {
     def result32bit(res: UInt) =
       Cat(Fill(32, res(31)), res(31, 0))
     
-    val rs1 = singleCycleArithmeticRequest.rs1
-    val rs2 = singleCycleArithmeticRequest.rs2
+    val rs1 = singleCycleArithmeticRequest.rs1 // Mux(singleCycleArithmeticRequest.instruction(19, 15).orR,singleCycleArithmeticRequest.rs1, 0.U)
+    val rs2 = singleCycleArithmeticRequest.rs2 // Mux(singleCycleArithmeticRequest.instruction(24, 20).orR || !singleCycleArithmeticRequest.instruction(5).asBool, singleCycleArithmeticRequest.rs2, 0.U)
     val instruction = singleCycleArithmeticRequest.instruction
 
     val arithmetic32 = VecInit.tabulate(4)(i => i match {
@@ -270,7 +285,7 @@ class core (
 
   // getting arithmetic result
   singleCycleArithmeticRequest.valid := prf.toExec.valid && (prf.toExec.instruction(4, 2) === BitPat("b1?0")) && (prf.toExec.instruction(6).asBool || !prf.toExec.instruction(5).asBool || !prf.toExec.instruction(25).asBool)
-  singleCycleArithmeticRequest.branchMask := prf.toExec.branchMask
+  singleCycleArithmeticRequest.branchMask := prf.toExec.branchmask
   singleCycleArithmeticRequest.instruction := prf.toExec.instruction
   singleCycleArithmeticRequest.prfDest := prf.toExec.prfDest
   singleCycleArithmeticRequest.robAddr := prf.toExec.robAddr
@@ -282,10 +297,10 @@ class core (
   ), 0.U), arithmeticImm)
   
   when(branchOps.valid) {
-    when((prf.toExec.branchMask & branchOps.branchMask).orR) {
-      singleCycleArithmeticRequest.branchMask := prf.toExec.branchMask ^ branchOps.branchMask
+    when((prf.toExec.branchmask & branchOps.branchMask).orR) {
+      singleCycleArithmeticRequest.branchMask := prf.toExec.branchmask ^ branchOps.branchMask
     }
-    when(!branchOps.passed && (prf.toExec.branchMask & branchOps.branchMask).orR) {
+    when(!branchOps.passed && (prf.toExec.branchmask & branchOps.branchMask).orR) {
       singleCycleArithmeticRequest.valid := false.B
     }
   }
@@ -304,13 +319,13 @@ class core (
 
     // getting extnM request
   extnMRequest.valid := prf.toExec.valid && (prf.toExec.instruction(6, 2) === BitPat("b011?0")) && prf.toExec.instruction(25).asBool
-  extnMRequest.branchMask := prf.toExec.branchMask
+  extnMRequest.branchMask := prf.toExec.branchmask
   extnMRequest.instruction := prf.toExec.instruction
   when(branchOps.valid) {
-    when((prf.toExec.branchMask & branchOps.branchMask).orR) {
-      extnMRequest.branchMask := prf.toExec.branchMask ^ branchOps.branchMask
+    when((prf.toExec.branchmask & branchOps.branchMask).orR) {
+      extnMRequest.branchMask := prf.toExec.branchmask ^ branchOps.branchMask
     }
-    when(!branchOps.passed && (prf.toExec.branchMask & branchOps.branchMask).orR) {
+    when(!branchOps.passed && (prf.toExec.branchmask & branchOps.branchMask).orR) {
       extnMRequest.valid := false.B
     }
   }
@@ -337,6 +352,7 @@ class core (
   val narrowMuls = Reg(Vec(9, UInt(64.W)))
   narrowMuls zip partialMuls32x32.map(_.asUInt) foreach{ case(reg, mul) => reg := mul }
 
+  // val mul64 = extnMRequest.rs1.asSInt * extnMRequest.rs2.asSInt
   muls(0) := (narrowMuls(0) + Cat(narrowMuls(1), 0.U(32.W)))// extnMRequest.rs1 * extnMRequest.rs2(31, 0)
   muls(1) := narrowMuls(3) + Cat(narrowMuls(5), 0.U(32.W)) // extnMRequest.rs1 * extnMRequest.rs2(63, 32)
   muls(2) := narrowMuls(3) + Cat(narrowMuls(6), 0.U(32.W))// (extnMRequest.rs1.asSInt * Cat(0.U(1.W),extnMRequest.rs2(63, 32)).asSInt)(95, 0).asUInt
@@ -362,13 +378,13 @@ class core (
   extnResponseInstruction := extnMServicing.instruction
 
   when(branchOps.valid) {
-    Seq(prf.toExec.branchMask, extnMRequest.branchMask, extnMPartialServicing.branchMask).map(i => (i ^ branchOps.branchMask, (i & branchOps.branchMask).orR))
+    Seq(prf.toExec.branchmask, extnMRequest.branchMask, extnMPartialServicing.branchMask).map(i => (i ^ branchOps.branchMask, (i & branchOps.branchMask).orR))
     .zip(Seq(extnMRequest.branchMask, extnMPartialServicing.branchMask, extnMServicing.branchMask))
     .foreach{ case((branchMaskUpdate, bitMatch), reg) => when(bitMatch) {
       reg := branchMaskUpdate
     }}
     when(!branchOps.passed) {
-      (Seq(prf.toExec.branchMask, extnMRequest.branchMask, extnMServicing.branchMask).map(_ & branchOps.branchMask).map(_.orR))
+      (Seq(prf.toExec.branchmask, extnMRequest.branchMask, extnMServicing.branchMask).map(_ & branchOps.branchMask).map(_.orR))
       .zip(Seq(extnMRequest.valid, extnMServicing.valid, extnMResponse.valid) zip Seq(prf.toExec.valid, extnMRequest.valid, extnMServicing.valid))
       .foreach{ case(branchMatch, (reg, validInstruction)) => when(branchMatch && validInstruction) { reg := false.B }}
     }
@@ -394,27 +410,9 @@ class core (
   }
   when(extnMResponse.valid && extnResponseInstruction(14).asBool) { mExtensionReady := true.B }
 
-  // Radix-8 (B6): unroll the proven non-restoring radix-2 recurrence THREE times
-  // per clock and decrement the counter by 3, cutting the iteration cycles to
-  // ceil(N/3). The arithmetic of each sub-step is bit-identical to the original
-  // radix-2 loop, so the final quotient/remainder are unchanged after the same
-  // TOTAL step count. The counter-parity select keeps the step count exact: it
-  // takes 3 steps while >=3 remain, then a 2-step or 1-step tail so the counter
-  // lands precisely on 0 — never overshooting. The result-extraction path
-  // (counter == 0) makes no parity assumption, so it is untouched. (B5 was the
-  // 2-step radix-4 form; the 3rd chained 65-bit add/sub lengthens the divider's
-  // combinational path — acceptable for the sim/IPC metric, watch FPGA timing.)
-  val remStep1 = (Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor))(64, 0)
-  val quoStep1 = Cat(division.quotient(63, 0), ~remStep1(64))
-  val remStep2 = (Cat(remStep1(63, 0), quoStep1(64)) + Mux(remStep1(64).asBool, division.divisor, - division.divisor))(64, 0)
-  val quoStep2 = Cat(quoStep1(63, 0), ~remStep2(64))
-  val remStep3 = (Cat(remStep2(63, 0), quoStep2(64)) + Mux(remStep2(64).asBool, division.divisor, - division.divisor))(64, 0)
-  val quoStep3 = Cat(quoStep2(63, 0), ~remStep3(64))
-  val doThree  = division.counter >= 3.U
-  val doTwo    = division.counter === 2.U
-  division.remainder := Mux(doThree, remStep3, Mux(doTwo, remStep2, remStep1))
-  division.quotient  := Mux(doThree, quoStep3, Mux(doTwo, quoStep2, quoStep1))
-  division.counter   := Mux(doThree, division.counter - 3.U, Mux(doTwo, division.counter - 2.U, division.counter - 1.U))
+  division.remainder := Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor)
+  division.quotient := Cat(division.quotient(63, 0), ~(Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor))(64))
+  division.counter := division.counter - 1.U
 
   when(extnMRequest.valid && extnMRequest.instruction(14).asBool) {
     division.counter := 65.U
@@ -435,30 +433,6 @@ class core (
         when(extnMRequest.rs1(31).asBool) { division.quotient := Cat(0.U(33.W), (- extnMRequest.rs1(31, 0))(31, 0)) }
         when(extnMRequest.rs2(31).asBool) { division.divisor := Cat(0.U(33.W), (- extnMRequest.rs2(31, 0))(31, 0)) }
       }
-    }
-  }
-
-  // Divider early termination: the non-restoring loop consumes the dividend
-  // MSB-first out of the 65-bit quotient register, and leading-zero bits only
-  // produce quotient bits of 0 while the partial remainder stays 0. So the
-  // cycle after operand load we left-align the (already sign-corrected)
-  // dividend and run only the iterations that carry information. divw/remw on
-  // small values drop from 65 iterations to a handful. The zero-dividend and
-  // zero-divisor cases keep the full-length path: the all-ones quotient that
-  // RISC-V mandates for division by zero is produced by the iterations
-  // themselves, which normalization would skip.
-  val divNormalizePending = RegInit(false.B)
-  when(extnMRequest.valid && extnMRequest.instruction(14).asBool) { divNormalizePending := true.B }
-  when(divNormalizePending) {
-    divNormalizePending := false.B
-    division.remainder := 0.U
-    when(division.quotient.orR && division.divisor.orR) {
-      val leadingZeros = PriorityEncoder(Reverse(division.quotient))
-      division.quotient := (division.quotient << leadingZeros)(64, 0)
-      division.counter := 65.U - leadingZeros
-    }.otherwise {
-      division.quotient := division.quotient // hold: default iteration must not shift it
-      division.counter := 65.U
     }
   }
 
@@ -504,6 +478,12 @@ class core (
   // oldest (fwdBuffers(1) or fwdFrom(2)) from fwding
   fwdBuffers zip fwdFrom foreach{ case (reg, nextVal) => { reg := nextVal }}
 
+  // doing branch evalutaion
+  /* val branchPCs = RegInit(VecInit(Seq.fill(configuration.branchMaskWidth*2)(new Bundle {
+    val valid = Bool()
+    val pc = UInt(64.W)
+  }.Lit(_.valid -> false.B))) )*/
+
   // pc of the instruction which branched
   //leon rename the depth
   val branchPCs = RegInit(VecInit(Seq.fill(configuration.branchPC_depth)(new Bundle {
@@ -523,9 +503,10 @@ class core (
     val rs1 = UInt(64.W)
     val rs2 = UInt(64.W)
     val robAddr = UInt(configuration.robAddrWidth.W)
-    val branchMask = UInt(configuration.newBranchMaskWidth.W) //leon coherency
+    val branchMask =UInt(configuration.newBranchMaskWidth.W) //leon coherency
     val instruction = UInt(32.W)
     val immediate = UInt(64.W)
+    //val conditionsInstructions = UInt(6.W)
   }.Lit(_.valid -> false.B))
 
   branchInstruction.immediate := {
@@ -558,16 +539,16 @@ class core (
     branchInstruction.rs2 := MuxCase(prf.toExec.rs2Data,
       fwdFrom.map(fwd => fwd.valid && (fwd.prfDest === prf.toExec.rs2Addr)) zip fwdFrom.map(_.result) map{ case(prfMatch, result ) => (prfMatch -> result)} 
     )
-    branchInstruction.branchMask := prf.toExec.branchMask
+    branchInstruction.branchMask := prf.toExec.branchmask
     branchInstruction.robAddr := prf.toExec.robAddr
     branchInstruction.instruction := prf.toExec.instruction
   }
   
   when(branchOps.valid) {
-    when((branchOps.branchMask & prf.toExec.branchMask).orR) {
-      branchInstruction.branchMask := prf.toExec.branchMask ^ branchOps.branchMask
+    when((branchOps.branchMask & prf.toExec.branchmask).orR) {
+      branchInstruction.branchMask := prf.toExec.branchmask ^ branchOps.branchMask
     }
-    when(!branchOps.passed && (branchOps.branchMask & prf.toExec.branchMask).orR) {
+    when(!branchOps.passed && (branchOps.branchMask & prf.toExec.branchmask).orR) {
       branchInstruction.valid := false.B
     }
   }
@@ -581,6 +562,7 @@ class core (
   branchEvals.branchMask := Mux(coherentLoadInvalid,configuration.coherent_BranchMask,branchPCs(0).branchMask)
 
   when(branchOps.valid) {
+    //branchEvals.branchMask := branchInstruction.branchMask ^ branchOps.branchMask
     when(!branchOps.passed) {
       branchEvals.valid := false.B
     }
@@ -597,13 +579,20 @@ class core (
     conditionEval(instruction(14, 12))
   }
   val nextCorrectPC = {
-    val rs1 = branchInstruction.rs1
-    val rs2 = branchInstruction.rs2
+    val rs1 = branchInstruction.rs1 // Mux(branchInstruction.instruction(19, 15).orR ,, 0.U)// branchInstruction.rs1
+    val rs2 = branchInstruction.rs2 // Mux(branchInstruction.instruction(24, 20).orR ,branchInstruction.rs2, 0.U)// branchInstruction.rs2
     val instruction = branchInstruction.instruction
+    /* val immediate = VecInit(
+      Cat(Fill(52, instruction(31)), instruction(7), instruction(30, 25), instruction(11, 8), 0.U(1.W)),
+      Cat(Fill(52, instruction(31)), instruction(31, 20)),
+      0.U,
+      Cat(Fill(44, instruction(31)), instruction(19, 12), instruction(20), instruction(30, 21), 0.U(1.W))
+    )(instruction(3, 2)) */
     val immediate = branchInstruction.immediate
     val pc = branchPCs(0).pc
     val pcPredicted = predictedPCs(0).pc
 
+    //val conditionEval = VecInit(Seq(rs1 === rs2, rs1 === rs2, rs1.asSInt < rs2.asSInt, rs1 < rs2).flatMap(cond => Seq(cond, !cond)))
     val conditionEval = VecInit(
       rs1 === rs2,
       rs1 =/= rs2,
@@ -625,7 +614,8 @@ class core (
 
   //leon coherency
   branchEvals.nextPC := Mux(coherentLoadInvalid,rob.commit.pc,nextCorrectPC)
-  branchEvals.passed := Mux(coherentLoadInvalid, 0.B, predictedPCs(0).valid && (nextCorrectPC === predictedPCs(0).pc))
+  // branchEvals.passed := (predictedPCs(0).valid || decode.branchPCs.fired) && (nextCorrectPC === Mux(predictedPCs(0).valid, predictedPCs(0).pc, decode.branchPCs.predictedPC))
+  branchEvals.passed := Mux(coherentLoadInvalid,0.B,(predictedPCs(0).valid) && (nextCorrectPC === predictedPCs(0).pc))
 
 
   decode.branchPCs.fired := decode.branchPCs.ready && !(branchPCs).map(_.valid).reduce(_ && _)
@@ -675,6 +665,33 @@ class core (
     .foreach{ case(update, reg) => reg := update }
     predictedPCs(branchPCs.length-1).valid := false.B
   }
+  /* branchPCs.map(_.valid).scanLeft(true.B)(_ && _)
+  .zip(branchPCs)
+  .map{ case (priorEntriesFull, entry) => Mux(!priorEntriesFull || entry.valid, entry, {
+    val newEntry = Wire(branchPCs(0).cloneType)
+    newEntry.valid := decode.branchPCs.fired
+    newEntry.pc := decode.branchPCs.PC
+    newEntry
+  }) }
+  .zip(branchPCs)
+  .foreach{ case(next, reg) => reg := next }
+
+  when(branchOps.valid && !branchOps.passed) {
+    branchPCs.foreach{ _.valid := false.B }
+  }.elsewhen(branchInstruction.valid) {
+    branchPCs.map(_.valid).scanLeft(true.B)(_ && _)
+    .zip(branchPCs)
+    .map{ case (priorEntriesFull, entry) => Mux(!priorEntriesFull || entry.valid, entry, {
+      val newEntry = Wire(branchPCs(0).cloneType)
+      newEntry.valid := decode.branchPCs.fired
+      newEntry.pc := decode.branchPCs.PC
+      newEntry
+    }) }.drop(2)
+    .zip(branchPCs)
+    .foreach{ case(next, reg) => reg := next }
+    branchPCs(branchPCs.length-1).valid := false.B
+    branchPCs(branchPCs.length-2).valid := false.B
+  } */
 
   //leon coherency
   val coherentLoadInvalidReg = RegInit(coherentLoadInvalid)
@@ -701,6 +718,8 @@ class core (
 
   //leon coherency
   memAccess.loadCommit.ready := rob.commit.instruction(6,2).orR===0.U && rob.commit.ready
+  //memAccess.coherentLoadMiss.modify := coherentLoadInvalid
+  //
 
 
   decode.writeAddrPRF.exec1Addr := scheduler.instrRetired.prfAddr
@@ -776,18 +795,14 @@ class core (
 
   decode.jumpAddrWrite.fired := decode.jumpAddrWrite.ready
 
-  prf.branchCheck.branchMask := branchOps.branchMask
+  prf.branchCheck.branchmask := branchOps.branchMask
   prf.branchCheck.pass := branchOps.passed
   prf.branchCheck.valid := branchOps.valid
 
-  // B3: single staging register on the store-data PRF read (was RegNext×2).
-  // The read is triggered only once the store is at the ROB head, so rs2 is
-  // architectural well before either delay; the arbiter captures writeDataIn
-  // whenever it arrives, so the extra cycle bought nothing.
-  prf.fromStore.branchMask := RegNext(dataQueue.toPRF.branchMask)
-  prf.fromStore.instruction := RegNext(dataQueue.toPRF.instruction)
-  prf.fromStore.rs2Addr := RegNext(dataQueue.toPRF.rs2Addr)
-  prf.fromStore.valid := RegNext(dataQueue.toPRF.valid && dataQueue.fromROB.readyNow, false.B)
+  prf.fromStore.branchmask := RegNext(RegNext(dataQueue.toPRF.branchMask))
+  prf.fromStore.instruction := RegNext(RegNext(dataQueue.toPRF.instruction))
+  prf.fromStore.rs2Addr := RegNext(RegNext(dataQueue.toPRF.rs2Addr))
+  prf.fromStore.valid := RegNext(RegNext(dataQueue.toPRF.valid && dataQueue.fromROB.readyNow, false.B), false.B)
   prf.fromStore.prfDest := 0.U
 
   dataQueue.fromBranch.robAddr := branchEvals.robAddr
@@ -813,11 +828,21 @@ class core (
 
   scheduler.branchOps := branchOps
 
+  // fetch.cachelinesUpdatesResp.fired := false.B
   val dPortBusWidth = math.pow(2, dPort_SIZE).toInt * 8
   val dPort = IO(new ACE(busWidth = dPortBusWidth))
   val peripheral = IO(new  AXI)
   dPort <> memAccess.dPort
   peripheral <> memAccess.peripheral
+
+  /* val debugIO = IO(Output(new Bundle {
+    val pc = UInt(32.W)
+    val instruction = UInt(32.W)
+    val valid = Bool()
+  }))
+  debugIO.pc := rob.commit.pc
+  debugIO.instruction := rob.commit.instruction
+  debugIO.valid := rob.commit.fired*/
 
   memAccess.initiateFence := rob.commit.fired && rob.commit.is_fence
   // When a fence is fired from fetch unit, it expects it to be executed
@@ -865,6 +890,10 @@ class core (
     _ := (memAccess.fenceInstructions.ready && icache.updateAllCachelines.ready)
   )
   fetch.carryOutFence.fired := fetch.carryOutFence.ready
+  // fetch informs the icache to update its cache lines
+  /* Seq(fetch.updateAllCachelines.fired, icache.updateAllCachelines.fired).foreach(
+    _ := (fetch.updateAllCachelines.ready && icache.updateAllCachelines.ready)
+  ) */
   fetch.updateAllCachelines.fired := fetch.updateAllCachelines.ready
   // icache informs the fetch unit to start fetching again
   Seq(icache.cachelinesUpdatesResp.fired, fetch.cachelinesUpdatesResp.fired).foreach(
@@ -885,6 +914,13 @@ class core (
   // This assumes these belong to an mispredicted execution path, and hence will be removed anyway by a future misprediction
   when(scheduler.release.instruction(4, 2) === "b010".U(3.W)) { prf.execRead.valid := false.B }
 
+  /* val fetch_decode_ready, fetch_decode_fired, decode_ready = IO(Output(Bool()))
+  fetch_decode_ready := fetch.toDecode.ready
+  fetch_decode_fired := fetch.toDecode.fired
+  decode_ready := decode.fromFetch.ready */
+
+  // val status = IO(Output(UInt(32.W)))
+  // val counterSelect = IO(Input(UInt(8.W)))
   val minstret = RegInit(0.U(64.W))
   //val decodeReadyCount = RegInit
   val programRunning = RegInit(true.B)
@@ -929,15 +965,21 @@ class core (
     }
   }
 
-  // Drive the architectural HPM counters in decode. These are free-running
-  // (not gated by `programRunning`) so software rdcycle/rdinstret/rdhpmcounterN
-  // reflect the whole program, not just the profiling window above.
-  decode.perfEvents.instRetire     := rob.commit.fired
-  decode.perfEvents.branchResolved := branchOps.valid
-  decode.perfEvents.branchMispred  := branchOps.valid && !branchOps.passed
-  decode.perfEvents.schedStall     := decode.toExec.ready && !scheduler.allocate.ready
-  decode.perfEvents.robStall       := decode.toExec.ready && !rob.allocate.ready
+  /* val selectedCounter = VecInit.tabulate(8)(i => i match {
+    case 0 => counters.branchCount
+    case 1 => counters.branchesPassed
+    case 2 => counters.cycleCount
+    case 3 => counters.decodeFired
+    case 4 => counters.decodeReady
+    case 5 => counters.minstret
+    case 6 => counters.robFull
+    case 7 => counters.schedulerFull
+  })(counterSelect(7, 3)) */
 
+  // status := VecInit.tabulate(8)(i => selectedCounter >> (i*8))(counterSelect(2, 0))
+  //val storesPending = RegInit(0.U(32.W))
+  //storesPending := storesPending +& memAccess.writeDataIn.valid.asUInt -& memAccess.decrCounter.asUInt
+  // status := memAccess.writeToMemoryPendingOut(31)
   val core_sample0, core_sample1 = IO(Output(UInt(1.W)))
   core_sample0 := decode.fromFetch.expected.valid.asUInt
   core_sample1 := decode.fromFetch.expected.pc(30)
@@ -1101,5 +1143,48 @@ class soc extends Module {
 
 
 object core extends App {
-  emitVerilog(new core(dPort_id = 0, peripheral_id = 0, mhart_id = 0, iPort_id = 0))
+  emitVerilog(new core(dPort_id = 0, peripheral_id =0, mhart_id = 0, iPort_id =0))
 }
+
+
+/**
+
+class soc extends Module {
+  val io = IO(new Bundle {
+    // Pull out only the non-debug signals
+    val core0_iPort = new ACE(busWidth = 64)
+    val core0_dPort = new ACE(busWidth = 64)
+    val core0_peripheral = new AXI
+    val core0_MTIP = Input(Bool())
+
+    val core1_iPort = new ACE(busWidth = 64)
+    val core1_dPort = new ACE(busWidth = 64)
+    val core1_peripheral = new AXI
+    val core1_MTIP = Input(Bool())
+  })
+
+  // Instantiate two cores
+  val core0 = Module(new core)
+  val core1 = Module(new core)
+
+  // Connect core0 signals to SoC IO
+  core0.iPort <> io.core0_iPort
+  core0.dPort <> io.core0_dPort
+  core0.peripheral <> io.core0_peripheral
+  core0.MTIP := io.core0_MTIP
+
+  // Connect core1 signals to SoC IO
+  core1.iPort <> io.core1_iPort
+  core1.dPort <> io.core1_dPort
+  core1.peripheral <> io.core1_peripheral
+  core1.MTIP := io.core1_MTIP
+
+
+}
+
+
+object soc extends App {
+  emitVerilog(new soc)
+}
+
+*/

@@ -17,6 +17,9 @@ $(BUILD)/profile.out: $(HARNESS)/profile.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) 
 $(BUILD)/fire.out: $(HARNESS)/fire.cpp $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_NOTRACE) $(HARNESS)/fire.cpp $(VSYS_LIB) -o $@
 
+$(BUILD)/profile_quad.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(VSYS_LIB) | $(BUILD)
+	$(CXX_NOTRACE) $(HARNESS)/profile_quad.cpp $(VSYS_LIB) -o $@
+
 # Golden-model emulator, standalone (no RTL). Needs -DLOCKSTEP for the
 # hart_set_interrupts overload; reads its image path from argv[1].
 $(BUILD)/emu.out: $(EMU)/src/emulator_linux.cpp $(EMU)/src/emulator.h | $(BUILD)
@@ -25,7 +28,7 @@ $(BUILD)/emu.out: $(EMU)/src/emulator_linux.cpp $(EMU)/src/emulator.h | $(BUILD)
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(EMU)/riscv-tests/images
 
-.PHONY: emu lockstep profile profile-all isa fire test linux demo
+.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux demo
 
 emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
 	$(BUILD)/emu.out $(BIN)
@@ -36,15 +39,32 @@ lockstep: $(BUILD)/lockstep.out      ## Lock-step RTL vs emulator for BENCH
 profile: $(BUILD)/profile.out        ## Cycle-accurate profile (IPC) for BENCH
 	@mkdir -p $(BUILD)/profile_results
 	$(BUILD)/profile.out --image $(BIN) --name $(BENCH) $(DONE) \
-		--output $(BUILD)/profile_results/$(BENCH).json --timeout 500000000
+		--output $(BUILD)/profile_results/$(BENCH).json --timeout 100000000
 
-profile-all: $(BUILD)/profile.out    ## Profile every manifest benchmark, all scales
+profile-quad: $(BUILD)/profile_quad.out    ## Quad-core profile (IPC) for FAM (e.g. make profile-quad FAM=vvadd)
+	@mkdir -p $(BUILD)/profile_results
+	$(BUILD)/profile_quad.out \
+	    --image $(BINS)/$($(FAM)_base)-q4.bin \
+	    --name $(FAM)-q4 $($(FAM)_DONE) \
+	    --output $(BUILD)/profile_results/$(FAM)-q4.json --timeout 100000000
+
+profile-all: $(BUILD)/profile_quad.out    ## Profile all quad-core benchmarks (default: q4 bins)
+	@mkdir -p $(BUILD)/profile_results
+	$(foreach fam,$(BENCHES), \
+	  test -f $(BINS)/$($(fam)_base)-q4.bin && \
+	  timeout 600 $(BUILD)/profile_quad.out \
+	    --image $(BINS)/$($(fam)_base)-q4.bin \
+	    --name $(fam)-q4 $($(fam)_DONE) \
+	    --output $(BUILD)/profile_results/$(fam)-q4.json --timeout 100000000 || true ;)
+	python3 scripts/profile_visualize.py $(BUILD)/profile_results/
+
+profile-all-sc: $(BUILD)/profile.out    ## Profile single-core (NUM_CORES=1) bins, all scales
 	@mkdir -p $(BUILD)/profile_results
 	$(foreach fam,$(BENCHES),$(foreach s,1 2 3 4 5, \
 	  test -f $(BINS)/$($(fam)_base)-s$(s).bin && \
-	  $(BUILD)/profile.out --image $(BINS)/$($(fam)_base)-s$(s).bin \
+	  timeout 600 $(BUILD)/profile.out --image $(BINS)/$($(fam)_base)-s$(s).bin \
 	    --name $(fam)-s$(s) $($(fam)_DONE) \
-	    --output $(BUILD)/profile_results/$(fam)-s$(s).json --timeout 500000000 ; ))
+	    --output $(BUILD)/profile_results/$(fam)-s$(s).json --timeout 100000000 || true ; ))
 	python3 scripts/profile_visualize.py $(BUILD)/profile_results/
 
 isa: test_all_images                 ## Alias for the full ISA regression suite
@@ -53,11 +73,14 @@ fire: $(BUILD)/fire.out $(BINS)/mt-fire.bin   ## Render the bare-metal fire demo
 	$(BUILD)/fire.out --image $(BINS)/mt-fire.bin --frames $(FIRE_FRAMES)
 FIRE_FRAMES ?= 60
 
-test: isa                            ## ISA suite + every benchmark, via lock-step
-	@for b in $(REGRESSION); do \
-	  echo "== lockstep $$b =="; \
-	  $(MAKE) --no-print-directory lockstep BENCH=$$b || exit 1; \
+test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks (uses -q4 bins)
+	@for fam in $(REGRESSION_Q4); do \
+	  echo "== quad-core $$fam-q4 =="; \
+	  $(MAKE) --no-print-directory profile-quad FAM=$$fam || exit 1; \
+	  echo "$$fam-q4: PASS"; \
 	done
+
+test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 
 linux: $(BUILD)/lockstep_linux.out   ## Linux-boot lock-step (dtb/bootrom harness)
 	$(BUILD)/lockstep_linux.out --image $(BIN)

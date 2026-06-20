@@ -144,12 +144,8 @@ class robResultsFifo[T <: Data ]( gen: T, depth: Int, numWritePorts: Int) extend
 
   allocatedAddr := writePtr
 
-  // W0 (2-wide commit sizing): is the entry just behind the head also present
-  // and result-ready (bit 0)? If so, a second commit port could retire it the
-  // same cycle. Uses the registered result bit, matching how head readiness is
-  // measured (deq.bits(0)); no same-cycle writeport bypass.
-  val secondPtr   = Mux(readPtr === (depth - 1).U, 0.U, readPtr + 1.U)
-  val twoOrMore   = fullReg || (!emptyReg && (secondPtr =/= writePtr))
+  val secondPtr  = Mux(readPtr === (depth - 1).U, 0.U, readPtr + 1.U)
+  val twoOrMore  = fullReg || (!emptyReg && (readPtr +% 1.U =/= writePtr))
   val secondReady = IO(Output(Bool()))
   secondReady := twoOrMore && memReg(secondPtr).asUInt(0)
 
