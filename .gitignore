@@ -64,7 +64,13 @@ verilator-tests/program_boot/programs/build/
 profile_results/
 test_results.txt
 .stamp.*
-run.log
+profile_report.png
+
+# =========================
+# Chisel / FIRRTL generated files
+# =========================
+firrtl_black_box_resource_files.f
+system.anno.json
 
 # =========================
 # Misc project artifacts
