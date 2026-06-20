@@ -118,8 +118,18 @@ flowchart LR
 
 ```
 chiron/
-├── src/main/scala/        # Chisel RTL (4-core system, frontend, decode, scheduler,
-│                          #   rob, prf, caches, ACE interconnect, …)
+├── src/main/scala/        # Chisel RTL — grouped by pipeline function:
+│   ├── Frontend/          #   fetch + branch prediction (TAGE/BTB)
+│   ├── Decode/            #   decode + register rename
+│   ├── Backend/           #   OoO execution: Rob · Prf · Scheduler · StoreDataIssue
+│   ├── pipeline/          #   shared port/fifo bundles (pipeline.ports / .fifo)
+│   ├── Icache/            #   L1 instruction cache (+ shared AXI bundle)
+│   ├── Dcache/            #   L1 non-blocking data cache
+│   ├── L2_cache/          #   shared non-blocking L2 (MSHR · pseudo-LRU)
+│   ├── Interconnect/      #   ACE coherence unit (CCU)
+│   ├── common/            #   configuration / parameters
+│   ├── testbench/         #   system top, main memory model, UARTs
+│   └── core.scala         #   per-core top-level (frontend → backend → L1)
 ├── emulator/              # C++ golden-model ISA simulator (4-hart, lock-step ref)
 ├── simulator/             # Verilator RTL wrapper
 │   └── src/
