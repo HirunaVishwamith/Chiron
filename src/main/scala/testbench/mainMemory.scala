@@ -161,7 +161,7 @@ class mainMemory(
       clients(data).ARREADY := false.B
       when(
         (!writeBuffers.addressValid && !clients(data).AWVALID) ||
-        (clients(data).WVALID && clients(data).WREADY)
+        (clients(data).WVALID && clients(data).WREADY && clients(data).WLAST)
       ) {
         arbiter := reading
       }
