@@ -118,4 +118,7 @@ test_all_images: $(BUILD)/lockstep_isa.out   ## CI: lock-step every ISA test ima
 	    printf "FAIL\n"; echo "$$name: fail" >> test_results.txt; \
 	  fi; \
 	done
-	@echo "ISA passed: $$(grep -c ': pass' test_results.txt) / $$(wc -l < test_results.txt)"
+	@PASSED=$$(grep -c ': pass' test_results.txt); \
+	 TOTAL=$$(wc -l < test_results.txt); \
+	 echo "ISA passed: $$PASSED / $$TOTAL"; \
+	 [ $$PASSED -ge 83 ] || { echo "REGRESSION: $$PASSED/$$TOTAL passed (expected >=83)"; exit 1; }

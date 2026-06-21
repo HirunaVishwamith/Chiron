@@ -4,6 +4,8 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 #include <iterator>
 #include <vector>
 #include <iostream>

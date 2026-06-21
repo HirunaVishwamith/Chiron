@@ -1,8 +1,4 @@
-/*
-This heder file represent a one core(hart) of the processor.
-*/
-
-/* HART INCLUDE HEADER FILES */
+#pragma once
 
 #include <unistd.h>
 #include <cstdlib>
@@ -11,8 +7,9 @@ This heder file represent a one core(hart) of the processor.
 #include <termios.h>
 #include <string>
 #include <fstream>
-#include <stdio.h>
-#include <bits/stdc++.h>
+#include <cstdio>
+#include <cmath>
+#include <cstdint>
 #include <sys/time.h>
 #include <fcntl.h>
 #include <iostream>
@@ -22,25 +19,22 @@ This heder file represent a one core(hart) of the processor.
 
 using namespace std;
 
-// detecting a key hit
-int kbhit()
+inline int kbhit()
 {
   int byteswaiting;
   ioctl(0, FIONREAD, &byteswaiting);
   return byteswaiting > 0;
 }
 
-// disables echo for terminal
-void enable_raw_mode()
+inline void enable_raw_mode()
 {
   termios term;
   tcgetattr(0, &term);
-  term.c_lflag &= ~(ICANON | ECHO); // Disable echo as well
+  term.c_lflag &= ~(ICANON | ECHO);
   tcsetattr(0, TCSANOW, &term);
 }
 
-// return terminal back to original state before termination of the program
-void disable_raw_mode()
+inline void disable_raw_mode()
 {
   termios term;
   tcgetattr(0, &term);
@@ -95,10 +89,6 @@ private:
 
   uint64_t DRAM_BASE = 0x80000000; /// **** this has to change inorder to write to seperate memory location
 
-  string line;
-  uint64_t temp;
-  uint64_t i = 0;
-
   enum opcode_t opcode;
   uint64_t rd = 0;
   uint64_t func3 = 0;
@@ -140,12 +130,6 @@ private:
   __uint128_t mult_temp = 0;
 
   uint64_t ret_data = 0;
-
-  
-  // vector<uint64_t> reg_file = vector<uint64_t>(32);          // register file
-
-  // *** edit the init fuction such that it sperate from emulators functionality i.e two times initializing mem
-  // *** remove meomory and make it shared
 
   uint64_t PC;
   uint64_t PC_phy;
@@ -668,56 +652,6 @@ private:
     return (x ^ m) - m;
   }
 
-  string exec(const char *cmd)
-  {
-    char buffer[128];
-    string result = "";
-    FILE *pipe = popen(cmd, "r");
-    if (!pipe)
-      throw runtime_error("popen() failed!");
-    try
-    {
-      while (fgets(buffer, sizeof buffer, pipe) != NULL)
-      {
-        result += buffer;
-      }
-    }
-    catch (...)
-    {
-      pclose(pipe);
-      throw;
-    }
-    pclose(pipe);
-    return result;
-  }
-
-  int hex_to_dec(const int64_t &hex_num)
-  {
-    stringstream stream;
-    int y;
-    stream << hex_num;
-    stream >> hex >> y;
-    return y;
-  }
-
-  void print_reg_file(const vector<uint64_t> &reg_file)
-  {
-    printf("\n");
-    for (int i = 0; i < 32 - 7; i += 8)
-    {
-      printf("%s : %lu | %s : %lu | %s : %lu | %s : %lu | %s : %lu | %s : %lu | %s : %lu | %s : %lu\n",
-             reg_file_names[i].c_str(), signed_value(reg_file[i]),
-             reg_file_names[i + 1].c_str(), signed_value(reg_file[i + 1]),
-             reg_file_names[i + 2].c_str(), signed_value(reg_file[i + 2]),
-             reg_file_names[i + 3].c_str(), signed_value(reg_file[i + 3]),
-             reg_file_names[i + 4].c_str(), signed_value(reg_file[i + 4]),
-             reg_file_names[i + 5].c_str(), signed_value(reg_file[i + 5]),
-             reg_file_names[i + 6].c_str(), signed_value(reg_file[i + 6]),
-             reg_file_names[i + 7].c_str(), signed_value(reg_file[i + 7]));
-    }
-    printf("\n");
-  }
-
   template <class T>
   T divi(T num1, T num2, int s)
   {
@@ -1214,19 +1148,19 @@ public:
 
     instruction = hart_fetch_instruction(PC,memory);
 
-    //--------------Debugging---------------------
-    //To check if all tests passed
+#ifndef LOCKSTEP
+    // ISA test completion detection for standalone emulator
     if (instruction == 0x00000073 && reg_file[3] == 0x1 && reg_file[17] == 0x5d && reg_file[10] == 0x0) {
-      std::cout<<"All tests passed"<<endl;
+      std::cout << "All tests passed" << std::endl;
       disable_raw_mode();
       exit(0);
     }
     if (instruction == 0x00018513) {
-      std::cout<<"Tests failed"<<endl;
+      std::cout << "Tests failed" << std::endl;
       disable_raw_mode();
       exit(1);
     }
-    //--------------Debugging---------------------
+#endif
 
     if (!INS_ADDR_MISSALIG)
     {
@@ -1757,14 +1691,10 @@ public:
         if (func3 == 0b010)
         { // AMO.W-32
           load_addr = reg_file[rs1] & 0x00000000ffffffff;
-          if (load_addr > DRAM_BASE & load_addr < DRAM_BASE + 0x9000000)
+          if (!(load_addr > DRAM_BASE && load_addr < DRAM_BASE + 0x9000000))
           {
-            load_addr = load_addr;
-          }
-          else
-          {
-            printf("illegal access\n");
-            exit(0);
+            printf("AMO.W: illegal access addr=%lx\n", load_addr);
+            exit(1);
           }
           load_data = memory.at((load_addr - DRAM_BASE) / 8);
           switch (amo_op)
@@ -1950,14 +1880,10 @@ public:
         else if (func3 == 0b011)
         { // AMO.D-64
           load_addr = reg_file[rs1] & 0x00000000ffffffff;
-          if (load_addr > DRAM_BASE & load_addr < DRAM_BASE + 0x9000000)
+          if (!(load_addr > DRAM_BASE && load_addr < DRAM_BASE + 0x9000000))
           {
-            load_addr = load_addr;
-          }
-          else
-          {
-            printf("illegal access\n");
-            exit(0);
+            printf("AMO.D: illegal access addr=%lx\n", load_addr);
+            exit(1);
           }
           wb_data = memory.at((load_addr - DRAM_BASE) / 8);
           switch (amo_op)

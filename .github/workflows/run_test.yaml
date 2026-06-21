@@ -87,10 +87,12 @@ jobs:
       run: make sim
 
     # =========================
-    # Run lockstep
-    # (runLockStep = compatibility alias → unified harness, vvadd-s1)
+    # Run lockstep smoke test
+    # Non-blocking: failure is reported but does not fail CI.
+    # ISA suite (below) is the actual pass/fail gate.
     # =========================
-    - name: Run Lockstep
+    - name: Run Lockstep (smoke test)
+      continue-on-error: true
       run: make runLockStep
 
     # =========================
