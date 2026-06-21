@@ -5,11 +5,15 @@
 SHELL := /bin/bash
 
 # Project directory layout (no inline comments — trailing space corrupts the value)
+# All host-side C++ lives under sim/: emulator (golden model), rtl (Verilator
+# wrapper), harness (drivers), tests (ISA images), data (runtime inputs).
 BUILD     := build                 # all generated artifacts (gitignored)
 BINS      := bins                  # runnable .bin images (built + staged)
-HARNESS   := harnesses             # C++ test/run drivers
-EMU       := emulator              # golden-model ISA emulator (was fyp18-riscv-emulator)
-SIM       := simulator/src         # Verilator RTL wrapper
+HARNESS   := sim/harness           # C++ test/run drivers
+EMU       := sim/emulator          # golden-model ISA emulator
+SIM       := sim/rtl               # Verilator RTL wrapper
+ISA_DIR   := sim/tests/riscv-isa   # RISC-V ISA regression images
+DATA      := sim/data              # runtime inputs (Image, qemu.dtb, boot.bin)
 BENCH_SRC := workloads/benchmarks  # benchmark sources (was Mt-Benchmark)
 DEMO_SRC  := workloads/demos       # bare-metal demos (was Mt-Tinyprograms)
 # Strip any trailing whitespace the aligned comments above introduced.
@@ -18,6 +22,8 @@ BINS      := $(strip $(BINS))
 HARNESS   := $(strip $(HARNESS))
 EMU       := $(strip $(EMU))
 SIM       := $(strip $(SIM))
+ISA_DIR   := $(strip $(ISA_DIR))
+DATA      := $(strip $(DATA))
 BENCH_SRC := $(strip $(BENCH_SRC))
 DEMO_SRC  := $(strip $(DEMO_SRC))
 
@@ -29,12 +35,12 @@ VSYS_LIB := $(SIM)/obj_dir/Vsystem__ALL.a
 RISCV_BIN := /media/hv/D1/OOO_Processor/riscv/bin
 TOOLPATH  := PATH=$(RISCV_BIN):$$PATH
 
-# Legacy fixed image path (kept so the emulator's default still resolves)
-EMU_IMAGE := $(EMU)/src/Image
+# Default runtime image (harnesses fall back to this when --image is omitted)
+EMU_IMAGE := $(DATA)/Image
 
 # Host-compiler invocations for the Verilator harnesses. These run from the repo
-# root, so "-I ." lets the harness quote-includes resolve emulator/ and
-# simulator/ headers. Lock-step harnesses dump a VCD (need verilated_vcd_c);
+# root, so "-I ." lets the harness quote-includes resolve sim/emulator/ and
+# sim/rtl/ headers. Lock-step harnesses dump a VCD (need verilated_vcd_c);
 # the profiler and the fire viz do not.
 HARNESS_INCS  := -I . -I $(VINC) -I $(SIM)/obj_dir
 VERILATED     := $(VINC)/verilated.cpp

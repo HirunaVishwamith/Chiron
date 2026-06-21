@@ -130,18 +130,24 @@ chiron/
 │   ├── common/            #   configuration / parameters
 │   ├── testbench/         #   system top, main memory model, UARTs
 │   └── core.scala         #   per-core top-level (frontend → backend → L1)
-├── emulator/              # C++ golden-model ISA simulator (4-hart, lock-step ref)
-├── simulator/             # Verilator RTL wrapper
-│   └── src/
-│       ├── simulator.h    #   single-core signal accessors (core 0)
-│       └── profiler_quad.h#   quad-core profiler (164 perf-counter signals)
-├── harnesses/             # Test/run drivers
-│   ├── lockstep.cpp       #   RTL-vs-emulator lock-step (core 0)
-│   ├── lockstep_isa.cpp   #   ISA regression completion
-│   ├── lockstep_linux.cpp #   Linux-boot variant
-│   ├── profile.cpp        #   single-core cycle-accurate profiler
-│   ├── profile_quad.cpp   #   quad-core profiler (all 4 cores + aggregate IPC)
-│   └── fire.cpp           #   bare-metal UART → terminal streamer
+├── sim/                   # all host-side C++ (golden model · RTL wrapper · drivers)
+│   ├── emulator/          #   C++ golden-model ISA simulator (4-hart, lock-step ref)
+│   │   ├── hart.h         #     one hart — split into hart_{csr,trap,alu,memory,execute}.inc
+│   │   ├── emulator.h     #     4-hart container
+│   │   └── terminal.h · clint.h · constants.h
+│   ├── rtl/               #   Verilator RTL wrapper
+│   │   ├── rtl_model.h    #     single-core (core 0) signal accessors + stepping
+│   │   └── profiler.h · profiler_quad.h   # perf-counter read-out
+│   ├── harness/           #   test/run drivers
+│   │   ├── common/        #     shared helpers: args.h · image.h · completion.h
+│   │   ├── lockstep.cpp   #     RTL-vs-emulator lock-step (core 0)
+│   │   ├── lockstep_isa.cpp   # ISA regression completion
+│   │   ├── lockstep_linux.cpp # Linux-boot variant
+│   │   ├── profile.cpp    #     single-core cycle-accurate profiler
+│   │   ├── profile_quad.cpp   # quad-core profiler (all 4 cores + aggregate IPC)
+│   │   └── fire.cpp       #     bare-metal UART → terminal streamer
+│   ├── tests/riscv-isa/   #   ISA regression images (images · avoid · dumps)
+│   └── data/              #   runtime inputs: Image · qemu.dtb · boot.bin
 ├── workloads/
 │   ├── benchmarks/        # benchmark sources (vvadd · matmul · filter · csaxpy · histo)
 │   └── demos/             # bare-metal demos (fire 🔥)
