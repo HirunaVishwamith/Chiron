@@ -1,6 +1,6 @@
 # ── Harness binaries (compiled into $(BUILD)) ────────────────────────────────
-EMU_HDRS := $(EMU)/src/emulator.h $(EMU)/src/constants.h
-SIM_HDR  := $(SIM)/simulator.h
+EMU_HDRS := $(EMU)/emulator.h $(EMU)/constants.h
+SIM_HDR  := $(SIM)/rtl_model.h
 
 $(BUILD)/lockstep.out: $(HARNESS)/lockstep.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_TRACE) $(HARNESS)/lockstep.cpp $(VSYS_LIB) -o $@
@@ -22,8 +22,8 @@ $(BUILD)/profile_quad.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(
 
 # Golden-model emulator, standalone (no RTL). Needs -DLOCKSTEP for the
 # hart_set_interrupts overload; reads its image path from argv[1].
-$(BUILD)/emu.out: $(EMU)/src/emulator_linux.cpp $(EMU)/src/emulator.h | $(BUILD)
-	g++ -O2 -DLOCKSTEP -I $(EMU)/src -o $@ $(EMU)/src/emulator_linux.cpp
+$(BUILD)/emu.out: $(EMU)/emulator_linux.cpp $(EMU)/emulator.h | $(BUILD)
+	g++ -O2 -DLOCKSTEP -I $(EMU) -o $@ $(EMU)/emulator_linux.cpp
 
 # ── Runtime flag helpers ──────────────────────────────────────────────────────
 # Expand to the appropriate CLI flag when the user passes SHOW_STATE=1 or
@@ -32,7 +32,7 @@ _SHOW_STATE_FLAG := $(if $(filter 1,$(SHOW_STATE)),--show-state,)
 _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 
 # ── Run targets — one entry point per task, no file copying ───────────────────
-ISA_IMAGES := $(EMU)/riscv-tests/images
+ISA_IMAGES := $(ISA_DIR)/images
 
 .PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux demo
 
