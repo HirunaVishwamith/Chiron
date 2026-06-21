@@ -19,6 +19,7 @@ metals.log
 # Build artifacts (general)
 # =========================
 target/
+bins/
 *build/
 *.out
 *.log
