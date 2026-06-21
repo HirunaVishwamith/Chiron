@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
     outFile << setfill('0') << setw(16) << hex << golden_model.get_pc(0) << " ";
     outFile << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
     outState << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
-    golden_model.show_state(0);
+    // golden_model.show_state(0);
     outregs << setfill('0') << setw(16) << hex << bench.return_instruction() << endl;
     outregs << bench.return_registers();
     outregs << "\n";
