@@ -145,16 +145,22 @@ class simulator {
   void init(
     std::string image_name = "Image",
     std::string dtb_name = "qemu.dtb",
-    std::string boot_rom = "boot.bin"
+    std::string boot_rom = "boot.bin",
+    bool enable_trace = false,
+    std::string trace_file = "system_trace.vcd"
   ) {
     tb = (new Vsystem);
     tickcount = 0UL;
     dump_tick = 0UL;
-	
-    Verilated::traceEverOn(true);
-    tfp = new VerilatedVcdC;
-    tb->trace(tfp, 99);
-    tfp->open("system_trace.vcd");
+
+    if (enable_trace) {
+      Verilated::traceEverOn(true);
+      tfp = new VerilatedVcdC;
+      tb->trace(tfp, 99);
+      tfp->open(trace_file.c_str());
+    } else {
+      tfp = nullptr;
+    }
 
     tb -> reset = 1;
     for(int i = 0; i < 20; i++){

@@ -42,5 +42,11 @@ VERILATED_VCD := $(VINC)/verilated_vcd_c.cpp
 CXX_TRACE     := g++ -O3 $(HARNESS_INCS) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD)
 CXX_NOTRACE   := g++ -O3 $(HARNESS_INCS) -I $(SIM) $(VERILATED)
 
+# Optional runtime diagnostic flags — passed to harness binaries at run time.
+# Use: make lockstep SHOW_STATE=1   (print golden-model register state each step)
+#      make lockstep DUMP_WAVES=1   (write VCD waveform to build/system_trace.vcd)
+SHOW_STATE ?= 0
+DUMP_WAVES ?= 0
+
 $(BUILD):
 	@mkdir -p $(BUILD)

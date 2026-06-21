@@ -25,6 +25,12 @@ $(BUILD)/profile_quad.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(
 $(BUILD)/emu.out: $(EMU)/src/emulator_linux.cpp $(EMU)/src/emulator.h | $(BUILD)
 	g++ -O2 -DLOCKSTEP -I $(EMU)/src -o $@ $(EMU)/src/emulator_linux.cpp
 
+# ── Runtime flag helpers ──────────────────────────────────────────────────────
+# Expand to the appropriate CLI flag when the user passes SHOW_STATE=1 or
+# DUMP_WAVES=1; expand to nothing otherwise.
+_SHOW_STATE_FLAG := $(if $(filter 1,$(SHOW_STATE)),--show-state,)
+_DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
+
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(EMU)/riscv-tests/images
 
@@ -34,15 +40,18 @@ emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
 	$(BUILD)/emu.out $(BIN)
 
 lockstep: $(BUILD)/lockstep.out      ## Lock-step RTL vs emulator for BENCH
-	$(BUILD)/lockstep.out --image $(BIN) $(DONE) --logdir $(BUILD)
+	$(BUILD)/lockstep.out --image $(BIN) $(DONE) --logdir $(BUILD) \
+	    $(_SHOW_STATE_FLAG) $(_DUMP_WAVES_FLAG)
 
 profile: $(BUILD)/profile.out        ## Cycle-accurate profile (IPC) for BENCH
 	@mkdir -p $(BUILD)/profile_results
+	@echo "[profile] $(BENCH)"
 	$(BUILD)/profile.out --image $(BIN) --name $(BENCH) $(DONE) \
 		--output $(BUILD)/profile_results/$(BENCH).json --timeout 100000000
 
 profile-quad: $(BUILD)/profile_quad.out    ## Quad-core profile (IPC) for FAM (e.g. make profile-quad FAM=vvadd)
 	@mkdir -p $(BUILD)/profile_results
+	@echo "[profile-quad] $(FAM)-q4"
 	$(BUILD)/profile_quad.out \
 	    --image $(BINS)/$($(FAM)_base)-q4.bin \
 	    --name $(FAM)-q4 $($(FAM)_DONE) \
@@ -51,6 +60,7 @@ profile-quad: $(BUILD)/profile_quad.out    ## Quad-core profile (IPC) for FAM (e
 profile-all: $(BUILD)/profile_quad.out    ## Profile all quad-core benchmarks (default: q4 bins)
 	@mkdir -p $(BUILD)/profile_results
 	$(foreach fam,$(BENCHES), \
+	  echo "[profile-all] $(fam)-q4" && \
 	  test -f $(BINS)/$($(fam)_base)-q4.bin && \
 	  timeout 600 $(BUILD)/profile_quad.out \
 	    --image $(BINS)/$($(fam)_base)-q4.bin \
@@ -61,6 +71,7 @@ profile-all: $(BUILD)/profile_quad.out    ## Profile all quad-core benchmarks (d
 profile-all-sc: $(BUILD)/profile.out    ## Profile single-core (NUM_CORES=1) bins, all scales
 	@mkdir -p $(BUILD)/profile_results
 	$(foreach fam,$(BENCHES),$(foreach s,1 2 3 4 5, \
+	  echo "[profile-all-sc] $(fam)-s$(s)" && \
 	  test -f $(BINS)/$($(fam)_base)-s$(s).bin && \
 	  timeout 600 $(BUILD)/profile.out --image $(BINS)/$($(fam)_base)-s$(s).bin \
 	    --name $(fam)-s$(s) $($(fam)_DONE) \
@@ -99,8 +110,12 @@ runLockStep: $(BUILD)/lockstep.out   ## CI: quick single lock-step (vvadd-s1)
 test_all_images: $(BUILD)/lockstep_isa.out   ## CI: lock-step every ISA test image
 	@rm -f test_results.txt
 	@for img in $(ISA_IMAGES)/*; do \
+	  name=$$(basename $$img); \
+	  printf "[isa] %-42s " "$$name"; \
 	  if $(BUILD)/lockstep_isa.out --image $$img >/dev/null 2>&1; then \
-	    echo "$$img: pass" >> test_results.txt; \
-	  else echo "$$img: fail" >> test_results.txt; fi; \
+	    printf "pass\n"; echo "$$name: pass" >> test_results.txt; \
+	  else \
+	    printf "FAIL\n"; echo "$$name: fail" >> test_results.txt; \
+	  fi; \
 	done
 	@echo "ISA passed: $$(grep -c ': pass' test_results.txt) / $$(wc -l < test_results.txt)"

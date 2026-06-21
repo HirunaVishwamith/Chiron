@@ -1,29 +1,37 @@
+// lockstep_isa.cpp — lock-step harness for RISC-V ISA regression images.
+//
+// Loads a riscv-tests ELF image (bare-metal), runs it lock-step against the
+// golden emulator, and exits with PASS (0) when gp==1 && a7==93.
+//
+// Usage:
+//   ./lockstep_isa.out --image <path>
+//                      [--logdir <dir>]    destination for run/states/regs logs
+//                      [--show-state]      print golden-model state each step
+//                      [--dump-waves]      write VCD to <logdir>/system_trace.vcd
+//
+// Exit codes: 0 = pass, 1 = fail / mismatch / timeout.
+
 #include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <cstring>
-#define LOCKSTEP
-#define MISA_SPEC (0b100000001000100000001 | (0b1llu << 63))
-// #define EMULATOR_LOGGING
-#include "emulator/src/emulator.h"
-#undef SHOW_TERMINAL
-#include "simulator/src/simulator.h"
-#include <chrono>
+#include <iomanip>
+#include <time.h>
 #include <unistd.h>
 #include <cstdlib>
 #include <signal.h>
-#include <sys/ioctl.h>
 #include <termios.h>
-#include <iomanip>
-#include <time.h>
+
+#define LOCKSTEP
+#define MISA_SPEC (0b100000001000100000001 | (0b1llu << 63))
+#include "emulator/src/emulator.h"
+#undef SHOW_TERMINAL
+#include "simulator/src/simulator.h"
+
 using namespace std;
 
-using namespace std::chrono;
-
-#define LOGGING
-#define DUMP_CONDITION 0 //&& (bench.tickcount > 533771995UL)
-#define PROBE_DOUBLE ((0xCA3BF0UL+(-136)) & (~7UL))
+#define PROBE_DOUBLE ((0xCA3BF0UL + (-136)) & (~7UL))
 
 emulator golden_model;
 
@@ -31,367 +39,147 @@ struct keystroke_buffer {
   unsigned char reader, writer, char_buffer[128];
 };
 
-/* void enable_raw_mode() {
-  termios term;
-  tcgetattr(0, &term);
-  term.c_lflag &= ~(ICANON | ECHO); // Disable echo as well
-  tcsetattr(0, TCSANOW, &term);
-}
-
-void disable_raw_mode() {
-  termios term;
-  tcgetattr(0, &term);
-  term.c_lflag |= ICANON | ECHO;
-  tcsetattr(0, TCSANOW, &term);
-} */
-
-// Define the function to be called when ctrl-c (SIGINT) is sent to process
 void signal_callback_handler(int signum) {
   golden_model.show_state(0);
-  // disable_raw_mode();
-  tcflush(0, TCIFLUSH); 
-  // Terminate program
+  tcflush(0, TCIFLUSH);
   exit(signum);
 }
 
-/* int kbhit()
-{
-  int byteswaiting;
-  ioctl(0, FIONREAD, &byteswaiting);
-  return byteswaiting > 0;
-} */
-
-// emulator emu;
-
-// Resolve --image <path> (default to the staged Image) so the ISA loop can run
-// any test binary directly, without copying it to a fixed filename first.
-static const char *find_image_arg(int argc, char **argv) {
+// ── Argument parsing ──────────────────────────────────────────────────────────
+static const char *find_arg(int argc, char **argv, const char *flag,
+                             const char *def = nullptr) {
   for (int i = 1; i < argc - 1; ++i)
-    if (strcmp(argv[i], "--image") == 0) return argv[i + 1];
-  return "emulator/src/Image";
+    if (strcmp(argv[i], flag) == 0) return argv[i + 1];
+  return def;
+}
+
+static bool has_flag(int argc, char **argv, const char *flag) {
+  for (int i = 1; i < argc; ++i)
+    if (strcmp(argv[i], flag) == 0) return true;
+  return false;
 }
 
 int main(int argc, char* argv[]) {
-  const char *image_path = find_image_arg(argc, argv);
   struct tm current_time;
   time_t now = time(NULL);
-
   localtime_r(&now, &current_time);
-    
-  // Name of kernel image must be provided at run time
-  /* if (argc == 1) {
-    printf("Name of kerenl image must be provided at run time\n");
-    return 1;
-  } else if (argc > 2) {
-    printf("Too many arguments provided\n");
-  } */
 
-  /* if (!golden_model.load_kernel(argv[1])) {
-    printf("kernel loading failed\n");
-    return 1;
-  } */
+  // ── CLI ───────────────────────────────────────────────────────────────────
+  const char *image_path = find_arg(argc, argv, "--image", "emulator/src/Image");
+  const char *logdir     = find_arg(argc, argv, "--logdir", ".");
+  bool show_state        = has_flag(argc, argv, "--show-state");
+  bool dump_waves        = has_flag(argc, argv, "--dump-waves");
 
+  string logp = string(logdir);
+  if (!logp.empty() && logp.back() != '/') logp += "/";
+
+  string vcd_path = logp + "system_trace.vcd";
+
+  // ── Init RTL + golden model ───────────────────────────────────────────────
   simulator bench;
-  bench.init(image_path);
-  printf("bench inititated! image=%s\n", image_path);
+  bench.init(image_path, "qemu.dtb", "boot.bin", dump_waves, vcd_path);
+  printf("bench initiated! image=%s\n", image_path);
   cout << endl;
 
-  // golden_model.load_dtb(argv[2], 0x7e00000UL);
-  // golden_model.load_bootrom(argv[3]);
-  // golden_model.load_symbols("resources/symbol_names.txt", "resources/symbol_pointers.bin");
-  char x;
-  // golden_model.init();
   golden_model.init(image_path);
-  //golden_model.print_symbols();
-  /* golden_model.step();
-  golden_model.step(); */
-  #ifdef LOGGING
-  std::ofstream outFile("run.log"); // This will create or overwrite the file
-  std::ofstream outState("states.log");
-  std::ofstream outregs("regs.log");
 
-
-  // Check if the file is open
-  if (!outFile.is_open()) {
-    std::cerr << "Error opening the file." << std::endl;
+  std::ofstream outFile((logp + "run.log").c_str());
+  std::ofstream outState((logp + "states.log").c_str());
+  std::ofstream outregs((logp + "regs.log").c_str());
+  if (!outFile.is_open() || !outState.is_open() || !outregs.is_open()) {
+    std::cerr << "Error opening log files under " << logp << std::endl;
     return 1;
   }
 
-  if (!outState.is_open()) {
-    std::cerr << "Error opening the file." << std::endl;
-    return 1;
-  }
-
-  if (!outregs.is_open()) {
-    std::cerr << "Error opening the file." << std::endl;
-    return 1;
-  }
-
-
-  #endif
-  /* std::ifstream inputFile("resources/symbol_names.txt");
-
-  if (!inputFile.is_open()) {
-    std::cerr << "Failed to open the file." << std::endl;
-    return 1;
-  } */
-
-  std::vector<std::string> symbols;
-
-  std::string line;
-  /* while (std::getline(inputFile, line)) {
-    symbols.push_back(line);
-  } */
-
-  // inputFile.close();
-
-  // Now you can access and print the stored symbols
-  /* for (const std::string& storedLine : symbols) {
-    std::cout << storedLine << std::endl;
-  } */
-  unsigned long old_symbol = 1;
-  unsigned long mem_address, data;
-  unsigned long delta = 10000000;
-  //for (int i; i < 10; i++) {
   printf("stepping\n");
-  // Use auto keyword to avoid typing long
-  // type definitions to get the timepoint
-  // at this instant use function now()
-  auto start = high_resolution_clock::now();
-  int timer_interr = 0;
   signal(SIGINT, signal_callback_handler);
 
-  // enable_raw_mode();
-  
-  keystroke_buffer keys_rx;
-  keys_rx.reader = 0;
-  keys_rx.writer = 0;
-  unsigned long gprs[32];
+  keystroke_buffer keys_rx = {};
   bench.set_probe(PROBE_DOUBLE);
   bench.step_nodump();
-  unsigned long sim_prev = 0x80100000UL;
-	printf("Runtime: %04d-%02d-%02d %02d:%02d:%02d\n",
-    current_time.tm_year + 1900,
-    current_time.tm_mon + 1,
-    current_time.tm_mday,
-    current_time.tm_hour,
-    current_time.tm_min,
-    current_time.tm_sec);
-  while (1 || (bench.tickcount + bench.dump_tick) < 800351768UL) {
-    // golden_model.show_state(0);
-    //cin >> x;
+
+  printf("Runtime: %04d-%02d-%02d %02d:%02d:%02d\n",
+    current_time.tm_year + 1900, current_time.tm_mon + 1, current_time.tm_mday,
+    current_time.tm_hour, current_time.tm_min, current_time.tm_sec);
+
+  // ── Main lock-step loop ───────────────────────────────────────────────────
+  while (1) {
     if (kbhit()) {
-      // printf("detected input, %c\n", getchar());
       keys_rx.char_buffer[keys_rx.writer++] = getchar();
-      keys_rx.reader += (keys_rx.reader == keys_rx.writer); // overflow
+      keys_rx.reader += (keys_rx.reader == keys_rx.writer);
       outFile << "keyhit\n";
     }
-    
-    // if (keys_rx.reader != keys_rx.writer) { keys_rx.reader += golden_model.load_rx_char(keys_rx.char_buffer[keys_rx.reader]); }
 
-    #ifdef LOGGING
-    /* if (golden_model.get_instruction(0) == 0x00100073) 
-      break; */
+    outFile  << setfill('0') << setw(16) << dec << bench.dump_tick << " "
+             << setfill('0') << setw(16) << hex << golden_model.get_pc(0) << " "
+             << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << "\n";
+    outState << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << "\n";
+    if (show_state) golden_model.show_state(0);
+    outregs  << setfill('0') << setw(16) << hex << bench.return_instruction() << "\n"
+             << bench.return_registers() << "\n";
 
-    //unsigned long current_symbol = golden_model.get_symbom_index(golden_model.get_pc(0), old_symbol);
-
-    /* if (current_symbol != old_symbol)
-    {
-      outFile << setfill('0') << setw(8) << hex << golden_model.get_pc(0) << " " << symbols[current_symbol];// << "\n";
-      outFile << setfill('0') << setw(8) << hex << golden_model.get_csr_value(MIE) << "\n";
-      old_symbol = current_symbol;
-    } */
-    outFile <<  setfill('0') << setw(16) << dec <<  (bench.dump_tick)  << " ";
-    outFile <<  setfill('0') << setw(16) << hex << golden_model.get_pc(0) << " ";
-    outFile <<  setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
-    //outFile <<  setfill('0') << setw(16) << hex << golden_model.fetch_long(PROBE_DOUBLE) << " ";
-    //outFile <<  setfill('0') << setw(16) << hex << bench.get_probe() << endl;
-
-
-    outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
-    golden_model.show_state(0);
-
-
-    outregs <<  setfill('0') << setw(16) << hex << bench.return_instruction() << endl;
-    outregs << bench.return_registers();
-    outregs << "\n";
-    /* switch (golden_model.check_for_mem_access(&mem_address, &data))
-    {
-    case 1:
-      //if (mem_address == 0x80001000) { printf("0x%016lx\n", data); }
-      if (mem_address >= 0x80000001 || mem_address < 0x90000000) { break; }
-      outFile << "load access at " << setfill('0') << setw(16) << hex << mem_address;
-      outFile << " reading data " << setfill('0') << setw(16) << hex << data << "\n";
-      break;
-    
-    case 2:
-      if (mem_address >= 0x80000001 || mem_address < 0x90000000) { break; }
-      outFile << "store access at " << setfill('0') << setw(16) << hex << mem_address;
-      outFile << " writing data " << setfill('0') << setw(16) << hex << data << "\n";
-      break;
-
-    case 3:
-      if (mem_address >= 0x80000001 || mem_address < 0x90000000) { break; }
-      outFile << "atomic access at " << setfill('0') << setw(16) << hex << mem_address;
-      outFile << " reading data " << setfill('0') << setw(16) << hex << data << "\n";
-      break;
-        
-    default:
-      break;
-    } */
-    #endif
-    /* if (
-      golden_model.check_for_mem_access(&mem_address, &data) && 
-      (mem_address == 0x10000004) &&
-      (data == 0))
-    {
-      break;
-    } */
-    // golden_model.show_state(0);
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    /* if (timer_interr == 0)
-      if (duration.count() > 10000000) { printf("Timer might be working"); timer_interr++; } */
-    if (duration.count() > 10000000) {
-      //printf("Timer might be working"); 
-      //start = high_resolution_clock::now();
-      //golden_model.set_mtip();
-    }
-    // golden_model.set_mtime(duration.count()*10);
-    //printf("%d\n", timer_interr);
-    // Write data to the file
-    //printf("Timer might be working");
-
-    /**
-     * bench.prev_pc - executed pc by cpu pipeline
-     * golden_model.get_pc - The next instruction to be executed
-     * 
-     * This happens because we get bench.prev_pc after it is executed.
-     * This needs to be fixed to have a common semantic for both pc values
-    */
-    if (bench.prev_pc != golden_model.get_pc(0)) { 
-      cout << "PC mismatech emulator: " << hex << golden_model.get_pc(0);
-      cout << " emulator instruction: " << setfill('0') << setw(8) << hex << golden_model.get_instruction(0);      cout << " simulator: " << hex << bench.prev_pc << endl;
-      golden_model.show_state(0); 
-      break;
-    }
-    /* if (1 || (bench.tickcount >= 856489UL)) {
-      cout << "time out reached" << endl;
-      golden_model.show_state(0); break;
-    } */
-    if (bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0))) { 
-      cout << "Register mismatch at register " << dec << bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0));
-      cout << " simulator value: " << setfill('0') << setw(16) << hex << bench.read_register(bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0))) << endl;
+    // ── State comparison ──────────────────────────────────────────────────
+    if (bench.prev_pc != golden_model.get_pc(0)) {
+      cout << "PC mismatch  emulator: " << hex << golden_model.get_pc(0)
+           << "  insn: " << setfill('0') << setw(8) << hex << golden_model.get_instruction(0)
+           << "  simulator: " << hex << bench.prev_pc << "\n";
       golden_model.show_state(0);
-      cout << dec << (bench.tickcount + bench.dump_tick) << endl;bench.step(); bench.step(); bench.step(); bench.step(); bench.step(); break;
+      break;
     }
-    sim_prev = golden_model.get_pc(0);
-    int x = 1;
-    if (DUMP_CONDITION) {
-      x = bench.step();
-    } else {
-      x = bench.step_nodump();
-    }
-    if (x == 1) { break; }
-    // bench.step();
-    if (x == 0) {
-      if (0){//golden_model.is_peripheral_read(0)) {
-        // cout << "peripheral read" << endl;
-        __uint32_t p_instruction = golden_model.get_instruction(0);
-        golden_model.step();
-        //golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f));
-      } else{
-        golden_model.step();
-      }
-      while (
-        ((golden_model.get_instruction(0) & 0x0000007f) == 0x73) && 
-        (golden_model.get_instruction(0) & 0x00007000)
-      )
-      {
-        golden_model.step();
-      }
-    } //else if ((x == 2) && (golden_model.set_interrupts(bench.get_register_value((golden_model.get_instruction(0)>>7)&0x1f), 0/*don't care*/)))
-    //{
-     // cout << "Setting interrupts failed in emulator" << endl;
-      //cout << "tickcount: " << dec << (bench.tickcount + bench.dump_tick) << endl;
-     // golden_model.show_state(0);
-     // break;
-    //}
-    if (x == 2) { 
-      if (DUMP_CONDITION) {
-        x = bench.step();
-      } else {
-        x = bench.step_nodump();
-      } 
-      // printf("Taking interrupt\n");
-      // golden_model.show_state(0);
-      if (x == 1) { return 1; }
-      if (golden_model.is_peripheral_read(0)) {
-        // cout << "peripheral read" << endl;
-        __uint32_t p_instruction = golden_model.get_instruction(0);
-        golden_model.step();
-        //golden_model.set_register_with_value((p_instruction>>7)&0x1f, bench.get_register_value((p_instruction>>7)&0x1f));
-      } else{
-        golden_model.step();
-      }
-      while (
-        ((golden_model.get_instruction(0) & 0x0000007f) == 0x73) && 
-        (golden_model.get_instruction(0) & 0x00007000)
-      )
-      {
-        golden_model.step();
-      }
+    int bad = bench.check_registers(golden_model.reg_file(0), golden_model.get_mstatus(0));
+    if (bad) {
+      cout << "Register mismatch x" << dec << bad
+           << "  simulator value: " << setfill('0') << setw(16) << hex
+           << bench.read_register(bad) << "\n";
+      golden_model.show_state(0);
+      cout << dec << (bench.tickcount + bench.dump_tick) << "\n";
+      bench.step(); bench.step(); bench.step(); bench.step(); bench.step();
+      break;
     }
 
-    // Check for test completion
+    // ── Advance both models ───────────────────────────────────────────────
+    int x = dump_waves ? bench.step() : bench.step_nodump();
+    if (x == 1) { break; }
+    if (x == 0) {
+      golden_model.step();
+      while (((golden_model.get_instruction(0) & 0x7f) == 0x73) &&
+              (golden_model.get_instruction(0) & 0x7000))
+        golden_model.step();
+    }
+    if (x == 2) {
+      x = dump_waves ? bench.step() : bench.step_nodump();
+      if (x == 1) { return 1; }
+      golden_model.step();
+      while (((golden_model.get_instruction(0) & 0x7f) == 0x73) &&
+              (golden_model.get_instruction(0) & 0x7000))
+        golden_model.step();
+    }
+
+    // ── ISA test completion (gp/x3 == 1, a7/x17 == 93) ───────────────────
     if (bench.read_register(3) == 1 && bench.read_register(17) == 93) {
-      printf("Test complete \n");
-      #ifdef LOGGING
-            outFile.close();
-      #endif
+      printf("Test complete\n");
+      outFile.close();
       tcflush(0, TCIFLUSH);
-      return 0; // Exit the program here with success.
+      return 0;
     }
     if (bench.read_register(17) == 93) {
-      printf("Test Failed \n");
-      #ifdef LOGGING
-            outFile.close();
-      #endif
+      printf("Test Failed\n");
+      outFile.close();
       tcflush(0, TCIFLUSH);
-      return 1; // Exit the program here with success.
+      return 1;
     }
-    // Check for test completion
-    // if (bench.prev_pc == 0x10000854) {
-    //   printf("Test complete \n");
-    //   #ifdef LOGGING
-    //         outFile.close();
-    //   #endif
-    //   tcflush(0, TCIFLUSH);
-    //   return 0; // Exit the program here with success.
-    // }
-    
   }
-  
 
   printf("Test failed: Time-out!\n");
-  printf("Total ticks: %ld \n", (bench.tickcount+bench.dump_tick));
-  printf("The next instruction should be: \n");
+  printf("Total ticks: %ld\n", (bench.tickcount + bench.dump_tick));
   golden_model.step();
-  outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
+  outState << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << "\n";
+  golden_model.show_state(0);
+  golden_model.step();
+  outState << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << "\n";
   golden_model.show_state(0);
 
-  printf("The next instruction should be: \n");
-  golden_model.step();
-  outState <<  setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << endl;
-  golden_model.show_state(0);
-  
-
-  #ifdef LOGGING
   outFile.close();
-  #endif
-
-  // disable_raw_mode();
-  tcflush(0, TCIFLUSH); 
-
+  tcflush(0, TCIFLUSH);
   return 1;
 }
