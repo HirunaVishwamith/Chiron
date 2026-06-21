@@ -14,7 +14,7 @@ $(VSYS_LIB): $(SCALA_SRCS)
 	cd $(SIM)/; \
 	cp ../../iCacheRegisters.v .; \
 	for v in system.v iCacheRegisters.v; do \
-	  for p in UNUSED DECLFILENAME VARHIDDEN WIDTH; do \
+	  for p in UNUSED DECLFILENAME VARHIDDEN WIDTH PINMISSING; do \
 	    echo "/* verilator lint_off $$p */" | cat - $$v > tmp && mv tmp $$v; \
 	  done; \
 	done; \

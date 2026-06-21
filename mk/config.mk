@@ -39,8 +39,24 @@ EMU_IMAGE := $(EMU)/src/Image
 HARNESS_INCS  := -I . -I $(VINC) -I $(SIM)/obj_dir
 VERILATED     := $(VINC)/verilated.cpp
 VERILATED_VCD := $(VINC)/verilated_vcd_c.cpp
-CXX_TRACE     := g++ -O3 $(HARNESS_INCS) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD)
-CXX_NOTRACE   := g++ -O3 $(HARNESS_INCS) -I $(SIM) $(VERILATED)
+
+# Verilator 5.x splits the runtime into a separate libverilated.a (containing
+# verilated.o + verilated_vcd_c.o + verilated_threads.o). Verilator 4.x bundles
+# everything into Vsystem__ALL.a and has no libverilated.a.
+# Detect which world we're in: if libverilated.a is present (built by make sim),
+# link against it; otherwise compile the verilated sources directly.
+_VLIB := $(wildcard $(SIM)/obj_dir/libverilated.a)
+ifneq ($(_VLIB),)
+  # 5.x: link against pre-built runtime (includes VlThreadPool etc.)
+  VSYS_LIB  := $(_VLIB) $(SIM)/obj_dir/Vsystem__ALL.a
+  CXX_TRACE   := g++ -O3 $(HARNESS_INCS) -DSTEP_TIMEOUT=500000
+  CXX_NOTRACE := g++ -O3 $(HARNESS_INCS) -I $(SIM)
+else
+  # 4.x: runtime is bundled in Vsystem__ALL.a; compile verilated sources ourselves
+  VSYS_LIB  := $(SIM)/obj_dir/Vsystem__ALL.a
+  CXX_TRACE   := g++ -O3 $(HARNESS_INCS) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD)
+  CXX_NOTRACE := g++ -O3 $(HARNESS_INCS) -I $(SIM) $(VERILATED)
+endif
 
 # Optional runtime diagnostic flags — passed to harness binaries at run time.
 # Use: make lockstep SHOW_STATE=1   (print golden-model register state each step)
