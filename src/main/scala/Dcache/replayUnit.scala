@@ -76,7 +76,7 @@ class replayUnit extends Module{
   }
   writeBackOut.request := writeBackFIFO.read.data
 
-  fenceReady := requestWaitFIFO.isEmpty
+  fenceReady := requestWaitFIFO.isEmpty && writeBackFIFO.isEmpty
 
   //Resource Utilization
   requestWaitFIFO.write.data.cacheLine.cacheLine := 0.U

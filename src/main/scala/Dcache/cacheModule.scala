@@ -179,26 +179,50 @@ class CacheModule (
 
 
 
-  //-----------------Initiate Fence----------------------//
-  val fenceInititatedReg = RegInit(false.B)
-  val canInititatedFenceReg = RegInit(false.B)
+  //-----------------Initiate Fence (clean-on-fence)----------------------//
+  // On a fence(.i) we drain the request pipeline, run the D-cache clean
+  // walker (writes every dirty line back to L2), wait for those writebacks
+  // to reach L2, and only then signal the fence as done. This makes the
+  // subsequent non-coherent I-fetch observe up-to-date instruction memory.
+  val fenceIdle :: fenceFlush :: fenceDrain :: fenceSignal :: Nil = Enum(4)
+  val fenceState = RegInit(fenceIdle)
   val subModulesReady = WireDefault(
-    requestScheduler.fenceReady && 
+    requestScheduler.fenceReady &&
     arbiter.fenceReady &&
     replayUnit.fenceReady &&
     aceUnit.fenceReady &&
     RegNext(RegNext(!cacheLookup.request.holdInOrder))
     //* inorder signal is delayed by two clock cycles so all operations are done
   )
-  canInititatedFenceReg := Mux(!canInititatedFenceReg, initiateFence, canInititatedFenceReg)
 
-  fenceInititatedReg := canInititatedFenceReg && subModulesReady
-  
-  when(fenceInititatedReg){
-    fenceInstructions.ready := true.B
-    canAllocate := false.B
-    fenceInititatedReg := Mux(fenceInstructions.fired, false.B, true.B)
-    canInititatedFenceReg := Mux(fenceInstructions.fired, false.B, true.B)
+  cacheLookup.flush.start := false.B
+
+  switch(fenceState){
+    is(fenceIdle){
+      when(initiateFence){
+        fenceState := fenceFlush
+      }
+    }
+    is(fenceFlush){
+      //Wait for the request pipeline to drain, then kick off the walker
+      when(subModulesReady){
+        cacheLookup.flush.start := true.B
+        fenceState := fenceDrain
+      }
+    }
+    is(fenceDrain){
+      //Walker sweeping; wait until it finishes AND all writebacks reach L2
+      when(!cacheLookup.flush.busy && subModulesReady){
+        fenceState := fenceSignal
+      }
+    }
+    is(fenceSignal){
+      fenceInstructions.ready := true.B
+      canAllocate := false.B
+      when(fenceInstructions.fired){
+        fenceState := fenceIdle
+      }
+    }
   }
 
   commitFifo.write.data.cacheLine.cacheLine := 0.U
