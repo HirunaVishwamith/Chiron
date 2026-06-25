@@ -20,10 +20,13 @@ $(BUILD)/fire.out: $(HARNESS)/fire.cpp $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 $(BUILD)/profile_quad.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(VSYS_LIB) | $(BUILD)
 	$(CXX_NOTRACE) $(HARNESS)/profile_quad.cpp $(VSYS_LIB) -o $@
 
-# Golden-model emulator, standalone (no RTL). Needs -DLOCKSTEP for the
-# hart_set_interrupts overload; reads its image path from argv[1].
+# Golden-model emulator, standalone (no RTL). Built WITHOUT -DLOCKSTEP so it
+# uses the real timer path (fires only when mtime>=mtimecmp) and reads console
+# input from stdin — both required to boot Linux. (The lock-step harnesses keep
+# -DLOCKSTEP, which force-fires a timer interrupt every step for RTL sync.)
+# Reads its image path from argv[1].
 $(BUILD)/emu.out: $(EMU)/emulator_linux.cpp $(EMU)/emulator.h | $(BUILD)
-	g++ -O2 -DLOCKSTEP -I $(EMU) -o $@ $(EMU)/emulator_linux.cpp
+	g++ -O2 -I $(EMU) -o $@ $(EMU)/emulator_linux.cpp
 
 # ── Runtime flag helpers ──────────────────────────────────────────────────────
 # Expand to the appropriate CLI flag when the user passes SHOW_STATE=1 or
@@ -34,7 +37,7 @@ _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(ISA_DIR)/images
 
-.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux demo
+.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-lockstep demo
 
 emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
 	$(BUILD)/emu.out $(BIN)
@@ -93,8 +96,19 @@ test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks
 
 test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 
-linux: $(BUILD)/lockstep_linux.out   ## Linux-boot lock-step (dtb/bootrom harness)
-	$(BUILD)/lockstep_linux.out --image $(BIN)
+# ── Linux boot (nommu RISC-V image, see Multicore_Linux_Image/) ───────────────
+# LINUX_IMAGE selects the bbl.bin to run; override on the command line, e.g.
+#   make linux-emu LINUX_IMAGE=bins/linux-q4.bin
+LINUX_IMAGE ?= $(BINS)/linux-s1.bin
+
+linux-emu: $(BUILD)/emu.out          ## Boot LINUX_IMAGE on the golden emulator
+	@scripts/run_linux.sh emu $(LINUX_IMAGE) $(if $(TIMEOUT),$(TIMEOUT),300)
+
+linux-lockstep: $(BUILD)/lockstep_linux.out  ## Bounded RTL lock-step of LINUX_IMAGE
+	@scripts/run_linux.sh lockstep $(LINUX_IMAGE) $(if $(TIMEOUT),$(TIMEOUT),180)
+
+# Back-compat alias: the old `linux` target now runs the golden-model boot.
+linux: linux-emu                     ## Alias for linux-emu
 
 demo: $(BUILD)/lockstep.out          ## Image-processing demo (mt-image.bin)
 	$(BUILD)/lockstep.out --image $(BINS)/mt-image.bin --logdir $(BUILD)
