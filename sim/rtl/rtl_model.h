@@ -126,6 +126,7 @@ class simulator {
   Vsystem       *tb  = nullptr;
   VerilatedVcdC *tfp = nullptr;
   uint64_t      *reg_[33] = {};  // &registersOut0_0 .. _32, filled by init()
+  bool          tx_prev_valid_ = false;  // edge-detect for SHOW_TERMINAL UART TX
 
   void bind_registers() {
 #define CHIRON_BIND(i) reg_[i] = &tb->registersOut0_##i;
@@ -154,14 +155,19 @@ class simulator {
   void advance(bool dump) {
     if (dump) tick(++dump_tick);
     else { ++tickcount; tick_nodump(); }
+#ifdef SHOW_TERMINAL
+    // Surface the core's UART TX byte once per write. core0OutChar_valid is
+    // held high while the write request is buffered, so edge-detect it to
+    // avoid printing the same character on every clock it stays asserted.
+    if (tb->core0OutChar_valid && !tx_prev_valid_)
+      std::cout << (char)tb->core0OutChar_byte << std::flush;
+    tx_prev_valid_ = tb->core0OutChar_valid;
+#endif
   }
 
   int run_until_commit(bool dump) {
     advance(dump);
     for (int i = 0; !tb->robOut0_commitFired && i < STEP_TIMEOUT; ++i) {
-#ifdef SHOW_TERMINAL
-      if (tb->core0OutChar_valid) std::cout << tb->core0OutChar_byte << std::flush;
-#endif
       advance(dump);
     }
     prev_pc = tb->robOut0_pc;

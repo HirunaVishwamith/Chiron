@@ -1,5 +1,9 @@
 # ── Harness binaries (compiled into $(BUILD)) ────────────────────────────────
-EMU_HDRS := $(EMU)/emulator.h $(EMU)/constants.h
+# All emulator headers/fragments emulator.h pulls in, so any change to the
+# golden model (hart.h, the hart_*.inc fragments, terminal.h, …) forces a
+# rebuild of the harnesses that embed it.
+EMU_HDRS := $(EMU)/emulator.h $(EMU)/constants.h $(EMU)/hart.h \
+            $(wildcard $(EMU)/hart_*.inc) $(EMU)/terminal.h $(EMU)/clint.h
 SIM_HDR  := $(SIM)/rtl_model.h
 
 $(BUILD)/lockstep.out: $(HARNESS)/lockstep.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
@@ -10,6 +14,13 @@ $(BUILD)/lockstep_isa.out: $(HARNESS)/lockstep_isa.cpp $(EMU_HDRS) $(SIM_HDR) $(
 
 $(BUILD)/lockstep_linux.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_TRACE) $(HARNESS)/lockstep_linux.cpp $(VSYS_LIB) -o $@
+
+# RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
+# its UART TX streamed to stdout (-DSHOW_TERMINAL). Uses CXX_TRACE for its link
+# set (rtl_model.h pulls in the Verilator VCD runtime) but never opens a trace;
+# CXX_TRACE already sets STEP_TIMEOUT=500000 so boot/cache stalls aren't hangs.
+$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
+	$(CXX_TRACE) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB) -o $@
 
 $(BUILD)/profile.out: $(HARNESS)/profile.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_NOTRACE) $(HARNESS)/profile.cpp $(VSYS_LIB) -o $@
@@ -25,7 +36,7 @@ $(BUILD)/profile_quad.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(
 # input from stdin — both required to boot Linux. (The lock-step harnesses keep
 # -DLOCKSTEP, which force-fires a timer interrupt every step for RTL sync.)
 # Reads its image path from argv[1].
-$(BUILD)/emu.out: $(EMU)/emulator_linux.cpp $(EMU)/emulator.h | $(BUILD)
+$(BUILD)/emu.out: $(EMU)/emulator_linux.cpp $(EMU_HDRS) | $(BUILD)
 	g++ -O2 -I $(EMU) -o $@ $(EMU)/emulator_linux.cpp
 
 # ── Runtime flag helpers ──────────────────────────────────────────────────────
@@ -37,7 +48,7 @@ _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(ISA_DIR)/images
 
-.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-lockstep demo
+.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-emu-check linux-sim linux-lockstep demo
 
 emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
 	$(BUILD)/emu.out $(BIN)
@@ -101,10 +112,19 @@ test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 #   make linux-emu LINUX_IMAGE=bins/linux-q4.bin
 LINUX_IMAGE ?= $(BINS)/linux-s1.bin
 
-linux-emu: $(BUILD)/emu.out          ## Boot LINUX_IMAGE on the golden emulator
+linux-emu: $(BUILD)/emu.out          ## Interactive Linux shell on the golden model (fast)
+	@echo "== interactive golden-model boot: $(LINUX_IMAGE) =="
+	@echo "   (boots to 'buildroot login:' in seconds — type at the prompt; Ctrl-C to quit)"
+	$(BUILD)/emu.out $(LINUX_IMAGE)
+
+linux-emu-check: $(BUILD)/emu.out    ## Non-interactive boot-to-login check (CI)
 	@scripts/run_linux.sh emu $(LINUX_IMAGE) $(if $(TIMEOUT),$(TIMEOUT),300)
 
-linux-lockstep: $(BUILD)/lockstep_linux.out  ## Bounded RTL lock-step of LINUX_IMAGE
+linux-sim: $(BUILD)/linux_sim.out    ## Boot LINUX_IMAGE on the RTL core (live console, no dump)
+	@echo "== RTL boot: $(LINUX_IMAGE) (Verilator ~thousands of cyc/s; no input) =="
+	$(BUILD)/linux_sim.out $(LINUX_IMAGE) $(DATA)/qemu.dtb $(DATA)/boot.bin
+
+linux-lockstep: $(BUILD)/lockstep_linux.out  ## Bounded RTL lock-step of LINUX_IMAGE (debug; slow)
 	@scripts/run_linux.sh lockstep $(LINUX_IMAGE) $(if $(TIMEOUT),$(TIMEOUT),180)
 
 # Back-compat alias: the old `linux` target now runs the golden-model boot.
