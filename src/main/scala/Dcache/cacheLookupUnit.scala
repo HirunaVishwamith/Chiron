@@ -38,6 +38,11 @@ class cacheLookupUnit extends Module{
     val request = Output(new requestPipelineWire)
   })
   val writeInstructionCommit = IO(new composableInterface)
+  //Clean-on-fence walker : sweeps all sets/ways, writing back dirty lines to L2
+  val flush = IO(new Bundle {
+    val start = Input(Bool())
+    val busy = Output(Bool())
+  })
   val branchOps = IO(new branchOps)
   //! Debug only
   val debug = IO(new debug)
@@ -197,9 +202,17 @@ class cacheLookupUnit extends Module{
     writeCommitInstructionBuffer := false.B
   }
 
+  //-----------------------Clean-on-fence walker state------------------//
+  val sFlushIdle :: sFlushRead :: sFlushEmit :: sFlushDrain :: Nil = Enum(4)
+  val flushState = RegInit(sFlushIdle)
+  val flushSet = RegInit(0.U(dataAddrWidth.W))
+  val flushWay = RegInit(0.U(log2Ceil(nway).W))
+  val flushActive = flushState =/= sFlushIdle
+  flush.busy := flushActive
+
   //____________________Functional description_________________________//
   //Response out is always release in one clock cycle, so no ready signal
-  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready
+  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready && !flushActive
   val islastInorderMissRecordRegisterValid = toLastInorderMissRecordRegisterWire || lastInorderMissRecordRegister.valid && lastInorderMissRecordRegister.branch.valid
   val islastSpeculativeMissRecordRegisterValid = toLastSpeculativetMissRecordRegisterWire || lastSpeculativeMissRecordRegister.valid && lastSpeculativeMissRecordRegister.branch.valid
   request.holdInOrder := (islastInorderMissRecordRegisterValid || islastSpeculativeMissRecordRegisterValid) && !writeCommitInstructionBuffer
@@ -591,6 +604,67 @@ class cacheLookupUnit extends Module{
       reservationRegister.address := readBuffer.address
       reservationRegister.size := readBuffer.core.instruction(12)
     }
+  }
+
+  //____________________Clean-on-fence walker logic____________________//
+  // The D-cache is write-back, so on fence(.i) dirty lines live only in L1
+  // and a subsequent non-coherent I-fetch would read stale data from L2.
+  // This walker sweeps every set/way and writes back each dirty+valid line.
+  val flushTagChunks = VecInit(Seq.tabulate(nway) { i =>
+    tagBRAM.rdData(((i + 1) * tagSection) - 1, i * tagSection)
+  })
+
+  when(flush.start && flushState === sFlushIdle) {
+    flushState := sFlushRead
+    flushSet := 0.U
+    flushWay := 0.U
+  }
+
+  switch(flushState) {
+    is(sFlushRead) {
+      // rdAddr = flushSet driven below; wait one cycle for the SyncReadMem read
+      flushState := sFlushEmit
+    }
+    is(sFlushEmit) {
+      val wayValid = flushTagChunks(flushWay)(tagSize)
+      val wayDirty = flushTagChunks(flushWay)(tagSize + 1)
+      val needWriteBack = wayValid && wayDirty
+      val lastWay = flushWay === (nway - 1).U
+      val lastSet = flushSet === (tagDepth - 1).U
+
+      // Stall while the writeback buffer is still occupied
+      when(!(needWriteBack && writeBackBuffer.valid)) {
+        when(needWriteBack) {
+          writeBackBuffer.valid := true.B
+          writeBackBuffer.address := Cat(flushTagChunks(flushWay), flushSet, 0.U(log2Ceil(lineSize).W))
+          writeBackBuffer.data := dataBRAMVec(flushWay).rdData
+        }
+        when(lastWay) {
+          flushWay := 0.U
+          when(lastSet) {
+            flushState := sFlushDrain
+          }.otherwise {
+            flushSet := flushSet + 1.U
+            flushState := sFlushRead
+          }
+        }.otherwise {
+          flushWay := flushWay + 1.U
+        }
+      }
+    }
+    is(sFlushDrain) {
+      // Hold busy until the final writeback has left the buffer for the FIFO
+      when(!writeBackBuffer.valid) {
+        flushState := sFlushIdle
+      }
+    }
+  }
+
+  // Drive BRAM read address during flush (last-connect priority over the
+  // normal request path, which is gated off via request.ready while flushing)
+  when(flushActive) {
+    tagBRAM.rdAddr := flushSet
+    dataBRAMVec.foreach { bram => bram.rdAddr := flushSet }
   }
 
   //! Debug only

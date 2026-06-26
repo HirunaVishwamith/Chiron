@@ -9,10 +9,12 @@
 #include <termios.h>
 #include <unistd.h>
 
-// Non-zero if a byte is waiting on stdin (non-blocking key poll).
+// Non-zero if a byte is waiting on stdin (non-blocking key poll). Initialise
+// the count and honour the ioctl return so a device that doesn't support
+// FIONREAD (e.g. /dev/null) reports "no input" rather than a garbage value.
 inline int kbhit() {
-  int byteswaiting;
-  ioctl(0, FIONREAD, &byteswaiting);
+  int byteswaiting = 0;
+  if (ioctl(0, FIONREAD, &byteswaiting) < 0) return 0;
   return byteswaiting > 0;
 }
 

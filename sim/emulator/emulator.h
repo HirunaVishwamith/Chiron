@@ -61,12 +61,20 @@ public:
   }
 
   void set_interrupts(int i){
+#ifdef LOCKSTEP
     harts[i].hart_set_interrupts(memory);
+#else
+    harts[i].hart_set_interrupts();
+#endif
   }
 
   void set_interrupts(){
     for (auto &r : harts)
+#ifdef LOCKSTEP
       r.hart_set_interrupts(memory);
+#else
+      r.hart_set_interrupts();
+#endif
   }
 
   void show_registers()

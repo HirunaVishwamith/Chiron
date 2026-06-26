@@ -5,6 +5,7 @@
 */
 
 #include "emulator.h"
+#include <csignal>
 
 emulator emu;
 
@@ -23,6 +24,9 @@ int main(int argc, char **argv) {
 
   // initiate registers and memory
   emu.init(image);
+
+  // Restore the cooked terminal on Ctrl-C so the shell isn't left in raw mode.
+  signal(SIGINT, signal_callback_handler);
 
   enable_raw_mode();
   while (1) {

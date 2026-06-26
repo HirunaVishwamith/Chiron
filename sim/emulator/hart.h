@@ -100,6 +100,11 @@ private:
   uint64_t csr_data = 0;
   bool csr_bool = false;
 
+  // One-byte uartlite RX holding register. -1 = empty. STATUS reports RXVALID
+  // only when this holds a real byte actually read from stdin, so a consumer
+  // that loops "while RXVALID" (e.g. the kernel's RX poll) always terminates.
+  int uart_rx_byte = -1;
+
   uint64_t itr = 0;
 
   uint64_t cycle_count = 0;

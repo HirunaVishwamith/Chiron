@@ -379,7 +379,7 @@ class ACEUnit(
       coherentAXIState := Mux(bus.CDLAST && bus.CDREADY, coherentIdleState, coherentDataOutState)
     }
   }
-  fenceReady := !readBuffer.valid && !responseBuffer.valid && ACEMSHR.isEmpty
+  fenceReady := !readBuffer.valid && !responseBuffer.valid && ACEMSHR.isEmpty && !writeBuffer.valid
 
   //Resource Utilization
   readBuffer.cacheLine.cacheLine := 0.U

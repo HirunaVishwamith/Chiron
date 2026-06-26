@@ -116,7 +116,7 @@
         }
         else
         {
-          if ((load_addr != FIFO_ADDR_RX) && ((load_addr != FIFO_ADDR_TX)))
+          if ((load_addr != FIFO_ADDR_RX) && (load_addr != FIFO_ADDR_TX) && (load_addr != FIFO_ADDR_STATUS))
           {
             if ((load_addr >= DRAM_BASE) & (load_addr <= (DRAM_BASE + 0x9000000)))
             {
@@ -233,24 +233,38 @@
           }
           else
           {
-            if (load_addr == FIFO_ADDR_RX)
+            // Xilinx uartlite register model. The kernel driver polls STATUS
+            // for RXVALID, then reads RX to pull the byte; TX is always ready.
+            if (load_addr == FIFO_ADDR_STATUS)
             {
-              if (kbhit())
-              {
-                wb_data = 0;
+              // Refill the 1-byte RX register from stdin, but only when a byte
+              // is genuinely available: kbhit() gates a non-blocking read, and
+              // RXVALID is asserted ONLY after read() actually returns a byte.
+              // This is what makes the kernel's "while (RXVALID)" poll loop
+              // terminate instead of spinning on a phantom byte. Under LOCKSTEP
+              // the RTL is the source of truth for peripheral reads, so the
+              // golden model must not touch stdin here.
+              #ifndef LOCKSTEP
+              if (uart_rx_byte < 0 && kbhit()) {
+                unsigned char ch = 0;
+                if (read(0, &ch, 1) == 1) { uart_rx_byte = ch; }
               }
-              else
-              {
-                wb_data = 2;
-              }
+              #endif
+              wb_data = ULITE_STATUS_TXEMPTY;        // TX FIFO always drains
+              if (uart_rx_byte >= 0) { wb_data |= ULITE_STATUS_RXVALID; }
+              reg_file[rd] = wb_data;
+            }
+            else if (load_addr == FIFO_ADDR_RX)
+            {
+              // Return and consume the held byte (0 if none). Clearing it drops
+              // RXVALID on the next STATUS read.
+              wb_data = (uart_rx_byte >= 0) ? (uint64_t)uart_rx_byte : 0;
+              uart_rx_byte = -1;
               reg_file[rd] = wb_data;
             }
             else if (load_addr == FIFO_ADDR_TX)
             {
-              #ifndef LOCKSTEP
-              wb_data = getchar();
-              #endif
-              reg_file[rd] = wb_data;
+              reg_file[rd] = wb_data;                // TX is write-only; read 0
             }
           }
         }
