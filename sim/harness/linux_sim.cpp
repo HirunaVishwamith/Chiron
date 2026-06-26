@@ -41,15 +41,18 @@ int main(int argc, char **argv) {
 
   std::printf("\n***** booting Linux on the RTL core (Ctrl-C to stop) *****\n");
   std::printf("      (RTL is slow: expect no console output for several minutes\n");
-  std::printf("       while bbl copies the kernel — watch the heartbeat below)\n\n");
+  std::printf("       while bbl copies the kernel into place)\n\n");
   std::fflush(stdout);
 
+  // Optional progress heartbeat on stderr — enable with LINUX_SIM_HB=1. Off by
+  // default so it doesn't interleave with the guest console; when on it prints
+  // committed instrs + PC every ~3 s so a real deadlock (PC frozen while cycles
+  // climb) is visible versus a merely slow boot.
+  const bool heartbeat = std::getenv("LINUX_SIM_HB") != nullptr;
   using clock = std::chrono::steady_clock;
   auto t_start = clock::now();
   auto t_last  = t_start;
-  uint64_t commits = 0;
-  uint64_t last_commits = 0;
-  uint64_t last_pc = 0;
+  uint64_t commits = 0, last_commits = 0, last_pc = 0;
 
   // Run forever; UART TX is streamed to stdout from inside step_nodump()
   // (the SHOW_TERMINAL hook in rtl_model.h). step_nodump() keeps no VCD and
@@ -64,22 +67,23 @@ int main(int argc, char **argv) {
     }
     ++commits;
 
-    // Heartbeat every ~3 s of wall-clock so the run never looks frozen.
-    auto now = clock::now();
-    if (std::chrono::duration_cast<std::chrono::milliseconds>(now - t_last).count() >= 3000) {
-      double dt = std::chrono::duration<double>(now - t_last).count();
-      double total = std::chrono::duration<double>(now - t_start).count();
-      uint64_t pc = bench.prev_pc;
-      std::fprintf(stderr,
-        "[linux_sim] +%5.0fs  instrs=%-10lu (%6.0f/s)  cycles=%-12lu  pc=0x%08lx%s\n",
-        total, (unsigned long)commits,
-        (commits - last_commits) / (dt > 0 ? dt : 1),
-        bench.tickcount, (unsigned long)pc,
-        (pc == last_pc) ? "  <-- PC not advancing (possible deadlock)" : "");
-      std::fflush(stderr);
-      t_last = now;
-      last_commits = commits;
-      last_pc = pc;
+    if (heartbeat) {
+      auto now = clock::now();
+      if (std::chrono::duration_cast<std::chrono::milliseconds>(now - t_last).count() >= 3000) {
+        double dt = std::chrono::duration<double>(now - t_last).count();
+        double total = std::chrono::duration<double>(now - t_start).count();
+        uint64_t pc = bench.prev_pc;
+        std::fprintf(stderr,
+          "[linux_sim] +%5.0fs  instrs=%-10lu (%6.0f/s)  cycles=%-12lu  pc=0x%08lx%s\n",
+          total, (unsigned long)commits,
+          (commits - last_commits) / (dt > 0 ? dt : 1),
+          bench.tickcount, (unsigned long)pc,
+          (pc == last_pc) ? "  <-- PC not advancing (possible deadlock)" : "");
+        std::fflush(stderr);
+        t_last = now;
+        last_commits = commits;
+        last_pc = pc;
+      }
     }
   }
   return 0;
