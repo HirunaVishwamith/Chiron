@@ -17,6 +17,12 @@ import os.size
 class cacheLookupUnit extends Module{
   val request = IO(new Bundle {
     val ready = Output(Bool())
+    //* Coherency lookups never produce replay or writeback entries, so they
+    //* only need the coherency response path free. A separate ready keeps
+    //* snoops serviceable while the replay/writeback FIFOs are backed up
+    //* (otherwise a full FIFO wedges the snoop -> CR never sent -> the CCU's
+    //* single request queue head-of-line blocks -> system deadlock).
+    val readyCoherency = Output(Bool())
     val holdInOrder = Output(Bool())
     val inorderPending = Output(Bool())
     val requestType = Input(UInt(2.W))
@@ -48,6 +54,7 @@ class cacheLookupUnit extends Module{
   val debug = IO(new debug)
 
   request.ready := false.B
+  request.readyCoherency := false.B
   request.holdInOrder := false.B
   zeroInit(toResponse.request)
   zeroInit(toCoherency.request)
@@ -55,7 +62,13 @@ class cacheLookupUnit extends Module{
   zeroInit(toReplay.request)
 
   //-------------------Operation Valid register-------------------//
-  val operationValid = RegNext(request.ready && request.request.valid && request.request.branch.valid)
+  //A coherency request may be accepted on readyCoherency alone (see IO note)
+  val acceptedWire = WireDefault(request.ready || (request.readyCoherency && request.requestType === "b11".U))
+  val operationValid = RegNext(acceptedWire && request.request.valid && request.request.branch.valid)
+  //Coherency accepted this cycle: borrows the BRAM read port from the
+  //clean-on-fence walker (see the walker interlock below)
+  val cohAcceptedWire = WireDefault(request.readyCoherency && request.requestType === "b11".U &&
+                                    request.request.valid && request.request.branch.valid)
 
   //-----------------------Data BRAM------------------------------//
   val blockCount = nway                                   //No.of blocks
@@ -213,6 +226,11 @@ class cacheLookupUnit extends Module{
   //____________________Functional description_________________________//
   //Response out is always release in one clock cycle, so no ready signal
   request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready && !flushActive
+  //* Snoops stay serviceable even during the clean-on-fence walk: the walker's
+  //* writebacks queue behind the very bus read that is waiting on the snoop
+  //* (single serialized CCU queue), so blocking snoops here deadlocks the
+  //* system. The walker interlock below arbitrates the shared BRAM read port.
+  request.readyCoherency := toCoherency.ready
   val islastInorderMissRecordRegisterValid = toLastInorderMissRecordRegisterWire || lastInorderMissRecordRegister.valid && lastInorderMissRecordRegister.branch.valid
   val islastSpeculativeMissRecordRegisterValid = toLastSpeculativetMissRecordRegisterWire || lastSpeculativeMissRecordRegister.valid && lastSpeculativeMissRecordRegister.branch.valid
   request.holdInOrder := (islastInorderMissRecordRegisterValid || islastSpeculativeMissRecordRegisterValid) && !writeCommitInstructionBuffer
@@ -660,9 +678,19 @@ class cacheLookupUnit extends Module{
     }
   }
 
+  // Snoop-during-flush interlock: a snoop accepted mid-walk borrows the BRAM
+  // read port for one cycle, so the data the walker was about to consume in
+  // sFlushEmit is gone - re-read the current set. The re-read also makes the
+  // walker observe any tag update the snoop performed (e.g. an invalidation),
+  // so it never writes back a line another core just took ownership of.
+  when(cohAcceptedWire && (flushState === sFlushRead || flushState === sFlushEmit)) {
+    flushState := sFlushRead
+  }
+
   // Drive BRAM read address during flush (last-connect priority over the
-  // normal request path, which is gated off via request.ready while flushing)
-  when(flushActive) {
+  // normal request path, which is gated off via request.ready while flushing).
+  // A snoop accepted this cycle gets the port instead (see interlock above).
+  when(flushActive && !cohAcceptedWire) {
     tagBRAM.rdAddr := flushSet
     dataBRAMVec.foreach { bram => bram.rdAddr := flushSet }
   }

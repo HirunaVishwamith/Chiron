@@ -21,6 +21,8 @@ metals.log
 target/
 bins/
 *build/
+obj_dir*/
+sim/rtl/obj_dir*/
 *.out
 *.log
 *.dump

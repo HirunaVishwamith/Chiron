@@ -1280,6 +1280,12 @@ class system extends Module {
   core2.MTIP := peripherals.MTIP2
   core3.MTIP := peripherals.MTIP3
 
+  // Machine software interrupts (SMP IPIs) from the shared CLINT msip array.
+  core0.MSIP := peripherals.MSIP0
+  core1.MSIP := peripherals.MSIP1
+  core2.MSIP := peripherals.MSIP2
+  core3.MSIP := peripherals.MSIP3
+
 
 
   //core0

@@ -17,6 +17,22 @@ class uartPort extends Module {
 
   val io_mtime = IO(Input(UInt(64.W)))
 
+  // Shared CLINT msip: a real CLINT is one region in which any hart can write any
+  // hart's msip (this is how SMP IPIs work). The 4 uartPorts are separate AXI
+  // peripherals, so msip can't live locally — MultiUart owns the shared array.
+  // This port reads it (for msip loads) and forwards msip stores up to MultiUart.
+  val msipShared = IO(Input(Vec(4, UInt(32.W))))
+  val msipWrite  = IO(Output(new Bundle {
+    val valid = Bool()
+    val hart  = UInt(2.W)
+    val data  = UInt(32.W)
+  }))
+  // CLINT msip[hart] is memory-mapped at 0x0200_0000 + 4*hart.
+  def msipHartOf(addr: UInt): UInt = MuxCase(0.U(2.W), Seq(
+    (addr === "h02000004".U) -> 1.U,
+    (addr === "h02000008".U) -> 2.U,
+    (addr === "h0200000C".U) -> 3.U))
+
   val readRequestBuffer = RegInit(new Bundle {
     val valid = Bool()
     val address = UInt(32.W)
@@ -55,7 +71,6 @@ class uartPort extends Module {
   }
   
   val mtimecmp = RegInit(0.U(64.W))
-  val msip = RegInit(0.U(32.W))
   val mtimecmplowtemp = Reg(UInt(32.W))
 
   val mtimeRead = Reg(UInt(64.W))
@@ -71,7 +86,7 @@ class uartPort extends Module {
   }
 
   when(client.ARREADY && client.ARVALID) {
-    msipRead := msip
+    msipRead := msipShared(msipHartOf(client.ARADDR))
   }
 
   // we don't expect writes larger than 64-bits to uart or clint
@@ -93,7 +108,11 @@ class uartPort extends Module {
     is("h02000008".U) { client.RDATA := msipRead } // check this only core 2 should access this adress
     is("h0200000C".U) { client.RDATA := msipRead } // check this only core 3 should access this adress
     is("h04000000".U) { client.RDATA := ps_stat }
-    is("h040600008".U){client.RDATA := 4096.U}
+    // uartlite STATUS: TXEMPTY (bit 2) set, TXFULL/RXVALID clear — matches the
+    // golden model's uartlite model (hart_execute.inc) and real hardware. The
+    // old 4096 (bit 12, undefined) diverged from the emulator's 0x4 and failed
+    // lockstep at the benchmark print loop's status poll.
+    is("h040600008".U){client.RDATA := 4.U}
   }
   client.RID := readRequestBuffer.id
   client.RLAST := !readRequestBuffer.len.orR
@@ -210,15 +229,17 @@ class uartPort extends Module {
     mtimecmp := Cat(writeRequestBuffer.data.data, mtimecmplowtemp)
   }
 
-  when(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h02000000".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) { // check this only used in core 0
-    msip := writeRequestBuffer.data.data
-  }.elsewhen(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h02004004".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) { // check this only use in core 1
-    msip := writeRequestBuffer.data.data
-  }.elsewhen(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h02004008".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) { // check this only use in core 2
-    msip := writeRequestBuffer.data.data
-  }.elsewhen(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h0200400C".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) { // check this only use in core 3
-    msip := writeRequestBuffer.data.data
-  }
+  // msip stores: forward to MultiUart's shared array, addressed by hart. Real
+  // CLINT addresses are 0x0200_0000 + 4*hart (any hart may write any hart's msip
+  // — this is the SMP IPI mechanism). The receiver clears its own by writing 0.
+  val isMsipWrite = (writeRequestBuffer.address.offset === "h02000000".U) ||
+                    (writeRequestBuffer.address.offset === "h02000004".U) ||
+                    (writeRequestBuffer.address.offset === "h02000008".U) ||
+                    (writeRequestBuffer.address.offset === "h0200000C".U)
+  msipWrite.valid := writeRequestBuffer.address.valid && isMsipWrite &&
+                     writeRequestBuffer.data.valid && writeRequestBuffer.data.last
+  msipWrite.hart  := msipHartOf(writeRequestBuffer.address.offset)
+  msipWrite.data  := writeRequestBuffer.data.data
 
   client.ARREADY := !readRequestBuffer.valid
 
@@ -230,9 +251,7 @@ class uartPort extends Module {
   client.BVALID := writeRequestBuffer.address.valid && writeRequestBuffer.data.valid && writeRequestBuffer.data.last
 
   val MTIP = IO(Output(Bool()))
-  val MSIP = IO(Output(UInt(32.W)))
   MTIP := (io_mtime > mtimecmp)
-  MSIP := msip
 }
 
 
@@ -245,6 +264,10 @@ class MultiUart extends Module {
   val mtime = RegInit(0.U(64.W)) // only need one mtime for all clients
   val couter_wrap = RegInit(0.U(4.W))
   couter_wrap := couter_wrap + 1.U
+  // mtime advances once per 16 cycles (4-bit prescaler wrap) — the correct
+  // ~6.25 MHz timebase the device tree advertises. (An EXPERIMENTAL `+ 1.U`
+  // every cycle was used to probe whether the __switch_to boot stall is timer-
+  // rate-sensitive; reverted to the real timer here.)
   mtime := mtime + couter_wrap.andR.asUInt
 
   val uart0 = Module(new uartPort{
@@ -287,6 +310,22 @@ class MultiUart extends Module {
   uart2.io_mtime := mtime
   uart3.io_mtime := mtime
 
+  // ── Shared CLINT msip (one array, any hart can write any hart's bit) ─────────
+  // This is the SMP IPI register file. Each uartPort reads it and forwards its
+  // client's msip stores here; we apply them addressed by target hart (lower
+  // port wins a same-cycle same-hart race — harmless, writes are idempotent).
+  val msipShared = RegInit(VecInit(Seq.fill(4)(0.U(32.W))))
+  val uarts = Seq(uart0, uart1, uart2, uart3)
+  uarts.foreach { u => u.msipShared := msipShared }
+  for (hart <- 0 until 4) {
+    // last matching port in this loop wins; iterate high→low so port0 has priority
+    for (u <- uarts.reverse) {
+      when(u.msipWrite.valid && u.msipWrite.hart === hart.U) {
+        msipShared(hart) := u.msipWrite.data
+      }
+    }
+  }
+
   val putChar0 = IO(Output(uart0.putCharOut0.cloneType))
   putChar0 := uart0.putCharOut0
 
@@ -308,6 +347,16 @@ class MultiUart extends Module {
   MTIP1 := uart1.MTIP
   MTIP2 := uart2.MTIP
   MTIP3 := uart3.MTIP
+
+  // Per-hart machine software interrupt pending (bit 0 of the shared msip).
+  val MSIP0 = IO(Output(Bool()))
+  val MSIP1 = IO(Output(Bool()))
+  val MSIP2 = IO(Output(Bool()))
+  val MSIP3 = IO(Output(Bool()))
+  MSIP0 := msipShared(0)(0)
+  MSIP1 := msipShared(1)(0)
+  MSIP2 := msipShared(2)(0)
+  MSIP3 := msipShared(3)(0)
 
 }
 

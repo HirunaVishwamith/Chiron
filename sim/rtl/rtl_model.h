@@ -9,6 +9,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -53,10 +54,20 @@ class simulator {
     bind_registers();
 
     if (enable_trace) {
+#ifdef CHIRON_NO_TRACE
+      // This binary was linked against a model Verilated without --trace
+      // (the fast linux_sim/profile path). VCD dumping is unavailable; use a
+      // --trace build (the default `make sim` model) for waveforms instead.
+      std::fprintf(stderr,
+        "rtl_model: VCD tracing requested but this build has no trace support; "
+        "ignoring.\n");
+      tfp = nullptr;
+#else
       Verilated::traceEverOn(true);
       tfp = new VerilatedVcdC;
       tb->trace(tfp, 99);
       tfp->open(trace_file.c_str());
+#endif
     } else {
       tfp = nullptr;
     }
@@ -89,6 +100,34 @@ class simulator {
   // (tickcount). Both leave prev_pc at the committed instruction's PC.
   int step()        { return run_until_commit(/*dump=*/true);  }
   int step_nodump() { return run_until_commit(/*dump=*/false); }
+
+  // Advance the clock until ANY core commits (0 = committed, 1 = timed out).
+  // For RTL-only SMP runs (linux_sim): core 0 may legitimately sit in wfi as a
+  // lottery loser while another hart does all the work, so gauging progress —
+  // and declaring deadlock — on core 0 alone gives false stalls. Timeout here
+  // means no core committed for STEP_TIMEOUT cycles: a genuine global wedge.
+  int step_any_nodump() {
+    for (int i = 0; i < STEP_TIMEOUT; ++i) {
+      advance(/*dump=*/false);
+      if (tb->robOut0_commitFired || tb->robOut1_commitFired ||
+          tb->robOut2_commitFired || tb->robOut3_commitFired) {
+        prev_pc = tb->robOut0_pc;
+        return 0;
+      }
+    }
+    prev_pc = tb->robOut0_pc;
+    return 1;
+  }
+
+  // PC of core n's most recently committed instruction (n = 0..3).
+  uint64_t core_pc(int n) const {
+    switch (n) {
+      case 1:  return tb->robOut1_pc;
+      case 2:  return tb->robOut2_pc;
+      case 3:  return tb->robOut3_pc;
+      default: return tb->robOut0_pc;
+    }
+  }
 
   // ── core 0 register read-out (GPRs at 0..31, mstatus at 32) ───────────────
   uint64_t reg(int i) const { return (i >= 0 && i <= 32) ? *reg_[i] : 0; }
@@ -126,7 +165,7 @@ class simulator {
   Vsystem       *tb  = nullptr;
   VerilatedVcdC *tfp = nullptr;
   uint64_t      *reg_[33] = {};  // &registersOut0_0 .. _32, filled by init()
-  bool          tx_prev_valid_ = false;  // edge-detect for SHOW_TERMINAL UART TX
+  bool          tx_prev_valid_[4] = {};  // edge-detect for SHOW_TERMINAL UART TX
 
   void bind_registers() {
 #define CHIRON_BIND(i) reg_[i] = &tb->registersOut0_##i;
@@ -156,12 +195,19 @@ class simulator {
     if (dump) tick(++dump_tick);
     else { ++tickcount; tick_nodump(); }
 #ifdef SHOW_TERMINAL
-    // Surface the core's UART TX byte once per write. core0OutChar_valid is
-    // held high while the write request is buffered, so edge-detect it to
-    // avoid printing the same character on every clock it stays asserted.
-    if (tb->core0OutChar_valid && !tx_prev_valid_)
-      std::cout << (char)tb->core0OutChar_byte << std::flush;
-    tx_prev_valid_ = tb->core0OutChar_valid;
+    // Surface UART TX bytes once per write. Each core has its own uartPort, so
+    // under SMP Linux console bytes can come from ANY of the four ports (the
+    // kernel prints from whichever hart holds the console lock) — watch all
+    // four, not just core 0. valid is held high while the write request is
+    // buffered, so edge-detect per port to print each byte once.
+    const bool tx_v[4] = {tb->core0OutChar_valid != 0, tb->core1OutChar_valid != 0,
+                          tb->core2OutChar_valid != 0, tb->core3OutChar_valid != 0};
+    const char tx_b[4] = {(char)tb->core0OutChar_byte, (char)tb->core1OutChar_byte,
+                          (char)tb->core2OutChar_byte, (char)tb->core3OutChar_byte};
+    for (int p = 0; p < 4; ++p) {
+      if (tx_v[p] && !tx_prev_valid_[p]) std::cout << tx_b[p] << std::flush;
+      tx_prev_valid_[p] = tx_v[p];
+    }
 #endif
   }
 
@@ -177,20 +223,36 @@ class simulator {
     return 1;
   }
 
-  // Stream one file into DRAM at `base`, 8 bytes per programmer write.
+  // Stream one file into DRAM at `base`.
+  //
+  // The RTL exposes a clocked 64-bit "programmer" port, but driving it one word
+  // per clock means ~one full-design Verilator eval per 8 bytes — for a multi-MB
+  // Linux image that is ~10^6 evals, i.e. minutes of wall time spent just
+  // loading. Instead we write straight into the Verilated DRAM backing array
+  // (a flat little-endian byte image, identical in layout to the .bin on disk),
+  // which is effectively instantaneous. init() still pulses finishedProgramming
+  // afterwards so the model's `programmed` latch is set the normal way.
   void load_segment(const std::string &path, unsigned long base) {
     std::ifstream input(path, std::ios::binary);
+    if (!input) {
+      std::fprintf(stderr, "load_segment: cannot open '%s'\n", path.c_str());
+      std::exit(1);
+    }
     std::vector<unsigned char> buffer(
         std::istreambuf_iterator<char>(input), {});
 
-    tb->programmer_valid = 1;
-    for (size_t i = 0; i + 8 <= buffer.size(); i += 8) {
-      tb->programmer_byte   = *reinterpret_cast<unsigned long *>(&buffer[i]);
-      tb->programmer_offset = base + i;
-      tick_nodump();
-      printf("Loaded: %zu %%\r", buffer.empty() ? (size_t)100 : (i * 100 / buffer.size()));
+    constexpr size_t kDramBytes =
+        sizeof(tb->system__DOT__memory__DOT__memory);
+    if (base + buffer.size() > kDramBytes) {
+      std::fprintf(stderr,
+        "load_segment: '%s' (%zu bytes) @ 0x%lx overflows DRAM (0x%zx bytes)\n",
+        path.c_str(), buffer.size(), base, kDramBytes);
+      std::exit(1);
     }
-    printf("done\n");
+    std::memcpy(&tb->system__DOT__memory__DOT__memory[base],
+                buffer.data(), buffer.size());
+    std::printf("loaded %zu bytes @ 0x%08lx (%s)\n",
+                buffer.size(), base, path.c_str());
   }
 };
 

@@ -356,6 +356,14 @@
       return true;
     case MIP:
       mip.write_reg(val);
+      // Support guests that ack CLINT MSIP IPI by writing the CSR (csr_clear(mip, MIP_MSIP))
+      // instead of (or in addition to) storing 0 to the memory-mapped CLINT location.
+      // This prevents the MSIP bit from staying set forever, which would cause
+      // constant re-delivery of soft interrupts and starve the smpboot/ksoftirqd/migration threads.
+      if ((val & (1ULL << 3)) == 0) {
+        // MSIP bit cleared in this write -> clear the source in CLINT
+        clint.write(CLINT_BASE + 4 * mhartid, 0, 4);
+      }
       return true;
     case MTVEC:
       mtvec.write_reg(val);

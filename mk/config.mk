@@ -64,6 +64,27 @@ else
   CXX_NOTRACE := g++ -O3 $(HARNESS_INCS) -I $(SIM) $(VERILATED)
 endif
 
+# ── Fast no-trace model (the run-only path, e.g. linux-sim) ───────────────────
+# Same RTL as obj_dir, but Verilated WITHOUT --trace and with -O3 codegen — for
+# long runs (a full Linux boot) where VCD is never dumped. Harnesses link with
+# -DCHIRON_NO_TRACE so rtl_model.h's single tb->trace() call compiles out. The
+# behaviour-changing --x-assign/--x-initial fast flags are deliberately NOT used
+# (they wedge the uartlite MMIO read path); only behaviour-neutral flags here.
+SIM_FAST          := $(SIM)/obj_dir_fast
+HARNESS_INCS_FAST := -I . -I $(VINC) -I $(SIM_FAST)
+_VLIB_FAST := $(wildcard $(SIM_FAST)/libverilated.a)
+ifneq ($(_VLIB_FAST),)
+  VSYS_LIB_FAST := $(_VLIB_FAST) $(SIM_FAST)/Vsystem__ALL.a
+  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000
+else
+  VSYS_LIB_FAST := $(SIM_FAST)/Vsystem__ALL.a
+  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD)
+endif
+
+# Optimization for the Verilator-generated C++ (verilated.mk's OPT_FAST default
+# is -Os = size; -O3 is markedly faster for long simulations). Behaviour-neutral.
+VOPT_FAST ?= -O3 -march=native -fno-math-errno
+
 # Optional runtime diagnostic flags — passed to harness binaries at run time.
 # Use: make lockstep SHOW_STATE=1   (print golden-model register state each step)
 #      make lockstep DUMP_WAVES=1   (write VCD waveform to build/system_trace.vcd)

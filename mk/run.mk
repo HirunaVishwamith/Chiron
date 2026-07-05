@@ -16,11 +16,13 @@ $(BUILD)/lockstep_linux.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SIM_HDR
 	$(CXX_TRACE) $(HARNESS)/lockstep_linux.cpp $(VSYS_LIB) -o $@
 
 # RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
-# its UART TX streamed to stdout (-DSHOW_TERMINAL). Uses CXX_TRACE for its link
-# set (rtl_model.h pulls in the Verilator VCD runtime) but never opens a trace;
-# CXX_TRACE already sets STEP_TIMEOUT=500000 so boot/cache stalls aren't hangs.
-$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
-	$(CXX_TRACE) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB) -o $@
+# its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
+# (CXX_FAST sets -DCHIRON_NO_TRACE so rtl_model.h's tb->trace() compiles out) for
+# the long Linux boot; STEP_TIMEOUT=500000 so boot/cache stalls aren't hangs. The
+# image is loaded by a direct memcpy into the Verilated DRAM (see rtl_model.h),
+# so there is no slow per-word programmer phase.
+$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
 
 $(BUILD)/profile.out: $(HARNESS)/profile.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_NOTRACE) $(HARNESS)/profile.cpp $(VSYS_LIB) -o $@
@@ -110,7 +112,7 @@ test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 # ── Linux boot (nommu RISC-V image, see Multicore_Linux_Image/) ───────────────
 # LINUX_IMAGE selects the bbl.bin to run; override on the command line, e.g.
 #   make linux-emu LINUX_IMAGE=bins/linux-q4.bin
-LINUX_IMAGE ?= $(BINS)/linux-s1.bin
+LINUX_IMAGE ?= $(BINS)/linux-q4.bin
 
 linux-emu: $(BUILD)/emu.out          ## Interactive Linux shell on the golden model (fast)
 	@echo "== interactive golden-model boot: $(LINUX_IMAGE) =="

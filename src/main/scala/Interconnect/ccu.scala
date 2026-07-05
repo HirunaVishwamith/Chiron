@@ -1332,7 +1332,7 @@ class ccu extends Module {
 			}.otherwise{
 				stateReg_9 := 3.U
 			}
-			crpbuf_2_5 := core3.CRRESP
+			crpbuf_2_5 := core5.CRRESP
 		}
 		is(3.U){//CR
 			core5.CRREADY := true.B
@@ -1830,6 +1830,7 @@ class ccu extends Module {
 	debug.stateReg_11 := stateReg_7
 	debug.stateReg_12 := stateReg_8
 	*/
+
 }
 
 

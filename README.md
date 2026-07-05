@@ -424,14 +424,17 @@ JSON reports are written to `build/profile_results/`.
 | `make lockstep BENCH=…` | Lock-step RTL vs emulator; writes logs to `build/` |
 | `make lockstep … SHOW_STATE=1` | Same, plus per-step golden-model register dump |
 | `make lockstep … DUMP_WAVES=1` | Same, plus VCD to `build/system_trace.vcd` |
-| `make isa` | Full RISC-V ISA regression suite (83/84 expected) — progress per test |
+| `make isa` | Full RISC-V ISA regression suite (84/84 expected) — progress per test |
 | `make test` | ISA suite + quad-core vvadd pass/fail |
 | `make profile BENCH=…` | Single-core cycle-accurate profile |
 | `make profile-quad FAM=…` | Quad-core profile for one benchmark family |
 | `make profile-all` | Quad-core profile for all benchmarks + chart |
 | `make profile-all-sc` | Single-core profile for all benchmarks, all scales |
 | `make fire [FIRE_FRAMES=N]` | Bare-metal Doom-fire demo |
-| `make linux BENCH=…` | Linux-boot lock-step harness |
+| `make linux-emu [LINUX_IMAGE=…]` | Interactive Linux shell on the golden model (fast) |
+| `make linux-emu-check [LINUX_IMAGE=…]` | Scripted boot-to-login check (CI, non-interactive) |
+| `make linux-sim [LINUX_IMAGE=…]` | Boot Linux on the Verilated RTL (live console, slow) |
+| `make linux-lockstep [LINUX_IMAGE=…]` | Bounded RTL-vs-emulator lock-step of the Linux boot (debug) |
 | `make clean` | Remove generated artifacts (`build/`, `obj_dir`, logs) |
 | `make distclean` | `clean` + drop sbt/Verilator build trees |
 | `make help` | List all targets with descriptions |
@@ -442,6 +445,56 @@ Families: `vvadd matmul filter csaxpy histo`. Scales: `s1`–`s5`. Default `BENC
 > The benchmark manifest (`mk/benchmarks.mk`) is the single source of truth for
 > done-PCs and family names. Adding a workload is a one-line edit — no harness
 > copy-paste required.
+
+---
+
+## Booting Linux (nommu, single-core & quad-core SMP)
+
+chiron boots real Linux — a nommu, M-mode RISC-V kernel wrapped in bbl as a
+flat binary loaded at `0x80000000`. Images are produced by the
+[`Multicore_Linux_Image/`](Multicore_Linux_Image/) submodule (full pipeline and
+every chiron-specific knob documented in its README):
+
+```
+cd Multicore_Linux_Image
+./submodule_update                       # clone linux/ buildroot/ riscv-pk/
+cd buildroot && make -j$(nproc) && cd .. # toolchain + rootfs (slow, once)
+export RISCV=$PWD/buildroot/output/host
+./apply_configs_and_patches              # stage chiron configs + patches
+./build_image.sh s1                      # -> bins/linux-s1.bin (single-core)
+./build_image.sh q4                      # -> bins/linux-q4.bin (quad-core SMP)
+```
+
+Then, from this repo root (RTL targets need `make sim` / `make sim-fast` first):
+
+```
+make linux-emu                             # quad-core shell on the golden model (default image)
+make linux-emu  LINUX_IMAGE=bins/linux-s1.bin   # single-core variant
+make linux-sim                             # boot the same image on the RTL (live console)
+```
+
+- **`linux-emu`** attaches the golden-model emulator to your terminal: it
+  reaches `buildroot login:` in about a minute; log in as `root` (no password) —
+  interactive input works (emulator UART RX + the kernel uartlite RX-poll patch).
+  `linux-emu-check` is the non-interactive CI variant of the same boot.
+- **`linux-sim`** boots the image on the Verilated RTL with a live uartlite
+  console. Expect ~5–10K cycles/s: the kernel banner appears after ~20 minutes,
+  and full boot takes days — it prints a heartbeat line every 5 s
+  (`steps/s`, per-hart PCs) so progress and wedges are obvious at a glance.
+- `LINUX_IMAGE` defaults to `bins/linux-q4.bin` (see `mk/run.mk`).
+
+**Status (2026-07-03):** the quad-core image boots on both back-ends. The two
+RTL blockers were root-caused and fixed: (1) a CCU/L2 snoop-starvation deadlock
+— the D-cache clean-on-fence walker starved snoop requests behind its
+writebacks in the CCU's single serialized transaction FIFO (fixed with a
+dedicated `readyCoherency` snoop path + flush-walker interlock in
+`src/main/scala/Dcache/`); and (2) a ROB livelock on coherent-load squash — a
+snoop invalidating a load between D-cache response and commit triggered a
+whole-ROB rollback that the ROB FIFO's pointer arithmetic could not represent
+(`full` vs `empty` ambiguity), freezing the hart (fixed with an explicit
+`flushAll` in `src/main/scala/pipeline/Fifo.scala`, driven one cycle after the
+squash decision in `core.scala`). Both fixes hold under the full regression
+suite (ISA 84/84, vvadd/csaxpy quad-core lock-step).
 
 ---
 
@@ -476,3 +529,18 @@ to teach.
 <div align="center">
 <sub>"The wisest of the Centaurs taught heroes. This core teaches how an out-of-order machine really works."</sub>
 </div>
+
+
+
+claude --resume 2bd56383-99b4-4764-9c4c-ddcc53be2c5a
+
+
+claude --resume db930fb6-3d22-4aec-8a65-b96bb405dd4b  ================= linux-emu working
+
+2026-07-03: quad-core linux-sim WORKING — CCU/L2 snoop-starvation deadlock and
+ROB coherent-squash livelock both fixed (see "Booting Linux" section above);
+kernel banner prints on the RTL, ISA 84/84, lockstep regressions green.
+
+
+
+claude --resume db930fb6-3d22-4aec-8a65-b96bb405dd4b ================== try to fix the bugs in linux-sim

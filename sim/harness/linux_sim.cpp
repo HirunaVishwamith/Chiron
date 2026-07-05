@@ -44,45 +44,57 @@ int main(int argc, char **argv) {
   std::printf("       while bbl copies the kernel into place)\n\n");
   std::fflush(stdout);
 
-  // Optional progress heartbeat on stderr — enable with LINUX_SIM_HB=1. Off by
-  // default so it doesn't interleave with the guest console; when on it prints
-  // committed instrs + PC every ~3 s so a real deadlock (PC frozen while cycles
-  // climb) is visible versus a merely slow boot.
-  const bool heartbeat = std::getenv("LINUX_SIM_HB") != nullptr;
+  // Progress heartbeat on stderr — ON by default (set LINUX_SIM_HB=0 to
+  // silence). Prints steps + all four cores' PCs every ~5 s: under SMP any
+  // hart can be the one making progress, so a single-core PC is not enough to
+  // tell a slow boot from a wedge. A hart whose PC hasn't moved since the last
+  // beat is flagged with '*' (spin-wait or wfi — normal for lottery losers,
+  // suspicious for all four at once).
+  const char *hb_env = std::getenv("LINUX_SIM_HB");
+  const bool heartbeat = !(hb_env && hb_env[0] == '0');
   using clock = std::chrono::steady_clock;
   auto t_start = clock::now();
   auto t_last  = t_start;
-  uint64_t commits = 0, last_commits = 0, last_pc = 0;
+  uint64_t steps = 0, last_steps = 0;
+  uint64_t last_pc[4] = {};
 
-  // Run forever; UART TX is streamed to stdout from inside step_nodump()
-  // (the SHOW_TERMINAL hook in rtl_model.h). step_nodump() keeps no VCD and
-  // writes no trace, so the only console output is the guest itself.
+  // Run forever; UART TX from all four cores' uartPorts is streamed to stdout
+  // from inside step_any_nodump() (the SHOW_TERMINAL hook in rtl_model.h).
+  // Progress/stall is judged on ANY core committing, not just core 0 — under
+  // the SMP image core 0 may idle while another hart runs.
   while (true) {
-    if (bench.step_nodump() == 1) {  // run_until_commit hit STEP_TIMEOUT
+    if (bench.step_any_nodump() == 1) {  // no core committed for STEP_TIMEOUT
       std::fprintf(stderr,
-        "\n[linux_sim] core stalled: no commit for STEP_TIMEOUT cycles "
-        "at pc=0x%lx (cycle %lu)\n",
-        (unsigned long)bench.prev_pc, bench.tickcount);
+        "\n[linux_sim] ALL cores stalled: no commit on any hart for "
+        "STEP_TIMEOUT cycles (cycle %lu)\n"
+        "            pc0=0x%08lx pc1=0x%08lx pc2=0x%08lx pc3=0x%08lx\n",
+        bench.tickcount,
+        (unsigned long)bench.core_pc(0), (unsigned long)bench.core_pc(1),
+        (unsigned long)bench.core_pc(2), (unsigned long)bench.core_pc(3));
       return 1;
     }
-    ++commits;
+    ++steps;
 
     if (heartbeat) {
       auto now = clock::now();
-      if (std::chrono::duration_cast<std::chrono::milliseconds>(now - t_last).count() >= 3000) {
+      if (std::chrono::duration_cast<std::chrono::milliseconds>(now - t_last).count() >= 5000) {
         double dt = std::chrono::duration<double>(now - t_last).count();
         double total = std::chrono::duration<double>(now - t_start).count();
-        uint64_t pc = bench.prev_pc;
+        uint64_t pc[4];
+        for (int i = 0; i < 4; ++i) pc[i] = bench.core_pc(i);
         std::fprintf(stderr,
-          "[linux_sim] +%5.0fs  instrs=%-10lu (%6.0f/s)  cycles=%-12lu  pc=0x%08lx%s\n",
-          total, (unsigned long)commits,
-          (commits - last_commits) / (dt > 0 ? dt : 1),
-          bench.tickcount, (unsigned long)pc,
-          (pc == last_pc) ? "  <-- PC not advancing (possible deadlock)" : "");
+          "[linux_sim] +%5.0fs  steps=%-10lu (%6.0f/s)  cycles=%-12lu  "
+          "pc0=0x%08lx%s pc1=0x%08lx%s pc2=0x%08lx%s pc3=0x%08lx%s\n",
+          total, (unsigned long)steps,
+          (steps - last_steps) / (dt > 0 ? dt : 1), bench.tickcount,
+          (unsigned long)pc[0], pc[0] == last_pc[0] ? "*" : " ",
+          (unsigned long)pc[1], pc[1] == last_pc[1] ? "*" : " ",
+          (unsigned long)pc[2], pc[2] == last_pc[2] ? "*" : " ",
+          (unsigned long)pc[3], pc[3] == last_pc[3] ? "*" : " ");
         std::fflush(stderr);
         t_last = now;
-        last_commits = commits;
-        last_pc = pc;
+        last_steps = steps;
+        for (int i = 0; i < 4; ++i) last_pc[i] = pc[i];
       }
     }
   }

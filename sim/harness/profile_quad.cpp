@@ -45,6 +45,7 @@ int main(int argc, char *argv[]) {
     const char *output_path = find_arg(argc, argv, "--output", "");
     const char *bench_name  = find_arg(argc, argv, "--name", nullptr);
     const char *timeout_str = find_arg(argc, argv, "--timeout", "4000000000");
+    const char *print_interval_str = find_arg(argc, argv, "--print-interval", "10000000");
 
     uint64_t max_cycles = strtoull(timeout_str, nullptr, 10);
 
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]) {
     int      exit_code   = 2;
     uint64_t last_print  = 0ULL;
     uint64_t stall_cycles = 0ULL;
-    const uint64_t PRINT_INTERVAL = 10000000ULL;
+    const uint64_t PRINT_INTERVAL = strtoull(print_interval_str, nullptr, 10);
     const uint64_t MAX_STALL      = 500000ULL;
 
     while (sim_cycles < max_cycles) {
@@ -94,8 +95,8 @@ int main(int argc, char *argv[]) {
         ++sim_cycles;
 
         if (sim_cycles - last_print >= PRINT_INTERVAL) {
-            printf("[profile_quad] %llu M cycles  C0=0x%llx C1=0x%llx C2=0x%llx C3=0x%llx\r",
-                   (unsigned long long)(sim_cycles / 1000000),
+            printf("[profile_quad] %llu cycles  C0=0x%llx C1=0x%llx C2=0x%llx C3=0x%llx\n",
+                   (unsigned long long)sim_cycles,
                    (unsigned long long)tb->robOut0_pc,
                    (unsigned long long)tb->robOut1_pc,
                    (unsigned long long)tb->robOut2_pc,
@@ -135,7 +136,12 @@ int main(int argc, char *argv[]) {
         }
 
         // ISA test exit (a7/x17 == 93): gp/x3 == 1 → pass, else fail.
-        IsaResult isa = isa_test_status(tb->registersOut0_3, tb->registersOut0_17);
+        // Only meaningful when no done-pc spec is active: benchmarks use a7
+        // as a scratch register, so a transient a7==93 mid-kernel would be
+        // misread as an ISA exit (filter-q4 hits exactly that).
+        IsaResult isa = completion.active()
+                            ? IsaResult::Running
+                            : isa_test_status(tb->registersOut0_3, tb->registersOut0_17);
         if (isa == IsaResult::Pass) {
             printf("\n[profile_quad] ISA TEST PASSED at PC=0x%016llx\n",
                    (unsigned long long)pc);

@@ -35,7 +35,7 @@ help:   ## Show this help
 .PHONY: clean distclean
 clean:   ## Remove generated artifacts (build/, obj_dir, logs)
 	rm -rf $(BUILD)
-	rm -rf $(SIM)/obj_dir
+	rm -rf $(SIM)/obj_dir $(SIM)/obj_dir_fast
 	rm -f  $(SIM)/system.v $(SIM)/iCacheRegisters.v
 	rm -f  run.log states.log regs.log test_results.txt system_trace.vcd
 	rm -f  system.v system.fir system.anno.json .stamp.*

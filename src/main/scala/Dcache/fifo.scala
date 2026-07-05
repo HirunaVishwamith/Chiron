@@ -140,7 +140,9 @@ class fifoRecordInvalidateI[T <: requestPipelineTrait](depth: Int, traitType: T)
 
   when(invalidateEnable) {
     for (i <- 0 until depth) {
-      when(memReg(i).address === invalidateAddr) {
+      //Line-granular: the snoop carries a line address; any pending load
+      //commit reading that line holds data the snoop just took ownership of
+      when(memReg(i).address(addrWidth - 1, log2Ceil(lineSize)) === invalidateAddr(addrWidth - 1, log2Ceil(lineSize))) {
         memReg(i).valid := false.B
       }
     }
