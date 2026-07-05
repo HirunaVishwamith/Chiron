@@ -109,6 +109,25 @@ test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks
 
 test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 
+# ── Linux image build (Multicore_Linux_Image/ submodule) ──────────────────────
+IMG_DIR := Multicore_Linux_Image
+
+.PHONY: patch linux-toolchain linux-image-s1 linux-image-q4 linux-images
+
+patch:   ## Update linux/buildroot/riscv-pk submodules + stage chiron patches
+	cd $(IMG_DIR) && ./submodule_update && ./apply_configs_and_patches
+
+linux-toolchain:   ## Build the buildroot cross toolchain + rootfs (slow, once)
+	$(MAKE) -C $(IMG_DIR)/buildroot -j$(shell nproc)
+
+linux-image-s1: patch   ## Build bins/linux-s1.bin (single-core nommu Linux)
+	cd $(IMG_DIR) && RISCV="$$PWD/buildroot/output/host" ./build_image.sh s1 ../$(BINS)
+
+linux-image-q4: patch   ## Build bins/linux-q4.bin (quad-core SMP Linux)
+	cd $(IMG_DIR) && RISCV="$$PWD/buildroot/output/host" ./build_image.sh q4 ../$(BINS)
+
+linux-images: linux-image-s1 linux-image-q4   ## Build both Linux images
+
 # ── Linux boot (nommu RISC-V image, see Multicore_Linux_Image/) ───────────────
 # LINUX_IMAGE selects the bbl.bin to run; override on the command line, e.g.
 #   make linux-emu LINUX_IMAGE=bins/linux-q4.bin
