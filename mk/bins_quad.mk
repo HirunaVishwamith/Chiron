@@ -1,11 +1,11 @@
 # ── Quad-core (NUM_CORES=4) benchmark binary generation ──────────────────────
-# Builds all 5 benchmarks with -DNUM_CORES=4 injected via RISCV_GCC_OPTS.
+# Builds all benchmarks with -DNUM_CORES=4 injected via RISCV_GCC_OPTS.
 # The sub-Makefile doesn't support OBJDIR, so we build in-place then copy.
 # A clean pass before and after avoids stale s/c objects cross-contaminating.
 #
-# Usage:  make bins-q4      → produces bins/mt-*-q4.bin for all 5 benchmarks
+# Usage:  make bins-q4      → produces bins/mt-*-q4.bin for all listed benchmarks
 
-QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy
+QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy mt-seqlock
 
 QUAD_GCC_OPTS := -mcmodel=medany -static -std=gnu99 -O2 -fno-common \
                  -fno-builtin-printf -march=rv64ima_zicsr -mabi=lp64 \
@@ -33,3 +33,12 @@ bins-q4:    ## Build all benchmarks with NUM_CORES=4 → bins/mt-*-q4.bin
 	@echo "[bins-q4] Done."
 
 bins-all: bench-bin bins-q4   ## Build both single-core and quad-core bins
+
+.PHONY: seqlock-bin
+seqlock-bin:    ## Build just bins/mt-seqlock-q4.bin (fast iteration, no clean)
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-seqlock" \
+	    RISCV_GCC_OPTS="$(QUAD_GCC_OPTS)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-seqlock.bin $(BINS)/mt-seqlock-q4.bin
+	@echo "[seqlock-bin] staged: $(BINS)/mt-seqlock-q4.bin"

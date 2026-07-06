@@ -186,7 +186,7 @@ class uartPort extends Module {
   }
 
   when(
-    ((readRequestBuffer.address & "hffff0fff".U) === "h40600004".U) && 
+    ((readRequestBuffer.address & "hffff0fff".U) === "h40600004".U) &&
     readRequestBuffer.valid && afterLogin
   ) {
     client.RDATA := command(0).char
@@ -194,6 +194,37 @@ class uartPort extends Module {
       command.dropRight(1).zip(command.drop(1)).foreach { case(curr, next) => curr := next }
       command.last.valid := false.B
     }
+  }
+
+  // Host-driven input (FPGA only): a live keyboard/console bridge feeds one
+  // character at a time through this port instead of the compiled-in
+  // hardInput/command ROM above. Placed after those blocks so Chisel's
+  // last-connect semantics give it priority whenever hostInput.valid is
+  // asserted; every simulation instantiation (MultiUart in testbench/
+  // system.scala) ties hostInput.valid to false, so this is a no-op there and
+  // sim behavior is completely unchanged. Not gated on terminalReady/
+  // afterLogin — a live host decides what to type and when, it doesn't need
+  // the boot-string auto-detection the compiled-in ROM relies on.
+  val hostInput = IO(Input(new Bundle {
+    val valid = Bool()
+    val char  = UInt(8.W)
+  }))
+  val hostInputConsumed = IO(Output(Bool()))
+  hostInputConsumed := false.B
+
+  when(
+    ((readRequestBuffer.address & "hffff0fff".U) === "h40600000".U) &&
+    readRequestBuffer.valid && hostInput.valid
+  ) {
+    client.RDATA := (8.U(32.W) | Cat(!(hostInput.valid.asUInt), 0.U(1.W)))
+  }
+
+  when(
+    ((readRequestBuffer.address & "hffff0fff".U) === "h40600004".U) &&
+    readRequestBuffer.valid && hostInput.valid
+  ) {
+    client.RDATA := hostInput.char
+    when(client.RREADY) { hostInputConsumed := true.B }
   }
 
   when(writeRequestBuffer.address.valid && writeRequestBuffer.data.valid) {
@@ -309,6 +340,25 @@ class MultiUart extends Module {
   uart1.io_mtime := mtime
   uart2.io_mtime := mtime
   uart3.io_mtime := mtime
+
+  // Host-driven console input (FPGA only): only core0's console is bridged
+  // to the host (the FPGA top's AXI-Lite bridge feeds hostInput0); every
+  // simulation instantiation (system.scala) ties hostInput0.valid to false,
+  // which keeps uart0's own hostInput tied off too, so the compiled-in ROM
+  // path is unaffected there. uart1-3 never have a host bridge.
+  val hostInput0 = IO(Input(new Bundle {
+    val valid = Bool()
+    val char  = UInt(8.W)
+  }))
+  val hostInputConsumed0 = IO(Output(Bool()))
+  uart0.hostInput := hostInput0
+  hostInputConsumed0 := uart0.hostInputConsumed
+  uart1.hostInput.valid := false.B
+  uart1.hostInput.char  := 0.U
+  uart2.hostInput.valid := false.B
+  uart2.hostInput.char  := 0.U
+  uart3.hostInput.valid := false.B
+  uart3.hostInput.char  := 0.U
 
   // ── Shared CLINT msip (one array, any hart can write any hart's bit) ─────────
   // This is the SMP IPI register file. Each uartPort reads it and forwards its

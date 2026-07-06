@@ -11,6 +11,9 @@ matmul_base := mt-matmul
 filter_base := mt-mask-sfilter
 csaxpy_base := mt-csaxpy
 histo_base  := mt-histo
+# q4-only diagnostic microbenchmark (see workloads/benchmarks/mt-seqlock/) --
+# no single-core scale variants, built via `make seqlock-bin`.
+seqlock_base := mt-seqlock
 
 # completion: committed PC(s), optionally gated on a0 (x10)
 vvadd_DONE  := --done-pc 0x800009a0 --done-pc 0x800009ac --done-a0 2
@@ -18,6 +21,7 @@ matmul_DONE := --done-pc 0x80000a04
 filter_DONE := --done-pc 0x80000bc8
 csaxpy_DONE := --done-pc 0x800009a4 --done-pc 0x80000998 --done-a0 0
 histo_DONE  := --done-pc 0x80000a40
+seqlock_DONE := --done-pc 0x80000aa0
 
 # Resolve BENCH=<family>-s<scale> (default vvadd-s1) into a bin path + done spec.
 # None of the family names contain "-s", so splitting on it is unambiguous.

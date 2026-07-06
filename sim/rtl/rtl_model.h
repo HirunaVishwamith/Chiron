@@ -106,9 +106,15 @@ class simulator {
   // lottery loser while another hart does all the work, so gauging progress —
   // and declaring deadlock — on core 0 alone gives false stalls. Timeout here
   // means no core committed for STEP_TIMEOUT cycles: a genuine global wedge.
-  int step_any_nodump() {
+  int step_any_nodump() { return step_any(/*dump=*/false); }
+
+  // Same as step_any_nodump(), but the caller picks per-call whether this
+  // stretch of cycles is VCD-dumped. Lets a harness run undumped at full
+  // speed and only flip dump=true once some runtime trigger fires (e.g. a
+  // suspected wedge), instead of tracing from cycle 0 — see linux_sim_trace.cpp.
+  int step_any(bool dump) {
     for (int i = 0; i < STEP_TIMEOUT; ++i) {
-      advance(/*dump=*/false);
+      advance(dump);
       if (tb->robOut0_commitFired || tb->robOut1_commitFired ||
           tb->robOut2_commitFired || tb->robOut3_commitFired) {
         prev_pc = tb->robOut0_pc;

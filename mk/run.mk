@@ -24,6 +24,21 @@ $(BUILD)/lockstep_linux.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SIM_HDR
 $(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
 
+# Same boot, but watches for the known timekeeping-seqlock SMP wedge (see the
+# file's own comment) and captures a bounded VCD right around the point it
+# sets in, instead of either tracing from cycle 0 (far too slow/large) or not
+# at all. Needs the TRACE-capable model (VCD dumping is unavailable on the
+# fast no-trace build), so it is undumped-but-not-optimized-away until triggered.
+$(BUILD)/linux_sim_trace.out: $(HARNESS)/linux_sim_trace.cpp $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
+	$(CXX_TRACE) $(HARNESS)/linux_sim_trace.cpp $(VSYS_LIB) -o $@
+
+# Same wedge-capture idea as linux_sim_trace.out, but for the mt-seqlock
+# microbenchmark (see workloads/benchmarks/mt-seqlock/) instead of a full
+# Linux boot: any hart's PC frozen for --threshold cycles is by construction
+# a wedge (no legitimate loop in that benchmark sits still that long).
+$(BUILD)/seqlock_wedge_trace.out: $(HARNESS)/seqlock_wedge_trace.cpp $(VSYS_LIB) | $(BUILD)
+	$(CXX_TRACE) $(HARNESS)/seqlock_wedge_trace.cpp $(VSYS_LIB) -o $@
+
 $(BUILD)/profile.out: $(HARNESS)/profile.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_NOTRACE) $(HARNESS)/profile.cpp $(VSYS_LIB) -o $@
 

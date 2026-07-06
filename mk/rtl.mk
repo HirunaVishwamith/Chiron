@@ -41,6 +41,20 @@ $(VSYS_LIB_FAST): $(SIM)/system.v
 sim: $(VSYS_LIB)             ## Build the RTL: Chisel → Verilog → Verilator library
 sim-fast: $(VSYS_LIB_FAST)   ## Build the fast no-trace RTL model (used by linux-sim)
 
+# ── Kintex-7 FPGA flavour (quad-core, PCIe/XDMA — see fpga/) ──────────────────
+# Same instructionBase as sim (0x8000_0000): fpgaTop reuses chironCore
+# unchanged (see testbench/fpgaTop.scala), just swaps mainMemory/MultiUart's
+# tie-offs for real DDR3 (MIG)/host-bridge wiring. Output copied into
+# fpga/hdl/ where fpga/build_kintex7.tcl's source-file globbing picks it up.
+.PHONY: fpga-verilog
+fpga-verilog:   ## Generate fpgaTop.v for the Kintex-7 build (fpga/hdl/fpgaTop.v)
+	mv src/main/scala/common/configuration.scala configuration.txt && \
+	sed 's/instructionBase/instructionBase = 0x0000000080000000L\/\//' configuration.txt \
+	    > src/main/scala/common/configuration.scala && \
+	(sbt "runMain fpgaTop"; mv configuration.txt src/main/scala/common/configuration.scala)
+	@mkdir -p fpga/hdl
+	cp fpgaTop.v fpga/hdl/
+
 # ── Zynq FPGA flavour (instructionBase = 0x4000_0000 + boot ROM + PS CLINT) ───
 .PHONY: zynq
 zynq:                   ## Generate FPGA Verilog (Zynq base) + boot ROM + vivado.tcl

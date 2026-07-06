@@ -45,5 +45,12 @@ distclean: clean   ## clean + drop the sbt/Verilator build trees
 	$(TOOLPATH) $(MAKE) -C $(DEMO_SRC) clean  2>/dev/null || true
 	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) clean 2>/dev/null || true
 
+.PHONY: vivado program
+vivado: fpga-verilog   ## Build the Kintex-7 Vivado project + bitstream (see fpga/)
+	$(MAKE) -C fpga vivado
+
+program:   ## JTAG-program the FPGA's configuration memory (never flash)
+	$(MAKE) -C fpga program
+
 .PHONY: fix-inotify
 fix-inotify:   ## Raise inotify limit if sbt hangs on file watches
