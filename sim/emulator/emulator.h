@@ -58,18 +58,18 @@ public:
 
   void step()
   {
-    clint.tick();
+    clint.advance();
     for (auto &r : harts)
       r.hart_step(memory);
   }
 
   void step(int i){
-    clint.tick();
+    clint.advance();
     harts[i].hart_step(memory);
   }
 
   void set_interrupts(int i){
-    // CLINT mtime/msip already updated by tick(); just refresh per-hart view
+    // CLINT mtime/msip already updated by advance(); just refresh per-hart view
 #ifdef LOCKSTEP
     harts[i].hart_set_interrupts(memory);
 #else
@@ -78,7 +78,7 @@ public:
   }
 
   void set_interrupts(){
-    clint.tick();
+    clint.advance();
     for (auto &r : harts)
 #ifdef LOCKSTEP
       r.hart_set_interrupts(memory);

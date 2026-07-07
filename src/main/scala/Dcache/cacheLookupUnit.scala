@@ -654,7 +654,13 @@ class cacheLookupUnit extends Module{
       when(!(needWriteBack && writeBackBuffer.valid)) {
         when(needWriteBack) {
           writeBackBuffer.valid := true.B
-          writeBackBuffer.address := Cat(flushTagChunks(flushWay), flushSet, 0.U(log2Ceil(lineSize).W))
+          // Tag chunk carries 4 flag bits (valid/dirty/share/PLRU) above the
+          // tag itself -- only bits (tagSize-1,0) are the real tag (same
+          // slice used elsewhere in this file, e.g. newAddrWire above).
+          // Using the whole chunk here shifted those flag bits into the
+          // reconstructed address, writing dirty data back to the wrong L2
+          // line and corrupting whatever was actually there.
+          writeBackBuffer.address := Cat(flushTagChunks(flushWay)(tagSize - 1, 0), flushSet, 0.U(log2Ceil(lineSize).W))
           writeBackBuffer.data := dataBRAMVec(flushWay).rdData
         }
         when(lastWay) {

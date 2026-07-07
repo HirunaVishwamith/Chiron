@@ -14,6 +14,9 @@ histo_base  := mt-histo
 # q4-only diagnostic microbenchmark (see workloads/benchmarks/mt-seqlock/) --
 # no single-core scale variants, built via `make seqlock-bin`.
 seqlock_base := mt-seqlock
+# q4-only SPLASH-3 Radix port (see workloads/benchmarks/mt-radix/) -- no
+# single-core scale variants, built via `make radix-bin`.
+radix_base := mt-radix
 
 # completion: committed PC(s), optionally gated on a0 (x10)
 vvadd_DONE  := --done-pc 0x800009a0 --done-pc 0x800009ac --done-a0 2
@@ -22,6 +25,7 @@ filter_DONE := --done-pc 0x80000bc8
 csaxpy_DONE := --done-pc 0x800009a4 --done-pc 0x80000998 --done-a0 0
 histo_DONE  := --done-pc 0x80000a40
 seqlock_DONE := --done-pc 0x80000aa0
+radix_DONE  := --done-pc 0x80000c68
 
 # Resolve BENCH=<family>-s<scale> (default vvadd-s1) into a bin path + done spec.
 # None of the family names contain "-s", so splitting on it is unambiguous.

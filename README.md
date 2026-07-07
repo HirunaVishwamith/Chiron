@@ -544,3 +544,7 @@ kernel banner prints on the RTL, ISA 84/84, lockstep regressions green.
 
 
 claude --resume db930fb6-3d22-4aec-8a65-b96bb405dd4b ================== try to fix the bugs in linux-sim
+
+
+I'll check that later, move on to implimenting splash 3 benchmark on this I need to run it anyway, but as you my know I dont have F/D extensions suport, or you may donwload splash 3 benchmakr and convert evrything to int32 type. and
+  map pthread to baremetal threads do benchmarking
