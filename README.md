@@ -529,22 +529,3 @@ to teach.
 <div align="center">
 <sub>"The wisest of the Centaurs taught heroes. This core teaches how an out-of-order machine really works."</sub>
 </div>
-
-
-
-claude --resume 2bd56383-99b4-4764-9c4c-ddcc53be2c5a
-
-
-claude --resume db930fb6-3d22-4aec-8a65-b96bb405dd4b  ================= linux-emu working
-
-2026-07-03: quad-core linux-sim WORKING — CCU/L2 snoop-starvation deadlock and
-ROB coherent-squash livelock both fixed (see "Booting Linux" section above);
-kernel banner prints on the RTL, ISA 84/84, lockstep regressions green.
-
-
-
-claude --resume db930fb6-3d22-4aec-8a65-b96bb405dd4b ================== try to fix the bugs in linux-sim
-
-
-I'll check that later, move on to implimenting splash 3 benchmark on this I need to run it anyway, but as you my know I dont have F/D extensions suport, or you may donwload splash 3 benchmakr and convert evrything to int32 type. and
-  map pthread to baremetal threads do benchmarking
