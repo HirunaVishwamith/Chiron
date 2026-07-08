@@ -21,8 +21,11 @@ $(BUILD)/lockstep_linux.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SIM_HDR
 # the long Linux boot; STEP_TIMEOUT=500000 so boot/cache stalls aren't hangs. The
 # image is loaded by a direct memcpy into the Verilated DRAM (see rtl_model.h),
 # so there is no slow per-word programmer phase.
-$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_FAST) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
+# Linux boot uses the walker-disabled model (VSYS_LIB_LINUX / obj_dir_linux):
+# the fence.i clean walker deadlocks bbl's large fence.i under SMP. Build it with
+# `make sim-linux` first (linux-sim depends on it).
+$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_LINUX) | $(BUILD)
+	$(CXX_LINUX) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_LINUX) -o $@
 
 # Same boot, but watches for the known timekeeping-seqlock SMP wedge (see the
 # file's own comment) and captures a bounded VCD right around the point it

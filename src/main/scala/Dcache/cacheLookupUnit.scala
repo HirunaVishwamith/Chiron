@@ -203,18 +203,33 @@ class cacheLookupUnit extends Module{
   }
 
   //-----------------------Clean-on-fence.i walker state------------------//
-  val sFlushIdle :: sFlushRead :: sFlushEmit :: sFlushDrain :: Nil = Enum(4)
+  // Yield-to-snoop design: the walker must NOT block the request path, because
+  // under SMP that path also carries coherency snoop requests from other cores
+  // (arbiter routes them into cacheLookup only when request.ready is high). If
+  // the walker held request.ready low for the whole sweep, this core would stop
+  // answering snoops and the CCU/L2 would deadlock (its writeback needs the CCU,
+  // which may be waiting on a snoop response from this very core). So instead the
+  // walker (a) never gates request.ready, (b) reads each set's tags/data on a
+  // cycle when no request is being serviced and latches them into registers, then
+  // iterates the ways from those registers (immune to snoops stealing the BRAM),
+  // and (c) only writes writeBackBuffer on non-serving cycles.
+  val sFlushIdle :: sFlushRead :: sFlushCapture :: sFlushEmit :: sFlushDrain :: Nil = Enum(5)
   val flushState = RegInit(sFlushIdle)
   val flushSet = RegInit(0.U(dataAddrWidth.W))
   val flushWay = RegInit(0.U(log2Ceil(nway).W))
   val flushActive = flushState =/= sFlushIdle
+  val flushTagReg  = Reg(Vec(nway, UInt(tagSection.W)))
+  val flushDataReg = Reg(Vec(nway, UInt(dataDataWidth.W)))
   flush.busy := flushActive
 
   //____________________Functional description_________________________//
   //Response out is always release in one clock cycle, so no ready signal
-  //Gated off while the fence.i walker is sweeping so the request path does
-  //not fight the walker for the BRAM read port / writeBackBuffer.
-  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready && !flushActive
+  //NOTE: request.ready is intentionally NOT gated by flushActive -- see the
+  //walker comment above (snoops must keep flowing during a fence.i sweep).
+  request.ready := toReplay.ready && toWriteBack.ready && toCoherency.ready
+  // A request (snoop/load/store/replay) is entering the pipeline this cycle and
+  // owns the BRAM read port; the walker must yield the port on these cycles.
+  val servingRequest = request.ready && request.request.valid
   val islastInorderMissRecordRegisterValid = toLastInorderMissRecordRegisterWire || lastInorderMissRecordRegister.valid && lastInorderMissRecordRegister.branch.valid
   val islastSpeculativeMissRecordRegisterValid = toLastSpeculativetMissRecordRegisterWire || lastSpeculativeMissRecordRegister.valid && lastSpeculativeMissRecordRegister.branch.valid
   request.holdInOrder := (islastInorderMissRecordRegisterValid || islastSpeculativeMissRecordRegisterValid) && !writeCommitInstructionBuffer
@@ -613,11 +628,15 @@ class cacheLookupUnit extends Module{
   // subsequent non-coherent I-fetch would read stale data from L2. This walker
   // sweeps every set/way and writes back each valid+dirty line via the existing
   // writeBackBuffer path. It only runs on fence.i (see cacheModule's fence FSM),
-  // never on the plain `fence` barriers the benchmarks spin on, so it cannot
-  // contribute to multi-core request starvation.
-  val flushTagChunks = VecInit(Seq.tabulate(nway) { i =>
-    tagBRAM.rdData(((i + 1) * tagSection) - 1, i * tagSection)
-  })
+  // never on the plain `fence` barriers the benchmarks spin on.
+  //
+  // Crucially it YIELDS the BRAM read port to the normal request path (which
+  // carries coherency snoops from other cores under SMP): it reads/drives BRAM
+  // only on a cycle when no request is using it (`bramFree`), captures the whole
+  // set into registers, and then drains the ways from those registers -- so a
+  // snoop stealing the BRAM mid-sweep cannot corrupt the walk or deadlock the
+  // coherence fabric.
+  val bramFree = !(request.request.valid && request.request.branch.valid)
 
   when(flush.start && flushState === sFlushIdle) {
     flushState := sFlushRead
@@ -627,24 +646,41 @@ class cacheLookupUnit extends Module{
 
   switch(flushState) {
     is(sFlushRead) {
-      // rdAddr = flushSet driven below; wait one cycle for the SyncReadMem read
+      // Advance only once we own the BRAM this cycle (rdAddr=flushSet is driven
+      // in the free-cycle block below), so next cycle rdData reflects flushSet.
+      when(bramFree) {
+        flushState := sFlushCapture
+      }
+    }
+    is(sFlushCapture) {
+      // rdData now reflects flushSet (driven last cycle, unaffected by whatever
+      // uses the port this cycle). Latch every way; the emit phase is then
+      // independent of the BRAM.
+      flushTagReg  := VecInit(Seq.tabulate(nway) { i =>
+        tagBRAM.rdData(((i + 1) * tagSection) - 1, i * tagSection)
+      })
+      flushDataReg := VecInit(dataBRAMVec.map(_.rdData))
       flushState := sFlushEmit
     }
     is(sFlushEmit) {
-      val wayValid = flushTagChunks(flushWay)(tagSize)
-      val wayDirty = flushTagChunks(flushWay)(tagSize + 1)
+      val tagChunk = flushTagReg(flushWay)
+      val wayValid = tagChunk(tagSize)
+      val wayDirty = tagChunk(tagSize + 1)
       val needWriteBack = wayValid && wayDirty
       val lastWay = flushWay === (nway - 1).U
       val lastSet = flushSet === (tagDepth - 1).U
 
-      // Stall while the writeback buffer is still occupied
-      when(!(needWriteBack && writeBackBuffer.valid)) {
+      // A way needing writeback may only post to writeBackBuffer on a free cycle
+      // (so it never collides with a snoop-driven eviction) and when the buffer
+      // has drained. Non-dirty ways advance immediately.
+      val canPost = !needWriteBack || (bramFree && !writeBackBuffer.valid)
+      when(canPost) {
         when(needWriteBack) {
           writeBackBuffer.valid := true.B
           // {tag, setIndex, blockOffset}. The (tagSize-1,0) slice drops the 4
           // flag bits so only the true tag is placed in the address.
-          writeBackBuffer.address := Cat(flushTagChunks(flushWay)(tagSize - 1, 0), flushSet, 0.U(log2Ceil(lineSize).W))
-          writeBackBuffer.data := dataBRAMVec(flushWay).rdData
+          writeBackBuffer.address := Cat(tagChunk(tagSize - 1, 0), flushSet, 0.U(log2Ceil(lineSize).W))
+          writeBackBuffer.data := flushDataReg(flushWay)
         }
         when(lastWay) {
           flushWay := 0.U
@@ -667,9 +703,10 @@ class cacheLookupUnit extends Module{
     }
   }
 
-  // Drive BRAM read address during flush (last-connect priority over the normal
-  // request path, which is gated off via request.ready while flushing)
-  when(flushActive) {
+  // Drive the BRAM read address for the walker ONLY on a free cycle and only
+  // while it is reading a set (sFlushRead). Last-connect, so on a busy cycle the
+  // normal request path (which drove rdAddr above) wins and the walker waits.
+  when(flushState === sFlushRead && bramFree) {
     tagBRAM.rdAddr := flushSet
     dataBRAMVec.foreach { bram => bram.rdAddr := flushSet }
   }

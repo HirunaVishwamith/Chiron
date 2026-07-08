@@ -855,7 +855,13 @@ class core (
   memAccess.initiateFence := rob.commit.fired && rob.commit.is_fence
   // fence.i is the MISC-MEM opcode with funct3=001; only it needs the D-cache
   // clean-on-fence walker (plain `fence`, funct3=000, just drains).
-  memAccess.initiateFenceI := rob.commit.fired && rob.commit.is_fence && (rob.commit.instruction(14,12) === "b001".U)
+  // fence.i is the MISC-MEM opcode with funct3=001; only it needs the D-cache
+  // clean-on-fence walker (plain `fence`, funct3=000, just drains). The walker
+  // can be compiled out (configuration.disableFenceIWalker) for the Linux model,
+  // where bbl's large fence.i otherwise deadlocks the coherent writeback path.
+  memAccess.initiateFenceI :=
+    (if (configuration.disableFenceIWalker) false.B
+     else rob.commit.fired && rob.commit.is_fence && (rob.commit.instruction(14,12) === "b001".U))
   // When a fence is fired from fetch unit, it expects it to be executed
   // Accounting when fence belongs to a mispredicted path
   val noFence :: fenceFromFetch :: fenceFromDecode :: Nil = Enum(3)

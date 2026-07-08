@@ -16,6 +16,13 @@ object configuration {
   val branchPC_depth = 4
 
 
+  // Build knob: when true, the fence.i clean-on-fence D-cache walker is
+  // disabled (fence.i behaves as a plain drain). The walker is required for the
+  // rv64ui-p-fence_i ISA test but hard-deadlocks bbl's large fence.i during
+  // Linux SMP boot (walker vs coherency-snoop contend for the D-cache writeback
+  // buffer). Default false (walker on) for the CI/benchmark model; the Linux
+  // model (make sim-linux / linux-sim) patches this to true so Linux can boot.
+  val disableFenceIWalker = false
   val instrIssueDepth = 8
   val robAddrWidth = 4
   val prfAddrWidth = 6
