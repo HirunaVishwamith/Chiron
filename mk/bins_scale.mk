@@ -5,25 +5,35 @@
 # no header dependency tracking, so a stale .o from a different scale would
 # not otherwise get invalidated), then copy the result into bins/.
 #
-# crt.S now hardcodes NUM_CORES=4 (every hart always participates), so the
-# single-core-labeled and quad-core-labeled builds differ only in which
-# harness verifies them (lockstep vs profile_quad) and in bin naming --
-# passing -DNUM_CORES=4 for the "-q4" family is kept for clarity even though
-# it matches crt.S's own default.
+# crt.S bakes `li a1, NUM_CORES` (the hart count handed to thread_entry), so the
+# core count MUST match the harness that runs the bin: the single-core family is
+# verified by the single-core lockstep harness and therefore must be built with
+# NUM_CORES=1 (otherwise core 0 computes only 1/Nth of the work and then spins
+# forever on an N-way barrier -> register mismatch + timeout). The "-q4" family
+# is verified by the 4-core profile_quad harness and is built with NUM_CORES=4.
+# crt.S #ifndef-guards its own default, so the -D injected here always wins.
 #
-# Usage:  make bins-scale       -> bins/<dir>-sN.bin      (lockstep-verified family)
-#         make bins-scale-q4    -> bins/<dir>-sN-q4.bin   (profile_quad-verified family)
+# Usage:  make bins-scale       -> bins/<dir>-sN.bin      (single-core, NUM_CORES=1)
+#         make bins-scale-q4    -> bins/<dir>-sN-q4.bin   (quad-core,   NUM_CORES=4)
 #         make bins-scale-all   -> both
 
-# NUM_CORES defaults to 4 (defined in mk/bins_quad.mk); override on the command
-# line, e.g.  make bins-scale NUM_CORES=1   or   make bins-scale-q4 NUM_CORES=8 .
-# Both the single-core (bins-scale) and quad (bins-scale-q4) commands bake the
-# chosen count into the benchmark via the compiler; crt.S #ifndef-guards its
-# own default so this -D wins.
-SCALE_GCC_OPTS := -mcmodel=medany -static -std=gnu99 -O2 -fno-common \
+# Per-family default core count. Override BOTH families explicitly from the
+# command line with e.g.  make bins-scale NUM_CORES=2 .  When NUM_CORES is NOT
+# given on the command line, the single family builds for 1 core and the quad
+# family for 4 (the counts their respective harnesses actually run).
+ifeq ($(origin NUM_CORES),command line)
+  SCALE_NC_SINGLE := $(NUM_CORES)
+  SCALE_NC_QUAD   := $(NUM_CORES)
+else
+  SCALE_NC_SINGLE := 1
+  SCALE_NC_QUAD   := 4
+endif
+
+SCALE_GCC_OPTS_BASE := -mcmodel=medany -static -std=gnu99 -O2 -fno-common \
                    -fno-builtin-printf -fno-tree-loop-distribute-patterns \
-                   -march=rv64ima_zicsr -mabi=lp64 -DNUM_CORES=$(NUM_CORES)
-SCALE_GCC_OPTS_Q4 := $(SCALE_GCC_OPTS)
+                   -march=rv64ima_zicsr -mabi=lp64
+SCALE_GCC_OPTS    := $(SCALE_GCC_OPTS_BASE) -DNUM_CORES=$(SCALE_NC_SINGLE)
+SCALE_GCC_OPTS_Q4 := $(SCALE_GCC_OPTS_BASE) -DNUM_CORES=$(SCALE_NC_QUAD)
 
 # name:dir:maxscale -- matmul has no s4/s5 dataset, capped at s3.
 SCALE_FAMILIES := vvadd:mt-vvadd:5 matmul:mt-matmul:3 filter:mt-mask-sfilter:5 \
