@@ -28,8 +28,15 @@
 #define CAUSE_FETCH_ACCESS          0x1
 #define CAUSE_LOAD_ACCESS           0x5
 
-#define FIFO_ADDR_TX 0x40600004
-#define FIFO_ADDR_RX 0x40600000
+// Xilinx AXI UART Lite register map (matches the kernel's drivers/tty/serial/
+// uartlite.c). RX char @ +0x0, TX char @ +0x4, STATUS @ +0x8.
+#define FIFO_ADDR_RX     0x40600000   // ULITE_RX     (read a received byte)
+#define FIFO_ADDR_TX     0x40600004   // ULITE_TX     (write a byte to transmit)
+#define FIFO_ADDR_STATUS 0x40600008   // ULITE_STATUS (RX/TX FIFO flags)
+
+// uartlite STATUS bits the driver polls.
+#define ULITE_STATUS_RXVALID 0x01     // a byte is waiting in the RX FIFO
+#define ULITE_STATUS_TXEMPTY 0x04     // TX FIFO is empty (always true for us)
 
 #define CLINT_BASE 0x2000000
 #define CLINT_SIZE 0x00c0000

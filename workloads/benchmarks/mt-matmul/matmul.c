@@ -9,7 +9,7 @@
 //--------------------------------------------------------------------------
 
 
-#include "dataset.h"
+#include "active.h"
 
 
 void __attribute__((noinline)) matmul(const int coreid, const int ncores, const int lda,  const data_t A[], const data_t B[], data_t C[] )

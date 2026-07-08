@@ -20,14 +20,16 @@
 #include "encoding.h"
 
 
+// Number of harts that participate. Overridable from the compiler with
+// -DNUM_CORES=N (see mk/bins_quad.mk / mk/bins_scale.mk); defaults to 4.
 #ifndef NUM_CORES
-#define NUM_CORES 1 // Override via -DNUM_CORES=N on the compiler command line.
+#define NUM_CORES 4
 #endif
 //#  define DATA_BASE 0x10040000
  #define DATA_BASE 0x80040000
 # define STACK_SIZE (1<<17)
 # define TLS_SIZE   (1<<17)
-#define REGION_SHIFT 18 // (STACK_SIZE + TLS_SIZE) 
+#define REGION_SHIFT 18 // (STACK_SIZE + TLS_SIZE)
 #define UART_BASE 0x40600004
 // #define UART_BASE 0xe0001030
 

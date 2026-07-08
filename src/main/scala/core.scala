@@ -723,7 +723,6 @@ class core (
   //memAccess.coherentLoadMiss.modify := coherentLoadInvalid
   //
 
-
   decode.writeAddrPRF.exec1Addr := scheduler.instrRetired.prfAddr
   decode.writeAddrPRF.exec1Valid := scheduler.instrRetired.valid
   decode.writeAddrPRF.exec2Addr := memAccess.responseOut.prfDest
@@ -739,6 +738,13 @@ class core (
   rob.branch.pass := branchEvals.passed
   rob.branch.robAddr := branchEvals.robAddr
   rob.branch.valid := branchEvals.valid
+  //A coherent squash kills everything including the ROB head; qualified the
+  //same way the modify path fires (valid after all overrides, passed forced 0)
+  // Must use the registered signal: coherentLoadInvalid and branchEvals.valid
+  // are never high together (the squash broadcast asserts modify, which drops
+  // deq.valid and thus commit.ready). coherentLoadInvalidReg lands exactly on
+  // the broadcast cycle, where flushAll overrides modify's ambiguous rollback.
+  rob.flushAll := coherentLoadInvalidReg
 
   scheduler.memoryReady := memAccess.canAllocate
   scheduler.multuplyAndDivideReady := mExtensionReady
@@ -757,7 +763,7 @@ class core (
   .zip(Seq(
     singleCycleArithmeticResponse.valid,
     branchEvals.valid,
-    memAccess.responseOut.valid,
+    memAccess.responseOut.valid, // for reads
     extnMResponse.valid
   ))
   .zip(rob.execPorts)
@@ -987,6 +993,9 @@ class core (
   core_sample1 := decode.fromFetch.expected.pc(30)
   
   val MTIP = IO(Input(Bool()))
+  // Machine software interrupt pending (CLINT msip for this hart) — used for SMP
+  // cross-hart IPIs. Handled by the same inject FSM as MTIP (see below).
+  val MSIP = IO(Input(Bool()))
   /**
     * Implementing timer interrupts
     * Where do we insert the timer interrupts. when,
@@ -1059,15 +1068,30 @@ class core (
   when(decode.fromFetch.fired) { lastRetiredSystem := fetch.toDecode.instruction(6, 0) === "b1110011".U }
   val waitForMTIP :: waitToInjectInterr :: flushSpeculated :: waitToCommitBranch :: Nil = Enum(4)
   val interruptInjectStatus = RegInit(waitForMTIP)
+  // Timer (MTIP) and software (MSIP, IPI) interrupt requests, each gated by its
+  // own enable. RISC-V priority is software (MSI) over timer (MTI); we latch
+  // which kind is being injected so decode reports the right mcause (3 vs 7).
+  val timerIntReq = decode.canTakeInterrupt && MTIP
+  val softIntReq  = decode.canTakeSoftInterrupt && MSIP
+  val injectingSoftwareInterrupt = RegInit(false.B)
+  decode.softwareInterruptInject := injectingSoftwareInterrupt
+  // Feed the CLINT lines into the mip CSR (read-only MTIP/MSIP bits).
+  decode.mtipLine := MTIP
+  decode.msipLine := MSIP
+  // Once injection has started, keep going based on whichever enable applies.
+  val intInjectEnabled = Mux(injectingSoftwareInterrupt, decode.canTakeSoftInterrupt, decode.canTakeInterrupt)
   switch(interruptInjectStatus) {
     is(waitForMTIP) {
       // Some system instructions enable/disable MTIP its pain to account for this in our verification method
       // Writing this few lines of code is easier (However this is technical debt!)
-      when(decode.canTakeInterrupt && MTIP && !lastRetiredSystem) { interruptInjectStatus := waitToInjectInterr }
+      when((timerIntReq || softIntReq) && !lastRetiredSystem) {
+        interruptInjectStatus := waitToInjectInterr
+        injectingSoftwareInterrupt := softIntReq   // MSI has priority over MTI
+      }
     }
     is(waitToInjectInterr) {
       // branchEvals.valid asserted is hard to control so we avoid it
-			when (decode.canTakeInterrupt) {
+			when (intInjectEnabled) {
 				when(!branchEvals.valid) {
 					when(branchCounter.orR) {
 						when(branchInstruction.valid && branchInstruction.instruction(6, 0) === "b1100011".U) {
@@ -1107,6 +1131,7 @@ class core (
     fetch.toDecode.fired := false.B
     decode.fromFetch.fired := false.B
   }
+
 }
 
 
@@ -1133,12 +1158,14 @@ class soc extends Module {
   core0.dPort <> io.core0_dPort
   core0.peripheral <> io.core0_peripheral
   core0.MTIP := io.core0_MTIP
+  core0.MSIP := false.B   // this 2-core soc variant has no CLINT IPI wiring yet
 
   // Connect core1 signals to SoC IO
   core1.iPort <> io.core1_iPort
   core1.dPort <> io.core1_dPort
   core1.peripheral <> io.core1_peripheral
   core1.MTIP := io.core1_MTIP
+  core1.MSIP := false.B
 
 
 }
@@ -1174,12 +1201,14 @@ class soc extends Module {
   core0.dPort <> io.core0_dPort
   core0.peripheral <> io.core0_peripheral
   core0.MTIP := io.core0_MTIP
+  core0.MSIP := false.B   // this 2-core soc variant has no CLINT IPI wiring yet
 
   // Connect core1 signals to SoC IO
   core1.iPort <> io.core1_iPort
   core1.dPort <> io.core1_dPort
   core1.peripheral <> io.core1_peripheral
   core1.MTIP := io.core1_MTIP
+  core1.MSIP := false.B
 
 
 }

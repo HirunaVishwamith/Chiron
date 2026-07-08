@@ -176,6 +176,8 @@ class CacheModule (
       loadCommit.valid := true.B
     }
   }
+        loadCommit.valid := true.B
+        loadCommit.state := true.B
 
 
 

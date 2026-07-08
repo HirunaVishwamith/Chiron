@@ -1,5 +1,9 @@
 # ── Harness binaries (compiled into $(BUILD)) ────────────────────────────────
-EMU_HDRS := $(EMU)/emulator.h $(EMU)/constants.h
+# All emulator headers/fragments emulator.h pulls in, so any change to the
+# golden model (hart.h, the hart_*.inc fragments, terminal.h, …) forces a
+# rebuild of the harnesses that embed it.
+EMU_HDRS := $(EMU)/emulator.h $(EMU)/constants.h $(EMU)/hart.h \
+            $(wildcard $(EMU)/hart_*.inc) $(EMU)/terminal.h $(EMU)/clint.h
 SIM_HDR  := $(SIM)/rtl_model.h
 
 $(BUILD)/lockstep.out: $(HARNESS)/lockstep.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
@@ -11,6 +15,30 @@ $(BUILD)/lockstep_isa.out: $(HARNESS)/lockstep_isa.cpp $(EMU_HDRS) $(SIM_HDR) $(
 $(BUILD)/lockstep_linux.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_TRACE) $(HARNESS)/lockstep_linux.cpp $(VSYS_LIB) -o $@
 
+# RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
+# its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
+# (CXX_FAST sets -DCHIRON_NO_TRACE so rtl_model.h's tb->trace() compiles out) for
+# the long Linux boot; STEP_TIMEOUT=500000 so boot/cache stalls aren't hangs. The
+# image is loaded by a direct memcpy into the Verilated DRAM (see rtl_model.h),
+# so there is no slow per-word programmer phase.
+$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
+
+# Same boot, but watches for the known timekeeping-seqlock SMP wedge (see the
+# file's own comment) and captures a bounded VCD right around the point it
+# sets in, instead of either tracing from cycle 0 (far too slow/large) or not
+# at all. Needs the TRACE-capable model (VCD dumping is unavailable on the
+# fast no-trace build), so it is undumped-but-not-optimized-away until triggered.
+$(BUILD)/linux_sim_trace.out: $(HARNESS)/linux_sim_trace.cpp $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
+	$(CXX_TRACE) $(HARNESS)/linux_sim_trace.cpp $(VSYS_LIB) -o $@
+
+# Same wedge-capture idea as linux_sim_trace.out, but for the mt-seqlock
+# microbenchmark (see workloads/benchmarks/mt-seqlock/) instead of a full
+# Linux boot: any hart's PC frozen for --threshold cycles is by construction
+# a wedge (no legitimate loop in that benchmark sits still that long).
+$(BUILD)/seqlock_wedge_trace.out: $(HARNESS)/seqlock_wedge_trace.cpp $(VSYS_LIB) | $(BUILD)
+	$(CXX_TRACE) $(HARNESS)/seqlock_wedge_trace.cpp $(VSYS_LIB) -o $@
+
 $(BUILD)/profile.out: $(HARNESS)/profile.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_NOTRACE) $(HARNESS)/profile.cpp $(VSYS_LIB) -o $@
 
@@ -20,10 +48,13 @@ $(BUILD)/fire.out: $(HARNESS)/fire.cpp $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 $(BUILD)/profile_quad.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(VSYS_LIB) | $(BUILD)
 	$(CXX_NOTRACE) $(HARNESS)/profile_quad.cpp $(VSYS_LIB) -o $@
 
-# Golden-model emulator, standalone (no RTL). Needs -DLOCKSTEP for the
-# hart_set_interrupts overload; reads its image path from argv[1].
-$(BUILD)/emu.out: $(EMU)/emulator_linux.cpp $(EMU)/emulator.h | $(BUILD)
-	g++ -O2 -DLOCKSTEP -I $(EMU) -o $@ $(EMU)/emulator_linux.cpp
+# Golden-model emulator, standalone (no RTL). Built WITHOUT -DLOCKSTEP so it
+# uses the real timer path (fires only when mtime>=mtimecmp) and reads console
+# input from stdin — both required to boot Linux. (The lock-step harnesses keep
+# -DLOCKSTEP, which force-fires a timer interrupt every step for RTL sync.)
+# Reads its image path from argv[1].
+$(BUILD)/emu.out: $(EMU)/emulator_linux.cpp $(EMU_HDRS) | $(BUILD)
+	g++ -O2 -I $(EMU) -o $@ $(EMU)/emulator_linux.cpp
 
 # ── Runtime flag helpers ──────────────────────────────────────────────────────
 # Expand to the appropriate CLI flag when the user passes SHOW_STATE=1 or
@@ -34,7 +65,7 @@ _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(ISA_DIR)/images
 
-.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux demo
+.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-emu-check linux-sim linux-lockstep demo
 
 emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
 	$(BUILD)/emu.out $(BIN)
@@ -91,10 +122,73 @@ test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks
 	  echo "$$fam-q4: PASS"; \
 	done
 
+# Fast (no-trace) profile_quad -- much quicker on the large s5 datasets than the
+# traced model. Requires the fast RTL model (make sim-fast).
+$(BUILD)/profile_quad_fast.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) -I $(SIM) $(HARNESS)/profile_quad.cpp $(VSYS_LIB_FAST) -o $@
+
+# ── CI benchmark gate ─────────────────────────────────────────────────────────
+# The five max-scale quad-core benchmarks that must ALL reach BENCHMARK COMPLETE
+# for CI to pass. Runs the committed -q4 scale bins on the fast no-trace model.
+# "BENCHMARK COMPLETE" (not "Simulation cycles", which prints on TIMEOUT too) is
+# the success marker.
+ci-bench: $(BUILD)/profile_quad_fast.out   ## CI gate: 5 max-scale q4 benchmarks must all complete
+	@fail=0; \
+	run() { \
+	  echo "== CI bench: $$1 =="; \
+	  if timeout 1500 $(BUILD)/profile_quad_fast.out --image $(BINS)/$$2 --name $$1 $$3 \
+	       --timeout 120000000 2>&1 | grep -q 'BENCHMARK COMPLETE'; \
+	  then echo "$$1: PASS"; else echo "$$1: FAIL"; fail=1; fi; }; \
+	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
+	run matmul-s3-q4 mt-matmul-s3-q4.bin       "$(matmul_DONE)"; \
+	run filter-s5-q4 mt-mask-sfilter-s5-q4.bin "$(filter_DONE)"; \
+	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
+	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"; \
+	if [ $$fail -eq 0 ]; then echo "ci-bench: ALL 5 PASS"; else echo "ci-bench: FAILURES"; exit 1; fi
+
 test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 
-linux: $(BUILD)/lockstep_linux.out   ## Linux-boot lock-step (dtb/bootrom harness)
-	$(BUILD)/lockstep_linux.out --image $(BIN)
+# ── Linux image build (Multicore_Linux_Image/ submodule) ──────────────────────
+IMG_DIR := Multicore_Linux_Image
+
+.PHONY: patch linux-toolchain linux-image-s1 linux-image-q4 linux-images
+
+patch:   ## Update linux/buildroot/riscv-pk submodules + stage chiron patches
+	cd $(IMG_DIR) && ./submodule_update && ./apply_configs_and_patches
+
+linux-toolchain:   ## Build the buildroot cross toolchain + rootfs (slow, once)
+	$(MAKE) -C $(IMG_DIR)/buildroot -j$(shell nproc)
+
+linux-image-s1: patch   ## Build bins/linux-s1.bin (single-core nommu Linux)
+	cd $(IMG_DIR) && RISCV="$$PWD/buildroot/output/host" ./build_image.sh s1 ../$(BINS)
+
+linux-image-q4: patch   ## Build bins/linux-q4.bin (quad-core SMP Linux)
+	cd $(IMG_DIR) && RISCV="$$PWD/buildroot/output/host" ./build_image.sh q4 ../$(BINS)
+
+linux-images: linux-image-s1 linux-image-q4   ## Build both Linux images
+
+# ── Linux boot (nommu RISC-V image, see Multicore_Linux_Image/) ───────────────
+# LINUX_IMAGE selects the bbl.bin to run; override on the command line, e.g.
+#   make linux-emu LINUX_IMAGE=bins/linux-q4.bin
+LINUX_IMAGE ?= $(BINS)/linux-q4.bin
+
+linux-emu: $(BUILD)/emu.out          ## Interactive Linux shell on the golden model (fast)
+	@echo "== interactive golden-model boot: $(LINUX_IMAGE) =="
+	@echo "   (boots to 'buildroot login:' in seconds — type at the prompt; Ctrl-C to quit)"
+	$(BUILD)/emu.out $(LINUX_IMAGE)
+
+linux-emu-check: $(BUILD)/emu.out    ## Non-interactive boot-to-login check (CI)
+	@scripts/run_linux.sh emu $(LINUX_IMAGE) $(if $(TIMEOUT),$(TIMEOUT),300)
+
+linux-sim: $(BUILD)/linux_sim.out    ## Boot LINUX_IMAGE on the RTL core (live console, no dump)
+	@echo "== RTL boot: $(LINUX_IMAGE) (Verilator ~thousands of cyc/s; no input) =="
+	$(BUILD)/linux_sim.out $(LINUX_IMAGE) $(DATA)/qemu.dtb $(DATA)/boot.bin
+
+linux-lockstep: $(BUILD)/lockstep_linux.out  ## Bounded RTL lock-step of LINUX_IMAGE (debug; slow)
+	@scripts/run_linux.sh lockstep $(LINUX_IMAGE) $(if $(TIMEOUT),$(TIMEOUT),180)
+
+# Back-compat alias: the old `linux` target now runs the golden-model boot.
+linux: linux-emu                     ## Alias for linux-emu
 
 demo: $(BUILD)/lockstep.out          ## Image-processing demo (mt-image.bin)
 	$(BUILD)/lockstep.out --image $(BINS)/mt-image.bin --logdir $(BUILD)

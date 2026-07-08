@@ -106,6 +106,12 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
   fifo.modifyVal := branch.robAddr
   results.modify := branch.valid & !branch.pass
   results.modifyVal := branch.robAddr
+
+  // Coherent-load squash flushes the whole ROB (the invalidated load at the
+  // head is refetched); see robFifo.flushAll for why modify alone cannot.
+  val flushAll = IO(Input(Bool()))
+  fifo.flushAll := flushAll
+  results.flushAll := flushAll
   results.writeports(numWritePorts).valid := branch.valid
   results.writeports(numWritePorts).addr := branch.robAddr
   results.writeports(numWritePorts).data := Cat(0.U(129.W),1.U)

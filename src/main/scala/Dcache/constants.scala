@@ -41,5 +41,14 @@ object constants{
   val arbiterReqTypesWidth : Int = 2
 
   val DRAM_BASE = "h80000000"
-  val DRAM_RANGE = "h7fffffff"
+  // Must match the real DRAM backing (mainMemory is 2^28 bytes = 256 MB).
+  // Addresses the D-cache classifies as main memory alias modulo this size in
+  // mainMemory, so an oversized range silently maps MMIO onto the image: with
+  // the old h7fffffff (2 GB), bbl's Zynq PS-UART console at 0xE000_002C/30
+  // (machine/mtrap.c mcall_console_putchar) read image bytes instead of the
+  // uartPort — its TXFULL poll saw bit 4 stuck high and wedged Linux boot
+  // before the first kernel byte. Everything outside [DRAM_BASE,
+  // DRAM_BASE+DRAM_RANGE] routes to the peripheral port, which already decodes
+  // the PS-UART registers.
+  val DRAM_RANGE = "h0fffffff"
 }

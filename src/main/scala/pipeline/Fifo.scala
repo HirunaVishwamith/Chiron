@@ -120,7 +120,19 @@ class robFifo[T <: Data ]( gen: T, depth: Int) extends Fifo(gen:
   io.deq.bits := memReg(readPtr)
   io.enq.ready := (!fullReg | (io.deq.valid & io.deq.ready)) & !modify
   io.deq.valid := !emptyReg & !modify
-  //printf(p"$io\n")
+
+  // Coherent-load squash: the rollback target is commit.robAddr-1, which the
+  // modify block above cannot represent — nextval === readPtr is ambiguous
+  // between "keep nothing" (this case) and "keep everything" (full FIFO
+  // rolling back to its newest slot), and resolving it as full leaves the
+  // stale head presenting at commit forever while blocking all allocation.
+  // An explicit flush empties the FIFO with last-connect priority.
+  val flushAll = IO(Input(Bool()))
+  when(flushAll) {
+    writeReg := readReg
+    fullReg := false.B
+    emptyReg := true.B
+  }
 }
 
 class robResultsFifo[T <: Data ]( gen: T, depth: Int, numWritePorts: Int) extends robFifo(gen: T, depth: Int){

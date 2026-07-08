@@ -20,6 +20,7 @@
 using namespace std;
 
 #include "terminal.h"
+#include "clint.h"
 /**
  * Main hart class, the following functions are defined.
  *
@@ -84,6 +85,10 @@ private:
   bool amo_reserve_valid64 = false;
   uint64_t amo_reserve_addr = 0;
   uint64_t amo_reserve_addr64 = 0;
+  uint64_t amo_reserve_gen = 0;  // snapshot of global_store_gen at time of LR for this hart
+  bool smp_released = false;     // for non-0 harts: set true on first MSIP release; stay runnable after that
+  bool in_wfi = false;           // true while hart is waiting in WFI for an interrupt (used for secondary parking)
+  uint32_t post_kick_protect = 0; // steps after kick during which we skip MSIP takes (to let bringup code run cleanly)
 
   uint64_t wb_data = 0;
 
@@ -99,6 +104,19 @@ private:
 
   uint64_t csr_data = 0;
   bool csr_bool = false;
+
+  // One-byte uartlite RX holding register. -1 = empty. STATUS reports RXVALID
+  // only when this holds a real byte actually read from stdin, so a consumer
+  // that loops "while RXVALID" (e.g. the kernel's RX poll) always terminates.
+  // Shared across harts (static): there is one physical console, and which
+  // hart's guest code happens to poll STATUS is scheduler-dependent, not
+  // necessarily the hart the blocked getty read() runs on. A per-hart copy
+  // lets one hart silently consume a byte another hart can never see,
+  // hanging login forever.
+  static int uart_rx_byte;
+
+  // Shared across harts for lr/sc correctness: store generation counter. Any DRAM store bumps it; hart records snapshot at LR.
+  static uint64_t global_store_gen;
 
   uint64_t itr = 0;
 
@@ -131,8 +149,8 @@ private:
   struct timeval tv;
   uint64_t time_in_micros;
 
-  uint64_t &mtime;
-  uint64_t &mtimecmp;
+  // CLINT is the source of truth for mtime, per-hart mtimecmp and msip (IPI)
+  CLINT &clint;
 
 
   // ── CSR file: control/status registers (csr_read / csr_write) ──────────
@@ -150,15 +168,13 @@ private:
 public:
 
   //Constructor
-  hart(vector<uint64_t> &memory):mtime(memory.at(MTIME_ADDR / 8)),mtimecmp(memory.at(MTIMECMP_ADDR / 8))
+  hart(vector<uint64_t> &memory, CLINT &clint_ref) : clint(clint_ref)
   {
-      // memory.at(MTIME_ADDR / 8) = 0;
-      // memory.at(MTIMECMP_ADDR / 8) = -1;
-
       // PC = DRAM_BASE;
       // PC_phy = 0;
       // instruction = 0;
   }
+
   // uint64_t get_semphore_status() { return (((amo_reserve_addr64&0x00000000FFFFFFF8UL) | amo_reserve_valid64) << 32) | ((amo_reserve_addr&0x00000000FFFFFFFCUL) | amo_reserve_valid); }
   uint64_t get_mstatus() { return mstatus.read_reg(); }
 
@@ -207,14 +223,13 @@ public:
    */
   void hart_init(vector<uint64_t> &memory,uint8_t hid)
   {
-    memory.at(MTIME_ADDR / 8) = 0;
-    memory.at(MTIMECMP_ADDR / 8) = -1;
-
     PC = DRAM_BASE;
     PC_phy = 0;
     instruction = 0;
     mhartid = static_cast<uint64_t>(hid);
-
+    smp_released = (hid == 0);
+    in_wfi = false;
+    post_kick_protect = 0;
   }
 
 
@@ -224,6 +239,12 @@ public:
    */
   __uint64_t hart_fetch_instruction(__uint64_t PC,vector<uint64_t> &memory)
   {
+    if (PC < DRAM_BASE || PC >= (DRAM_BASE + 0x09000000ULL)) {
+      // Bogus PC: tolerate by nop-skip to keep simulation alive (model limitation)
+      PC += 4;
+      return 0;
+    }
+
     PC_phy = PC - DRAM_BASE;
 
     if (PC % 4 == 0)
@@ -246,7 +267,12 @@ public:
    */
   void hart_set_interrupts()
   {
-    mip.MTIP = (mtime >= mtimecmp);
+    // Drive live interrupt lines from CLINT (per-hart).  Actual machine interrupt
+    // injection (MSIP/MTIP) is now performed at the top of hart_step for correct
+    // boundary + mepc semantics.  Here we only refresh mip and drain synchronous
+    // exception flags set by the previous step.
+    mip.MTIP = clint.check_timer_interrupt((uint32_t)mhartid) ? 1 : 0;
+    mip.MSIP = clint.check_software_interrupt((uint32_t)mhartid) ? 1 : 0;
 
     if (signed_value(PC) < 0)
     {
@@ -257,18 +283,6 @@ public:
     {
       LD_ACC_FAULT = false;
       PC = excep_function(PC, CAUSE_LOAD_ACCESS, CAUSE_LOAD_ACCESS, CAUSE_LOAD_ACCESS, cp);
-    }
-    else if (mie.MEIE && mip.MEIP)
-    {
-      PC = interrupt_function(PC, CAUSE_MACHINE_EXT_INT, cp);
-    }
-    else if (mie.MSIE & mip.MSIP)
-    {
-      PC = interrupt_function(PC, CAUSE_MACHINE_SOFT_INT, cp);
-    }
-    else if (mie.MTIE && mip.MTIP)
-    {
-      PC = interrupt_function(PC, CAUSE_MACHINE_TIMER_INT, cp);
     }
     else if (mie.UEIE & mip.UEIP)
     {
@@ -340,3 +354,6 @@ public:
   // ── Instruction step: fetch → decode → execute → writeback ────────────
 #include "hart_execute.inc"
 };
+
+uint64_t hart::global_store_gen = 1;
+int hart::uart_rx_byte = -1;

@@ -20,6 +20,7 @@ include mk/benchmarks.mk
 include mk/rtl.mk
 include mk/bins.mk
 include mk/bins_quad.mk
+include mk/bins_scale.mk
 include mk/run.mk
 
 .DEFAULT_GOAL := help
@@ -35,7 +36,7 @@ help:   ## Show this help
 .PHONY: clean distclean
 clean:   ## Remove generated artifacts (build/, obj_dir, logs)
 	rm -rf $(BUILD)
-	rm -rf $(SIM)/obj_dir
+	rm -rf $(SIM)/obj_dir $(SIM)/obj_dir_fast
 	rm -f  $(SIM)/system.v $(SIM)/iCacheRegisters.v
 	rm -f  run.log states.log regs.log test_results.txt system_trace.vcd
 	rm -f  system.v system.fir system.anno.json .stamp.*
@@ -44,6 +45,13 @@ distclean: clean   ## clean + drop the sbt/Verilator build trees
 	rm -rf target project/target project/project
 	$(TOOLPATH) $(MAKE) -C $(DEMO_SRC) clean  2>/dev/null || true
 	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) clean 2>/dev/null || true
+
+.PHONY: vivado program
+vivado: fpga-verilog   ## Build the Kintex-7 Vivado project + bitstream (see fpga/)
+	$(MAKE) -C fpga vivado
+
+program:   ## JTAG-program the FPGA's configuration memory (never flash)
+	$(MAKE) -C fpga program
 
 .PHONY: fix-inotify
 fix-inotify:   ## Raise inotify limit if sbt hangs on file watches

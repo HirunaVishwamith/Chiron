@@ -163,7 +163,12 @@ int main(int argc, char *argv[]) {
         }
 
         // ISA test exit (a7/x17 == 93): gp/x3 == 1 → pass, else fail.
-        IsaResult isa = isa_test_status(tb->registersOut0_3, tb->registersOut0_17);
+        // Only meaningful when no done-pc spec is active: benchmarks use a7
+        // as a scratch register, so a transient a7==93 mid-kernel would be
+        // misread as an ISA exit (filter-q4 hits exactly that).
+        IsaResult isa = completion.active()
+                            ? IsaResult::Running
+                            : isa_test_status(tb->registersOut0_3, tb->registersOut0_17);
         if (isa == IsaResult::Pass) {
             printf("\n[profile_run] ISA TEST PASSED (gp=1, a7=93) at PC=0x%016llx\n",
                    (unsigned long long)pc);

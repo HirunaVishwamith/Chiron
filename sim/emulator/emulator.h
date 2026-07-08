@@ -6,17 +6,23 @@
 #include <vector>
 #include <iostream>
 #include "hart.h"
+#include "clint.h"
 
 class emulator
 {
 private:
   std::vector<uint64_t> memory = std::vector<uint64_t>(1 << MEM_SIZE);
+  CLINT clint;
   std::vector<hart> harts;
 
 
 public:
-  emulator() : harts(NUM_HARTS, memory)
+  emulator() : clint(NUM_HARTS), harts()
   {
+    // Construct harts with reference to the shared CLINT (per-hart mtimecmp/msip)
+    for (uint8_t i = 0; i < NUM_HARTS; i++) {
+      harts.emplace_back(memory, clint);
+    }
     for (uint8_t i = 0; i < NUM_HARTS; i++)
       harts[i].hart_init(memory, i);
   }
@@ -52,21 +58,49 @@ public:
 
   void step()
   {
+    clint.advance();
     for (auto &r : harts)
       r.hart_step(memory);
   }
 
   void step(int i){
+    clint.advance();
     harts[i].hart_step(memory);
   }
 
   void set_interrupts(int i){
+    // CLINT mtime/msip already updated by advance(); just refresh per-hart view
+#ifdef LOCKSTEP
     harts[i].hart_set_interrupts(memory);
+#else
+    harts[i].hart_set_interrupts();
+#endif
   }
 
   void set_interrupts(){
+    clint.advance();
     for (auto &r : harts)
+#ifdef LOCKSTEP
       r.hart_set_interrupts(memory);
+#else
+      r.hart_set_interrupts();
+#endif
+  }
+
+  // Fine-grained control for better IPI/timer causality in the Linux golden run.
+  // tick_only + per-hart step + deliver after each makes MSIP writes from one
+  // hart visible to the target's top-of-step check with very low latency.
+  // Uses advance() (step-driven mtime), not tick() (wall-clock) -- see the
+  // comment on CLINT::advance() for why wall-clock mtime livelocks Linux SMP
+  // boot in an interpretive multi-hart emulator.
+  void tick_only() { clint.advance(); }
+  void step_hart_only(int i) { harts[i].hart_step(memory); }
+  void deliver_interrupts() {
+#ifdef LOCKSTEP
+    for (auto &r : harts) r.hart_set_interrupts(memory);
+#else
+    for (auto &r : harts) r.hart_set_interrupts();
+#endif
   }
 
   void show_registers()

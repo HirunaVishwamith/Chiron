@@ -1,0 +1,3 @@
+[submodule "Multicore_Linux_Image"]
+	path = Multicore_Linux_Image
+	url = https://github.com/HirunaVishwamith/Multicore_Linux_Image.git

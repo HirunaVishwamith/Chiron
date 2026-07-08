@@ -20,9 +20,6 @@
 // #include <stdio.h>
 
 // UART base address
-// #define UART_TX 0xe0001030
-// #define UART_RX 0xe000102c
-
 #define UART_TX  0x40600004
 #define UART_STS 0x40600008
 #define UART_STS_TX_FULL (1 << 3)
@@ -39,6 +36,7 @@ static void uart_send_char(char c) {
 
   *uart_tx_reg = (uint32_t)c; // Assuming writing to this address sends the char
 }
+
 
 // Helper function to send a null-terminated string to UART
 void uart_send_string(const char *s) {

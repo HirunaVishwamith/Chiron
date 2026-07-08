@@ -7,11 +7,63 @@
   {
     reg_file[0] = 0;
 
+    // Park non-primary harts until first IPI (MSIP) release from primary (for correct SMP boot on both s1 and q4 images)
+    bool skip_initial_kick_take = false;
+    if (!smp_released) {
+      if (clint.check_software_interrupt((uint32_t)mhartid)) {
+        smp_released = true;
+        skip_initial_kick_take = true;  // the kick MSIP is a raw wake to start at entry PC, not a trap to handle
+        post_kick_protect = 200; // protect secondary bringup from MSIP takes for a while
+      } else {
+        // stay parked at current PC (usually entry); do not execute or advance
+        return;
+      }
+    }
 
-    gettimeofday(&tv, NULL);
-    time_in_micros = 1000000 * tv.tv_sec + tv.tv_usec;
-    mtime = (uint64_t)(time_in_micros * 10);
+    // Take any enabled pending MSIP/MTIP *before* fetch. This ensures an IPI sent
+    // after a core finishes its work (stop_machine, complete, migration, smpboot)
+    // is delivered at insn boundary with correct mepc, waking waiters promptly.
+    // Timers (MTIP) are never suppressed by PC range: every CPU must receive periodic
+    // timer ticks for timekeeping, scheduler, watchdog, and to make forward progress.
+    if (!skip_initial_kick_take) {
+      mip.MTIP = clint.check_timer_interrupt((uint32_t)mhartid) ? 1 : 0;
+      mip.MSIP = clint.check_software_interrupt((uint32_t)mhartid) ? 1 : 0;
+      if (mstatus.mie) {
+        if (mie.MSIE && mip.MSIP) {
+          if (post_kick_protect > 0) {
+            post_kick_protect--;
+          } else {
+            in_wfi = false;
+            amo_reserve_valid = false;
+            amo_reserve_valid64 = false;
+            PC = interrupt_function(PC, CAUSE_MACHINE_SOFT_INT, cp);
+            // fall through
+          }
+        } else if (mie.MTIE && mip.MTIP) {
+          in_wfi = false;
+          amo_reserve_valid = false;
+          amo_reserve_valid64 = false;
+          PC = interrupt_function(PC, CAUSE_MACHINE_TIMER_INT, cp);
+          // fall through
+        }
+      }
+    }
 
+    if (post_kick_protect > 0) post_kick_protect--;
+
+    // WFI handling: if we previously executed a WFI and no enabled interrupt is pending for us, stay parked.
+    if (in_wfi) {
+      bool irq_pending = false;
+      if (mie.MSIE && clint.check_software_interrupt((uint32_t)mhartid)) irq_pending = true;
+      else if (mie.MTIE && clint.check_timer_interrupt((uint32_t)mhartid)) irq_pending = true;
+      if (!irq_pending) {
+        return;  // remain in WFI, do not fetch/execute this step
+      }
+      in_wfi = false;
+      return;  // woke; skip post-WFI exec this step so set_interrupts can take trap if mstatus.mie now allows.
+    }
+
+    // mtime is advanced centrally by the shared CLINT (see emulator + CLINT::tick)
     instruction = hart_fetch_instruction(PC,memory);
 
 #ifndef LOCKSTEP
@@ -116,30 +168,24 @@
         }
         else
         {
-          if ((load_addr != FIFO_ADDR_RX) && ((load_addr != FIFO_ADDR_TX)))
+          if ((load_addr != FIFO_ADDR_RX) && (load_addr != FIFO_ADDR_TX) && (load_addr != FIFO_ADDR_STATUS))
           {
-            if ((load_addr >= DRAM_BASE) & (load_addr <= (DRAM_BASE + 0x9000000)))
+            if ((load_addr >= DRAM_BASE) & (load_addr <= (DRAM_BASE + 0x9000000ULL)))
             {
-              load_data = memory.at((load_addr - DRAM_BASE) / 8);
+              uint64_t idx = (load_addr - DRAM_BASE) / 8;
+              if (idx >= memory.size()) {
+                fprintf(stderr, "[hart%lu] BAD LOAD addr=0x%lx idx=%lu\n", (unsigned long)mhartid, (unsigned long)load_addr, (unsigned long)idx);
+                LD_ACC_FAULT = true;
+                load_data = 0;
+              } else {
+                load_data = memory.at(idx);
+              }
             }
             else
             {
               if ((load_addr >= CLINT_BASE) && (load_addr <= CLINT_BASE + CLINT_SIZE))
               {
-                uint64_t offset = load_addr - CLINT_BASE;
-                switch (offset)
-                {
-                case 0xbff8: // rtc time
-                  load_data = mtime;
-                  break;
-                case 0x4000: // timecmp
-                  load_data = mtimecmp;
-                  break;
-                default:
-                  load_data = 0;
-                  break;
-                }
-
+                load_data = clint.read(load_addr);
                 // printf("load_address: %016lx, data: %lu , core: %lu \n", load_addr, load_data , mhartid);
               }
               else
@@ -233,24 +279,38 @@
           }
           else
           {
-            if (load_addr == FIFO_ADDR_RX)
+            // Xilinx uartlite register model. The kernel driver polls STATUS
+            // for RXVALID, then reads RX to pull the byte; TX is always ready.
+            if (load_addr == FIFO_ADDR_STATUS)
             {
-              if (kbhit())
-              {
-                wb_data = 0;
+              // Refill the 1-byte RX register from stdin, but only when a byte
+              // is genuinely available: kbhit() gates a non-blocking read, and
+              // RXVALID is asserted ONLY after read() actually returns a byte.
+              // This is what makes the kernel's "while (RXVALID)" poll loop
+              // terminate instead of spinning on a phantom byte. Under LOCKSTEP
+              // the RTL is the source of truth for peripheral reads, so the
+              // golden model must not touch stdin here.
+              #ifndef LOCKSTEP
+              if (uart_rx_byte < 0 && kbhit()) {
+                unsigned char ch = 0;
+                if (read(0, &ch, 1) == 1) { uart_rx_byte = ch; }
               }
-              else
-              {
-                wb_data = 2;
-              }
+              #endif
+              wb_data = ULITE_STATUS_TXEMPTY;        // TX FIFO always drains
+              if (uart_rx_byte >= 0) { wb_data |= ULITE_STATUS_RXVALID; }
+              reg_file[rd] = wb_data;
+            }
+            else if (load_addr == FIFO_ADDR_RX)
+            {
+              // Return and consume the held byte (0 if none). Clearing it drops
+              // RXVALID on the next STATUS read.
+              wb_data = (uart_rx_byte >= 0) ? (uint64_t)uart_rx_byte : 0;
+              uart_rx_byte = -1;
               reg_file[rd] = wb_data;
             }
             else if (load_addr == FIFO_ADDR_TX)
             {
-              #ifndef LOCKSTEP
-              wb_data = getchar();
-              #endif
-              reg_file[rd] = wb_data;
+              reg_file[rd] = wb_data;                // TX is write-only; read 0
             }
           }
         }
@@ -296,7 +356,14 @@
             }
             else
             {
-              memory.at((store_addr - DRAM_BASE) / 8) = wb_data;
+              uint64_t idx = (store_addr - DRAM_BASE) / 8;
+              if (idx >= memory.size()) {
+                fprintf(stderr, "[hart%lu] BAD STORE addr=0x%lx idx=%lu val=0x%lx\n", (unsigned long)mhartid, (unsigned long)store_addr, (unsigned long)idx, (unsigned long)wb_data);
+                // skip write
+              } else {
+                memory.at(idx) = wb_data;
+                global_store_gen++;
+              }
               // printf("store_addr: %016lx  wb_data: %016lx ",store_addr,wb_data);
             }
           }
@@ -304,17 +371,12 @@
           {
             if ((store_addr >= CLINT_BASE) & (store_addr <= (CLINT_BASE + CLINT_SIZE)))
             {
-              uint64_t offset = store_addr - CLINT_BASE;
-              switch (offset)
-              {
-              case 0x4000:
-                mtimecmp = reg_file[rs2];
-                mip.STIP = 0;
-                break;
-              default:
-                break;
-              }
-
+              int sz = 8;
+              if (func3 == 0b000) sz = 1;
+              else if (func3 == 0b001) sz = 2;
+              else if (func3 == 0b010) sz = 4;
+              else if (func3 == 0b011) sz = 8;
+              clint.write(store_addr, reg_file[rs2], sz);
               // printf("store_address: %016lx, data: %lu , core: %lu \n", store_addr, reg_file[rs2], mhartid );
             }
             else
@@ -577,10 +639,11 @@
               ret_data = sign_extend<uint64_t>(wb_data & MASK32, 32);
               amo_reserve_valid = true;
               amo_reserve_addr = load_addr;
+              amo_reserve_gen = global_store_gen;
             }
             break;
           case 0b00011: // SC.W
-            if (amo_reserve_valid && (reg_file[rs1] == amo_reserve_addr))
+            if (amo_reserve_valid && (reg_file[rs1] == amo_reserve_addr) && (amo_reserve_gen == global_store_gen))
             {
               store_data = reg_file[rs2] & MASK32;
               ls_success = store_word(load_addr, load_data, store_data, wb_data);
@@ -593,6 +656,7 @@
               else
               {
                 memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+                global_store_gen++;
                 ret_data = 0;
               }
             }
@@ -616,6 +680,7 @@
               wb_data = reg_file[rs2] & MASK32;
               ls_success = store_word(load_addr, load_data, wb_data, store_data);
               memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+              global_store_gen++;
             }
             break;
           case 0b00000: // AMOADD.W
@@ -631,6 +696,7 @@
               wb_data = ((wb_data & MASK32) + (reg_file[rs2] & MASK32)) & MASK32;
               ls_success = store_word(load_addr, load_data, wb_data, store_data);
               memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+              global_store_gen++;
             }
             break;
           case 0b00100: // AMOXOR.W
@@ -646,6 +712,7 @@
               wb_data = ((wb_data & MASK32) ^ (reg_file[rs2] & MASK32)) & MASK32;
               ls_success = store_word(load_addr, load_data, wb_data, store_data);
               memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+              global_store_gen++;
             }
             break;
           case 0b01100: // AMOAND.W
@@ -661,6 +728,7 @@
               wb_data = ((wb_data & MASK32) & (reg_file[rs2] & MASK32)) & MASK32;
               ls_success = store_word(load_addr, load_data, wb_data, store_data);
               memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+              global_store_gen++;
             }
             break;
           case 0b01000: // AMOOR.W
@@ -676,6 +744,7 @@
               wb_data = ((wb_data & MASK32) | (reg_file[rs2] & MASK32)) & MASK32;
               ls_success = store_word(load_addr, load_data, wb_data, store_data);
               memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+              global_store_gen++;
             }
             break;
           case 0b10000: // AMOMIN.W
@@ -691,6 +760,7 @@
               wb_data = min(signed_value32(wb_data & MASK32), signed_value32(reg_file[rs2] & MASK32)) & MASK32;
               ls_success = store_word(load_addr, load_data, wb_data, store_data);
               memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+              global_store_gen++;
             }
             break;
           case 0b10100: // AMOMAX.W
@@ -706,6 +776,7 @@
               wb_data = max(signed_value32(wb_data & MASK32), signed_value32(reg_file[rs2] & MASK32)) & MASK32;
               ls_success = store_word(load_addr, load_data, wb_data, store_data);
               memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+              global_store_gen++;
             }
             break;
           case 0b11000: // AMOMINU.W
@@ -721,6 +792,7 @@
               wb_data = min((wb_data & MASK32), (reg_file[rs2] & MASK32)) & MASK32;
               ls_success = store_word(load_addr, load_data, wb_data, store_data);
               memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+              global_store_gen++;
             }
             break;
           case 0b11100: // AMOMAXU.W
@@ -736,6 +808,7 @@
               wb_data = max((wb_data & MASK32), (reg_file[rs2] & MASK32)) & MASK32;
               ls_success = store_word(load_addr, load_data, wb_data, store_data);
               memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+              global_store_gen++;
             }
             break;
           default:
@@ -779,6 +852,7 @@
               else
               {
                 memory.at((load_addr - DRAM_BASE) / 8) = store_data;
+                global_store_gen++;
                 ret_data = 0;
               }
             }
@@ -800,6 +874,7 @@
               ret_data = wb_data;
               wb_data = reg_file[rs2];
               memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+              global_store_gen++;
             }
             break;
           case 0b00000: // AMOADD.D
@@ -813,6 +888,7 @@
               ret_data = wb_data;
               wb_data = (wb_data + reg_file[rs2]);
               memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+              global_store_gen++;
             }
             break;
           case 0b00100: // AMOXOR.D
@@ -826,6 +902,7 @@
               ret_data = wb_data;
               wb_data = (wb_data ^ reg_file[rs2]);
               memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+              global_store_gen++;
             }
             break;
           case 0b01100: // AMOAND.D
@@ -839,6 +916,7 @@
               ret_data = wb_data;
               wb_data = (wb_data & reg_file[rs2]);
               memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+              global_store_gen++;
             }
             break;
           case 0b01000: // AMOOR.D
@@ -852,6 +930,7 @@
               ret_data = wb_data;
               wb_data = (wb_data | reg_file[rs2]);
               memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+              global_store_gen++;
             }
             break;
           case 0b10000: // AMOMIN.D
@@ -865,6 +944,7 @@
               ret_data = wb_data;
               wb_data = min(signed_value(wb_data), signed_value(reg_file[rs2]));
               memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+              global_store_gen++;
             }
             break;
           case 0b10100: // AMOMAX.D
@@ -878,6 +958,7 @@
               ret_data = wb_data;
               wb_data = max(signed_value(wb_data), signed_value(reg_file[rs2]));
               memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+              global_store_gen++;
             }
             break;
           case 0b11000: // AMOMINU.D
@@ -891,6 +972,7 @@
               ret_data = wb_data;
               wb_data = min(wb_data, reg_file[rs2]);
               memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+              global_store_gen++;
             }
             break;
           case 0b11100: // AMOMAXU.D
@@ -904,6 +986,7 @@
               ret_data = wb_data;
               wb_data = max(wb_data, reg_file[rs2]);
               memory.at((load_addr - DRAM_BASE) / 8) = wb_data;
+              global_store_gen++;
             }
             break;
           default:
@@ -1074,12 +1157,16 @@
           case 1: // ebreak
             EBREAK = true;
             break;
+          case 0x105: // WFI
+            in_wfi = true;
+            break;
           case 770: // mret
             PC = mepc;
             cp = (plevel_t)mstatus.mpp;
-            mstatus.mie = mstatus.mpie; // 1; ?
-            mstatus.mpp = 0b00;         // setting to umode (least privilage mode)
-            mstatus.mpie = 1;           // 0; ?
+            mstatus.mie = mstatus.mpie;
+            mstatus.mpp = 0b00;
+            mstatus.mpie = 1;
+            in_wfi = false;
             break;
           default:
             break;

@@ -19,7 +19,7 @@
 //--------------------------------------------------------------------------
 // Input/Reference Data
 
-#include "dataset2.h"
+#include "active.h"
 
 //--------------------------------------------------------------------------
 // Basic Utilities and Multi-thread Support

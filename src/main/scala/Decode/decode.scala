@@ -512,6 +512,13 @@ class decode (
   val mcause      = RegInit(0.U(dataWidth.W))
   val mtval       = RegInit(0.U(dataWidth.W))
   val mip         = RegInit(0.U(dataWidth.W))
+  // Hardware interrupt lines from the CLINT (driven by core.scala). Per RISC-V,
+  // mip.MTIP (bit 7) and mip.MSIP (bit 3) are READ-ONLY views of these lines —
+  // software clears them by writing the CLINT (mtimecmp / msip), never mip. So
+  // reads of mip below splice the live lines into bits 7 and 3.
+  val mtipLine = IO(Input(Bool()))
+  val msipLine = IO(Input(Bool()))
+  val mipLive  = Cat(mip(63,8), mtipLine, mip(6,4), msipLine, mip(2,0))
   val pmpcfg0     = RegInit(0.U(dataWidth.W))
   val pmpaddr0    = RegInit(0.U(dataWidth.W))
   val mvendorid   = RegInit(0.U(dataWidth.W))
@@ -550,7 +557,7 @@ class decode (
       is("h341".U) { csrReadDataReg := mepc }
       is("h342".U) { csrReadDataReg := mcause }
       is("h343".U) { csrReadDataReg := mtval }
-      is("h344".U) { csrReadDataReg := mip }
+      is("h344".U) { csrReadDataReg := mipLive }  // mip with live MTIP/MSIP lines
       is("h3a0".U) { csrReadDataReg := pmpcfg0 }
       is("h3b0".U) { csrReadDataReg := pmpaddr0 }
       is("hf11".U) { csrReadDataReg := mvendorid }
@@ -740,6 +747,11 @@ class decode (
     }
   }
   val interruptedPC = IO(Input(UInt(64.W)))
+  // Set by core.scala while the in-flight injected interrupt is a software (IPI)
+  // interrupt rather than a timer interrupt, so the trap below reports the right
+  // mcause (machine software int = 3 vs machine timer int = 7). Declared here
+  // (before the trap logic that reads it) to avoid a forward reference.
+  val softwareInterruptInject = IO(Input(Bool()))
   val currentPrivilege = RegInit(MMODE.U(dataWidth.W))
   when(writeBackResult.fired && writeBackResult.instruction(6,0) === system.U && writeBackResult.instruction(14,12) === 0.U) {
     when(writeBackResult.instruction(31, 20) === "h302".U) {
@@ -759,7 +771,8 @@ class decode (
       // interrupt
       // stallReg is asserted due to interrupt being injected from fromFetch interface
       mepc := Mux(stallReg, ecallPC, interruptedPC)
-      mcause := "h8000000000000007".U 
+      // machine software interrupt (cause 3) for IPIs, else machine timer (7)
+      mcause := Mux(softwareInterruptInject, "h8000000000000003".U, "h8000000000000007".U)
       currentPrivilege := MMODE.U
       expectedPC := mtvec
       mstatus := "h0000000A00000000".U(64.W) | Cat(0.U(51.W), Mux(currentPrivilege===MMODE.U, "b11000".U(5.W), 0.U(5.W)), mstatus(3, 0), 0.U(4.W))
@@ -906,6 +919,18 @@ class decode (
   }.otherwise {
     // mstatus.MIE && mstatus.MTIE
     canTakeInterrupt := mstatus(3).asBool && mie(7).asBool
+  }
+
+  // Machine software interrupt (IPI) enable — same gating as the timer path but
+  // keyed on mie.MSIE (bit 3) instead of mie.MTIE (bit 7). Drives the MSIP arm
+  // of the interrupt-inject FSM in core.scala (used for SMP cross-hart IPIs).
+  val canTakeSoftInterrupt = IO(Output(Bool()))
+  when(stallReg) {
+    canTakeSoftInterrupt := false.B
+  }.elsewhen(currentPrivilege === UMODE.U) {
+    canTakeSoftInterrupt := mie(3).asBool
+  }.otherwise {
+    canTakeSoftInterrupt := mstatus(3).asBool && mie(3).asBool
   }
 }
 
