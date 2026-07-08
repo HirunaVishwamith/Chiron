@@ -25,7 +25,6 @@ class arbiter extends Module {
   })
   val toCacheLookup = IO(new Bundle {
     val ready = Input(Bool())
-    val readyCoherency = Input(Bool())
     val holdInOrder = Input(Bool())
     val requestType = Output(UInt(2.W))
     val inorderPending = Input(Bool())
@@ -168,7 +167,6 @@ class arbiter extends Module {
   //*    3.  Inorder
   //*    4.  Speculative
   val atomicBusyState = RegInit(false.B)
-
   when(toCacheLookup.ready) {
     when(atomicBusyState && !toCacheLookup.inorderPending){
       when(inorderBufferValidWire && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
@@ -215,20 +213,6 @@ class arbiter extends Module {
       requestTypeWire := "b00".U
     }
     toCacheLookup.requestType := requestTypeWire
-  } .elsewhen(toCacheLookup.readyCoherency && coherencyRequest.request.valid
-              && !(atomicBusyState && !toCacheLookup.inorderPending)){
-    //* Snoop service must not depend on the replay/writeback FIFOs draining:
-    //* a coherency lookup never allocates into them, and the CCU serialises
-    //* all bus requests through one queue, so a snoop stalled behind full
-    //* FIFOs deadlocks the whole system. Atomic hit sequences still block
-    //* snoops (same rule as the priority chain above) to stay atomic.
-    coherencyRequest.ready := true.B
-
-    toCacheLookup.request.valid := true.B
-    toCacheLookup.request.address := coherencyRequest.request.address
-    toCacheLookup.request.cacheLine.response := coherencyRequest.request.response
-    toCacheLookup.request.branch.valid := true.B
-    toCacheLookup.requestType := "b11".U
   }
   when(toPeripheral.ready && (operationWires.isPeriRead || operationWires.isPeriWrite) && inorderBufferValidWire) {
     inorderBuffer.valid := false.B

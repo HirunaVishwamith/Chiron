@@ -20,6 +20,7 @@ include mk/benchmarks.mk
 include mk/rtl.mk
 include mk/bins.mk
 include mk/bins_quad.mk
+include mk/bins_scale.mk
 include mk/run.mk
 
 .DEFAULT_GOAL := help

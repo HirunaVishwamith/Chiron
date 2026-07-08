@@ -89,3 +89,6 @@ project/
 workloads/**/*.o
 workloads/**/*.riscv
 workloads/**/*.bin
+# active.h is the scale-selection scratch file the build copies sN.h into
+# (see mk/bins_scale.mk) -- never a real source file.
+workloads/**/active.h

@@ -21,7 +21,7 @@ radix_base := mt-radix
 # completion: committed PC(s), optionally gated on a0 (x10)
 vvadd_DONE  := --done-pc 0x800009a0 --done-pc 0x800009ac --done-a0 2
 matmul_DONE := --done-pc 0x80000a04
-filter_DONE := --done-pc 0x80000bc8
+filter_DONE := --done-pc 0x80000bc8 --done-pc 0x80000bcc
 csaxpy_DONE := --done-pc 0x800009a4 --done-pc 0x80000998 --done-a0 0
 histo_DONE  := --done-pc 0x80000a40
 seqlock_DONE := --done-pc 0x80000aa0

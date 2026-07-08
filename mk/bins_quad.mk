@@ -7,9 +7,14 @@
 
 QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy mt-seqlock mt-radix
 
+# Number of harts baked into the -q4 (and scale-q4) benchmarks. Override on the
+# command line, e.g.  make bins-q4 NUM_CORES=8 .  crt.S guards its own default
+# with #ifndef NUM_CORES, so this -D is what actually selects the hart count.
+NUM_CORES ?= 4
+
 QUAD_GCC_OPTS := -mcmodel=medany -static -std=gnu99 -O2 -fno-common \
                  -fno-builtin-printf -fno-tree-loop-distribute-patterns \
-                 -march=rv64ima_zicsr -mabi=lp64 -DNUM_CORES=4
+                 -march=rv64ima_zicsr -mabi=lp64 -DNUM_CORES=$(NUM_CORES)
 # -fno-tree-loop-distribute-patterns: this is a nostdlib/freestanding target
 # (no libc) -- without it, GCC silently rewrites simple zeroing/copying
 # loops (e.g. mt-radix's per-pass histogram reset) into calls to memset/

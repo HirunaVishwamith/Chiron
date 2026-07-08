@@ -1,13 +1,28 @@
 name: RISC-V OOO Core CI
 
+# Run ONCE per change:
+#   - pull_request: covers every push to a branch that has an open PR
+#     (opened/synchronize/reopened)
+#   - push: only the default branch (main), so merges/direct pushes there test.
+# A feature-branch push with an open PR no longer double-runs (previously the
+# `push: ['**']` trigger fired alongside the PR event).
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
+
+# Cancel an in-progress run when a newer commit supersedes it (same ref).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    # Pinned to 22.04: its apt `verilator` is 4.038, which matches the internal
+    # signal naming (system__DOT__memory__DOT__memory) that sim/rtl/rtl_model.h
+    # relies on. ubuntu-latest ships Verilator 5.x, which renames that internal
+    # and breaks the lockstep-harness build.
+    runs-on: ubuntu-22.04
 
     env:
       SBT_OPTS: "-Xmx4G -Xss2M"
@@ -68,7 +83,7 @@ jobs:
       run: make clean
 
     # =========================
-    # Build RTL from Scala
+    # Build RTL from Scala (traced model, used by the ISA lockstep suite)
     # =========================
     - name: Build RTL (SBT + Verilator flow)
       run: make sim
@@ -76,18 +91,30 @@ jobs:
     # =========================
     # Run lockstep smoke test
     # Non-blocking: failure is reported but does not fail CI.
-    # ISA suite (below) is the actual pass/fail gate.
     # =========================
     - name: Run Lockstep (smoke test)
       continue-on-error: true
       run: make runLockStep
 
     # =========================
-    # Run tests
-    # (test_all_images = compatibility alias → full ISA regression, == `make isa`)
+    # ISA regression suite (gate: >= 83/84 -- fence_i is a known miss on the
+    # current stable D-cache; see mk/run.mk test_all_images).
     # =========================
-    - name: Run full test suite
+    - name: Run full ISA test suite
       run: make test_all_images
+
+    # =========================
+    # Build the fast no-trace model (reuses the system.v from `make sim`) for
+    # the quad-core benchmark gate.
+    # =========================
+    - name: Build fast RTL model
+      run: make sim-fast
+
+    # =========================
+    # Quad-core benchmark gate: the 5 max-scale q4 benchmarks must all complete.
+    # =========================
+    - name: Run quad-core benchmark suite
+      run: make ci-bench
 
     # =========================
     # Upload results

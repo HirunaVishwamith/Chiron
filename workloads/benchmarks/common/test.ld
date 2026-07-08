@@ -14,7 +14,7 @@ OUTPUT_ARCH("riscv")
 /* Memory Definitions */
 MEMORY
 {
-    ram (rwx) : ORIGIN = 0x0, LENGTH = 512K  /* RAM starts at 0x0, 64KB size */
+    ram (rwx) : ORIGIN = 0x0, LENGTH = 16000K  /* RAM starts at 0x0, 64KB size */
 }
 
 /* Sections */
@@ -28,6 +28,7 @@ SECTIONS
 
     /* Main text section with 4-byte alignment */
     .text : ALIGN(4) { *(.text) } > ram
+
 
     /* Small data section for global pointer with 4-byte alignment */
     .sdata : ALIGN(4) {

@@ -122,6 +122,30 @@ test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks
 	  echo "$$fam-q4: PASS"; \
 	done
 
+# Fast (no-trace) profile_quad -- much quicker on the large s5 datasets than the
+# traced model. Requires the fast RTL model (make sim-fast).
+$(BUILD)/profile_quad_fast.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) -I $(SIM) $(HARNESS)/profile_quad.cpp $(VSYS_LIB_FAST) -o $@
+
+# ── CI benchmark gate ─────────────────────────────────────────────────────────
+# The five max-scale quad-core benchmarks that must ALL reach BENCHMARK COMPLETE
+# for CI to pass. Runs the committed -q4 scale bins on the fast no-trace model.
+# "BENCHMARK COMPLETE" (not "Simulation cycles", which prints on TIMEOUT too) is
+# the success marker.
+ci-bench: $(BUILD)/profile_quad_fast.out   ## CI gate: 5 max-scale q4 benchmarks must all complete
+	@fail=0; \
+	run() { \
+	  echo "== CI bench: $$1 =="; \
+	  if timeout 1500 $(BUILD)/profile_quad_fast.out --image $(BINS)/$$2 --name $$1 $$3 \
+	       --timeout 120000000 2>&1 | grep -q 'BENCHMARK COMPLETE'; \
+	  then echo "$$1: PASS"; else echo "$$1: FAIL"; fail=1; fi; }; \
+	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
+	run matmul-s3-q4 mt-matmul-s3-q4.bin       "$(matmul_DONE)"; \
+	run filter-s5-q4 mt-mask-sfilter-s5-q4.bin "$(filter_DONE)"; \
+	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
+	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"; \
+	if [ $$fail -eq 0 ]; then echo "ci-bench: ALL 5 PASS"; else echo "ci-bench: FAILURES"; exit 1; fi
+
 test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 
 # ── Linux image build (Multicore_Linux_Image/ submodule) ──────────────────────
