@@ -1,15 +1,16 @@
 name: RISC-V OOO Core CI
 
-# Run ONCE per change:
-#   - pull_request: covers every push to a branch that has an open PR
-#     (opened/synchronize/reopened)
-#   - push: only the default branch (main), so merges/direct pushes there test.
-# A feature-branch push with an open PR no longer double-runs (previously the
-# `push: ['**']` trigger fired alongside the PR event).
+# Run ONCE per commit, named after the commit (not the branch/PR).
+#   - push only (all branches): exactly one run per push. We deliberately do
+#     NOT add a `pull_request` trigger — with both, a push to a branch that
+#     has an open PR fires twice. push-only also makes the run title default
+#     to the commit message instead of the PR title (e.g. "Linux build").
 on:
   push:
-    branches: [main]
-  pull_request:
+    branches: ['**']
+
+# Title each run after the pushed commit's message rather than the branch name.
+run-name: ${{ github.event.head_commit.message }}
 
 # Cancel an in-progress run when a newer commit supersedes it (same ref).
 concurrency:
@@ -33,6 +34,15 @@ jobs:
     # =========================
     - name: Checkout
       uses: actions/checkout@v4
+
+    # =========================
+    # JDK 17 (sbt 2.x requires JDK 17+; ubuntu-22.04 defaults to JDK 11)
+    # =========================
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
 
     # =========================
     # System dependencies
