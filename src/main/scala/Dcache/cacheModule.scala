@@ -21,6 +21,9 @@ class CacheModule (
   val canAllocate = IO(Output(Bool()))
   val writeDataIn = IO(new writeDataIn)
   val initiateFence = IO(Input(Bool()))
+  // High (with initiateFence) only when the committing fence is a fence.i
+  // (funct3=001); selects the clean-on-fence walker path below.
+  val initiateFenceI = IO(Input(Bool()))
   val fenceInstructions = IO(new composableInterface)
   val writeCommit = IO(new composableInterface)
   val writeInstructionCommit = IO(new composableInterface)
@@ -181,26 +184,59 @@ class CacheModule (
 
 
 
-  //-----------------Initiate Fence----------------------//
-  val fenceInititatedReg = RegInit(false.B)
-  val canInititatedFenceReg = RegInit(false.B)
+  //-----------------Initiate Fence (fence.i => clean-on-fence)----------------//
+  // Plain `fence` just drains the request pipeline and signals done (its ordering
+  // is already enforced by the drain). A `fence.i` additionally runs the D-cache
+  // clean walker (writes every dirty line back to L2) and waits for those
+  // writebacks to reach L2 before signalling done, so the subsequent
+  // non-coherent I-fetch observes up-to-date instruction memory. Only fence.i
+  // takes the walker path, so the plain-fence barriers the benchmarks spin on
+  // are unaffected.
+  val fenceIdle :: fenceFlush :: fenceDrain :: fenceSignal :: Nil = Enum(4)
+  val fenceState = RegInit(fenceIdle)
+  val fenceIsI = RegInit(false.B)
   val subModulesReady = WireDefault(
-    requestScheduler.fenceReady && 
+    requestScheduler.fenceReady &&
     arbiter.fenceReady &&
     replayUnit.fenceReady &&
     aceUnit.fenceReady &&
     RegNext(RegNext(!cacheLookup.request.holdInOrder))
     //* inorder signal is delayed by two clock cycles so all operations are done
   )
-  canInititatedFenceReg := Mux(!canInititatedFenceReg, initiateFence, canInititatedFenceReg)
 
-  fenceInititatedReg := canInititatedFenceReg && subModulesReady
-  
-  when(fenceInititatedReg){
-    fenceInstructions.ready := true.B
-    canAllocate := false.B
-    fenceInititatedReg := Mux(fenceInstructions.fired, false.B, true.B)
-    canInititatedFenceReg := Mux(fenceInstructions.fired, false.B, true.B)
+  cacheLookup.flush.start := false.B
+
+  switch(fenceState){
+    is(fenceIdle){
+      when(initiateFence){
+        fenceIsI := initiateFenceI   // remember whether this fence is a fence.i
+        fenceState := fenceFlush
+      }
+    }
+    is(fenceFlush){
+      //Wait for the request pipeline to drain; fence.i then kicks off the walker
+      when(subModulesReady){
+        when(fenceIsI){
+          cacheLookup.flush.start := true.B
+          fenceState := fenceDrain
+        }.otherwise{
+          fenceState := fenceSignal
+        }
+      }
+    }
+    is(fenceDrain){
+      //Walker sweeping; wait until it finishes AND all writebacks reach L2
+      when(!cacheLookup.flush.busy && subModulesReady){
+        fenceState := fenceSignal
+      }
+    }
+    is(fenceSignal){
+      fenceInstructions.ready := true.B
+      canAllocate := false.B
+      when(fenceInstructions.fired){
+        fenceState := fenceIdle
+      }
+    }
   }
 
   commitFifo.write.data.cacheLine.cacheLine := 0.U

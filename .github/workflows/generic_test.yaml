@@ -1,4 +1,4 @@
-name: RISC-V OOO Core CI
+name: generic tests
 
 # Run ONCE per commit, named after the commit (not the branch/PR).
 #   - push only (all branches): exactly one run per push. We deliberately do
@@ -99,19 +99,44 @@ jobs:
       run: make sim
 
     # =========================
-    # Run lockstep smoke test
-    # Non-blocking: failure is reported but does not fail CI.
+    # Run lockstep smoke test (now a hard gate)
+    # Any register mismatch (e.g. x14), timeout, or "Test failed" will cause CI to fail.
+    # If the mt-vvadd-s1.bin (or other smoke bin) causes persistent mismatch with current RTL,
+    # regenerate/rebuild the benchmark binary (e.g. via make in sim/ or test image generation)
+    # and commit the updated .bin so it matches the RTL + fence.i behavior.
     # =========================
     - name: Run Lockstep (smoke test)
-      continue-on-error: true
       run: make runLockStep
 
     # =========================
-    # ISA regression suite (gate: >= 83/84 -- fence_i is a known miss on the
-    # current stable D-cache; see mk/run.mk test_all_images).
+    # ISA regression suite
+    # Gate is now strict: ANY FAIL (incl. rv64ui-p-fence_i.bin) or Register mismatch
+    # will fail the CI. Previously it tolerated fence_i as "known miss".
+    # Fix fence.i in RTL/D-cache (or test harness) so the ISA suite passes cleanly.
     # =========================
     - name: Run full ISA test suite
       run: make test_all_images
+
+    - name: Verify ISA suite has no FAILs or register mismatches
+      run: |
+        echo "Verifying ISA test results..."
+        FAILED=0
+        # test_all_images writes lowercase "<name>: fail" for any failing image.
+        if [ -f test_results.txt ] && grep -qiE ': fail' test_results.txt; then
+          echo "::error::ISA suite reported a FAIL (e.g. fence_i or other). Full results:"
+          cat test_results.txt || true
+          FAILED=1
+        fi
+        # Any register mismatch captured by the lockstep smoke step.
+        if grep -qi "Register mismatch" lockstep_smoke.log run.log 2>/dev/null; then
+          echo "::error::Register mismatch detected in lockstep/ISA run"
+          FAILED=1
+        fi
+        if [ $FAILED -eq 1 ]; then
+          echo "Failing CI due to ISA failures or mismatches as requested."
+          exit 1
+        fi
+        echo "ISA suite passed with no FAILs and no register mismatches."
 
     # =========================
     # Build the fast no-trace model (reuses the system.v from `make sim`) for
@@ -122,17 +147,34 @@ jobs:
 
     # =========================
     # Quad-core benchmark gate: the 5 max-scale q4 benchmarks must all complete.
+    # Now also fails CI on any "Register mismatch" or failure indicators from fast model / bench.
     # =========================
     - name: Run quad-core benchmark suite
       run: make ci-bench
 
+    - name: Verify quad-core / fast RTL benchmark has no mismatches or failures
+      run: |
+        echo "Verifying quad-core benchmark results..."
+        # ci-bench appends "<bench>: fail" to test_results.txt for any benchmark
+        # that did not reach BENCHMARK COMPLETE or that reported a mismatch/deadlock.
+        if grep -qiE ': fail' test_results.txt 2>/dev/null; then
+          echo "::error::A quad-core benchmark (or the fast RTL model) failed. Full results:"
+          cat test_results.txt || true
+          exit 1
+        fi
+        echo "Quad-core benchmarks and fast RTL model passed without register mismatches or failures."
+
     # =========================
-    # Upload results
+    # Upload results (always, even if previous steps failed, for debugging)
     # =========================
     - name: Upload results
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: riscv-test-results
         path: |
           test_results.txt
           run.log
+          lockstep_smoke.log
+          *.log
+        retention-days: 7
