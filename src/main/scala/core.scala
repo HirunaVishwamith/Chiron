@@ -393,13 +393,15 @@ class core (
   }
 
   val divBranchMask = Reg(UInt(configuration.newBranchMaskWidth.W)) //leon coherency
-  when(scheduler.release.fired && 
-  (Cat(scheduler.release.instruction(25), scheduler.release.instruction(14), scheduler.release.instruction(6, 4)) === "b11011".U)) { 
-    // There is a chance that this instruction will be flushed in the same cycle
-    mExtensionReady := false.B || (branchOps.valid && (branchOps.branchMask & scheduler.release.branchMask).orR && !branchOps.passed)
-    // Branch dependencies can change on the sampling clock cycle
-    divBranchMask := Mux(branchOps.valid && (branchOps.branchMask & scheduler.release.branchMask).orR, scheduler.release.branchMask ^ branchOps.branchMask, scheduler.release.branchMask)
-  }
+  // NOTE: the "release fired -> mExtensionReady := false" gate lives BELOW the
+  // divider completion block. It used to sit here, textually before the
+  // response-driven `mExtensionReady := true` writers — so when a new divide
+  // was released in the same cycle the previous divide's response pulsed,
+  // last-connect semantics let the `true` win, the busy gate stayed open one
+  // extra cycle, the scheduler released a second divide into a busy divider,
+  // and that divide fell off the execute stage uncompleted: ROB wedge at the
+  // divuw in __update_load_avg_se (repro: mt-divburst, lost rob release at
+  // cycle ~4148 two cycles after a completion).
   when(!mExtensionReady) {
     when(branchOps.valid && (branchOps.branchMask & divBranchMask).orR) {
       when(branchOps.passed) {
@@ -412,11 +414,37 @@ class core (
   }
   when(extnMResponse.valid && extnResponseInstruction(14).asBool) { mExtensionReady := true.B }
 
-  division.remainder := Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor)
-  division.quotient := Cat(division.quotient(63, 0), ~(Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor))(64))
-  division.counter := division.counter - 1.U
+  // Multi-cycle divider. CRITICAL:
+  //  1) Only iterate while in flight (request.valid && counter != 0).
+  //  2) Arm only when idle AND we have not already completed this held request.
+  // The old code re-armed counter=65 every cycle extnMRequest.valid was high
+  // (PRF can hold div at toExec for many cycles) so the unit never finished —
+  // ROB wedged on divuw in __update_load_avg_cfs_rq during Linux SMP bring-up.
+  // After complete, the same held extnMRequest must not re-arm — but ONLY the
+  // same dynamic instruction. divDone is therefore qualified by the completed
+  // request's robAddr: back-to-back divides (divu/divu/divuw in the kernel's
+  // __update_load_avg_se, repro mt-divburst) flow through prf.toExec with
+  // valid never dropping and the opcode staying a divide, so a valid-gap /
+  // non-div clear alone never fires and the next divide would never arm.
+  val divDone = RegInit(false.B)
+  val divDoneRobAddr = Reg(UInt(configuration.robAddrWidth.W))
 
-  when(extnMRequest.valid && extnMRequest.instruction(14).asBool) {
+  when(division.request.valid && division.counter.orR) {
+    division.remainder := Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor)
+    division.quotient := Cat(division.quotient(63, 0), ~(Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor))(64))
+    division.counter := division.counter - 1.U
+  }
+
+  // Clear "already completed" once the execute-stage request is gone or is no longer a div.
+  when(!extnMRequest.valid || !extnMRequest.instruction(14).asBool) {
+    divDone := false.B
+  }
+
+  // Arm once when a div/rem reaches the M-extension and the unit is free.
+  // divDone only blocks the dynamic instruction that already completed
+  // (robAddr match); a different divide arriving back-to-back arms freely.
+  when(extnMRequest.valid && extnMRequest.instruction(14).asBool && !division.request.valid &&
+       !(divDone && (extnMRequest.robAddr === divDoneRobAddr))) {
     division.counter := 65.U
     division.divisor := extnMRequest.rs2
     division.quotient := extnMRequest.rs1
@@ -462,8 +490,14 @@ class core (
     extnMResponse.valid := division.request.valid
     extnResponseInstruction := division.request.instruction
     division.request.valid := false.B
+    divDone := true.B
+    divDoneRobAddr := division.request.robAddr
+    // Free the M-extension slot the same cycle we produce the result.
+    mExtensionReady := true.B
     when(branchOps.valid) {
-      when((division.request.branchMask & branchOps.branchMask).orR && !branchOps.passed) { extnMResponse.valid := false.B } 
+      when((division.request.branchMask & branchOps.branchMask).orR && !branchOps.passed) {
+        extnMResponse.valid := false.B
+      }
     }
   }
 
@@ -474,6 +508,18 @@ class core (
     }
     when ((division.request.branchMask & branchOps.branchMask).orR) { division.request.branchMask := division.request.branchMask ^ branchOps.branchMask }
     when(!branchOps.passed && (division.request.branchMask & branchOps.branchMask).orR) { division.request.valid := false.B }
+  }
+
+  // Release gate LAST among mExtensionReady writers: a div/rem release this
+  // cycle must always close the M-extension slot, even when the previous
+  // divide's completion/response is pulsing `true` in the same cycle (see the
+  // NOTE at divBranchMask above for the lost-release wedge this prevents).
+  when(scheduler.release.fired &&
+  (Cat(scheduler.release.instruction(25), scheduler.release.instruction(14), scheduler.release.instruction(6, 4)) === "b11011".U)) {
+    // There is a chance that this instruction will be flushed in the same cycle
+    mExtensionReady := false.B || (branchOps.valid && (branchOps.branchMask & scheduler.release.branchMask).orR && !branchOps.passed)
+    // Branch dependencies can change on the sampling clock cycle
+    divBranchMask := Mux(branchOps.valid && (branchOps.branchMask & scheduler.release.branchMask).orR, scheduler.release.branchMask ^ branchOps.branchMask, scheduler.release.branchMask)
   }
 
   // setting up forwarding data for next cycle

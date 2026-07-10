@@ -81,21 +81,25 @@ else
   CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD)
 endif
 
-# ── Linux model (walker-disabled, for `make linux-sim`) ───────────────────────
-# Same no-trace flow as obj_dir_fast, but built from a system.v generated with
-# configuration.disableFenceIWalker = true (see mk/rtl.mk). The fence.i clean
-# walker deadlocks bbl's large fence.i under SMP, so the Linux boot model omits
-# it. A larger STEP_TIMEOUT is used: legitimate boot phases (bbl kernel copy,
-# rootfs) can idle-commit for a while without it being a wedge.
+# ── Linux boot harness flags ──────────────────────────────────────────────────
+# linux-sim links the same walker-ON fast model as CI (obj_dir_fast). A larger
+# STEP_TIMEOUT is used: legitimate boot phases (bbl kernel copy, rootfs) can
+# idle-commit for a while without it being a wedge. The old walker-disabled
+# obj_dir_linux path (sim-linux) is kept only for A/B debugging.
 SIM_LINUX          := $(SIM)/obj_dir_linux
 HARNESS_INCS_LINUX := -I . -I $(VINC) -I $(SIM_LINUX)
 _VLIB_LINUX := $(wildcard $(SIM_LINUX)/libverilated.a)
 ifneq ($(_VLIB_LINUX),)
   VSYS_LIB_LINUX := $(_VLIB_LINUX) $(SIM_LINUX)/Vsystem__ALL.a
-  CXX_LINUX      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_LINUX) -DSTEP_TIMEOUT=5000000
 else
   VSYS_LIB_LINUX := $(SIM_LINUX)/Vsystem__ALL.a
-  CXX_LINUX      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_LINUX) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD)
+endif
+# Prefer the fast-model include path (single-build fix); fall back to compiling
+# verilated sources ourselves on Verilator 4.x.
+ifneq ($(_VLIB_FAST),)
+  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000
+else
+  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD)
 endif
 
 # Optimization for the Verilator-generated C++ (verilated.mk's OPT_FAST default

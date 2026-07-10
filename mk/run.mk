@@ -15,17 +15,24 @@ $(BUILD)/lockstep_isa.out: $(HARNESS)/lockstep_isa.cpp $(EMU_HDRS) $(SIM_HDR) $(
 $(BUILD)/lockstep_linux.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_TRACE) $(HARNESS)/lockstep_linux.cpp $(VSYS_LIB) -o $@
 
+# Same lock-step compare, linked against the fast no-trace model: ~4-5x faster,
+# no VCD on mismatch (rtl_model.h prints a notice and skips tracing). Use this
+# to *reach* a deep-boot mismatch quickly; switch to lockstep_linux.out when a
+# waveform of the failure is needed.
+$(BUILD)/lockstep_linux_fast.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/lockstep_linux.cpp $(VSYS_LIB_FAST) -o $@
+
 # RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
 # its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
 # (CXX_FAST sets -DCHIRON_NO_TRACE so rtl_model.h's tb->trace() compiles out) for
-# the long Linux boot; STEP_TIMEOUT=500000 so boot/cache stalls aren't hangs. The
-# image is loaded by a direct memcpy into the Verilated DRAM (see rtl_model.h),
-# so there is no slow per-word programmer phase.
-# Linux boot uses the walker-disabled model (VSYS_LIB_LINUX / obj_dir_linux):
-# the fence.i clean walker deadlocks bbl's large fence.i under SMP. Build it with
-# `make sim-linux` first (linux-sim depends on it).
-$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_LINUX) | $(BUILD)
-	$(CXX_LINUX) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_LINUX) -o $@
+# the long Linux boot. STEP_TIMEOUT is raised (CXX_LINUX) so legitimate boot
+# phases (bbl kernel copy, rootfs) aren't misclassified as hangs. The image is
+# loaded by a direct memcpy into the Verilated DRAM (see rtl_model.h).
+# Uses the same walker-ON RTL as CI (obj_dir_fast): walkerWriteBackBuffer keeps
+# fence.i from deadlocking the snoop path under SMP, so a separate walker-off
+# model is no longer required.
+$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
 
 # Same boot, but watches for the known timekeeping-seqlock SMP wedge (see the
 # file's own comment) and captures a bounded VCD right around the point it

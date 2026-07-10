@@ -1681,9 +1681,19 @@ class ccu extends Module {
 				last_buff := core7.CDLAST
 				rsp_buff := Cat(crpbuf_3_7(3),crpbuf_3_7(2),"b00".U(2.W))
 			}.otherwise{
+				// Data from L2 (no peer supplied a copy). For ReadShared
+				// (tran 0001) force ACE IsShared=1 so the requester never
+				// installs Exclusive from a cold L2 fill. Otherwise two cores
+				// racing ReadShared→L2 both get Unique and silently diverge
+				// on later stores (seqlock / ktime_get hang). ReadUnique
+				// (0111) and other types keep IsShared=0.
 				beat_buff := L2.RDATA
 				last_buff := L2.RLAST
-				rsp_buff := Cat("b0".U(1.W),"b0".U(1.W),L2.RRESP)
+				when(tran_pbuf_3 === "b0001".U(4.W)) {
+					rsp_buff := Cat("b1".U(1.W), "b0".U(1.W), L2.RRESP) // IsShared=1
+				}.otherwise {
+					rsp_buff := Cat("b0".U(1.W), "b0".U(1.W), L2.RRESP)
+				}
 			}
 
 		}

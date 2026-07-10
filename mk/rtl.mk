@@ -37,14 +37,12 @@ $(VSYS_LIB_FAST): $(SIM)/system.v
 	verilator -Wall -O3 -cc system.v --Mdir obj_dir_fast; \
 	cd obj_dir_fast/; make -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
 
-# ── Linux model (fence.i walker disabled) ─────────────────────────────────────
-# Same Chisel → Verilog flow as system.v, but also patches
-# configuration.disableFenceIWalker to true so the fence.i clean-on-fence walker
-# is compiled out. That walker is required for the rv64ui-p-fence_i ISA test but
-# deadlocks bbl's large fence.i during Linux SMP boot; the Linux boot model omits
-# it. sbt always emits root system.v, so we copy it aside to system_linux.v. NOTE:
-# this shares configuration.scala + root system.v with the `sim` rule, so do not
-# build `sim` and `sim-linux` concurrently.
+# ── Optional walker-disabled model (A/B debug only) ───────────────────────────
+# Same Chisel → Verilog flow as system.v, but patches
+# configuration.disableFenceIWalker to true. NOT required for linux-sim anymore
+# (walkerWriteBackBuffer fixes the SMP fence.i circular wait in the default
+# model). Kept so `make sim-linux` can still build a walker-off binary for
+# bisect/debug. Do not build `sim` and `sim-linux` concurrently (shared sbt).
 $(SIM)/system_linux.v: $(SCALA_SRCS)
 	mv src/main/scala/common/configuration.scala configuration.txt && \
 	sed -e 's/instructionBase/instructionBase = 0x0000000080000000L\/\//' \
@@ -60,8 +58,6 @@ $(SIM)/system_linux.v: $(SCALA_SRCS)
 	  done; \
 	done
 
-# Verilate the walker-disabled Verilog into its own obj_dir_linux (top module is
-# still `system`, so the class is Vsystem, same as the other models).
 $(VSYS_LIB_LINUX): $(SIM)/system_linux.v
 	cd $(SIM)/; \
 	verilator -Wall -O3 -cc system_linux.v --top-module system --Mdir obj_dir_linux; \
@@ -69,8 +65,8 @@ $(VSYS_LIB_LINUX): $(SIM)/system_linux.v
 
 .PHONY: sim sim-fast sim-linux
 sim: $(VSYS_LIB)             ## Build the RTL: Chisel → Verilog → Verilator library
-sim-fast: $(VSYS_LIB_FAST)   ## Build the fast no-trace RTL model (used by benchmarks)
-sim-linux: $(VSYS_LIB_LINUX) ## Build the walker-disabled RTL model (for linux-sim boot)
+sim-fast: $(VSYS_LIB_FAST)   ## Build the fast no-trace RTL model (used by benchmarks + linux-sim)
+sim-linux: $(VSYS_LIB_LINUX) ## Optional: walker-disabled model (A/B debug only)
 
 # ── Kintex-7 FPGA flavour (quad-core, PCIe/XDMA — see fpga/) ──────────────────
 # Same instructionBase as sim (0x8000_0000): fpgaTop reuses chironCore

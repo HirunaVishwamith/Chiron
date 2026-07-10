@@ -5,7 +5,7 @@
 #
 # Usage:  make bins-q4      → produces bins/mt-*-q4.bin for all listed benchmarks
 
-QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy mt-seqlock mt-radix
+QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy mt-seqlock mt-radix mt-spinwait mt-divburst
 
 # Number of harts baked into the -q4 (and scale-q4) benchmarks. Override on the
 # command line, e.g.  make bins-q4 NUM_CORES=8 .  crt.S guards its own default
@@ -51,6 +51,24 @@ seqlock-bin:    ## Build just bins/mt-seqlock-q4.bin (fast iteration, no clean)
 	@mkdir -p $(BINS)
 	cp $(BENCH_SRC)/mt-seqlock.bin $(BINS)/mt-seqlock-q4.bin
 	@echo "[seqlock-bin] staged: $(BINS)/mt-seqlock-q4.bin"
+
+.PHONY: divburst-bin
+divburst-bin:    ## Build just bins/mt-divburst-q4.bin (fast iteration, no clean)
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-divburst" \
+	    RISCV_GCC_OPTS="$(QUAD_GCC_OPTS)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-divburst.bin $(BINS)/mt-divburst-q4.bin
+	@echo "[divburst-bin] staged: $(BINS)/mt-divburst-q4.bin"
+
+.PHONY: spinwait-bin
+spinwait-bin:    ## Build just bins/mt-spinwait-q4.bin (fast iteration, no clean)
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-spinwait" \
+	    RISCV_GCC_OPTS="$(QUAD_GCC_OPTS)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-spinwait.bin $(BINS)/mt-spinwait-q4.bin
+	@echo "[spinwait-bin] staged: $(BINS)/mt-spinwait-q4.bin"
 
 .PHONY: radix-bin
 radix-bin:    ## Build just bins/mt-radix-q4.bin (fast iteration, no clean)

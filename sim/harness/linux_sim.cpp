@@ -66,38 +66,36 @@ int main(int argc, char **argv) {
     if (bench.step_any_nodump() == 1) {  // no core committed for STEP_TIMEOUT
       std::fprintf(stderr,
         "\n[linux_sim] ALL cores stalled: no commit on any hart for "
-        "STEP_TIMEOUT cycles (cycle %lu)\n",
-        bench.tickcount);
-      // Debug detail (per-hart PCs) intentionally commented out for clean runs:
-      // std::fprintf(stderr,
-      //   "            pc0=0x%08lx pc1=0x%08lx pc2=0x%08lx pc3=0x%08lx\n",
-      //   (unsigned long)bench.core_pc(0), (unsigned long)bench.core_pc(1),
-      //   (unsigned long)bench.core_pc(2), (unsigned long)bench.core_pc(3));
+        "STEP_TIMEOUT cycles (cycle %lu)\n"
+        "            pc0=0x%08lx pc1=0x%08lx pc2=0x%08lx pc3=0x%08lx\n",
+        bench.tickcount,
+        (unsigned long)bench.core_pc(0), (unsigned long)bench.core_pc(1),
+        (unsigned long)bench.core_pc(2), (unsigned long)bench.core_pc(3));
       return 1;
     }
     ++steps;
 
     if (heartbeat) {
       auto now = clock::now();
-      // if (std::chrono::duration_cast<std::chrono::milliseconds>(now - t_last).count() >= 5000) {
-      //   double dt = std::chrono::duration<double>(now - t_last).count();
-      //   double total = std::chrono::duration<double>(now - t_start).count();
-      //   uint64_t pc[4];
-      //   for (int i = 0; i < 4; ++i) pc[i] = bench.core_pc(i);
-      //   std::fprintf(stderr,
-      //     "[linux_sim] +%5.0fs  steps=%-10lu (%6.0f/s)  cycles=%-12lu  "
-      //     "pc0=0x%08lx%s pc1=0x%08lx%s pc2=0x%08lx%s pc3=0x%08lx%s\n",
-      //     total, (unsigned long)steps,
-      //     (steps - last_steps) / (dt > 0 ? dt : 1), bench.tickcount,
-      //     (unsigned long)pc[0], pc[0] == last_pc[0] ? "*" : " ",
-      //     (unsigned long)pc[1], pc[1] == last_pc[1] ? "*" : " ",
-      //     (unsigned long)pc[2], pc[2] == last_pc[2] ? "*" : " ",
-      //     (unsigned long)pc[3], pc[3] == last_pc[3] ? "*" : " ");
-      //   std::fflush(stderr);
-      //   t_last = now;
-      //   last_steps = steps;
-      //   for (int i = 0; i < 4; ++i) last_pc[i] = pc[i];
-      // }
+      if (std::chrono::duration_cast<std::chrono::milliseconds>(now - t_last).count() >= 5000) {
+        double dt = std::chrono::duration<double>(now - t_last).count();
+        double total = std::chrono::duration<double>(now - t_start).count();
+        uint64_t pc[4];
+        for (int i = 0; i < 4; ++i) pc[i] = bench.core_pc(i);
+        std::fprintf(stderr,
+          "[linux_sim] +%5.0fs  steps=%-10lu (%6.0f/s)  cycles=%-12lu  "
+          "pc0=0x%08lx%s pc1=0x%08lx%s pc2=0x%08lx%s pc3=0x%08lx%s\n",
+          total, (unsigned long)steps,
+          (steps - last_steps) / (dt > 0 ? dt : 1), bench.tickcount,
+          (unsigned long)pc[0], pc[0] == last_pc[0] ? "*" : " ",
+          (unsigned long)pc[1], pc[1] == last_pc[1] ? "*" : " ",
+          (unsigned long)pc[2], pc[2] == last_pc[2] ? "*" : " ",
+          (unsigned long)pc[3], pc[3] == last_pc[3] ? "*" : " ");
+        std::fflush(stderr);
+        t_last = now;
+        last_steps = steps;
+        for (int i = 0; i < 4; ++i) last_pc[i] = pc[i];
+      }
     }
   }
   return 0;
