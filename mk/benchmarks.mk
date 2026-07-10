@@ -23,6 +23,9 @@ spinwait_base := mt-spinwait
 # back-to-back M-extension divide regression (Linux __update_load_avg_se
 # wedge repro, see workloads/benchmarks/mt-divburst/).
 divburst_base := mt-divburst
+# divide clusters under timer-IRQ fire + div-dependent branch shadows
+# (see workloads/benchmarks/mt-divirq/).
+divirq_base := mt-divirq
 
 # completion: committed PC(s), optionally gated on a0 (x10)
 vvadd_DONE  := --done-pc 0x800009a0 --done-pc 0x800009ac --done-a0 2
@@ -34,6 +37,7 @@ seqlock_DONE := --done-pc 0x80000aa0
 radix_DONE  := --done-pc 0x80000c68
 spinwait_DONE := --done-pc 0x80000a9c
 divburst_DONE := --done-pc 0x800009e4 --done-a0 0
+divirq_DONE := --done-pc 0x80000b68 --done-a0 0
 
 # Resolve BENCH=<family>-s<scale> (default vvadd-s1) into a bin path + done spec.
 # None of the family names contain "-s", so splitting on it is unambiguous.

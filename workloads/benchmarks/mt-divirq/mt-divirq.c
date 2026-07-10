@@ -111,13 +111,11 @@ void thread_entry(int cid, int nc)
   initialize_count_asm(0);
   barrier(nc);
 
-  if (cid != 0) {
-    barrier(nc);
-    exit(2);
-  }
-
+  // ALL participating harts run the div+IRQ loop (in the q4 build this adds
+  // the multi-hart bus/coherency traffic the Linux wedge context has); only
+  // hart 0 reports.
   unsigned long acc_asm = 0, acc_c = 0;
-  unsigned long x = seed64;
+  unsigned long x = seed64 + (unsigned long)cid * 0x1234567UL;
 
   divirq_arm();
 
@@ -153,11 +151,49 @@ void thread_entry(int cid, int nc)
                divu64(a, rq0);
     }
 
+    // Branch-shadow cluster: the beqz condition depends on the first divu,
+    // so it cannot resolve for ~65 cycles — the shadow divides behind it are
+    // released speculatively and get flushed on the ~50% mispredicts, with
+    // timer IRQs (whose injection forges a branch mispredict to flush
+    // speculated instructions) landing on top. This is the missing Linux
+    // ingredient mt-divburst's straight-line clusters lack.
+    {
+      unsigned long s0, s1, s2, srem;
+      unsigned long c64 = (unsigned long)c | 1UL;
+      asm volatile(
+          "divu  %[s0], %[a], %[b]\n\t"
+          "li    %[s1], 0\n\t"
+          "li    %[s2], 0\n\t"
+          "andi  %[sr], %[s0], 1\n\t"
+          "beqz  %[sr], 1f\n\t"
+          "divu  %[s1], %[a], %[c64]\n\t"
+          "j     2f\n\t"
+          "1:\n\t"
+          "divuw %[s2], %[c], %[d]\n\t"
+          "2:\n\t"
+          "remu  %[sr], %[a], %[b]\n\t"
+          : [s0] "=&r"(s0), [s1] "=&r"(s1), [s2] "=&r"(s2), [sr] "=&r"(srem)
+          : [a] "r"(a), [b] "r"(b), [c] "r"(c), [d] "r"(d), [c64] "r"(c64)
+          :);
+      acc_asm += s0 + s1 + s2 + srem;
+
+      unsigned long rs0 = divu64(a, b);
+      unsigned long rs1 = 0, rs2 = 0;
+      if (rs0 & 1)
+        rs1 = divu64(a, c64);
+      else
+        rs2 = (unsigned long)(long)(int)divu32(c, d);  // divuw sign-extends rd
+      acc_c += rs0 + rs1 + rs2 + remu64(a, b);
+    }
+
     x = x * 6364136223846793005UL + 1442695040888963407UL;
   }
 
   divirq_disarm();
   barrier(nc);
+
+  if (cid != 0)
+    exit(2);
 
   uart_send_string("mt-divirq: irqs=");
   uart_send_integer((int)divirq_count);

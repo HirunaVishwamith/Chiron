@@ -5,7 +5,7 @@
 #
 # Usage:  make bins-q4      → produces bins/mt-*-q4.bin for all listed benchmarks
 
-QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy mt-seqlock mt-radix mt-spinwait mt-divburst
+QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy mt-seqlock mt-radix mt-spinwait mt-divburst mt-divirq
 
 # Number of harts baked into the -q4 (and scale-q4) benchmarks. Override on the
 # command line, e.g.  make bins-q4 NUM_CORES=8 .  crt.S guards its own default

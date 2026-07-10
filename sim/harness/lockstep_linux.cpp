@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <map>
 #define LOCKSTEP
 #define MISA_SPEC (0b100000001000100000001 | (0b1llu << 63))
 #include "sim/emulator/emulator.h"
@@ -416,12 +417,18 @@ int main(int argc, char *argv[]) {
                 splice_word(w8, op.addr, op.width, neww));
           }
           ++racy_fixups;
-          if (racy_fixups <= 20 || (racy_fixups % 1000) == 0)
+          // Log the first few occurrences of each distinct (hart, pc) site,
+          // then thin. A blanket cap hid the one lock-load divergence behind
+          // thousands of identical string-scan fixups.
+          static std::map<uint64_t, uint32_t> fixup_seen;
+          const uint64_t site = ((uint64_t)h << 62) | rtl_pc;
+          const uint32_t n_site = ++fixup_seen[site];
+          if (n_site <= 5 || (racy_fixups % 1000) == 0)
             cout << "[racy-fixup #" << dec << racy_fixups << "] h" << h
                  << " pc=0x" << hex << rtl_pc << " kind=" << dec
                  << op.kind << " x" << r << " rtl=0x" << hex << rtl_rd
                  << " golden=0x" << gold_rd << " addr=0x" << op.addr
-                 << dec << endl;
+                 << dec << " site_n=" << n_site << endl;
           r = bench.check_registers(h, golden_model.reg_file(h),
                                     golden_model.get_mstatus(h));
         }
