@@ -511,7 +511,7 @@ suite (ISA 84/84, vvadd/csaxpy quad-core lock-step).
 ---
 
 ## Credits
-
+<!--
 Built as a final-year project at the **University of Moratuwa**.
 
 **Contributors** (in alphabetical order):
@@ -521,6 +521,8 @@ Built as a final-year project at the **University of Moratuwa**.
 * Leon Fernando
 * Mewan Rathnayaka
 * Yasiru Amarasinghe
+
+!-->
 
 Chisel/FIRRTL by the Chisel community; verification leans on **Verilator** and
 the official **riscv-tests**. The Chiron artwork crowns a core meant, above all,
