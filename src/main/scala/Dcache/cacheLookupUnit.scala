@@ -38,6 +38,40 @@ class cacheLookupUnit extends Module{
     val request = Output(new requestPipelineWire)
   })
   val writeInstructionCommit = IO(new composableInterface)
+  // Coherence snoop into the *staging* writeback slots (before the FIFO).
+  // On replacement the victim tags are rewritten the same cycle as these
+  // registers fill, so a peer snoop already misses L1 while the only dirty
+  // copy sits here — answering "no data" poisons shared kernel data
+  // (jiffies / tick_broadcast_lock under SMP).
+  val writeBackStageSnoop = IO(new Bundle {
+    val addr = Input(UInt(addrWidth.W))
+    val hit = Output(Bool())
+    val data = Output(new writeBackWire)
+  })
+  // Same-line snoop-vs-fill-install hazard. A replayed fill installs into the
+  // BRAMs one cycle after dispatch; a snoop arbitrated just before/at that
+  // write reads pre-install tags (or the same-cycle RAW returns old data),
+  // answers "not present", and the stale fill then installs as VALID — a
+  // permanently stale line no later invalidation can reach (proven on the
+  // Linux SMP boot: CPU1 kept a zero task pointer from a line CPU0 owned
+  // dirty). The ACE unit holds a same-line snoop while this is high; it
+  // covers the dispatch stage and the BRAM-write cycle after it.
+  val installSnoop = IO(new Bundle {
+    val addr = Input(UInt(addrWidth.W))
+    val hazard = Output(Bool())
+  })
+  // LR/SC forward-progress guard: for a bounded window after an LR sets the
+  // reservation, the arbiter defers snoops that target the reserved LINE so
+  // the subsequent SC can complete before a peer steals the line. Without
+  // this, four harts in the RISC-V constrained lr/sc retry loop steal the
+  // line from each other's LR-to-SC window forever — proven total livelock
+  // (mt-lrsc, all four harts parked 130M+ cycles, counter never advanced).
+  // The window is a pure countdown, so snoop service is delayed but never
+  // blocked — deadlock-freedom is preserved.
+  val reservationGuard = IO(new Bundle {
+    val active = Output(Bool())
+    val address = Output(UInt(addrWidth.W))
+  })
   //Clean-on-fence.i walker : sweeps all sets/ways, writing back dirty lines to L2
   val flush = IO(new Bundle {
     val start = Input(Bool())
@@ -131,6 +165,40 @@ class cacheLookupUnit extends Module{
     val size = UInt(1.W)  
   }))
   val toReservationRegisterWire = WireDefault(false.B)
+  // Guard countdown (see reservationGuard IO). 128 cycles comfortably covers
+  // LR writeback/commit plus SC dispatch through the inorder queue; kept
+  // small so a deferred snoop's extra latency stays negligible.
+  //
+  // ONE-TENURE RULE: a spinning cmpxchg (`while (cmpxchg(&lock,0,id))`)
+  // executes a fresh LR every iteration; re-arming the guard on each of them
+  // holds the line hostage indefinitely and defers the lock HOLDER's release
+  // store forever — proven deadlock (mt-lrsc phase 3, victim hart parked at
+  // lr.d.aq with no commit). So when a guard window expires WITHOUT an SC,
+  // guardBlocked suppresses re-arming until the deferred snoop actually
+  // lands on the reserved line (or an SC completes). Every window therefore
+  // drains at least one pending snoop before a new one can open.
+  val reservationGuardCnt = RegInit(0.U(8.W))
+  val reservationGuardBlocked = RegInit(false.B)
+  val scWritePassFire = WireDefault(false.B)
+  val guardSnoopLanded = WireDefault(false.B)   // set at the kill point below
+  // The countdown is MONOTONIC within a tenure: a spinner's retry LRs come
+  // every ~15 cycles, so reloading on each would keep the guard alive
+  // forever (probe-proven: guard cnt cycling 82..121 while the lock
+  // holder's release-store snoop sat parked and two other harts starved at
+  // their LRs with no commit). Arming only from cnt==0 caps every tenure at
+  // one window; an SC ends the tenure cleanly and allows an immediate
+  // re-arm, expiry without an SC requires the pending snoop to land first.
+  when(toReservationRegisterWire && !reservationGuardBlocked && !reservationGuardCnt.orR) {
+    reservationGuardCnt := 128.U
+  }.elsewhen(scWritePassFire || !reservationRegister.reserved) {
+    reservationGuardCnt := 0.U
+  }.elsewhen(reservationGuardCnt.orR) {
+    reservationGuardCnt := reservationGuardCnt - 1.U
+    when(reservationGuardCnt === 1.U) { reservationGuardBlocked := true.B }
+  }
+  when(scWritePassFire || guardSnoopLanded) { reservationGuardBlocked := false.B }
+  reservationGuard.active := reservationGuardCnt.orR && reservationRegister.reserved
+  reservationGuard.address := reservationRegister.address
 
   //-----------------------Last Miss record-----------------------//
   val lastInorderMissRecordRegister = RegInit(0.U.asTypeOf(new requestPipelineWire))
@@ -214,6 +282,31 @@ class cacheLookupUnit extends Module{
       // Keep valid low so the writeBackFIFO never samples a stale beat.
       toWriteBack.request.valid := false.B
     }
+  }
+
+  // Install hazard: replay request in the lookup stage now, or its BRAM write
+  // cycle (one after). Line-granular compare against the pending snoop.
+  {
+    val lineHi = log2Ceil(lineSize)
+    val installingNow = readBuffer.valid && requestType === "b10".U
+    val installedLast = RegNext(installingNow, false.B)
+    val installAddrLast = RegNext(readBuffer.address)
+    val snoopLine = installSnoop.addr(addrWidth - 1, lineHi)
+    installSnoop.hazard :=
+      (installingNow && readBuffer.address(addrWidth - 1, lineHi) === snoopLine) ||
+      (installedLast && installAddrLast(addrWidth - 1, lineHi) === snoopLine)
+  }
+
+  // Snoop CAM for the two staging slots (normal path preferred over walker).
+  {
+    val lineHi = log2Ceil(lineSize)
+    val snoopLine = writeBackStageSnoop.addr(addrWidth - 1, lineHi)
+    val wbHit = writeBackBuffer.valid &&
+      writeBackBuffer.address(addrWidth - 1, lineHi) === snoopLine
+    val walkHit = walkerWriteBackBuffer.valid &&
+      walkerWriteBackBuffer.address(addrWidth - 1, lineHi) === snoopLine
+    writeBackStageSnoop.hit := wbHit || walkHit
+    writeBackStageSnoop.data := Mux(wbHit, writeBackBuffer, walkerWriteBackBuffer)
   }
 
   val writeCommitInstructionBuffer = RegInit(false.B)
@@ -336,6 +429,18 @@ class cacheLookupUnit extends Module{
     val isDataMissWire = WireDefault(!(matchFoundVec.reduce(_ | _) && validBitWire))
     val isPermissionMiss = WireDefault(!isDataMissWire && isSharedWire)
     val isReplayValidWire = WireDefault(requestType === "b10".U) //&& !readBuffer.cacheLine.invalidated)
+    // A CleanUnique upgrade whose line was invalidated by a peer's snoop while
+    // the upgrade was in flight: the response carries no data (ACEUnit sets
+    // cacheLine.valid=0 for CleanUnique) and the tag no longer matches.
+    // Treating this replay as a hit re-validates the dead way from the stale
+    // data BRAM with NO data transfer — resurrecting a line another hart just
+    // rewrote. That silently undoes the peer's committed store system-wide
+    // (mt-lrscirq: c3's mutex-release store erased by c1's stale upgrade ->
+    // owner never returns to 0 -> every hart spins forever; Linux: dropped
+    // spinlock unlock -> post-/init freeze). Such a replay must NOT pass; it
+    // is sent back around as a data-carrying ReadUnique instead.
+    val isStaleUpgradeReplay = WireDefault(
+      isReplayValidWire && isDataMissWire && !readBuffer.cacheLine.valid)
 
     //Updating wires
     val newtagChunks = VecInit(Seq.tabulate(nway) { i =>
@@ -403,7 +508,7 @@ class cacheLookupUnit extends Module{
     when(isLRReadWire || isAtmoicReadWire){
       when(!isPermissionMiss && !isDataMissWire){//Hit
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
-      } .elsewhen(isReplayValidWire){
+      } .elsewhen(isReplayValidWire && !isStaleUpgradeReplay){
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
         newValidBitWire := 1.U
         newShareBitWire := 0.U //readBuffer.cacheLine.response(1)
@@ -413,7 +518,7 @@ class cacheLookupUnit extends Module{
           writeChunks(i) := readBuffer.cacheLine.cacheLine((i + 1) * 32 - 1, i * 32)
         }
       }
-    }   
+    }
 
     //Write related
     val result32 = WireDefault(0.U(32.W))
@@ -422,7 +527,7 @@ class cacheLookupUnit extends Module{
       when(!isPermissionMiss && !isDataMissWire){
         newDirtyBitWire := 1.U
         newPLRUBitWire := Mux(PLRUSetWire.reduce(_ & _), 0.U, 1.U)
-      } .elsewhen(isReplayValidWire && isDataMissWire){
+      } .elsewhen(isReplayValidWire && isDataMissWire && !isStaleUpgradeReplay){
         newValidBitWire := 1.U
         newDirtyBitWire := 1.U
         newShareBitWire := 0.U //readBuffer.cacheLine.response(1)//Can put to 0.U       
@@ -492,10 +597,26 @@ class cacheLookupUnit extends Module{
     val isReservationMatch32 = WireDefault((reservationRegister.address((addrWidth-1),2)) === (readBuffer.address((addrWidth-1),2)))
     val isReservationMatch64 = WireDefault((reservationRegister.address((addrWidth-1),3)) === (readBuffer.address((addrWidth-1),3)))
     val isReservationMatch = Mux(reservationRegister.size.asBool, isReservationMatch64, isReservationMatch32)
-    when(reservationRegister.reserved && (isCoherentWire || isWriteWire ||  isAtmoicWriteWire)){
+    // Snoops carry LINE-aligned addresses (low bits zero), so a word/dword
+    // compare only ever matches a reservation on dword 0 of the line: a peer
+    // could steal the whole line while a reservation on any other offset
+    // survived, and the SC then reported success without owning the line —
+    // a silent cross-hart lost update (Linux: corrupted mutex owner /
+    // csd llist / tty state; MUTEX_WARN_ON(owner & MUTEX_FLAG_PICKUP)).
+    // Coherent ops therefore kill on LINE match; the core's own stores keep
+    // the word/dword granularity below (a spurious SC failure is legal, a
+    // false success is not).
+    val isReservationLineMatch = WireDefault(
+      reservationRegister.address(addrWidth - 1, log2Ceil(lineSize)) ===
+        readBuffer.address(addrWidth - 1, log2Ceil(lineSize)))
+    when(reservationRegister.reserved && isCoherentWire && isReservationLineMatch){
+      reservationRegister.reserved := false.B
+      guardSnoopLanded := true.B   // deferred snoop drained -> guard may re-arm
+    }
+    when(reservationRegister.reserved && (isWriteWire ||  isAtmoicWriteWire)){
       switch(reservationRegister.size){
-        is(0.U){reservationRegister.reserved := !isReservationMatch32}  
-        is(1.U){reservationRegister.reserved := !isReservationMatch64}     
+        is(0.U){reservationRegister.reserved := !isReservationMatch32}
+        is(1.U){reservationRegister.reserved := !isReservationMatch64}
       }
     }
 
@@ -532,13 +653,15 @@ class cacheLookupUnit extends Module{
       }
     }
     when(isLRReadWire || isAtmoicReadWire){
-      when(isReplayValidWire || (!isPermissionMiss && !isDataMissWire)){ //Hit
+      when((isReplayValidWire && !isStaleUpgradeReplay) || (!isPermissionMiss && !isDataMissWire)){ //Hit
         toMemoryResponseValidWire := true.B
         tagBRAMUpdateWire:= true.B
         toReservationRegisterWire := true.B
         toWriteBackValidWire := (isUpdateDirtyWire && isUpdateValidWire) && isReplayValidWire && !isPermissionMiss
         dataBRAMUpdateWire := writeCacheLineUpdate
       } .otherwise {
+        // isStaleUpgradeReplay lands here with isDataMissWire set, so the
+        // required response is the data-carrying "b01" ReadUnique.
         toReplayValidWire := true.B
         requiredResponseWire := Mux(isPermissionMiss && !isDataMissWire, "b11".U, "b01".U)
         toLastInorderMissRecordRegisterWire := true.B
@@ -550,7 +673,7 @@ class cacheLookupUnit extends Module{
       tagBRAMUpdateWire:= !isDataMissWire
     }
     when(isWriteWire || isAtmoicWriteWire){
-      when(isReplayValidWire || (!isPermissionMiss && !isDataMissWire)){
+      when((isReplayValidWire && !isStaleUpgradeReplay) || (!isPermissionMiss && !isDataMissWire)){
         toWriteBackValidWire := (isUpdateDirtyWire && isUpdateValidWire) && isReplayValidWire && !isPermissionMiss
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
@@ -563,8 +686,19 @@ class cacheLookupUnit extends Module{
     }
     when(isSCReadWire){toMemoryResponseValidWire := true.B}
     when(isSCWriteWire){
+      scWritePassFire := true.B
       reservationRegister.reserved := false.B
-      when(reservationRegister.reserved && isReservationMatch){
+      // SC may only write if the reservation held AND the line is still
+      // present and owned (not shared, not evicted). Without the presence
+      // check, an eviction (or, before the line-granular kill above, a peer
+      // steal) between LR and SC left the reservation set and this pass
+      // wrote tag+data into whatever way the replacement pointer chose —
+      // corrupting an unrelated line. The result reported at the SC read
+      // pass uses the same condition, and the arbiter's atomic window keeps
+      // same-line snoops out between the two passes, so read-pass success
+      // implies write-pass success.
+      when(reservationRegister.reserved && isReservationMatch &&
+           !isDataMissWire && !isSharedWire){
         toWriteBackValidWire := isDirtyWire  &&  isReplayValidWire && isDataMissWire && !isPermissionMiss
         tagBRAMUpdateWire:= true.B
         dataBRAMUpdateWire := true.B
@@ -601,8 +735,11 @@ class cacheLookupUnit extends Module{
                                     doubleWordChoosen)}
     }
     when(isSCReadWire){
-      responseResultWire := Mux(reservationRegister.reserved && isReservationMatch, 0.U, 1.U)
-    } 
+      // Success (0) requires the line be PRESENT and OWNED in addition to a
+      // live matching reservation — see the isSCWriteWire comment above.
+      responseResultWire := Mux(reservationRegister.reserved && isReservationMatch &&
+                                !isDataMissWire && !isSharedWire, 0.U, 1.U)
+    }
 
     //____________________Output Buffer update___________________//
     //Replay
@@ -626,7 +763,17 @@ class cacheLookupUnit extends Module{
         coherencyResponseBuffer.cacheLine := Mux(!isDataMissWire, dataBRAMVec(hitTagWire).rdData, 0.U)
         coherencyResponseBuffer.dataValid := !isDataMissWire
         coherencyResponseBuffer.response := newShareBitWire ## Mux(readBuffer.cacheLine.response(1), isDirtyWire, 0.U)
-      } .elsewhen(readBuffer.cacheLine.response(1) && isDirtyWire && !isSharedWire){
+      } .elsewhen(readBuffer.cacheLine.response(1) && !isDataMissWire){
+        // Invalidating snoop (CleanUnique) on ANY valid copy must offer the
+        // line data, not only when it is dirty+exclusive. A CleanUnique whose
+        // requester lost its own copy mid-flight (peer ReadUnique) otherwise
+        // destroys the system's last valid copy with no data transfer and no
+        // writeback: the next fill then comes from stale L2 (mt-lrscirq:
+        // barrier count/sense reverted to a pre-arrival snapshot, all four
+        // harts spin forever; same shape wedges Linux spinlocks). The
+        // requester side already accepts CleanUnique data — wasCleanUniqueReg
+        // clears when a full line streams in — so offering it here completes
+        // that path. PassDirty still reflects this copy's dirty bit.
         coherencyResponseBuffer.cacheLine := Mux(!isDataMissWire, dataBRAMVec(hitTagWire).rdData, 0.U)
         coherencyResponseBuffer.dataValid := !isDataMissWire
         coherencyResponseBuffer.response := Mux(!isDataMissWire, newShareBitWire ## Mux(readBuffer.cacheLine.response(1), isDirtyWire, 0.U), 0.U)
@@ -639,7 +786,11 @@ class cacheLookupUnit extends Module{
     //WriteBack
     when(toWriteBackValidWire){
       writeBackBuffer.valid := toWriteBackValidWire
-      writeBackBuffer.address := Cat(tagChunks(updatingSet), readBuffer.address(addrEnd, addrBeg), 0.U(log2Ceil(lineSize).W))
+      // Explicitly slice the pure tag (drop PLRU/Share/Dirty/Valid flags) —
+      // matches walkerWriteBackBuffer. Relying on 36→32 truncation of
+      // Cat(fullTagChunk, set, off) is fragile if tagSection ever changes.
+      writeBackBuffer.address := Cat(tagChunks(updatingSet)(tagSize - 1, 0),
+        readBuffer.address(addrEnd, addrBeg), 0.U(log2Ceil(lineSize).W))
       writeBackBuffer.data := dataBRAMVec(updatingSet).rdData
     }
     

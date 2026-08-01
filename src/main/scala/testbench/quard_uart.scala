@@ -101,7 +101,11 @@ class uartPort extends Module {
 
   // client.RDATA := Mux((readRequestBuffer.address&("hff".U)) === ("h2c".U), 8.U, 0.U)
   val ps_stat = RegInit(0.U(32.W))
-  client.RDATA := 8.U
+  // Default for UNMAPPED reads must be 0, not a nonzero constant: a wild
+  // kernel %s scan (e.g. the corrupted-pointer .owner dump in spin_dump)
+  // walking unmapped space otherwise never sees a NUL byte and livelocks the
+  // console hart forever. Every real register below has an explicit entry.
+  client.RDATA := 0.U
   switch(readRequestBuffer.address) {
     is("he000002c".U) { client.RDATA := 2.U }
     is("h40600000".U) { client.RDATA := 2.U }
@@ -119,7 +123,11 @@ class uartPort extends Module {
     // golden model's uartlite model (hart_execute.inc) and real hardware. The
     // old 4096 (bit 12, undefined) diverged from the emulator's 0x4 and failed
     // lockstep at the benchmark print loop's status poll.
-    is("h040600008".U){client.RDATA := 4.U}
+    // (Was "h040600008" — 9 hex digits, a 36-bit literal that could never
+    // match the 32-bit address, so STATUS reads silently fell through to the
+    // unmapped-read default. TX still worked because every TX path only
+    // checks TXFULL, but the entry was dead.)
+    is("h40600008".U){client.RDATA := 4.U}
   }
   client.RID := readRequestBuffer.id
   client.RLAST := !readRequestBuffer.len.orR
@@ -388,11 +396,26 @@ class MultiUart extends Module {
     u.localHart      := i.U
   }
   for (hart <- 0 until 4) {
-    // last matching port in this loop wins; iterate high→low so port0 has priority
+    // msip: a foreign SET (an IPI, data bit0=1) can collide in the SAME cycle
+    // with this hart clearing its own msip (data=0) from a prior handler —
+    // common once timer IRQs delay the handler. The old "last port wins /
+    // port0 priority" arbitration let the local CLEAR clobber the foreign SET,
+    // silently dropping the IPI: bits stays pending but msip never re-asserts,
+    // so the target never traps and the sender's csd_lock_wait hangs forever
+    // (the Linux post-/init smp_call_function wedge; repro mt-ipitmr). A lost
+    // SET is a permanent missed wakeup; a lost CLEAR only costs one spurious
+    // re-trap. So any set this cycle wins over a clear.
+    val msipSets = uarts.map(u =>
+      u.msipWrite.valid && u.msipWrite.hart === hart.U && u.msipWrite.data(0))
+    val msipClrs = uarts.map(u =>
+      u.msipWrite.valid && u.msipWrite.hart === hart.U && !u.msipWrite.data(0))
+    when(msipSets.reduce(_ || _)) {
+      msipShared(hart) := 1.U
+    }.elsewhen(msipClrs.reduce(_ || _)) {
+      msipShared(hart) := 0.U
+    }
+    // mtimecmp: effectively single-writer per hart; last-port-wins is fine.
     for (u <- uarts.reverse) {
-      when(u.msipWrite.valid && u.msipWrite.hart === hart.U) {
-        msipShared(hart) := u.msipWrite.data
-      }
       when(u.mtimecmpWrite.valid && u.mtimecmpWrite.hart === hart.U) {
         mtimecmpShared(hart) := u.mtimecmpWrite.data
       }

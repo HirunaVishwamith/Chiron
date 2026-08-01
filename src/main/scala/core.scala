@@ -113,13 +113,26 @@ class core (
   dataQueue.fromDecode.valid := scheduler.allocate.fired && (decode.toExec.instruction(6, 4) === "b010".U)
   when(instructionDecodedReady) { scheduler.allocate.fired := false.B }
   when(branchOps.valid) {
-   scheduler.allocate.branchMask := decode.toExec.branchMask ^ branchOps.branchMask
-   dataQueue.fromDecode.branchMask := decode.toExec.branchMask ^ branchOps.branchMask
+   // Only clear the resolving branch's bit when it is actually IN this
+   // instruction's mask. An unguarded XOR with a disjoint mask SETS the bit,
+   // tagging the newly-decoded instruction with a younger branch it never
+   // depended on; when that bit is later recycled and its new owner
+   // mispredicts, this instruction is squashed in the scheduler while it is
+   // otherwise on the correct path -> a lost register write (e.g. the ISR's
+   // `li a4,0` loop-init dropped, so the csd-clear loop counter never resets
+   // and the software-IPI handler spins forever: the Linux post-/init
+   // csd_lock_wait wedge, repro mt-ipitmr). Every other branchMask-XOR site
+   // (addressGen L172, mUnit L327, scheduler L112/L155) already guards this;
+   // this allocation site was the sole unguarded one.
+   when((decode.toExec.branchMask & branchOps.branchMask).orR) {
+     scheduler.allocate.branchMask := decode.toExec.branchMask ^ branchOps.branchMask
+     dataQueue.fromDecode.branchMask := decode.toExec.branchMask ^ branchOps.branchMask
+   }
    when(!branchOps.passed) {
     scheduler.allocate.fired := false.B
     rob.allocate.fired := false.B
     dataQueue.fromDecode.valid := false.B
-   } 
+   }
   }
   // waking up instructions before inserting to queue
   wakeUps.foreach { wakeup => {

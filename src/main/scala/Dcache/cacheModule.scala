@@ -128,6 +128,26 @@ class CacheModule (
   aceUnit.readRequest <> replayUnit.requestOut
   aceUnit.coherencyResponse <> cacheLookup.toCoherency
   aceUnit.writeRequest <> replayUnit.writeBackOut
+  // Snoop CAM on writebacks still in the FIFO (between lookup and ACE head).
+  replayUnit.writeBackSnoop.addr := aceUnit.writeBackFifoSnoop.addr
+  aceUnit.writeBackFifoSnoop.hit := replayUnit.writeBackSnoop.hit
+  aceUnit.writeBackFifoSnoop.data := replayUnit.writeBackSnoop.data
+  // Drain-before-refetch: replay holds same-line read misses while their
+  // writeback is anywhere between the FIFO and the AXI B response.
+  replayUnit.aceWriteInFlight.valid := aceUnit.writeInFlight.valid
+  replayUnit.aceWriteInFlight.address := aceUnit.writeInFlight.address
+  // Staging writeback regs (before FIFO) — tags already dropped the victim.
+  cacheLookup.writeBackStageSnoop.addr := aceUnit.writeBackStageSnoop.addr
+  aceUnit.writeBackStageSnoop.hit := cacheLookup.writeBackStageSnoop.hit
+  aceUnit.writeBackStageSnoop.data := cacheLookup.writeBackStageSnoop.data
+  // Same-line fill-install hazard: hold a snoop in the ACE unit while a
+  // replayed fill for that line is dispatching/installing in the lookup.
+  cacheLookup.installSnoop.addr := aceUnit.installSnoop.addr
+  aceUnit.installSnoop.hazard := cacheLookup.installSnoop.hazard
+  // LR/SC forward-progress guard: arbiter defers reserved-line snoops for a
+  // bounded window after an LR (see cacheLookupUnit.reservationGuard).
+  arbiter.reservationGuard.active := cacheLookup.reservationGuard.active
+  arbiter.reservationGuard.address := cacheLookup.reservationGuard.address
 
   //PeripheralUnit
   peripheralUnit.branchOps <> branchOps
@@ -170,6 +190,10 @@ class CacheModule (
     commitFifo.invalidateEnable := true.B
   }
   //Dequeue as requested from the loadCommit
+  // A/B result 2026-07-11: re-enabling this check (removing the two overrides
+  // below) did NOT fix the CPU1 stale-read "spinlock bad magic" and DID
+  // deadlock mt-radix-q4 (no commit at 0x800004ec), so the overrides stay.
+  // The commitFifo order assumptions need rework before this can go live.
   when(loadCommit.ready){
     commitFifo.read.ready := true.B
     loadCommit.state := commitFifo.read.data.valid

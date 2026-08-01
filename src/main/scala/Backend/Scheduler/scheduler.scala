@@ -145,8 +145,20 @@ class scheduler extends Module {
     releasedBuffer.rs2prfAddr := dequeued.rs2.prfAddr
     releasedBuffer.valid := dequeued.valid && (!branchOps.valid || !(dequeued.branchMask & branchOps.branchMask).orR || branchOps.passed) && readyVector.orR
   }.elsewhen(branchOps.valid) {
-    releasedBuffer.branchMask := releasedBuffer.branchMask ^ branchOps.branchMask
-    releasedBuffer.valid := releasedBuffer.valid && (!branchOps.valid || !(releasedBuffer.branchMask & branchOps.branchMask).orR || branchOps.passed)
+    // Only touch the mask when the resolving branch's bit is actually in it:
+    // an unguarded XOR with a disjoint mask SETS the bit, tagging this waiting
+    // instruction with a younger branch it never depended on. When that bit is
+    // recycled and the new owner mispredicts, the instruction is killed here
+    // while its (older) ROB entry survives the flush — ROB head wedges forever
+    // (Linux SMP: divuw parked at __update_load_avg_cfs_rq with the M-unit
+    // idle and mExtensionReady high). Queue entries above already guard this.
+    when((releasedBuffer.branchMask & branchOps.branchMask).orR) {
+      when(branchOps.passed) {
+        releasedBuffer.branchMask := releasedBuffer.branchMask ^ branchOps.branchMask
+      }.otherwise {
+        releasedBuffer.valid := false.B
+      }
+    }
   }
 }
 

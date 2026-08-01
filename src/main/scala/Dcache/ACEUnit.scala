@@ -27,6 +27,33 @@ class ACEUnit(
     val ready = Output(Bool())
     val request = Input(new writeBackWire)
   })
+  // In-flight writebacks still in the replay FIFO (not yet in writeBuffer).
+  // Must answer snoops from here: L1 tags already dropped the victim.
+  val writeBackFifoSnoop = IO(new Bundle {
+    val addr = Output(UInt(addrWidth.W))
+    val hit = Input(Bool())
+    val data = Input(new writeBackWire)
+  })
+  // Staging writeback regs inside cacheLookup (before FIFO enqueue).
+  val writeBackStageSnoop = IO(new Bundle {
+    val addr = Output(UInt(addrWidth.W))
+    val hit = Input(Bool())
+    val data = Input(new writeBackWire)
+  })
+  // Fill-install hazard from cacheLookup: a replayed fill for the snooped
+  // line is dispatching/installing right now — hold the snoop until the
+  // install is visible in the tags (see cacheLookupUnit.installSnoop).
+  val installSnoop = IO(new Bundle {
+    val addr = Output(UInt(addrWidth.W))
+    val hazard = Input(Bool())
+  })
+  // Writeback currently held in the ACE write FSM (dequeued from the replay
+  // FIFO, on/awaiting the AXI W channel). The replay unit gates same-line
+  // read misses on this — see fifoBypassModule.selfHit for why.
+  val writeInFlight = IO(new Bundle {
+    val valid = Output(Bool())
+    val address = Output(UInt(addrWidth.W))
+  })
   val coherencyRequest = IO(new Bundle {
     val ready = Input(Bool())
     val request = Output(new coherencyRequestWire)
@@ -118,10 +145,38 @@ class ACEUnit(
   val isWriteACEBusyWire = WireDefault(false.B)
   val isCoherencyAddressMatchWire = WireDefault(responseBuffer.address(addrWidth - 1, log2Ceil(lineSize)) === coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize)))
   val isWriteAddressMatchWire = WireDefault(false.B)
-  when(writeRequest.request.valid && !writeBuffer.valid){
-    isWriteAddressMatchWire := writeRequest.request.address(addrWidth - 1, log2Ceil(lineSize)) === coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize))
-  } .elsewhen(writeBuffer.valid){
-    isWriteAddressMatchWire  := writeBuffer.address(addrWidth - 1, log2Ceil(lineSize)) === coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize))
+  // Source for a snoop hit on the writeback pipeline. Priority (freshest first):
+  //   1. ACE writeBuffer (on the bus)
+  //   2. writeRequest (FIFO head at ACE port)
+  //   3. writeBackFIFO CAM
+  //   4. cacheLookup staging regs (writeBackBuffer / walkerWriteBackBuffer)
+  // Staging is last among "in flight" but was the first hole we closed after
+  // FIFO: tags already point at the new line while dirty data sits in the reg.
+  val writePipeHitData = Wire(new writeBackWire)
+  zeroInit(writePipeHitData)
+  val writePipeHit = WireDefault(false.B)
+  writeBackFifoSnoop.addr := coherencyRequestBuffer.address
+  writeBackStageSnoop.addr := coherencyRequestBuffer.address
+  when(writeBuffer.valid &&
+       writeBuffer.address(addrWidth - 1, log2Ceil(lineSize)) ===
+         coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize))) {
+    isWriteAddressMatchWire := true.B
+    writePipeHit := true.B
+    writePipeHitData := writeBuffer
+  }.elsewhen(writeRequest.request.valid &&
+             writeRequest.request.address(addrWidth - 1, log2Ceil(lineSize)) ===
+               coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize))) {
+    isWriteAddressMatchWire := true.B
+    writePipeHit := true.B
+    writePipeHitData := writeRequest.request
+  }.elsewhen(writeBackFifoSnoop.hit) {
+    isWriteAddressMatchWire := true.B
+    writePipeHit := true.B
+    writePipeHitData := writeBackFifoSnoop.data
+  }.elsewhen(writeBackStageSnoop.hit) {
+    isWriteAddressMatchWire := true.B
+    writePipeHit := true.B
+    writePipeHitData := writeBackStageSnoop.data
   }
 
   //ReadBuffer operations
@@ -143,6 +198,8 @@ class ACEUnit(
   ACEMSHR.branchOps := branchOps
 
   //WriteRequests operations
+  writeInFlight.valid := writeBuffer.valid
+  writeInFlight.address := writeBuffer.address
   writeRequest.ready := !writeBuffer.valid
   when(!writeBuffer.valid && writeRequest.request.valid){
     writeBuffer := writeRequest.request
@@ -150,6 +207,10 @@ class ACEUnit(
 
   //CoherentRequests operations
   coherencyRequest.request := coherencyRequestBuffer
+  // Presentation gate (assigned again below once the hold conditions exist;
+  // see the toCoherentRequestInStateWire block) — a snoop already presented
+  // to the arbiter must ALSO drop while a same-line fill streams/installs,
+  // or the arbiter dispatches it against pre-install tags.
 
   //COherentResponse operations
   coherencyResponse.ready := !coherencyResponseBuffer.valid
@@ -255,6 +316,10 @@ class ACEUnit(
   val wasCleanUniqueReg = RegInit(false.B)
   readCounter.incrm := false.B
   readCounter.reset := false.B
+  // True on the cycle responseBuffer is (re)loaded from the MSHR. The
+  // regRecordUpdate below must not touch the buffer on such a cycle — see the
+  // comment there.
+  val responseBufferLoading = WireDefault(false.B)
   switch(readACEResponseState) {
     is(readDataInState){
       readCounter.reset := true.B
@@ -262,6 +327,7 @@ class ACEUnit(
       when(!ACEMSHR.isEmpty){
         ACEMSHR.read.ready := true.B
         responseBuffer := ACEMSHR.read.data
+        responseBufferLoading := true.B
       }
       responseBuffer.valid := false.B
       
@@ -298,8 +364,29 @@ class ACEUnit(
 
       readACEResponseState := Mux(readResponse.ready, readDataInState, readDataOutState)
     }
-  } 
-  regRecordUpdate(responseBuffer.branch, branchOps)
+  }
+  // Do NOT age the branch state of a buffer that is being loaded this cycle.
+  // This block is elaborated after the switch above, so on a cycle where the
+  // MSHR pop (readDataInState) and a branch resolution coincide it wins
+  // last-connect over `responseBuffer := ACEMSHR.read.data` — and
+  // regRecordUpdate's branch-PASS arm ends in an unconditional
+  // `buffer.valid := buffer.valid` (utils.scala:137) which writes back the
+  // PREVIOUS occupant's valid bit. That resurrects a squashed request:
+  // measured on mt-ipitmr, where the wrong-path `ld a5,384(a2)` at 0x488 (past
+  // the loop exit of `bne a4,a6,454`) was correctly squashed everywhere —
+  // aceUnit.readBuffer, the MSHR entry, replayUnit's FIFO, the miss records —
+  // and then came back out of responseBuffer with branch.valid=1/mask=0, i.e.
+  // looking NON-speculative. cacheModule.scala:160's branch.valid gate passed
+  // it, and since core.scala:837 puts no squash check on the load write port,
+  // it wrote PRF[33] — by then the committed mapping of a4, whose loop counter
+  // it replaced with 0x290, hanging the ISR loop forever.
+  // The freshly popped entry needs no ageing here: the FIFO read port already
+  // applies this cycle's branchOps to it (fifo.scala regReadUpdate).
+  // readBuffer above is immune to the same hazard only by construction —
+  // readRequest.ready := !readBuffer.valid makes load and update exclusive.
+  when(!responseBufferLoading) {
+    regRecordUpdate(responseBuffer.branch, branchOps)
+  }
 
   //--------------------Coherent state----------------------------//
   //* Since a new coherent request comes after the previous request's response is released-
@@ -308,8 +395,28 @@ class ACEUnit(
   val responseValidReg = RegInit(false.B)
   val coherentAXIState = RegInit(coherentIdleState)
   val coherentCounter = Module(new moduleCounter(length))
-  val toCoherentRequestInStateWire = WireDefault(isReadRespBusy && isCoherencyAddressMatchWire)
-  val chooseFromWriteBufferWire = WireDefault(isWriteAddressMatchWire && isWriteACEBusyWire)
+  installSnoop.addr := coherencyRequestBuffer.address
+  // Hold the snoop while a same-line fill is anywhere between the ACE R
+  // channel and the BRAM install: streaming/presented here (isReadRespBusy)
+  // OR dispatching/installing in the lookup (installSnoop.hazard). Without
+  // the second term the snoop reads pre-install tags, answers "not present",
+  // and the stale fill then installs as valid — a permanently stale line.
+  // The hazard is same-line and clears within two cycles of the install, so
+  // it cannot deadlock the CCU.
+  val toCoherentRequestInStateWire = WireDefault(
+    (isReadRespBusy && isCoherencyAddressMatchWire) || installSnoop.hazard)
+  // Gate the snoop's presentation to the arbiter with the same hold: a snoop
+  // parked in coherentRequestInState (e.g. deferred by the arbiter's atomic
+  // window) must retract while a same-line fill streams in or installs.
+  // The buffer stays valid, so presentation resumes when the hold clears.
+  when(toCoherentRequestInStateWire) {
+    coherencyRequest.request.valid := false.B
+  }
+  // Serve snoop from the writeback pipeline whenever it holds the line — not
+  // only when the ACE write FSM is "busy". A line sitting only in writeBackFIFO
+  // never made writeBuffer.valid, so the old isWriteACEBusyWire gate answered
+  // "no data" while dirty bytes were mid-flight.
+  val chooseFromWriteBufferWire = WireDefault(writePipeHit)
 
   isCoherencyIdle := (coherentAXIState === coherentIdleState)
   coherentCounter.incrm := false.B
@@ -328,16 +435,21 @@ class ACEUnit(
     }
     is(coherencyRequestWaitState){
       when(chooseFromWriteBufferWire){
-        coherencyResponseBuffer.valid := writeBuffer.valid
-        coherencyResponseBuffer.address := writeBuffer.address
-        coherencyResponseBuffer.cacheLine := writeBuffer.data
-        coherencyResponseBuffer.response := "b01".U
+        // Dirty writeback always has the current line. MUST set dataValid so
+        // CRRESP.DataTransfer=1 and CDDATA carries writePipeHitData — without
+        // it (old code left dataValid stale/0) CCU took L2/DRAM instead and
+        // the later WriteBack could cross data with another transaction.
+        coherencyResponseBuffer.valid := writePipeHitData.valid
+        coherencyResponseBuffer.address := writePipeHitData.address
+        coherencyResponseBuffer.cacheLine := writePipeHitData.data
+        coherencyResponseBuffer.response := "b01".U // !IsShared, PassDirty
+        coherencyResponseBuffer.dataValid := writePipeHitData.valid
       }.otherwise{
         coherencyRequestBuffer.valid := Mux(toCoherentRequestInStateWire, false.B, true.B)
       }
 
       when(chooseFromWriteBufferWire){
-        coherentAXIState := Mux(writeBuffer.valid, coherentResponseState, coherencyRequestWaitState)
+        coherentAXIState := Mux(writePipeHitData.valid, coherentResponseState, coherencyRequestWaitState)
       }.otherwise{
         coherentAXIState := Mux(toCoherentRequestInStateWire, coherencyRequestWaitState, coherentRequestInState)
       }

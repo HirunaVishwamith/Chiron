@@ -195,11 +195,12 @@
               }
               else
               {
-                // Match RTL uartPort default: client.RDATA := 8.U for any
-                // address not decoded (PLIC, unused MMIO, …). Old 0x1000 made
-                // __plic_toggle's lw of the enable word disagree with RTL and
-                // failed lockstep (~19M commits in).
-                load_data = 8;
+                // Match RTL uartPort default: client.RDATA := 0.U for any
+                // address not decoded (PLIC, unused MMIO, …). Was 8 (the old
+                // RTL default); 0 lets a wild kernel %s scan over unmapped
+                // space self-terminate (spin_dump .owner livelock) — keep the
+                // two models identical or lockstep fails at __plic_toggle.
+                load_data = 0;
               }
             }
             switch (func3)

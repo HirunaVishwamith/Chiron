@@ -104,7 +104,15 @@ class fifoWithBranchOps[T <: requestPipelineTrait](depth: Int, traitType: T) ext
 
   when(branchOps.valid) {
     for (i <- 0 until depth) {
-      when(startPointer <= i.U || i.U <= endPointer) {
+      // Never touch the slot being WRITTEN this cycle: its update comes from
+      // regWriteUpdate above (fresh data + this cycle's branchOps). This loop
+      // reads the slot's OLD register value, and last-connect would clobber
+      // the fresh entry with stale-mask garbage (branch pass) or kill it
+      // outright (branch fail) — a committed store dropped from the inorder
+      // queue this way served a stale dword to a peer's snoop on the Linux
+      // SMP boot (CPU1 read a zero task pointer in complete()).
+      when((startPointer <= i.U || i.U <= endPointer) &&
+           !(doWrite && i.U === writePtr)) {
         when(branchOps.passed) {
           when((memReg(i).branch.mask & branchOps.branchMask).orR) {
             memReg(i).branch.mask := memReg(i).branch.mask ^ branchOps.branchMask
@@ -161,9 +169,21 @@ class fifoBypassModule[T <: baseTrait](depth: Int, traitType: T) extends Module 
   })
   val isEmpty = IO(Output(Bool()))
 
+  // Line-address CAM for coherence: a dirty line in-flight in this FIFO is
+  // no longer in the L1 tags (replacement already dropped it) and is not yet
+  // in ACE writeBuffer. Without a snoop hit here the core answers "no data"
+  // while still owning the only current copy — CCU then serves stale L2/DRAM
+  // and the later writeback can race (proven spinlock-line corruption under
+  // Linux SMP: DRAM at a kernel data PA holding another line's text bytes).
+  val snoopAddr = IO(Input(UInt(addrWidth.W)))
+  val snoopHit = IO(Output(Bool()))
+  val snoopData = IO(Output(traitType.cloneType))
+
   zeroInit(read.data)
   isEmpty := false.B
   write.ready := false.B
+  snoopHit := false.B
+  zeroInit(snoopData)
 
   protected val memReg = RegInit(0.U.asTypeOf(Vec(depth, traitType.cloneType)))
 
@@ -232,9 +252,47 @@ class fifoBypassModule[T <: baseTrait](depth: Int, traitType: T) extends Module 
     memReg(writePtr) := write.data
   }
 
+  // Invalidate a slot as it is dequeued: both CAMs below scan raw memReg
+  // entries, and a stale (already-drained) writeback left valid would (a)
+  // serve OLD line data to a peer's snoop and (b) wedge the owner's own
+  // drain-before-refetch gate forever (proven: boot hart froze in percpu
+  // setup). The doWrite guard keeps a same-cycle write to the same slot
+  // (read while full) from being clobbered, regardless of connect order.
+  when(incrRead && !(doWrite && writePtr === readPtr)) {
+    memReg(readPtr).valid := false.B
+  }
+
   // Bypass write data to read when FIFO is empty and both read/write are ready
   read.data := Mux(bypass, write.data, memReg(readPtr))
   read.data.valid := Mux(bypass, true.B, !emptyReg)
   write.ready := !fullReg
   isEmpty := emptyReg
+
+  // Snoop CAM: hit any valid entry (or the bypassing write) at the same line.
+  // Priority: lowest index first (deterministic); bypass beats only when empty.
+  val lineHi = log2Ceil(lineSize)
+  val snoopLine = snoopAddr(addrWidth - 1, lineHi)
+  val entryHits = VecInit(memReg.map { e =>
+    e.valid && e.address(addrWidth - 1, lineHi) === snoopLine
+  })
+  val bypassHit = bypass && write.data.valid &&
+    write.data.address(addrWidth - 1, lineHi) === snoopLine
+  snoopHit := entryHits.asUInt.orR || bypassHit
+  snoopData := Mux(bypassHit, write.data,
+    MuxCase(memReg(0), entryHits.zipWithIndex.map { case (h, i) =>
+      h -> memReg(i)
+    }))
+
+  // Second, independent CAM port: the owning core's OWN read-miss path must
+  // not overtake a queued writeback of the same line (refill would return the
+  // pre-eviction version from L2 and the line splits into two partial
+  // copies — proven on the Linux SMP boot as a stale task pointer served to
+  // a peer). Hit = any valid entry or the bypassing write on the same line.
+  val selfAddr = IO(Input(UInt(addrWidth.W)))
+  val selfHit = IO(Output(Bool()))
+  val selfLine = selfAddr(addrWidth - 1, lineHi)
+  selfHit := memReg.map { e =>
+    e.valid && e.address(addrWidth - 1, lineHi) === selfLine
+  }.reduce(_ || _) || (bypass && write.data.valid &&
+    write.data.address(addrWidth - 1, lineHi) === selfLine)
 }

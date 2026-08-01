@@ -1618,7 +1618,29 @@ class ccu extends Module {
 		}
 		is(1.U){//SELECT
 			stateReg_12 := 2.U
-			when(crpbuf_3_0(0)){ //here i am only checking it is shared or not because according to MOESI protocol.
+			// Prefer the PassDirty responder (CRRESP bit2) over any clean
+			// DataTransfer: when a dirty owner and clean sharers both offer
+			// data, index-priority used to pick a clean sharer, dropping
+			// PassDirty — the requester installed the line clean, nobody
+			// owned the writeback, and L2 silently went stale (mt-lrscirq
+			// barrier corruption / stale-fill after the last copy died).
+			when(crpbuf_3_0(0) && crpbuf_3_0(2)){
+				select_buff := "b0000".U(4.W)
+			}.elsewhen(crpbuf_3_1(0) && crpbuf_3_1(2)){
+				select_buff := "b0001".U(4.W)
+			}.elsewhen(crpbuf_3_2(0) && crpbuf_3_2(2)){
+				select_buff := "b0010".U(4.W)
+			}.elsewhen(crpbuf_3_3(0) && crpbuf_3_3(2)){
+				select_buff := "b0011".U(4.W)
+			}.elsewhen(crpbuf_3_4(0) && crpbuf_3_4(2)){
+				select_buff := "b0100".U(4.W)
+			}.elsewhen(crpbuf_3_5(0) && crpbuf_3_5(2)){
+				select_buff := "b0101".U(4.W)
+			}.elsewhen(crpbuf_3_6(0) && crpbuf_3_6(2)){
+				select_buff := "b0110".U(4.W)
+			}.elsewhen(crpbuf_3_7(0) && crpbuf_3_7(2)){
+				select_buff := "b0111".U(4.W)
+			}.elsewhen(crpbuf_3_0(0)){
 				select_buff := "b0000".U(4.W)
 			}.elsewhen(crpbuf_3_1(0)){
 				select_buff := "b0001".U(4.W)
