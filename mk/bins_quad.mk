@@ -5,7 +5,8 @@
 #
 # Usage:  make bins-q4      → produces bins/mt-*-q4.bin for all listed benchmarks
 
-QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy mt-seqlock mt-radix mt-spinwait mt-divburst mt-divirq
+QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy mt-seqlock mt-radix mt-spinwait mt-divburst mt-divirq \
+               mt-ipi mt-ipitmr mt-ipimux mt-lrsc mt-lrscirq
 
 # Number of harts baked into the -q4 (and scale-q4) benchmarks. Override on the
 # command line, e.g.  make bins-q4 NUM_CORES=8 .  crt.S guards its own default
@@ -78,3 +79,25 @@ radix-bin:    ## Build just bins/mt-radix-q4.bin (fast iteration, no clean)
 	@mkdir -p $(BINS)
 	cp $(BENCH_SRC)/mt-radix.bin $(BINS)/mt-radix-q4.bin
 	@echo "[radix-bin] staged: $(BINS)/mt-radix-q4.bin"
+
+# ── SMP-coherency regression microbenchmarks ─────────────────────────────────
+# Each one is the minimal bare-metal repro of a bug found while bringing up
+# quad-core Linux; they are the regressions for the RTL fixes on this branch:
+#   mt-ipi      plain CLINT MSIP -> trap path
+#   mt-ipitmr   MSIP under timer-IRQ pressure  (msip set/clear collision,
+#               unguarded allocate-branchMask XOR, ACE responseBuffer clobber)
+#   mt-ipimux   Linux 6.3 ipi_mux layered protocol, all harts sender+receiver
+#   mt-lrsc     four-hart contended lr/sc (reservation forward progress)
+#   mt-lrscirq  the same under IRQ fire      (stale CleanUnique upgrade)
+# Usage: make ipi-bin / ipitmr-bin / ipimux-bin / lrsc-bin / lrscirq-bin
+define smp_bmark_rule
+.PHONY: $(1)-bin
+$(1)-bin:    ## Build just bins/mt-$(1)-q4.bin (fast iteration, no clean)
+	$$(TOOLPATH) $$(MAKE) -C $$(BENCH_SRC) riscv \
+	    bmarks="mt-$(1)" \
+	    RISCV_GCC_OPTS="$$(QUAD_GCC_OPTS)"
+	@mkdir -p $$(BINS)
+	cp $$(BENCH_SRC)/mt-$(1).bin $$(BINS)/mt-$(1)-q4.bin
+	@echo "[$(1)-bin] staged: $$(BINS)/mt-$(1)-q4.bin"
+endef
+$(foreach b,ipi ipitmr ipimux lrsc lrscirq,$(eval $(call smp_bmark_rule,$(b))))
