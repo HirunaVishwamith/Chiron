@@ -428,6 +428,8 @@ int main(int argc, char *argv[]) {
                  << " pc=0x" << hex << rtl_pc << " kind=" << dec
                  << op.kind << " x" << r << " rtl=0x" << hex << rtl_rd
                  << " golden=0x" << gold_rd << " addr=0x" << op.addr
+                 << " dram=0x" << bench.read_dram64(op.addr)
+                 << " gmem=0x" << golden_model.read_mem64(op.addr & ~7ULL)
                  << dec << " site_n=" << n_site << endl;
           r = bench.check_registers(h, golden_model.reg_file(h),
                                     golden_model.get_mstatus(h));

@@ -57,6 +57,16 @@ int main(int argc, char **argv) {
   auto t_last  = t_start;
   uint64_t steps = 0, last_steps = 0;
   uint64_t last_pc[4] = {};
+  // Per-hart PC band over the current heartbeat window (min/max of every
+  // committed PC sampled). A livelock spins across a *changing* PC each commit,
+  // so a single snapshot can't see it — but a tight loop keeps [min,max] small
+  // and, crucially, *identical* window after window. We track that band and the
+  // previous window's band so the heartbeat can flag "pinned" harts (band tiny
+  // AND unchanged) — the true livelock signature — and print the exact address
+  // range to disassemble.
+  uint64_t band_lo[4], band_hi[4];
+  uint64_t prev_lo[4] = {}, prev_hi[4] = {};
+  for (int i = 0; i < 4; ++i) { band_lo[i] = ~0ULL; band_hi[i] = 0; }
 
   // Run forever; UART TX from all four cores' uartPorts is streamed to stdout
   // from inside step_any_nodump() (the SHOW_TERMINAL hook in rtl_model.h).
@@ -75,6 +85,13 @@ int main(int argc, char **argv) {
     }
     ++steps;
 
+    // Fold every committed PC into the per-hart band for this window.
+    for (int i = 0; i < 4; ++i) {
+      uint64_t p = bench.core_pc(i);
+      if (p < band_lo[i]) band_lo[i] = p;
+      if (p > band_hi[i]) band_hi[i] = p;
+    }
+
     if (heartbeat) {
       auto now = clock::now();
       if (std::chrono::duration_cast<std::chrono::milliseconds>(now - t_last).count() >= 5000) {
@@ -82,19 +99,42 @@ int main(int argc, char **argv) {
         double total = std::chrono::duration<double>(now - t_start).count();
         uint64_t pc[4];
         for (int i = 0; i < 4; ++i) pc[i] = bench.core_pc(i);
+        // A hart is "pinned" if its band this window spans < 4 KB AND is
+        // identical to last window's band — spinning in a fixed code region.
+        int pinned = 0;
+        char flag[4];
+        for (int i = 0; i < 4; ++i) {
+          bool tight = (band_hi[i] >= band_lo[i]) &&
+                       (band_hi[i] - band_lo[i] < 0x1000);
+          bool same  = (band_lo[i] == prev_lo[i]) && (band_hi[i] == prev_hi[i]);
+          flag[i] = (tight && same) ? '#' : (pc[i] == last_pc[i] ? '*' : ' ');
+          if (tight && same) ++pinned;
+        }
         std::fprintf(stderr,
-          "[linux_sim] +%5.0fs  steps=%-10lu (%6.0f/s)  cycles=%-12lu  "
-          "pc0=0x%08lx%s pc1=0x%08lx%s pc2=0x%08lx%s pc3=0x%08lx%s\n",
+          "[linux_sim] +%6.0fs steps=%-11lu (%6.0f/s) cyc=%-12lu  "
+          "pc0=%08lx%c pc1=%08lx%c pc2=%08lx%c pc3=%08lx%c%s\n",
           total, (unsigned long)steps,
           (steps - last_steps) / (dt > 0 ? dt : 1), bench.tickcount,
-          (unsigned long)pc[0], pc[0] == last_pc[0] ? "*" : " ",
-          (unsigned long)pc[1], pc[1] == last_pc[1] ? "*" : " ",
-          (unsigned long)pc[2], pc[2] == last_pc[2] ? "*" : " ",
-          (unsigned long)pc[3], pc[3] == last_pc[3] ? "*" : " ");
+          (unsigned long)pc[0], flag[0], (unsigned long)pc[1], flag[1],
+          (unsigned long)pc[2], flag[2], (unsigned long)pc[3], flag[3],
+          pinned == 4 ? "  <<< ALL 4 PINNED (livelock?)" : "");
+        // On an all-pinned window, dump each hart's spin band once.
+        if (pinned == 4)
+          std::fprintf(stderr,
+            "            bands: c0=[%08lx..%08lx] c1=[%08lx..%08lx] "
+            "c2=[%08lx..%08lx] c3=[%08lx..%08lx]\n",
+            (unsigned long)band_lo[0], (unsigned long)band_hi[0],
+            (unsigned long)band_lo[1], (unsigned long)band_hi[1],
+            (unsigned long)band_lo[2], (unsigned long)band_hi[2],
+            (unsigned long)band_lo[3], (unsigned long)band_hi[3]);
         std::fflush(stderr);
         t_last = now;
         last_steps = steps;
-        for (int i = 0; i < 4; ++i) last_pc[i] = pc[i];
+        for (int i = 0; i < 4; ++i) {
+          last_pc[i] = pc[i];
+          prev_lo[i] = band_lo[i]; prev_hi[i] = band_hi[i];
+          band_lo[i] = ~0ULL; band_hi[i] = 0;  // reset band for next window
+        }
       }
     }
   }

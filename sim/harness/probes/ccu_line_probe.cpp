@@ -9,21 +9,43 @@
 // Run  :  build/ccu_line_probe.out bins/linux-q4.bin sim/data/qemu.dtb sim/data/boot.bin
 #include <cstdio>
 #include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include "sim/rtl/rtl_model.h"
 
 #define CCU(sig) tb_->system__DOT__chiron__DOT__interconnect___DOT__CCU__DOT__##sig
 #define CORE_SNOOP(n) \
   tb_->system__DOT__chiron__DOT__core##n##__DOT__memAccess__DOT__aceUnit__DOT__coherencyRequestBuffer_address
 
+// Watched 64B lines. Defaults preserve the original spinlock-corruption pair;
+// override with env CCU_WATCH="addr1,addr2,..." (hex, line-aligned or not).
+static uint64_t watch_base[8];
+static int n_watch = 0;
+static void init_watch(void) {
+  const char *env = getenv("CCU_WATCH");
+  if (!env || !*env) {
+    watch_base[n_watch++] = 0x806b2c00ULL;
+    watch_base[n_watch++] = 0x80274c40ULL;
+    return;
+  }
+  char buf[256]; snprintf(buf, sizeof buf, "%s", env);
+  for (char *tok = strtok(buf, ","); tok && n_watch < 8; tok = strtok(nullptr, ","))
+    watch_base[n_watch++] = strtoull(tok, nullptr, 16) & ~0x3fULL;
+}
 static bool watched(uint64_t a) {
-  return (a >= 0x806b2c00ULL && a < 0x806b2c40ULL) ||
-         (a >= 0x80274c40ULL && a < 0x80274c80ULL);
+  for (int i = 0; i < n_watch; ++i)
+    if (a >= watch_base[i] && a < watch_base[i] + 0x40ULL) return true;
+  return false;
 }
 
 int main(int argc, char **argv) {
   const char *image   = (argc > 1) ? argv[1] : "bins/linux-q4.bin";
   const char *dtb     = (argc > 2) ? argv[2] : "sim/data/qemu.dtb";
   const char *bootrom = (argc > 3) ? argv[3] : "sim/data/boot.bin";
+
+  init_watch();
+  for (int i = 0; i < n_watch; ++i)
+    printf("[ccu] watching line 0x%llx\n", (unsigned long long)watch_base[i]);
 
   simulator bench;
   bench.init(image, dtb, bootrom);

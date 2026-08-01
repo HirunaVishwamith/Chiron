@@ -33,6 +33,57 @@ $(BUILD)/ccu_line_probe.out: $(HARNESS)/probes/ccu_line_probe.cpp $(SIM_HDR) $(V
 $(BUILD)/div_park_probe.out: $(HARNESS)/probes/div_park_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/div_park_probe.cpp $(VSYS_LIB_FAST) -o $@
 
+$(BUILD)/wedge_dump_probe.out: $(HARNESS)/probes/wedge_dump_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/wedge_dump_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/tag_dump_probe.out: $(HARNESS)/probes/tag_dump_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/tag_dump_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/ipi_hang_probe.out: $(HARNESS)/probes/ipi_hang_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ipi_hang_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/tty_scan_probe.out: $(HARNESS)/probes/tty_scan_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/tty_scan_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/ipitmr_wedge_probe.out: $(HARNESS)/probes/ipitmr_wedge_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ipitmr_wedge_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/msip_arb_probe.out: $(HARNESS)/probes/msip_arb_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/msip_arb_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/ipitmr_loop_probe.out: $(HARNESS)/probes/ipitmr_loop_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ipitmr_loop_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/ipitmr_ctx_probe.out: $(HARNESS)/probes/ipitmr_ctx_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ipitmr_ctx_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/inject_fsm_probe.out: $(HARNESS)/probes/inject_fsm_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/inject_fsm_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/rob_integrity_probe.out: $(HARNESS)/probes/rob_integrity_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/rob_integrity_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/arbiter_race_probe.out: $(HARNESS)/probes/arbiter_race_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/arbiter_race_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/periph_squash_probe.out: $(HARNESS)/probes/periph_squash_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/periph_squash_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/arbiter_stall_probe.out: $(HARNESS)/probes/arbiter_stall_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/arbiter_stall_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/injwedge_probe.out: $(HARNESS)/probes/injwedge_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/injwedge_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/brswallow_probe.out: $(HARNESS)/probes/brswallow_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/brswallow_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/brleak_probe.out: $(HARNESS)/probes/brleak_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/brleak_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/robmodify_probe.out: $(HARNESS)/probes/robmodify_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/robmodify_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 # RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
 # its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
 # (CXX_FAST sets -DCHIRON_NO_TRACE so rtl_model.h's tb->trace() compiles out) for
@@ -246,3 +297,48 @@ test_all_images: $(BUILD)/lockstep_isa.out   ## CI: lock-step every ISA test ima
 	 TOTAL=$$(wc -l < test_results.txt); \
 	 echo "ISA passed: $$PASSED / $$TOTAL"; \
 	 [ $$PASSED -eq $$TOTAL ] || { echo "REGRESSION: $$PASSED/$$TOTAL passed (expected ALL to pass -- any FAIL, incl. fence_i, fails CI)"; grep -i ': fail' test_results.txt || true; exit 1; }
+
+$(BUILD)/lrsc_wedge_probe.out: $(HARNESS)/probes/lrsc_wedge_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe2.out: $(HARNESS)/probes/lrsc_wedge_probe2.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe2.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe3.out: $(HARNESS)/probes/lrsc_wedge_probe3.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe3.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe4.out: $(HARNESS)/probes/lrsc_wedge_probe4.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe4.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe5.out: $(HARNESS)/probes/lrsc_wedge_probe5.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe5.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe6.out: $(HARNESS)/probes/lrsc_wedge_probe6.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe6.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe7.out: $(HARNESS)/probes/lrsc_wedge_probe7.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe7.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/rename_a4_probe.out: $(HARNESS)/probes/rename_a4_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/rename_a4_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/mshr_prfdest_probe.out: $(HARNESS)/probes/mshr_prfdest_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/mshr_prfdest_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/prf33_alloc_probe.out: $(HARNESS)/probes/prf33_alloc_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/prf33_alloc_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/dualalloc_probe.out: $(HARNESS)/probes/dualalloc_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/dualalloc_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/prfwrite_probe.out: $(HARNESS)/probes/prfwrite_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/prfwrite_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/w3path_probe.out: $(HARNESS)/probes/w3path_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/w3path_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/squashmiss_probe.out: $(HARNESS)/probes/squashmiss_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/squashmiss_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lifetime_probe.out: $(HARNESS)/probes/lifetime_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lifetime_probe.cpp $(VSYS_LIB_FAST) -o $@

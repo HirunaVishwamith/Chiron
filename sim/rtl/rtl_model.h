@@ -170,15 +170,11 @@ class simulator {
     }
   }
 
-  // Raw ROB fire (includes CSR). Available for diagnostics.
-  bool commit_fired_raw(int n) const {
-    switch (n) {
-      case 1:  return tb->system__DOT__chiron__DOT__core1__DOT__rob_commit_fired;
-      case 2:  return tb->system__DOT__chiron__DOT__core2__DOT__rob_commit_fired;
-      case 3:  return tb->system__DOT__chiron__DOT__core3__DOT__rob_commit_fired;
-      default: return tb->system__DOT__chiron__DOT__core0__DOT__rob_commit_fired;
-    }
-  }
+  // (A commit_fired_raw() accessor used to live here, reading the internal
+  // core<N>.rob_commit_fired net. Verilator no longer emits that net -- it is
+  // inlined away -- so the accessor stopped compiling. It had no callers, and
+  // the top-level robOut<N>_commitFired port above carries the same signal, so
+  // it is gone rather than re-pointed at a duplicate of commit_fired().)
 
   bool commit_interrupt(int n) const {
     switch (n) {
@@ -308,6 +304,21 @@ class simulator {
   // Raw Verilated model — for ad-hoc debug probes that need hierarchical
   // signals rtl_model.h doesn't wrap. Read-only use intended.
   Vsystem *raw() { return tb; }
+
+  // Read an aligned 64-bit word straight out of the Verilated DRAM backing
+  // array (same array load_segment writes). This is the DRAM truth — it does
+  // NOT see dirty lines still in the L1/L2 caches. Used by the lock-step
+  // racy-fixup log to tell "memory corrupted by a bad writeback" (DRAM word
+  // differs from golden) from "clean DRAM, fill-path returned wrong data".
+  uint64_t read_dram64(uint64_t phys) const {
+    constexpr size_t kDramBytes = sizeof(tb->system__DOT__memory__DOT__memory);
+    if (phys < 0x80000000ULL) return 0;
+    const uint64_t off = (phys - 0x80000000ULL) & ~7ULL;
+    if (off + 8 > kDramBytes) return 0;
+    uint64_t v;
+    std::memcpy(&v, &tb->system__DOT__memory__DOT__memory[off], 8);
+    return v;
+  }
 
  private:
   Vsystem       *tb  = nullptr;
