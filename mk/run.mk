@@ -149,7 +149,7 @@ _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(ISA_DIR)/images
 
-.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-emu-check linux-sim linux-lockstep demo
+.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-emu-check linux-sim linux-lockstep demo ci-bench ci-check
 
 emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
 	$(BUILD)/emu.out $(BIN)
@@ -211,6 +211,13 @@ test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks
 $(BUILD)/profile_quad_fast.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) -I $(SIM) $(HARNESS)/profile_quad.cpp $(VSYS_LIB_FAST) -o $@
 
+# Same harness, built with the microarchitectural assertions in
+# sim/harness/invariants.h compiled IN. Slower (it reads all 16 ROB ready bits
+# per core per cycle), so it is a separate binary rather than a flag on the
+# profiling one -- `make ci-bench` stays fast, `make ci-check` stays strict.
+$(BUILD)/profile_quad_check.out: $(HARNESS)/profile_quad.cpp $(HARNESS)/invariants.h $(SIM)/profiler_quad.h $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) -DCHIRON_INVARIANTS -I $(SIM) $(HARNESS)/profile_quad.cpp $(VSYS_LIB_FAST) -o $@
+
 # ── CI benchmark gate ─────────────────────────────────────────────────────────
 # The five max-scale quad-core benchmarks that must ALL reach BENCHMARK COMPLETE
 # for CI to pass. Runs the committed -q4 scale bins on the fast no-trace model.
@@ -233,6 +240,68 @@ ci-bench: $(BUILD)/profile_quad_fast.out   ## CI gate: 5 quad-core benchmarks mu
 	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
 	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"; \
 	if [ $$fail -eq 0 ]; then echo "ci-bench: ALL 5 PASS"; else echo "ci-bench: FAILURES"; exit 1; fi
+
+# ── CI correctness gate ───────────────────────────────────────────────────────
+# ci-bench asks "did the benchmark produce the right answer?". This asks the
+# stricter question: "did the microarchitecture stay self-consistent while it
+# did?" Four separate wedges in this repo were caused by a completion landing on
+# a ROB slot that speculation had already reallocated -- each corrupted state
+# silently for millions of cycles before anything visibly hung, and each cost
+# days of one-off probing to find. sim/harness/invariants.h asserts the
+# invariants they violated on every cycle; a violation fails the run even if the
+# benchmark still happened to compute the right result.
+ci-check: $(BUILD)/profile_quad_check.out   ## Strict gate: benchmarks + per-cycle microarchitectural assertions
+	@fail=0; \
+	run() { \
+	  echo "== CI check: $$1 =="; \
+	  out=$$(timeout 3000 $(BUILD)/profile_quad_check.out --image $(BINS)/$$2 --name $$1 $$3 \
+	       --timeout 120000000 2>&1); \
+	  echo "$$out" | grep -E 'INVARIANT|chiron invariants|no violations|VIOLATION|BENCHMARK COMPLETE|TIMEOUT|DEADLOCK' || true; \
+	  if echo "$$out" | grep -q 'BENCHMARK COMPLETE' && \
+	     ! echo "$$out" | grep -qiE 'Register mismatch|Deadlock|TIMEOUT|VIOLATION|INVARIANT'; \
+	  then echo "$$1: CLEAN"; \
+	  else echo "$$1: FAIL"; fail=1; fi; }; \
+	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
+	run matmul-s1-q4 mt-matmul-s1-q4.bin       "$(matmul_DONE)"; \
+	run filter-s5-q4 mt-mask-sfilter-s5-q4.bin "$(filter_DONE)"; \
+	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
+	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"; \
+	if [ $$fail -eq 0 ]; then echo "ci-check: ALL 5 CLEAN"; else echo "ci-check: FAILURES"; exit 1; fi
+
+# ── Constrained-random stress campaign ────────────────────────────────────────
+# The generated program's <exit> address moves with every seed and block count,
+# so the done-pc is derived from the freshly built dump rather than pinned in a
+# variable the way the fixed benchmarks are. Link base is 0; the RTL runs at
+# 0x8000_0000.
+STRESS_TIMEOUT ?= 20000000
+STRESS_SEEDS   ?= 1 2 3 4 5 6 7 8
+
+.PHONY: stress-run stress-sweep
+stress-run: $(BUILD)/profile_quad_check.out   ## Run the current bins/mt-stress-q4.bin under the invariant assertions
+	@pc=$$(grep -m1 '<exit>:' $(BENCH_SRC)/mt-stress.riscv.dump | cut -d' ' -f1); \
+	 pc=$$(printf '0x%x' $$((0x$$pc + 0x80000000))); \
+	 echo "[stress-run] seed=$(SEED) blocks=$(BLOCKS) done-pc=$$pc"; \
+	 $(BUILD)/profile_quad_check.out --image $(BINS)/mt-stress-q4.bin \
+	     --name stress-q4 --done-pc $$pc --timeout $(STRESS_TIMEOUT)
+
+# One seed per iteration: regenerate, rebuild, run, and stop at the first seed
+# that violates an invariant or fails to complete -- that seed is the repro, and
+# `make stress-bin SEED=<n> && make stress-run SEED=<n>` replays it exactly.
+stress-sweep: $(BUILD)/profile_quad_check.out   ## Sweep STRESS_SEEDS; stops at the first failing seed
+	@for s in $(STRESS_SEEDS); do \
+	  echo "===== stress seed $$s ====="; \
+	  $(MAKE) --no-print-directory stress-bin SEED=$$s BLOCKS=$(BLOCKS) > /dev/null || exit 1; \
+	  out=$$($(MAKE) --no-print-directory stress-run SEED=$$s BLOCKS=$(BLOCKS) 2>&1); \
+	  echo "$$out" | grep -E 'INVARIANT|VIOLATION|no violations|BENCHMARK COMPLETE|TIMEOUT|DEADLOCK' || true; \
+	  if echo "$$out" | grep -q 'BENCHMARK COMPLETE' && \
+	     ! echo "$$out" | grep -qiE 'VIOLATION|INVARIANT|TIMEOUT|DEADLOCK'; then \
+	    echo "seed $$s: CLEAN"; \
+	  else \
+	    echo "seed $$s: FAIL  -- replay with: make stress-bin SEED=$$s BLOCKS=$(BLOCKS) && make stress-run SEED=$$s"; \
+	    exit 1; \
+	  fi; \
+	done; \
+	echo "stress-sweep: all seeds clean"
 
 test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 

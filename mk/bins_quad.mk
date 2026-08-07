@@ -101,3 +101,37 @@ $(1)-bin:    ## Build just bins/mt-$(1)-q4.bin (fast iteration, no clean)
 	@echo "[$(1)-bin] staged: $$(BINS)/mt-$(1)-q4.bin"
 endef
 $(foreach b,ipi ipitmr ipimux lrsc lrscirq,$(eval $(call smp_bmark_rule,$(b))))
+
+# ── Constrained-random speculation stress (tools/gen_stress.py) ───────────────
+# mt-stress.c is GENERATED, not written: every one of the four reallocated-slot
+# bugs lived in a corner the directed benchmarks never reach (a divide still in
+# flight when a mispredict resolves, a second divide parked behind it, an MMIO
+# load in a branch shadow, AMO/LR-SC racing a peer). This emits programs whose
+# only purpose is to sit in those corners, with data-dependent branches the
+# predictor cannot learn.
+#
+# The program is NOT self-checking on purpose. The oracle is external:
+#   single core -> `make lockstep` compares every commit against the emulator,
+#   quad core   -> `make ci-check` asserts the invariants every cycle.
+# Everything derives from SEED, so a failing run replays exactly.
+SEED   ?= 1
+BLOCKS ?= 240
+
+# The stress mix emits fence.i, which binutils only accepts when the arch
+# string names Zifencei. The other benchmarks never assemble one by hand, which
+# is why the shared QUAD_GCC_OPTS does not carry it.
+STRESS_GCC_OPTS := $(subst _zicsr,_zicsr_zifencei,$(QUAD_GCC_OPTS))
+
+.PHONY: stress-gen stress-bin
+stress-gen:  ## Generate workloads/benchmarks/mt-stress/mt-stress.c from SEED
+	@python3 tools/gen_stress.py --seed $(SEED) --blocks $(BLOCKS) \
+	    --out workloads/benchmarks/mt-stress/mt-stress.c
+
+# Regenerate then build, so `make stress-bin SEED=7` is one reproducible step.
+stress-bin: stress-gen                                                    ## Generate + build bins/mt-stress-q4.bin for SEED
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-stress" \
+	    RISCV_GCC_OPTS="$(STRESS_GCC_OPTS)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-stress.bin $(BINS)/mt-stress-q4.bin
+	@echo "[stress-bin] staged: $(BINS)/mt-stress-q4.bin (seed=$(SEED))"
