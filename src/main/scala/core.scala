@@ -399,9 +399,41 @@ class core (
       reg := branchMaskUpdate
     }}
     when(!branchOps.passed) {
-      (Seq(prf.toExec.branchmask, extnMRequest.branchMask, extnMServicing.branchMask).map(_ & branchOps.branchMask).map(_.orR))
-      .zip(Seq(extnMRequest.valid, extnMServicing.valid, extnMResponse.valid) zip Seq(prf.toExec.valid, extnMRequest.valid, extnMServicing.valid))
-      .foreach{ case(branchMatch, (reg, validInstruction)) => when(branchMatch && validInstruction) { reg := false.B }}
+      // One entry per stage BOUNDARY of the multiply pipeline
+      //   prf.toExec -> extnMRequest -> extnMPartialServicing -> extnMServicing -> extnMResponse
+      // (declared at lines 235-236 and 392). Each entry reads the SOURCE stage's
+      // mask and valid, and kills the value being loaded into the DESTINATION
+      // register this cycle — overriding the unconditional `dst := src` above by
+      // last-connect. Keep source and destination adjacent; that is the whole
+      // correctness argument, and it is what the old code got wrong.
+      //
+      // This list used to have three entries and they were mis-paired:
+      // extnMPartialServicing was never squashed at all, and extnMServicing was
+      // squashed off extnMRequest's mask/valid — one stage too far upstream.
+      // Both directions of that error wedge the ROB:
+      //   * a multiply in PartialServicing when a mispredict fires SURVIVES
+      //     whenever extnMRequest does not happen to match the same mask (it is
+      //     invalid, or holds a different branch's mask), and two cycles later
+      //     asserts extnMResponse.valid still carrying its stale robAddr/prfDest.
+      //     That writes the PRF (the write port has no squash check) and sets the
+      //     ROB ready bit at execPorts(i).robAddr (rob.scala:120-126, no ownership
+      //     check) — so a slot since reallocated to a BRANCH retires before its
+      //     own resolution arrives, the real resolution lands late and flushes,
+      //     and the next ROB head never completes.
+      //   * conversely a LEGITIMATE multiply in PartialServicing is dropped when
+      //     extnMRequest matches but it does not, so its ROB entry never goes
+      //     ready — the same wedge from the other side.
+      // Measured in mt-ipimux: exactly one occurrence in 26.8M cycles, attributed
+      // to the M-ext port by robready_probe, and it is the event that wedges
+      // hart1 (READY-NO-RESOLVE on slot 12 @cyc 26814085).
+      Seq(
+        (prf.toExec.branchmask,            prf.toExec.valid,            extnMRequest.valid),
+        (extnMRequest.branchMask,          extnMRequest.valid,          extnMPartialServicing.valid),
+        (extnMPartialServicing.branchMask, extnMPartialServicing.valid, extnMServicing.valid),
+        (extnMServicing.branchMask,        extnMServicing.valid,        extnMResponse.valid)
+      ).foreach{ case(sourceMask, sourceValid, destinationValid) =>
+        when((sourceMask & branchOps.branchMask).orR && sourceValid) { destinationValid := false.B }
+      }
     }
   }
 
@@ -456,8 +488,13 @@ class core (
   // Arm once when a div/rem reaches the M-extension and the unit is free.
   // divDone only blocks the dynamic instruction that already completed
   // (robAddr match); a different divide arriving back-to-back arms freely.
-  when(extnMRequest.valid && extnMRequest.instruction(14).asBool && !division.request.valid &&
-       !(divDone && (extnMRequest.robAddr === divDoneRobAddr))) {
+  // Hoisted so the branch-mask ageing below can ask the SAME question this arm
+  // asks. Those two used to disagree, which is what corrupted a divide's
+  // provenance — see the long note at the ageing block.
+  val divArming = extnMRequest.valid && extnMRequest.instruction(14).asBool &&
+                  !division.request.valid &&
+                  !(divDone && (extnMRequest.robAddr === divDoneRobAddr))
+  when(divArming) {
     division.counter := 65.U
     division.divisor := extnMRequest.rs2
     division.quotient := extnMRequest.rs1
@@ -514,13 +551,49 @@ class core (
     }
   }
 
+  // Age / kill the divide that is ACTUALLY in the divider this cycle.
+  //
+  // There are exactly two possible sources for what division.request holds after
+  // this cycle, and they are mutually exclusive (divArming requires
+  // !division.request.valid, a completion requires it):
+  //   * ARMING  — the value lands from extnMRequest, so it must be aged against
+  //     extnMRequest's mask;
+  //   * otherwise — the register keeps its own contents, so it must be aged
+  //     against its OWN mask.
+  // Pick the source once and age that. Never let both write.
+  //
+  // The old code guarded the first case on `extnMRequest.valid` alone — which is
+  // NOT the arm condition — and then ran the second case unconditionally after
+  // it. Both halves were wrong, and the first is what wedges the machine:
+  //   * A divide occupies the unit for 65 cycles, and the NEXT divide sits in
+  //     extnMRequest for most of that window (the PRF holds a div at toExec for
+  //     many cycles — see the divDone note above). A branchOps pulse anywhere in
+  //     that window rewrote the IN-FLIGHT divide's mask to
+  //     `extnMRequest.branchMask ^ branchOps.branchMask` — a different
+  //     instruction's provenance. The in-flight divide then no longer carried the
+  //     bit of the branch it actually depended on, survived the mispredict that
+  //     should have squashed it, and completed still carrying its stale robAddr.
+  //     By then the ROB had rolled back and reallocated that slot, and since
+  //     rob.scala:120-126 writes the ready bit at execPorts(i).robAddr with no
+  //     ownership check, the completion readied whatever now occupied it. In
+  //     mt-ipimux that is a BRANCH, which retires before its own resolution
+  //     arrives; the real resolution lands late, fails, flushes the scheduler and
+  //     swallows the ROB head's resolution, and the head never completes.
+  //   * Conversely, on a genuine arm cycle the second (unconditional) half keyed
+  //     off the OLD register value and could clobber the mask just installed for
+  //     the newly armed request, or kill the new request outright — a lost
+  //     completion, the same wedge from the other side.
+  // Repro: mt-ipimux hart1 — `remu`/`remw` at 0x80000548/0x80000554 speculated
+  // past the branches at 0x80000538/0x80000540, one event in 26.8M cycles
+  // (robready_probe, attributed to the M-ext port; mextpath_probe separates the
+  // divider from the multiply pipeline).
   when(branchOps.valid) {
-    when(extnMRequest.valid) {
-      when ((extnMRequest.branchMask & branchOps.branchMask).orR) { division.request.branchMask := extnMRequest.branchMask ^ branchOps.branchMask }
-      when(!branchOps.passed && (extnMRequest.branchMask & branchOps.branchMask).orR) { division.request.valid := false.B }
+    val divSourceMask  = Mux(divArming, extnMRequest.branchMask, division.request.branchMask)
+    val divSourceValid = divArming || division.request.valid
+    when(divSourceValid && (divSourceMask & branchOps.branchMask).orR) {
+      division.request.branchMask := divSourceMask ^ branchOps.branchMask
+      when(!branchOps.passed) { division.request.valid := false.B }
     }
-    when ((division.request.branchMask & branchOps.branchMask).orR) { division.request.branchMask := division.request.branchMask ^ branchOps.branchMask }
-    when(!branchOps.passed && (division.request.branchMask & branchOps.branchMask).orR) { division.request.valid := false.B }
   }
 
   // Release gate LAST among mExtensionReady writers: a div/rem release this

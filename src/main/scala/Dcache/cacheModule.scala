@@ -157,8 +157,13 @@ class CacheModule (
   peripheralUnit.responseOut.ready := !cacheLookup.toResponse.request.valid
   peripheralUnit.writeInstructionCommit.fired := false.B
 
-  responseOut.valid := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.valid && cacheLookup.toResponse.request.branch.valid, 
-                  peripheralUnit.responseOut.request.valid)
+  // Both arms must carry the squash check. The peripheral arm used to be
+  // ungated -- see the comment on responseOut.request.valid in peripheralUnit
+  // for what that allowed. peripheralUnit now gates its own valid too; keeping
+  // the term here as well makes the two arms read identically and stops the
+  // gate from being lost again if that internal one is ever refactored away.
+  responseOut.valid := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.valid && cacheLookup.toResponse.request.branch.valid,
+                  peripheralUnit.responseOut.request.valid && peripheralUnit.responseOut.request.branch.valid)
   responseOut.prfDest := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.core.prfDest, peripheralUnit.responseOut.request.core.prfDest)
   responseOut.robAddr := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.core.robAddr, peripheralUnit.responseOut.request.core.robAddr)
   responseOut.result := Mux(cacheLookup.toResponse.request.valid, cacheLookup.toResponse.request.writeData.data, peripheralUnit.responseOut.request.writeData.data)

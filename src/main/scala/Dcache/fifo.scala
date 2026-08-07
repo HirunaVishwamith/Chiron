@@ -7,7 +7,11 @@ import Dcache.constants._
 import Dcache._
 import Dcache.ChiselUtils._
 
-//Use in Peripheral MSHR, replayUnit
+// Base class only -- every FIFO in the D-cache now extends one of the
+// branch-aware subclasses below. (It used to be instantiated directly as the
+// peripheral MSHR, which meant an MMIO read on the bus could not be squashed;
+// see peripheralUnit.) Do not instantiate this for anything carrying a
+// speculative request.
 class fifoBaseModule[T <: baseTrait](depth: Int, traitType: T) extends Module {
   val write = IO(new Bundle{
     val ready = Output(Bool())
