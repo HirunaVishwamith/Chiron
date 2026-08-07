@@ -84,6 +84,18 @@ $(BUILD)/brleak_probe.out: $(HARNESS)/probes/brleak_probe.cpp $(SIM_HDR) $(VSYS_
 $(BUILD)/robmodify_probe.out: $(HARNESS)/probes/robmodify_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/robmodify_probe.cpp $(VSYS_LIB_FAST) -o $@
 
+$(BUILD)/robhead_probe.out: $(HARNESS)/probes/robhead_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/robhead_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/brvanish_probe.out: $(HARNESS)/probes/brvanish_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/brvanish_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/robready_probe.out: $(HARNESS)/probes/robready_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/robready_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/mextpath_probe.out: $(HARNESS)/probes/mextpath_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/mextpath_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 # RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
 # its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
 # (CXX_FAST sets -DCHIRON_NO_TRACE so rtl_model.h's tb->trace() compiles out) for
