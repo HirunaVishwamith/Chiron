@@ -59,6 +59,34 @@ struct PerfMetrics {
     uint64_t fe_cache_not_prod;
     uint64_t fe_req_fire;
     uint64_t fe_req_refused;
+    // Why decode refused the next instruction — the three rename stall terms in
+    // Decode/decode.scala, reported with that file's priority so they sum to the
+    // number of stalled cycles rather than double-counting.
+    uint64_t ds_prf_exhausted;
+    uint64_t ds_branch_mask_full;
+    uint64_t ds_rename_collide;
+    // Pipeline flushes split by cause, and true retired branch count.
+    uint64_t flush_branch;
+    uint64_t flush_coherent;
+    uint64_t retired_branch;
+    // Commit-port stall decomposition (RTL slots 29-40). rob_head_not_ready is
+    // the head being incomplete, split by the head's opcode; rob_ready_blocked
+    // is the head being complete but held back by a commit-side gate.
+    uint64_t rob_head_not_ready;
+    uint64_t rob_ready_blocked;
+    uint64_t hnr_load;
+    uint64_t hnr_branch;
+    uint64_t hnr_mext;
+    uint64_t hnr_amo;
+    uint64_t hnr_other;
+    // hnr_load counted as *episodes* rather than cycles: one per load that
+    // stalls at the ROB head at all, plus those lasting >= 2 cycles. Quad-core
+    // profiler only (RTL slots 27-28); the single-core path leaves these zero.
+    uint64_t hnr_load_episodes = 0;
+    uint64_t hnr_load_ge2      = 0;
+    uint64_t rnr_store_gate;
+    uint64_t rnr_wb_gate;
+    uint64_t rnr_load_gate;
 
     // Derived metrics
     double ipc;
@@ -164,6 +192,25 @@ public:
         m.fe_cache_not_prod   = get_perf_counter(22);
         m.fe_req_fire         = get_perf_counter(23);
         m.fe_req_refused      = get_perf_counter(24);
+        // Single-core `system` spends slots 21-24 on the lineStreamer counters
+        // above; the decode rename-stall attribution is quad-core only (see
+        // profiler_quad.h), so report it as absent rather than as garbage.
+        m.ds_prf_exhausted    = 0;
+        m.ds_branch_mask_full = 0;
+        m.ds_rename_collide   = 0;
+        m.flush_branch        = 0;
+        m.flush_coherent      = 0;
+        m.retired_branch      = 0;
+        m.rob_head_not_ready  = get_perf_counter(29);
+        m.rob_ready_blocked   = get_perf_counter(30);
+        m.hnr_load            = get_perf_counter(31);
+        m.hnr_branch          = get_perf_counter(32);
+        m.hnr_mext            = get_perf_counter(33);
+        m.hnr_amo             = get_perf_counter(34);
+        m.hnr_other           = get_perf_counter(35);
+        m.rnr_store_gate      = get_perf_counter(36);
+        m.rnr_wb_gate         = get_perf_counter(37);
+        m.rnr_load_gate       = get_perf_counter(38);
 
         const double clock_hz = 75000000.0;
         const double bytes_per_beat = 8.0;

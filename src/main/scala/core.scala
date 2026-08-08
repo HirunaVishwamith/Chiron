@@ -416,26 +416,57 @@ class core (
   division.quotient := Cat(division.quotient(63, 0), ~(Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor))(64))
   division.counter := division.counter - 1.U
 
+  /**
+    * The recurrence costs one pad cycle plus one cycle per dividend bit that
+    * passes through bit 64, so a divide only needs as many cycles as the
+    * dividend has *significant* bits — once the dividend is left-aligned in the
+    * 65-bit shift register rather than sitting in the low half behind a run of
+    * zeroes.
+    *
+    * Skipping those leading zeroes is exact, not an approximation. Leading
+    * zeroes of the dividend give leading zeroes of the quotient (quotient <=
+    * dividend), and in the non-restoring recurrence a zero bit fed from a zero
+    * remainder settles the remainder at -divisor, which is precisely the state
+    * the first significant bit would have started from. The quotient
+    * accumulates right-aligned at bit 0 either way, so the result is read out
+    * unchanged.
+    *
+    * The degenerate cases — zero dividend, and divide-by-zero — keep the full
+    * 65 iterations. x/0 must return all-ones, and that value is produced by
+    * running the recurrence to completion and detected by the `.andR` test in
+    * the result mux below; a shortened run would accumulate too few bits and
+    * silently break it.
+    *
+    * This is the hart-0 critical path: uart_send_integer()'s `n % 10` and
+    * `n / 10` per decimal digit are the largest single consumer of commit-stall
+    * cycles, and those dividends are small.
+    */
   when(extnMRequest.valid && extnMRequest.instruction(14).asBool) {
-    division.counter := 65.U
-    division.divisor := extnMRequest.rs2
-    division.quotient := extnMRequest.rs1
-    when(extnMRequest.instruction(3).asBool) {
-      division.divisor := Cat(0.U(33.W), extnMRequest.rs2(31, 0))
-      division.quotient := Cat(0.U(33.W), extnMRequest.rs1(31, 0))
-    }
+    val isW        = extnMRequest.instruction(3).asBool
+    val isUnsigned = extnMRequest.instruction(12).asBool
+    val rs1W       = extnMRequest.rs1(31, 0)
+    val rs2W       = extnMRequest.rs2(31, 0)
+
+    // Operand magnitudes as unsigned 64-bit values (what the recurrence wants).
+    val dividend = Mux(isW,
+      Cat(0.U(32.W), Mux(!isUnsigned && rs1W(31).asBool, (- rs1W)(31, 0), rs1W)),
+      Mux(!isUnsigned && extnMRequest.rs1(63).asBool, (- extnMRequest.rs1)(63, 0), extnMRequest.rs1))
+    val divisorMag = Mux(isW,
+      Cat(0.U(32.W), Mux(!isUnsigned && rs2W(31).asBool, (- rs2W)(31, 0), rs2W)),
+      Mux(!isUnsigned && extnMRequest.rs2(63).asBool, (- extnMRequest.rs2)(63, 0), extnMRequest.rs2))
+
+    val msb        = Log2(dividend) // index of the highest set bit
+    val degenerate = (dividend === 0.U) || (divisorMag === 0.U)
+
+    division.counter  := Mux(degenerate, 65.U, msb +& 2.U)
+    division.divisor  := Cat(0.U(1.W), divisorMag)
+    division.quotient := Cat(0.U(1.W),
+      Mux(degenerate, dividend, (dividend << (63.U - msb))(63, 0)))
     division.remainder := 0.U
     division.request := extnMRequest
-    division.resultNegative := false.B
-    when(!extnMRequest.instruction(12).asBool){
-      division.resultNegative := extnMRequest.rs1(63).asBool ^ extnMRequest.rs2(63).asBool
-      when(extnMRequest.rs1(63).asBool) { division.quotient := Cat(0.U(1.W), (- extnMRequest.rs1)(63, 0)) }
-      when(extnMRequest.rs2(63).asBool) { division.divisor := Cat(0.U(1.W), (- extnMRequest.rs2)(63, 0)) }
-      when(extnMRequest.instruction(3).asBool) {
-        when(extnMRequest.rs1(31).asBool) { division.quotient := Cat(0.U(33.W), (- extnMRequest.rs1(31, 0))(31, 0)) }
-        when(extnMRequest.rs2(31).asBool) { division.divisor := Cat(0.U(33.W), (- extnMRequest.rs2(31, 0))(31, 0)) }
-      }
-    }
+    division.resultNegative := Mux(isUnsigned, false.B,
+      Mux(isW, rs1W(31).asBool ^ rs2W(31).asBool,
+               extnMRequest.rs1(63).asBool ^ extnMRequest.rs2(63).asBool))
   }
 
   when(division.request.valid && !division.counter.orR) {

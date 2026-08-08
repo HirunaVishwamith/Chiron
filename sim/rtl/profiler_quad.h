@@ -25,8 +25,64 @@ private:
 
     static inline uint64_t safe_max1(uint64_t v) { return v > 0 ? v : 1ULL; }
 
+    // ── Work-region windowing ────────────────────────────────────────────────
+    // Harts 1-3 finish their slice and then spin in barrier()'s busy-wait
+    // (workloads/benchmarks/common/util.h) for most of the run, so whole-run
+    // per-hart counters largely describe a 1-2 instruction branch loop rather
+    // than the benchmark. Classify each block of commits by the PC span it
+    // covers -- a tight spin loop spans a handful of bytes, real code spans far
+    // more -- and snapshot every counter at the end of the last block that
+    // looked like real work. That snapshot is the work-region measurement.
+    //
+    // Deliberately conservative: a block straddling the work/spin boundary has
+    // a wide span and counts as work, so the window errs towards including too
+    // much rather than truncating real work.
+    static const int      BLOCK_COMMITS   = 64;
+    static const uint64_t WORK_SPAN_BYTES = 16;  // > 4 instructions == real code
+
+    struct WorkWin {
+        uint64_t blk_lo = ~0ULL, blk_hi = 0;
+        int      blk_n = 0;
+        uint64_t commits = 0, spin_commits = 0;
+        uint64_t spin_lo = ~0ULL, spin_hi = 0;
+        uint64_t work_cycle = 0;
+        uint64_t snap[41] = {0};
+        bool     have_snap = false;
+    };
+    WorkWin win[4];
+
 public:
     explicit ProfilerQuad(Vsystem *tb_ptr) : tb(tb_ptr) {}
+
+    // Call once per cycle, before any early-continue in the harness loop.
+    void sample(uint64_t cycle) {
+        const uint8_t fired[4] = { tb->robOut0_commitFired, tb->robOut1_commitFired,
+                                   tb->robOut2_commitFired, tb->robOut3_commitFired };
+        const uint64_t pcs[4]  = { tb->robOut0_pc, tb->robOut1_pc,
+                                   tb->robOut2_pc, tb->robOut3_pc };
+        for (int i = 0; i < 4; ++i) {
+            if (!fired[i]) continue;
+            WorkWin &w = win[i];
+            ++w.commits;
+            if (pcs[i] < w.blk_lo) w.blk_lo = pcs[i];
+            if (pcs[i] > w.blk_hi) w.blk_hi = pcs[i];
+            if (++w.blk_n < BLOCK_COMMITS) continue;
+            if (w.blk_hi - w.blk_lo > WORK_SPAN_BYTES) {
+                w.work_cycle = cycle;
+                read_counters(i, w.snap);
+                w.have_snap = true;
+            } else {
+                w.spin_commits += BLOCK_COMMITS;
+                if (w.blk_lo < w.spin_lo) w.spin_lo = w.blk_lo;
+                if (w.blk_hi > w.spin_hi) w.spin_hi = w.blk_hi;
+            }
+            w.blk_lo = ~0ULL; w.blk_hi = 0; w.blk_n = 0;
+        }
+    }
+
+    double spin_commit_pct(int c) const {
+        return 100.0 * (double)win[c].spin_commits / (double)safe_max1(win[c].commits);
+    }
 
     uint64_t get_core_counter(int core, int id) const {
         switch (core) {
@@ -52,6 +108,14 @@ public:
             case 18: return tb->perfCountersOut0_18;
             case 19: return tb->perfCountersOut0_19;
             case 20: return tb->perfCountersOut0_20;
+            case 21: return tb->perfCountersOut0_21;
+            case 22: return tb->perfCountersOut0_22;
+            case 23: return tb->perfCountersOut0_23;
+            case 24: return tb->perfCountersOut0_24;
+            case 25: return tb->perfCountersOut0_25;
+            case 26: return tb->perfCountersOut0_26;
+            case 27: return tb->perfCountersOut0_27;
+            case 28: return tb->perfCountersOut0_28;
             case 29: return tb->perfCountersOut0_29;
             case 30: return tb->perfCountersOut0_30;
             case 31: return tb->perfCountersOut0_31;
@@ -87,6 +151,14 @@ public:
             case 18: return tb->perfCountersOut1_18;
             case 19: return tb->perfCountersOut1_19;
             case 20: return tb->perfCountersOut1_20;
+            case 21: return tb->perfCountersOut1_21;
+            case 22: return tb->perfCountersOut1_22;
+            case 23: return tb->perfCountersOut1_23;
+            case 24: return tb->perfCountersOut1_24;
+            case 25: return tb->perfCountersOut1_25;
+            case 26: return tb->perfCountersOut1_26;
+            case 27: return tb->perfCountersOut1_27;
+            case 28: return tb->perfCountersOut1_28;
             case 29: return tb->perfCountersOut1_29;
             case 30: return tb->perfCountersOut1_30;
             case 31: return tb->perfCountersOut1_31;
@@ -122,6 +194,14 @@ public:
             case 18: return tb->perfCountersOut2_18;
             case 19: return tb->perfCountersOut2_19;
             case 20: return tb->perfCountersOut2_20;
+            case 21: return tb->perfCountersOut2_21;
+            case 22: return tb->perfCountersOut2_22;
+            case 23: return tb->perfCountersOut2_23;
+            case 24: return tb->perfCountersOut2_24;
+            case 25: return tb->perfCountersOut2_25;
+            case 26: return tb->perfCountersOut2_26;
+            case 27: return tb->perfCountersOut2_27;
+            case 28: return tb->perfCountersOut2_28;
             case 29: return tb->perfCountersOut2_29;
             case 30: return tb->perfCountersOut2_30;
             case 31: return tb->perfCountersOut2_31;
@@ -157,6 +237,14 @@ public:
             case 18: return tb->perfCountersOut3_18;
             case 19: return tb->perfCountersOut3_19;
             case 20: return tb->perfCountersOut3_20;
+            case 21: return tb->perfCountersOut3_21;
+            case 22: return tb->perfCountersOut3_22;
+            case 23: return tb->perfCountersOut3_23;
+            case 24: return tb->perfCountersOut3_24;
+            case 25: return tb->perfCountersOut3_25;
+            case 26: return tb->perfCountersOut3_26;
+            case 27: return tb->perfCountersOut3_27;
+            case 28: return tb->perfCountersOut3_28;
             case 29: return tb->perfCountersOut3_29;
             case 30: return tb->perfCountersOut3_30;
             case 31: return tb->perfCountersOut3_31;
@@ -174,29 +262,53 @@ public:
         }
     }
 
-    PerfMetrics compute_core_metrics(int c) const {
+    void read_counters(int c, uint64_t *r) const {
+        for (int k = 0; k <= 40; ++k) r[k] = get_core_counter(c, k);
+    }
+
+    // Derive metrics from a counter snapshot, so the same maths serves both
+    // the whole-run numbers and the work-region window below.
+    PerfMetrics metrics_from(const uint64_t *r) const {
         PerfMetrics m;
-        m.cycles            = get_core_counter(c,  0);
-        m.inst_retired      = get_core_counter(c,  1);
-        m.branch_total      = get_core_counter(c,  2);
-        m.branches_passed   = get_core_counter(c,  3);
-        m.scheduler_stalls  = get_core_counter(c,  4);
-        m.rob_stalls        = get_core_counter(c,  5);
-        m.decode_ready      = get_core_counter(c,  6);
-        m.decode_fired      = get_core_counter(c,  7);
-        m.icache_stalls     = get_core_counter(c,  8);
-        m.dcache_reqs       = get_core_counter(c,  9);
-        m.dcache_miss       = get_core_counter(c, 10);
-        m.dcache_rd_beats   = get_core_counter(c, 11);
-        m.dcache_wr_beats   = get_core_counter(c, 12);
-        m.icache_miss       = get_core_counter(c, 13);
-        m.icache_rd_beats   = get_core_counter(c, 14);
-        m.l2_to_mem_rd_reqs = get_core_counter(c, 15);
-        m.l2_to_mem_rd_beats= get_core_counter(c, 16);
-        m.l2_to_mem_wr_beats= get_core_counter(c, 17);
-        m.fe_fetch_not_ready  = get_core_counter(c, 18);
-        m.fe_decode_not_ready = get_core_counter(c, 19);
-        m.fe_expected_block   = get_core_counter(c, 20);
+        m.cycles            = r[0];
+        m.inst_retired      = r[1];
+        m.branch_total      = r[2];
+        m.branches_passed   = r[3];
+        m.scheduler_stalls  = r[4];
+        m.rob_stalls        = r[5];
+        m.decode_ready      = r[6];
+        m.decode_fired      = r[7];
+        m.icache_stalls     = r[8];
+        m.dcache_reqs       = r[9];
+        m.dcache_miss       = r[10];
+        m.dcache_rd_beats   = r[11];
+        m.dcache_wr_beats   = r[12];
+        m.icache_miss       = r[13];
+        m.icache_rd_beats   = r[14];
+        m.l2_to_mem_rd_reqs = r[15];
+        m.l2_to_mem_rd_beats= r[16];
+        m.l2_to_mem_wr_beats= r[17];
+        m.fe_fetch_not_ready  = r[18];
+        m.fe_decode_not_ready = r[19];
+        m.fe_expected_block   = r[20];
+        m.ds_prf_exhausted    = r[21];
+        m.ds_branch_mask_full = r[22];
+        m.ds_rename_collide   = r[23];
+        m.flush_branch        = r[24];
+        m.flush_coherent      = r[25];
+        m.retired_branch      = r[26];
+        m.rob_head_not_ready  = r[29];
+        m.rob_ready_blocked   = r[30];
+        m.hnr_load            = r[31];
+        m.hnr_branch          = r[32];
+        m.hnr_mext            = r[33];
+        m.hnr_amo             = r[34];
+        m.hnr_other           = r[35];
+        m.hnr_load_episodes   = r[27];
+        m.hnr_load_ge2        = r[28];
+        m.rnr_store_gate      = r[36];
+        m.rnr_wb_gate         = r[37];
+        m.rnr_load_gate       = r[38];
         m.fe_resp_valid_idle  = 0;  // no lineStreamer in quad-core fetch
         m.fe_cache_not_prod   = 0;
         m.fe_req_fire         = 0;
@@ -224,6 +336,18 @@ public:
         m.decode_efficiency_pct = 100.0 * (double)m.decode_fired    / (double)sdr;
         m.dcache_mem_reqs_per_million_cycles = (double)m.dcache_reqs / (double)sc * 1e6;
         return m;
+    }
+
+    PerfMetrics compute_core_metrics(int c) const {
+        uint64_t r[41]; read_counters(c, r); return metrics_from(r);
+    }
+
+    // Work-region metrics: the counters as they stood at the end of the last
+    // block of commits that looked like real code. Falls back to the whole run
+    // if this hart never spun (hart 0 normally never does).
+    PerfMetrics compute_core_metrics_work(int c) const {
+        if (!win[c].have_snap) return compute_core_metrics(c);
+        return metrics_from(win[c].snap);
     }
 
     // Emit a JSON object with per-core breakdown and aggregate summary.
@@ -277,8 +401,62 @@ public:
             ss << "        \"l2_to_mem_wr_beats\": "  << m.l2_to_mem_wr_beats<< ",\n";
             ss << "        \"fe_fetch_not_ready\": "  << m.fe_fetch_not_ready << ",\n";
             ss << "        \"fe_decode_not_ready\": " << m.fe_decode_not_ready<< ",\n";
-            ss << "        \"fe_expected_block\": "   << m.fe_expected_block  << "\n";
+            ss << "        \"fe_expected_block\": "   << m.fe_expected_block  << ",\n";
+            ss << "        \"ds_prf_exhausted\": "    << m.ds_prf_exhausted   << ",\n";
+            ss << "        \"ds_branch_mask_full\": " << m.ds_branch_mask_full<< ",\n";
+            ss << "        \"ds_rename_collide\": "   << m.ds_rename_collide  << ",\n";
+            ss << "        \"flush_branch\": "        << m.flush_branch       << ",\n";
+            ss << "        \"flush_coherent\": "      << m.flush_coherent     << ",\n";
+            ss << "        \"retired_branch\": "      << m.retired_branch     << ",\n";
+            ss << "        \"rob_head_not_ready\": "  << m.rob_head_not_ready << ",\n";
+            ss << "        \"rob_ready_blocked\": "   << m.rob_ready_blocked  << ",\n";
+            ss << "        \"hnr_load\": "            << m.hnr_load           << ",\n";
+            ss << "        \"hnr_branch\": "          << m.hnr_branch         << ",\n";
+            ss << "        \"hnr_mext\": "            << m.hnr_mext           << ",\n";
+            ss << "        \"hnr_amo\": "             << m.hnr_amo            << ",\n";
+            ss << "        \"hnr_other\": "           << m.hnr_other          << ",\n";
+            ss << "        \"hnr_load_episodes\": "   << m.hnr_load_episodes  << ",\n";
+            ss << "        \"hnr_load_ge2\": "        << m.hnr_load_ge2       << ",\n";
+            ss << "        \"rnr_store_gate\": "      << m.rnr_store_gate     << ",\n";
+            ss << "        \"rnr_wb_gate\": "         << m.rnr_wb_gate        << ",\n";
+            ss << "        \"rnr_load_gate\": "       << m.rnr_load_gate      << "\n";
             ss << "      },\n";
+            // Work-region view: same counters, sampled at the end of the last
+            // block of commits that looked like real code rather than spin.
+            {
+                PerfMetrics w = compute_core_metrics_work(i);
+                uint64_t swc = safe_max1(w.cycles);
+                ss << "      \"work\": {\n";
+                ss << "        \"cycles\": "             << w.cycles            << ",\n";
+                ss << "        \"inst_retired\": "       << w.inst_retired      << ",\n";
+                ss << "        \"ipc\": "                << w.ipc               << ",\n";
+                ss << "        \"spin_commit_pct\": "    << spin_commit_pct(i)  << ",\n";
+                ss << "        \"spin_pc_lo\": "         << win[i].spin_lo      << ",\n";
+                ss << "        \"spin_pc_hi\": "         << win[i].spin_hi      << ",\n";
+                ss << "        \"rob_head_not_ready_pct\": " << 100.0*(double)w.rob_head_not_ready/(double)swc << ",\n";
+                ss << "        \"hnr_load_pct\": "       << 100.0*(double)w.hnr_load/(double)swc       << ",\n";
+                // What a shorter D-cache hit pipeline would actually buy. Each
+                // stage removed shortens every head-of-ROB load stall by one
+                // cycle, so one stage saves at most `episodes` cycles and two
+                // save at most `episodes + ge2` -- capped by hnr_load itself.
+                ss << "        \"hnr_load_episodes\": "  << w.hnr_load_episodes << ",\n";
+                ss << "        \"hnr_load_ge2\": "       << w.hnr_load_ge2      << ",\n";
+                ss << "        \"hnr_load_avg_stall\": " << (double)w.hnr_load/(double)safe_max1(w.hnr_load_episodes) << ",\n";
+                ss << "        \"save_1stage_pct\": "    << 100.0*(double)w.hnr_load_episodes/(double)swc << ",\n";
+                ss << "        \"save_2stage_pct\": "    << 100.0*(double)(w.hnr_load_episodes+w.hnr_load_ge2)/(double)swc << ",\n";
+                ss << "        \"hnr_mext_pct\": "       << 100.0*(double)w.hnr_mext/(double)swc       << ",\n";
+                ss << "        \"hnr_other_pct\": "      << 100.0*(double)w.hnr_other/(double)swc      << ",\n";
+                ss << "        \"rob_ready_blocked_pct\": " << 100.0*(double)w.rob_ready_blocked/(double)swc << ",\n";
+                ss << "        \"rnr_store_gate_pct\": " << 100.0*(double)w.rnr_store_gate/(double)swc << ",\n";
+                ss << "        \"icache_stall_pct\": "   << 100.0*(double)w.icache_stalls/(double)swc  << ",\n";
+                ss << "        \"dcache_reqs\": "        << w.dcache_reqs       << ",\n";
+                ss << "        \"dcache_miss\": "        << w.dcache_miss       << ",\n";
+                ss << "        \"dcache_miss_rate_pct\": " << w.dcache_miss_rate_pct << ",\n";
+                ss << "        \"dcache_rd_beats\": "    << w.dcache_rd_beats   << ",\n";
+                ss << "        \"dcache_wr_beats\": "    << w.dcache_wr_beats   << ",\n";
+                ss << "        \"retired_branch\": "     << w.retired_branch    << "\n";
+                ss << "      },\n";
+            }
             ss << "      \"derived\": {\n";
             ss << "        \"ipc\": "                           << m.ipc                           << ",\n";
             ss << "        \"branch_accuracy_pct\": "           << m.branch_accuracy_pct           << ",\n";
