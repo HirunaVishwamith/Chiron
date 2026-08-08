@@ -55,6 +55,9 @@ public:
             case 21: return tb->perfCountersOut0_21;
             case 22: return tb->perfCountersOut0_22;
             case 23: return tb->perfCountersOut0_23;
+            case 24: return tb->perfCountersOut0_24;
+            case 25: return tb->perfCountersOut0_25;
+            case 26: return tb->perfCountersOut0_26;
             case 29: return tb->perfCountersOut0_29;
             case 30: return tb->perfCountersOut0_30;
             case 31: return tb->perfCountersOut0_31;
@@ -93,6 +96,9 @@ public:
             case 21: return tb->perfCountersOut1_21;
             case 22: return tb->perfCountersOut1_22;
             case 23: return tb->perfCountersOut1_23;
+            case 24: return tb->perfCountersOut1_24;
+            case 25: return tb->perfCountersOut1_25;
+            case 26: return tb->perfCountersOut1_26;
             case 29: return tb->perfCountersOut1_29;
             case 30: return tb->perfCountersOut1_30;
             case 31: return tb->perfCountersOut1_31;
@@ -131,6 +137,9 @@ public:
             case 21: return tb->perfCountersOut2_21;
             case 22: return tb->perfCountersOut2_22;
             case 23: return tb->perfCountersOut2_23;
+            case 24: return tb->perfCountersOut2_24;
+            case 25: return tb->perfCountersOut2_25;
+            case 26: return tb->perfCountersOut2_26;
             case 29: return tb->perfCountersOut2_29;
             case 30: return tb->perfCountersOut2_30;
             case 31: return tb->perfCountersOut2_31;
@@ -169,6 +178,9 @@ public:
             case 21: return tb->perfCountersOut3_21;
             case 22: return tb->perfCountersOut3_22;
             case 23: return tb->perfCountersOut3_23;
+            case 24: return tb->perfCountersOut3_24;
+            case 25: return tb->perfCountersOut3_25;
+            case 26: return tb->perfCountersOut3_26;
             case 29: return tb->perfCountersOut3_29;
             case 30: return tb->perfCountersOut3_30;
             case 31: return tb->perfCountersOut3_31;
@@ -212,6 +224,9 @@ public:
         m.ds_prf_exhausted    = get_core_counter(c, 21);
         m.ds_branch_mask_full = get_core_counter(c, 22);
         m.ds_rename_collide   = get_core_counter(c, 23);
+        m.flush_branch        = get_core_counter(c, 24);
+        m.flush_coherent      = get_core_counter(c, 25);
+        m.retired_branch      = get_core_counter(c, 26);
         m.fe_resp_valid_idle  = 0;  // no lineStreamer in quad-core fetch
         m.fe_cache_not_prod   = 0;
         m.fe_req_fire         = 0;
@@ -295,7 +310,10 @@ public:
             ss << "        \"fe_expected_block\": "   << m.fe_expected_block  << ",\n";
             ss << "        \"ds_prf_exhausted\": "    << m.ds_prf_exhausted   << ",\n";
             ss << "        \"ds_branch_mask_full\": " << m.ds_branch_mask_full<< ",\n";
-            ss << "        \"ds_rename_collide\": "   << m.ds_rename_collide  << "\n";
+            ss << "        \"ds_rename_collide\": "   << m.ds_rename_collide  << ",\n";
+            ss << "        \"flush_branch\": "        << m.flush_branch       << ",\n";
+            ss << "        \"flush_coherent\": "      << m.flush_coherent     << ",\n";
+            ss << "        \"retired_branch\": "      << m.retired_branch     << "\n";
             ss << "      },\n";
             ss << "      \"derived\": {\n";
             ss << "        \"ipc\": "                           << m.ipc                           << ",\n";

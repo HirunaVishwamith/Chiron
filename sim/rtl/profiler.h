@@ -65,6 +65,10 @@ struct PerfMetrics {
     uint64_t ds_prf_exhausted;
     uint64_t ds_branch_mask_full;
     uint64_t ds_rename_collide;
+    // Pipeline flushes split by cause, and true retired branch count.
+    uint64_t flush_branch;
+    uint64_t flush_coherent;
+    uint64_t retired_branch;
 
     // Derived metrics
     double ipc;
@@ -176,6 +180,9 @@ public:
         m.ds_prf_exhausted    = 0;
         m.ds_branch_mask_full = 0;
         m.ds_rename_collide   = 0;
+        m.flush_branch        = 0;
+        m.flush_coherent      = 0;
+        m.retired_branch      = 0;
 
         const double clock_hz = 75000000.0;
         const double bytes_per_beat = 8.0;

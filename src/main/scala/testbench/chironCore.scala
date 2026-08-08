@@ -88,6 +88,13 @@ class chironCore extends Module {
     val pc_dsPrfExhausted   = RegInit(0.U(64.W))
     val pc_dsBranchMaskFull = RegInit(0.U(64.W))
     val pc_dsRenameCollide  = RegInit(0.U(64.W))
+    // What actually flushed the pipeline. branchTotal/branchesPassed lump the
+    // coherency load-squash in with branch resolution (core.scala forces
+    // branchEvals.valid high and .passed low for it), so "branch accuracy" is
+    // not a predictor metric. Split the flushes and count real retired branches.
+    val pc_flushBranch    = RegInit(0.U(64.W))
+    val pc_flushCoherent  = RegInit(0.U(64.W))
+    val pc_retiredBranch  = RegInit(0.U(64.W))
 
     pc_cycles := pc_cycles + 1.U
     when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
@@ -143,6 +150,14 @@ class chironCore extends Module {
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
+    when(branchOps.valid && !branchOps.passed) {
+      when(coherentLoadInvalidReg) { pc_flushCoherent := pc_flushCoherent + 1.U }
+      .otherwise                   { pc_flushBranch   := pc_flushBranch   + 1.U }
+    }
+    when(rob.commit.fired && rob.commit.instruction(6, 4) === "b110".U) {
+      pc_retiredBranch := pc_retiredBranch + 1.U
+    }
+
     when(decode.stallReason.prfExhausted)    { pc_dsPrfExhausted   := pc_dsPrfExhausted   + 1.U }
     when(decode.stallReason.branchMaskFull)  { pc_dsBranchMaskFull := pc_dsBranchMaskFull + 1.U }
     when(decode.stallReason.renameCollision) { pc_dsRenameCollide  := pc_dsRenameCollide  + 1.U }
@@ -176,6 +191,9 @@ class chironCore extends Module {
       val dsPrfExhausted  = UInt(64.W)
       val dsBranchMaskFull= UInt(64.W)
       val dsRenameCollide = UInt(64.W)
+      val flushBranch     = UInt(64.W)
+      val flushCoherent   = UInt(64.W)
+      val retiredBranch   = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -205,6 +223,9 @@ class chironCore extends Module {
     perfCnt.dsPrfExhausted  := pc_dsPrfExhausted
     perfCnt.dsBranchMaskFull:= pc_dsBranchMaskFull
     perfCnt.dsRenameCollide := pc_dsRenameCollide
+    perfCnt.flushBranch     := pc_flushBranch
+    perfCnt.flushCoherent   := pc_flushCoherent
+    perfCnt.retiredBranch   := pc_retiredBranch
   })
 
   val core1 = Module(new core(
@@ -260,6 +281,13 @@ class chironCore extends Module {
     val pc_dsPrfExhausted   = RegInit(0.U(64.W))
     val pc_dsBranchMaskFull = RegInit(0.U(64.W))
     val pc_dsRenameCollide  = RegInit(0.U(64.W))
+    // What actually flushed the pipeline. branchTotal/branchesPassed lump the
+    // coherency load-squash in with branch resolution (core.scala forces
+    // branchEvals.valid high and .passed low for it), so "branch accuracy" is
+    // not a predictor metric. Split the flushes and count real retired branches.
+    val pc_flushBranch    = RegInit(0.U(64.W))
+    val pc_flushCoherent  = RegInit(0.U(64.W))
+    val pc_retiredBranch  = RegInit(0.U(64.W))
 
     pc_cycles := pc_cycles + 1.U
     when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
@@ -315,6 +343,14 @@ class chironCore extends Module {
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
+    when(branchOps.valid && !branchOps.passed) {
+      when(coherentLoadInvalidReg) { pc_flushCoherent := pc_flushCoherent + 1.U }
+      .otherwise                   { pc_flushBranch   := pc_flushBranch   + 1.U }
+    }
+    when(rob.commit.fired && rob.commit.instruction(6, 4) === "b110".U) {
+      pc_retiredBranch := pc_retiredBranch + 1.U
+    }
+
     when(decode.stallReason.prfExhausted)    { pc_dsPrfExhausted   := pc_dsPrfExhausted   + 1.U }
     when(decode.stallReason.branchMaskFull)  { pc_dsBranchMaskFull := pc_dsBranchMaskFull + 1.U }
     when(decode.stallReason.renameCollision) { pc_dsRenameCollide  := pc_dsRenameCollide  + 1.U }
@@ -348,6 +384,9 @@ class chironCore extends Module {
       val dsPrfExhausted  = UInt(64.W)
       val dsBranchMaskFull= UInt(64.W)
       val dsRenameCollide = UInt(64.W)
+      val flushBranch     = UInt(64.W)
+      val flushCoherent   = UInt(64.W)
+      val retiredBranch   = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -377,6 +416,9 @@ class chironCore extends Module {
     perfCnt.dsPrfExhausted  := pc_dsPrfExhausted
     perfCnt.dsBranchMaskFull:= pc_dsBranchMaskFull
     perfCnt.dsRenameCollide := pc_dsRenameCollide
+    perfCnt.flushBranch     := pc_flushBranch
+    perfCnt.flushCoherent   := pc_flushCoherent
+    perfCnt.retiredBranch   := pc_retiredBranch
   })
 
   val core2 = Module(new core(
@@ -432,6 +474,13 @@ class chironCore extends Module {
     val pc_dsPrfExhausted   = RegInit(0.U(64.W))
     val pc_dsBranchMaskFull = RegInit(0.U(64.W))
     val pc_dsRenameCollide  = RegInit(0.U(64.W))
+    // What actually flushed the pipeline. branchTotal/branchesPassed lump the
+    // coherency load-squash in with branch resolution (core.scala forces
+    // branchEvals.valid high and .passed low for it), so "branch accuracy" is
+    // not a predictor metric. Split the flushes and count real retired branches.
+    val pc_flushBranch    = RegInit(0.U(64.W))
+    val pc_flushCoherent  = RegInit(0.U(64.W))
+    val pc_retiredBranch  = RegInit(0.U(64.W))
 
     pc_cycles := pc_cycles + 1.U
     when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
@@ -487,6 +536,14 @@ class chironCore extends Module {
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
+    when(branchOps.valid && !branchOps.passed) {
+      when(coherentLoadInvalidReg) { pc_flushCoherent := pc_flushCoherent + 1.U }
+      .otherwise                   { pc_flushBranch   := pc_flushBranch   + 1.U }
+    }
+    when(rob.commit.fired && rob.commit.instruction(6, 4) === "b110".U) {
+      pc_retiredBranch := pc_retiredBranch + 1.U
+    }
+
     when(decode.stallReason.prfExhausted)    { pc_dsPrfExhausted   := pc_dsPrfExhausted   + 1.U }
     when(decode.stallReason.branchMaskFull)  { pc_dsBranchMaskFull := pc_dsBranchMaskFull + 1.U }
     when(decode.stallReason.renameCollision) { pc_dsRenameCollide  := pc_dsRenameCollide  + 1.U }
@@ -520,6 +577,9 @@ class chironCore extends Module {
       val dsPrfExhausted  = UInt(64.W)
       val dsBranchMaskFull= UInt(64.W)
       val dsRenameCollide = UInt(64.W)
+      val flushBranch     = UInt(64.W)
+      val flushCoherent   = UInt(64.W)
+      val retiredBranch   = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -549,6 +609,9 @@ class chironCore extends Module {
     perfCnt.dsPrfExhausted  := pc_dsPrfExhausted
     perfCnt.dsBranchMaskFull:= pc_dsBranchMaskFull
     perfCnt.dsRenameCollide := pc_dsRenameCollide
+    perfCnt.flushBranch     := pc_flushBranch
+    perfCnt.flushCoherent   := pc_flushCoherent
+    perfCnt.retiredBranch   := pc_retiredBranch
   })
 
   val core3 = Module(new core(
@@ -604,6 +667,13 @@ class chironCore extends Module {
     val pc_dsPrfExhausted   = RegInit(0.U(64.W))
     val pc_dsBranchMaskFull = RegInit(0.U(64.W))
     val pc_dsRenameCollide  = RegInit(0.U(64.W))
+    // What actually flushed the pipeline. branchTotal/branchesPassed lump the
+    // coherency load-squash in with branch resolution (core.scala forces
+    // branchEvals.valid high and .passed low for it), so "branch accuracy" is
+    // not a predictor metric. Split the flushes and count real retired branches.
+    val pc_flushBranch    = RegInit(0.U(64.W))
+    val pc_flushCoherent  = RegInit(0.U(64.W))
+    val pc_retiredBranch  = RegInit(0.U(64.W))
 
     pc_cycles := pc_cycles + 1.U
     when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
@@ -659,6 +729,14 @@ class chironCore extends Module {
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
+    when(branchOps.valid && !branchOps.passed) {
+      when(coherentLoadInvalidReg) { pc_flushCoherent := pc_flushCoherent + 1.U }
+      .otherwise                   { pc_flushBranch   := pc_flushBranch   + 1.U }
+    }
+    when(rob.commit.fired && rob.commit.instruction(6, 4) === "b110".U) {
+      pc_retiredBranch := pc_retiredBranch + 1.U
+    }
+
     when(decode.stallReason.prfExhausted)    { pc_dsPrfExhausted   := pc_dsPrfExhausted   + 1.U }
     when(decode.stallReason.branchMaskFull)  { pc_dsBranchMaskFull := pc_dsBranchMaskFull + 1.U }
     when(decode.stallReason.renameCollision) { pc_dsRenameCollide  := pc_dsRenameCollide  + 1.U }
@@ -692,6 +770,9 @@ class chironCore extends Module {
       val dsPrfExhausted  = UInt(64.W)
       val dsBranchMaskFull= UInt(64.W)
       val dsRenameCollide = UInt(64.W)
+      val flushBranch     = UInt(64.W)
+      val flushCoherent   = UInt(64.W)
+      val retiredBranch   = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -721,6 +802,9 @@ class chironCore extends Module {
     perfCnt.dsPrfExhausted  := pc_dsPrfExhausted
     perfCnt.dsBranchMaskFull:= pc_dsBranchMaskFull
     perfCnt.dsRenameCollide := pc_dsRenameCollide
+    perfCnt.flushBranch     := pc_flushBranch
+    perfCnt.flushCoherent   := pc_flushCoherent
+    perfCnt.retiredBranch   := pc_retiredBranch
   })
 
   val interconnect = Module(new Interconnect)
@@ -1432,9 +1516,9 @@ class chironCore extends Module {
   perfCountersOut0(21) := core0.perfCnt.dsPrfExhausted
   perfCountersOut0(22) := core0.perfCnt.dsBranchMaskFull
   perfCountersOut0(23) := core0.perfCnt.dsRenameCollide
-  perfCountersOut0(24) := 0.U
-  perfCountersOut0(25) := 0.U
-  perfCountersOut0(26) := 0.U
+  perfCountersOut0(24) := core0.perfCnt.flushBranch
+  perfCountersOut0(25) := core0.perfCnt.flushCoherent
+  perfCountersOut0(26) := core0.perfCnt.retiredBranch
   perfCountersOut0(27) := 0.U
   perfCountersOut0(28) := 0.U
   perfCountersOut0(29) := core0.perfCnt.robHeadNotReady
@@ -1475,9 +1559,9 @@ class chironCore extends Module {
   perfCountersOut1(21) := core1.perfCnt.dsPrfExhausted
   perfCountersOut1(22) := core1.perfCnt.dsBranchMaskFull
   perfCountersOut1(23) := core1.perfCnt.dsRenameCollide
-  perfCountersOut1(24) := 0.U
-  perfCountersOut1(25) := 0.U
-  perfCountersOut1(26) := 0.U
+  perfCountersOut1(24) := core1.perfCnt.flushBranch
+  perfCountersOut1(25) := core1.perfCnt.flushCoherent
+  perfCountersOut1(26) := core1.perfCnt.retiredBranch
   perfCountersOut1(27) := 0.U
   perfCountersOut1(28) := 0.U
   perfCountersOut1(29) := core1.perfCnt.robHeadNotReady
@@ -1518,9 +1602,9 @@ class chironCore extends Module {
   perfCountersOut2(21) := core2.perfCnt.dsPrfExhausted
   perfCountersOut2(22) := core2.perfCnt.dsBranchMaskFull
   perfCountersOut2(23) := core2.perfCnt.dsRenameCollide
-  perfCountersOut2(24) := 0.U
-  perfCountersOut2(25) := 0.U
-  perfCountersOut2(26) := 0.U
+  perfCountersOut2(24) := core2.perfCnt.flushBranch
+  perfCountersOut2(25) := core2.perfCnt.flushCoherent
+  perfCountersOut2(26) := core2.perfCnt.retiredBranch
   perfCountersOut2(27) := 0.U
   perfCountersOut2(28) := 0.U
   perfCountersOut2(29) := core2.perfCnt.robHeadNotReady
@@ -1561,9 +1645,9 @@ class chironCore extends Module {
   perfCountersOut3(21) := core3.perfCnt.dsPrfExhausted
   perfCountersOut3(22) := core3.perfCnt.dsBranchMaskFull
   perfCountersOut3(23) := core3.perfCnt.dsRenameCollide
-  perfCountersOut3(24) := 0.U
-  perfCountersOut3(25) := 0.U
-  perfCountersOut3(26) := 0.U
+  perfCountersOut3(24) := core3.perfCnt.flushBranch
+  perfCountersOut3(25) := core3.perfCnt.flushCoherent
+  perfCountersOut3(26) := core3.perfCnt.retiredBranch
   perfCountersOut3(27) := 0.U
   perfCountersOut3(28) := 0.U
   perfCountersOut3(29) := core3.perfCnt.robHeadNotReady
