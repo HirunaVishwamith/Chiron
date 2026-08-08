@@ -79,6 +79,13 @@ class chironCore extends Module {
     val pc_hnrMext   = RegInit(0.U(64.W))
     val pc_hnrAmo    = RegInit(0.U(64.W))
     val pc_hnrOther  = RegInit(0.U(64.W))
+    // D-cache hit-latency probe. hnrLoad counts the *cycles* a head-of-ROB load
+    // stalls, which cannot say what a shorter hit pipeline would buy. Count the
+    // stall *episodes* too: one per load that stalls at the head at all, and
+    // those that last >= 2 cycles. Trimming one stage off the hit path removes
+    // at most `episodes` cycles, two stages at most `episodes + ge2`.
+    val pc_hnrLoadEpisodes = RegInit(0.U(64.W))
+    val pc_hnrLoadGE2      = RegInit(0.U(64.W))
     val pc_rnrStoreGate = RegInit(0.U(64.W))
     val pc_rnrWbGate    = RegInit(0.U(64.W))
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
@@ -138,6 +145,20 @@ class chironCore extends Module {
       .elsewhen(headIsAmo)    { pc_hnrAmo    := pc_hnrAmo    + 1.U }
       .otherwise              { pc_hnrOther  := pc_hnrOther  + 1.U }
     }
+
+    // One episode per load that stalls at the head. Commit is 1-wide, so two
+    // consecutive stalling loads are always separated by the cycle in which the
+    // first one commits (commit.ready high) -- the condition drops and the
+    // episodes stay distinct.
+    val hnrLoadCond  = rob.headValid && !rob.commit.ready && headIsLoad
+    val hnrLoadPrev  = RegNext(hnrLoadCond, false.B)
+    val hnrLoadPrev2 = RegNext(hnrLoadPrev, false.B)
+    when(hnrLoadCond && !hnrLoadPrev) {
+      pc_hnrLoadEpisodes := pc_hnrLoadEpisodes + 1.U
+    }
+    when(hnrLoadCond && hnrLoadPrev && !hnrLoadPrev2) {
+      pc_hnrLoadGE2 := pc_hnrLoadGE2 + 1.U
+    }
     when(rob.commit.ready && !rob.commit.fired) {
       when((rob.commit.instruction(6, 4) === "b010".U) && !memAccess.writeInstructionCommit.ready) {
         pc_rnrStoreGate := pc_rnrStoreGate + 1.U
@@ -183,6 +204,8 @@ class chironCore extends Module {
       val hnrMext         = UInt(64.W)
       val hnrAmo          = UInt(64.W)
       val hnrOther        = UInt(64.W)
+      val hnrLoadEpisodes = UInt(64.W)
+      val hnrLoadGE2      = UInt(64.W)
       val rnrStoreGate    = UInt(64.W)
       val rnrWbGate       = UInt(64.W)
       val rnrLoadGate     = UInt(64.W)
@@ -215,6 +238,8 @@ class chironCore extends Module {
     perfCnt.hnrMext         := pc_hnrMext
     perfCnt.hnrAmo          := pc_hnrAmo
     perfCnt.hnrOther        := pc_hnrOther
+    perfCnt.hnrLoadEpisodes := pc_hnrLoadEpisodes
+    perfCnt.hnrLoadGE2      := pc_hnrLoadGE2
     perfCnt.rnrStoreGate    := pc_rnrStoreGate
     perfCnt.rnrWbGate       := pc_rnrWbGate
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
@@ -272,6 +297,13 @@ class chironCore extends Module {
     val pc_hnrMext   = RegInit(0.U(64.W))
     val pc_hnrAmo    = RegInit(0.U(64.W))
     val pc_hnrOther  = RegInit(0.U(64.W))
+    // D-cache hit-latency probe. hnrLoad counts the *cycles* a head-of-ROB load
+    // stalls, which cannot say what a shorter hit pipeline would buy. Count the
+    // stall *episodes* too: one per load that stalls at the head at all, and
+    // those that last >= 2 cycles. Trimming one stage off the hit path removes
+    // at most `episodes` cycles, two stages at most `episodes + ge2`.
+    val pc_hnrLoadEpisodes = RegInit(0.U(64.W))
+    val pc_hnrLoadGE2      = RegInit(0.U(64.W))
     val pc_rnrStoreGate = RegInit(0.U(64.W))
     val pc_rnrWbGate    = RegInit(0.U(64.W))
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
@@ -331,6 +363,20 @@ class chironCore extends Module {
       .elsewhen(headIsAmo)    { pc_hnrAmo    := pc_hnrAmo    + 1.U }
       .otherwise              { pc_hnrOther  := pc_hnrOther  + 1.U }
     }
+
+    // One episode per load that stalls at the head. Commit is 1-wide, so two
+    // consecutive stalling loads are always separated by the cycle in which the
+    // first one commits (commit.ready high) -- the condition drops and the
+    // episodes stay distinct.
+    val hnrLoadCond  = rob.headValid && !rob.commit.ready && headIsLoad
+    val hnrLoadPrev  = RegNext(hnrLoadCond, false.B)
+    val hnrLoadPrev2 = RegNext(hnrLoadPrev, false.B)
+    when(hnrLoadCond && !hnrLoadPrev) {
+      pc_hnrLoadEpisodes := pc_hnrLoadEpisodes + 1.U
+    }
+    when(hnrLoadCond && hnrLoadPrev && !hnrLoadPrev2) {
+      pc_hnrLoadGE2 := pc_hnrLoadGE2 + 1.U
+    }
     when(rob.commit.ready && !rob.commit.fired) {
       when((rob.commit.instruction(6, 4) === "b010".U) && !memAccess.writeInstructionCommit.ready) {
         pc_rnrStoreGate := pc_rnrStoreGate + 1.U
@@ -376,6 +422,8 @@ class chironCore extends Module {
       val hnrMext         = UInt(64.W)
       val hnrAmo          = UInt(64.W)
       val hnrOther        = UInt(64.W)
+      val hnrLoadEpisodes = UInt(64.W)
+      val hnrLoadGE2      = UInt(64.W)
       val rnrStoreGate    = UInt(64.W)
       val rnrWbGate       = UInt(64.W)
       val rnrLoadGate     = UInt(64.W)
@@ -408,6 +456,8 @@ class chironCore extends Module {
     perfCnt.hnrMext         := pc_hnrMext
     perfCnt.hnrAmo          := pc_hnrAmo
     perfCnt.hnrOther        := pc_hnrOther
+    perfCnt.hnrLoadEpisodes := pc_hnrLoadEpisodes
+    perfCnt.hnrLoadGE2      := pc_hnrLoadGE2
     perfCnt.rnrStoreGate    := pc_rnrStoreGate
     perfCnt.rnrWbGate       := pc_rnrWbGate
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
@@ -465,6 +515,13 @@ class chironCore extends Module {
     val pc_hnrMext   = RegInit(0.U(64.W))
     val pc_hnrAmo    = RegInit(0.U(64.W))
     val pc_hnrOther  = RegInit(0.U(64.W))
+    // D-cache hit-latency probe. hnrLoad counts the *cycles* a head-of-ROB load
+    // stalls, which cannot say what a shorter hit pipeline would buy. Count the
+    // stall *episodes* too: one per load that stalls at the head at all, and
+    // those that last >= 2 cycles. Trimming one stage off the hit path removes
+    // at most `episodes` cycles, two stages at most `episodes + ge2`.
+    val pc_hnrLoadEpisodes = RegInit(0.U(64.W))
+    val pc_hnrLoadGE2      = RegInit(0.U(64.W))
     val pc_rnrStoreGate = RegInit(0.U(64.W))
     val pc_rnrWbGate    = RegInit(0.U(64.W))
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
@@ -524,6 +581,20 @@ class chironCore extends Module {
       .elsewhen(headIsAmo)    { pc_hnrAmo    := pc_hnrAmo    + 1.U }
       .otherwise              { pc_hnrOther  := pc_hnrOther  + 1.U }
     }
+
+    // One episode per load that stalls at the head. Commit is 1-wide, so two
+    // consecutive stalling loads are always separated by the cycle in which the
+    // first one commits (commit.ready high) -- the condition drops and the
+    // episodes stay distinct.
+    val hnrLoadCond  = rob.headValid && !rob.commit.ready && headIsLoad
+    val hnrLoadPrev  = RegNext(hnrLoadCond, false.B)
+    val hnrLoadPrev2 = RegNext(hnrLoadPrev, false.B)
+    when(hnrLoadCond && !hnrLoadPrev) {
+      pc_hnrLoadEpisodes := pc_hnrLoadEpisodes + 1.U
+    }
+    when(hnrLoadCond && hnrLoadPrev && !hnrLoadPrev2) {
+      pc_hnrLoadGE2 := pc_hnrLoadGE2 + 1.U
+    }
     when(rob.commit.ready && !rob.commit.fired) {
       when((rob.commit.instruction(6, 4) === "b010".U) && !memAccess.writeInstructionCommit.ready) {
         pc_rnrStoreGate := pc_rnrStoreGate + 1.U
@@ -569,6 +640,8 @@ class chironCore extends Module {
       val hnrMext         = UInt(64.W)
       val hnrAmo          = UInt(64.W)
       val hnrOther        = UInt(64.W)
+      val hnrLoadEpisodes = UInt(64.W)
+      val hnrLoadGE2      = UInt(64.W)
       val rnrStoreGate    = UInt(64.W)
       val rnrWbGate       = UInt(64.W)
       val rnrLoadGate     = UInt(64.W)
@@ -601,6 +674,8 @@ class chironCore extends Module {
     perfCnt.hnrMext         := pc_hnrMext
     perfCnt.hnrAmo          := pc_hnrAmo
     perfCnt.hnrOther        := pc_hnrOther
+    perfCnt.hnrLoadEpisodes := pc_hnrLoadEpisodes
+    perfCnt.hnrLoadGE2      := pc_hnrLoadGE2
     perfCnt.rnrStoreGate    := pc_rnrStoreGate
     perfCnt.rnrWbGate       := pc_rnrWbGate
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
@@ -658,6 +733,13 @@ class chironCore extends Module {
     val pc_hnrMext   = RegInit(0.U(64.W))
     val pc_hnrAmo    = RegInit(0.U(64.W))
     val pc_hnrOther  = RegInit(0.U(64.W))
+    // D-cache hit-latency probe. hnrLoad counts the *cycles* a head-of-ROB load
+    // stalls, which cannot say what a shorter hit pipeline would buy. Count the
+    // stall *episodes* too: one per load that stalls at the head at all, and
+    // those that last >= 2 cycles. Trimming one stage off the hit path removes
+    // at most `episodes` cycles, two stages at most `episodes + ge2`.
+    val pc_hnrLoadEpisodes = RegInit(0.U(64.W))
+    val pc_hnrLoadGE2      = RegInit(0.U(64.W))
     val pc_rnrStoreGate = RegInit(0.U(64.W))
     val pc_rnrWbGate    = RegInit(0.U(64.W))
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
@@ -717,6 +799,20 @@ class chironCore extends Module {
       .elsewhen(headIsAmo)    { pc_hnrAmo    := pc_hnrAmo    + 1.U }
       .otherwise              { pc_hnrOther  := pc_hnrOther  + 1.U }
     }
+
+    // One episode per load that stalls at the head. Commit is 1-wide, so two
+    // consecutive stalling loads are always separated by the cycle in which the
+    // first one commits (commit.ready high) -- the condition drops and the
+    // episodes stay distinct.
+    val hnrLoadCond  = rob.headValid && !rob.commit.ready && headIsLoad
+    val hnrLoadPrev  = RegNext(hnrLoadCond, false.B)
+    val hnrLoadPrev2 = RegNext(hnrLoadPrev, false.B)
+    when(hnrLoadCond && !hnrLoadPrev) {
+      pc_hnrLoadEpisodes := pc_hnrLoadEpisodes + 1.U
+    }
+    when(hnrLoadCond && hnrLoadPrev && !hnrLoadPrev2) {
+      pc_hnrLoadGE2 := pc_hnrLoadGE2 + 1.U
+    }
     when(rob.commit.ready && !rob.commit.fired) {
       when((rob.commit.instruction(6, 4) === "b010".U) && !memAccess.writeInstructionCommit.ready) {
         pc_rnrStoreGate := pc_rnrStoreGate + 1.U
@@ -762,6 +858,8 @@ class chironCore extends Module {
       val hnrMext         = UInt(64.W)
       val hnrAmo          = UInt(64.W)
       val hnrOther        = UInt(64.W)
+      val hnrLoadEpisodes = UInt(64.W)
+      val hnrLoadGE2      = UInt(64.W)
       val rnrStoreGate    = UInt(64.W)
       val rnrWbGate       = UInt(64.W)
       val rnrLoadGate     = UInt(64.W)
@@ -794,6 +892,8 @@ class chironCore extends Module {
     perfCnt.hnrMext         := pc_hnrMext
     perfCnt.hnrAmo          := pc_hnrAmo
     perfCnt.hnrOther        := pc_hnrOther
+    perfCnt.hnrLoadEpisodes := pc_hnrLoadEpisodes
+    perfCnt.hnrLoadGE2      := pc_hnrLoadGE2
     perfCnt.rnrStoreGate    := pc_rnrStoreGate
     perfCnt.rnrWbGate       := pc_rnrWbGate
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
@@ -1519,8 +1619,8 @@ class chironCore extends Module {
   perfCountersOut0(24) := core0.perfCnt.flushBranch
   perfCountersOut0(25) := core0.perfCnt.flushCoherent
   perfCountersOut0(26) := core0.perfCnt.retiredBranch
-  perfCountersOut0(27) := 0.U
-  perfCountersOut0(28) := 0.U
+  perfCountersOut0(27) := core0.perfCnt.hnrLoadEpisodes
+  perfCountersOut0(28) := core0.perfCnt.hnrLoadGE2
   perfCountersOut0(29) := core0.perfCnt.robHeadNotReady
   perfCountersOut0(30) := core0.perfCnt.robReadyBlocked
   perfCountersOut0(31) := core0.perfCnt.hnrLoad
@@ -1562,8 +1662,8 @@ class chironCore extends Module {
   perfCountersOut1(24) := core1.perfCnt.flushBranch
   perfCountersOut1(25) := core1.perfCnt.flushCoherent
   perfCountersOut1(26) := core1.perfCnt.retiredBranch
-  perfCountersOut1(27) := 0.U
-  perfCountersOut1(28) := 0.U
+  perfCountersOut1(27) := core1.perfCnt.hnrLoadEpisodes
+  perfCountersOut1(28) := core1.perfCnt.hnrLoadGE2
   perfCountersOut1(29) := core1.perfCnt.robHeadNotReady
   perfCountersOut1(30) := core1.perfCnt.robReadyBlocked
   perfCountersOut1(31) := core1.perfCnt.hnrLoad
@@ -1605,8 +1705,8 @@ class chironCore extends Module {
   perfCountersOut2(24) := core2.perfCnt.flushBranch
   perfCountersOut2(25) := core2.perfCnt.flushCoherent
   perfCountersOut2(26) := core2.perfCnt.retiredBranch
-  perfCountersOut2(27) := 0.U
-  perfCountersOut2(28) := 0.U
+  perfCountersOut2(27) := core2.perfCnt.hnrLoadEpisodes
+  perfCountersOut2(28) := core2.perfCnt.hnrLoadGE2
   perfCountersOut2(29) := core2.perfCnt.robHeadNotReady
   perfCountersOut2(30) := core2.perfCnt.robReadyBlocked
   perfCountersOut2(31) := core2.perfCnt.hnrLoad
@@ -1648,8 +1748,8 @@ class chironCore extends Module {
   perfCountersOut3(24) := core3.perfCnt.flushBranch
   perfCountersOut3(25) := core3.perfCnt.flushCoherent
   perfCountersOut3(26) := core3.perfCnt.retiredBranch
-  perfCountersOut3(27) := 0.U
-  perfCountersOut3(28) := 0.U
+  perfCountersOut3(27) := core3.perfCnt.hnrLoadEpisodes
+  perfCountersOut3(28) := core3.perfCnt.hnrLoadGE2
   perfCountersOut3(29) := core3.perfCnt.robHeadNotReady
   perfCountersOut3(30) := core3.perfCnt.robReadyBlocked
   perfCountersOut3(31) := core3.perfCnt.hnrLoad

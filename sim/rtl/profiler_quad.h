@@ -114,6 +114,8 @@ public:
             case 24: return tb->perfCountersOut0_24;
             case 25: return tb->perfCountersOut0_25;
             case 26: return tb->perfCountersOut0_26;
+            case 27: return tb->perfCountersOut0_27;
+            case 28: return tb->perfCountersOut0_28;
             case 29: return tb->perfCountersOut0_29;
             case 30: return tb->perfCountersOut0_30;
             case 31: return tb->perfCountersOut0_31;
@@ -155,6 +157,8 @@ public:
             case 24: return tb->perfCountersOut1_24;
             case 25: return tb->perfCountersOut1_25;
             case 26: return tb->perfCountersOut1_26;
+            case 27: return tb->perfCountersOut1_27;
+            case 28: return tb->perfCountersOut1_28;
             case 29: return tb->perfCountersOut1_29;
             case 30: return tb->perfCountersOut1_30;
             case 31: return tb->perfCountersOut1_31;
@@ -196,6 +200,8 @@ public:
             case 24: return tb->perfCountersOut2_24;
             case 25: return tb->perfCountersOut2_25;
             case 26: return tb->perfCountersOut2_26;
+            case 27: return tb->perfCountersOut2_27;
+            case 28: return tb->perfCountersOut2_28;
             case 29: return tb->perfCountersOut2_29;
             case 30: return tb->perfCountersOut2_30;
             case 31: return tb->perfCountersOut2_31;
@@ -237,6 +243,8 @@ public:
             case 24: return tb->perfCountersOut3_24;
             case 25: return tb->perfCountersOut3_25;
             case 26: return tb->perfCountersOut3_26;
+            case 27: return tb->perfCountersOut3_27;
+            case 28: return tb->perfCountersOut3_28;
             case 29: return tb->perfCountersOut3_29;
             case 30: return tb->perfCountersOut3_30;
             case 31: return tb->perfCountersOut3_31;
@@ -296,6 +304,8 @@ public:
         m.hnr_mext            = r[33];
         m.hnr_amo             = r[34];
         m.hnr_other           = r[35];
+        m.hnr_load_episodes   = r[27];
+        m.hnr_load_ge2        = r[28];
         m.rnr_store_gate      = r[36];
         m.rnr_wb_gate         = r[37];
         m.rnr_load_gate       = r[38];
@@ -405,6 +415,8 @@ public:
             ss << "        \"hnr_mext\": "            << m.hnr_mext           << ",\n";
             ss << "        \"hnr_amo\": "             << m.hnr_amo            << ",\n";
             ss << "        \"hnr_other\": "           << m.hnr_other          << ",\n";
+            ss << "        \"hnr_load_episodes\": "   << m.hnr_load_episodes  << ",\n";
+            ss << "        \"hnr_load_ge2\": "        << m.hnr_load_ge2       << ",\n";
             ss << "        \"rnr_store_gate\": "      << m.rnr_store_gate     << ",\n";
             ss << "        \"rnr_wb_gate\": "         << m.rnr_wb_gate        << ",\n";
             ss << "        \"rnr_load_gate\": "       << m.rnr_load_gate      << "\n";
@@ -423,6 +435,15 @@ public:
                 ss << "        \"spin_pc_hi\": "         << win[i].spin_hi      << ",\n";
                 ss << "        \"rob_head_not_ready_pct\": " << 100.0*(double)w.rob_head_not_ready/(double)swc << ",\n";
                 ss << "        \"hnr_load_pct\": "       << 100.0*(double)w.hnr_load/(double)swc       << ",\n";
+                // What a shorter D-cache hit pipeline would actually buy. Each
+                // stage removed shortens every head-of-ROB load stall by one
+                // cycle, so one stage saves at most `episodes` cycles and two
+                // save at most `episodes + ge2` -- capped by hnr_load itself.
+                ss << "        \"hnr_load_episodes\": "  << w.hnr_load_episodes << ",\n";
+                ss << "        \"hnr_load_ge2\": "       << w.hnr_load_ge2      << ",\n";
+                ss << "        \"hnr_load_avg_stall\": " << (double)w.hnr_load/(double)safe_max1(w.hnr_load_episodes) << ",\n";
+                ss << "        \"save_1stage_pct\": "    << 100.0*(double)w.hnr_load_episodes/(double)swc << ",\n";
+                ss << "        \"save_2stage_pct\": "    << 100.0*(double)(w.hnr_load_episodes+w.hnr_load_ge2)/(double)swc << ",\n";
                 ss << "        \"hnr_mext_pct\": "       << 100.0*(double)w.hnr_mext/(double)swc       << ",\n";
                 ss << "        \"hnr_other_pct\": "      << 100.0*(double)w.hnr_other/(double)swc      << ",\n";
                 ss << "        \"rob_ready_blocked_pct\": " << 100.0*(double)w.rob_ready_blocked/(double)swc << ",\n";

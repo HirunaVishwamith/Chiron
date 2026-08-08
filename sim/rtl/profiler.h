@@ -79,6 +79,11 @@ struct PerfMetrics {
     uint64_t hnr_mext;
     uint64_t hnr_amo;
     uint64_t hnr_other;
+    // hnr_load counted as *episodes* rather than cycles: one per load that
+    // stalls at the ROB head at all, plus those lasting >= 2 cycles. Quad-core
+    // profiler only (RTL slots 27-28); the single-core path leaves these zero.
+    uint64_t hnr_load_episodes = 0;
+    uint64_t hnr_load_ge2      = 0;
     uint64_t rnr_store_gate;
     uint64_t rnr_wb_gate;
     uint64_t rnr_load_gate;
