@@ -111,6 +111,10 @@ int main(int argc, char *argv[]) {
         if (tb->core2OutChar_valid) { putchar((int)tb->core2OutChar_byte); fflush(stdout); }
         if (tb->core3OutChar_valid) { putchar((int)tb->core3OutChar_byte); fflush(stdout); }
 
+        // Work-region windowing: must run before the early-continue below, so
+        // cycles where core 0 does not commit still advance the other harts.
+        profiler.sample(sim_cycles);
+
         // Completion is declared when core 0 (the coordinator hart) reaches
         // the terminal condition. At that point all cores have finished their
         // parallel work (they joined a barrier before core 0 exits).
