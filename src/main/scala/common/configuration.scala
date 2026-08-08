@@ -25,6 +25,38 @@ object configuration {
   val instructionBase = 0x0000000080000000L// = 0x0000000080000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L
   val bootBase = 0x0000000010000000L
   val bootHigh = 0x0000000010001f40L
+  /**
+    * Frontend branch prediction. Everything here only steers *which address
+    * fetch requests next* — resolution and squash are untouched — so a bad
+    * setting costs IPC, never correctness. `enableAdvancedPredictor = false`
+    * restores the original BTB + gshare frontend for A/B from one build.
+    */
+  object frontend {
+    val enableAdvancedPredictor = false
+    val enableRAS               = true
+    val enableTAGE              = true
+
+    // Legacy gshare geometry, used when enableAdvancedPredictor is false.
+    val gshareCounterDepth = 2048
+    val gshareBtbSize      = 256
+
+    val btbEntries     = 256   // taken-target cache, written at resolution
+    val cfiEntries     = 512   // pre-decode branch classifier (cond/call/ret/…)
+    val bimodalEntries = 2048  // TAGE base predictor
+
+    val tageTableEntries    = 256
+    val tageTagWidth        = 9
+    val tageHistoryLengths  = Seq(4, 9, 19, 40)
+    val tageAgeCounterWidth = 18 // usefulness reset every 2^18 trained branches
+    val ghrLength           = tageHistoryLengths.max
+
+    val rasDepth   = 16
+    val rasSpWidth  = log2Ceil(rasDepth)
+    val rasCntWidth = log2Ceil(rasDepth + 1)
+    // Checkpointed alongside every in-flight fetch so a redirect can roll back.
+    val rasCheckpointWidth = rasSpWidth + rasCntWidth
+  }
+
   object cache {
     val newRequestBufferDepth = 4
     val dependentReadsDepth = 4

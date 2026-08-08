@@ -255,16 +255,25 @@ class fetch(val fifo_size: Int) extends Module {
 
 
   // initialize BHT and fifo buffer
-  val predictor = Module(new gshare_predictor(2048,256))
+  private val fe = configuration.frontend
+  val predictor: nextPCPredictor = Module(
+    if (fe.enableAdvancedPredictor) new advancedPredictor
+    else new legacyPredictor(fe.gshareCounterDepth, fe.gshareBtbSize))
   predictor.io.branchres <> branchRes
   predictor.io.curr_pc := PC
   val PC_fifo = Module(new regFifo(UInt(128.W), fifo_size))
 
+  // Each in-flight fetch carries the RAS pointer as of its own push/pop, in the
+  // spare upper bits of the 128-bit fifo entry, so a redirect can roll the
+  // stack back to the last correct-path state. Everything downstream of the
+  // fifo must therefore take the low 64 bits explicitly.
+  private val ckptW = configuration.frontend.rasCheckpointWidth
+
   //Connect PC fifo
-  PC_fifo.io.enq.bits := PC
+  PC_fifo.io.enq.bits := Cat(predictor.rasCheckpoint, PC)
   PC_fifo.io.enq.valid := cache.req.valid & cache.req.ready
   PC_fifo.io.deq.ready := cache.resp.valid & cache.resp.ready
-  toDecode.pc := PC_fifo.io.deq.bits
+  toDecode.pc := PC_fifo.io.deq.bits(63, 0)
 
   //fence.I
   val is_fenceI = (toDecode.instruction(6,2) === "b00011".U) & (toDecode.instruction(14,13) === 0.U) & (toDecode.fired)
@@ -318,7 +327,7 @@ class fetch(val fifo_size: Int) extends Module {
   when(redirect_bit===1.U) {
     PC := toDecode.expected.pc
   }.elsewhen(is_fenceI) {
-    PC := PC_fifo.io.deq.bits + 4.U
+    PC := PC_fifo.io.deq.bits(63, 0) + 4.U
   }.elsewhen(cache.req.valid & cache.req.ready) {
     PC := predictor.io.next_pc
   }
@@ -349,6 +358,27 @@ class fetch(val fifo_size: Int) extends Module {
   }
 
   predictor.mispredicted := misPredicted
+
+  // Any redirect — mispredict or coherency squash — discards the speculative
+  // frontend state, so the predictor's speculative global history has to be
+  // reloaded from the committed one either way.
+  val redirectDetected = (redirect_bit === 0.U) && PC_fifo.io.deq.valid && redirect
+  val pipelineFlushed = RegInit(0.B)
+  pipelineFlushed := redirectDetected
+  predictor.pipelineFlush := pipelineFlushed
+
+  // Roll the return-address stack back to the checkpoint the mispredicting
+  // fetch carried, discarding what wrong-path fetches did behind it.
+  predictor.rasRestore.valid := redirectDetected
+  predictor.rasRestore.state := PC_fifo.io.deq.bits(63 + ckptW, 64)
+
+  // Pre-decode: fetch already sees every correct-path instruction on its way to
+  // decode, so it can classify branches/calls/returns itself without touching
+  // the decode or resolution path.
+  predictor.predecode.valid       := toDecode.fired
+  predictor.predecode.pc          := PC_fifo.io.deq.bits(63, 0)
+  predictor.predecode.instruction := cache.resp.bits
+
   when(handle_fenceI.asBool) { cache.resp.ready := true.B }
 
 
