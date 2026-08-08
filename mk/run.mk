@@ -306,6 +306,30 @@ stress-sweep: $(BUILD)/profile_quad_check.out   ## Sweep STRESS_SEEDS; stops at 
 	done; \
 	echo "stress-sweep: all seeds clean"
 
+# ── Performance dashboard ─────────────────────────────────────────────────────
+# profile_quad already emits every counter worth plotting, so this is pure
+# post-processing: run the benchmarks with --output, then render one
+# self-contained HTML file (no external libraries, opens anywhere).
+PROFILE_DIR ?= $(BUILD)/profiles
+DASHBOARD   ?= $(BUILD)/chiron_dashboard.html
+
+.PHONY: profiles dashboard
+profiles: $(BUILD)/profile_quad_fast.out   ## Run the 5 benchmarks, writing profiler JSON to PROFILE_DIR
+	@mkdir -p $(PROFILE_DIR)
+	@run() { \
+	  echo "== profiling $$1 =="; \
+	  timeout 3000 $(BUILD)/profile_quad_fast.out --image $(BINS)/$$2 --name $$1 $$3 \
+	      --timeout 120000000 --output $(PROFILE_DIR)/$$1.json > $(PROFILE_DIR)/$$1.txt 2>&1 \
+	    || echo "  $$1: FAILED (rc=$$?) — see $(PROFILE_DIR)/$$1.txt"; }; \
+	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
+	run matmul-s1-q4 mt-matmul-s1-q4.bin       "$(matmul_DONE)"; \
+	run filter-s5-q4 mt-mask-sfilter-s5-q4.bin "$(filter_DONE)"; \
+	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
+	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"
+
+dashboard:   ## Render PROFILE_DIR's JSON into a self-contained HTML dashboard
+	@python3 tools/viz_report.py --profiles $(PROFILE_DIR) --out $(DASHBOARD)
+
 test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 
 # ── Linux image build (Multicore_Linux_Image/ submodule) ──────────────────────
