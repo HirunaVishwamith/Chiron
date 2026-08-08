@@ -31,6 +31,10 @@ sim/rtl/obj_dir*/
 *.bsp
 *.fir
 *.json
+# ...but the published performance numbers are a deliberate exception: the
+# dashboard in docs/ is rendered from these, so committing them lets a reader
+# reproduce the figures without re-running ~30 min of simulation.
+!docs/profiles/*.json
 *.vcd
 *.vcd.fst
 Image
