@@ -227,6 +227,16 @@ public:
         m.flush_branch        = get_core_counter(c, 24);
         m.flush_coherent      = get_core_counter(c, 25);
         m.retired_branch      = get_core_counter(c, 26);
+        m.rob_head_not_ready  = get_core_counter(c, 29);
+        m.rob_ready_blocked   = get_core_counter(c, 30);
+        m.hnr_load            = get_core_counter(c, 31);
+        m.hnr_branch          = get_core_counter(c, 32);
+        m.hnr_mext            = get_core_counter(c, 33);
+        m.hnr_amo             = get_core_counter(c, 34);
+        m.hnr_other           = get_core_counter(c, 35);
+        m.rnr_store_gate      = get_core_counter(c, 36);
+        m.rnr_wb_gate         = get_core_counter(c, 37);
+        m.rnr_load_gate       = get_core_counter(c, 38);
         m.fe_resp_valid_idle  = 0;  // no lineStreamer in quad-core fetch
         m.fe_cache_not_prod   = 0;
         m.fe_req_fire         = 0;
@@ -313,7 +323,17 @@ public:
             ss << "        \"ds_rename_collide\": "   << m.ds_rename_collide  << ",\n";
             ss << "        \"flush_branch\": "        << m.flush_branch       << ",\n";
             ss << "        \"flush_coherent\": "      << m.flush_coherent     << ",\n";
-            ss << "        \"retired_branch\": "      << m.retired_branch     << "\n";
+            ss << "        \"retired_branch\": "      << m.retired_branch     << ",\n";
+            ss << "        \"rob_head_not_ready\": "  << m.rob_head_not_ready << ",\n";
+            ss << "        \"rob_ready_blocked\": "   << m.rob_ready_blocked  << ",\n";
+            ss << "        \"hnr_load\": "            << m.hnr_load           << ",\n";
+            ss << "        \"hnr_branch\": "          << m.hnr_branch         << ",\n";
+            ss << "        \"hnr_mext\": "            << m.hnr_mext           << ",\n";
+            ss << "        \"hnr_amo\": "             << m.hnr_amo            << ",\n";
+            ss << "        \"hnr_other\": "           << m.hnr_other          << ",\n";
+            ss << "        \"rnr_store_gate\": "      << m.rnr_store_gate     << ",\n";
+            ss << "        \"rnr_wb_gate\": "         << m.rnr_wb_gate        << ",\n";
+            ss << "        \"rnr_load_gate\": "       << m.rnr_load_gate      << "\n";
             ss << "      },\n";
             ss << "      \"derived\": {\n";
             ss << "        \"ipc\": "                           << m.ipc                           << ",\n";

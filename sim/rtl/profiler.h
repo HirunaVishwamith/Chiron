@@ -69,6 +69,19 @@ struct PerfMetrics {
     uint64_t flush_branch;
     uint64_t flush_coherent;
     uint64_t retired_branch;
+    // Commit-port stall decomposition (RTL slots 29-40). rob_head_not_ready is
+    // the head being incomplete, split by the head's opcode; rob_ready_blocked
+    // is the head being complete but held back by a commit-side gate.
+    uint64_t rob_head_not_ready;
+    uint64_t rob_ready_blocked;
+    uint64_t hnr_load;
+    uint64_t hnr_branch;
+    uint64_t hnr_mext;
+    uint64_t hnr_amo;
+    uint64_t hnr_other;
+    uint64_t rnr_store_gate;
+    uint64_t rnr_wb_gate;
+    uint64_t rnr_load_gate;
 
     // Derived metrics
     double ipc;
@@ -183,6 +196,16 @@ public:
         m.flush_branch        = 0;
         m.flush_coherent      = 0;
         m.retired_branch      = 0;
+        m.rob_head_not_ready  = get_perf_counter(29);
+        m.rob_ready_blocked   = get_perf_counter(30);
+        m.hnr_load            = get_perf_counter(31);
+        m.hnr_branch          = get_perf_counter(32);
+        m.hnr_mext            = get_perf_counter(33);
+        m.hnr_amo             = get_perf_counter(34);
+        m.hnr_other           = get_perf_counter(35);
+        m.rnr_store_gate      = get_perf_counter(36);
+        m.rnr_wb_gate         = get_perf_counter(37);
+        m.rnr_load_gate       = get_perf_counter(38);
 
         const double clock_hz = 75000000.0;
         const double bytes_per_beat = 8.0;
