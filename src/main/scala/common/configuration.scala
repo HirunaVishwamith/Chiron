@@ -32,7 +32,7 @@ object configuration {
     * restores the original BTB + gshare frontend for A/B from one build.
     */
   object frontend {
-    val enableAdvancedPredictor = false
+    val enableAdvancedPredictor = true
     val enableRAS               = true
     val enableTAGE              = true
 
