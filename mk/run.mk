@@ -96,6 +96,12 @@ $(BUILD)/robready_probe.out: $(HARNESS)/probes/robready_probe.cpp $(SIM_HDR) $(V
 $(BUILD)/mextpath_probe.out: $(HARNESS)/probes/mextpath_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/mextpath_probe.cpp $(VSYS_LIB_FAST) -o $@
 
+# Boots the full Linux image while counting CLINT msip writes per target hart.
+# Uses CXX_LINUX (raised STEP_TIMEOUT) like linux_sim.out, since legitimate boot
+# phases stall far longer than a benchmark ever does.
+$(BUILD)/linux_ipi_probe.out: $(HARNESS)/probes/linux_ipi_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_ipi_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 # RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
 # its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
 # (CXX_FAST sets -DCHIRON_NO_TRACE so rtl_model.h's tb->trace() compiles out) for
@@ -255,12 +261,10 @@ ci-check: $(BUILD)/profile_quad_check.out   ## Strict gate: benchmarks + per-cyc
 	run() { \
 	  echo "== CI check: $$1 =="; \
 	  out=$$(timeout 3000 $(BUILD)/profile_quad_check.out --image $(BINS)/$$2 --name $$1 $$3 \
-	       --timeout 120000000 2>&1); \
+	       --timeout 120000000 2>&1); rc=$$?; \
 	  echo "$$out" | grep -E 'INVARIANT|chiron invariants|no violations|VIOLATION|BENCHMARK COMPLETE|TIMEOUT|DEADLOCK' || true; \
-	  if echo "$$out" | grep -q 'BENCHMARK COMPLETE' && \
-	     ! echo "$$out" | grep -qiE 'Register mismatch|Deadlock|TIMEOUT|VIOLATION|INVARIANT'; \
-	  then echo "$$1: CLEAN"; \
-	  else echo "$$1: FAIL"; fail=1; fi; }; \
+	  if [ $$rc -eq 0 ]; then echo "$$1: CLEAN"; \
+	  else echo "$$1: FAIL (rc=$$rc: 2=timeout 3=deadlock 4=invariant-violation 124=wall-clock)"; fail=1; fi; }; \
 	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
 	run matmul-s1-q4 mt-matmul-s1-q4.bin       "$(matmul_DONE)"; \
 	run filter-s5-q4 mt-mask-sfilter-s5-q4.bin "$(filter_DONE)"; \
@@ -291,13 +295,12 @@ stress-sweep: $(BUILD)/profile_quad_check.out   ## Sweep STRESS_SEEDS; stops at 
 	@for s in $(STRESS_SEEDS); do \
 	  echo "===== stress seed $$s ====="; \
 	  $(MAKE) --no-print-directory stress-bin SEED=$$s BLOCKS=$(BLOCKS) > /dev/null || exit 1; \
-	  out=$$($(MAKE) --no-print-directory stress-run SEED=$$s BLOCKS=$(BLOCKS) 2>&1); \
+	  out=$$($(MAKE) --no-print-directory stress-run SEED=$$s BLOCKS=$(BLOCKS) 2>&1); rc=$$?; \
 	  echo "$$out" | grep -E 'INVARIANT|VIOLATION|no violations|BENCHMARK COMPLETE|TIMEOUT|DEADLOCK' || true; \
-	  if echo "$$out" | grep -q 'BENCHMARK COMPLETE' && \
-	     ! echo "$$out" | grep -qiE 'VIOLATION|INVARIANT|TIMEOUT|DEADLOCK'; then \
+	  if [ $$rc -eq 0 ]; then \
 	    echo "seed $$s: CLEAN"; \
 	  else \
-	    echo "seed $$s: FAIL  -- replay with: make stress-bin SEED=$$s BLOCKS=$(BLOCKS) && make stress-run SEED=$$s"; \
+	    echo "seed $$s: FAIL (rc=$$rc)  -- replay with: make stress-bin SEED=$$s BLOCKS=$(BLOCKS) && make stress-run SEED=$$s"; \
 	    exit 1; \
 	  fi; \
 	done; \
