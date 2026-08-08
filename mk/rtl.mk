@@ -32,9 +32,21 @@ $(VSYS_LIB): $(SIM)/system.v
 
 # Fast model (obj_dir_fast): same Verilog, NO --trace, -O3 codegen — for the
 # run-only harnesses (linux_sim). ~1.2x faster; cannot dump waveforms.
+#
+# --savable adds Verilator's model save/restore (VerilatedSave/VerilatedRestore).
+# It only emits extra serialisation methods; it does not change simulation
+# behaviour. It exists because the Linux SMP boot takes ~16 h to reach the
+# post-/init hang, which made every hypothesis cost a full day. With
+# checkpoints, a run snapshots itself periodically and a debug session restores
+# just before the failure and iterates in minutes. It also makes cycle-bisection
+# of a hang practical. See `make linux-ckpt` / CKPT_* in mk/run.mk.
+#
+# NOTE the checkpoint contains the whole model INCLUDING the 256 MB DRAM array
+# (system.memory.memory), so each file is ~256 MB. CKPT_KEEP bounds how many are
+# retained.
 $(VSYS_LIB_FAST): $(SIM)/system.v
 	cd $(SIM)/; \
-	verilator -Wall -O3 -cc system.v --Mdir obj_dir_fast; \
+	verilator -Wall -O3 --savable -cc system.v --Mdir obj_dir_fast; \
 	cd obj_dir_fast/; make -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
 
 # ── Optional walker-disabled model (A/B debug only) ───────────────────────────

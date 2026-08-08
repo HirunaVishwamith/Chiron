@@ -45,6 +45,12 @@ EMU_IMAGE := $(DATA)/Image
 HARNESS_INCS  := -I . -I $(VINC) -I $(SIM)/obj_dir
 VERILATED     := $(VINC)/verilated.cpp
 VERILATED_VCD := $(VINC)/verilated_vcd_c.cpp
+# The fast model is Verilated with --savable (checkpoint/restore for the long
+# Linux boot — see mk/rtl.mk). Verilator 4.x emits calls into
+# VerilatedSerialize/VerilatedDeserialize but does NOT bundle their
+# implementation into Vsystem__ALL.a, so this must be compiled alongside or the
+# link fails with `undefined reference to VerilatedDeserialize::readAssert`.
+VERILATED_SAVE := $(VINC)/verilated_save.cpp
 
 # Verilator 5.x splits the runtime into a separate libverilated.a (containing
 # verilated.o + verilated_vcd_c.o + verilated_threads.o). Verilator 4.x bundles
@@ -75,10 +81,10 @@ HARNESS_INCS_FAST := -I . -I $(VINC) -I $(SIM_FAST)
 _VLIB_FAST := $(wildcard $(SIM_FAST)/libverilated.a)
 ifneq ($(_VLIB_FAST),)
   VSYS_LIB_FAST := $(_VLIB_FAST) $(SIM_FAST)/Vsystem__ALL.a
-  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000
+  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED_SAVE)
 else
   VSYS_LIB_FAST := $(SIM_FAST)/Vsystem__ALL.a
-  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD)
+  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD) $(VERILATED_SAVE)
 endif
 
 # ── Linux boot harness flags ──────────────────────────────────────────────────
@@ -97,9 +103,9 @@ endif
 # Prefer the fast-model include path (single-build fix); fall back to compiling
 # verilated sources ourselves on Verilator 4.x.
 ifneq ($(_VLIB_FAST),)
-  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000
+  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED_SAVE)
 else
-  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD)
+  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD) $(VERILATED_SAVE)
 endif
 
 # Optimization for the Verilator-generated C++ (verilated.mk's OPT_FAST default

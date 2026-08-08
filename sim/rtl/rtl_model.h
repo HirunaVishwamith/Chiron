@@ -96,6 +96,18 @@ class simulator {
     prev_pc = 0x80000000UL;
   }
 
+  // Construct the model WITHOUT resetting it or loading an image.
+  //
+  // For restoring a Verilator checkpoint (--savable): the restore overwrites
+  // every register and all 256 MB of DRAM, so resetting or loading here would
+  // be wasted work at best and would corrupt the resumed state at worst. Pair
+  // with VerilatedRestore; see sim/harness/probes/linux_ipi_probe.cpp.
+  void init_no_image() {
+    tb = new Vsystem;
+    bind_registers();
+    tfp = nullptr;
+  }
+
   // Advance the clock until the next instruction commits.
   //   return 0 = committed, 1 = timed out, 2 = committed with interrupt.
   // step() drives the VCD timeline (dump_tick); step_nodump() does not

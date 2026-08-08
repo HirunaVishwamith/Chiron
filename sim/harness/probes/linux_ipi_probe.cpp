@@ -35,16 +35,32 @@
 // The heartbeat also reports cycles-since-last-UART-byte, because the console
 // going quiet is the symptom the whole hunt started from.
 //
+// CHECKPOINTING
+// -------------
+// Reaching the hang costs ~16 h, which made every hypothesis cost a day. This
+// probe snapshots the whole Verilated model periodically (Verilator --savable),
+// so a debug session can restore just before the failure and iterate in
+// minutes, and a hang can be cycle-bisected. The checkpoint contains the 256 MB
+// DRAM array, so each file is ~256 MB — CKPT_KEEP bounds how many survive.
+//
 // Usage (same arguments as linux_sim.out):
 //   build/linux_ipi_probe.out bins/linux-q4.bin sim/data/qemu.dtb sim/data/boot.bin
 // Env:
 //   IPI_REPORT_CYCLES  cycles between diagnostic lines (default 20,000,000)
+//   CKPT_DIR           where to write checkpoints (default: none = disabled)
+//   CKPT_EVERY         cycles between checkpoints (default 100,000,000)
+//   CKPT_KEEP          how many recent checkpoints to retain (default 3, 0=all)
+//   CKPT_RESTORE       path to a checkpoint to resume from (skips image load)
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <cinttypes>
+#include <string>
+#include <deque>
 
 #include "sim/rtl/rtl_model.h"
+#include "verilated_save.h"
 
 #define CORE(N, s) tb->system__DOT__chiron__DOT__core##N##__DOT__##s
 
@@ -55,22 +71,58 @@ int main(int argc, char **argv) {
 
   const char *rp = getenv("IPI_REPORT_CYCLES");
   const uint64_t REPORT = rp ? strtoull(rp, nullptr, 0) : 20000000ULL;
-
-  simulator bench;
-  bench.init(image, dtb, bootrom);
-  Vsystem *tb = bench.raw();
-
-  std::printf("\n***** Linux IPI probe: booting quad-core image *****\n");
-  std::printf("      counting CLINT msip writes per target hart; the console\n");
-  std::printf("      going quiet is the symptom, msip counts are the evidence\n\n");
-  std::fflush(stdout);
+  const char *ckpt_dir     = getenv("CKPT_DIR");
+  const char *ckpt_restore = getenv("CKPT_RESTORE");
+  const char *ce = getenv("CKPT_EVERY");
+  const uint64_t CKPT_EVERY = ce ? strtoull(ce, nullptr, 0) : 100000000ULL;
+  const char *ck = getenv("CKPT_KEEP");
+  const unsigned CKPT_KEEP = ck ? (unsigned)strtoul(ck, nullptr, 0) : 3u;
 
   uint64_t cyc = 0;
   uint64_t msip_writes[4] = {0, 0, 0, 0};
   uint64_t last_msip_writes[4] = {0, 0, 0, 0};
   uint64_t last_uart_cyc = 0;
   uint64_t uart_bytes = 0;
-  uint64_t next_report = REPORT;
+
+  simulator bench;
+  Vsystem *tb = nullptr;
+
+  if (ckpt_restore) {
+    // Resume: build the model but do NOT load the image — every byte of DRAM,
+    // and all core state, comes back from the checkpoint. The harness's own
+    // counters are saved alongside so the diagnostic stream is continuous
+    // across a restore rather than restarting from zero.
+    bench.init_no_image();
+    tb = bench.raw();
+    VerilatedRestore rs;
+    rs.open(ckpt_restore);
+    rs >> cyc;
+    rs >> msip_writes[0]; rs >> msip_writes[1];
+    rs >> msip_writes[2]; rs >> msip_writes[3];
+    rs >> last_uart_cyc;  rs >> uart_bytes;
+    rs >> *tb;
+    rs.close();
+    for (int h = 0; h < 4; h++) last_msip_writes[h] = msip_writes[h];
+    std::printf("\n***** RESTORED from %s at cycle %" PRIu64 " *****\n",
+                ckpt_restore, cyc);
+    std::printf("      (image NOT reloaded; DRAM and core state came from the"
+                " checkpoint)\n\n");
+  } else {
+    bench.init(image, dtb, bootrom);
+    tb = bench.raw();
+    std::printf("\n***** Linux IPI probe: booting quad-core image *****\n");
+    std::printf("      counting CLINT msip writes per target hart; the console\n");
+    std::printf("      going quiet is the symptom, msip counts are the evidence\n\n");
+  }
+  if (ckpt_dir)
+    std::printf("      checkpointing every %" PRIu64 " cycles -> %s"
+                " (~256 MB each, keeping %u)\n\n", CKPT_EVERY, ckpt_dir,
+                CKPT_KEEP);
+  std::fflush(stdout);
+
+  std::deque<std::string> ckpts;
+  uint64_t next_ckpt = ckpt_dir ? ((cyc / CKPT_EVERY) + 1) * CKPT_EVERY : ~0ULL;
+  uint64_t next_report = ((cyc / REPORT) + 1) * REPORT;
 
   for (;;) {
     tb->eval();
@@ -141,6 +193,32 @@ int main(int argc, char **argv) {
           " advance but msip_line stays\n"
           "[ipi]      high with MSIP=1 and the hart does not trap, the receiver"
           " gate is shut (MIE/MSIE).\n");
+      std::fflush(stderr);
+    }
+
+    // Checkpoint on a clean cycle boundary, before the edge, so a restore
+    // resumes at exactly this point with the model in the same phase.
+    if (cyc >= next_ckpt) {
+      next_ckpt = cyc + CKPT_EVERY;
+      char path[1024];
+      std::snprintf(path, sizeof path, "%s/ckpt_%012" PRIu64 ".bin",
+                    ckpt_dir, cyc);
+      VerilatedSave sv;
+      sv.open(path);
+      // Harness state first, in the same order the restore reads it.
+      sv << cyc;
+      sv << msip_writes[0]; sv << msip_writes[1];
+      sv << msip_writes[2]; sv << msip_writes[3];
+      sv << last_uart_cyc;  sv << uart_bytes;
+      sv << *tb;
+      sv.close();
+      std::fprintf(stderr, "[ckpt] wrote %s\n", path);
+      ckpts.push_back(path);
+      while (CKPT_KEEP && ckpts.size() > CKPT_KEEP) {
+        std::remove(ckpts.front().c_str());
+        std::fprintf(stderr, "[ckpt] pruned %s\n", ckpts.front().c_str());
+        ckpts.pop_front();
+      }
       std::fflush(stderr);
     }
 
