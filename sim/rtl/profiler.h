@@ -59,6 +59,12 @@ struct PerfMetrics {
     uint64_t fe_cache_not_prod;
     uint64_t fe_req_fire;
     uint64_t fe_req_refused;
+    // Why decode refused the next instruction — the three rename stall terms in
+    // Decode/decode.scala, reported with that file's priority so they sum to the
+    // number of stalled cycles rather than double-counting.
+    uint64_t ds_prf_exhausted;
+    uint64_t ds_branch_mask_full;
+    uint64_t ds_rename_collide;
 
     // Derived metrics
     double ipc;
@@ -164,6 +170,12 @@ public:
         m.fe_cache_not_prod   = get_perf_counter(22);
         m.fe_req_fire         = get_perf_counter(23);
         m.fe_req_refused      = get_perf_counter(24);
+        // Single-core `system` spends slots 21-24 on the lineStreamer counters
+        // above; the decode rename-stall attribution is quad-core only (see
+        // profiler_quad.h), so report it as absent rather than as garbage.
+        m.ds_prf_exhausted    = 0;
+        m.ds_branch_mask_full = 0;
+        m.ds_rename_collide   = 0;
 
         const double clock_hz = 75000000.0;
         const double bytes_per_beat = 8.0;

@@ -59,6 +59,12 @@ $(BUILD)/emu.out: $(EMU)/emulator_linux.cpp $(EMU_HDRS) | $(BUILD)
 # ── Runtime flag helpers ──────────────────────────────────────────────────────
 # Expand to the appropriate CLI flag when the user passes SHOW_STATE=1 or
 # DUMP_WAVES=1; expand to nothing otherwise.
+# Wall-clock cap per benchmark in profile-all / profile-all-sc. A benchmark that
+# exceeds it is killed mid-run and silently leaves no JSON, so the sweep looks
+# like it succeeded with one result missing — keep this comfortably above the
+# slowest benchmark (csaxpy-q4 is ~10 min on the traced model).
+PROFILE_TIMEOUT ?= 1800
+
 _SHOW_STATE_FLAG := $(if $(filter 1,$(SHOW_STATE)),--show-state,)
 _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 
@@ -93,7 +99,7 @@ profile-all: $(BUILD)/profile_quad.out    ## Profile all quad-core benchmarks (d
 	$(foreach fam,$(BENCHES), \
 	  echo "[profile-all] $(fam)-q4" && \
 	  test -f $(BINS)/$($(fam)_base)-q4.bin && \
-	  timeout 600 $(BUILD)/profile_quad.out \
+	  timeout $(PROFILE_TIMEOUT) $(BUILD)/profile_quad.out \
 	    --image $(BINS)/$($(fam)_base)-q4.bin \
 	    --name $(fam)-q4 $($(fam)_DONE) \
 	    --output $(BUILD)/profile_results/$(fam)-q4.json --timeout 100000000 || true ;)
@@ -104,7 +110,7 @@ profile-all-sc: $(BUILD)/profile.out    ## Profile single-core (NUM_CORES=1) bin
 	$(foreach fam,$(BENCHES),$(foreach s,1 2 3 4 5, \
 	  echo "[profile-all-sc] $(fam)-s$(s)" && \
 	  test -f $(BINS)/$($(fam)_base)-s$(s).bin && \
-	  timeout 600 $(BUILD)/profile.out --image $(BINS)/$($(fam)_base)-s$(s).bin \
+	  timeout $(PROFILE_TIMEOUT) $(BUILD)/profile.out --image $(BINS)/$($(fam)_base)-s$(s).bin \
 	    --name $(fam)-s$(s) $($(fam)_DONE) \
 	    --output $(BUILD)/profile_results/$(fam)-s$(s).json --timeout 100000000 || true ; ))
 	python3 scripts/profile_visualize.py $(BUILD)/profile_results/

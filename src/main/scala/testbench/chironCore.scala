@@ -84,6 +84,10 @@ class chironCore extends Module {
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
     val pc_issueReadyGE2 = RegInit(0.U(64.W))
     val pc_commitTwoOpp  = RegInit(0.U(64.W))
+    // Why decode refused the next instruction — see decode.stallReason.
+    val pc_dsPrfExhausted   = RegInit(0.U(64.W))
+    val pc_dsBranchMaskFull = RegInit(0.U(64.W))
+    val pc_dsRenameCollide  = RegInit(0.U(64.W))
 
     pc_cycles := pc_cycles + 1.U
     when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
@@ -139,6 +143,10 @@ class chironCore extends Module {
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
+    when(decode.stallReason.prfExhausted)    { pc_dsPrfExhausted   := pc_dsPrfExhausted   + 1.U }
+    when(decode.stallReason.branchMaskFull)  { pc_dsBranchMaskFull := pc_dsBranchMaskFull + 1.U }
+    when(decode.stallReason.renameCollision) { pc_dsRenameCollide  := pc_dsRenameCollide  + 1.U }
+
     val perfCnt = IO(Output(new Bundle {
       val cycles          = UInt(64.W)
       val instRetired     = UInt(64.W)
@@ -165,6 +173,9 @@ class chironCore extends Module {
       val rnrLoadGate     = UInt(64.W)
       val issueReadyGE2   = UInt(64.W)
       val commitTwoOpp    = UInt(64.W)
+      val dsPrfExhausted  = UInt(64.W)
+      val dsBranchMaskFull= UInt(64.W)
+      val dsRenameCollide = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -191,6 +202,9 @@ class chironCore extends Module {
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
     perfCnt.issueReadyGE2   := pc_issueReadyGE2
     perfCnt.commitTwoOpp    := pc_commitTwoOpp
+    perfCnt.dsPrfExhausted  := pc_dsPrfExhausted
+    perfCnt.dsBranchMaskFull:= pc_dsBranchMaskFull
+    perfCnt.dsRenameCollide := pc_dsRenameCollide
   })
 
   val core1 = Module(new core(
@@ -242,6 +256,10 @@ class chironCore extends Module {
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
     val pc_issueReadyGE2 = RegInit(0.U(64.W))
     val pc_commitTwoOpp  = RegInit(0.U(64.W))
+    // Why decode refused the next instruction — see decode.stallReason.
+    val pc_dsPrfExhausted   = RegInit(0.U(64.W))
+    val pc_dsBranchMaskFull = RegInit(0.U(64.W))
+    val pc_dsRenameCollide  = RegInit(0.U(64.W))
 
     pc_cycles := pc_cycles + 1.U
     when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
@@ -297,6 +315,10 @@ class chironCore extends Module {
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
+    when(decode.stallReason.prfExhausted)    { pc_dsPrfExhausted   := pc_dsPrfExhausted   + 1.U }
+    when(decode.stallReason.branchMaskFull)  { pc_dsBranchMaskFull := pc_dsBranchMaskFull + 1.U }
+    when(decode.stallReason.renameCollision) { pc_dsRenameCollide  := pc_dsRenameCollide  + 1.U }
+
     val perfCnt = IO(Output(new Bundle {
       val cycles          = UInt(64.W)
       val instRetired     = UInt(64.W)
@@ -323,6 +345,9 @@ class chironCore extends Module {
       val rnrLoadGate     = UInt(64.W)
       val issueReadyGE2   = UInt(64.W)
       val commitTwoOpp    = UInt(64.W)
+      val dsPrfExhausted  = UInt(64.W)
+      val dsBranchMaskFull= UInt(64.W)
+      val dsRenameCollide = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -349,6 +374,9 @@ class chironCore extends Module {
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
     perfCnt.issueReadyGE2   := pc_issueReadyGE2
     perfCnt.commitTwoOpp    := pc_commitTwoOpp
+    perfCnt.dsPrfExhausted  := pc_dsPrfExhausted
+    perfCnt.dsBranchMaskFull:= pc_dsBranchMaskFull
+    perfCnt.dsRenameCollide := pc_dsRenameCollide
   })
 
   val core2 = Module(new core(
@@ -400,6 +428,10 @@ class chironCore extends Module {
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
     val pc_issueReadyGE2 = RegInit(0.U(64.W))
     val pc_commitTwoOpp  = RegInit(0.U(64.W))
+    // Why decode refused the next instruction — see decode.stallReason.
+    val pc_dsPrfExhausted   = RegInit(0.U(64.W))
+    val pc_dsBranchMaskFull = RegInit(0.U(64.W))
+    val pc_dsRenameCollide  = RegInit(0.U(64.W))
 
     pc_cycles := pc_cycles + 1.U
     when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
@@ -455,6 +487,10 @@ class chironCore extends Module {
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
+    when(decode.stallReason.prfExhausted)    { pc_dsPrfExhausted   := pc_dsPrfExhausted   + 1.U }
+    when(decode.stallReason.branchMaskFull)  { pc_dsBranchMaskFull := pc_dsBranchMaskFull + 1.U }
+    when(decode.stallReason.renameCollision) { pc_dsRenameCollide  := pc_dsRenameCollide  + 1.U }
+
     val perfCnt = IO(Output(new Bundle {
       val cycles          = UInt(64.W)
       val instRetired     = UInt(64.W)
@@ -481,6 +517,9 @@ class chironCore extends Module {
       val rnrLoadGate     = UInt(64.W)
       val issueReadyGE2   = UInt(64.W)
       val commitTwoOpp    = UInt(64.W)
+      val dsPrfExhausted  = UInt(64.W)
+      val dsBranchMaskFull= UInt(64.W)
+      val dsRenameCollide = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -507,6 +546,9 @@ class chironCore extends Module {
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
     perfCnt.issueReadyGE2   := pc_issueReadyGE2
     perfCnt.commitTwoOpp    := pc_commitTwoOpp
+    perfCnt.dsPrfExhausted  := pc_dsPrfExhausted
+    perfCnt.dsBranchMaskFull:= pc_dsBranchMaskFull
+    perfCnt.dsRenameCollide := pc_dsRenameCollide
   })
 
   val core3 = Module(new core(
@@ -558,6 +600,10 @@ class chironCore extends Module {
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
     val pc_issueReadyGE2 = RegInit(0.U(64.W))
     val pc_commitTwoOpp  = RegInit(0.U(64.W))
+    // Why decode refused the next instruction — see decode.stallReason.
+    val pc_dsPrfExhausted   = RegInit(0.U(64.W))
+    val pc_dsBranchMaskFull = RegInit(0.U(64.W))
+    val pc_dsRenameCollide  = RegInit(0.U(64.W))
 
     pc_cycles := pc_cycles + 1.U
     when(rob.commit.fired) { pc_instRetired := pc_instRetired + 1.U }
@@ -613,6 +659,10 @@ class chironCore extends Module {
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
+    when(decode.stallReason.prfExhausted)    { pc_dsPrfExhausted   := pc_dsPrfExhausted   + 1.U }
+    when(decode.stallReason.branchMaskFull)  { pc_dsBranchMaskFull := pc_dsBranchMaskFull + 1.U }
+    when(decode.stallReason.renameCollision) { pc_dsRenameCollide  := pc_dsRenameCollide  + 1.U }
+
     val perfCnt = IO(Output(new Bundle {
       val cycles          = UInt(64.W)
       val instRetired     = UInt(64.W)
@@ -639,6 +689,9 @@ class chironCore extends Module {
       val rnrLoadGate     = UInt(64.W)
       val issueReadyGE2   = UInt(64.W)
       val commitTwoOpp    = UInt(64.W)
+      val dsPrfExhausted  = UInt(64.W)
+      val dsBranchMaskFull= UInt(64.W)
+      val dsRenameCollide = UInt(64.W)
     }))
     perfCnt.cycles          := pc_cycles
     perfCnt.instRetired     := pc_instRetired
@@ -665,6 +718,9 @@ class chironCore extends Module {
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
     perfCnt.issueReadyGE2   := pc_issueReadyGE2
     perfCnt.commitTwoOpp    := pc_commitTwoOpp
+    perfCnt.dsPrfExhausted  := pc_dsPrfExhausted
+    perfCnt.dsBranchMaskFull:= pc_dsBranchMaskFull
+    perfCnt.dsRenameCollide := pc_dsRenameCollide
   })
 
   val interconnect = Module(new Interconnect)
@@ -1373,9 +1429,9 @@ class chironCore extends Module {
   perfCountersOut0(18) := core0.perfCnt.feFetchNotReady
   perfCountersOut0(19) := core0.perfCnt.feDecodeNotReady
   perfCountersOut0(20) := core0.perfCnt.feExpectedBlock
-  perfCountersOut0(21) := 0.U
-  perfCountersOut0(22) := 0.U
-  perfCountersOut0(23) := 0.U
+  perfCountersOut0(21) := core0.perfCnt.dsPrfExhausted
+  perfCountersOut0(22) := core0.perfCnt.dsBranchMaskFull
+  perfCountersOut0(23) := core0.perfCnt.dsRenameCollide
   perfCountersOut0(24) := 0.U
   perfCountersOut0(25) := 0.U
   perfCountersOut0(26) := 0.U
@@ -1416,9 +1472,9 @@ class chironCore extends Module {
   perfCountersOut1(18) := core1.perfCnt.feFetchNotReady
   perfCountersOut1(19) := core1.perfCnt.feDecodeNotReady
   perfCountersOut1(20) := core1.perfCnt.feExpectedBlock
-  perfCountersOut1(21) := 0.U
-  perfCountersOut1(22) := 0.U
-  perfCountersOut1(23) := 0.U
+  perfCountersOut1(21) := core1.perfCnt.dsPrfExhausted
+  perfCountersOut1(22) := core1.perfCnt.dsBranchMaskFull
+  perfCountersOut1(23) := core1.perfCnt.dsRenameCollide
   perfCountersOut1(24) := 0.U
   perfCountersOut1(25) := 0.U
   perfCountersOut1(26) := 0.U
@@ -1459,9 +1515,9 @@ class chironCore extends Module {
   perfCountersOut2(18) := core2.perfCnt.feFetchNotReady
   perfCountersOut2(19) := core2.perfCnt.feDecodeNotReady
   perfCountersOut2(20) := core2.perfCnt.feExpectedBlock
-  perfCountersOut2(21) := 0.U
-  perfCountersOut2(22) := 0.U
-  perfCountersOut2(23) := 0.U
+  perfCountersOut2(21) := core2.perfCnt.dsPrfExhausted
+  perfCountersOut2(22) := core2.perfCnt.dsBranchMaskFull
+  perfCountersOut2(23) := core2.perfCnt.dsRenameCollide
   perfCountersOut2(24) := 0.U
   perfCountersOut2(25) := 0.U
   perfCountersOut2(26) := 0.U
@@ -1502,9 +1558,9 @@ class chironCore extends Module {
   perfCountersOut3(18) := core3.perfCnt.feFetchNotReady
   perfCountersOut3(19) := core3.perfCnt.feDecodeNotReady
   perfCountersOut3(20) := core3.perfCnt.feExpectedBlock
-  perfCountersOut3(21) := 0.U
-  perfCountersOut3(22) := 0.U
-  perfCountersOut3(23) := 0.U
+  perfCountersOut3(21) := core3.perfCnt.dsPrfExhausted
+  perfCountersOut3(22) := core3.perfCnt.dsBranchMaskFull
+  perfCountersOut3(23) := core3.perfCnt.dsRenameCollide
   perfCountersOut3(24) := 0.U
   perfCountersOut3(25) := 0.U
   perfCountersOut3(26) := 0.U

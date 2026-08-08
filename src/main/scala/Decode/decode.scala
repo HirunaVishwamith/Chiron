@@ -348,6 +348,40 @@ class decode (
     }
   }
 
+  /**
+    * Attribution of the rename stalls above, for profiling only — no logic
+    * downstream reads these.
+    *
+    * `stall` is what keeps decode from accepting the next instruction from
+    * fetch, and it shows up in the profile twice over: it drops validInputBuf
+    * (so decode has nothing for the backend) and it deasserts readyInputBuf
+    * (so fetch is refused). Knowing *which* of the three terms fires is the
+    * difference between widening the PRF, widening the branch mask, and fixing
+    * the free-list collision — so split it here.
+    *
+    * Reported with the same priority the `when` blocks above impose, so the
+    * three counts sum to the number of stalled cycles rather than
+    * double-counting a cycle where several terms are true at once. Gated on the
+    * state in which `stall` actually blocks (input buffer full, not being
+    * flushed by a mispredict), so idle and squash cycles are not charged.
+    */
+  private val prfExhausted = freeRegAddr === 63.U
+  private val branchMaskFull =
+    Seq(jump.U, jumpr.U, cjump.U).map(_ === opcode).reduce(_ || _) &&
+    branchBuffer.branchMask.map(_.asBool).reduce(_ && _)
+  private val renameCollision = (rs1Addr === freeRegAddr) || (rs2Addr === freeRegAddr)
+  private val stallBlocking =
+    (stateRegInputBuf === fullState) && !(branchEvalIn.fired && !branchEvalIn.passFail)
+
+  val stallReason = IO(Output(new Bundle {
+    val prfExhausted    = Bool()
+    val branchMaskFull  = Bool()
+    val renameCollision = Bool()
+  }))
+  stallReason.prfExhausted    := stallBlocking && prfExhausted
+  stallReason.branchMaskFull  := stallBlocking && !prfExhausted && branchMaskFull
+  stallReason.renameCollision := stallBlocking && !prfExhausted && !branchMaskFull && renameCollision
+
   when(jumpAddrWrite.fired && outputBuffer.instruction(11,7) =/= 0.U) { PRFValidList(outputBuffer.PRFDest) := true.B }
 
   when(validInputBuf && readyOutputBuf && (insType === itype.U || insType === rtype.U || insType === utype.U || insType === jtype.U) && rd =/= 0.U) {
