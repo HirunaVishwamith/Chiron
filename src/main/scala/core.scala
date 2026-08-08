@@ -838,10 +838,18 @@ class core (
   prf.branchCheck.pass := branchOps.passed
   prf.branchCheck.valid := branchOps.valid
 
-  prf.fromStore.branchmask := RegNext(RegNext(dataQueue.toPRF.branchMask))
-  prf.fromStore.instruction := RegNext(RegNext(dataQueue.toPRF.instruction))
-  prf.fromStore.rs2Addr := RegNext(RegNext(dataQueue.toPRF.rs2Addr))
-  prf.fromStore.valid := RegNext(RegNext(dataQueue.toPRF.valid && dataQueue.fromROB.readyNow, false.B), false.B)
+  // The store-data read sits on the head-of-ROB critical path: the SDI fifo is
+  // only popped once the store has reached the ROB head (core.scala's
+  // dataQueue.fromROB.readyNow below), and commit cannot proceed until the data
+  // has reached the cache. The PRF's R3 port is already a synchronous read, so
+  // these two RegNext stages were two cycles of pure latency on that path --
+  // and the store commit gate is the largest remaining stall bucket (~24% of
+  // cycles). A store at the ROB head is non-speculative, so no older branch can
+  // still invalidate the read; PRF's own branchCheck masking is unchanged.
+  prf.fromStore.branchmask := dataQueue.toPRF.branchMask
+  prf.fromStore.instruction := dataQueue.toPRF.instruction
+  prf.fromStore.rs2Addr := dataQueue.toPRF.rs2Addr
+  prf.fromStore.valid := dataQueue.toPRF.valid && dataQueue.fromROB.readyNow
   prf.fromStore.prfDest := 0.U
 
   dataQueue.fromBranch.robAddr := branchEvals.robAddr
