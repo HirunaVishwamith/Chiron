@@ -197,6 +197,12 @@ class core (
   memAccess.request := memoryRequest
   memAccess.branchOps := branchOps
 
+  val dmemValid = memAccess.responseOut.valid
+  val dmemRes   = memAccess.responseOut.result
+  val dmemPrf   = memAccess.responseOut.prfDest
+  val dmemRob   = memAccess.responseOut.robAddr
+  val dmemIns   = memAccess.responseOut.instruction
+
   val singleCycleArithmeticRequest = RegInit(new Bundle {
     val valid = Bool()
     val rs1 = UInt(64.W)
@@ -412,9 +418,19 @@ class core (
   }
   when(extnMResponse.valid && extnResponseInstruction(14).asBool) { mExtensionReady := true.B }
 
-  division.remainder := Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor)
-  division.quotient := Cat(division.quotient(63, 0), ~(Cat(division.remainder(63, 0), division.quotient(64)) + Mux(division.remainder(64).asBool, division.divisor, - division.divisor))(64))
-  division.counter := division.counter - 1.U
+  // Radix-4: two non-restoring steps per cycle when at least two remain.
+  {
+    val rem0 = division.remainder
+    val q0   = division.quotient
+    val rem1 = Cat(rem0(63, 0), q0(64)) + Mux(rem0(64).asBool, division.divisor, - division.divisor)
+    val q1   = Cat(q0(63, 0), ~rem1(64))
+    val rem2 = Cat(rem1(63, 0), q1(64)) + Mux(rem1(64).asBool, division.divisor, - division.divisor)
+    val q2   = Cat(q1(63, 0), ~rem2(64))
+    val two  = division.counter >= 2.U
+    division.remainder := Mux(two, rem2, rem1)
+    division.quotient  := Mux(two, q2, q1)
+    division.counter   := Mux(two, division.counter - 2.U, division.counter - 1.U)
+  }
 
   /**
     * The recurrence costs one pad cycle plus one cycle per dividend bit that
@@ -441,6 +457,10 @@ class core (
     * `n / 10` per decimal digit are the largest single consumer of commit-stall
     * cycles, and those dividends are small.
     */
+  val divEarly     = RegInit(false.B)
+  val divEarlyQuot = Reg(UInt(64.W))
+  val divEarlyRem  = Reg(UInt(64.W))
+
   when(extnMRequest.valid && extnMRequest.instruction(14).asBool) {
     val isW        = extnMRequest.instruction(3).asBool
     val isUnsigned = extnMRequest.instruction(12).asBool
@@ -455,10 +475,30 @@ class core (
       Cat(0.U(32.W), Mux(!isUnsigned && rs2W(31).asBool, (- rs2W)(31, 0), rs2W)),
       Mux(!isUnsigned && extnMRequest.rs2(63).asBool, (- extnMRequest.rs2)(63, 0), extnMRequest.rs2))
 
-    val msb        = Log2(dividend) // index of the highest set bit
-    val degenerate = (dividend === 0.U) || (divisorMag === 0.U)
+    val signedDividend = Mux(isW,
+      Cat(Fill(32, Mux(isUnsigned, 0.U, rs1W(31))), rs1W),
+      extnMRequest.rs1)
+    val msb        = Log2(dividend)
+    val divByZero  = divisorMag === 0.U
+    val divByOne   = divisorMag === 1.U
+    val divSmaller = !divByZero && (dividend < divisorMag)
+    val early      = divByZero || divByOne || divSmaller
 
-    division.counter  := Mux(degenerate, 65.U, msb +& 2.U)
+    val earlyQuot = Mux(divByZero, Fill(64, 1.U),
+                    Mux(divByOne,
+                      Mux(isUnsigned, dividend,
+                        Mux(isW,
+                          Mux(rs1W(31).asBool ^ rs2W(31).asBool, (- dividend)(63, 0), dividend),
+                          Mux(extnMRequest.rs1(63).asBool ^ extnMRequest.rs2(63).asBool, (- dividend)(63, 0), dividend))),
+                      0.U))
+    val earlyRem = Mux(divByOne, 0.U, signedDividend)
+
+    divEarly     := early
+    divEarlyQuot := earlyQuot
+    divEarlyRem  := earlyRem
+
+    val degenerate = (dividend === 0.U) || divByZero
+    division.counter  := Mux(early, 0.U, Mux(degenerate, 65.U, msb +& 2.U))
     division.divisor  := Cat(0.U(1.W), divisorMag)
     division.quotient := Cat(0.U(1.W),
       Mux(degenerate, dividend, (dividend << (63.U - msb))(63, 0)))
@@ -472,23 +512,29 @@ class core (
   when(division.request.valid && !division.counter.orR) {
     extnMResponse.prfDest := division.request.prfDest
     extnMResponse.result := {
+      val isRem = division.request.instruction(13).asBool
+      val isW   = division.request.instruction(3).asBool
+      val isU   = division.request.instruction(12).asBool
+      val earlyOut = Mux(isRem, divEarlyRem, divEarlyQuot)
+      val earlyFmt = Mux(isW,
+        Mux(isU, earlyOut(31, 0).pad(64), Cat(Fill(32, earlyOut(31)), earlyOut(31, 0))),
+        earlyOut)
       val quotient32 = Mux((division.request.rs1(31).asBool ^ division.request.rs2(31).asBool) && !division.quotient.andR, (- division.quotient)(31, 0), division.quotient(31, 0))
       val remainder64Unsigned = Mux(division.remainder(64).asBool, division.remainder + division.divisor, division.remainder)
       val remainder32Signed = Mux((division.request.rs1(31).asBool), - remainder64Unsigned, remainder64Unsigned)
-      
-      VecInit(
-      Mux((division.request.rs1(63).asBool ^ division.request.rs2(63).asBool) && !division.quotient.andR, - division.quotient, division.quotient),
-      division.quotient,
-      Mux((division.request.rs1(63).asBool), - remainder64Unsigned, remainder64Unsigned),
-      remainder64Unsigned,
-      Cat(Fill(32, quotient32(31)), quotient32(31, 0)),
-      Cat(Fill(32, division.quotient(31)), division.quotient(31, 0)),
-      Cat(Fill(32, remainder32Signed(31)), 
-        remainder32Signed(31, 0)),
-      Cat(Fill(32, remainder64Unsigned(31)), 
-        remainder64Unsigned(31, 0))
-    )(Cat(division.request.instruction(3), division.request.instruction(13, 12)))
-  }
+      val rec = VecInit(
+        Mux((division.request.rs1(63).asBool ^ division.request.rs2(63).asBool) && !division.quotient.andR, - division.quotient, division.quotient),
+        division.quotient,
+        Mux((division.request.rs1(63).asBool), - remainder64Unsigned, remainder64Unsigned),
+        remainder64Unsigned,
+        Cat(Fill(32, quotient32(31)), quotient32(31, 0)),
+        Cat(Fill(32, division.quotient(31)), division.quotient(31, 0)),
+        Cat(Fill(32, remainder32Signed(31)), remainder32Signed(31, 0)),
+        Cat(Fill(32, remainder64Unsigned(31)), remainder64Unsigned(31, 0))
+      )(Cat(division.request.instruction(3), division.request.instruction(13, 12)))
+      Mux(divEarly, earlyFmt, rec)
+    }
+    divEarly := false.B
     extnMResponse.robAddr := division.request.robAddr
     extnMResponse.valid := division.request.valid
     extnResponseInstruction := division.request.instruction
@@ -757,9 +803,9 @@ class core (
 
   decode.writeAddrPRF.exec1Addr := scheduler.instrRetired.prfAddr
   decode.writeAddrPRF.exec1Valid := scheduler.instrRetired.valid
-  decode.writeAddrPRF.exec2Addr := memAccess.responseOut.prfDest
+  decode.writeAddrPRF.exec2Addr := dmemPrf
   decode.writeAddrPRF.exec3Addr := extnMResponse.prfDest
-  decode.writeAddrPRF.exec2Valid := memAccess.responseOut.valid && memAccess.responseOut.instruction(11, 7).orR
+  decode.writeAddrPRF.exec2Valid := dmemValid && dmemIns(11, 7).orR
   decode.writeAddrPRF.exec3Valid := extnMResponse.valid && extnResponseInstruction(11, 7).orR
 
   decode.branchEvalIn.branchMask := branchEvals.branchMask
@@ -789,13 +835,13 @@ class core (
   Seq(
     singleCycleArithmeticResponse.robAddr,
     branchEvals.robAddr,
-    memAccess.responseOut.robAddr, // for reads
+    dmemRob, // for reads (D$ or store-to-load forward)
     extnMResponse.robAddr // for mul and div
   )
   .zip(Seq(
     singleCycleArithmeticResponse.valid,
     branchEvals.valid,
-    memAccess.responseOut.valid, // for reads
+    dmemValid, // for reads
     extnMResponse.valid
   ))
   .zip(rob.execPorts)
@@ -807,7 +853,7 @@ class core (
   Seq(
     (singleCycleArithmeticResponse.prfDest, singleCycleArithmeticResponse.result, singleCycleArithmeticResponse.valid && RegNext(singleCycleArithmeticRequest.instruction(11, 7).orR && (singleCycleArithmeticRequest.instruction(6, 2) =/= "b11100".U), false.B)),
     (decode.jumpAddrWrite.PRFDest, decode.jumpAddrWrite.linkAddr, decode.jumpAddrWrite.ready),
-    (memAccess.responseOut.prfDest, memAccess.responseOut.result, memAccess.responseOut.valid && memAccess.responseOut.instruction(11, 7).orR),
+    (dmemPrf, dmemRes, dmemValid && dmemIns(11, 7).orR),
     (extnMResponse.prfDest, extnMResponse.result, extnMResponse.valid && extnResponseInstruction(11, 7).orR)
   )
   .zip(Seq(prf.w1, prf.w2, prf.w3, prf.w4))
@@ -819,12 +865,12 @@ class core (
 
   Seq(
     scheduler.instrRetired.prfAddr,
-    memAccess.responseOut.prfDest,
+    dmemPrf,
     extnMResponse.prfDest
   )
   .zip(Seq(
     scheduler.instrRetired.valid,
-    memAccess.responseOut.valid && memAccess.responseOut.instruction(11, 7).orR,
+    dmemValid && dmemIns(11, 7).orR,
     extnMResponse.valid && extnResponseInstruction(11, 7).orR
   ))
   .zip(wakeUps)
@@ -839,20 +885,6 @@ class core (
   prf.branchCheck.pass := branchOps.passed
   prf.branchCheck.valid := branchOps.valid
 
-  // The store-data read sits on the head-of-ROB critical path: the SDI fifo is
-  // only popped once the store has reached the ROB head (core.scala's
-  // dataQueue.fromROB.readyNow below), and commit cannot proceed until the data
-  // has reached the cache. The PRF's R3 port is already a synchronous read, so
-  // these two RegNext stages were two cycles of pure latency on that path --
-  // and the store commit gate is the largest remaining stall bucket (~24% of
-  // cycles). A store at the ROB head is non-speculative, so no older branch can
-  // still invalidate the read; PRF's own branchCheck masking is unchanged.
-  prf.fromStore.branchmask := dataQueue.toPRF.branchMask
-  prf.fromStore.instruction := dataQueue.toPRF.instruction
-  prf.fromStore.rs2Addr := dataQueue.toPRF.rs2Addr
-  prf.fromStore.valid := dataQueue.toPRF.valid && dataQueue.fromROB.readyNow
-  prf.fromStore.prfDest := 0.U
-
   dataQueue.fromBranch.robAddr := branchEvals.robAddr
   dataQueue.fromBranch.passOrFail := branchOps.passed
   dataQueue.fromBranch.valid := branchOps.valid
@@ -865,7 +897,13 @@ class core (
   memAccess.writeDataIn.data := prf.toStore.rs2Data
   memAccess.writeDataIn.valid := prf.toStore.valid
 
-  memAccess.writeCommit.fired := memAccess.writeCommit.ready && (rob.commit.instruction(6, 4) === "b010".U) 
+  memAccess.writeCommit.fired := memAccess.writeCommit.ready && (rob.commit.instruction(6, 4) === "b010".U)
+
+  prf.fromStore.branchmask := dataQueue.toPRF.branchMask
+  prf.fromStore.instruction := dataQueue.toPRF.instruction
+  prf.fromStore.rs2Addr := dataQueue.toPRF.rs2Addr
+  prf.fromStore.valid := dataQueue.toPRF.valid && dataQueue.fromROB.readyNow
+  prf.fromStore.prfDest := 0.U 
 
   (wakeUps.drop(1) zip scheduler.wakeUpExt)
   .foreach{ case (wakeup, schedulerWakeup) => {

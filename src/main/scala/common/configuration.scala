@@ -54,7 +54,7 @@ object configuration {
     val cfiEntries     = 512   // pre-decode branch classifier (cond/call/ret/…)
     val bimodalEntries = 2048  // TAGE base predictor
 
-    val tageTableEntries    = 256
+    val tageTableEntries    = 512
     val tageTagWidth        = 9
     val tageHistoryLengths  = Seq(4, 9, 19, 40)
     val tageAgeCounterWidth = 18 // usefulness reset every 2^18 trained branches

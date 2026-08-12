@@ -380,7 +380,9 @@ class fetch(val fifo_size: Int) extends Module {
   // Pre-decode: fetch already sees every correct-path instruction on its way to
   // decode, so it can classify branches/calls/returns itself without touching
   // the decode or resolution path.
-  predictor.predecode.valid       := toDecode.fired
+  // Do not train CFI from a fetch that decode is already rejecting — that
+  // is the wrong-path window, and filling from it pollutes the classifier.
+  predictor.predecode.valid       := toDecode.fired && !redirect && (redirect_bit === 0.U)
   predictor.predecode.pc          := PC_fifo.io.deq.bits(63, 0)
   predictor.predecode.instruction := cache.resp.bits
 
