@@ -12,6 +12,8 @@
 #   make isa                       Full RISC-V ISA regression suite
 #   make test                      ISA suite + quad-core benchmark tests
 #   make fire     [FIRE_FRAMES=N]  Render the bare-metal Doom-fire demo
+#   make cube     [FIRE_FRAMES=N]  Wireframe rotating cube (UART truecolor)
+#   make solid    [FIRE_FRAMES=N]  Filled, shaded rotating cube
 #
 # BENCH defaults to vvadd-s1. Families: vvadd matmul filter csaxpy histo (×s1..s5).
 

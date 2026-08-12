@@ -96,6 +96,23 @@ void printf(const char *format, ...){
 
 
 
+void *memset(void *s, int c, unsigned long n)
+{
+  unsigned char *p = (unsigned char *)s;
+  while (n--)
+    *p++ = (unsigned char)c;
+  return s;
+}
+
+void *memcpy(void *d, const void *s, unsigned long n)
+{
+  unsigned char *dd = (unsigned char *)d;
+  const unsigned char *ss = (const unsigned char *)s;
+  while (n--)
+    *dd++ = *ss++;
+  return d;
+}
+
 void __attribute__((weak)) thread_entry(int cid, int nc)
 {
   // multi-threaded programs override this function.

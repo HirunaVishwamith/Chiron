@@ -29,7 +29,7 @@ SECTIONS
     . = 0x80000000;
 
     /* Initial text section (boot code) with 4-byte alignment */
-    .text.init : ALIGN(4) { crt.o(.text) } > ram
+    .text.init : ALIGN(4) { *(.text.init) } > ram
 
     /* Main text section with 4-byte alignment */
     .text : ALIGN(4) { *(.text) } > ram

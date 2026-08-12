@@ -71,7 +71,7 @@ _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(ISA_DIR)/images
 
-.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-emu-check linux-sim linux-lockstep demo compare snapshot-baseline gate regress-q4
+.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire cube solid test linux linux-emu linux-emu-check linux-sim linux-lockstep demo compare snapshot-baseline gate regress-q4
 
 emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
 	$(BUILD)/emu.out $(BIN)
@@ -120,6 +120,12 @@ isa: test_all_images                 ## Alias for the full ISA regression suite
 fire: $(BUILD)/fire.out $(BINS)/mt-fire.bin   ## Render the bare-metal fire demo
 	$(BUILD)/fire.out --image $(BINS)/mt-fire.bin --frames $(FIRE_FRAMES)
 FIRE_FRAMES ?= 60
+
+cube: $(BUILD)/fire.out $(BINS)/mt-cube.bin   ## Wireframe rotating cube (UART truecolor)
+	$(BUILD)/fire.out --image $(BINS)/mt-cube.bin --frames $(FIRE_FRAMES)
+
+solid: $(BUILD)/fire.out $(BINS)/mt-solid.bin ## Filled, shaded rotating cube
+	$(BUILD)/fire.out --image $(BINS)/mt-solid.bin --frames $(FIRE_FRAMES)
 
 test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks (uses -q4 bins)
 	@for fam in $(REGRESSION_Q4); do \

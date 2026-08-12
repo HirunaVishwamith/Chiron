@@ -1,64 +1,55 @@
-#=======================================================================
-# UOM Multicore processor: Makefile for Mt-Tinyprograms
-#-----------------------------------------------------------------------
-# Hiruna Vishwamith
+# Bare-metal UART demos for Chiron (RV64IMA, no libm / no FPU).
 #
-#-----------------------------------------------------------------------
+#   make              — fire + cube + solid
+#   make mt-cube.bin  — rotating wireframe cube
+#   make mt-solid.bin — filled, shaded cube
 
-
-# Define the RISC-V toolchain prefix
-RISCV_PREFIX = riscv64-unknown-elf-
-RISCV_GCC = $(RISCV_PREFIX)gcc
-# RISCV_GCC_OPTS = -static -ffreestanding -fno-pic -O2 -fno-common -fno-builtin-printf -march=rv64ima_zicsr -mabi=lp64
-# RISCV_GCC_OPTS = -mcmodel=medany -static -std=gnu99 -O2 -fno-common -fno-builtin-printf  -march=rv64ima_zicsr -mabi=lp64
-RISCV_GCC_OPTS = -mcmodel=medany -static -std=gnu99 -O2 -fno-common -march=rv64ima_zicsr -mabi=lp64
+RISCV_PREFIX    = riscv64-unknown-elf-
+RISCV_GCC       = $(RISCV_PREFIX)gcc
+RISCV_GCC_OPTS  = -mcmodel=medany -static -std=gnu99 -O2 -fno-common \
+                  -fno-builtin-printf -march=rv64ima_zicsr -mabi=lp64 \
+                  -DNUM_CORES=$(NUM_CORES)
 RISCV_LINK_OPTS = -nostdlib -nostartfiles
+NUM_CORES      ?= 4
 
-# Include path for headers in ./common (if needed)
-INCS = -I./common
+INCS = -I./common -I./g3d
+VPATH = .:./common:./g3d
 
-# List of object files to be generated
-OBJS = mt-fire.o syscalls.o crt.o
+COMMON_OBJS = syscalls.o crt.o
 
-# List of source files
-SRCS = mt-fire.c common/syscalls.c common/crt.S
+.PHONY: all clean host-smoke
+all: mt-fire.bin mt-cube.bin mt-solid.bin
 
-# VPATH to help Make find source files in . and ./common
-VPATH = .:./common
+# Host-only projection check (not part of the RV64 image).
+host-smoke: g3d/host_smoke.c g3d/g3d.c g3d/g3d.h
+	gcc -O2 -I./g3d -I./common g3d/host_smoke.c g3d/g3d.c -o /tmp/g3d_smoke
+	/tmp/g3d_smoke
 
-# Default target
-all: mt-fire.riscv mt-fire.dump mt-fire.bin
-
-# Individual dependencies.  This is the correct way to specify dependencies.
-mt-fire.o: mt-fire.c
-
-syscalls.o: common/syscalls.c
-
-crt.o: common/crt.S
-
-# Compile rule for .c files
 %.o: %.c
 	$(RISCV_GCC) $(RISCV_GCC_OPTS) $(INCS) -c $< -o $@
 
-# Compile rule for .S files (Assembler)
 %.o: %.S
 	$(RISCV_GCC) $(RISCV_GCC_OPTS) $(INCS) -D__ASSEMBLY__=1 -c $< -o $@
 
-# Link object files into the final executable
-mt-fire.riscv: $(OBJS)
-	$(RISCV_GCC) -T common/test.ld $(RISCV_LINK_OPTS) -o $@ $(OBJS)
+g3d.o: g3d/g3d.c g3d/g3d.h
+	$(RISCV_GCC) $(RISCV_GCC_OPTS) $(INCS) -c $< -o $@
 
-# Generate disassembly dump
-mt-fire.dump: mt-fire.riscv
+mt-fire.riscv: mt-fire.o $(COMMON_OBJS)
+	$(RISCV_GCC) -T common/test.ld $(RISCV_LINK_OPTS) -o $@ $^
+
+mt-cube.riscv: mt-cube.o g3d.o $(COMMON_OBJS)
+	$(RISCV_GCC) -T common/test.ld $(RISCV_LINK_OPTS) -o $@ $^
+
+mt-solid.riscv: mt-solid.o g3d.o $(COMMON_OBJS)
+	$(RISCV_GCC) -T common/test.ld $(RISCV_LINK_OPTS) -o $@ $^
+
+%.dump: %.riscv
 	$(RISCV_PREFIX)objdump -D $< > $@
 
-# Rule to convert ELF to binary
-mt-fire.bin: mt-fire.riscv
+%.bin: %.riscv
 	$(RISCV_PREFIX)objcopy -O binary $< $@
 
-# Clean up generated files
 clean:
-	rm -f $(OBJS) mt-fire.riscv mt-fire.bin mt-fire.dump
-
-# Declare phony targets
-.PHONY: all clean
+	rm -f *.o g3d/*.o mt-fire.riscv mt-fire.bin mt-fire.dump \
+	      mt-cube.riscv mt-cube.bin mt-cube.dump \
+	      mt-solid.riscv mt-solid.bin mt-solid.dump
