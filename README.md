@@ -95,11 +95,11 @@ flowchart LR
 | Reorder buffer | 16 entries |
 | Physical registers | 64 (LVT-based rename) |
 | Issue queue | 8 entries, centralized |
-| Commit width | 4-wide |
-| Divider | Radix-4 (2 bits/cycle), clz-normalized |
+| Commit width | 1-wide (decode is also 1-wide) |
+| Divider | Radix-4 (2 bits/cycle), clz-normalized, /0 /1 /small early-out |
 | L1 I-Cache | 2-way · 64 sets · 16-instr lines |
 | L1 D-Cache | 2-way · 64 sets · 8×8-byte lines |
-| Branch predictor | Bimodal + BTB + 4-table TAGE |
+| Branch predictor | Bimodal + BTB + 4×512 TAGE |
 | Clock target | 75 MHz |
 
 ### System parameters
@@ -185,11 +185,22 @@ make fix-inotify
 make sim        # Chisel → Verilog → Verilator library (~5 min first time)
 ```
 
-> **Gotcha:** `make sim` always exits 0 even when `sbt` fails — it reuses a
-> stale `system.v`. Always verify by spot-checking the generated file:
-> ```bash
-> grep "WLAST" system.v   # should have > 0 hits
-> ```
+> `make sim` fails if `sbt` fails. It will not copy a stale `system.v`.
+
+### Everyday RTL gate
+
+After any frontend/backend change:
+
+```bash
+make gate            # lockstep vvadd-s1 + vvadd-q4, compared to testdata/baseline/q4
+make compare         # re-score whatever JSON is already in build/profile_results
+make regress-q4      # all five q4 benches, then compare (slow)
+make snapshot-baseline   # refresh testdata/baseline/q4 from the current JSONs
+```
+
+`profile_quad` now scrapes `The code is ran with error code: N` from UART
+and exits 4 if N is nonzero — a done-PC hit with a wrong result array is a
+fail, not a silent pass. The JSON `result.bench_error` field records it.
 
 ---
 

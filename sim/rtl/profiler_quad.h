@@ -343,7 +343,9 @@ public:
     // Emit a JSON object with per-core breakdown and aggregate summary.
     // Aggregate IPC = total instructions / max-cycle (throughput from wall-clock).
     void print_json(const std::string &benchmark_name,
-                    const std::string &output_path = "") const {
+                    const std::string &output_path = "",
+                    int harness_exit = 0,
+                    int bench_error = -1) const {
         PerfMetrics c[4];
         for (int i = 0; i < 4; ++i) c[i] = compute_core_metrics(i);
 
@@ -364,6 +366,11 @@ public:
         ss << "    \"total_inst_retired\": " << agg_inst << ",\n";
         ss << "    \"max_cycles\": "         << agg_cyc  << ",\n";
         ss << "    \"aggregate_ipc\": "      << agg_ipc  << "\n";
+        ss << "  },\n";
+        ss << "  \"result\": {\n";
+        ss << "    \"complete\": "     << (harness_exit == 0 ? "true" : "false") << ",\n";
+        ss << "    \"harness_exit\": " << harness_exit << ",\n";
+        ss << "    \"bench_error\": "  << bench_error << "\n";
         ss << "  },\n";
         ss << "  \"cores\": [\n";
         for (int i = 0; i < 4; ++i) {

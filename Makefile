@@ -5,12 +5,12 @@
 # ╚══════════════════════════════════════════════════════════════════════════╝
 #
 #   make sim                       Build the RTL (Chisel → Verilog → Verilator)
-#   make bins                      Build + stage every workload .bin into bins/
-#   make emu       BENCH=vvadd-s1  Run a benchmark on the golden emulator (fast)
+#   make gate                      Everyday RTL gate: lockstep + vvadd-q4 vs baseline
+#   make compare                   Diff build/profile_results against testdata/baseline/q4
 #   make lockstep  BENCH=matmul-s2 Lock-step the RTL against the emulator
-#   make profile   BENCH=vvadd-s1  Cycle-accurate IPC / stall profile
+#   make profile-quad FAM=vvadd    Cycle-accurate quad-core IPC / stall profile
 #   make isa                       Full RISC-V ISA regression suite
-#   make test                      ISA suite + every benchmark (lock-step)
+#   make test                      ISA suite + quad-core benchmark tests
 #   make fire     [FIRE_FRAMES=N]  Render the bare-metal Doom-fire demo
 #
 # BENCH defaults to vvadd-s1. Families: vvadd matmul filter csaxpy histo (×s1..s5).

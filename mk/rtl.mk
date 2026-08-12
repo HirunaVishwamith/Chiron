@@ -10,10 +10,17 @@ SCALA_SRCS := $(shell find src/main/scala/ -type f -name '*.scala')
 # (0x8000_0000); the configuration.scala patch is always reverted, even if sbt
 # fails.
 $(SIM)/system.v: $(SCALA_SRCS)
-	mv src/main/scala/common/configuration.scala configuration.txt && \
+	@set -e; \
+	cp src/main/scala/common/configuration.scala configuration.txt; \
 	sed 's/instructionBase/instructionBase = 0x0000000080000000L\/\//' configuration.txt \
-	    > src/main/scala/common/configuration.scala && \
-	(sbt "runMain system"; mv configuration.txt src/main/scala/common/configuration.scala)
+	    > src/main/scala/common/configuration.scala; \
+	if ! sbt "runMain system"; then \
+	  mv configuration.txt src/main/scala/common/configuration.scala; \
+	  echo "[rtl] sbt FAILED — refusing to reuse a stale system.v"; \
+	  exit 1; \
+	fi; \
+	mv configuration.txt src/main/scala/common/configuration.scala; \
+	test -s system.v
 	cp system.v $(SIM)/
 	cd $(SIM)/; \
 	cp ../../iCacheRegisters.v .; \
@@ -48,20 +55,33 @@ sim-fast: $(VSYS_LIB_FAST)   ## Build the fast no-trace RTL model (used by linux
 # fpga/hdl/ where fpga/build_kintex7.tcl's source-file globbing picks it up.
 .PHONY: fpga-verilog
 fpga-verilog:   ## Generate fpgaTop.v for the Kintex-7 build (fpga/hdl/fpgaTop.v)
-	mv src/main/scala/common/configuration.scala configuration.txt && \
+	@set -e; \
+	cp src/main/scala/common/configuration.scala configuration.txt; \
 	sed 's/instructionBase/instructionBase = 0x0000000080000000L\/\//' configuration.txt \
-	    > src/main/scala/common/configuration.scala && \
-	(sbt "runMain fpgaTop"; mv configuration.txt src/main/scala/common/configuration.scala)
+	    > src/main/scala/common/configuration.scala; \
+	if ! sbt "runMain fpgaTop"; then \
+	  mv configuration.txt src/main/scala/common/configuration.scala; \
+	  echo "[rtl] sbt FAILED — not copying a stale fpgaTop.v"; \
+	  exit 1; \
+	fi; \
+	mv configuration.txt src/main/scala/common/configuration.scala; \
+	test -s fpgaTop.v
 	@mkdir -p fpga/hdl
 	cp fpgaTop.v fpga/hdl/
 
 # ── Zynq FPGA flavour (instructionBase = 0x4000_0000 + boot ROM + PS CLINT) ───
 .PHONY: zynq
 zynq:                   ## Generate FPGA Verilog (Zynq base) + boot ROM + vivado.tcl
-	mv src/main/scala/common/configuration.scala configuration.txt && \
+	@set -e; \
+	cp src/main/scala/common/configuration.scala configuration.txt; \
 	sed 's/instructionBase/instructionBase = 0x0000000040000000L\/\//' configuration.txt \
-	    > src/main/scala/common/configuration.scala && \
-	(sbt "runMain core"; mv configuration.txt src/main/scala/common/configuration.scala)
+	    > src/main/scala/common/configuration.scala; \
+	if ! sbt "runMain core"; then \
+	  mv configuration.txt src/main/scala/common/configuration.scala; \
+	  echo "[rtl] sbt FAILED — not emitting stale Zynq Verilog"; \
+	  exit 1; \
+	fi; \
+	mv configuration.txt src/main/scala/common/configuration.scala
 	sbt "runMain bootROM"
 	sbt "runMain testbench.psClint"
 	cp src/main/resources/zynq/vivado.tcl .

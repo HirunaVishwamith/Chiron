@@ -86,6 +86,7 @@ int main(int argc, char *argv[]) {
     int      exit_code   = 2;
     uint64_t last_print  = 0ULL;
     uint64_t stall_cycles = 0ULL;
+    std::string uart_log;
     const uint64_t PRINT_INTERVAL = strtoull(print_interval_str, nullptr, 10);
     const uint64_t MAX_STALL      = 500000ULL;
 
@@ -105,11 +106,19 @@ int main(int argc, char *argv[]) {
             last_print = sim_cycles;
         }
 
-        // UART output from all cores
-        if (tb->core0OutChar_valid) { putchar((int)tb->core0OutChar_byte); fflush(stdout); }
-        if (tb->core1OutChar_valid) { putchar((int)tb->core1OutChar_byte); fflush(stdout); }
-        if (tb->core2OutChar_valid) { putchar((int)tb->core2OutChar_byte); fflush(stdout); }
-        if (tb->core3OutChar_valid) { putchar((int)tb->core3OutChar_byte); fflush(stdout); }
+        // UART output from all cores. Also keep a bounded log so we can
+        // scrape "The code is ran with error code: N" — reaching the done-PC
+        // is not enough; a wrong result array still prints a nonzero N.
+        auto take_uart = [&](unsigned char byte) {
+            putchar((int)byte);
+            if (uart_log.size() < (1u << 20)) uart_log.push_back((char)byte);
+        };
+        if (tb->core0OutChar_valid) take_uart((unsigned char)tb->core0OutChar_byte);
+        if (tb->core1OutChar_valid) take_uart((unsigned char)tb->core1OutChar_byte);
+        if (tb->core2OutChar_valid) take_uart((unsigned char)tb->core2OutChar_byte);
+        if (tb->core3OutChar_valid) take_uart((unsigned char)tb->core3OutChar_byte);
+        if (tb->core0OutChar_valid || tb->core1OutChar_valid ||
+            tb->core2OutChar_valid || tb->core3OutChar_valid) fflush(stdout);
 
         // Work-region windowing: must run before the early-continue below, so
         // cycles where core 0 does not commit still advance the other harts.
@@ -167,9 +176,23 @@ int main(int argc, char *argv[]) {
     else if (exit_code == 3)
         printf("[profile_quad] DEADLOCK detected; partial profile written\n");
 
+    int bench_error = -1;
+    {
+        const char *key = "error code: ";
+        size_t pos = uart_log.rfind(key);
+        if (pos != std::string::npos)
+            bench_error = atoi(uart_log.c_str() + pos + strlen(key));
+    }
+    if (exit_code == 0 && bench_error > 0) {
+        printf("[profile_quad] VERIFY FAIL: benchmark error code %d "
+               "(done-PC hit but result array did not match)\n", bench_error);
+        exit_code = 4;
+    }
+
     printf("\n");
     profiler.print_summary();
-    profiler.print_json(benchmark_name, string(output_path ? output_path : ""));
+    profiler.print_json(benchmark_name, string(output_path ? output_path : ""),
+                        exit_code, bench_error);
 
     printf("[profile_quad] Total RTL ticks (including load): %llu\n",
            (unsigned long long)tickcount);

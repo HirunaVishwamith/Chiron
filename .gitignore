@@ -31,6 +31,9 @@ sim/rtl/obj_dir*/
 *.bsp
 *.fir
 *.json
+!testdata/
+!testdata/**/
+!testdata/**/*.json
 *.vcd
 *.vcd.fst
 Image

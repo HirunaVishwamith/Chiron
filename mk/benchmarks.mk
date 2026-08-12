@@ -35,6 +35,7 @@ SCALE := $(lastword  $(subst -s, ,$(BENCH)))
 BIN   := $(BINS)/$($(FAM)_base)-s$(SCALE).bin
 DONE  := $($(FAM)_DONE)
 
-# Quad-core benchmark families verified to complete on the RTL (used by make test).
-# csaxpy-q4 uses DATA_SIZE=10000 (≡ s5 scale) which triggers the CCU deadlock.
+# Quad-core families `make test-q4` / `make regress-q4` must finish with
+# error code 0. The everyday gate is vvadd; the full set is REGRESSION_Q4_ALL.
 REGRESSION_Q4 := vvadd
+REGRESSION_Q4_ALL := vvadd matmul filter histo csaxpy

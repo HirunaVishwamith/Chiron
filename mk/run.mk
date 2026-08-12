@@ -71,7 +71,7 @@ _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(ISA_DIR)/images
 
-.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-emu-check linux-sim linux-lockstep demo
+.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-emu-check linux-sim linux-lockstep demo compare snapshot-baseline gate regress-q4
 
 emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
 	$(BUILD)/emu.out $(BIN)
@@ -102,7 +102,7 @@ profile-all: $(BUILD)/profile_quad.out    ## Profile all quad-core benchmarks (d
 	  timeout $(PROFILE_TIMEOUT) $(BUILD)/profile_quad.out \
 	    --image $(BINS)/$($(fam)_base)-q4.bin \
 	    --name $(fam)-q4 $($(fam)_DONE) \
-	    --output $(BUILD)/profile_results/$(fam)-q4.json --timeout 100000000 || true ;)
+	    --output $(BUILD)/profile_results/$(fam)-q4.json --timeout 100000000 || exit 1; )
 	python3 scripts/profile_visualize.py $(BUILD)/profile_results/
 
 profile-all-sc: $(BUILD)/profile.out    ## Profile single-core (NUM_CORES=1) bins, all scales
@@ -112,7 +112,7 @@ profile-all-sc: $(BUILD)/profile.out    ## Profile single-core (NUM_CORES=1) bin
 	  test -f $(BINS)/$($(fam)_base)-s$(s).bin && \
 	  timeout $(PROFILE_TIMEOUT) $(BUILD)/profile.out --image $(BINS)/$($(fam)_base)-s$(s).bin \
 	    --name $(fam)-s$(s) $($(fam)_DONE) \
-	    --output $(BUILD)/profile_results/$(fam)-s$(s).json --timeout 100000000 || true ; ))
+	    --output $(BUILD)/profile_results/$(fam)-s$(s).json --timeout 100000000 || exit 1; ))
 	python3 scripts/profile_visualize.py $(BUILD)/profile_results/
 
 isa: test_all_images                 ## Alias for the full ISA regression suite
@@ -127,6 +127,30 @@ test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks
 	  $(MAKE) --no-print-directory profile-quad FAM=$$fam || exit 1; \
 	  echo "$$fam-q4: PASS"; \
 	done
+
+BASELINE_Q4 := testdata/baseline/q4
+
+compare:   ## Diff build/profile_results against testdata/baseline/q4
+	python3 scripts/profile_compare.py $(BASELINE_Q4) $(BUILD)/profile_results
+
+snapshot-baseline:   ## Copy current q4 JSON into testdata/baseline/q4 (commit the refresh)
+	@mkdir -p $(BASELINE_Q4)
+	@for fam in $(REGRESSION_Q4_ALL); do \
+	  test -f $(BUILD)/profile_results/$$fam-q4.json || { echo "missing $$fam-q4.json"; exit 1; }; \
+	  cp $(BUILD)/profile_results/$$fam-q4.json $(BASELINE_Q4)/; \
+	  echo "updated $(BASELINE_Q4)/$$fam-q4.json"; \
+	done
+
+gate: $(BUILD)/lockstep.out $(BUILD)/profile_quad.out   ## Everyday RTL gate: lockstep vvadd-s1 + vvadd-q4 vs baseline
+	@$(MAKE) --no-print-directory runLockStep
+	@$(MAKE) --no-print-directory profile-quad FAM=vvadd
+	python3 scripts/profile_compare.py $(BASELINE_Q4) $(BUILD)/profile_results --only vvadd-q4
+
+regress-q4: $(BUILD)/profile_quad.out   ## All five q4 benches, then compare against the committed baseline
+	@for fam in $(REGRESSION_Q4_ALL); do \
+	  $(MAKE) --no-print-directory profile-quad FAM=$$fam || exit 1; \
+	done
+	python3 scripts/profile_compare.py $(BASELINE_Q4) $(BUILD)/profile_results
 
 # Fast (no-trace) profile_quad -- much quicker on the large s5 datasets than the
 # traced model. Requires the fast RTL model (make sim-fast).
@@ -146,7 +170,8 @@ ci-bench: $(BUILD)/profile_quad_fast.out   ## CI gate: 5 quad-core benchmarks mu
 	       --timeout 120000000 2>&1); \
 	  echo "$$out" | tail -4; \
 	  if echo "$$out" | grep -q 'BENCHMARK COMPLETE' && \
-	     ! echo "$$out" | grep -qiE 'Register mismatch|Deadlock|TIMEOUT'; \
+	     ! echo "$$out" | grep -qiE 'Register mismatch|Deadlock|TIMEOUT|VERIFY FAIL' && \
+	     ! echo "$$out" | grep -E 'error code: [1-9]'; \
 	  then echo "$$1: PASS"; echo "$$1: pass" >> test_results.txt; \
 	  else echo "$$1: FAIL"; echo "$$1: fail" >> test_results.txt; fail=1; fi; }; \
 	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
