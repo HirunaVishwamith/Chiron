@@ -74,7 +74,7 @@ class BranchEvalIn extends composableInterface {
 
 class BranchEvalOut extends composableInterface {
   val passFail   = Output(Bool())
-  val branchMask = Output(UInt(4.W))
+  val branchMask = Output(UInt(configuration.newBranchMaskWidth.W))
 }
 
 class RetiredRenamedTable extends Bundle {
@@ -139,23 +139,24 @@ class decode (
     _.branchEvalReady -> false.B
   ))
 
-  val branchBuffer = RegInit(new Bundle {
-    val branchPCReady    = Bool()
-    val predictedPCReady = Bool()
-    val branchPC         = UInt(dataWidth.W)
-    val predictedPC      = UInt(dataWidth.W)
-    val branchMask       = Vec(configuration.newBranchMaskWidth, UInt(1.W)) //leon coherency
-  }.Lit(
-    _.branchPCReady    -> false.B,
-    _.predictedPCReady -> false.B,
-    _.branchPC         -> 0.U,
-    _.predictedPC      -> 0.U,
-    _.branchMask(0)    -> 0.U,
-    _.branchMask(1)    -> 0.U,
-    _.branchMask(2)    -> 0.U,
-    _.branchMask(3)    -> 0.U,
-    _.branchMask(4)    -> 1.U  //leon coherency
-  ))
+  val branchBuffer = RegInit({
+    val init = Wire(new Bundle {
+      val branchPCReady    = Bool()
+      val predictedPCReady = Bool()
+      val branchPC         = UInt(dataWidth.W)
+      val predictedPC      = UInt(dataWidth.W)
+      val branchMask       = Vec(configuration.newBranchMaskWidth, UInt(1.W))
+    })
+    init.branchPCReady    := false.B
+    init.predictedPCReady := false.B
+    init.branchPC         := 0.U
+    init.predictedPC      := 0.U
+    for (i <- 0 until configuration.newBranchMaskWidth - 1) {
+      init.branchMask(i) := 0.U
+    }
+    init.branchMask(configuration.newBranchMaskWidth - 1) := 1.U
+    init
+  })
 
   /** Initializing some intermediate wires */
 
@@ -175,7 +176,7 @@ class decode (
 
   val freeRegAddr = WireDefault(0.U(PRFAddrWidth.W))
 
-  val branchTracker = RegInit(0.U(3.W))
+  val branchTracker = RegInit(0.U(log2Ceil(configuration.branchMaskWidth + 1).W))
 
   val ins = WireDefault(0.U(insAddrWidth.W))
   val pc  = WireDefault(0.U(dataWidth.W))
@@ -222,7 +223,7 @@ class decode (
   outputBuffer.passFail        := branchEvalIn.passFail
   outputBuffer.branchMask      := branchEvalIn.branchMask
 
-  val branchPCMask = RegInit("b00000".U(configuration.newBranchMaskWidth.W))  //leon coherency
+  val branchPCMask = RegInit(0.U(configuration.newBranchMaskWidth.W))
   val branchReg    = RegInit(false.B)
 
   val stall = WireDefault(false.B)
@@ -314,20 +315,12 @@ class decode (
     retiredRenamedTable.table(i) := architecturalRegMap(i)
   }
 
-  val reservedRegMap1 = Reg(frontEndRegMap.cloneType)
-  val reservedRegMap2 = Reg(frontEndRegMap.cloneType)
-  val reservedRegMap3 = Reg(frontEndRegMap.cloneType)
-  val reservedRegMap4 = Reg(frontEndRegMap.cloneType)
-
-  val reservedFreeList1 = Reg(PRFFreeList.cloneType)
-  val reservedFreeList2 = Reg(PRFFreeList.cloneType)
-  val reservedFreeList3 = Reg(PRFFreeList.cloneType)
-  val reservedFreeList4 = Reg(PRFFreeList.cloneType)
-
-  val reservedValidList1 = Reg(PRFValidList.cloneType)
-  val reservedValidList2 = Reg(PRFValidList.cloneType)
-  val reservedValidList3 = Reg(PRFValidList.cloneType)
-  val reservedValidList4 = Reg(PRFValidList.cloneType)
+  // One rename/freelist/valid snapshot per in-flight branch. Branches resolve
+  // in order, so a hit restores slot 0 and a pass shifts the queue down.
+  private val nCheckpoints = configuration.branchMaskWidth
+  val reservedRegMap    = Reg(Vec(nCheckpoints, frontEndRegMap.cloneType))
+  val reservedFreeList  = Reg(Vec(nCheckpoints, PRFFreeList.cloneType))
+  val reservedValidList = Reg(Vec(nCheckpoints, PRFValidList.cloneType))
 
   rs1Addr  := frontEndRegMap(rs1)
   rs2Addr  := frontEndRegMap(rs2)
@@ -392,7 +385,7 @@ class decode (
     }
   }
 
-  val LoadMask = "b01111".U(configuration.newBranchMaskWidth.W) //leon has done this
+  val LoadMask = ((BigInt(1) << configuration.branchMaskWidth) - 1).U(configuration.newBranchMaskWidth.W)
 
   when(branchEvalIn.fired) {
     branchTracker := branchTracker - 1.U
@@ -403,23 +396,21 @@ class decode (
     when(!branchEvalIn.passFail) {
       branchReg := false.B
 
-      branchBuffer.branchMask(0) := 0.U
-      branchBuffer.branchMask(1) := 0.U
-      branchBuffer.branchMask(2) := 0.U
-      branchBuffer.branchMask(3) := 0.U
-      branchBuffer.branchMask(4) := 1.U  //leon coherency
+      for (i <- 0 until configuration.newBranchMaskWidth - 1) {
+        branchBuffer.branchMask(i) := 0.U
+      }
+      branchBuffer.branchMask(configuration.newBranchMaskWidth - 1) := 1.U
 
       expectedPC := branchEvalIn.targetPC
 
-      //leon coherency //here
-      when(branchEvalIn.branchMask(3,0).orR){
-      frontEndRegMap := reservedRegMap1
-      PRFFreeList    := (reservedFreeList1 zip PRFFreeList map{case(reserved, current) => reserved | current})
-      PRFValidList   := (reservedValidList1 zip PRFValidList map{case(reserved, current) => reserved | current})
+      when(branchEvalIn.branchMask(configuration.branchMaskWidth - 1, 0).orR){
+        frontEndRegMap := reservedRegMap(0)
+        PRFFreeList    := (reservedFreeList(0) zip PRFFreeList map{case(reserved, current) => reserved | current})
+        PRFValidList   := (reservedValidList(0) zip PRFValidList map{case(reserved, current) => reserved | current})
       }.otherwise{
         frontEndRegMap := architecturalRegMap
-        PRFFreeList    := VecInit(Seq.fill(64)(true.B))
-        PRFValidList   := VecInit(Seq.fill(64)(false.B))
+        PRFFreeList    := VecInit(Seq.fill(PRFCount)(true.B))
+        PRFValidList   := VecInit(Seq.fill(PRFCount)(false.B))
         coherency := true.B  //leon coherency
 
         for (i <- 0 until regCount){
@@ -427,83 +418,37 @@ class decode (
           PRFFreeList(architecturalRegMap(i)):=false.B
         }
       }
-      //here
 
       branchTracker := 0.U
     }.otherwise {
-      reservedRegMap1 := reservedRegMap2
-      reservedRegMap2 := reservedRegMap3
-      reservedRegMap3 := reservedRegMap4
-
-      reservedFreeList1 := reservedFreeList2
-      reservedFreeList2 := reservedFreeList3
-      reservedFreeList3 := reservedFreeList4
-
-      reservedValidList1 := reservedValidList2
-      reservedValidList2 := reservedValidList3
-      reservedValidList3 := reservedValidList4
+      for (i <- 0 until nCheckpoints - 1) {
+        reservedRegMap(i)    := reservedRegMap(i + 1)
+        reservedFreeList(i)  := reservedFreeList(i + 1)
+        reservedValidList(i) := reservedValidList(i + 1)
+      }
     }
   }
 
-  val bitPosition = WireDefault(0.U(2.W))
-
-  //leon kept it because branchBuffer.branchMask=10000
-  bitPosition := PriorityEncoder(~branchBuffer.branchMask.asUInt)
+  val bitPosition = PriorityEncoder(~branchBuffer.branchMask.asUInt)
 
   when(validInputBuf && readyOutputBuf) {
     when(opcode === jump.U || opcode === jumpr.U || opcode === cjump.U) {
       branchReg := true.B
       branchBuffer.branchPC := pc
       branchBuffer.branchMask(bitPosition) := 1.U
-      switch(bitPosition) {
-        is(0.U) { branchPCMask := 1.U }
-        is(1.U) { branchPCMask := 2.U }
-        is(2.U) { branchPCMask := 4.U }
-        is(3.U) { branchPCMask := 8.U }
-      }
+      branchPCMask := (1.U(configuration.newBranchMaskWidth.W) << bitPosition)
 
-      switch(branchTracker) {
-        is(0.U) {
-          reservedRegMap1    := frontEndRegMap
-          reservedFreeList1  := PRFFreeList
-          reservedValidList1 := PRFValidList
-          when(opcode(2).asBool && rd.orR) {
-            reservedRegMap1(rd)             := freeRegAddr
-            reservedFreeList1(freeRegAddr)  := false.B
-            reservedValidList1(freeRegAddr) := false.B
-          }
-        }
-        is(1.U) {
-          reservedRegMap2    := frontEndRegMap
-          reservedFreeList2  := PRFFreeList
-          reservedValidList2 := PRFValidList
-          when(opcode(2).asBool && rd.orR) {
-            reservedRegMap2(rd)             := freeRegAddr
-            reservedFreeList2(freeRegAddr)  := false.B
-            reservedValidList2(freeRegAddr) := false.B
-          }
-        }
-        is(2.U) {
-          reservedRegMap3    := frontEndRegMap
-          reservedFreeList3  := PRFFreeList
-          reservedValidList3 := PRFValidList
-          when(opcode(2).asBool && rd.orR) {
-            reservedRegMap3(rd)             := freeRegAddr
-            reservedFreeList3(freeRegAddr)  := false.B
-            reservedValidList3(freeRegAddr) := false.B
-          }
-        }
-        is(3.U) {
-          reservedRegMap4    := frontEndRegMap
-          reservedFreeList4  := PRFFreeList
-          reservedValidList4 := PRFValidList
-          when(opcode(2).asBool && rd.orR) {
-            reservedRegMap4(rd)             := freeRegAddr
-            reservedFreeList4(freeRegAddr)  := false.B
-            reservedValidList4(freeRegAddr) := false.B
-          }
-        }
+      val snapMap   = WireDefault(frontEndRegMap)
+      val snapFree  = WireDefault(PRFFreeList)
+      val snapValid = WireDefault(PRFValidList)
+      when(opcode(2).asBool && rd.orR) {
+        snapMap(rd)            := freeRegAddr
+        snapFree(freeRegAddr)  := false.B
+        snapValid(freeRegAddr) := false.B
       }
+      reservedRegMap(branchTracker)    := snapMap
+      reservedFreeList(branchTracker)  := snapFree
+      reservedValidList(branchTracker) := snapValid
       branchTracker := branchTracker + 1.U
     }.otherwise {
       branchReg := false.B
@@ -936,10 +881,9 @@ class decode (
   ) {
     architecturalRegMap(writeBackResult.rdAddr)              := writeBackResult.PRFDest
     PRFFreeList(architecturalRegMap(writeBackResult.rdAddr)) := true.B
-    reservedFreeList1(architecturalRegMap(writeBackResult.rdAddr)) := true.B
-    reservedFreeList2(architecturalRegMap(writeBackResult.rdAddr)) := true.B
-    reservedFreeList3(architecturalRegMap(writeBackResult.rdAddr)) := true.B
-    reservedFreeList4(architecturalRegMap(writeBackResult.rdAddr)) := true.B
+    for (i <- 0 until nCheckpoints) {
+      reservedFreeList(i)(architecturalRegMap(writeBackResult.rdAddr)) := true.B
+    }
   }
 
   val canTakeInterrupt = IO(Output(Bool()))

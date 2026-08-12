@@ -324,17 +324,22 @@ class fetch(val fifo_size: Int) extends Module {
 
 
   //PC update logic
+  // Backend redirect wins. A TAGE override only fires the cycle after the
+  // branch itself was requested, and blocks this cycle's I$ issue so the
+  // bimodal successor is never fetched — agreement costs no bubble.
   when(redirect_bit===1.U) {
     PC := toDecode.expected.pc
   }.elsewhen(is_fenceI) {
     PC := PC_fifo.io.deq.bits(63, 0) + 4.U
+  }.elsewhen(predictor.overrideValid && !redirect) {
+    PC := predictor.overridePC
   }.elsewhen(cache.req.valid & cache.req.ready) {
     PC := predictor.io.next_pc
   }
   cache.req.bits := PC
 
   //ready valid signal logic
-  cache.req.valid := redirect_bit === 0.U & PC_fifo.io.enq.ready & !is_fenceI & !(handle_fenceI===1.U)
+  cache.req.valid := redirect_bit === 0.U & PC_fifo.io.enq.ready & !is_fenceI & !(handle_fenceI===1.U) & !predictor.overrideValid
   cache.resp.ready := (redirect_bit===1.U || toDecode.fired) & !(handle_fenceI)
   updateAllCachelines.ready := clear_cache_req
   cachelinesUpdatesResp.ready := cache_cleared

@@ -130,6 +130,7 @@ class branchResToFetch extends composableInterface {
   val branchTaken   = Input(Bool())
   val pc            = Input(UInt(64.W)) // pc of the branched instruction
   val pcAfterBrnach = Input(UInt(64.W)) // pc of the next instruction after branch
+  val instruction   = Input(UInt(32.W)) // resolved insn; CFI is trained from this, not from speculative predecode
 }
 
 

@@ -734,7 +734,8 @@ class core (
   fetch.branchRes.branchTaken := branchTaken
   fetch.branchRes.isBranch := true.B
   fetch.branchRes.pc := branchPCs(0).pc
-  fetch.branchRes.pcAfterBrnach := branchEvals.nextPC 
+  fetch.branchRes.pcAfterBrnach := branchEvals.nextPC
+  fetch.branchRes.instruction := branchInstruction.instruction
   fetch.branchRes.fired := fetch.branchRes.ready && branchEvals.valid && !coherentLoadInvalidReg
 
   decode.writeBackResult.PRFDest := rob.commit.prfDest

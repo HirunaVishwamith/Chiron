@@ -17,9 +17,9 @@ object constants{
   val dataWidth : Int = 64
   val insWidth : Int = 32
 
-  val branchMaskWidth : Int = 5
-  val robAddrWidth : Int = 4
-  val prfAddrWidth : Int = 6
+  val branchMaskWidth : Int = common.configuration.newBranchMaskWidth
+  val robAddrWidth : Int = common.configuration.robAddrWidth
+  val prfAddrWidth : Int = common.configuration.prfAddrWidth
 
   val FIFO_ADDR_TX = "hE000_1030"
   val FIFO_ADDR_RX = "hE000_102C"

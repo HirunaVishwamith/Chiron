@@ -25,6 +25,9 @@ import common.configuration
   *  - BTB         : PC-indexed taken-target cache, filled at branch resolution.
   *  - TAGE        : tagged geometric-history direction predictor for
   *                  conditional branches, with a bimodal base predictor.
+  *                  With `enableTageOverride`, same-cycle next-PC uses only
+  *                  the bimodal bit; TAGE is computed the same cycle but only
+  *                  registered, and overrides fetch the next cycle on disagreement.
   *  - RAS         : return-address stack for JALR returns, with a per-fetch
   *                  checkpoint so a redirect can roll the stack pointer back.
   */
@@ -85,6 +88,18 @@ class rasRestorePort extends Bundle {
   val state = UInt(configuration.frontend.rasCheckpointWidth.W)
 }
 
+/** State captured on a direction-predicted fetch so TAGE can override next cycle. */
+class tageOverrideSnap extends Bundle {
+  val valid     = Bool()
+  val pc        = UInt(64.W)
+  val wasCond   = Bool()
+  val fastTaken = Bool()
+  val tageTaken = Bool()
+  val btbHit    = Bool()
+  val btbTarget = UInt(64.W)
+  val ghrUsed   = UInt(configuration.frontend.ghrLength.W)
+}
+
 /**
   * Common interface every next-PC predictor presents to `fetch`, so the two
   * implementations can be A/B'd from one build without rewiring fetch.
@@ -108,6 +123,13 @@ abstract class nextPCPredictor extends Module {
   val predecode     = IO(Input(new predecodeInfo))
   val rasCheckpoint = IO(Output(UInt(configuration.frontend.rasCheckpointWidth.W)))
   val rasRestore    = IO(Input(new rasRestorePort))
+  /**
+    * Delayed TAGE override. High the cycle after a direction-predicted fetch
+    * if TAGE disagrees with the same-cycle bimodal steer. `next_pc` is always
+    * valid the same cycle — fetch must not wait on these.
+    */
+  val overrideValid = IO(Output(Bool()))
+  val overridePC    = IO(Output(UInt(64.W)))
 }
 
 /**
@@ -123,7 +145,9 @@ class legacyPredictor(counterDepth: Int, btbSize: Int) extends nextPCPredictor {
   inner.requestSent  := requestSent
   inner.mispredicted := mispredicted
   rasCheckpoint := 0.U
-  // predecode / rasRestore intentionally unused
+  overrideValid := false.B
+  overridePC    := 0.U
+  // predecode / rasRestore / override intentionally unused
 }
 
 /**
@@ -140,6 +164,14 @@ class legacyPredictor(counterDepth: Int, btbSize: Int) extends nextPCPredictor {
   * the predicted history it was fetched with *is* the committed history by the
   * time it resolves. On a mispredict ghrSpec is reloaded from ghrCommit, which
   * re-establishes the invariant. No per-branch history queue is needed.
+  *
+  * Same-cycle next-PC is bimodal+BTB+RAS so the TAGE mux is not on the fetch
+  * request path. TAGE is still evaluated from `curr_pc`/`ghrSpec` that cycle
+  * (so it sees the same tables as a combinational TAGE would) but the result
+  * is only registered; if it disagrees and the BTB can realize the other
+  * direction, fetch is redirected before the wrong successor is requested
+  * (one bubble). A TAGE override repairs only the last ghrSpec bit — it must
+  * not use pipelineFlush, which would smash speculative history back to commit.
   *
   * Both history registers are advanced on exactly one predicate — "the CFI
   * table says this PC is a conditional branch" — so the two stay in step.
@@ -174,7 +206,12 @@ class advancedPredictor extends nextPCPredictor {
 
   /** Type of the PC being predicted, and of the branch being resolved. */
   val typeP = lookupType(io.curr_pc)
-  val typeR = lookupType(io.branchres.pc)
+  // Prefer the resolved instruction over the CFI table so a cold miss cannot
+  // train TAGE/BTB as "not a branch". Predecode still fills the table so a
+  // loop body that is fetched again before the first resolve still hits.
+  val typeR = Mux(io.branchres.fired,
+    cfiType.classify(io.branchres.instruction),
+    lookupType(io.branchres.pc))
 
   // ───────────────────────────────── BTB ──────────────────────────────────
   private val btbIdxW = log2Ceil(cfg.btbEntries)
@@ -280,15 +317,19 @@ class advancedPredictor extends nextPCPredictor {
   }
 
   // ───────────────────────── TAGE: prediction path ────────────────────────
+  // TAGE is computed from curr_pc/ghrSpec every cycle so it matches the
+  // combinational predictor. With override it only feeds a register — next_pc
+  // uses the bimodal bit so the TAGE mux is not on the I$ request path.
+  private val baseP = bimodal(baseIdx(io.curr_pc))(1)
   private val idxP  = (0 until nTables).map(t => tageIdx(io.curr_pc, ghrSpec, t))
   private val tagsP = (0 until nTables).map(t => tageTag(io.curr_pc, ghrSpec, t))
-  private val hitP  = (0 until nTables).map(t => tageValid(t)(idxP(t)) && (tageTags(t)(idxP(t)) === tagsP(t)))
+  private val hitP  = (0 until nTables).map(t =>
+    tageValid(t)(idxP(t)) && (tageTags(t)(idxP(t)) === tagsP(t)))
   private val ctrsP = (0 until nTables).map(t => tageCtrs(t)(idxP(t)))
   private val usP   = (0 until nTables).map(t => tageU(t)(idxP(t)))
-  private val baseP = bimodal(baseIdx(io.curr_pc))(1)
-
-  private val selP = select(hitP, ctrsP, usP, baseP)
-  val dirTaken = if (cfg.enableTAGE) selP.finalPred else baseP
+  private val selP  = select(hitP, ctrsP, usP, baseP)
+  val tageDirTaken  = if (cfg.enableTAGE) selP.finalPred else baseP
+  val dirTaken      = if (cfg.enableTAGE && !cfg.enableTageOverride) tageDirTaken else baseP
 
   // ───────────────────────── RAS (return-address stack) ───────────────────
   private val spW  = cfg.rasSpWidth
@@ -343,9 +384,47 @@ class advancedPredictor extends nextPCPredictor {
   io.next_pc := Mux(useRAS, rasTop,
                 Mux(fetchedTaken, btbTargetP, io.curr_pc + 4.U))
 
+  // ──────────────────── TAGE override (next cycle, disagreement only) ─────
+  val ov = RegInit(0.U.asTypeOf(new tageOverrideSnap))
+  private val doOverride = WireDefault(false.B)
+
+  if (cfg.enableTAGE && cfg.enableTageOverride) {
+    // Capture the same-cycle TAGE result, not a re-lookup: intervening
+    // table updates must not change the decision fetch already "would have"
+    // made. JUMP/CALL/RET stay same-cycle via BTB/RAS.
+    when(pipelineFlush) {
+      ov.valid := false.B
+    }.elsewhen(requestSent && (typeP === cfiType.COND.U)) {
+      // Only classified conditionals. A NONE+BTB alias must not let TAGE
+      // redirect sequential fetch; that desynchronises ghrSpec (NONE does
+      // not shift history) from the path we actually follow.
+      ov.valid     := true.B
+      ov.pc        := io.curr_pc
+      ov.wasCond   := true.B
+      ov.fastTaken := dirTaken
+      ov.tageTaken := tageDirTaken
+      ov.btbHit    := btbHitP
+      ov.btbTarget := btbTargetP
+      ov.ghrUsed   := ghrSpec
+    }.otherwise {
+      ov.valid := false.B
+    }
+
+    // No BTB target means both predictors fall through to pc+4, so a
+    // direction mismatch cannot be realized and must not redirect.
+    doOverride := ov.valid && ov.btbHit && (ov.tageTaken =/= ov.fastTaken)
+  }
+
+  overrideValid := doOverride && !pipelineFlush
+  overridePC    := Mux(ov.tageTaken, ov.btbTarget, ov.pc + 4.U)
+
   // Speculative history advances on exactly the predicate the commit side uses.
+  // A TAGE override repairs only the bit written from bimodal; it must not
+  // reload ghrSpec from ghrCommit (that is pipelineFlush's job).
   when(pipelineFlush) {
     ghrSpec := ghrCommitNext
+  }.elsewhen(doOverride && ov.wasCond) {
+    ghrSpec := Cat(ov.ghrUsed(histLen - 2, 0), ov.btbHit && ov.tageTaken)
   }.elsewhen(requestSent && (typeP === cfiType.COND.U)) {
     ghrSpec := Cat(ghrSpec(histLen - 2, 0), fetchedTaken)
   }

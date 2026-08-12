@@ -1,10 +1,12 @@
 package Backend.storeDataIssue
 
-object constants {
-    val prfAddrWidth    =   6
-    //val branchMaskWidth =   4
-    val newBranchMaskWidth= 5  //leon coherency
+import common.configuration
 
-    val fifo_width      = prfAddrWidth + newBranchMaskWidth  //leon coherency
-    val fifo_depth      = 16 
+object constants {
+    val prfAddrWidth     = configuration.prfAddrWidth
+    val newBranchMaskWidth = configuration.newBranchMaskWidth
+    val robAddrWidth     = configuration.robAddrWidth
+
+    val fifo_width      = prfAddrWidth + newBranchMaskWidth
+    val fifo_depth      = 1 << robAddrWidth
 }

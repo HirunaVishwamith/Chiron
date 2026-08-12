@@ -11,15 +11,18 @@ object configuration {
 
   def timeInCyclesFromSec(time: Int) =  (time*clock/*  / 32 */)
 
-  val newBranchMaskWidth = 5; //leon for coherency 
-  val coherent_BranchMask=0x10.U(newBranchMaskWidth.W) // leon for coherency
-  val branchPC_depth = 4
-
+  // In-flight branch slots (bits [branchMaskWidth-1:0]) plus one coherency bit
+  // at the top. Decode snapshots a rename map per slot; a full mask stalls
+  // decode. Kept at 4: widening to 8 on a ~70% predictor made hart 0
+  // almost entirely wrong-path and lost IPC.
+  val branchMaskWidth = 4
+  val newBranchMaskWidth = branchMaskWidth + 1
+  val coherent_BranchMask = (1 << branchMaskWidth).U(newBranchMaskWidth.W)
+  val branchPC_depth = branchMaskWidth
 
   val instrIssueDepth = 8
   val robAddrWidth = 4
   val prfAddrWidth = 6
-  val branchMaskWidth = 4
   val ramBaseAddress = 0x0000000080000000L
   val ramHighAddress = 0x00000000ffffffffL
   val instructionBase = 0x0000000080000000L// = 0x0000000080000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L// = 0x0000000010000000L
@@ -35,6 +38,13 @@ object configuration {
     val enableAdvancedPredictor = true
     val enableRAS               = true
     val enableTAGE              = true
+    // Fetch never stalls for TAGE. Bimodal+BTB+RAS produce next_pc the same
+    // cycle; TAGE is computed the same cycle but only registered, and wins
+    // the next cycle if it disagrees (one bubble). JUMP/CALL/RET stay same-cycle.
+    // Off: histo-q4 lost 7% cycles / 6.6pt C0 accuracy (TAGE != bimodal
+    // often; the 1-cycle override still poisons later history). vvadd/filter
+    // were small wins. Flip to true to A/B.
+    val enableTageOverride      = false
 
     // Legacy gshare geometry, used when enableAdvancedPredictor is false.
     val gshareCounterDepth = 2048
