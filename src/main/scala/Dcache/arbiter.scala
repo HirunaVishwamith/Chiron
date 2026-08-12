@@ -125,7 +125,15 @@ class arbiter extends Module {
     is(commitReadyState){
 
       writeCommit.ready := true.B
-      operationState := Mux(writeCommit.fired, commitFiredState, commitReadyState)
+      when(writeCommit.fired && writeDataIn.valid){
+        inorderBuffer := operationBuffer
+        inorderBuffer.writeData.data := writeDataIn.data
+        inorderBuffer.writeData.valid := writeDataIn.valid
+        operationBuffer.valid := false.B
+        operationState := writeInstructionFiredState
+      }.otherwise{
+        operationState := Mux(writeCommit.fired, commitFiredState, commitReadyState)
+      }
     }
     is(commitFiredState){
       when(writeDataIn.valid){

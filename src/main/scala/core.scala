@@ -19,6 +19,17 @@ import Dcache._
 import Frontend._
 import Backend.prf._
 
+// Per-ROB-slot store data. Filled by snooping PRF writes; R3 is used only
+// after decode already saw rs2 ready (or as the writeCommit.fired fallback).
+class storeDataBufEntry extends Bundle {
+  val valid     = Bool()
+  val dataValid = Bool()
+  val issued    = Bool()
+  val rs2Ready  = Bool()
+  val rs2       = UInt(configuration.prfAddrWidth.W)
+  val robAddr   = UInt(configuration.robAddrWidth.W)
+  val data      = UInt(64.W)
+}
 
 class core (
   peripheral_id: Int,
@@ -894,16 +905,120 @@ class core (
 
   dataQueue.fromROB.readyNow := memAccess.writeCommit.fired
 
-  memAccess.writeDataIn.data := prf.toStore.rs2Data
-  memAccess.writeDataIn.valid := prf.toStore.valid
-
   memAccess.writeCommit.fired := memAccess.writeCommit.ready && (rob.commit.instruction(6, 4) === "b010".U)
 
-  prf.fromStore.branchmask := dataQueue.toPRF.branchMask
+  val sdbN = 1 << configuration.robAddrWidth
+  val sdb = RegInit(VecInit(Seq.fill(sdbN)(0.U.asTypeOf(new storeDataBufEntry))))
+  val prfWrites = Seq(prf.w1, prf.w2, prf.w3, prf.w4)
+  def prfWriteHit(addr: UInt): (Bool, UInt) = {
+    val hits = prfWrites.map(w => w.en && (w.addr === addr))
+    (hits.reduce(_ || _), MuxCase(0.U, hits.zip(prfWrites.map(_.data))))
+  }
+
+  for (i <- 0 until sdbN) {
+    when(sdb(i).valid && !sdb(i).dataValid) {
+      val (hit, dat) = prfWriteHit(sdb(i).rs2)
+      when(hit) {
+        sdb(i).data      := dat
+        sdb(i).dataValid := true.B
+        sdb(i).rs2Ready  := true.B
+      }
+    }
+  }
+
+  when(prf.toStore.valid) {
+    val idx = rob.commit.robAddr
+    when(sdb(idx).valid && !sdb(idx).dataValid) {
+      sdb(idx).data      := prf.toStore.rs2Data
+      sdb(idx).dataValid := true.B
+    }
+  }
+
+  when(scheduler.release.fired && (scheduler.release.instruction(6, 4) === "b010".U)) {
+    val idx = scheduler.release.robAddr
+    when(sdb(idx).valid) { sdb(idx).issued := true.B }
+  }
+
+  when(branchOps.valid && !branchOps.passed) {
+    when(coherentLoadInvalid || rob.flushAll) {
+      for (i <- 0 until sdbN) {
+        sdb(i).valid     := false.B
+        sdb(i).dataValid := false.B
+        sdb(i).issued    := false.B
+      }
+    }.otherwise {
+      val head = rob.commit.robAddr
+      val ageBr = branchEvals.robAddr - head
+      for (i <- 0 until sdbN) {
+        val age = i.U(configuration.robAddrWidth.W) - head
+        when(sdb(i).valid && (age > ageBr)) {
+          sdb(i).valid     := false.B
+          sdb(i).dataValid := false.B
+          sdb(i).issued    := false.B
+        }
+      }
+    }
+  }
+  when(rob.flushAll) {
+    for (i <- 0 until sdbN) {
+      sdb(i).valid     := false.B
+      sdb(i).dataValid := false.B
+      sdb(i).issued    := false.B
+    }
+  }
+
+  when(rob.commit.fired && (rob.commit.instruction(6, 4) === "b010".U)) {
+    val idx = rob.commit.robAddr
+    sdb(idx).valid     := false.B
+    sdb(idx).dataValid := false.B
+    sdb(idx).issued    := false.B
+  }
+
+  when(dataQueue.fromDecode.valid) {
+    val idx  = rob.allocate.robAddr
+    val rs2  = decode.toExec.rs2Addr
+    val isX0 = decode.toExec.instruction(24, 20) === 0.U
+    val (hit, dat) = prfWriteHit(rs2)
+    sdb(idx).valid   := true.B
+    sdb(idx).issued  := false.B
+    sdb(idx).rs2     := rs2
+    sdb(idx).robAddr := idx
+    when(isX0) {
+      sdb(idx).data      := 0.U
+      sdb(idx).dataValid := true.B
+      sdb(idx).rs2Ready  := true.B
+    }.elsewhen(hit) {
+      sdb(idx).data      := dat
+      sdb(idx).dataValid := true.B
+      sdb(idx).rs2Ready  := true.B
+    }.otherwise {
+      sdb(idx).dataValid := false.B
+      sdb(idx).rs2Ready  := decode.toExec.rs2Ready
+    }
+  }
+
+  val sdbHead = sdb(rob.commit.robAddr)
+  // AMOs share opcode[6:4]=010 with stores but go through the LR/SC
+  // waitState first; only a registered hit on a plain store may collapse.
+  val headIsPlainStore = rob.commit.instruction(6, 0) === "b0100011".U
+  val headHasData = headIsPlainStore && sdbHead.valid && sdbHead.dataValid
+  val headData = sdbHead.data
+
+  // R3 only on writeCommit.fired (never ready, never prefetch). Accept
+  // toStore only if it is the reply for this ROB head.
+  val sdbNeedR3 = dataQueue.toPRF.valid && memAccess.writeCommit.fired && !headHasData
+  val r3Issued = RegNext(sdbNeedR3, false.B)
+  val r3Rob    = RegNext(rob.commit.robAddr)
+  val r3Match  = prf.toStore.valid && r3Issued && (r3Rob === rob.commit.robAddr)
+
+  memAccess.writeDataIn.valid := headHasData || r3Match
+  memAccess.writeDataIn.data  := Mux(headHasData, headData, prf.toStore.rs2Data)
+
+  prf.fromStore.branchmask  := dataQueue.toPRF.branchMask
   prf.fromStore.instruction := dataQueue.toPRF.instruction
-  prf.fromStore.rs2Addr := dataQueue.toPRF.rs2Addr
-  prf.fromStore.valid := dataQueue.toPRF.valid && dataQueue.fromROB.readyNow
-  prf.fromStore.prfDest := 0.U 
+  prf.fromStore.rs2Addr     := dataQueue.toPRF.rs2Addr
+  prf.fromStore.valid       := sdbNeedR3
+  prf.fromStore.prfDest     := 0.U 
 
   (wakeUps.drop(1) zip scheduler.wakeUpExt)
   .foreach{ case (wakeup, schedulerWakeup) => {
