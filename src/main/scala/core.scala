@@ -525,10 +525,10 @@ class core (
     extnMResponse.result := {
       val isRem = division.request.instruction(13).asBool
       val isW   = division.request.instruction(3).asBool
-      val isU   = division.request.instruction(12).asBool
       val earlyOut = Mux(isRem, divEarlyRem, divEarlyQuot)
+      // W-ops always sign-extend the 32-bit result, including DIVUW/REMUW.
       val earlyFmt = Mux(isW,
-        Mux(isU, earlyOut(31, 0).pad(64), Cat(Fill(32, earlyOut(31)), earlyOut(31, 0))),
+        Cat(Fill(32, earlyOut(31)), earlyOut(31, 0)),
         earlyOut)
       val quotient32 = Mux((division.request.rs1(31).asBool ^ division.request.rs2(31).asBool) && !division.quotient.andR, (- division.quotient)(31, 0), division.quotient(31, 0))
       val remainder64Unsigned = Mux(division.remainder(64).asBool, division.remainder + division.divisor, division.remainder)

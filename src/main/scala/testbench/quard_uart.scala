@@ -123,14 +123,13 @@ class uartPort extends Module {
     val valid = Bool()
     val byte = UInt(8.W)
   })
-  // TX char register. Legacy bare-metal demos write the char at offset 0x30;
-  // the Linux xilinx-uartlite driver writes it at ULITE_TX = base+0x04
-  // (0x40600004). Accept both so the kernel's console output is surfaced (and
-  // the lastUartChars / auto-login detection below works) under Linux too.
-  // Full-address match on 0x40600004 avoids colliding with CLINT writes whose
-  // low byte is also 0x04 (e.g. msip 0x02004004).
-  val isTxWrite = ((writeRequestBuffer.address.offset & "hff".U) === "h30".U) ||
-                  (writeRequestBuffer.address.offset === "h40600004".U)
+  // TX char register. Match full addresses only: any store whose low byte is
+  // 0x30 (the old Zynq PS-UART FIFO offset) used to be treated as a character,
+  // so framebuffer / stack traffic at ...30 leaked into the terminal and
+  // smashed ANSI frames (cube/solid, and fire to a lesser extent).
+  val isTxWrite = (writeRequestBuffer.address.offset === "h40600004".U) ||
+                  (writeRequestBuffer.address.offset === "he0001030".U) ||
+                  (writeRequestBuffer.address.offset === "he0000030".U)
   putChar.valid := Seq(isTxWrite, writeRequestBuffer.address.valid, writeRequestBuffer.data.valid).reduce(_ && _)
   putChar.byte := writeRequestBuffer.data.data(7, 0)
 
