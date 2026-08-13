@@ -63,6 +63,7 @@ static g3d_vert2  projected[NVERT];
 static g3d_vec3   nrot[NFACE];
 static volatile int angle_x;
 static volatile int angle_y;
+static volatile int video_go;
 
 void thread_entry(int cid, int nc)
 {
@@ -76,10 +77,15 @@ void thread_entry(int cid, int nc)
     y_lo = (cid * G3D_H) / nc;
     y_hi = ((cid + 1) * G3D_H) / nc;
 
+    /* Don't AMO-spin in barrier while hart 0 is still talking to the UART. */
     if (cid == 0) {
         angle_x = 18;
         angle_y = 30;
-        GL_init();
+        printf("\033[?25l\033[H\033[2J");
+        video_go = 1;
+    } else {
+        while (!video_go)
+            ;
     }
     barrier(nc);
 

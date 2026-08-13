@@ -38,6 +38,7 @@ static const unsigned char cube_edge[NEDGE][2] = {
 static g3d_rgb fb[G3D_W * G3D_H];
 static g3d_vert2 projected[NVERT];
 static volatile int angle_y;
+static volatile int video_go;
 
 void thread_entry(int cid, int nc)
 {
@@ -47,9 +48,14 @@ void thread_entry(int cid, int nc)
     const int cx = G3D_W / 2;
     const int cy = G3D_H / 2;
 
+    /* Don't AMO-spin in barrier while hart 0 is still talking to the UART. */
     if (cid == 0) {
         angle_y = 20;
-        GL_init();
+        printf("\033[?25l\033[H\033[2J");
+        video_go = 1;
+    } else {
+        while (!video_go)
+            ;
     }
     barrier(nc);
 

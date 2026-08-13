@@ -1,8 +1,6 @@
 #include "g3d.h"
 
-#define GL_width  G3D_W
-#define GL_height G3D_H
-#include "GL_tty.h"
+extern void uart_send_char(char c);
 
 /* 256-entry Q16.16 sine, 0..2π. cos(a) = sin(a + 64). */
 static const g3d_fx g3d_sintab[256] = {
@@ -309,16 +307,67 @@ void g3d_triangle(g3d_rgb *fb, uint16_t *zbuf,
     }
 }
 
+/* 0..255 → decimal, no divide (printf %d is a 32-bit DIVW per digit). */
+static void g3d_put_u8(uint8_t v)
+{
+    uint8_t h = 0, t = 0;
+    while (v >= 100) { v = (uint8_t)(v - 100); h++; }
+    while (v >= 10)  { v = (uint8_t)(v - 10);  t++; }
+    if (h) uart_send_char((char)('0' + h));
+    if (h || t) uart_send_char((char)('0' + t));
+    uart_send_char((char)('0' + v));
+}
+
+static void g3d_put_str(const char *s)
+{
+    while (*s)
+        uart_send_char(*s++);
+}
+
+static int g3d_rgb_eq(g3d_rgb a, g3d_rgb b)
+{
+    return a.r == b.r && a.g == b.g && a.b == b.b;
+}
+
 void g3d_present(const g3d_rgb *fb)
 {
     int x, y;
-    GL_home();
+    g3d_rgb last_bg = {1, 2, 3};
+    g3d_rgb last_fg = {3, 2, 1};
+    g3d_put_str("\033[H");
     for (y = 0; y < G3D_H; y += 2) {
         for (x = 0; x < G3D_W; x++) {
-            const g3d_rgb *a = &fb[y * G3D_W + x];
-            const g3d_rgb *b = &fb[(y + 1) * G3D_W + x];
-            GL_set2pixelsRGBhere(a->r, a->g, a->b, b->r, b->g, b->b);
+            g3d_rgb a = fb[y * G3D_W + x];
+            g3d_rgb b = fb[(y + 1) * G3D_W + x];
+            if (g3d_rgb_eq(a, b)) {
+                if (!g3d_rgb_eq(a, last_bg) || !g3d_rgb_eq(a, last_fg)) {
+                    g3d_put_str("\033[48;2;");
+                    g3d_put_u8(a.r); uart_send_char(';');
+                    g3d_put_u8(a.g); uart_send_char(';');
+                    g3d_put_u8(a.b); uart_send_char('m');
+                    last_bg = a;
+                    last_fg = a;
+                }
+                uart_send_char(' ');
+            } else {
+                if (!g3d_rgb_eq(a, last_bg)) {
+                    g3d_put_str("\033[48;2;");
+                    g3d_put_u8(a.r); uart_send_char(';');
+                    g3d_put_u8(a.g); uart_send_char(';');
+                    g3d_put_u8(a.b); uart_send_char('m');
+                    last_bg = a;
+                }
+                if (!g3d_rgb_eq(b, last_fg)) {
+                    g3d_put_str("\033[38;2;");
+                    g3d_put_u8(b.r); uart_send_char(';');
+                    g3d_put_u8(b.g); uart_send_char(';');
+                    g3d_put_u8(b.b); uart_send_char('m');
+                    last_fg = b;
+                }
+                g3d_put_str("\xE2\x96\x83");
+            }
         }
-        GL_newline();
+        g3d_put_str("\033[38;2;0;0;0m\033[48;2;0;0;0m\n");
+        last_bg.r = 1; last_fg.r = 2; /* force a resend after newline */
     }
 }

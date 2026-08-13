@@ -30,7 +30,7 @@
 #define UART_RX 0x40600000
 
 // Helper function to send a character to UART
-static void uart_send_char(char c) {
+void uart_send_char(char c) {
   volatile uint32_t *uart_tx_reg = (volatile uint32_t *)(UART_TX);
   // volatile uint32_t *uart_rx_reg = (volatile uint32_t *)(UART_RX);
 
