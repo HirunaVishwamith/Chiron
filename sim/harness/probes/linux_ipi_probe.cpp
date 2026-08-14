@@ -203,8 +203,29 @@ int main(int argc, char **argv) {
       char path[1024];
       std::snprintf(path, sizeof path, "%s/ckpt_%012" PRIu64 ".bin",
                     ckpt_dir, cyc);
+      // Re-create the directory every time. A checkpoint run lasts many hours,
+      // and anything can remove the destination in that window (a cleanup
+      // script, a stray rm, a full disk being tidied). This happened: the
+      // directory vanished mid-run.
+      { char cmd[1100];
+        std::snprintf(cmd, sizeof cmd, "mkdir -p '%s' 2>/dev/null", ckpt_dir);
+        if (system(cmd) != 0) { /* checked via isOpen() below */ } }
       VerilatedSave sv;
       sv.open(path);
+      // VerilatedSave::open() does NOT fail loudly — on error it just sets
+      // m_isOpen=false and returns, and every subsequent write is a no-op
+      // (verilated_save.cpp:133,188). Without this check a run reports nothing
+      // wrong while silently producing no checkpoints, which is worse than
+      // crashing: you only discover it when you go to restore and there is
+      // nothing there.
+      if (!sv.isOpen()) {
+        std::fprintf(stderr,
+            "[ckpt] ERROR: cannot open %s — checkpointing DISABLED for this "
+            "run; the boot continues (a checkpoint is an optimisation and must "
+            "never be able to kill the thing it is optimising)\n", path);
+        std::fflush(stderr);
+        next_ckpt = ~0ULL;   // stop trying; don't spam every interval
+      } else {
       // Harness state first, in the same order the restore reads it.
       sv << cyc;
       sv << msip_writes[0]; sv << msip_writes[1];
@@ -218,6 +239,7 @@ int main(int argc, char **argv) {
         std::remove(ckpts.front().c_str());
         std::fprintf(stderr, "[ckpt] pruned %s\n", ckpts.front().c_str());
         ckpts.pop_front();
+      }
       }
       std::fflush(stderr);
     }

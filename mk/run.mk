@@ -102,6 +102,18 @@ $(BUILD)/mextpath_probe.out: $(HARNESS)/probes/mextpath_probe.cpp $(SIM_HDR) $(V
 $(BUILD)/linux_ipi_probe.out: $(HARNESS)/probes/linux_ipi_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_LINUX) $(HARNESS)/probes/linux_ipi_probe.cpp $(VSYS_LIB_FAST) -o $@
 
+# Restores a linux_ipi_probe checkpoint and dissects the csd_lock_wait hang:
+# reads hart1's a4 (the csd address), what its reload actually returns, and the
+# same word straight out of DRAM. Same checkpoint format as linux_ipi_probe.
+$(BUILD)/linux_csd_probe.out: $(HARNESS)/probes/linux_csd_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_csd_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Push/pop ledger for call_single_queue, watching the sc.d in llist_add_batch
+# and the amoswap in __flush_smp_call_function_queue. Decides whether the lost
+# cross-call entry was dropped before or after the dequeue.
+$(BUILD)/linux_llist_probe.out: $(HARNESS)/probes/linux_llist_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_llist_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 # RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
 # its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
 # (CXX_FAST sets -DCHIRON_NO_TRACE so rtl_model.h's tb->trace() compiles out) for
@@ -450,3 +462,81 @@ $(BUILD)/squashmiss_probe.out: $(HARNESS)/probes/squashmiss_probe.cpp $(SIM_HDR)
 
 $(BUILD)/lifetime_probe.out: $(HARNESS)/probes/lifetime_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/lifetime_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Watches ONE D-cache line's tag state (valid/dirty/shared) plus the fence.i
+# walker FSM and both writeback staging slots, through the cycle window where
+# csd_unlock's committed store goes missing. See linux_llist_probe for how that
+# window was located.
+$(BUILD)/linux_dcache_probe.out: $(HARNESS)/probes/linux_dcache_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_dcache_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Follows ONE line (the rt_sigreturn trampoline) through every place a stale
+# copy can hide at once: hart1's I-cache line and its refill data, all four
+# harts' D-cache copies, and every hart's fence.i walker sweep. Answers why an
+# I-fetch returned zeros for an address whose data read was correct.
+$(BUILD)/linux_tramp_probe.out: $(HARNESS)/probes/linux_tramp_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_tramp_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Watches ACEUnit's snoop-answer path for one line: does writePipeHit steer a
+# peer's snoop into the writeback pipeline and serve the pre-store copy? Run on
+# the PRE-FIX model, where the bug is live and the checkpoints still restore.
+$(BUILD)/linux_snoop_probe.out: $(HARNESS)/probes/linux_snoop_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_snoop_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Restores a linux_ipi_probe checkpoint and traces the interrupt-injection FSM
+# (core.scala waitForMTIP/waitToInjectInterr) for whichever hart has an
+# unserviced MSIP pending — see inject_fsm_probe.cpp's header for the known
+# branchCounter-stuck failure mode this was built to catch.
+$(BUILD)/linux_injfsm_probe.out: $(HARNESS)/probes/linux_injfsm_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_injfsm_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Tests whether the Linux 1,235M freeze is a jammed ROB head with a lost branch
+# resolution (the reallocated-slot defect class, task #40). See the probe's
+# header: the interrupt-injection FSM was proven to be a symptom, not the cause.
+$(BUILD)/linux_robjam_probe.out: $(HARNESS)/probes/linux_robjam_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_robjam_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Reads DRAM straight out of a checkpoint (no simulation, runs in seconds) to
+# ask whether the address hart0 fetched zeros from actually contains code.
+$(BUILD)/linux_itext_probe.out: $(HARNESS)/probes/linux_itext_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_itext_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Console RX round trip: drives the same hostInput pins linux_sim.cpp drives,
+# against bins/mt-uartrx-q4.bin, and checks the bytes come back intact.
+$(BUILD)/uartrx_test.out: $(HARNESS)/uartrx_test.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/uartrx_test.cpp $(VSYS_LIB_FAST) -o $@
+
+.PHONY: uartrx-test
+uartrx-test: $(BUILD)/uartrx_test.out   ## Verify the console RX path end to end
+	$(BUILD)/uartrx_test.out
+
+# ── SMP repro gate: mt-illegal + both mt-icoh variants ───────────────────────
+# These three are NOT in benchmarks.mk's *_DONE table, and running them without
+# a completion criterion looks exactly like a hang: common/syscalls.c's
+# exit(int code) is just `while(1);`, so there is no done signal, the exit code
+# stays in a0, and only hart0 ever exits (harts 1-3 spin by design) — so waiting
+# on all cores times out by construction and a passing run reads as rc=124.
+# Completion is therefore "--done-pc <exit> --done-a0 0", and the exit address
+# is derived per build because mt-icoh's -D flags change code size (SELF=0 and
+# SELF=1 land on different addresses; a hardcoded constant silently never
+# matches).
+.PHONY: smp-repro
+smp-repro: $(BUILD)/profile_quad_fast.out  ## mt-illegal + mt-icoh (cross & self)
+	@fail=0; \
+	run() { \
+	  pc=$$($(RISCV_BIN)/riscv64-unknown-elf-nm $$2 | awk '$$3=="exit"{print $$1}'); \
+	  pc=$$(printf "0x%x" $$((0x80000000 + 0x$$pc))); \
+	  echo "== $$1 (exit @ $$pc) =="; \
+	  out=$$(timeout 900 $(BUILD)/profile_quad_fast.out --image $$3 --name $$1 \
+	        --done-pc $$pc --done-a0 0 --timeout 120000000 2>&1); \
+	  echo "$$out" | grep -E 'Simulation cycles' || true; \
+	  if echo "$$out" | grep -q 'BENCHMARK COMPLETE' && \
+	     ! echo "$$out" | grep -qiE 'Deadlock|TIMEOUT'; \
+	  then echo "$$1: PASS"; else echo "$$1: FAIL"; fail=1; fi; }; \
+	$(MAKE) illegal-bin >/dev/null; \
+	run mt-illegal $(BENCH_SRC)/mt-illegal.riscv $(BINS)/mt-illegal-q4.bin; \
+	$(MAKE) icoh-bin ICOH_SELF=0 >/dev/null; \
+	run mt-icoh-cross $(BENCH_SRC)/mt-icoh.riscv $(BINS)/mt-icoh-q4.bin; \
+	$(MAKE) icoh-bin ICOH_SELF=1 >/dev/null; \
+	run mt-icoh-self $(BENCH_SRC)/mt-icoh.riscv $(BINS)/mt-icoh-q4.bin; \
+	if [ $$fail -eq 0 ]; then echo "smp-repro: ALL 3 PASS"; else echo "smp-repro: FAILURES"; exit 1; fi

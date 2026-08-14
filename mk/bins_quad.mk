@@ -100,7 +100,47 @@ $(1)-bin:    ## Build just bins/mt-$(1)-q4.bin (fast iteration, no clean)
 	cp $$(BENCH_SRC)/mt-$(1).bin $$(BINS)/mt-$(1)-q4.bin
 	@echo "[$(1)-bin] staged: $$(BINS)/mt-$(1)-q4.bin"
 endef
-$(foreach b,ipi ipitmr ipimux lrsc lrscirq,$(eval $(call smp_bmark_rule,$(b))))
+#   mt-illegal  executes a literal 0x00000000 word and requires that it TRAPS
+#               (mcause=2, mtval=0) instead of jamming the ROB head forever --
+#               the regression for the illegal-instruction trap. NOTE: a
+#               pre-fix RTL does not fail this, it HANGS, so a harness timeout
+#               is the expected regression signature.
+$(foreach b,ipi ipitmr ipimux lrsc lrscirq illegal,$(eval $(call smp_bmark_rule,$(b))))
+
+# ── mt-llist: cmpxchg (lr/sc) racing amoswap on one word ─────────────────────
+# The Linux cross-call queue publishes with cmpxchg and drains with xchg, both
+# on call_single_queue's head. Nothing else in the suite mixes the two atomics
+# on a single address, and the /init hang leaves an entry locked but on no
+# queue -- the signature of a lost push. PUSH_CAS=0 builds the same-atomic
+# control. Like fencei-bin, the objects are removed first because only a -D
+# changes between the two builds.
+PUSH_CAS ?= 1
+.PHONY: llist-bin crosscall-bin
+
+# ── mt-crosscall: the whole cross-call protocol at once ──────────────────────
+# csd_lock -> llist_add (cmpxchg) -> IPI -> drain with amoswap IN THE ISR ->
+# fence.i -> csd_unlock, with the sender spinning in csd_lock_wait. The ISR
+# drain is the ingredient mt-csdwait/mt-fencei/mt-llist/mt-ipi* each lack.
+# Emits fence.i by hand, hence the Zifencei arch string.
+CC_FENCEI ?= 1
+crosscall-bin:  ## Build bins/mt-crosscall-q4.bin (CC_FENCEI=0 drops the fence.i)
+	@rm -f $(BENCH_SRC)/mt-crosscall.o $(BENCH_SRC)/mt-crosscall.riscv \
+	       $(BENCH_SRC)/mt-crosscall.bin
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-crosscall" \
+	    RISCV_GCC_OPTS="$(STRESS_GCC_OPTS) -DCC_FENCEI=$(CC_FENCEI)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-crosscall.bin $(BINS)/mt-crosscall-q4.bin
+	@echo "[crosscall-bin] staged: $(BINS)/mt-crosscall-q4.bin (CC_FENCEI=$(CC_FENCEI))"
+llist-bin:  ## Build bins/mt-llist-q4.bin (PUSH_CAS=0 builds the control)
+	@rm -f $(BENCH_SRC)/mt-llist.o $(BENCH_SRC)/mt-llist.riscv \
+	       $(BENCH_SRC)/mt-llist.bin
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-llist" \
+	    RISCV_GCC_OPTS="$(QUAD_GCC_OPTS) -DPUSH_CAS=$(PUSH_CAS)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-llist.bin $(BINS)/mt-llist-q4.bin
+	@echo "[llist-bin] staged: $(BINS)/mt-llist-q4.bin (PUSH_CAS=$(PUSH_CAS))"
 
 # ── Constrained-random speculation stress (tools/gen_stress.py) ───────────────
 # mt-stress.c is GENERATED, not written: every one of the four reallocated-slot
@@ -122,6 +162,29 @@ BLOCKS ?= 240
 # is why the shared QUAD_GCC_OPTS does not carry it.
 STRESS_GCC_OPTS := $(subst _zicsr,_zicsr_zifencei,$(QUAD_GCC_OPTS))
 
+# ── mt-fencei: is a release store issued just after fence.i still visible? ────
+# The Linux /init hang leaves a csd locked with every call_single_queue empty
+# and func = ipi_remote_fence_i, i.e. a target popped the entry, ran `fence.i`,
+# and then csd_unlock()'s release store vanished. fence.i arms the D-cache
+# clean-on-fence walker, so this builds that exact sequence. Emits a fence.i by
+# hand, hence the Zifencei arch string it shares with mt-stress.
+#   make fencei-bin            fence.i present (the suspect)
+#   make fencei-bin FENCEI=0   identical program without it (the control)
+FENCEI      ?= 1
+DIRTY_LINES ?= 64
+.PHONY: fencei-bin
+fencei-bin:  ## Build bins/mt-fencei-q4.bin (FENCEI=0 builds the control)
+	@# FENCEI/DIRTY_LINES only change -D flags, not the .c, so make would leave
+	@# the stale object in place and silently hand back the previous image.
+	@rm -f $(BENCH_SRC)/mt-fencei.o $(BENCH_SRC)/mt-fencei.riscv \
+	       $(BENCH_SRC)/mt-fencei.bin
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-fencei" \
+	    RISCV_GCC_OPTS="$(STRESS_GCC_OPTS) -DFENCEI=$(FENCEI) -DDIRTY_LINES=$(DIRTY_LINES)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-fencei.bin $(BINS)/mt-fencei-q4.bin
+	@echo "[fencei-bin] staged: $(BINS)/mt-fencei-q4.bin (FENCEI=$(FENCEI) DIRTY_LINES=$(DIRTY_LINES))"
+
 .PHONY: stress-gen stress-bin
 stress-gen:  ## Generate workloads/benchmarks/mt-stress/mt-stress.c from SEED
 	@python3 tools/gen_stress.py --seed $(SEED) --blocks $(BLOCKS) \
@@ -135,3 +198,44 @@ stress-bin: stress-gen                                                    ## Gen
 	@mkdir -p $(BINS)
 	cp $(BENCH_SRC)/mt-stress.bin $(BINS)/mt-stress-q4.bin
 	@echo "[stress-bin] staged: $(BINS)/mt-stress-q4.bin (seed=$(SEED))"
+
+# ── mt-icoh: is freshly-written CODE visible to another hart's I-FETCH? ──────
+# mt-fencei covers fence.i + a DATA release store and passes; nothing covered
+# INSTRUCTION visibility, which is a different path (I-cache invalidate + refill
+# vs D-cache walker writeback). That is the gap behind the Linux freeze where
+# hart0 fetched 16 words of zeros at 0x81b03840. Needs zifencei for the hand
+# written fence.i, and the objects are removed first because only a -D changes
+# between A/B builds.
+ICOH_FENCEI ?= 1
+ICOH_ROUNDS ?= 64
+# ICOH_SELF=1 makes the writer execute its OWN freshly written code (same-hart
+# store -> fence.i -> fetch). That is the Linux signal-trampoline path; the
+# cross-hart default passes, so the two are built and run as separate cases.
+ICOH_SELF ?= 0
+.PHONY: icoh-bin
+icoh-bin:  ## Build bins/mt-icoh-q4.bin (ICOH_FENCEI=0 drops the writer's fence.i; ICOH_SELF=1 same-hart)
+	@rm -f $(BENCH_SRC)/mt-icoh.o $(BENCH_SRC)/mt-icoh.riscv $(BENCH_SRC)/mt-icoh.bin
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-icoh" \
+	    RISCV_GCC_OPTS="$(STRESS_GCC_OPTS) -DWRITER_FENCEI=$(ICOH_FENCEI) -DROUNDS=$(ICOH_ROUNDS) -DSELF_EXEC=$(ICOH_SELF)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-icoh.bin $(BINS)/mt-icoh-q4.bin
+	@echo "[icoh-bin] staged: $(BINS)/mt-icoh-q4.bin (WRITER_FENCEI=$(ICOH_FENCEI) SELF_EXEC=$(ICOH_SELF))"
+
+# ── mt-uartrx: does the console RX path actually deliver a keystroke? ────────
+# The Linux boot parks at "buildroot login: " and needs `root`/`nproc` typed in.
+# That depends on brand-new logic (uartlite RX in quard_uart.scala, the
+# hostInput top-level port, linux_sim.cpp's stdin forwarding), and the natural
+# place to discover a mistake in it is 14 h into a boot with no way to type.
+# This exercises the same registers the Linux uartlite driver uses, in seconds.
+# RX_CHARS must match the harness's RX_TEXT length.
+RX_CHARS ?= 11
+.PHONY: uartrx-bin
+uartrx-bin:  ## Build bins/mt-uartrx-q4.bin (console RX round-trip test)
+	@rm -f $(BENCH_SRC)/mt-uartrx.o $(BENCH_SRC)/mt-uartrx.riscv $(BENCH_SRC)/mt-uartrx.bin
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-uartrx" \
+	    RISCV_GCC_OPTS="$(STRESS_GCC_OPTS) -DRX_CHARS=$(RX_CHARS)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-uartrx.bin $(BINS)/mt-uartrx-q4.bin
+	@echo "[uartrx-bin] staged: $(BINS)/mt-uartrx-q4.bin (RX_CHARS=$(RX_CHARS))"
