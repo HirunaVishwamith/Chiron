@@ -844,8 +844,16 @@ class core (
   decode.writeBackResult.rdAddr := rob.commit.instruction(11, 7)
 
   //leon coherency
-  Seq(decode.writeBackResult.fired, rob.commit.fired).foreach{ 
-    _ := ((!rob.commit.instruction(6,2).orR===0.U || (!coherentLoadInvalid && memAccess.loadCommit.valid)) && decode.writeBackResult.ready && rob.commit.ready && (memAccess.writeInstructionCommit.ready || (rob.commit.instruction(6, 4) =/= "b010".U)))
+  // An illegal instruction must bypass the load-completion wait below. That
+  // term requires memAccess.loadCommit.valid whenever instruction(6,2)===0 --
+  // the LOAD encoding -- and an all-zero word (the classic result of fetching
+  // unpopulated memory after a bad jump) has instruction(6,2)===0 too. It is
+  // therefore mistaken for a load and waits forever for a loadCommit that no
+  // one will ever produce, which is what makes the wedge permanent and silent
+  // rather than a trap. See the is_illegal note in rob.scala.
+  val commitIsIllegal = rob.commit.instruction(1,0) =/= "b11".U
+  Seq(decode.writeBackResult.fired, rob.commit.fired).foreach{
+    _ := ((commitIsIllegal || !rob.commit.instruction(6,2).orR===0.U || (!coherentLoadInvalid && memAccess.loadCommit.valid)) && decode.writeBackResult.ready && rob.commit.ready && (memAccess.writeInstructionCommit.ready || (rob.commit.instruction(6, 4) =/= "b010".U)))
   }
 
   memAccess.writeInstructionCommit.fired := memAccess.writeInstructionCommit.ready && (rob.commit.instruction(6, 4) === "b010".U)  && rob.commit.fired
@@ -1235,6 +1243,31 @@ class core (
 			when (intInjectEnabled) {
 				when(!branchEvals.valid) {
 					when(branchCounter.orR) {
+						// KNOWN BUG (open, 2026-08-12): this escape only matches a
+						// conditional BRANCH, but branchCounter counts every
+						// opcode(6,4)==110 instruction (BRANCH, JAL, JALR — see the
+						// increment above). A hart can therefore sit in
+						// waitToInjectInterr forever with branchCounter stuck nonzero and
+						// a pending timer/IPI never serviced. Reproduced on the quad-core
+						// Linux SMP boot: hart0 frozen at pc=81b03840 for 80M+ cycles from
+						// cycle ~1,235M, MSIP asserted at the CLINT the whole time
+						// (mip.MSIP reading 0), last branchInstruction latched = 0x00008067
+						// (`ret`). Trace it with linux_injfsm_probe.cpp against
+						// ckpt_prefix3_dualUnique_only/ckpt_001200000000.bin.
+						//
+						// DO NOT "fix" this by simply widening the match to
+						// instruction(6,4)==="b110" and forcing branchEvals.passed:=false
+						// for JAL/JALR. That is logically correct (nextCorrectPC IS
+						// computed per-type: JALR->rs1+imm, JAL->pc+imm) and it does clear
+						// mt-ipimux-q4 / mt-ipitmr-q4 + ISA 84/84 + ci-bench 5/5 — but it
+						// turns a rare synthetic mispredict into one on every call/return,
+						// and the resulting flood of pipeline squashes corrupts memory:
+						// the boot then dies during initramfs unpack with
+						// "BUG: spinlock bad magic ... .magic: 00000000" and never reaches
+						// /init. Suspected to be exposure of the still-open reallocated-slot
+						// defect class (ROB exec write ports lack an ownership check).
+						// Fix that first, or find an escape that does not raise the squash
+						// rate.
 						when(branchInstruction.valid && branchInstruction.instruction(6, 0) === "b1100011".U) {
 							interruptInjectStatus := flushSpeculated
 							// Manupulating the results to flush all speculated instructions
