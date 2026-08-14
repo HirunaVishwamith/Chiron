@@ -626,3 +626,42 @@ smp-repro: $(BUILD)/profile_quad_fast.out  ## mt-illegal + mt-icoh (cross & self
 	$(MAKE) icoh-bin ICOH_SELF=1 >/dev/null; \
 	run mt-icoh-self $(BENCH_SRC)/mt-icoh.riscv $(BINS)/mt-icoh-q4.bin; \
 	if [ $$fail -eq 0 ]; then echo "smp-repro: ALL 3 PASS"; else echo "smp-repro: FAILURES"; exit 1; fi
+
+# Image-load integrity: streams an image through the programmer port and diffs
+# all of DRAM against the file. Catches a dropped/mis-addressed load word, which
+# otherwise shows up only as a wrong benchmark answer millions of cycles later.
+$(BUILD)/image_load_probe.out: $(HARNESS)/probes/image_load_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/image_load_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+.PHONY: image-check
+image-check: $(BUILD)/image_load_probe.out  ## Verify an image lands in DRAM intact (IMG=bins/x.bin)
+	$(BUILD)/image_load_probe.out $(if $(IMG),$(IMG),$(BINS)/mt-mask-sfilter-s5.bin)
+
+# ── Full profiling sweep (the data behind docs/profile_report.png) ────────────
+# Every family at every scale it has a dataset for, single-core AND quad-core,
+# on the no-trace model. Runs PSWEEP_JOBS at a time: each simulation is
+# single-threaded, so the sweep is embarrassingly parallel and goes from hours
+# to tens of minutes on a multi-core host.
+PSWEEP_DIR  ?= $(BUILD)/profile_results
+PSWEEP_JOBS ?= $(shell nproc)
+
+$(BUILD)/profile_fast.out: $(HARNESS)/profile.cpp $(SIM)/profiler.h $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) -I $(SIM) $(HARNESS)/profile.cpp $(VSYS_LIB_FAST) -o $@
+
+.PHONY: profile-sweep profile-report
+profile-sweep: $(BUILD)/profile_fast.out $(BUILD)/profile_quad_fast.out  ## Profile every family/scale, single + quad
+	@mkdir -p $(PSWEEP_DIR)
+	@echo "[sweep] $(PSWEEP_JOBS) jobs in parallel -> $(PSWEEP_DIR)"
+	@: $(foreach f,$(SCALE_FAMILIES), \
+	   $(foreach s,1 2 3 4 5, \
+	     $(if $(shell test $(s) -le $(word 3,$(subst :, ,$(f))) && echo y), \
+	       $(eval FAM := $(word 1,$(subst :, ,$(f)))) \
+	       $(eval DIR := $(word 2,$(subst :, ,$(f)))) \
+	       $(file >>$(BUILD)/.sweep.cmds,$(BUILD)/profile_fast.out --image $(BINS)/$(DIR)-s$(s).bin --name $(FAM)-s$(s) $($(FAM)_DONE) --output $(PSWEEP_DIR)/$(FAM)-s$(s).json --timeout 400000000 > $(BUILD)/.sweep-$(FAM)-s$(s).log 2>&1) \
+	       $(file >>$(BUILD)/.sweep.cmds,$(BUILD)/profile_quad_fast.out --image $(BINS)/$(DIR)-s$(s)-q4.bin --name $(FAM)-s$(s)-q4 $($(FAM)_DONE) --output $(PSWEEP_DIR)/$(FAM)-s$(s)-q4.json --timeout 400000000 > $(BUILD)/.sweep-$(FAM)-s$(s)-q4.log 2>&1))))
+	@wc -l < $(BUILD)/.sweep.cmds | xargs echo "[sweep] runs:"
+	@xargs -a $(BUILD)/.sweep.cmds -d '\n' -P $(PSWEEP_JOBS) -I{} sh -c '{}' ; rm -f $(BUILD)/.sweep.cmds
+	@echo "[sweep] done -> $(PSWEEP_DIR)"
+
+profile-report: ## Render docs/profile_report.png from $(PSWEEP_DIR)
+	python3 scripts/profile_visualize.py $(PSWEEP_DIR) --out docs/profile_report.png
