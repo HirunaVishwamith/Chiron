@@ -147,10 +147,30 @@ sync_all_harts:
   sll     t2, t3, REGION_SHIFT  # t2 = 0x1100
 
   # Compute offset = hart id * REGION_SIZE
-  mul     t0, a0, t2        # t0 = hart id * 0x1100
+  mul     t0, a0, t2        # t0 = hart id * REGION_SIZE
 
-  # Compute TLS base = DATA_BASE + offset.
-  li      t1, DATA_BASE     # t1 = DATA_BASE (0x10000000)
+  # Per-hart TLS+stack regions start just past THIS image's .bss, not at a
+  # fixed address.
+  #
+  # DATA_BASE used to be hardcoded to 0x80040000, chosen when the only user was
+  # a ~6 KB demo. A benchmark at scale s4/s5 is far bigger: mt-mask-sfilter-s5
+  # has 97 KB of .bss, so results_data spans 0x8003c318..0x80054098 and runs
+  # straight through hart 0's stack region. The two then overwrite each other,
+  # and the benchmark reports a wrong answer for whichever element the stack
+  # happened to land on -- results_data[3898] sits at exactly 0x80040000, and
+  # that is precisely the element that failed. It looked like a core bug because
+  # it is perfectly deterministic; it reproduced on the golden model too, which
+  # is what gave it away.
+  #
+  # _end is the top of .bss, so aligning it up to REGION_SIZE puts every hart's
+  # stack above anything the program itself owns, whatever its size. la is
+  # PC-relative under -mcmodel=medany, so this resolves correctly even though
+  # the image links at 0 and runs at 0x80000000.
+  la      t1, _end
+  addi    t4, t2, -1
+  add     t1, t1, t4
+  not     t4, t4
+  and     t1, t1, t4        # t1 = align_up(_end, REGION_SIZE)
   add     t1, t1, t0        # t1 = TLS base for this core
 
   # Set the thread pointer (x4, tp) to point to our TLS area.
