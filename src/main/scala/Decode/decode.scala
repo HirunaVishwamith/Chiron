@@ -779,6 +779,23 @@ class decode (
     }
   }
 
+  // Illegal-instruction trap (mcause=2). Mutually exclusive with the SYSTEM
+  // block above: every real instruction -- including SYSTEM (0x73) -- has
+  // bits[1:0]=="11", so this only fires on a word that is not an instruction.
+  // The ROB retires such a word with exceptionOccurred instead of waiting for a
+  // completion that will never arrive (see rob.scala is_illegal); without this
+  // trap the core wedges silently forever on a bad jump into unpopulated
+  // memory. mtval gets the offending word, mepc the faulting PC, so a kernel
+  // oops names the address instead of the machine simply stopping.
+  when(writeBackResult.fired && writeBackResult.instruction(1,0) =/= "b11".U) {
+    mepc := writeBackResult.pc
+    mcause := 2.U
+    mtval := Cat(0.U(32.W), writeBackResult.instruction)
+    currentPrivilege := MMODE.U
+    expectedPC := mtvec
+    mstatus := "h0000000A00000000".U(64.W) | Cat(0.U(51.W), Mux(currentPrivilege===MMODE.U, "b11000".U(5.W), 0.U(5.W)), mstatus(3, 0), 0.U(4.W))
+  }
+
   /* when(opcode === system.U && fun3 === 0.U && immediate === 0.U && validInputBuf && readyOutputBuf) {
     mepc := outputBuffer.pc
     when(currentPrivilege === MMODE.U) { mcause := 11.U }

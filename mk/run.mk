@@ -15,14 +15,116 @@ $(BUILD)/lockstep_isa.out: $(HARNESS)/lockstep_isa.cpp $(EMU_HDRS) $(SIM_HDR) $(
 $(BUILD)/lockstep_linux.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_TRACE) $(HARNESS)/lockstep_linux.cpp $(VSYS_LIB) -o $@
 
+# Same lock-step compare, linked against the fast no-trace model: ~4-5x faster,
+# no VCD on mismatch (rtl_model.h prints a notice and skips tracing). Use this
+# to *reach* a deep-boot mismatch quickly; switch to lockstep_linux.out when a
+# waveform of the failure is needed.
+$(BUILD)/lockstep_linux_fast.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/lockstep_linux.cpp $(VSYS_LIB_FAST) -o $@
+
+# Debug probes (sim/harness/probes/): RTL-only Linux boot with targeted
+# internal-signal logging. ccu_line_probe watches CCU transactions/beats on
+# hardwired victim/source lines (edit the watched() ranges in the source);
+# div_park_probe dumps M-unit + scheduler queue state when a hart's ROB head
+# parks. Both link the fast no-trace model.
+$(BUILD)/ccu_line_probe.out: $(HARNESS)/probes/ccu_line_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ccu_line_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/div_park_probe.out: $(HARNESS)/probes/div_park_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/div_park_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/wedge_dump_probe.out: $(HARNESS)/probes/wedge_dump_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/wedge_dump_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/tag_dump_probe.out: $(HARNESS)/probes/tag_dump_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/tag_dump_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/ipi_hang_probe.out: $(HARNESS)/probes/ipi_hang_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ipi_hang_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/tty_scan_probe.out: $(HARNESS)/probes/tty_scan_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/tty_scan_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/ipitmr_wedge_probe.out: $(HARNESS)/probes/ipitmr_wedge_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ipitmr_wedge_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/msip_arb_probe.out: $(HARNESS)/probes/msip_arb_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/msip_arb_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/ipitmr_loop_probe.out: $(HARNESS)/probes/ipitmr_loop_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ipitmr_loop_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/ipitmr_ctx_probe.out: $(HARNESS)/probes/ipitmr_ctx_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ipitmr_ctx_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/inject_fsm_probe.out: $(HARNESS)/probes/inject_fsm_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/inject_fsm_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/rob_integrity_probe.out: $(HARNESS)/probes/rob_integrity_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/rob_integrity_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/arbiter_race_probe.out: $(HARNESS)/probes/arbiter_race_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/arbiter_race_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/periph_squash_probe.out: $(HARNESS)/probes/periph_squash_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/periph_squash_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/arbiter_stall_probe.out: $(HARNESS)/probes/arbiter_stall_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/arbiter_stall_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/injwedge_probe.out: $(HARNESS)/probes/injwedge_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/injwedge_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/brswallow_probe.out: $(HARNESS)/probes/brswallow_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/brswallow_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/brleak_probe.out: $(HARNESS)/probes/brleak_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/brleak_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/robmodify_probe.out: $(HARNESS)/probes/robmodify_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/robmodify_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/robhead_probe.out: $(HARNESS)/probes/robhead_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/robhead_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/brvanish_probe.out: $(HARNESS)/probes/brvanish_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/brvanish_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/robready_probe.out: $(HARNESS)/probes/robready_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/robready_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/mextpath_probe.out: $(HARNESS)/probes/mextpath_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/mextpath_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Boots the full Linux image while counting CLINT msip writes per target hart.
+# Uses CXX_LINUX (raised STEP_TIMEOUT) like linux_sim.out, since legitimate boot
+# phases stall far longer than a benchmark ever does.
+$(BUILD)/linux_ipi_probe.out: $(HARNESS)/probes/linux_ipi_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_ipi_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Restores a linux_ipi_probe checkpoint and dissects the csd_lock_wait hang:
+# reads hart1's a4 (the csd address), what its reload actually returns, and the
+# same word straight out of DRAM. Same checkpoint format as linux_ipi_probe.
+$(BUILD)/linux_csd_probe.out: $(HARNESS)/probes/linux_csd_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_csd_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Push/pop ledger for call_single_queue, watching the sc.d in llist_add_batch
+# and the amoswap in __flush_smp_call_function_queue. Decides whether the lost
+# cross-call entry was dropped before or after the dequeue.
+$(BUILD)/linux_llist_probe.out: $(HARNESS)/probes/linux_llist_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_llist_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 # RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
 # its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
 # (CXX_FAST sets -DCHIRON_NO_TRACE so rtl_model.h's tb->trace() compiles out) for
-# the long Linux boot; STEP_TIMEOUT=500000 so boot/cache stalls aren't hangs. The
-# image is loaded by a direct memcpy into the Verilated DRAM (see rtl_model.h),
-# so there is no slow per-word programmer phase.
+# the long Linux boot. STEP_TIMEOUT is raised (CXX_LINUX) so legitimate boot
+# phases (bbl kernel copy, rootfs) aren't misclassified as hangs. The image is
+# loaded by a direct memcpy into the Verilated DRAM (see rtl_model.h).
+# Uses the same walker-ON RTL as CI (obj_dir_fast): walkerWriteBackBuffer keeps
+# fence.i from deadlocking the snoop path under SMP, so a separate walker-off
+# model is no longer required.
 $(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_FAST) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
+	$(CXX_LINUX) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
 
 # Same boot, but watches for the known timekeeping-seqlock SMP wedge (see the
 # file's own comment) and captures a bounded VCD right around the point it
@@ -65,7 +167,7 @@ _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(ISA_DIR)/images
 
-.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-emu-check linux-sim linux-lockstep demo
+.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa fire test linux linux-emu linux-emu-check linux-sim linux-lockstep demo ci-bench ci-check
 
 emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
 	$(BUILD)/emu.out $(BIN)
@@ -127,6 +229,13 @@ test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks
 $(BUILD)/profile_quad_fast.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) -I $(SIM) $(HARNESS)/profile_quad.cpp $(VSYS_LIB_FAST) -o $@
 
+# Same harness, built with the microarchitectural assertions in
+# sim/harness/invariants.h compiled IN. Slower (it reads all 16 ROB ready bits
+# per core per cycle), so it is a separate binary rather than a flag on the
+# profiling one -- `make ci-bench` stays fast, `make ci-check` stays strict.
+$(BUILD)/profile_quad_check.out: $(HARNESS)/profile_quad.cpp $(HARNESS)/invariants.h $(SIM)/profiler_quad.h $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) -DCHIRON_INVARIANTS -I $(SIM) $(HARNESS)/profile_quad.cpp $(VSYS_LIB_FAST) -o $@
+
 # ── CI benchmark gate ─────────────────────────────────────────────────────────
 # The five max-scale quad-core benchmarks that must ALL reach BENCHMARK COMPLETE
 # for CI to pass. Runs the committed -q4 scale bins on the fast no-trace model.
@@ -149,6 +258,89 @@ ci-bench: $(BUILD)/profile_quad_fast.out   ## CI gate: 5 quad-core benchmarks mu
 	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
 	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"; \
 	if [ $$fail -eq 0 ]; then echo "ci-bench: ALL 5 PASS"; else echo "ci-bench: FAILURES"; exit 1; fi
+
+# ── CI correctness gate ───────────────────────────────────────────────────────
+# ci-bench asks "did the benchmark produce the right answer?". This asks the
+# stricter question: "did the microarchitecture stay self-consistent while it
+# did?" Four separate wedges in this repo were caused by a completion landing on
+# a ROB slot that speculation had already reallocated -- each corrupted state
+# silently for millions of cycles before anything visibly hung, and each cost
+# days of one-off probing to find. sim/harness/invariants.h asserts the
+# invariants they violated on every cycle; a violation fails the run even if the
+# benchmark still happened to compute the right result.
+ci-check: $(BUILD)/profile_quad_check.out   ## Strict gate: benchmarks + per-cycle microarchitectural assertions
+	@fail=0; \
+	run() { \
+	  echo "== CI check: $$1 =="; \
+	  out=$$(timeout 3000 $(BUILD)/profile_quad_check.out --image $(BINS)/$$2 --name $$1 $$3 \
+	       --timeout 120000000 2>&1); rc=$$?; \
+	  echo "$$out" | grep -E 'INVARIANT|chiron invariants|no violations|VIOLATION|BENCHMARK COMPLETE|TIMEOUT|DEADLOCK' || true; \
+	  if [ $$rc -eq 0 ]; then echo "$$1: CLEAN"; \
+	  else echo "$$1: FAIL (rc=$$rc: 2=timeout 3=deadlock 4=invariant-violation 124=wall-clock)"; fail=1; fi; }; \
+	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
+	run matmul-s1-q4 mt-matmul-s1-q4.bin       "$(matmul_DONE)"; \
+	run filter-s5-q4 mt-mask-sfilter-s5-q4.bin "$(filter_DONE)"; \
+	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
+	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"; \
+	if [ $$fail -eq 0 ]; then echo "ci-check: ALL 5 CLEAN"; else echo "ci-check: FAILURES"; exit 1; fi
+
+# ── Constrained-random stress campaign ────────────────────────────────────────
+# The generated program's <exit> address moves with every seed and block count,
+# so the done-pc is derived from the freshly built dump rather than pinned in a
+# variable the way the fixed benchmarks are. Link base is 0; the RTL runs at
+# 0x8000_0000.
+STRESS_TIMEOUT ?= 20000000
+STRESS_SEEDS   ?= 1 2 3 4 5 6 7 8
+
+.PHONY: stress-run stress-sweep
+stress-run: $(BUILD)/profile_quad_check.out   ## Run the current bins/mt-stress-q4.bin under the invariant assertions
+	@pc=$$(grep -m1 '<exit>:' $(BENCH_SRC)/mt-stress.riscv.dump | cut -d' ' -f1); \
+	 pc=$$(printf '0x%x' $$((0x$$pc + 0x80000000))); \
+	 echo "[stress-run] seed=$(SEED) blocks=$(BLOCKS) done-pc=$$pc"; \
+	 $(BUILD)/profile_quad_check.out --image $(BINS)/mt-stress-q4.bin \
+	     --name stress-q4 --done-pc $$pc --timeout $(STRESS_TIMEOUT)
+
+# One seed per iteration: regenerate, rebuild, run, and stop at the first seed
+# that violates an invariant or fails to complete -- that seed is the repro, and
+# `make stress-bin SEED=<n> && make stress-run SEED=<n>` replays it exactly.
+stress-sweep: $(BUILD)/profile_quad_check.out   ## Sweep STRESS_SEEDS; stops at the first failing seed
+	@for s in $(STRESS_SEEDS); do \
+	  echo "===== stress seed $$s ====="; \
+	  $(MAKE) --no-print-directory stress-bin SEED=$$s BLOCKS=$(BLOCKS) > /dev/null || exit 1; \
+	  out=$$($(MAKE) --no-print-directory stress-run SEED=$$s BLOCKS=$(BLOCKS) 2>&1); rc=$$?; \
+	  echo "$$out" | grep -E 'INVARIANT|VIOLATION|no violations|BENCHMARK COMPLETE|TIMEOUT|DEADLOCK' || true; \
+	  if [ $$rc -eq 0 ]; then \
+	    echo "seed $$s: CLEAN"; \
+	  else \
+	    echo "seed $$s: FAIL (rc=$$rc)  -- replay with: make stress-bin SEED=$$s BLOCKS=$(BLOCKS) && make stress-run SEED=$$s"; \
+	    exit 1; \
+	  fi; \
+	done; \
+	echo "stress-sweep: all seeds clean"
+
+# ── Performance dashboard ─────────────────────────────────────────────────────
+# profile_quad already emits every counter worth plotting, so this is pure
+# post-processing: run the benchmarks with --output, then render one
+# self-contained HTML file (no external libraries, opens anywhere).
+PROFILE_DIR ?= $(BUILD)/profiles
+DASHBOARD   ?= $(BUILD)/chiron_dashboard.html
+
+.PHONY: profiles dashboard
+profiles: $(BUILD)/profile_quad_fast.out   ## Run the 5 benchmarks, writing profiler JSON to PROFILE_DIR
+	@mkdir -p $(PROFILE_DIR)
+	@run() { \
+	  echo "== profiling $$1 =="; \
+	  timeout 3000 $(BUILD)/profile_quad_fast.out --image $(BINS)/$$2 --name $$1 $$3 \
+	      --timeout 120000000 --output $(PROFILE_DIR)/$$1.json > $(PROFILE_DIR)/$$1.txt 2>&1 \
+	    || echo "  $$1: FAILED (rc=$$?) — see $(PROFILE_DIR)/$$1.txt"; }; \
+	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
+	run matmul-s1-q4 mt-matmul-s1-q4.bin       "$(matmul_DONE)"; \
+	run filter-s5-q4 mt-mask-sfilter-s5-q4.bin "$(filter_DONE)"; \
+	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
+	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"
+
+dashboard:   ## Render PROFILE_DIR's JSON into a self-contained HTML dashboard
+	@python3 tools/viz_report.py --profiles $(PROFILE_DIR) --out $(DASHBOARD)
 
 test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 
@@ -225,3 +417,126 @@ test_all_images: $(BUILD)/lockstep_isa.out   ## CI: lock-step every ISA test ima
 	 TOTAL=$$(wc -l < test_results.txt); \
 	 echo "ISA passed: $$PASSED / $$TOTAL"; \
 	 [ $$PASSED -eq $$TOTAL ] || { echo "REGRESSION: $$PASSED/$$TOTAL passed (expected ALL to pass -- any FAIL, incl. fence_i, fails CI)"; grep -i ': fail' test_results.txt || true; exit 1; }
+
+$(BUILD)/lrsc_wedge_probe.out: $(HARNESS)/probes/lrsc_wedge_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe2.out: $(HARNESS)/probes/lrsc_wedge_probe2.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe2.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe3.out: $(HARNESS)/probes/lrsc_wedge_probe3.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe3.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe4.out: $(HARNESS)/probes/lrsc_wedge_probe4.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe4.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe5.out: $(HARNESS)/probes/lrsc_wedge_probe5.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe5.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe6.out: $(HARNESS)/probes/lrsc_wedge_probe6.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe6.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lrsc_wedge_probe7.out: $(HARNESS)/probes/lrsc_wedge_probe7.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe7.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/rename_a4_probe.out: $(HARNESS)/probes/rename_a4_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/rename_a4_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/mshr_prfdest_probe.out: $(HARNESS)/probes/mshr_prfdest_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/mshr_prfdest_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/prf33_alloc_probe.out: $(HARNESS)/probes/prf33_alloc_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/prf33_alloc_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/dualalloc_probe.out: $(HARNESS)/probes/dualalloc_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/dualalloc_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/prfwrite_probe.out: $(HARNESS)/probes/prfwrite_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/prfwrite_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/w3path_probe.out: $(HARNESS)/probes/w3path_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/w3path_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/squashmiss_probe.out: $(HARNESS)/probes/squashmiss_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/squashmiss_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+$(BUILD)/lifetime_probe.out: $(HARNESS)/probes/lifetime_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/lifetime_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Watches ONE D-cache line's tag state (valid/dirty/shared) plus the fence.i
+# walker FSM and both writeback staging slots, through the cycle window where
+# csd_unlock's committed store goes missing. See linux_llist_probe for how that
+# window was located.
+$(BUILD)/linux_dcache_probe.out: $(HARNESS)/probes/linux_dcache_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_dcache_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Follows ONE line (the rt_sigreturn trampoline) through every place a stale
+# copy can hide at once: hart1's I-cache line and its refill data, all four
+# harts' D-cache copies, and every hart's fence.i walker sweep. Answers why an
+# I-fetch returned zeros for an address whose data read was correct.
+$(BUILD)/linux_tramp_probe.out: $(HARNESS)/probes/linux_tramp_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_tramp_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Watches ACEUnit's snoop-answer path for one line: does writePipeHit steer a
+# peer's snoop into the writeback pipeline and serve the pre-store copy? Run on
+# the PRE-FIX model, where the bug is live and the checkpoints still restore.
+$(BUILD)/linux_snoop_probe.out: $(HARNESS)/probes/linux_snoop_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_snoop_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Restores a linux_ipi_probe checkpoint and traces the interrupt-injection FSM
+# (core.scala waitForMTIP/waitToInjectInterr) for whichever hart has an
+# unserviced MSIP pending — see inject_fsm_probe.cpp's header for the known
+# branchCounter-stuck failure mode this was built to catch.
+$(BUILD)/linux_injfsm_probe.out: $(HARNESS)/probes/linux_injfsm_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_injfsm_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Tests whether the Linux 1,235M freeze is a jammed ROB head with a lost branch
+# resolution (the reallocated-slot defect class, task #40). See the probe's
+# header: the interrupt-injection FSM was proven to be a symptom, not the cause.
+$(BUILD)/linux_robjam_probe.out: $(HARNESS)/probes/linux_robjam_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_robjam_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Reads DRAM straight out of a checkpoint (no simulation, runs in seconds) to
+# ask whether the address hart0 fetched zeros from actually contains code.
+$(BUILD)/linux_itext_probe.out: $(HARNESS)/probes/linux_itext_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) $(HARNESS)/probes/linux_itext_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Console RX round trip: drives the same hostInput pins linux_sim.cpp drives,
+# against bins/mt-uartrx-q4.bin, and checks the bytes come back intact.
+$(BUILD)/uartrx_test.out: $(HARNESS)/uartrx_test.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/uartrx_test.cpp $(VSYS_LIB_FAST) -o $@
+
+.PHONY: uartrx-test
+uartrx-test: $(BUILD)/uartrx_test.out   ## Verify the console RX path end to end
+	$(BUILD)/uartrx_test.out
+
+# ── SMP repro gate: mt-illegal + both mt-icoh variants ───────────────────────
+# These three are NOT in benchmarks.mk's *_DONE table, and running them without
+# a completion criterion looks exactly like a hang: common/syscalls.c's
+# exit(int code) is just `while(1);`, so there is no done signal, the exit code
+# stays in a0, and only hart0 ever exits (harts 1-3 spin by design) — so waiting
+# on all cores times out by construction and a passing run reads as rc=124.
+# Completion is therefore "--done-pc <exit> --done-a0 0", and the exit address
+# is derived per build because mt-icoh's -D flags change code size (SELF=0 and
+# SELF=1 land on different addresses; a hardcoded constant silently never
+# matches).
+.PHONY: smp-repro
+smp-repro: $(BUILD)/profile_quad_fast.out  ## mt-illegal + mt-icoh (cross & self)
+	@fail=0; \
+	run() { \
+	  pc=$$($(RISCV_BIN)/riscv64-unknown-elf-nm $$2 | awk '$$3=="exit"{print $$1}'); \
+	  pc=$$(printf "0x%x" $$((0x80000000 + 0x$$pc))); \
+	  echo "== $$1 (exit @ $$pc) =="; \
+	  out=$$(timeout 900 $(BUILD)/profile_quad_fast.out --image $$3 --name $$1 \
+	        --done-pc $$pc --done-a0 0 --timeout 120000000 2>&1); \
+	  echo "$$out" | grep -E 'Simulation cycles' || true; \
+	  if echo "$$out" | grep -q 'BENCHMARK COMPLETE' && \
+	     ! echo "$$out" | grep -qiE 'Deadlock|TIMEOUT'; \
+	  then echo "$$1: PASS"; else echo "$$1: FAIL"; fail=1; fi; }; \
+	$(MAKE) illegal-bin >/dev/null; \
+	run mt-illegal $(BENCH_SRC)/mt-illegal.riscv $(BINS)/mt-illegal-q4.bin; \
+	$(MAKE) icoh-bin ICOH_SELF=0 >/dev/null; \
+	run mt-icoh-cross $(BENCH_SRC)/mt-icoh.riscv $(BINS)/mt-icoh-q4.bin; \
+	$(MAKE) icoh-bin ICOH_SELF=1 >/dev/null; \
+	run mt-icoh-self $(BENCH_SRC)/mt-icoh.riscv $(BINS)/mt-icoh-q4.bin; \
+	if [ $$fail -eq 0 ]; then echo "smp-repro: ALL 3 PASS"; else echo "smp-repro: FAILURES"; exit 1; fi

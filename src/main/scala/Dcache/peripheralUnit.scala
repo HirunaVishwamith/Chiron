@@ -72,20 +72,49 @@ class peripheralUnit(
   
   val responseOutBuffer = RegInit(0.U.asTypeOf(new requestPipelineWire))
   responseOut.request := responseOutBuffer
-  
+  // A squashed MMIO load must not write back. Nothing else in this unit used
+  // to enforce that: the branch state captured into readRequestBuffer /
+  // peripheralMSHR / responseOutBuffer was never aged by later resolutions, and
+  // cacheModule's peripheral response arm (unlike the cache arm) carries no
+  // branch.valid gate -- FIRRTL even pruned responseOut.request.branch out of
+  // the generated Verilog as unread. So a load speculated past a mispredicted
+  // branch still landed its result in the PRF, and since core.scala:837 puts no
+  // squash check on the load write port, it corrupted whatever the destination
+  // had been reallocated to. Identical in shape to the ACE responseBuffer
+  // clobber (ACEUnit.scala), which wedged mt-ipitmr; here the speculated loads
+  // are UART/PLIC/CLINT polls in Linux's console and IRQ paths.
+  // The AXI transaction itself is never aborted -- see the drain comment at
+  // readDataInState -- only the writeback is suppressed.
+  responseOut.request.valid := responseOutBuffer.valid && responseOutBuffer.branch.valid
+  // True on a cycle a buffer is (re)loaded; the ageing blocks below must skip
+  // such cycles, because regRecordUpdate's branch-PASS arm ends in an
+  // unconditional `buffer.valid := buffer.valid` (utils.scala:137) that would
+  // write back the PREVIOUS occupant's valid bit and resurrect it.
+  val reqLoading = WireDefault(false.B)
+  val readReqLoading = WireDefault(false.B)
+  val responseOutLoading = WireDefault(false.B)
+
   val writeCommitInstructionBuffer = RegInit(false.B)
   writeInstructionCommit.ready := writeCommitInstructionBuffer
   when(writeInstructionCommit.fired){
     writeCommitInstructionBuffer := false.B
   }
   //-----------------------MSHR-------------------------------------------//
-  val peripheralMSHR = Module(new fifoBaseModule(
+  // fifoWithBranchOps, not fifoBaseModule: the base class has no branch state
+  // at all, so an MMIO read already on the bus could never be squashed. Same
+  // class the ACE MSHR uses.
+  val peripheralMSHR = Module(new fifoWithBranchOps(
     depth = schedulerDepth,
     traitType = new requestPipelineWire
   ))
 
   peripheralMSHR.read.ready := false.B
   zeroInit(peripheralMSHR.write.data)
+  // Was never connected, so fifoBaseModule's per-entry squash loop (fifo.scala
+  // 105-127) was dead code here and FIRRTL pruned the port off the instance
+  // entirely: an in-flight MMIO read could not be squashed once its address
+  // was on the bus.
+  peripheralMSHR.branchOps := branchOps
 
   when(requestBuffer.valid && requestBuffer.branch.valid){
     request.ready := false.B
@@ -93,6 +122,7 @@ class peripheralUnit(
       
       readRequestBuffer := requestBuffer
       regWriteUpdate(readRequestBuffer.branch,branchOps,requestBuffer.branch)
+      readReqLoading := true.B
       requestBuffer.valid := false.B
     }.elsewhen(!writeRequestBuffer.valid && requestBuffer.writeData.valid && requestBuffer.branch.valid){
 
@@ -104,10 +134,31 @@ class peripheralUnit(
     request.ready := !writeCommitInstructionBuffer
     when(request.request.valid && request.request.branch.valid){
       requestBuffer := request.request
+      reqLoading := true.B
+    }
+  }
+
+  // Age the staging request too, so a squash is caught before the unit ever
+  // asks the bus for it. Retire it outright: the block above only clears
+  // requestBuffer.valid on a hand-off to the read/write buffer, which a dead
+  // request never gets, and while it sits valid it holds request.ready low.
+  val reqSquashed = branchOps.valid && !branchOps.passed &&
+                    (requestBuffer.branch.mask & branchOps.branchMask).orR
+  when(requestBuffer.valid && !reqLoading) {
+    regRecordUpdate(requestBuffer.branch, branchOps)
+    when(reqSquashed || !requestBuffer.branch.valid) {
+      requestBuffer.valid := false.B
     }
   }
 
   //-----------------------AXI Write-------------------------------//
+  // NOTE: writeRequestBuffer is deliberately NOT aged. Peripheral stores only
+  // reach this unit after the arbiter's commitReadyState/writeCommit handshake,
+  // i.e. after the ROB has committed them, so no later branch can squash one.
+  // Ageing it would be actively harmful: writeIdleState's only exit is
+  // `writeRequestBuffer.branch.valid`, and the buffer is only released by the
+  // AXI B response, so a cleared branch.valid would strand the buffer and block
+  // every subsequent MMIO write -- the UART included.
   val writeIdleState :: writeRequestState :: writeResponseState :: Nil = Enum(3)
 
   val writeAXIState = RegInit(writeIdleState)
@@ -163,8 +214,20 @@ class peripheralUnit(
   //-----------------------AXI ReadRequest--------------------------------//
   val readIdleState :: readRequestState :: Nil = Enum(2)
   val readAXIRequestState = RegInit(readIdleState)
+  // Age the pending read request. Once it reaches this buffer it is committed
+  // to nothing yet -- ARVALID has not been asserted -- so a squash here is the
+  // cheap case: drop it outright below and no bus traffic happens at all.
+  when(readRequestBuffer.valid && !readReqLoading) {
+    regRecordUpdate(readRequestBuffer.branch, branchOps)
+  }
   switch(readAXIRequestState) {
     is(readIdleState){
+      // A squashed request must be RETIRED here, not merely held: the state
+      // machine's only other exit from this buffer is ARREADY, so leaving a
+      // dead request valid would block every later MMIO read forever.
+      when(readRequestBuffer.valid && !readRequestBuffer.branch.valid) {
+        readRequestBuffer.valid := false.B
+      }
       readAXIRequestState := Mux(readRequestBuffer.valid && readRequestBuffer.branch.valid && peripheralMSHR.write.ready, readRequestState, readIdleState)
     }
     is(readRequestState){
@@ -206,9 +269,16 @@ class peripheralUnit(
       when(!peripheralMSHR.isEmpty){
         peripheralMSHR.read.ready := true.B
         responseOutBuffer := peripheralMSHR.read.data
+        responseOutLoading := true.B
       }
       responseOutBuffer.valid := false.B
-      readAXIResponseState := Mux(peripheralMSHR.read.data.valid && peripheralMSHR.read.data.branch.valid && !peripheralMSHR.isEmpty, readResponseState, readDataInState)
+      // Drain the R channel for EVERY issued transaction, squashed or not.
+      // This used to be gated on the entry's branch.valid, which was safe only
+      // because nothing ever cleared it; now that squashes actually reach the
+      // MSHR, skipping readResponseState would leave the slave's read data
+      // beats stranded with RREADY low and hang every later MMIO access. The
+      // squash is honoured at the writeback instead (responseOut.request.valid).
+      readAXIResponseState := Mux(peripheralMSHR.read.data.valid && !peripheralMSHR.isEmpty, readResponseState, readDataInState)
     }
     is(readResponseState){
       bus.RREADY := true.B
@@ -246,6 +316,14 @@ class peripheralUnit(
       }
       readAXIResponseState := Mux(responseOut.ready && responseOutBuffer.valid, readDataInState, readDataOutState)
     }
+  }
+  // Age the response buffer, skipping the cycle it is loaded from the MSHR (see
+  // readReqLoading/responseOutLoading above). Elaborated after the switch so it
+  // wins last-connect on the branch fields only -- responseOutBuffer.valid is
+  // still owned by the state machine, so a squashed response keeps driving the
+  // FSM to completion and only its writeback is suppressed.
+  when(responseOutBuffer.valid && !responseOutLoading) {
+    regRecordUpdate(responseOutBuffer.branch, branchOps)
   }
 
   //Resource Utilization

@@ -38,6 +38,12 @@ class arbiter extends Module {
     val ready = Output(Bool())
     val request = Input(new coherencyRequestWire)
   })
+  // From cacheLookupUnit: bounded post-LR window during which snoops on the
+  // reserved line are deferred (LR/SC forward-progress guarantee).
+  val reservationGuard = IO(new Bundle {
+    val active = Input(Bool())
+    val address = Input(UInt(addrWidth.W))
+  })
   val writeDataIn = IO(new writeDataIn)
   val writeCommit = IO(new composableInterface)
   val branchOps = IO(new branchOps)
@@ -167,18 +173,43 @@ class arbiter extends Module {
   //*    3.  Inorder
   //*    4.  Speculative
   val atomicBusyState = RegInit(false.B)
+  // Line address of the in-flight atomic (LR/SC/AMO). operationBuffer holds the
+  // atomic for the whole read-pass -> commit -> write-pass window (waitState
+  // keeps it valid), so this compare is stable while atomicBusyState is set.
+  val snoopHitsAtomicLine =
+    operationBuffer.address(addrWidth - 1, log2Ceil(lineSize)) ===
+      coherencyRequest.request.address(addrWidth - 1, log2Ceil(lineSize))
+  // LR/SC forward-progress guard (see cacheLookupUnit.reservationGuard): for
+  // a bounded countdown after an LR, snoops on the reserved line are held
+  // here — parked in the ACE unit's coherentRequestInState exactly like the
+  // atomic-window deferral — so the owning hart's SC can complete before a
+  // peer steals the line. Bounded by the countdown, so never a deadlock.
+  val snoopHitsReservedLine = reservationGuard.active &&
+    reservationGuard.address(addrWidth - 1, log2Ceil(lineSize)) ===
+      coherencyRequest.request.address(addrWidth - 1, log2Ceil(lineSize))
+  // Between an atomic's read pass and its post-commit write pass
+  // (atomicBusyState && !inorderPending) only the atomic's line needs
+  // protecting. Blocking ALL other dequeues here deadlocks: the atomic can
+  // only commit after every older instruction, and an older speculative load
+  // that has not dispatched yet needs this arbiter — while a blocked snoop
+  // wedges the CCU (and with it every other hart). So the window keeps out
+  // just (a) snoops on the atomic's own line and (b) further inorder ops;
+  // speculative reads and different-line snoops flow (a read can't break
+  // atomicity, a different line can't steal the reservation). Replay stays
+  // blocked in this window, as before.
   when(toCacheLookup.ready) {
-    when(atomicBusyState && !toCacheLookup.inorderPending){
-      when(inorderBufferValidWire && !(operationWires.isPeriRead || operationWires.isPeriWrite)){
-        inorderBuffer.valid := false.B
-        
-        toCacheLookup.request := inorderBuffer
-        requestTypeWire := "b01".U
-        regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
-        
-        atomicBusyState := false.B
-      } 
-    }.elsewhen(coherencyRequest.request.valid){
+    when(atomicBusyState && !toCacheLookup.inorderPending && inorderBufferValidWire &&
+         !(operationWires.isPeriRead || operationWires.isPeriWrite)){
+      inorderBuffer.valid := false.B
+
+      toCacheLookup.request := inorderBuffer
+      requestTypeWire := "b01".U
+      regReadUpdate(toCacheLookup.request.branch, branchOps, inorderBuffer.branch)
+
+      atomicBusyState := false.B
+    }.elsewhen(coherencyRequest.request.valid &&
+               !(atomicBusyState && !toCacheLookup.inorderPending && snoopHitsAtomicLine) &&
+               !snoopHitsReservedLine){
       coherencyRequest.ready := true.B
 
       toCacheLookup.request.valid := coherencyRequest.request.valid
@@ -186,13 +217,14 @@ class arbiter extends Module {
       toCacheLookup.request.cacheLine.response := coherencyRequest.request.response
       toCacheLookup.request.branch.valid := true.B
       requestTypeWire := "b11".U
-    }.elsewhen(replayRequest.request.valid ){
+    }.elsewhen(replayRequest.request.valid &&
+               !(atomicBusyState && !toCacheLookup.inorderPending)){
       replayRequest.ready := true.B
       toCacheLookup.request := replayRequest.request
       requestTypeWire := "b10".U
       regReadUpdate(toCacheLookup.request.branch, branchOps, replayRequest.request.branch)
 
-    } .elsewhen(inorderBufferValidWire && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
+    } .elsewhen(inorderBufferValidWire && !atomicBusyState && !toCacheLookup.holdInOrder && !(operationWires.isPeriRead || operationWires.isPeriWrite)) {
       inorderBuffer.valid := false.B
 
       toCacheLookup.request := inorderBuffer

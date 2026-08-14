@@ -124,10 +124,20 @@ class system extends Module {
   //Peripherals & MTIPs
 
   val peripherals = Module(new MultiUart())
-  // No host bridge in simulation — tie off so uart0 keeps using its
-  // compiled-in hardInput/command ROM exactly as before.
-  peripherals.hostInput0.valid := false.B
-  peripherals.hostInput0.char  := 0.U
+  // Host console input. This used to be tied off, so the only way to type at the
+  // simulated console was uartPort's compiled-in ROM — and that ROM speaks the
+  // legacy UART map, which Linux's xilinx-uartlite driver never reads. Net
+  // effect: the quad-core boot reached "buildroot login: " and sat there with no
+  // possible way to enter anything.
+  //
+  // Exposing it as a top-level port lets the C++ harness forward the host's
+  // stdin, which is what makes `make linux-sim` interactive. A harness that does
+  // not drive it simply leaves valid=0, and uart0 falls back to the ROM exactly
+  // as before — so every existing harness is unaffected.
+  val hostInput = IO(Input(peripherals.hostInput0.cloneType))
+  val hostInputConsumed = IO(Output(Bool()))
+  peripherals.hostInput0 := hostInput
+  hostInputConsumed := peripherals.hostInputConsumed0
 
   val core0OutChar = IO(Output(peripherals.putChar0.cloneType))
   val core1OutChar = IO(Output(peripherals.putChar1.cloneType))

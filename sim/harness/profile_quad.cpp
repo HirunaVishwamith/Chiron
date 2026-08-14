@@ -28,6 +28,10 @@
 // Shared harness helpers: argv scanning, image loading, completion detection.
 #include "sim/harness/common/args.h"
 #include "sim/harness/common/image.h"
+// Microarchitectural assertions. Compiled out entirely unless the binary is
+// built with -DCHIRON_INVARIANTS (see `make ci-check`), so the default
+// profiling path keeps its speed.
+#include "sim/harness/invariants.h"
 #include "sim/harness/common/completion.h"
 
 using namespace std;
@@ -78,6 +82,8 @@ int main(int argc, char *argv[]) {
     }
 
     ProfilerQuad profiler(tb);
+    chiron_invariants invariants;
+    invariants.attach(tb);
 
     printf("[profile_quad] Starting simulation (max %llu cycles)...\n",
            (unsigned long long)max_cycles);
@@ -90,7 +96,7 @@ int main(int argc, char *argv[]) {
     const uint64_t MAX_STALL      = 500000ULL;
 
     while (sim_cycles < max_cycles) {
-        tick_nodump(tb);
+        tick_checked(tb, invariants, sim_cycles);
         ++tickcount;
         ++sim_cycles;
 
@@ -166,6 +172,12 @@ int main(int argc, char *argv[]) {
     printf("\n");
     profiler.print_summary();
     profiler.print_json(benchmark_name, string(output_path ? output_path : ""));
+
+    // Microarchitectural assertions (no-op unless built with
+    // -DCHIRON_INVARIANTS). A workload can compute the right answer while
+    // speculation silently corrupts state somewhere it did not happen to
+    // matter, so a violation fails the run even when the benchmark "passed".
+    if (invariants.report() && exit_code == 0) exit_code = 4;
 
     printf("[profile_quad] Total RTL ticks (including load): %llu\n",
            (unsigned long long)tickcount);

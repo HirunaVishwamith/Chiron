@@ -31,6 +31,10 @@ sim/rtl/obj_dir*/
 *.bsp
 *.fir
 *.json
+# ...but the published performance numbers are a deliberate exception: the
+# dashboard in docs/ is rendered from these, so committing them lets a reader
+# reproduce the figures without re-running ~30 min of simulation.
+!docs/profiles/*.json
 *.vcd
 *.vcd.fst
 Image
@@ -92,3 +96,14 @@ workloads/**/*.bin
 # active.h is the scale-selection scratch file the build copies sN.h into
 # (see mk/bins_scale.mk) -- never a real source file.
 workloads/**/active.h
+
+# =========================
+# Verilator --savable checkpoints
+# =========================
+# `make ckpt-*` writes ~256 MB per checkpoint (the 128 MB backing store shows up
+# twice) and a prefix run keeps dozens — the working tree currently holds ~29 GB
+# of them. They are also worthless outside the session that made them: every
+# checkpoint carries the model hash, so ANY netlist change invalidates all of
+# them. Regenerate, never store.
+ckpt/
+ckpt_*/

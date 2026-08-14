@@ -17,21 +17,34 @@ class uartPort extends Module {
 
   val io_mtime = IO(Input(UInt(64.W)))
 
-  // Shared CLINT msip: a real CLINT is one region in which any hart can write any
-  // hart's msip (this is how SMP IPIs work). The 4 uartPorts are separate AXI
-  // peripherals, so msip can't live locally — MultiUart owns the shared array.
-  // This port reads it (for msip loads) and forwards msip stores up to MultiUart.
-  val msipShared = IO(Input(Vec(4, UInt(32.W))))
+  // Shared CLINT msip + mtimecmp: a real CLINT is one region any hart can access
+  // for any hart's registers (IPIs write foreign msip; software may also program
+  // foreign mtimecmp). The 4 uartPorts are separate AXI peripherals, so the
+  // arrays live in MultiUart; this port reads them and forwards stores up.
+  val msipShared     = IO(Input(Vec(4, UInt(32.W))))
+  val mtimecmpShared = IO(Input(Vec(4, UInt(64.W))))
   val msipWrite  = IO(Output(new Bundle {
     val valid = Bool()
     val hart  = UInt(2.W)
     val data  = UInt(32.W)
   }))
+  val mtimecmpWrite = IO(Output(new Bundle {
+    val valid = Bool()
+    val hart  = UInt(2.W)
+    val data  = UInt(64.W)
+  }))
+  // Which local hart this uartPort drives MTIP for (wired by MultiUart).
+  val localHart = IO(Input(UInt(2.W)))
   // CLINT msip[hart] is memory-mapped at 0x0200_0000 + 4*hart.
   def msipHartOf(addr: UInt): UInt = MuxCase(0.U(2.W), Seq(
     (addr === "h02000004".U) -> 1.U,
     (addr === "h02000008".U) -> 2.U,
     (addr === "h0200000C".U) -> 3.U))
+  // CLINT mtimecmp[hart] is memory-mapped at 0x0200_4000 + 8*hart.
+  def mtimecmpHartOf(addr: UInt): UInt = MuxCase(0.U(2.W), Seq(
+    (addr === "h02004008".U) -> 1.U,
+    (addr === "h02004010".U) -> 2.U,
+    (addr === "h02004018".U) -> 3.U))
 
   val readRequestBuffer = RegInit(new Bundle {
     val valid = Bool()
@@ -70,7 +83,7 @@ class uartPort extends Module {
     when(!readRequestBuffer.len.orR) { readRequestBuffer.valid := false.B }
   }
   
-  val mtimecmp = RegInit(0.U(64.W))
+  // Staging for the low half of a 64-bit mtimecmp write (AXI is 32-bit here).
   val mtimecmplowtemp = Reg(UInt(32.W))
 
   val mtimeRead = Reg(UInt(64.W))
@@ -79,13 +92,7 @@ class uartPort extends Module {
 
   when(client.ARREADY && client.ARVALID) {
     mtimeRead := io_mtime
-  }
-
-  when(client.ARREADY && client.ARVALID) {
-    mtimecmpRead := mtimecmp
-  }
-
-  when(client.ARREADY && client.ARVALID) {
+    mtimecmpRead := mtimecmpShared(mtimecmpHartOf(client.ARADDR))
     msipRead := msipShared(msipHartOf(client.ARADDR))
   }
 
@@ -94,7 +101,11 @@ class uartPort extends Module {
 
   // client.RDATA := Mux((readRequestBuffer.address&("hff".U)) === ("h2c".U), 8.U, 0.U)
   val ps_stat = RegInit(0.U(32.W))
-  client.RDATA := 8.U
+  // Default for UNMAPPED reads must be 0, not a nonzero constant: a wild
+  // kernel %s scan (e.g. the corrupted-pointer .owner dump in spin_dump)
+  // walking unmapped space otherwise never sees a NUL byte and livelocks the
+  // console hart forever. Every real register below has an explicit entry.
+  client.RDATA := 0.U
   switch(readRequestBuffer.address) {
     is("he000002c".U) { client.RDATA := 2.U }
     is("h40600000".U) { client.RDATA := 2.U }
@@ -112,7 +123,11 @@ class uartPort extends Module {
     // golden model's uartlite model (hart_execute.inc) and real hardware. The
     // old 4096 (bit 12, undefined) diverged from the emulator's 0x4 and failed
     // lockstep at the benchmark print loop's status poll.
-    is("h040600008".U){client.RDATA := 4.U}
+    // (Was "h040600008" — 9 hex digits, a 36-bit literal that could never
+    // match the 32-bit address, so STATUS reads silently fell through to the
+    // unmapped-read default. TX still worked because every TX path only
+    // checks TXFULL, but the entry was dead.)
+    is("h40600008".U){client.RDATA := 4.U}
   }
   client.RID := readRequestBuffer.id
   client.RLAST := !readRequestBuffer.len.orR
@@ -145,17 +160,33 @@ class uartPort extends Module {
     terminalReady := "buildroot login: ".reverse.toCharArray().toSeq.zip(lastUartChars.toSeq) map { case(char, uchar) => (char.U === uchar)} reduce(_ && _)
   }
 
+  // Each hart has its OWN uartPort, and only the port whose core printed the
+  // banner would otherwise know the prompt has appeared. Linux does not promise
+  // that getty runs on hart0, so prompt detection is pooled across all four
+  // ports in MultiUart and fed back in here — otherwise input would be silently
+  // dead whenever the console task happened to be scheduled off core0.
+  val promptSeen = IO(Input(Bool()))
+  val loginSeen  = IO(Input(Bool()))
+  val sawPrompt  = IO(Output(Bool()))
+  val sawLogin   = IO(Output(Bool()))
+
   val afterLogin = RegInit(false.B)
   when(!afterLogin) {
     afterLogin := "~ # ".reverse.toCharArray().toSeq.zip(lastUartChars.toSeq) map { case(char, uchar) => (char.U === uchar)} reduce(_ && _)
   }
 
-  val hardInput = RegInit(VecInit("root\nls ..".map(c => new Bundle {
+  // Typed at "buildroot login: ". The trailing junk that used to pad this string
+  // was left over from the legacy demo and would be delivered as stray shell
+  // input once RX actually works, so it is gone.
+  val hardInput = RegInit(VecInit("root\n".map(c => new Bundle {
     val valid = Bool()
     val char = UInt(8.W)
   } Lit(_.valid -> true.B, _.char -> c.U))))
 
-  val command = RegInit(VecInit("ls .. && poweroff\n".map(c => new Bundle {
+  // Typed once the shell prompt appears. `nproc` is the quad-core acceptance
+  // check: it must print 4. Deliberately does NOT poweroff, so the session stays
+  // alive for a human to keep typing after the automatic answer.
+  val command = RegInit(VecInit("nproc\n".map(c => new Bundle {
     val valid = Bool()
     val char = UInt(8.W)
   } Lit(_.valid -> true.B, _.char -> c.U))))
@@ -227,6 +258,61 @@ class uartPort extends Module {
     when(client.RREADY) { hostInputConsumed := true.B }
   }
 
+  // ── uartlite RX map (what Linux actually uses) ──────────────────────────────
+  // Everything above speaks the LEGACY bare-metal map: STATUS at base+0x00, data
+  // at base+0x04. The Linux xilinx-uartlite driver uses a different layout:
+  //
+  //     base+0x00  RX FIFO   (pop a received byte)
+  //     base+0x04  TX FIFO
+  //     base+0x08  STATUS    bit0 RX_VALID, bit2 TX_EMPTY
+  //
+  // so the kernel polled STATUS at +0x08 -- which the switch above answers with
+  // a hardcoded 4 (TX_EMPTY, RX_VALID never set) -- and never once looked at the
+  // login ROM. The quad-core boot therefore printed "buildroot login: " and sat
+  // there forever: console TX worked, console RX did not exist. Nothing was
+  // wedged; there was simply no way to type.
+  //
+  // Placed last so Chisel's last-connect gives it priority over the legacy
+  // blocks, and gated on terminalReady (or a live host), which can only be true
+  // after "buildroot login: " has been printed -- no bare-metal benchmark can
+  // ever reach this path, so their behaviour is bit-identical.
+  //
+  // hostInput wins over the compiled-in ROM when a host is actually driving, so
+  // an interactive `make linux-sim` can be typed at while the ROM still provides
+  // hands-off auto-login when it isn't.
+  sawPrompt := terminalReady
+  sawLogin  := afterLogin
+  // Pooled across every hart's port (see promptSeen above).
+  val anyPrompt = terminalReady || promptSeen
+  val anyLogin  = afterLogin || loginSeen
+
+  val romValid  = Mux(anyLogin, command(0).valid, hardInput(0).valid)
+  val romChar   = Mux(anyLogin, command(0).char,  hardInput(0).char)
+  val liteValid = hostInput.valid || (anyPrompt && romValid)
+  val liteChar  = Mux(hostInput.valid, hostInput.char, romChar)
+
+  when(readRequestBuffer.valid && (anyPrompt || hostInput.valid) &&
+       ((readRequestBuffer.address & "hffff0fff".U) === "h40600008".U)) {
+    // {29'b0, TX_EMPTY, 0, RX_VALID}
+    client.RDATA := Cat(0.U(29.W), 1.U(1.W), 0.U(1.W), liteValid.asUInt)
+  }
+
+  when(readRequestBuffer.valid && liteValid &&
+       ((readRequestBuffer.address & "hffff0fff".U) === "h40600000".U)) {
+    client.RDATA := liteChar
+    when(client.RREADY) {
+      when(hostInput.valid) {
+        hostInputConsumed := true.B
+      }.elsewhen(anyLogin) {
+        command.dropRight(1).zip(command.drop(1)).foreach { case (curr, next) => curr := next }
+        command.last.valid := false.B
+      }.otherwise {
+        hardInput.dropRight(1).zip(hardInput.drop(1)).foreach { case (curr, next) => curr := next }
+        hardInput.last.valid := false.B
+      }
+    }
+  }
+
   when(writeRequestBuffer.address.valid && writeRequestBuffer.data.valid) {
     writeRequestBuffer.data.valid := false.B
     when(writeRequestBuffer.data.last) {
@@ -249,16 +335,20 @@ class uartPort extends Module {
     writeRequestBuffer.data.strb := client.WSTRB
   }
 
-  when(writeRequestBuffer.data.valid && !writeRequestBuffer.data.last) { mtimecmplowtemp := writeRequestBuffer.data.data }
-  when(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h02004000".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) { // check this only used in core 0
-    mtimecmp := Cat(writeRequestBuffer.data.data, mtimecmplowtemp)
-  }.elsewhen(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h02004008".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) { // check this only use in core 1
-    mtimecmp := Cat(writeRequestBuffer.data.data, mtimecmplowtemp)
-  }.elsewhen(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h02004010".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) { // check this only use in core 2
-    mtimecmp := Cat(writeRequestBuffer.data.data, mtimecmplowtemp)
-  }.elsewhen(writeRequestBuffer.address.valid && (writeRequestBuffer.address.offset === "h02004018".U) && writeRequestBuffer.data.valid && writeRequestBuffer.data.last) { // check this only use in core 3
-    mtimecmp := Cat(writeRequestBuffer.data.data, mtimecmplowtemp)
+  when(writeRequestBuffer.data.valid && !writeRequestBuffer.data.last) {
+    mtimecmplowtemp := writeRequestBuffer.data.data
   }
+
+  // mtimecmp stores: forward the assembled 64-bit value to MultiUart's shared
+  // array, addressed by target hart (same pattern as msip).
+  val isMtimecmpWrite = (writeRequestBuffer.address.offset === "h02004000".U) ||
+                        (writeRequestBuffer.address.offset === "h02004008".U) ||
+                        (writeRequestBuffer.address.offset === "h02004010".U) ||
+                        (writeRequestBuffer.address.offset === "h02004018".U)
+  mtimecmpWrite.valid := writeRequestBuffer.address.valid && isMtimecmpWrite &&
+                         writeRequestBuffer.data.valid && writeRequestBuffer.data.last
+  mtimecmpWrite.hart  := mtimecmpHartOf(writeRequestBuffer.address.offset)
+  mtimecmpWrite.data  := Cat(writeRequestBuffer.data.data, mtimecmplowtemp)
 
   // msip stores: forward to MultiUart's shared array, addressed by hart. Real
   // CLINT addresses are 0x0200_0000 + 4*hart (any hart may write any hart's msip
@@ -282,7 +372,8 @@ class uartPort extends Module {
   client.BVALID := writeRequestBuffer.address.valid && writeRequestBuffer.data.valid && writeRequestBuffer.data.last
 
   val MTIP = IO(Output(Bool()))
-  MTIP := (io_mtime > mtimecmp)
+  // MTIP for THIS hart only — uses the shared mtimecmp entry for localHart.
+  MTIP := (io_mtime > mtimecmpShared(localHart))
 }
 
 
@@ -351,27 +442,86 @@ class MultiUart extends Module {
     val char  = UInt(8.W)
   }))
   val hostInputConsumed0 = IO(Output(Bool()))
-  uart0.hostInput := hostInput0
-  hostInputConsumed0 := uart0.hostInputConsumed
-  uart1.hostInput.valid := false.B
-  uart1.hostInput.char  := 0.U
-  uart2.hostInput.valid := false.B
-  uart2.hostInput.char  := 0.U
-  uart3.hostInput.valid := false.B
-  uart3.hostInput.char  := 0.U
+  // Broadcast to EVERY port, not just uart0. Each hart reads the console through
+  // its own uartPort, and Linux gives no guarantee that getty lands on hart0 —
+  // delivering only to uart0 would make typing work or not work depending on
+  // which core the console task happened to be scheduled on.
+  //
+  // hostTaken turns the per-port one-cycle pop into a proper four-phase
+  // handshake, which matters for two independent reasons:
+  //
+  //  * The host cannot be required to watch every cycle. linux_sim.cpp advances
+  //    commit-to-commit (step_any_nodump), which can span many cycles, so a
+  //    one-cycle `consumed` pulse is missed far more often than it is seen — the
+  //    byte is never retired, the same character is re-offered, and the console
+  //    wedges after a couple of keystrokes. uartrx_test reproduced exactly that.
+  //    Held until the host drops `valid`, the handshake is sample-rate agnostic.
+  //
+  //  * The character is broadcast, so without a shared interlock two harts
+  //    reading the console in the same window would each pop the same byte, and
+  //    one keystroke would be delivered twice. Gating every port on !hostTaken
+  //    makes a byte popable exactly once per assertion of `valid`.
+  val hostTaken   = RegInit(false.B)
+  val anyConsumed = Seq(uart0, uart1, uart2, uart3)
+    .map(_.hostInputConsumed).reduce(_ || _)
+  when(!hostInput0.valid) {
+    hostTaken := false.B          // host retracted the byte; arm for the next
+  }.elsewhen(anyConsumed) {
+    hostTaken := true.B           // some port popped it; hold until retracted
+  }
+  Seq(uart0, uart1, uart2, uart3).foreach { u =>
+    u.hostInput.valid := hostInput0.valid && !hostTaken
+    u.hostInput.char  := hostInput0.char
+  }
+  hostInputConsumed0 := hostTaken || anyConsumed
 
-  // ── Shared CLINT msip (one array, any hart can write any hart's bit) ─────────
-  // This is the SMP IPI register file. Each uartPort reads it and forwards its
-  // client's msip stores here; we apply them addressed by target hart (lower
-  // port wins a same-cycle same-hart race — harmless, writes are idempotent).
-  val msipShared = RegInit(VecInit(Seq.fill(4)(0.U(32.W))))
+  // Pool the "buildroot login: " / "~ # " detections across all four ports for
+  // the same reason: only the port that printed the banner sees it locally.
+  val promptPool = Seq(uart0, uart1, uart2, uart3).map(_.sawPrompt).reduce(_ || _)
+  val loginPool  = Seq(uart0, uart1, uart2, uart3).map(_.sawLogin).reduce(_ || _)
+  Seq(uart0, uart1, uart2, uart3).foreach { u =>
+    u.promptSeen := promptPool
+    u.loginSeen  := loginPool
+  }
+
+  // ── Shared CLINT msip + mtimecmp (one array each, any hart → any hart) ──────
+  // SMP IPIs write foreign msip; the kernel also expects a single mtimecmp[]
+  // visible from every hart (the old per-uart local mtimecmp meant core0
+  // programming hart1's compare updated uart0's private copy, never uart1's
+  // MTIP — secondaries never saw their timer).
+  val msipShared     = RegInit(VecInit(Seq.fill(4)(0.U(32.W))))
+  // Init to all-ones so MTIP stays deasserted until software programs a compare
+  // (matches the golden model's CLINT ctor and real hardware power-on).
+  val mtimecmpShared = RegInit(VecInit(Seq.fill(4)(~0.U(64.W))))
   val uarts = Seq(uart0, uart1, uart2, uart3)
-  uarts.foreach { u => u.msipShared := msipShared }
+  uarts.zipWithIndex.foreach { case (u, i) =>
+    u.msipShared     := msipShared
+    u.mtimecmpShared := mtimecmpShared
+    u.localHart      := i.U
+  }
   for (hart <- 0 until 4) {
-    // last matching port in this loop wins; iterate high→low so port0 has priority
+    // msip: a foreign SET (an IPI, data bit0=1) can collide in the SAME cycle
+    // with this hart clearing its own msip (data=0) from a prior handler —
+    // common once timer IRQs delay the handler. The old "last port wins /
+    // port0 priority" arbitration let the local CLEAR clobber the foreign SET,
+    // silently dropping the IPI: bits stays pending but msip never re-asserts,
+    // so the target never traps and the sender's csd_lock_wait hangs forever
+    // (the Linux post-/init smp_call_function wedge; repro mt-ipitmr). A lost
+    // SET is a permanent missed wakeup; a lost CLEAR only costs one spurious
+    // re-trap. So any set this cycle wins over a clear.
+    val msipSets = uarts.map(u =>
+      u.msipWrite.valid && u.msipWrite.hart === hart.U && u.msipWrite.data(0))
+    val msipClrs = uarts.map(u =>
+      u.msipWrite.valid && u.msipWrite.hart === hart.U && !u.msipWrite.data(0))
+    when(msipSets.reduce(_ || _)) {
+      msipShared(hart) := 1.U
+    }.elsewhen(msipClrs.reduce(_ || _)) {
+      msipShared(hart) := 0.U
+    }
+    // mtimecmp: effectively single-writer per hart; last-port-wins is fine.
     for (u <- uarts.reverse) {
-      when(u.msipWrite.valid && u.msipWrite.hart === hart.U) {
-        msipShared(hart) := u.msipWrite.data
+      when(u.mtimecmpWrite.valid && u.mtimecmpWrite.hart === hart.U) {
+        mtimecmpShared(hart) := u.mtimecmpWrite.data
       }
     }
   }

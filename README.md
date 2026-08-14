@@ -377,6 +377,18 @@ sequenceDiagram
 
 Divergences dump `run.log`, `states.log`, `regs.log` to `build/` for debugging.
 
+Lock-step is the strongest oracle but it is **single-core only**, and it asks
+only "is the architectural state right?". Two further layers sit above it:
+
+| Gate | Question it answers |
+|---|---|
+| `make ci-check` | Did the *microarchitecture* stay self-consistent? Per-cycle assertions (`sim/harness/invariants.h`) catch a completion landing on a ROB slot speculation already reallocated — the bug shape behind four separate wedges in this design. |
+| `make stress-sweep` | Seeded constrained-random programs aimed at the speculation corners the directed benchmarks never reach (divides in branch shadows, speculative MMIO, cross-hart AMO/LR-SC). |
+
+**See [VERIFICATION.md](VERIFICATION.md)** for what each layer proves, the exact
+toolchain versions results were produced with, the defect taxonomy, and — read
+this before trusting any of it — the known gaps.
+
 ---
 
 ## Performance counters

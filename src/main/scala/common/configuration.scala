@@ -16,6 +16,13 @@ object configuration {
   val branchPC_depth = 4
 
 
+  // Build knob retained for A/B debugging only. Default false: the fence.i
+  // clean-on-fence walker is ON (required for rv64ui-p-fence_i and for correct
+  // I-fetch after self-modifying / bbl kernel copy). The former Linux-only
+  // dual-model path (walker off) is no longer needed: walkerWriteBackBuffer
+  // decouples the walker's writebacks from the request/snoop path so SMP boot
+  // no longer circular-waits on the single writeBackBuffer.
+  val disableFenceIWalker = false
   val instrIssueDepth = 8
   val robAddrWidth = 4
   val prfAddrWidth = 6
