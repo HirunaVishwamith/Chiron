@@ -6,8 +6,21 @@
 
 RISCV_PREFIX    = riscv64-unknown-elf-
 RISCV_GCC       = $(RISCV_PREFIX)gcc
+# -fno-tree-loop-distribute-patterns is not optional here, and the failure it
+# prevents is silent. This is a freestanding target with no libc, so syscalls.c
+# supplies its own memset as a byte loop. GCC recognises that loop as the memset
+# idiom and rewrites it into a call to memset -- i.e. memset calls itself, with
+# the same arguments and no progress:
+#
+#     8000168c <memset>:  ...  beqz a2,<ret>  ;  jal 8000168c <memset>
+#
+# Any clear of nonzero length then spins forever. That is what made `make cube`
+# and `make solid` print their init escape sequence and nothing else: g3d_clear()
+# never returned, so no frame was ever drawn. The benchmark builds already carry
+# this flag (mk/bins_quad.mk); the demos were missing it.
 RISCV_GCC_OPTS  = -mcmodel=medany -static -std=gnu99 -O2 -fno-common \
-                  -fno-builtin-printf -march=rv64ima_zicsr -mabi=lp64 \
+                  -fno-builtin-printf -fno-tree-loop-distribute-patterns \
+                  -march=rv64ima_zicsr -mabi=lp64 \
                   -DNUM_CORES=$(NUM_CORES)
 RISCV_LINK_OPTS = -nostdlib -nostartfiles
 NUM_CORES      ?= 4
