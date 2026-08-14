@@ -28,7 +28,7 @@ $(SIM)/system.v: $(SCALA_SRCS)
 $(VSYS_LIB): $(SIM)/system.v
 	cd $(SIM)/; \
 	verilator -Wall --trace -cc system.v; \
-	cd obj_dir/; make -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
+	cd obj_dir/; make -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
 
 # Fast model (obj_dir_fast): same Verilog, NO --trace, -O3 codegen — for the
 # run-only harnesses (linux_sim). ~1.2x faster; cannot dump waveforms.
@@ -47,7 +47,7 @@ $(VSYS_LIB): $(SIM)/system.v
 $(VSYS_LIB_FAST): $(SIM)/system.v
 	cd $(SIM)/; \
 	verilator -Wall -O3 --savable -cc system.v --Mdir obj_dir_fast; \
-	cd obj_dir_fast/; make -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
+	cd obj_dir_fast/; make -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
 
 # ── Optional walker-disabled model (A/B debug only) ───────────────────────────
 # Same Chisel → Verilog flow as system.v, but patches
@@ -73,7 +73,7 @@ $(SIM)/system_linux.v: $(SCALA_SRCS)
 $(VSYS_LIB_LINUX): $(SIM)/system_linux.v
 	cd $(SIM)/; \
 	verilator -Wall -O3 -cc system_linux.v --top-module system --Mdir obj_dir_linux; \
-	cd obj_dir_linux/; make -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
+	cd obj_dir_linux/; make -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
 
 .PHONY: sim sim-fast sim-linux
 sim: $(VSYS_LIB)             ## Build the RTL: Chisel → Verilog → Verilator library

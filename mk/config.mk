@@ -112,6 +112,14 @@ endif
 # is -Os = size; -O3 is markedly faster for long simulations). Behaviour-neutral.
 VOPT_FAST ?= -O3 -march=native -fno-math-errno
 
+# Parallelism for compiling the Verilated C++. Verilator splits system.v into
+# ~45 translation units and each takes tens of seconds at -O3 -march=native, so
+# building them one at a time costs 15-20 min -- long enough that people
+# reasonably mistake a rebuild for the simulation itself having got slower.
+# Rebuilds happen more often than you would think: `git checkout` rewrites the
+# mtime of every .scala file, which is enough to invalidate system.v.
+VJOBS ?= $(shell nproc)
+
 # Optional runtime diagnostic flags — passed to harness binaries at run time.
 # Use: make lockstep SHOW_STATE=1   (print golden-model register state each step)
 #      make lockstep DUMP_WAVES=1   (write VCD waveform to build/system_trace.vcd)
