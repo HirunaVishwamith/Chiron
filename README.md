@@ -18,7 +18,8 @@
 ![Chisel](https://img.shields.io/badge/Chisel-3.5.4-d22128)
 ![Scala](https://img.shields.io/badge/Scala-2.13.8-dc322f)
 ![Verilator](https://img.shields.io/badge/verified-Verilator%20lock--step-1f6feb)
-![ISA tests](https://img.shields.io/badge/riscv--tests-83%2F84-2ea44f)
+![ISA tests](https://img.shields.io/badge/riscv--tests-84%2F84-2ea44f)
+![Linux](https://img.shields.io/badge/Linux-SMP%20boots%20to%20shell-2ea44f)
 ![Target](https://img.shields.io/badge/clock-75%20MHz-555)
 
 </div>
@@ -36,7 +37,10 @@
 - **Modern branch prediction** — bimodal + BTB (64 sets, 2-way LRU) + a
   **4-table TAGE** predictor.
 - **Cycle-accurate, lock-step verified** against a C++ golden-model emulator,
-  one committed instruction at a time — **83/84 official `riscv-tests` pass**.
+  one committed instruction at a time — **84/84 official `riscv-tests` pass**.
+- **Boots quad-core Linux SMP to an interactive shell** — a nommu RISC-V kernel
+  brings up all four harts, runs userspace, and answers `nproc` with `4`, typed
+  live at the console (`docs/linux-quad-boot.log`).
 - **One command per task.** No copying files around: every harness loads images
   by path, driven from a single benchmark manifest.
 - **164 hardware performance counters** exposed from the RTL (41 per core × 4)
@@ -351,10 +355,20 @@ make test
 Runs in two stages:
 
 - **ISA suite** (`make isa`) — 84 official `riscv-tests` images, lock-step RTL
-  vs golden model. Progress is printed per-test. Expected result: **83/84**
-  (`rv64ui-p-fence_i` is a known I-cache coherence limitation).
+  vs golden model. Progress is printed per-test. Expected result: **84/84**.
+  (`rv64ui-p-fence_i` was the long-standing exception; it passes now that the
+  D-cache writes dirty lines back to L2 on `fence.i`.)
 - **Quad-core vvadd** (`make test-q4`) — profile-based pass/fail on
   `bins/mt-vvadd-q4.bin`.
+
+Two further gates cover the multi-core paths that the ISA suite, being
+single-hart, cannot reach:
+
+- **`make ci-bench`** — all five quad-core benchmark families must complete
+  cleanly.
+- **`make smp-repro`** — bare-metal reproductions of the failures found while
+  bringing up Linux SMP: an illegal-instruction trap and cross-hart code
+  publication (`fence.i`), each with a control build that is *expected* to fail.
 
 ---
 
@@ -438,6 +452,9 @@ JSON reports are written to `build/profile_results/`.
 | `make lockstep … DUMP_WAVES=1` | Same, plus VCD to `build/system_trace.vcd` |
 | `make isa` | Full RISC-V ISA regression suite (84/84 expected) — progress per test |
 | `make test` | ISA suite + quad-core vvadd pass/fail |
+| `make ci-bench` | All 5 quad-core benchmark families must complete cleanly |
+| `make smp-repro` | Multi-core repros: illegal-instruction trap + cross-hart `fence.i` |
+| `make uartrx-test` | Console-input (uartlite RX) round trip through the RTL |
 | `make profile BENCH=…` | Single-core cycle-accurate profile |
 | `make profile-quad FAM=…` | Quad-core profile for one benchmark family |
 | `make profile-all` | Quad-core profile for all benchmarks + chart |
@@ -464,11 +481,11 @@ Families: `vvadd matmul filter csaxpy histo`. Scales: `s1`–`s5`. Default `BENC
 
 chiron boots real Linux — a nommu, M-mode RISC-V kernel wrapped in bbl as a
 flat binary loaded at `0x80000000`. Images are produced by the
-[`Multicore_Linux_Image/`](Multicore_Linux_Image/) submodule (full pipeline and
+[`mc-linux/`](mc-linux/) submodule (full pipeline and
 every chiron-specific knob documented in its README):
 
 ```
-cd Multicore_Linux_Image
+cd mc-linux
 ./submodule_update                       # clone linux/ buildroot/ riscv-pk/
 cd buildroot && make -j$(nproc) && cd .. # toolchain + rootfs (slow, once)
 export RISCV=$PWD/buildroot/output/host
@@ -490,32 +507,62 @@ make linux-sim                             # boot the same image on the RTL (liv
   interactive input works (emulator UART RX + the kernel uartlite RX-poll patch).
   `linux-emu-check` is the non-interactive CI variant of the same boot.
 - **`linux-sim`** boots the image on the Verilated RTL with a live uartlite
-  console. Expect ~5–10K cycles/s: the kernel banner appears after ~20 minutes,
-  and full boot takes days — it prints a heartbeat line every 5 s
-  (`steps/s`, per-hart PCs) so progress and wedges are obvious at a glance.
+  console, and **stdin is wired through** — you can log in and run commands.
+  Expect ~5–10K cycles/s: the kernel banner appears after ~20 minutes and the
+  login prompt after ~3 billion cycles, so plan on leaving it overnight. It
+  prints a heartbeat line every 5 s (`steps/s`, per-hart PCs) so progress and
+  wedges are obvious at a glance. `make uartrx-test` is the fast regression for
+  the console-input path.
 - `LINUX_IMAGE` defaults to `bins/linux-q4.bin` (see `mk/run.mk`).
 
-**Status (2026-07-03):** the quad-core image boots on both back-ends. The two
-RTL blockers were root-caused and fixed: (1) a CCU/L2 snoop-starvation deadlock
-— the D-cache clean-on-fence walker starved snoop requests behind its
-writebacks in the CCU's single serialized transaction FIFO (fixed with a
-dedicated `readyCoherency` snoop path + flush-walker interlock in
-`src/main/scala/Dcache/`); and (2) a ROB livelock on coherent-load squash — a
-snoop invalidating a load between D-cache response and commit triggered a
-whole-ROB rollback that the ROB FIFO's pointer arithmetic could not represent
-(`full` vs `empty` ambiguity), freezing the hart (fixed with an explicit
-`flushAll` in `src/main/scala/pipeline/Fifo.scala`, driven one cycle after the
-squash decision in `core.scala`). Both fixes hold under the full regression
-suite (ISA 84/84, vvadd/csaxpy quad-core lock-step).
+**Status (2026-08-14): the quad-core image boots to an interactive shell on the
+RTL.** All four harts come online, `/init` runs, and `nproc` answers `4` typed
+live at the console — `docs/linux-quad-boot.log` is that boot.
+
+Booting a real SMP kernel turned out to be the sharpest verification tool in the
+project: it exercises coherence, speculation, and traps in combinations no
+directed test reached, and every failure below was invisible to the ISA suite.
+In the order they were found and fixed:
+
+1. **CCU/L2 snoop starvation** — the D-cache clean-on-fence walker starved snoop
+   requests behind its writebacks in the CCU's single serialized transaction
+   FIFO. Fixed with a dedicated `readyCoherency` snoop path plus a flush-walker
+   interlock.
+2. **ROB livelock on coherent-load squash** — a snoop invalidating a load
+   between D-cache response and commit triggered a whole-ROB rollback the FIFO's
+   pointer arithmetic could not represent (`full` vs `empty` ambiguity), freezing
+   the hart. Fixed with an explicit `flushAll` in `pipeline/Fifo.scala`.
+3. **Two harts holding one line Unique** — the snoop path answered out of the
+   writeback pipeline, which is correct for an eviction but not for a `fence.i`
+   walker writeback, where the L1 still owns the line and may have stored into
+   it since. Peers were handed pre-store data *with `PassDirty`*, silently losing
+   a committed store. Fixed with the `retain` bit in `Dcache/traits.scala`.
+4. **No illegal-instruction trap** — nothing drove `exceptionOccurred`, so a bad
+   jump filled the ROB with zeros and stopped forever instead of faulting. The
+   core now traps (`mcause=2`); `mt-illegal` is the regression, and note that
+   pre-fix RTL *hangs* on it rather than failing.
+
+One bug turned out not to be ours: on nommu RISC-V the kernel writes the
+`rt_sigreturn` trampoline to the user stack with `copy_to_user` and jumps to it
+without a `FENCE.I`. That is invisible on a machine whose I-fetch snoops the
+D-caches; on chiron the fetch reads stale L2. The two-line kernel fix lives in
+[`mc-linux/patches/`](mc-linux/patches/).
+
+All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
+`smp-repro` 3/3.
 
 ---
 
 ## Roadmap
 
-- Profile all 5 benchmarks at s1–s5 scales on the quad-core to establish a
-  baseline IPC (currently ~0.125 — single-core IPC improvements not yet ported).
 - Port the single-core IPC optimisations (radix-4 divider, store-data trim,
-  load-queue flow-through) to the quad-core back-end.
+  load-queue flow-through) to the quad-core back-end. Aggregate quad-core IPC is
+  currently **~1.0–1.17** across the five families (see the dashboard), i.e.
+  roughly 0.27 per core — the headroom is still large.
+- Add an ownership check to the ROB execute write ports. Four separate bugs so
+  far shared one shape: a completion landing on a slot that was rolled back and
+  reallocated underneath it. A structural guard would close the class rather
+  than the instances.
 - Add **SPLASH-3** multi-threaded benchmarks for academically comparable results.
 - Target IPC approaching 1.0 per core (4× aggregate) through microarchitectural
   tuning of the OoO window, commit width, and cache hierarchy.
