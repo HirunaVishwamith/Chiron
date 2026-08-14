@@ -54,7 +54,11 @@ class replayUnit extends Module{
   ))
   val writeBackFIFO = Module(new fifoBypassModule(
     depth = schedulerDepth,
-    traitType = new writeBackWire
+    traitType = new writeBackWire,
+    // fence.i walker writebacks (retain=true) must never answer a snoop: the
+    // L1 still owns those lines and the queued copy predates any store that
+    // landed after the walker captured it. See writeBackTrait.retain.
+    snoopEligible = (e: writeBackWire) => !e.retain
   ))
 
   requestIn.ready := false.B

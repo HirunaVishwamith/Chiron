@@ -157,13 +157,20 @@ class ACEUnit(
   val writePipeHit = WireDefault(false.B)
   writeBackFifoSnoop.addr := coherencyRequestBuffer.address
   writeBackStageSnoop.addr := coherencyRequestBuffer.address
-  when(writeBuffer.valid &&
+  // Every arm additionally requires !retain. A retain=true entry is a fence.i
+  // walker writeback: the tag was never reassigned, so the L1 still owns the
+  // line and a store may have landed after the walker captured it. Answering
+  // from that copy hands a peer pre-store data with PassDirty, which both
+  // loses the committed store and leaves the peer owning the stale line
+  // Unique — the permanent Linux csd_unlock hang. Evictions (retain=false)
+  // still answer here, which is the hole this logic exists to close.
+  when(writeBuffer.valid && !writeBuffer.retain &&
        writeBuffer.address(addrWidth - 1, log2Ceil(lineSize)) ===
          coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize))) {
     isWriteAddressMatchWire := true.B
     writePipeHit := true.B
     writePipeHitData := writeBuffer
-  }.elsewhen(writeRequest.request.valid &&
+  }.elsewhen(writeRequest.request.valid && !writeRequest.request.retain &&
              writeRequest.request.address(addrWidth - 1, log2Ceil(lineSize)) ===
                coherencyRequestBuffer.address(addrWidth - 1, log2Ceil(lineSize))) {
     isWriteAddressMatchWire := true.B

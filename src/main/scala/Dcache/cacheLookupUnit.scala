@@ -297,16 +297,18 @@ class cacheLookupUnit extends Module{
       (installedLast && installAddrLast(addrWidth - 1, lineHi) === snoopLine)
   }
 
-  // Snoop CAM for the two staging slots (normal path preferred over walker).
+  // Snoop CAM for the staging slots. ONLY the eviction slot may answer: the
+  // walker slot carries retain=true because the tag was never reassigned, so
+  // the L1 still holds that line and may have been stored into after the
+  // walker captured it. Answering from the walker copy returns pre-store data
+  // (see writeBackTrait.retain).
   {
     val lineHi = log2Ceil(lineSize)
     val snoopLine = writeBackStageSnoop.addr(addrWidth - 1, lineHi)
-    val wbHit = writeBackBuffer.valid &&
+    val wbHit = writeBackBuffer.valid && !writeBackBuffer.retain &&
       writeBackBuffer.address(addrWidth - 1, lineHi) === snoopLine
-    val walkHit = walkerWriteBackBuffer.valid &&
-      walkerWriteBackBuffer.address(addrWidth - 1, lineHi) === snoopLine
-    writeBackStageSnoop.hit := wbHit || walkHit
-    writeBackStageSnoop.data := Mux(wbHit, writeBackBuffer, walkerWriteBackBuffer)
+    writeBackStageSnoop.hit := wbHit
+    writeBackStageSnoop.data := writeBackBuffer
   }
 
   val writeCommitInstructionBuffer = RegInit(false.B)
@@ -792,6 +794,9 @@ class cacheLookupUnit extends Module{
       writeBackBuffer.address := Cat(tagChunks(updatingSet)(tagSize - 1, 0),
         readBuffer.address(addrEnd, addrBeg), 0.U(log2Ceil(lineSize).W))
       writeBackBuffer.data := dataBRAMVec(updatingSet).rdData
+      // A real eviction: the tag has been reassigned, so this buffered copy is
+      // the only one left and it MUST keep answering snoops.
+      writeBackBuffer.retain := false.B
     }
     
     //Last Miss Memory Record
@@ -892,6 +897,12 @@ class cacheLookupUnit extends Module{
             // flag bits so only the true tag is placed in the address.
             walkerWriteBackBuffer.address := Cat(tagChunk(tagSize - 1, 0), flushSet, 0.U(log2Ceil(lineSize).W))
             walkerWriteBackBuffer.data := flushDataReg(flushWay)
+            // Clean-on-fence, NOT an eviction: the tag is deliberately left
+            // alone, so the L1 keeps this line valid and writable. Mark it so
+            // no snoop is ever answered from this copy — a store landing after
+            // the capture would otherwise be handed to a peer as stale data
+            // with PassDirty and lost for good.
+            walkerWriteBackBuffer.retain := true.B
           }
           when(lastWay) {
             flushWay := 0.U

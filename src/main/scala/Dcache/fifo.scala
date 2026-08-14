@@ -162,7 +162,16 @@ class fifoRecordInvalidateI[T <: requestPipelineTrait](depth: Int, traitType: T)
   isFull := fullReg
 }
 
-class fifoBypassModule[T <: baseTrait](depth: Int, traitType: T) extends Module {
+// snoopEligible gates which queued entries may ANSWER a snoop. It defaults to
+// "all of them", which is right for an eviction queue: the tag has already been
+// reassigned, so the queued copy is the only one left. The writeback FIFO
+// overrides it to exclude fence.i walker writebacks (retain=true), whose lines
+// the L1 still owns and may have stored into after the walker captured them.
+// The independent selfHit CAM deliberately does NOT use this — a queued walker
+// writeback must still block the owning core's own refill of that line.
+class fifoBypassModule[T <: baseTrait](depth: Int, traitType: T,
+                                       snoopEligible: T => Bool = (_: T) => true.B)
+    extends Module {
   val write = IO(new Bundle{
     val ready = Output(Bool())
     val data = Input(traitType.cloneType)
@@ -276,10 +285,13 @@ class fifoBypassModule[T <: baseTrait](depth: Int, traitType: T) extends Module 
   // Priority: lowest index first (deterministic); bypass beats only when empty.
   val lineHi = log2Ceil(lineSize)
   val snoopLine = snoopAddr(addrWidth - 1, lineHi)
+  // retain=true entries (fence.i walker writebacks) are skipped: the L1 still
+  // owns those lines and may have been stored into since the walker captured
+  // them, so the queued copy can be stale. The L1 answers instead.
   val entryHits = VecInit(memReg.map { e =>
-    e.valid && e.address(addrWidth - 1, lineHi) === snoopLine
+    e.valid && snoopEligible(e) && e.address(addrWidth - 1, lineHi) === snoopLine
   })
-  val bypassHit = bypass && write.data.valid &&
+  val bypassHit = bypass && write.data.valid && snoopEligible(write.data) &&
     write.data.address(addrWidth - 1, lineHi) === snoopLine
   snoopHit := entryHits.asUInt.orR || bypassHit
   snoopData := Mux(bypassHit, write.data,
