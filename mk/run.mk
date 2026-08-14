@@ -665,3 +665,14 @@ profile-sweep: $(BUILD)/profile_fast.out $(BUILD)/profile_quad_fast.out  ## Prof
 
 profile-report: ## Render docs/profile_report.png from $(PSWEEP_DIR)
 	python3 scripts/profile_visualize.py $(PSWEEP_DIR) --out docs/profile_report.png
+
+.PHONY: done-pcs
+done-pcs:   ## Print each benchmark's current exit PC (the *_DONE table in mk/benchmarks.mk)
+	@for f in $(SCALE_FAMILIES); do \
+	  fam=$${f%%:*}; rest=$${f#*:}; dir=$${rest%%:*}; \
+	  $(TOOLPATH) $(MAKE) -s -C $(BENCH_SRC) riscv bmarks="$$dir" \
+	     RISCV_GCC_OPTS="$(QUAD_GCC_OPTS)" >/dev/null 2>&1; \
+	  pc=$$($(RISCV_BIN)/riscv64-unknown-elf-nm $(BENCH_SRC)/$$dir.riscv 2>/dev/null \
+	        | awk '$$3=="exit"{print $$1}'); \
+	  [ -n "$$pc" ] && printf "%-10s exit = 0x%08x\n" "$$fam" $$((0x80000000 + 0x$$pc)); \
+	done

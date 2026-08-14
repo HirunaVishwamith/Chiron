@@ -36,21 +36,31 @@ lrsc_base    := mt-lrsc
 lrscirq_base := mt-lrscirq
 
 # completion: committed PC(s), optionally gated on a0 (x10)
-vvadd_DONE  := --done-pc 0x800009a0 --done-pc 0x800009ac --done-a0 2
-matmul_DONE := --done-pc 0x80000a04
-filter_DONE := --done-pc 0x80000bc8 --done-pc 0x80000bcc
-csaxpy_DONE := --done-pc 0x800009a4 --done-pc 0x80000998 --done-a0 0
-histo_DONE  := --done-pc 0x80000a40
-seqlock_DONE := --done-pc 0x80000aa0
-radix_DONE  := --done-pc 0x80000c68
-spinwait_DONE := --done-pc 0x80000a9c
-divburst_DONE := --done-pc 0x800009e4 --done-a0 0
-divirq_DONE := --done-pc 0x80000b68 --done-a0 0
-ipi_DONE     := --done-pc 0x80000bd4 --done-a0 0
-ipitmr_DONE  := --done-pc 0x80000f54 --done-a0 0
-ipimux_DONE  := --done-pc 0x80000dd4 --done-a0 0
-lrsc_DONE    := --done-pc 0x80000cdc --done-a0 0
-lrscirq_DONE := --done-pc 0x80000b54 --done-a0 0
+# ── Completion PCs ───────────────────────────────────────────────────────────
+# Each entry is the PC a benchmark parks on when it is finished (its exit stub),
+# optionally gated on a0. THESE ARE ABSOLUTE ADDRESSES AND THEY MOVE: crt.o
+# links first, so any change to workloads/benchmarks/common/crt.S shifts every
+# one of them by the same amount, and a stale value means the harness never sees
+# completion and burns its whole cycle budget instead of failing fast.
+#
+# `make done-pcs` prints the current exit address for every family so the table
+# can be re-derived rather than guessed. (The 2026-08-15 crt.S stack fix shifted
+# everything by +0x0c.)
+vvadd_DONE  := --done-pc 0x800009ac --done-pc 0x800009b8 --done-a0 2
+matmul_DONE := --done-pc 0x80000a10
+filter_DONE := --done-pc 0x80000bd4 --done-pc 0x80000bd8
+csaxpy_DONE := --done-pc 0x800009b0 --done-pc 0x800009a4 --done-a0 0
+histo_DONE  := --done-pc 0x80000a4c
+seqlock_DONE := --done-pc 0x80000aac
+radix_DONE  := --done-pc 0x80000c74
+spinwait_DONE := --done-pc 0x80000aa8
+divburst_DONE := --done-pc 0x800009f0 --done-a0 0
+divirq_DONE := --done-pc 0x80000b74 --done-a0 0
+ipi_DONE     := --done-pc 0x80000be0 --done-a0 0
+ipitmr_DONE  := --done-pc 0x80000f60 --done-a0 0
+ipimux_DONE  := --done-pc 0x80000de0 --done-a0 0
+lrsc_DONE    := --done-pc 0x80000ce8 --done-a0 0
+lrscirq_DONE := --done-pc 0x80000b60 --done-a0 0
 
 # Resolve BENCH=<family>-s<scale> (default vvadd-s1) into a bin path + done spec.
 # None of the family names contain "-s", so splitting on it is unambiguous.
