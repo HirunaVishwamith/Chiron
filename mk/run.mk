@@ -352,7 +352,7 @@ IMG_DIR := mc-linux
 patch:   ## Update linux/buildroot/riscv-pk submodules + stage chiron patches
 	cd $(IMG_DIR) && ./submodule_update && ./apply_configs_and_patches
 
-linux-toolchain:   ## Build the buildroot cross toolchain + rootfs (slow, once)
+linux-toolchain: patch   ## Build the buildroot cross toolchain + rootfs (slow, once)
 	$(MAKE) -C $(IMG_DIR)/buildroot -j$(shell nproc)
 
 linux-image-s1: patch   ## Build bins/linux-s1.bin (single-core nommu Linux)
