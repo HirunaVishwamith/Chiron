@@ -26,7 +26,7 @@
 namespace {
 
 // [start, end) function ranges to watch, extracted via nm from the exact
-// vmlinux that produced bins/linux-q4.bin (Multicore_Linux_Image/linux/vmlinux,
+// vmlinux that produced bins/linux-q4.bin (mc-linux/linux/vmlinux,
 // 2026-07-02 build) — update if the kernel image is ever rebuilt.
 struct Watch { uint64_t lo, hi; const char *name; };
 constexpr Watch kWatched[] = {

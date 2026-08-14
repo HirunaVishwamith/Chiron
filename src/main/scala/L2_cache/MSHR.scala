@@ -45,8 +45,16 @@ class MSHR(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 3, addre
         
     val offset = enq_fifo.io.deq.bits.Mem_addr(7,6)
 
+    // Patch a completing WRITE miss with the head's OWN write data, stored in
+    // the FIFO at enqueue. io.Mem_read_in.W_data is a live wire owned by
+    // whichever NEWER miss sits at cache_miss_out when the DRAM refill lands
+    // ~100 cycles later — using it here installed another request's bytes
+    // (typically the hottest read line in outputBuffer, e.g. kernel text) into
+    // this line's written slice, dirty, then evicted that poison to DRAM
+    // (Linux SMP: spinlock 0x806b2c00 clobbered with text from 0x80274c40 →
+    // "CPU2 failed to come online").
     when(!enq_fifo.io.deq.bits.is_R){
-        R_combined(offset) := io.Mem_read_in.W_data
+        R_combined(offset) := enq_fifo.io.deq.bits.data
     }
 
 
@@ -54,8 +62,11 @@ class MSHR(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 3, addre
 
     writeBufferhit_data := io.Mem_read_in.repl_data
 
+    // The repl_hit bypass serves the INCOMING request, so the write patch must
+    // use the incoming request's slice offset — not the FIFO head's.
+    val offset_in = io.Mem_read_in.Mem_addr(7,6)
     when(!io.Mem_read_in.is_R){
-        writeBufferhit_data(offset) := io.Mem_read_in.W_data
+        writeBufferhit_data(offset_in) := io.Mem_read_in.W_data
     }
 
 

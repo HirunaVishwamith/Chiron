@@ -20,14 +20,16 @@
       }
     }
 
-    // Take any enabled pending MSIP/MTIP *before* fetch. This ensures an IPI sent
-    // after a core finishes its work (stop_machine, complete, migration, smpboot)
-    // is delivered at insn boundary with correct mepc, waking waiters promptly.
-    // Timers (MTIP) are never suppressed by PC range: every CPU must receive periodic
-    // timer ticks for timekeeping, scheduler, watchdog, and to make forward progress.
+    // Refresh live mip lines from CLINT. Under LOCKSTEP do *not* auto-take
+    // MSIP/MTIP traps here: mtime is mirrored from RTL and can satisfy
+    // mtime>=mtimecmp a cycle before the RTL pipeline delivers the interrupt,
+    // which jumps golden into the timer handler while RTL is still in the
+    // interrupted basic block (PC mismatch after clint timer init ~20.3M).
+    // Lock-step delivers traps only when RTL retires an interrupt (see harness).
+    mip.MTIP = clint.check_timer_interrupt((uint32_t)mhartid) ? 1 : 0;
+    mip.MSIP = clint.check_software_interrupt((uint32_t)mhartid) ? 1 : 0;
+#ifndef LOCKSTEP
     if (!skip_initial_kick_take) {
-      mip.MTIP = clint.check_timer_interrupt((uint32_t)mhartid) ? 1 : 0;
-      mip.MSIP = clint.check_software_interrupt((uint32_t)mhartid) ? 1 : 0;
       if (mstatus.mie) {
         if (mie.MSIE && mip.MSIP) {
           if (post_kick_protect > 0) {
@@ -48,6 +50,9 @@
         }
       }
     }
+#else
+    (void)skip_initial_kick_take;
+#endif
 
     if (post_kick_protect > 0) post_kick_protect--;
 
@@ -190,7 +195,12 @@
               }
               else
               {
-                load_data = 0x1000;
+                // Match RTL uartPort default: client.RDATA := 0.U for any
+                // address not decoded (PLIC, unused MMIO, …). Was 8 (the old
+                // RTL default); 0 lets a wild kernel %s scan over unmapped
+                // space self-terminate (spin_dump .owner livelock) — keep the
+                // two models identical or lockstep fails at __plic_toggle.
+                load_data = 0;
               }
             }
             switch (func3)
@@ -383,19 +393,25 @@
             {
               if (store_addr - DRAM_BASE == FIFO_ADDR_TX)
               {
+#ifndef LOCKSTEP
+                // Under LOCKSTEP the RTL SHOW_TERMINAL path owns the console;
+                // printing here doubles every UART byte in the lockstep log.
                 cout << (char)reg_file[rs2] << flush;
+#endif
               }
             }
           }
         }
         else
         {
+#ifndef LOCKSTEP
           cout << (char)reg_file[rs2] << flush;
             //printf("Hi");
             int out_char = reg_file[rs2]; // Extract 8-bit char
             //printf(" %d out_char:\n", out_char);
             //cout << out_char; // Print to terminal
             cout.flush();
+#endif
         }
         break;
       case iops:

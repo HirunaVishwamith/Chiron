@@ -80,11 +80,25 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
 
   val is_fence = commit.instruction(6,0) === "b0001111".U
 
+  // ── Illegal-instruction detection ────────────────────────────────────────
+  // Every RV32 instruction has bits[1:0]=="11" (chiron implements no C
+  // extension), so anything else is not an instruction at all. The case that
+  // matters is an all-zero word fetched from unpopulated memory after a bad
+  // jump: it is never issued by the scheduler, so no execute port ever writes
+  // its ready bit, and the ROB head waits for a completion that can never come.
+  // The machine then wedges SILENTLY and forever -- measured on the quad-core
+  // Linux boot, where hart0 jumped to 0x81b03840 (past the end of allocated
+  // memory), filled all 16 ROB entries with 0x00000000 and stopped, ~1.23e9
+  // cycles in, with every functional unit idle.
+  //
+  // Retiring it with an exception instead turns that silent hang into a normal
+  // trap (mcause=2), which the kernel reports and handles.
+  val is_illegal = commit.instruction(1,0) =/= "b11".U
   // Commit Logic
-  commit.ready := (results.io.deq.bits(0) | is_fence | commit.isStore) & fifo.io.deq.valid & results.io.deq.valid
-  commit.mcause := results.io.deq.bits(64,1)
-  commit.mtval := results.io.deq.bits(128,65)
-  commit.exceptionOccurred := results.io.deq.bits(129)
+  commit.ready := (results.io.deq.bits(0) | is_fence | commit.isStore | is_illegal) & fifo.io.deq.valid & results.io.deq.valid
+  commit.mcause := Mux(is_illegal, 2.U, results.io.deq.bits(64,1))
+  commit.mtval := Mux(is_illegal, Cat(0.U(32.W), commit.instruction), results.io.deq.bits(128,65))
+  commit.exceptionOccurred := results.io.deq.bits(129) | is_illegal
   commit.prfDest := fifo.io.deq.bits(5,0)
   commit.instruction := fifo.io.deq.bits(37,6)
   commit.pc := fifo.io.deq.bits(101,38)

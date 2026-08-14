@@ -1,0 +1,158 @@
+{
+  "benchmark": "histo-s5-q4",
+  "aggregate": {
+    "total_inst_retired": 3719846,
+    "max_cycles": 3646787,
+    "aggregate_ipc": 1.0200
+  },
+  "cores": [
+    {
+      "core": 0,
+      "raw": {
+        "cycles": 3646787,
+        "inst_retired": 624914,
+        "branch_total": 146789,
+        "branches_passed": 57667,
+        "scheduler_stalls": 91978,
+        "rob_stalls": 1077690,
+        "decode_ready": 2359193,
+        "decode_fired": 1191610,
+        "icache_stalls": 329991,
+        "dcache_reqs": 260873,
+        "dcache_miss": 3211,
+        "dcache_rd_beats": 25247,
+        "dcache_wr_beats": 8520,
+        "icache_miss": 39,
+        "icache_rd_beats": 312,
+        "l2_to_mem_rd_reqs": 1876,
+        "l2_to_mem_rd_beats": 15008,
+        "l2_to_mem_wr_beats": 0,
+        "fe_fetch_not_ready": 993127,
+        "fe_decode_not_ready": 1299367,
+        "fe_expected_block": 0
+      },
+      "derived": {
+        "ipc": 0.1714,
+        "branch_accuracy_pct": 39.2856,
+        "icache_miss_rate_pct": 0.0017,
+        "dcache_miss_rate_pct": 1.2309,
+        "l1d_read_bw_bytes_per_cycle": 0.0554,
+        "l1d_write_bw_bytes_per_cycle": 0.0187,
+        "scheduler_stall_pct": 3.8987,
+        "rob_stall_pct": 45.6805,
+        "decode_efficiency_pct": 50.5092
+      }
+    },
+    {
+      "core": 1,
+      "raw": {
+        "cycles": 3646787,
+        "inst_retired": 1031489,
+        "branch_total": 808047,
+        "branches_passed": 598003,
+        "scheduler_stalls": 72214,
+        "rob_stalls": 89759,
+        "decode_ready": 1689560,
+        "decode_fired": 1528078,
+        "icache_stalls": 396450,
+        "dcache_reqs": 92384,
+        "dcache_miss": 1959,
+        "dcache_rd_beats": 15224,
+        "dcache_wr_beats": 8,
+        "icache_miss": 29,
+        "icache_rd_beats": 232,
+        "l2_to_mem_rd_reqs": 1876,
+        "l2_to_mem_rd_beats": 15008,
+        "l2_to_mem_wr_beats": 0,
+        "fe_fetch_not_ready": 725983,
+        "fe_decode_not_ready": 1142835,
+        "fe_expected_block": 0
+      },
+      "derived": {
+        "ipc": 0.2828,
+        "branch_accuracy_pct": 74.0060,
+        "icache_miss_rate_pct": 0.0017,
+        "dcache_miss_rate_pct": 2.1205,
+        "l1d_read_bw_bytes_per_cycle": 0.0334,
+        "l1d_write_bw_bytes_per_cycle": 0.0000,
+        "scheduler_stall_pct": 4.2741,
+        "rob_stall_pct": 5.3126,
+        "decode_efficiency_pct": 90.4424
+      }
+    },
+    {
+      "core": 2,
+      "raw": {
+        "cycles": 3646787,
+        "inst_retired": 1029885,
+        "branch_total": 807255,
+        "branches_passed": 596683,
+        "scheduler_stalls": 72471,
+        "rob_stalls": 85238,
+        "decode_ready": 1689271,
+        "decode_fired": 1532399,
+        "icache_stalls": 397178,
+        "dcache_reqs": 91565,
+        "dcache_miss": 1956,
+        "dcache_rd_beats": 15207,
+        "dcache_wr_beats": 8,
+        "icache_miss": 24,
+        "icache_rd_beats": 192,
+        "l2_to_mem_rd_reqs": 1876,
+        "l2_to_mem_rd_beats": 15008,
+        "l2_to_mem_wr_beats": 0,
+        "fe_fetch_not_ready": 730534,
+        "fe_decode_not_ready": 1132980,
+        "fe_expected_block": 0
+      },
+      "derived": {
+        "ipc": 0.2824,
+        "branch_accuracy_pct": 73.9151,
+        "icache_miss_rate_pct": 0.0014,
+        "dcache_miss_rate_pct": 2.1362,
+        "l1d_read_bw_bytes_per_cycle": 0.0334,
+        "l1d_write_bw_bytes_per_cycle": 0.0000,
+        "scheduler_stall_pct": 4.2901,
+        "rob_stall_pct": 5.0458,
+        "decode_efficiency_pct": 90.7136
+      }
+    },
+    {
+      "core": 3,
+      "raw": {
+        "cycles": 3646787,
+        "inst_retired": 1033558,
+        "branch_total": 809089,
+        "branches_passed": 598787,
+        "scheduler_stalls": 71688,
+        "rob_stalls": 66275,
+        "decode_ready": 1676279,
+        "decode_fired": 1538477,
+        "icache_stalls": 399477,
+        "dcache_reqs": 93449,
+        "dcache_miss": 1771,
+        "dcache_rd_beats": 13720,
+        "dcache_wr_beats": 16,
+        "icache_miss": 29,
+        "icache_rd_beats": 232,
+        "l2_to_mem_rd_reqs": 1876,
+        "l2_to_mem_rd_beats": 15008,
+        "l2_to_mem_wr_beats": 0,
+        "fe_fetch_not_ready": 733444,
+        "fe_decode_not_ready": 1124494,
+        "fe_expected_block": 0
+      },
+      "derived": {
+        "ipc": 0.2834,
+        "branch_accuracy_pct": 74.0076,
+        "icache_miss_rate_pct": 0.0017,
+        "dcache_miss_rate_pct": 1.8952,
+        "l1d_read_bw_bytes_per_cycle": 0.0301,
+        "l1d_write_bw_bytes_per_cycle": 0.0000,
+        "scheduler_stall_pct": 4.2766,
+        "rob_stall_pct": 3.9537,
+        "decode_efficiency_pct": 91.7793
+      }
+    }
+  ]
+}

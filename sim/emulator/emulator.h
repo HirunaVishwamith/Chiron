@@ -95,6 +95,33 @@ public:
   // boot in an interpretive multi-hart emulator.
   void tick_only() { clint.advance(); }
   void step_hart_only(int i) { harts[i].hart_step(memory); }
+  void clear_wfi(int i) { harts[i].clear_wfi(); }
+
+  // Copy RTL CLINT MSIP pins into the golden model (lock-step only).
+  void set_msip(int hart, uint32_t value) { clint.set_msip((uint32_t)hart, value); }
+  uint32_t get_msip(int hart) const { return clint.get_msip((uint32_t)hart); }
+  void set_mtime(uint64_t value) { clint.set_mtime(value); }
+  uint64_t get_mtime() const { return clint.get_mtime(); }
+  void set_mtimecmp(int hart, uint64_t value) {
+    clint.set_mtimecmp((uint32_t)hart, value);
+  }
+  void take_machine_timer_irq(int h) { harts[h].take_machine_timer_irq(); }
+  void take_machine_soft_irq(int h) { harts[h].take_machine_soft_irq(); }
+  void set_mepc(int h, uint64_t v) { harts[h].set_mepc(v); }
+  uint64_t get_mepc(int h) const { return harts[h].get_mepc(); }
+  void set_mstatus(int h, uint64_t v) { harts[h].set_mstatus(v); }
+
+  // Aligned 64-bit DRAM word access (lock-step racy-op reconciliation: adopt
+  // the RTL's LR/SC/AMO outcome into golden memory). addr is a physical
+  // address; out-of-DRAM addresses read as 0 / write as no-op.
+  uint64_t read_mem64(uint64_t addr) const {
+    if (addr < 0x80000000ULL || addr >= 0x80000000ULL + 0x9000000ULL) return 0;
+    return memory.at((addr - 0x80000000ULL) / 8);
+  }
+  void write_mem64(uint64_t addr, uint64_t value) {
+    if (addr < 0x80000000ULL || addr >= 0x80000000ULL + 0x9000000ULL) return;
+    memory.at((addr - 0x80000000ULL) / 8) = value;
+  }
   void deliver_interrupts() {
 #ifdef LOCKSTEP
     for (auto &r : harts) r.hart_set_interrupts(memory);

@@ -195,13 +195,63 @@ public:
 
   __uint64_t get_pc() { return PC; }
 
+  // Lock-step helper: RTL may retire the insn after WFI without a visible
+  // interrupt edge (or with different interrupt timing). Force-wake so the
+  // next hart_step actually executes the matched instruction.
+  void clear_wfi() { in_wfi = false; }
+
+  // Deliver a machine timer / software interrupt now (lock-step: call when RTL
+  // has taken the trap; golden must not auto-fire from mtime>=mtimecmp).
+  void take_machine_timer_irq() {
+    in_wfi = false;
+    amo_reserve_valid = false;
+    amo_reserve_valid64 = false;
+    PC = interrupt_function(PC, CAUSE_MACHINE_TIMER_INT, cp);
+  }
+  void take_machine_soft_irq() {
+    in_wfi = false;
+    amo_reserve_valid = false;
+    amo_reserve_valid64 = false;
+    PC = interrupt_function(PC, CAUSE_MACHINE_SOFT_INT, cp);
+  }
+  // Override mepc after force-take (lock-step: match RTL interrupted PC).
+  void set_mepc(uint64_t v) { mepc = v; }
+  uint64_t get_mepc() const { return mepc; }
+  // Override mstatus after force-take (lock-step: RTL interrupted a few
+  // instructions later than golden's forced point, so MPIE/MIE can be
+  // captured from a different guest state; adopt RTL's view wholesale).
+  void set_mstatus(uint64_t v) { mstatus.write_reg(v); }
+
   //__uint64_t fetch_long(__uint64_t offset) { return memory.at(offset / 8); }
 
   int is_peripheral_read(vector<uint64_t> &memory) {
-     __uint32_t instruction = hart_fetch_instruction(PC,memory);
-     __uint64_t load_addr = reg_file[(instruction >> 15) & 0x1f] + (((__uint64_t)((__int32_t) instruction)) >> 20);
-     if ((instruction & 0x7f) != 0b0000011) { return 0; } 
-     if ((load_addr >= DRAM_BASE) & (load_addr <= (DRAM_BASE + 0x9000000))) { return 0; } else { return 1; }
+     __uint32_t instruction = hart_fetch_instruction(PC, memory);
+     if ((instruction & 0x7f) != 0b0000011) { return 0; }
+     // I-immediate is bits [31:20] sign-extended. Must arithmetic-shift the
+     // 32-bit instruction; casting to uint64 before >> zero-fills and turns
+     // e.g. lbu rd, -1(rs1) into a huge non-DRAM address, false-positive
+     // "peripheral" — lockstep then overwrites golden rd with a (possibly
+     // stale) RTL register value and desyncs.
+     int64_t iimm = (int64_t)(int32_t)instruction >> 20;
+     __uint64_t load_addr =
+         reg_file[(instruction >> 15) & 0x1f] + (uint64_t)iimm;
+     if ((load_addr >= DRAM_BASE) &&
+         (load_addr <= (DRAM_BASE + 0x9000000ULL))) {
+       return 0;
+     }
+     // Golden already models CLINT + Xilinx uartlite (STATUS/RX/TX). Returning
+     // 1 here makes lockstep overwrite rd with a possibly-stale RTL GPR
+     // (registersOut lags a commit), e.g. replacing STATUS=TXEMPTY(4) with the
+     // pre-load address 0x40600008 — early_uartlite_putc then sees TXFULL and
+     // times out while RTL proceeds. Only request RTL inject for unmodeled MMIO.
+     if ((load_addr >= 0x02000000ULL) &&
+         (load_addr < 0x02000000ULL + 0xc0000ULL)) {
+       return 0;  // CLINT
+     }
+     if ((load_addr >= 0x40600000ULL) && (load_addr <= 0x4060000cULL)) {
+       return 0;  // uartlite
+     }
+     return 1;
    }
 
   uint32_t get_instruction(vector<uint64_t> &memory) {
@@ -227,7 +277,15 @@ public:
     PC_phy = 0;
     instruction = 0;
     mhartid = static_cast<uint64_t>(hid);
+    // Standalone emu parks secondaries until first MSIP (matches BBL-style
+    // bring-up). Under LOCKSTEP the RTL runs all four harts from reset (Linux
+    // lottery), so golden must too — otherwise multi-hart PC compare desyncs
+    // on the first secondary commit.
+#ifdef LOCKSTEP
+    smp_released = true;
+#else
     smp_released = (hid == 0);
+#endif
     in_wfi = false;
     post_kick_protect = 0;
   }

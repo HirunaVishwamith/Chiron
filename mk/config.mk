@@ -45,6 +45,12 @@ EMU_IMAGE := $(DATA)/Image
 HARNESS_INCS  := -I . -I $(VINC) -I $(SIM)/obj_dir
 VERILATED     := $(VINC)/verilated.cpp
 VERILATED_VCD := $(VINC)/verilated_vcd_c.cpp
+# The fast model is Verilated with --savable (checkpoint/restore for the long
+# Linux boot — see mk/rtl.mk). Verilator 4.x emits calls into
+# VerilatedSerialize/VerilatedDeserialize but does NOT bundle their
+# implementation into Vsystem__ALL.a, so this must be compiled alongside or the
+# link fails with `undefined reference to VerilatedDeserialize::readAssert`.
+VERILATED_SAVE := $(VINC)/verilated_save.cpp
 
 # Verilator 5.x splits the runtime into a separate libverilated.a (containing
 # verilated.o + verilated_vcd_c.o + verilated_threads.o). Verilator 4.x bundles
@@ -75,15 +81,44 @@ HARNESS_INCS_FAST := -I . -I $(VINC) -I $(SIM_FAST)
 _VLIB_FAST := $(wildcard $(SIM_FAST)/libverilated.a)
 ifneq ($(_VLIB_FAST),)
   VSYS_LIB_FAST := $(_VLIB_FAST) $(SIM_FAST)/Vsystem__ALL.a
-  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000
+  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED_SAVE)
 else
   VSYS_LIB_FAST := $(SIM_FAST)/Vsystem__ALL.a
-  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD)
+  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD) $(VERILATED_SAVE)
+endif
+
+# ── Linux boot harness flags ──────────────────────────────────────────────────
+# linux-sim links the same walker-ON fast model as CI (obj_dir_fast). A larger
+# STEP_TIMEOUT is used: legitimate boot phases (bbl kernel copy, rootfs) can
+# idle-commit for a while without it being a wedge. The old walker-disabled
+# obj_dir_linux path (sim-linux) is kept only for A/B debugging.
+SIM_LINUX          := $(SIM)/obj_dir_linux
+HARNESS_INCS_LINUX := -I . -I $(VINC) -I $(SIM_LINUX)
+_VLIB_LINUX := $(wildcard $(SIM_LINUX)/libverilated.a)
+ifneq ($(_VLIB_LINUX),)
+  VSYS_LIB_LINUX := $(_VLIB_LINUX) $(SIM_LINUX)/Vsystem__ALL.a
+else
+  VSYS_LIB_LINUX := $(SIM_LINUX)/Vsystem__ALL.a
+endif
+# Prefer the fast-model include path (single-build fix); fall back to compiling
+# verilated sources ourselves on Verilator 4.x.
+ifneq ($(_VLIB_FAST),)
+  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED_SAVE)
+else
+  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD) $(VERILATED_SAVE)
 endif
 
 # Optimization for the Verilator-generated C++ (verilated.mk's OPT_FAST default
 # is -Os = size; -O3 is markedly faster for long simulations). Behaviour-neutral.
 VOPT_FAST ?= -O3 -march=native -fno-math-errno
+
+# Parallelism for compiling the Verilated C++. Verilator splits system.v into
+# ~45 translation units and each takes tens of seconds at -O3 -march=native, so
+# building them one at a time costs 15-20 min -- long enough that people
+# reasonably mistake a rebuild for the simulation itself having got slower.
+# Rebuilds happen more often than you would think: `git checkout` rewrites the
+# mtime of every .scala file, which is enough to invalidate system.v.
+VJOBS ?= $(shell nproc)
 
 # Optional runtime diagnostic flags — passed to harness binaries at run time.
 # Use: make lockstep SHOW_STATE=1   (print golden-model register state each step)

@@ -13,6 +13,19 @@ class baseWire extends baseTrait
 
 trait  writeBackTrait extends baseTrait {
 	val data = UInt((lineSize*8).W)
+	// true  = the L1 STILL OWNS this line (fence.i clean-on-fence walker: it
+	//         writes the line back without touching the tag, so the cache keeps
+	//         it valid and writable).
+	// false = eviction: the tag has already been reassigned, so this buffered
+	//         copy is the only one left.
+	// The snoop-answer path in ACEUnit serves a snoop straight out of the
+	// writeback pipeline, which is correct ONLY for evictions. For a walker
+	// writeback the core can store into the line AFTER the walker captured it,
+	// making the buffered copy stale; answering from it hands a peer old data
+	// with PassDirty and permanently loses the committed store (the Linux
+	// csd_unlock hang). Entries with retain=true must therefore never answer a
+	// snoop — the L1 does, and it is strictly fresher.
+	val retain = Bool()
 }
 class writeBackWire extends writeBackTrait
 

@@ -90,11 +90,64 @@ class robFifo[T <: Data ]( gen: T, depth: Int) extends Fifo(gen:
 
   val nextval = Mux(modifyVal === (depth - 1).U, 0.U, modifyVal + 1.U)
 
-  when (modify){
+  // A rollback may only target an entry that is still live, i.e. inside
+  // [readPtr, writePtr). The block below assumes that ("the branch itself ...
+  // cannot have committed yet"), but the assumption does not always hold: a
+  // branch can resolve AFTER its ROB entry has retired, and then modifyVal is
+  // behind readPtr and `writeReg := modifyVal + 1` moves the write pointer
+  // FORWARD, so the ROB GROWS instead of shrinking. Measured on mt-ipimux
+  // hart1 (robmodify_probe, pre-edge sampling) — exactly ONE such rollback in
+  // 218,231, and it is the one that wedges the core:
+  //   cyc 26814119  pre{rd=14 wr=11 occ=13} modify=1 mVal=12 rel=14  <- retired
+  //                 post{rd=14 wr=13 occ=15}                          <- grew
+  //   cyc 26814132  post{rd=14 wr=14 full=1 occ=16}                   <- FULL
+  // A permanently full ROB blocks allocation, so decode stalls, the scheduler
+  // drains, branchCounter can never reach 0, and the interrupt-injection FSM
+  // parks in waitToInjectInterr with fetch frozen (core.scala:1197) — the hart
+  // never takes its pending IPI.
+  //
+  // Occupancy is (writePtr - readPtr) mod depth, with empty/full disambiguated
+  // by the flags. A target at distance >= occupancy has already retired, so the
+  // rollback has nothing left to discard and is dropped. This cannot mask a
+  // real rollback: anything still in flight is by definition within occupancy.
+  private val relTarget = modifyVal - readPtr
+  private val relWrite  = writePtr - readPtr
+  private val ptrW      = log2Ceil(depth)
+  val occupancy = Mux(emptyReg, 0.U((ptrW + 1).W),
+                  Mux(fullReg,  depth.U((ptrW + 1).W), 0.U(1.W) ## relWrite))
+  val modifyInWindow = (0.U(1.W) ## relTarget) < occupancy
+  val doModify = modify && modifyInWindow
+
+  when (doModify){
     //val nextval = modifyVal
     writeReg := nextval
     fullReg := nextval === readPtr
-    // emptyReg := nextval === readPtr  //leon
+    // emptyReg MUST be updated here too. A branch-mispredict rollback keeps
+    // entries [readPtr .. modifyVal] — including the branch itself, which has
+    // resolved but cannot have committed yet (deq is gated by !modify, and
+    // commit.ready needs the ready bit this resolution is what sets). So the
+    // FIFO always retains at least one entry and the correct disambiguation of
+    // the nextval === readPtr case on THIS path is "kept everything" (full),
+    // never "kept nothing" (empty) — hence the constant below rather than the
+    // old commented-out `nextval === readPtr`.
+    //
+    // Leaving emptyReg stale here is what produced two long-standing SMP
+    // wedges, because it desynchronises emptyReg from readPtr/writePtr:
+    //   * stale emptyReg=true after a rollback -> deq.valid stays low while
+    //     readPtr =/= writePtr, then the next enq clears emptyReg and the head
+    //     presents a SLOT THAT WAS NEVER REWRITTEN. That stale entry retires
+    //     and lands its register writeback: mt-ipitmr's csd-clear loop counter
+    //     a4 gets overwritten with an older trap frame's value (0x290 =
+    //     timer_irqs) mid-loop, so `bne a4,a6` never sees 4 and the software
+    //     IPI handler spins forever.
+    //   * stale emptyReg=false with nextval === readPtr -> fullReg=true and the
+    //     ROB is permanently full: allocation blocked, branchCounter never
+    //     drains, and the interrupt-injection FSM sits in waitToInjectInterr
+    //     with fetch frozen (core.scala:1197) never taking its IPI — the
+    //     mt-ipimux wedge.
+    // The coherent-load squash needs the opposite resolution ("keep nothing")
+    // and gets it from flushAll below, which last-connect overrides this.
+    emptyReg := false.B
   }.elsewhen(incrWrite){
     writeReg := nextWrite
   }
@@ -118,8 +171,8 @@ class robFifo[T <: Data ]( gen: T, depth: Int) extends Fifo(gen:
   }
 
   io.deq.bits := memReg(readPtr)
-  io.enq.ready := (!fullReg | (io.deq.valid & io.deq.ready)) & !modify
-  io.deq.valid := !emptyReg & !modify
+  io.enq.ready := (!fullReg | (io.deq.valid & io.deq.ready)) & !doModify
+  io.deq.valid := !emptyReg & !doModify
 
   // Coherent-load squash: the rollback target is commit.robAddr-1, which the
   // modify block above cannot represent — nextval === readPtr is ambiguous

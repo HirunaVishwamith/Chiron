@@ -165,6 +165,34 @@ jobs:
         echo "Quad-core benchmarks and fast RTL model passed without register mismatches or failures."
 
     # =========================
+    # Microarchitectural assertion gate.
+    #
+    # ci-bench above asks "did the benchmark produce the right answer?".
+    # This asks the stricter question: "did the microarchitecture stay
+    # self-consistent while it did?" Four separate wedges in this design were
+    # caused by a completion landing on a ROB slot that speculation had already
+    # reallocated -- each corrupted state silently for millions of cycles before
+    # anything visibly hung, and ci-bench passed straight through some of them.
+    # sim/harness/invariants.h asserts the invariants they violated on every
+    # cycle; a violation fails the run even when the benchmark still computed
+    # the right result.
+    #
+    # Runs on the same committed bins/ as ci-bench, so it needs no RISC-V
+    # toolchain. It is slower (it reads all 16 ROB ready bits per core per
+    # cycle), which is why it is a separate binary and a separate step rather
+    # than a flag on the profiling one.
+    #
+    # NOT included here: `make stress-sweep` (seeded constrained-random
+    # speculation stress). It compiles generated C and therefore needs
+    # riscv64-unknown-elf-gcc, which this workflow deliberately does not
+    # install. To add it, install the toolchain and append e.g.
+    #   make stress-sweep STRESS_SEEDS="1 2 3 4" BLOCKS=200
+    # keeping the seed list short -- each seed is a full RTL simulation.
+    # =========================
+    - name: Run microarchitectural assertion gate
+      run: make ci-check
+
+    # =========================
     # Upload results (always, even if previous steps failed, for debugging)
     # =========================
     - name: Upload results

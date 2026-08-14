@@ -35,8 +35,10 @@ inline void reset(Vsystem *tb, unsigned long long &tickcount) {
 
 // Stream a flat image into DRAM at offset 0 via the programmer port.
 //   tag      log prefix, e.g. "[profile]"
-//   log      where diagnostics go (fire streams UART to stdout, so it logs to
-//            stderr to keep the rendered frames clean)
+//   log      where diagnostics go, or nullptr to stay silent. Loading progress
+//            is harness chatter, not program output: harnesses pass
+//            simlog::sink() so it lands in the --debug log and never on the
+//            console the guest is printing to.
 //   progress print a running percentage during the load
 inline bool load_image(Vsystem *tb, const std::string &image_path,
                        unsigned long long &tickcount,
@@ -52,8 +54,9 @@ inline bool load_image(Vsystem *tb, const std::string &image_path,
   std::vector<unsigned char> buffer(
       (std::istreambuf_iterator<char>(input)),
       std::istreambuf_iterator<char>());
-  std::fprintf(log, "%s Loading image: %s (%zu bytes)\n", tag,
-               image_path.c_str(), buffer.size());
+  if (log)
+    std::fprintf(log, "%s Loading image: %s (%zu bytes)\n", tag,
+                 image_path.c_str(), buffer.size());
 
   tb->programmer_valid = 1;
   for (size_t i = 0; i + 7 < buffer.size(); i += 8) {
@@ -61,13 +64,14 @@ inline bool load_image(Vsystem *tb, const std::string &image_path,
     tb->programmer_offset = static_cast<unsigned long>(i);
     tick_nodump(tb);
     ++tickcount;
-    if (progress && (i & 0xFFFFF) == 0) {
+    if (log && progress && (i & 0xFFFFF) == 0) {
       std::fprintf(log, "%s Loaded: %3llu%%\r", tag,
                    (unsigned long long)(i * 100 / buffer.size()));
       std::fflush(log);
     }
   }
-  std::fprintf(log, "%s Image loaded.%s\n", tag, progress ? "            " : "");
+  if (log)
+    std::fprintf(log, "%s Image loaded.%s\n", tag, progress ? "            " : "");
 
   tb->finishedProgramming = 1;
   tb->programmer_valid    = 0;

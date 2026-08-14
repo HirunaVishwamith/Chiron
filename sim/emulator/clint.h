@@ -30,12 +30,50 @@ public:
         gettimeofday(&tv, NULL);
     }
 
+    // Force MSIP[hart] from an external source (RTL pin in lock-step).
+    void set_msip(uint32_t h, uint32_t value)
+    {
+        if (h < num_harts)
+            msip[h] = value & 1;
+    }
+
+    uint32_t get_msip(uint32_t h) const
+    {
+        return (h < num_harts) ? (msip[h] & 1) : 0;
+    }
+
+    // Force mtime from RTL (lock-step). Guest code (clint_get_cycles64) loads
+    // the live MMIO mtime; independent golden advance() drifts from the RTL
+    // 16-cycle-prescaled counter and fails lockstep after timer init.
+    void set_mtime(uint64_t value) { mtime = value; }
+    uint64_t get_mtime() const { return mtime; }
+
+    void set_mtimecmp(uint32_t h, uint64_t value)
+    {
+        if (h < num_harts)
+            mtimecmp[h] = value;
+    }
+    uint64_t get_mtimecmp(uint32_t h) const
+    {
+        return (h < num_harts) ? mtimecmp[h] : ~0ULL;
+    }
+
     void write(uint64_t addr, uint64_t value, int size = 8)
     {
         if ((addr >= CLINT_BASE_ADDR + MSIP_BASE) && (addr < CLINT_BASE_ADDR + MSIP_BASE + 4 * num_harts))
         {
             hart = (addr - (CLINT_BASE_ADDR + MSIP_BASE)) / 4;
+#ifdef LOCKSTEP
+            // In RTL lock-step, MSIP is driven exclusively from the RTL
+            // msipShared pins (see lockstep_linux sync). Golden store timing
+            // is instantaneous while the RTL write takes many AXI cycles after
+            // the store commits — applying the store here makes secondaries
+            // leave the MSIP wait loop (csrr mip / andi / bnez) on golden
+            // while RTL is still WFI'ing → PC mismatch.
+            (void)value;
+#else
             msip[hart] = value & 1;   // only bit 0 is used for MSIP
+#endif
         }
         else if ((addr >= CLINT_BASE_ADDR + MTIMECMP_BASE) && (addr < CLINT_BASE_ADDR + MTIMECMP_BASE + 8 * num_harts))
         {

@@ -1,0 +1,401 @@
+<title>chiron — quad-core RV64IMA performance & verification</title>
+<style>
+  /* ---- tokens -------------------------------------------------------------
+     Light is the base. Dark is redefined twice: once for the OS setting (the
+     un-stamped document, guarded so an explicit light choice still wins) and
+     once for an explicit dark stamp. No colour is ever declared only inside a
+     media or [data-theme] block. */
+  :root {
+    color-scheme: light;
+    --ground:      #f1f3f6;   /* page: cool slate, biased toward the accent */
+    --surface:     #fcfcfb;   /* chart surface the palette was validated on */
+    --rule:        #dfe3e9;
+    --rule-strong: #c3c9d2;
+    --ink:         #0b0b0b;
+    --ink-2:       #52514e;
+    --ink-3:       #7c7f86;
+    --accent:      #2a78d6;
+    --good:        #008300;   /* status only — never a data series */
+    --good-bg:     #e6f2e6;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+    --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #5598e7;
+    --seq-4: #2a78d6; --seq-5: #1c5cab; --seq-6: #104281;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #101215; --surface: #1a1a19;
+      --rule: #2c2f34; --rule-strong: #414750;
+      --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8e9199;
+      --accent: #3987e5; --good: #46a046; --good-bg: #16261a;
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+      --seq-1: #184f95; --seq-2: #1c5cab; --seq-3: #256abf;
+      --seq-4: #3987e5; --seq-5: #6da7ec; --seq-6: #9ec5f4;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #101215; --surface: #1a1a19;
+    --rule: #2c2f34; --rule-strong: #414750;
+    --ink: #ffffff; --ink-2: #c3c2b7; --ink-3: #8e9199;
+    --accent: #3987e5; --good: #46a046; --good-bg: #16261a;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --seq-1: #184f95; --seq-2: #1c5cab; --seq-3: #256abf;
+    --seq-4: #3987e5; --seq-5: #6da7ec; --seq-6: #9ec5f4;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono, .num, table td, .tick, .vlabel {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+                 "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 24px 72px; }
+
+  header { border-bottom: 1px solid var(--rule-strong); padding-bottom: 20px; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-3); margin: 0 0 8px;
+  }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0 0 6px; font-weight: 620;
+       letter-spacing: -.015em; text-wrap: balance; }
+  .sub { color: var(--ink-2); margin: 0; max-width: 62ch; }
+
+  h2 { font-size: 13px; letter-spacing: .1em; text-transform: uppercase;
+       color: var(--ink-3); font-weight: 600; margin: 0 0 4px; }
+  .note { color: var(--ink-2); font-size: 13.5px; margin: 0 0 16px; max-width: 68ch; }
+
+  section { margin-top: 40px; }
+
+  /* ---- status strip ---- */
+  .gates { display: flex; flex-wrap: wrap; gap: 8px; }
+  .gate {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--rule);
+    padding: 8px 12px; font-size: 13px;
+  }
+  .gate .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); flex: none; }
+  .gate b { font-weight: 600; }
+  .gate .v { color: var(--ink-2); }
+  .gate.pass { background: var(--good-bg); border-color: color-mix(in srgb, var(--good) 30%, var(--rule)); }
+
+  /* ---- KPI row ---- */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px;
+          background: var(--rule); border: 1px solid var(--rule); }
+  .kpi { background: var(--surface); padding: 16px 18px; }
+  .kpi .k { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  .kpi .v { font-size: 28px; font-weight: 600; letter-spacing: -.02em; margin-top: 4px; }
+  .kpi .d { font-size: 12.5px; color: var(--ink-2); }
+
+  /* ---- charts ---- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--rule); padding: 20px 20px 12px; }
+  .card h3 { font-size: 15px; margin: 0 0 2px; font-weight: 600; }
+  .card p { font-size: 13px; color: var(--ink-2); margin: 0 0 14px; }
+  .chart { width: 100%; overflow-x: auto; }
+  svg { display: block; }
+  .grid-line { stroke: var(--rule); stroke-width: 1; }
+  .axis { stroke: var(--rule-strong); stroke-width: 1; }
+  .tick { font-size: 11px; fill: var(--ink-3); }
+  .cat { font-size: 12px; fill: var(--ink-2); }
+  .vlabel { font-size: 10.5px; fill: var(--ink-2); }
+  .bar { transition: opacity .12s ease; }
+  .bar:hover { opacity: .78; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 4px 0 0; padding: 0; list-style: none; }
+  .legend li { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); }
+  .legend .sw { width: 10px; height: 10px; flex: none; }
+
+  /* ---- table ---- */
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; min-width: 760px; }
+  th, td { padding: 8px 12px; text-align: right; white-space: nowrap; }
+  th { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3);
+       font-weight: 600; border-bottom: 1px solid var(--rule-strong); position: sticky; top: 0;
+       background: var(--surface); }
+  td { border-bottom: 1px solid var(--rule); color: var(--ink-2); }
+  th:first-child, td:first-child { text-align: left; }
+  td.b { color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+  .hart { display: inline-flex; align-items: center; gap: 6px; }
+  .hart .sw { width: 8px; height: 8px; flex: none; }
+
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--rule);
+           color: var(--ink-3); font-size: 12.5px; }
+  footer code { font-family: ui-monospace, Menlo, Consolas, monospace; }
+
+  /* tooltip */
+  #tip { position: fixed; pointer-events: none; opacity: 0; transition: opacity .1s;
+         background: var(--ink); color: var(--ground); padding: 6px 9px; font-size: 12px;
+         z-index: 10; white-space: nowrap;
+         font-family: ui-monospace, Menlo, Consolas, monospace; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">chiron · RV64IMA · 4 harts · Chisel → Verilator</p>
+    <h1>Quad-core performance &amp; verification</h1>
+    <p class="sub">Measured on the Verilated RTL, not a model. Every number below
+      comes from the on-core performance counters read by <span class="mono">profile_quad</span>
+      at the end of each run.</p>
+  </header>
+
+  <section>
+    <h2>Verification gates</h2>
+    <p class="note">What each gate proves — and what it does not — is written up in
+      <span class="mono">VERIFICATION.md</span>. ISA alone is deliberately not treated as
+      sufficient for speculation changes.</p>
+    <div class="gates"><span class="gate pass"><span class="dot"></span><b>ISA suite</b><span class="v mono">84 / 84</span></span>
+<span class="gate pass"><span class="dot"></span><b>Quad benchmarks</b><span class="v mono">5 / 5</span></span>
+<span class="gate pass"><span class="dot"></span><b>Invariant assertions</b><span class="v mono">0 violations</span></span>
+<span class="gate pass"><span class="dot"></span><b>Random stress</b><span class="v mono">8 / 8 seeds</span></span></div>
+  </section>
+
+  <section>
+    <h2>At a glance</h2>
+    <div class="kpis"><div class="kpi"><div class="k">Peak aggregate IPC</div><div class="v mono">1.17</div><div class="d">filter-s5 · 4 harts combined</div></div>
+<div class="kpi"><div class="k">Best single-hart IPC</div><div class="v mono">0.33</div><div class="d">across all runs</div></div>
+<div class="kpi"><div class="k">Instructions retired</div><div class="v mono">30.9M</div><div class="d">over 5 benchmarks</div></div>
+<div class="kpi"><div class="k">Cycles simulated</div><div class="v mono">27.7M</div><div class="d">RTL cycles, post-reset</div></div></div>
+  </section>
+
+  <section>
+    <h2>Per-benchmark</h2>
+    <p class="note">Harts keep the same colour in every chart — colour follows the hart,
+      never its rank. Each group labels its highest bar; hover any bar for its value, and
+      the table below carries every number, so nothing depends on colour alone.</p>
+    <div class="grid">
+    <div class="card">
+      <h3>Instructions per cycle, by hart</h3>
+      <p>Higher is better. Divergence between harts is load imbalance, not a fault.</p>
+      <div class="chart" id="c-ipc"></div><ul class="legend"><li><span class="sw" style="background:var(--s1)"></span>hart 0</li><li><span class="sw" style="background:var(--s2)"></span>hart 1</li><li><span class="sw" style="background:var(--s3)"></span>hart 2</li><li><span class="sw" style="background:var(--s4)"></span>hart 3</li></ul>
+    </div>
+    <div class="card">
+      <h3>Cycles stalled on the reorder buffer</h3>
+      <p>The dominant back-end stall: the ROB head cannot retire, so allocation blocks.</p>
+      <div class="chart" id="c-rob"></div><ul class="legend"><li><span class="sw" style="background:var(--s1)"></span>hart 0</li><li><span class="sw" style="background:var(--s2)"></span>hart 1</li><li><span class="sw" style="background:var(--s3)"></span>hart 2</li><li><span class="sw" style="background:var(--s4)"></span>hart 3</li></ul>
+    </div>
+    <div class="card">
+      <h3>L1 data-cache miss rate</h3>
+      <p>Worst hart per benchmark — a single-series magnitude, so one hue rather than
+         the categorical ramp.</p>
+      <div class="chart" id="c-dcache"></div>
+    </div>
+    <div class="card">
+      <h3>Branch prediction accuracy</h3>
+      <p>Worst hart per benchmark. Every mispredict flushes speculative state, which is
+         where this core has historically hidden bugs.</p>
+      <div class="chart" id="c-branch"></div>
+    </div></div>
+  </section>
+
+  <section>
+    <h2>All counters</h2>
+    <p class="note">The full per-hart readout behind the charts.</p>
+    <div class="tablewrap"><table><tr><th>Benchmark</th><th>Hart</th><th>IPC</th><th>Retired</th><th>Cycles</th><th>Branch acc</th><th>I$ miss</th><th>D$ miss</th><th>ROB stall</th><th>Decode eff</th><th>L1D read B/cyc</th></tr><tr><td class="b">csaxpy-s5-q4</td><td><span class="hart"><span class="sw" style="background:var(--s1)"></span>0</span></td><td class="b">0.113</td><td>1,033,253</td><td>9,171,351</td><td>63.18%</td><td>0.001%</td><td>1.177%</td><td>59.76%</td><td>24.0%</td><td>0.0236</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s2)"></span>1</span></td><td class="b">0.331</td><td>3,030,835</td><td>9,171,351</td><td>77.72%</td><td>0.001%</td><td>6.774%</td><td>1.11%</td><td>98.9%</td><td>0.0036</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s3)"></span>2</span></td><td class="b">0.330</td><td>3,030,442</td><td>9,171,351</td><td>77.72%</td><td>0.001%</td><td>6.959%</td><td>1.17%</td><td>98.8%</td><td>0.0038</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s4)"></span>3</span></td><td class="b">0.330</td><td>3,029,831</td><td>9,171,351</td><td>77.71%</td><td>0.001%</td><td>7.078%</td><td>1.17%</td><td>98.8%</td><td>0.0037</td></tr><tr><td class="b">filter-s5-q4</td><td><span class="hart"><span class="sw" style="background:var(--s1)"></span>0</span></td><td class="b">0.175</td><td>1,641,271</td><td>9,386,603</td><td>64.62%</td><td>0.001%</td><td>1.381%</td><td>65.16%</td><td>34.6%</td><td>0.0382</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s2)"></span>1</span></td><td class="b">0.332</td><td>3,114,854</td><td>9,386,603</td><td>77.01%</td><td>0.001%</td><td>1.427%</td><td>2.58%</td><td>97.0%</td><td>0.0088</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s3)"></span>2</span></td><td class="b">0.332</td><td>3,113,159</td><td>9,386,603</td><td>77.01%</td><td>0.001%</td><td>1.472%</td><td>2.61%</td><td>97.0%</td><td>0.0090</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s4)"></span>3</span></td><td class="b">0.331</td><td>3,110,217</td><td>9,386,603</td><td>77.04%</td><td>0.001%</td><td>1.438%</td><td>2.57%</td><td>97.1%</td><td>0.0089</td></tr><tr><td class="b">histo-s5-q4</td><td><span class="hart"><span class="sw" style="background:var(--s1)"></span>0</span></td><td class="b">0.171</td><td>624,914</td><td>3,646,787</td><td>39.29%</td><td>0.002%</td><td>1.231%</td><td>45.68%</td><td>50.5%</td><td>0.0554</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s2)"></span>1</span></td><td class="b">0.283</td><td>1,031,489</td><td>3,646,787</td><td>74.01%</td><td>0.002%</td><td>2.120%</td><td>5.31%</td><td>90.4%</td><td>0.0334</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s3)"></span>2</span></td><td class="b">0.282</td><td>1,029,885</td><td>3,646,787</td><td>73.92%</td><td>0.001%</td><td>2.136%</td><td>5.05%</td><td>90.7%</td><td>0.0334</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s4)"></span>3</span></td><td class="b">0.283</td><td>1,033,558</td><td>3,646,787</td><td>74.01%</td><td>0.002%</td><td>1.895%</td><td>3.95%</td><td>91.8%</td><td>0.0301</td></tr><tr><td class="b">matmul-s1-q4</td><td><span class="hart"><span class="sw" style="background:var(--s1)"></span>0</span></td><td class="b">0.189</td><td>148,140</td><td>785,401</td><td>43.69%</td><td>0.007%</td><td>0.839%</td><td>57.24%</td><td>42.8%</td><td>0.0369</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s2)"></span>1</span></td><td class="b">0.310</td><td>243,870</td><td>785,401</td><td>74.08%</td><td>0.008%</td><td>0.543%</td><td>12.27%</td><td>87.7%</td><td>0.0148</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s3)"></span>2</span></td><td class="b">0.310</td><td>243,879</td><td>785,401</td><td>73.94%</td><td>0.008%</td><td>0.594%</td><td>11.16%</td><td>88.8%</td><td>0.0162</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s4)"></span>3</span></td><td class="b">0.310</td><td>243,882</td><td>785,401</td><td>73.87%</td><td>0.007%</td><td>0.633%</td><td>10.93%</td><td>89.1%</td><td>0.0173</td></tr><tr><td class="b">vvadd-s5-q4</td><td><span class="hart"><span class="sw" style="background:var(--s1)"></span>0</span></td><td class="b">0.146</td><td>694,558</td><td>4,752,599</td><td>63.46%</td><td>0.001%</td><td>2.310%</td><td>68.58%</td><td>31.4%</td><td>0.0561</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s2)"></span>1</span></td><td class="b">0.317</td><td>1,507,736</td><td>4,752,599</td><td>77.19%</td><td>0.001%</td><td>4.968%</td><td>3.29%</td><td>96.7%</td><td>0.0108</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s3)"></span>2</span></td><td class="b">0.317</td><td>1,507,715</td><td>4,752,599</td><td>77.19%</td><td>0.001%</td><td>4.976%</td><td>3.31%</td><td>96.7%</td><td>0.0108</td></tr><tr><td></td><td><span class="hart"><span class="sw" style="background:var(--s4)"></span>3</span></td><td class="b">0.317</td><td>1,507,698</td><td>4,752,599</td><td>77.19%</td><td>0.001%</td><td>4.970%</td><td>3.29%</td><td>96.7%</td><td>0.0108</td></tr></table></div>
+  </section>
+
+  <footer>
+    <p>Generated by <code>tools/viz_report.py</code> from <code>profile_quad</code> JSON ·
+       2026-08-08 · chiron</p>
+  </footer>
+</div>
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+const DATA = [{"name": "csaxpy-s5-q4", "agg_ipc": 1.1039, "total_inst": 10124361, "max_cycles": 9171351, "cores": [{"core": 0, "ipc": 0.1127, "inst": 1033253, "cycles": 9171351, "branch_acc": 63.1793, "icache_miss": 0.0005, "dcache_miss": 1.1771, "rob_stall": 59.7648, "sched_stall": 29.1038, "decode_eff": 24.0059, "l1d_rd_bw": 0.0236}, {"core": 1, "ipc": 0.3305, "inst": 3030835, "cycles": 9171351, "branch_acc": 77.7195, "icache_miss": 0.0008, "dcache_miss": 6.7743, "rob_stall": 1.1093, "sched_stall": 0.0017, "decode_eff": 98.8891, "l1d_rd_bw": 0.0036}, {"core": 2, "ipc": 0.3304, "inst": 3030442, "cycles": 9171351, "branch_acc": 77.7178, "icache_miss": 0.0008, "dcache_miss": 6.959, "rob_stall": 1.1748, "sched_stall": 0.0017, "decode_eff": 98.8235, "l1d_rd_bw": 0.0038}, {"core": 3, "ipc": 0.3304, "inst": 3029831, "cycles": 9171351, "branch_acc": 77.7129, "icache_miss": 0.0006, "dcache_miss": 7.0779, "rob_stall": 1.1699, "sched_stall": 0.0017, "decode_eff": 98.8284, "l1d_rd_bw": 0.0037}]}, {"name": "filter-s5-q4", "agg_ipc": 1.1697, "total_inst": 10979501, "max_cycles": 9386603, "cores": [{"core": 0, "ipc": 0.1749, "inst": 1641271, "cycles": 9386603, "branch_acc": 64.623, "icache_miss": 0.0006, "dcache_miss": 1.3807, "rob_stall": 65.1596, "sched_stall": 0.2341, "decode_eff": 34.6286, "l1d_rd_bw": 0.0382}, {"core": 1, "ipc": 0.3318, "inst": 3114854, "cycles": 9386603, "branch_acc": 77.0109, "icache_miss": 0.0008, "dcache_miss": 1.4267, "rob_stall": 2.5841, "sched_stall": 0.4162, "decode_eff": 97.0382, "l1d_rd_bw": 0.0088}, {"core": 2, "ipc": 0.3317, "inst": 3113159, "cycles": 9386603, "branch_acc": 77.0088, "icache_miss": 0.0008, "dcache_miss": 1.4725, "rob_stall": 2.6069, "sched_stall": 0.4194, "decode_eff": 97.0127, "l1d_rd_bw": 0.009}, {"core": 3, "ipc": 0.3313, "inst": 3110217, "cycles": 9386603, "branch_acc": 77.0436, "icache_miss": 0.0008, "dcache_miss": 1.4378, "rob_stall": 2.5656, "sched_stall": 0.4014, "decode_eff": 97.0695, "l1d_rd_bw": 0.0089}]}, {"name": "histo-s5-q4", "agg_ipc": 1.02, "total_inst": 3719846, "max_cycles": 3646787, "cores": [{"core": 0, "ipc": 0.1714, "inst": 624914, "cycles": 3646787, "branch_acc": 39.2856, "icache_miss": 0.0017, "dcache_miss": 1.2309, "rob_stall": 45.6805, "sched_stall": 3.8987, "decode_eff": 50.5092, "l1d_rd_bw": 0.0554}, {"core": 1, "ipc": 0.2828, "inst": 1031489, "cycles": 3646787, "branch_acc": 74.006, "icache_miss": 0.0017, "dcache_miss": 2.1205, "rob_stall": 5.3126, "sched_stall": 4.2741, "decode_eff": 90.4424, "l1d_rd_bw": 0.0334}, {"core": 2, "ipc": 0.2824, "inst": 1029885, "cycles": 3646787, "branch_acc": 73.9151, "icache_miss": 0.0014, "dcache_miss": 2.1362, "rob_stall": 5.0458, "sched_stall": 4.2901, "decode_eff": 90.7136, "l1d_rd_bw": 0.0334}, {"core": 3, "ipc": 0.2834, "inst": 1033558, "cycles": 3646787, "branch_acc": 74.0076, "icache_miss": 0.0017, "dcache_miss": 1.8952, "rob_stall": 3.9537, "sched_stall": 4.2766, "decode_eff": 91.7793, "l1d_rd_bw": 0.0301}]}, {"name": "matmul-s1-q4", "agg_ipc": 1.1202, "total_inst": 879771, "max_cycles": 785401, "cores": [{"core": 0, "ipc": 0.1886, "inst": 148140, "cycles": 785401, "branch_acc": 43.6855, "icache_miss": 0.0075, "dcache_miss": 0.8392, "rob_stall": 57.2436, "sched_stall": 0.0014, "decode_eff": 42.7557, "l1d_rd_bw": 0.0369}, {"core": 1, "ipc": 0.3105, "inst": 243870, "cycles": 785401, "branch_acc": 74.0767, "icache_miss": 0.0079, "dcache_miss": 0.5434, "rob_stall": 12.27, "sched_stall": 0.0, "decode_eff": 87.73, "l1d_rd_bw": 0.0148}, {"core": 2, "ipc": 0.3105, "inst": 243879, "cycles": 785401, "branch_acc": 73.9361, "icache_miss": 0.0083, "dcache_miss": 0.5937, "rob_stall": 11.1641, "sched_stall": 0.0, "decode_eff": 88.8359, "l1d_rd_bw": 0.0162}, {"core": 3, "ipc": 0.3105, "inst": 243882, "cycles": 785401, "branch_acc": 73.8735, "icache_miss": 0.0069, "dcache_miss": 0.6326, "rob_stall": 10.9298, "sched_stall": 0.0, "decode_eff": 89.0702, "l1d_rd_bw": 0.0173}]}, {"name": "vvadd-s5-q4", "agg_ipc": 1.0979, "total_inst": 5217707, "max_cycles": 4752599, "cores": [{"core": 0, "ipc": 0.1461, "inst": 694558, "cycles": 4752599, "branch_acc": 63.4599, "icache_miss": 0.001, "dcache_miss": 2.3098, "rob_stall": 68.5795, "sched_stall": 0.0019, "decode_eff": 31.4187, "l1d_rd_bw": 0.0561}, {"core": 1, "ipc": 0.3172, "inst": 1507736, "cycles": 4752599, "branch_acc": 77.1902, "icache_miss": 0.0014, "dcache_miss": 4.968, "rob_stall": 3.2871, "sched_stall": 0.0033, "decode_eff": 96.7096, "l1d_rd_bw": 0.0108}, {"core": 2, "ipc": 0.3172, "inst": 1507715, "cycles": 4752599, "branch_acc": 77.1899, "icache_miss": 0.0014, "dcache_miss": 4.9764, "rob_stall": 3.3066, "sched_stall": 0.0033, "decode_eff": 96.6901, "l1d_rd_bw": 0.0108}, {"core": 3, "ipc": 0.3172, "inst": 1507698, "cycles": 4752599, "branch_acc": 77.1902, "icache_miss": 0.0014, "dcache_miss": 4.9702, "rob_stall": 3.2897, "sched_stall": 0.0033, "decode_eff": 96.707, "l1d_rd_bw": 0.0108}]}];
+const tip = document.getElementById('tip');
+function showTip(e, html) {
+  tip.textContent = html; tip.style.opacity = '1';
+  const pad = 14;
+  let x = e.clientX + pad, y = e.clientY + pad;
+  const r = tip.getBoundingClientRect();
+  if (x + r.width > window.innerWidth) x = e.clientX - r.width - pad;
+  if (y + r.height > window.innerHeight) y = e.clientY - r.height - pad;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function hideTip() { tip.style.opacity = '0'; }
+
+const NS = 'http://www.w3.org/2000/svg';
+const el = (n, a) => { const e = document.createElementNS(NS, n);
+  for (const k in a) e.setAttribute(k, a[k]); return e; };
+
+// Axis ticks must land on round numbers — 0 / 20 / 40, never 0 / 19.75 / 39.5.
+// Returns {max, step} where max >= the data and step is 1/2/2.5/5 x 10^n.
+function niceScale(raw, targetTicks) {
+  if (!(raw > 0)) return { max: 1, step: 0.25 };
+  const rough = raw / targetTicks;
+  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  const norm = rough / mag;
+  const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
+  return { max: Math.ceil(raw / step) * step, step };
+}
+
+// Grouped bar: one group per benchmark, one bar per hart.
+// 24px cap on bar thickness, 2px surface gap between adjacent bars, 4px rounded
+// data-end at the top and square at the baseline (a plain rect + a rounded cap).
+function groupedBars(mount, rows, opts) {
+  const W = Math.max(420, mount.clientWidth || 520), H = opts.height || 260;
+  const M = { t: 14, r: 14, b: 46, l: 46 };
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const svg = el('svg', { width: W, height: H, role: 'img',
+                          'aria-label': opts.aria || opts.title });
+  const peak = Math.max(...rows.flatMap(r => r.values));
+  const sc = niceScale(peak * 1.12, 4);
+  const max = sc.max;
+
+  // horizontal grid + y ticks, hairline and solid, on round values
+  for (let v = 0; v <= max + 1e-9; v += sc.step) {
+    const y = M.t + ih - (v / max) * ih;
+    svg.appendChild(el('line', { x1: M.l, x2: M.l + iw, y1: y, y2: y, class: 'grid-line' }));
+    const t = el('text', { x: M.l - 8, y: y + 3.5, class: 'tick', 'text-anchor': 'end' });
+    t.textContent = opts.fmtTick ? opts.fmtTick(v) : v.toFixed(2);
+    svg.appendChild(t);
+  }
+  svg.appendChild(el('line', { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih, class: 'axis' }));
+
+  const gw = iw / rows.length;
+  rows.forEach((row, gi) => {
+    const n = row.values.length;
+    const GAP = 2;                                   // surface gap, not a stroke
+    const bw = Math.min(24, (gw * 0.74 - GAP * (n - 1)) / n);
+    const total = bw * n + GAP * (n - 1);
+    const x0 = M.l + gi * gw + (gw - total) / 2;
+    // Label SELECTIVELY. Four harts often sit within a hair of each other, so a
+    // number on every bar overlaps into gibberish ("0.310.310.31") — the exact
+    // failure the "never a number on every point" rule exists to prevent. Label
+    // the group's extreme only; the legend gives identity, the tooltip gives any
+    // single value, and the table view carries all of them (which is also what
+    // discharges the light-mode contrast relief rule).
+    const peakIdx = row.values.indexOf(Math.max(...row.values));
+    row.values.forEach((v, si) => {
+      const h = Math.max(1, (v / max) * ih);
+      const x = x0 + si * (bw + GAP), y = M.t + ih - h;
+      const r = Math.min(4, bw / 2, h);
+      // rounded top, square baseline
+      const d = `M${x},${M.t + ih} L${x},${y + r} Q${x},${y} ${x + r},${y}
+                 L${x + bw - r},${y} Q${x + bw},${y} ${x + bw},${y + r}
+                 L${x + bw},${M.t + ih} Z`;
+      const p = el('path', { d, fill: opts.colors[si], class: 'bar' });
+      p.addEventListener('mousemove', (e) =>
+        showTip(e, `${row.label} · ${opts.seriesNames[si]}: ${opts.fmtVal(v)}`));
+      p.addEventListener('mouseleave', hideTip);
+      svg.appendChild(p);
+      if (opts.labelBars && si === peakIdx) {
+        const txt = opts.fmtVal(v);
+        // Measure before placing: a label wider than its group never gets drawn
+        // rather than clipped or overlapped.
+        if (txt.length * 6.4 <= total + GAP * 2) {
+          const t = el('text', { x: x + bw / 2, y: y - 5, class: 'vlabel',
+                                 'text-anchor': 'middle' });
+          t.textContent = txt;
+          svg.appendChild(t);
+        }
+      }
+    });
+    const c = el('text', { x: M.l + gi * gw + gw / 2, y: H - 26, class: 'cat',
+                           'text-anchor': 'middle' });
+    c.textContent = row.label;
+    svg.appendChild(c);
+  });
+  mount.replaceChildren(svg);
+}
+
+// Single-series bars — magnitude, so one hue rather than the categorical ramp.
+function seqBars(mount, rows, opts) {
+  const W = Math.max(420, mount.clientWidth || 520), H = opts.height || 260;
+  const M = { t: 14, r: 14, b: 46, l: 52 };
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const svg = el('svg', { width: W, height: H, role: 'img',
+                          'aria-label': opts.aria || opts.title });
+  const sc = niceScale(Math.max(...rows.map(r => r.value)) * 1.15, 4);
+  const max = sc.max;
+  for (let v = 0; v <= max + 1e-9; v += sc.step) {
+    const y = M.t + ih - (v / max) * ih;
+    svg.appendChild(el('line', { x1: M.l, x2: M.l + iw, y1: y, y2: y, class: 'grid-line' }));
+    const t = el('text', { x: M.l - 8, y: y + 3.5, class: 'tick', 'text-anchor': 'end' });
+    t.textContent = opts.fmtTick(v);
+    svg.appendChild(t);
+  }
+  svg.appendChild(el('line', { x1: M.l, x2: M.l + iw, y1: M.t + ih, y2: M.t + ih, class: 'axis' }));
+  const gw = iw / rows.length;
+  rows.forEach((row, i) => {
+    const bw = Math.min(24, gw * 0.5);
+    const h = Math.max(1, (row.value / max) * ih);
+    const x = M.l + i * gw + (gw - bw) / 2, y = M.t + ih - h;
+    const r = Math.min(4, bw / 2, h);
+    const d = `M${x},${M.t + ih} L${x},${y + r} Q${x},${y} ${x + r},${y}
+               L${x + bw - r},${y} Q${x + bw},${y} ${x + bw},${y + r}
+               L${x + bw},${M.t + ih} Z`;
+    const p = el('path', { d, fill: opts.color, class: 'bar' });
+    p.addEventListener('mousemove', (e) => showTip(e, `${row.label}: ${opts.fmtVal(row.value)}`));
+    p.addEventListener('mouseleave', hideTip);
+    svg.appendChild(p);
+    const t = el('text', { x: x + bw / 2, y: y - 5, class: 'vlabel', 'text-anchor': 'middle' });
+    t.textContent = opts.fmtVal(row.value);
+    svg.appendChild(t);
+    const c = el('text', { x: M.l + i * gw + gw / 2, y: H - 26, class: 'cat',
+                           'text-anchor': 'middle' });
+    c.textContent = row.label;
+    svg.appendChild(c);
+  });
+  mount.replaceChildren(svg);
+}
+
+const S = getComputedStyle(document.documentElement);
+const hartColors = () => ['--s1', '--s2', '--s3', '--s4']
+  .map(v => getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+const hartNames = DATA.length ? DATA[0].cores.map(c => 'hart ' + c.core) : [];
+
+function short(n) {
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(0) + 'k';
+  return String(n);
+}
+
+function draw() {
+  const cols = hartColors();
+  const ipcMount = document.getElementById('c-ipc');
+  if (ipcMount) groupedBars(ipcMount,
+    DATA.map(b => ({ label: b.name.replace(/-q4$/, ''), values: b.cores.map(c => c.ipc) })),
+    { colors: cols, seriesNames: hartNames, labelBars: true,
+      fmtVal: v => v.toFixed(2), fmtTick: v => v.toFixed(2),
+      title: 'IPC by hart', aria: 'Instructions per cycle for each hart, per benchmark' });
+
+  const robMount = document.getElementById('c-rob');
+  if (robMount) groupedBars(robMount,
+    DATA.map(b => ({ label: b.name.replace(/-q4$/, ''), values: b.cores.map(c => c.rob_stall) })),
+    { colors: cols, seriesNames: hartNames, labelBars: true,
+      fmtVal: v => v.toFixed(1), fmtTick: v => v.toFixed(0) + '%',
+      title: 'ROB stall', aria: 'Percentage of cycles stalled on the reorder buffer, per hart' });
+
+  const dcMount = document.getElementById('c-dcache');
+  if (dcMount) seqBars(dcMount,
+    DATA.map(b => ({ label: b.name.replace(/-q4$/, ''),
+                     value: Math.max(...b.cores.map(c => c.dcache_miss)) })),
+    { color: S.getPropertyValue('--seq-4').trim() || '#2a78d6',
+      fmtVal: v => v.toFixed(2) + '%', fmtTick: v => v.toFixed(1) + '%',
+      title: 'D-cache miss rate', aria: 'Worst-hart L1 data cache miss rate per benchmark' });
+
+  const brMount = document.getElementById('c-branch');
+  if (brMount) seqBars(brMount,
+    DATA.map(b => ({ label: b.name.replace(/-q4$/, ''),
+                     value: Math.min(...b.cores.map(c => c.branch_acc)) })),
+    { color: S.getPropertyValue('--seq-5').trim() || '#1c5cab',
+      fmtVal: v => v.toFixed(1) + '%', fmtTick: v => v.toFixed(0) + '%',
+      title: 'Branch accuracy', aria: 'Worst-hart branch prediction accuracy per benchmark' });
+}
+
+draw();
+let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(draw, 150); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+</script>

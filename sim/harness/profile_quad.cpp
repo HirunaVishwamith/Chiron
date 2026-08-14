@@ -28,7 +28,12 @@
 // Shared harness helpers: argv scanning, image loading, completion detection.
 #include "sim/harness/common/args.h"
 #include "sim/harness/common/image.h"
+// Microarchitectural assertions. Compiled out entirely unless the binary is
+// built with -DCHIRON_INVARIANTS (see `make ci-check`), so the default
+// profiling path keeps its speed.
+#include "sim/harness/invariants.h"
 #include "sim/harness/common/completion.h"
+#include "sim/harness/common/simlog.h"
 
 using namespace std;
 using namespace harness;
@@ -38,6 +43,7 @@ int main(int argc, char *argv[]) {
         printf("Usage: %s --image <path> [--name <benchmark>]\n", argv[0]);
         printf("             [--done-pc <hex> ...] [--done-a0 <val>]\n");
         printf("             [--output <file.json>] [--timeout <max_cycles>]\n");
+        printf("             [--debug] [--log <path>]\n");
         return 0;
     }
 
@@ -46,6 +52,12 @@ int main(int argc, char *argv[]) {
     const char *bench_name  = find_arg(argc, argv, "--name", nullptr);
     const char *timeout_str = find_arg(argc, argv, "--timeout", "4000000000");
     const char *print_interval_str = find_arg(argc, argv, "--print-interval", "10000000");
+    // Benchmarks are minutes, not hours, so there is nothing here to check-
+    // point — --debug only opens the log. See linux_sim.cpp for the long-run
+    // case, which does snapshot.
+    const bool  debug       = has_flag(argc, argv, "--debug");
+    const char *log_path    = find_arg(argc, argv, "--log", "build/profile-quad.log");
+    if (debug) simlog::open(log_path);
 
     uint64_t max_cycles = strtoull(timeout_str, nullptr, 10);
 
@@ -62,8 +74,12 @@ int main(int argc, char *argv[]) {
         if (dot != string::npos) benchmark_name = benchmark_name.substr(0, dot);
     }
 
-    printf("[profile_quad] Benchmark : %s\n", benchmark_name.c_str());
-    printf("[profile_quad] Max cycles: %llu\n", (unsigned long long)max_cycles);
+    // Run configuration and progress are harness chatter: they go to the
+    // --debug log, never to stdout, which belongs to the benchmark's own UART
+    // output. The pass/fail verdict below stays on stdout — that is the result,
+    // and `make ci-bench` greps for it.
+    SIMLOG("[profile_quad] Benchmark : %s\n", benchmark_name.c_str());
+    SIMLOG("[profile_quad] Max cycles: %llu\n", (unsigned long long)max_cycles);
 
     Verilated::commandArgs(argc, argv);
     Vsystem *tb = new Vsystem;
@@ -72,14 +88,17 @@ int main(int argc, char *argv[]) {
     unsigned long long tickcount = 0ULL;
 
     reset(tb, tickcount);
-    if (!load_image(tb, string(image_path), tickcount, "[profile_quad]")) {
+    if (!load_image(tb, string(image_path), tickcount, "[profile_quad]",
+                    simlog::sink(), simlog::enabled())) {
         delete tb;
         return 2;
     }
 
     ProfilerQuad profiler(tb);
+    chiron_invariants invariants;
+    invariants.attach(tb);
 
-    printf("[profile_quad] Starting simulation (max %llu cycles)...\n",
+    SIMLOG("[profile_quad] Starting simulation (max %llu cycles)...\n",
            (unsigned long long)max_cycles);
 
     uint64_t sim_cycles  = 0ULL;
@@ -91,18 +110,17 @@ int main(int argc, char *argv[]) {
     const uint64_t MAX_STALL      = 500000ULL;
 
     while (sim_cycles < max_cycles) {
-        tick_nodump(tb);
+        tick_checked(tb, invariants, sim_cycles);
         ++tickcount;
         ++sim_cycles;
 
         if (sim_cycles - last_print >= PRINT_INTERVAL) {
-            printf("[profile_quad] %llu cycles  C0=0x%llx C1=0x%llx C2=0x%llx C3=0x%llx\n",
+            SIMLOG("[profile_quad] %llu cycles  C0=0x%llx C1=0x%llx C2=0x%llx C3=0x%llx\n",
                    (unsigned long long)sim_cycles,
                    (unsigned long long)tb->robOut0_pc,
                    (unsigned long long)tb->robOut1_pc,
                    (unsigned long long)tb->robOut2_pc,
                    (unsigned long long)tb->robOut3_pc);
-            fflush(stdout);
             last_print = sim_cycles;
         }
 
@@ -193,6 +211,12 @@ int main(int argc, char *argv[]) {
     profiler.print_summary();
     profiler.print_json(benchmark_name, string(output_path ? output_path : ""),
                         exit_code, bench_error);
+
+    // Microarchitectural assertions (no-op unless built with
+    // -DCHIRON_INVARIANTS). A workload can compute the right answer while
+    // speculation silently corrupts state somewhere it did not happen to
+    // matter, so a violation fails the run even when the benchmark "passed".
+    if (invariants.report() && exit_code == 0) exit_code = 4;
 
     printf("[profile_quad] Total RTL ticks (including load): %llu\n",
            (unsigned long long)tickcount);
