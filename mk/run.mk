@@ -344,8 +344,8 @@ dashboard:   ## Render PROFILE_DIR's JSON into a self-contained HTML dashboard
 
 test: isa test-q4                    ## ISA suite + quad-core benchmark tests
 
-# ── Linux image build (Multicore_Linux_Image/ submodule) ──────────────────────
-IMG_DIR := Multicore_Linux_Image
+# ── Linux image build (mc-linux/ submodule) ──────────────────────
+IMG_DIR := mc-linux
 
 .PHONY: patch linux-toolchain linux-image-s1 linux-image-q4 linux-images
 
@@ -363,7 +363,7 @@ linux-image-q4: patch   ## Build bins/linux-q4.bin (quad-core SMP Linux)
 
 linux-images: linux-image-s1 linux-image-q4   ## Build both Linux images
 
-# ── Linux boot (nommu RISC-V image, see Multicore_Linux_Image/) ───────────────
+# ── Linux boot (nommu RISC-V image, see mc-linux/) ───────────────
 # LINUX_IMAGE selects the bbl.bin to run; override on the command line, e.g.
 #   make linux-emu LINUX_IMAGE=bins/linux-q4.bin
 LINUX_IMAGE ?= $(BINS)/linux-q4.bin

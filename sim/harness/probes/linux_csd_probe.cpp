@@ -52,7 +52,7 @@
 
 #define CORE(N, s) tb->system__DOT__chiron__DOT__core##N##__DOT__##s
 
-// Kernel symbols (from Multicore_Linux_Image/linux/vmlinux).
+// Kernel symbols (from mc-linux/linux/vmlinux).
 static const uint64_t kFlushQueueLo = 0x80294be4ULL;  // __flush_smp_call_function_queue
 static const uint64_t kFlushQueueHi = 0x80294e5cULL;  // .. smp_call_on_cpu_callback
 static const uint64_t kHandleIPI    = 0x80204968ULL;  // handle_IPI

@@ -47,7 +47,7 @@
 
 #define CORE(N, s) tb->system__DOT__chiron__DOT__core##N##__DOT__##s
 
-// Watchpoints (Multicore_Linux_Image/linux/vmlinux).
+// Watchpoints (mc-linux/linux/vmlinux).
 static const uint64_t kPushDone  = 0x803fc6dcULL;  // after sc.d.rl
 static const uint64_t kPopDone   = 0x80294c40ULL;  // after amoswap.d.aqrl
 static const uint64_t kFlushEnt  = 0x80294be4ULL;  // __flush_smp_call_function_queue
