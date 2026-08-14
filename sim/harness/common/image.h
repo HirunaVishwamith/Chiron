@@ -58,6 +58,15 @@ inline bool load_image(Vsystem *tb, const std::string &image_path,
     std::fprintf(log, "%s Loading image: %s (%zu bytes)\n", tag,
                  image_path.c_str(), buffer.size());
 
+  // Round the byte count up to a whole number of 8-byte words. The loop below
+  // writes 8 bytes per clock, and `i + 7 < size` silently skipped the final
+  // partial word: every image whose size is not a multiple of 8 lost its last
+  // 1-7 bytes. For the benchmark images that tail is hart_init_sync, the very
+  // last initialised datum -- it loaded as 0 instead of 1 in all five of them.
+  // buffer is padded rather than the loop being made partial-width, because the
+  // programmer port has no byte enables.
+  buffer.resize((buffer.size() + 7) & ~static_cast<size_t>(7), 0);
+
   tb->programmer_valid = 1;
   for (size_t i = 0; i + 7 < buffer.size(); i += 8) {
     tb->programmer_byte   = *reinterpret_cast<unsigned long *>(&buffer[i]);
