@@ -160,17 +160,33 @@ class uartPort extends Module {
     terminalReady := "buildroot login: ".reverse.toCharArray().toSeq.zip(lastUartChars.toSeq) map { case(char, uchar) => (char.U === uchar)} reduce(_ && _)
   }
 
+  // Each hart has its OWN uartPort, and only the port whose core printed the
+  // banner would otherwise know the prompt has appeared. Linux does not promise
+  // that getty runs on hart0, so prompt detection is pooled across all four
+  // ports in MultiUart and fed back in here — otherwise input would be silently
+  // dead whenever the console task happened to be scheduled off core0.
+  val promptSeen = IO(Input(Bool()))
+  val loginSeen  = IO(Input(Bool()))
+  val sawPrompt  = IO(Output(Bool()))
+  val sawLogin   = IO(Output(Bool()))
+
   val afterLogin = RegInit(false.B)
   when(!afterLogin) {
     afterLogin := "~ # ".reverse.toCharArray().toSeq.zip(lastUartChars.toSeq) map { case(char, uchar) => (char.U === uchar)} reduce(_ && _)
   }
 
-  val hardInput = RegInit(VecInit("root\nls ..".map(c => new Bundle {
+  // Typed at "buildroot login: ". The trailing junk that used to pad this string
+  // was left over from the legacy demo and would be delivered as stray shell
+  // input once RX actually works, so it is gone.
+  val hardInput = RegInit(VecInit("root\n".map(c => new Bundle {
     val valid = Bool()
     val char = UInt(8.W)
   } Lit(_.valid -> true.B, _.char -> c.U))))
 
-  val command = RegInit(VecInit("ls .. && poweroff\n".map(c => new Bundle {
+  // Typed once the shell prompt appears. `nproc` is the quad-core acceptance
+  // check: it must print 4. Deliberately does NOT poweroff, so the session stays
+  // alive for a human to keep typing after the automatic answer.
+  val command = RegInit(VecInit("nproc\n".map(c => new Bundle {
     val valid = Bool()
     val char = UInt(8.W)
   } Lit(_.valid -> true.B, _.char -> c.U))))
@@ -240,6 +256,61 @@ class uartPort extends Module {
   ) {
     client.RDATA := hostInput.char
     when(client.RREADY) { hostInputConsumed := true.B }
+  }
+
+  // ── uartlite RX map (what Linux actually uses) ──────────────────────────────
+  // Everything above speaks the LEGACY bare-metal map: STATUS at base+0x00, data
+  // at base+0x04. The Linux xilinx-uartlite driver uses a different layout:
+  //
+  //     base+0x00  RX FIFO   (pop a received byte)
+  //     base+0x04  TX FIFO
+  //     base+0x08  STATUS    bit0 RX_VALID, bit2 TX_EMPTY
+  //
+  // so the kernel polled STATUS at +0x08 -- which the switch above answers with
+  // a hardcoded 4 (TX_EMPTY, RX_VALID never set) -- and never once looked at the
+  // login ROM. The quad-core boot therefore printed "buildroot login: " and sat
+  // there forever: console TX worked, console RX did not exist. Nothing was
+  // wedged; there was simply no way to type.
+  //
+  // Placed last so Chisel's last-connect gives it priority over the legacy
+  // blocks, and gated on terminalReady (or a live host), which can only be true
+  // after "buildroot login: " has been printed -- no bare-metal benchmark can
+  // ever reach this path, so their behaviour is bit-identical.
+  //
+  // hostInput wins over the compiled-in ROM when a host is actually driving, so
+  // an interactive `make linux-sim` can be typed at while the ROM still provides
+  // hands-off auto-login when it isn't.
+  sawPrompt := terminalReady
+  sawLogin  := afterLogin
+  // Pooled across every hart's port (see promptSeen above).
+  val anyPrompt = terminalReady || promptSeen
+  val anyLogin  = afterLogin || loginSeen
+
+  val romValid  = Mux(anyLogin, command(0).valid, hardInput(0).valid)
+  val romChar   = Mux(anyLogin, command(0).char,  hardInput(0).char)
+  val liteValid = hostInput.valid || (anyPrompt && romValid)
+  val liteChar  = Mux(hostInput.valid, hostInput.char, romChar)
+
+  when(readRequestBuffer.valid && (anyPrompt || hostInput.valid) &&
+       ((readRequestBuffer.address & "hffff0fff".U) === "h40600008".U)) {
+    // {29'b0, TX_EMPTY, 0, RX_VALID}
+    client.RDATA := Cat(0.U(29.W), 1.U(1.W), 0.U(1.W), liteValid.asUInt)
+  }
+
+  when(readRequestBuffer.valid && liteValid &&
+       ((readRequestBuffer.address & "hffff0fff".U) === "h40600000".U)) {
+    client.RDATA := liteChar
+    when(client.RREADY) {
+      when(hostInput.valid) {
+        hostInputConsumed := true.B
+      }.elsewhen(anyLogin) {
+        command.dropRight(1).zip(command.drop(1)).foreach { case (curr, next) => curr := next }
+        command.last.valid := false.B
+      }.otherwise {
+        hardInput.dropRight(1).zip(hardInput.drop(1)).foreach { case (curr, next) => curr := next }
+        hardInput.last.valid := false.B
+      }
+    }
   }
 
   when(writeRequestBuffer.address.valid && writeRequestBuffer.data.valid) {
@@ -371,14 +442,47 @@ class MultiUart extends Module {
     val char  = UInt(8.W)
   }))
   val hostInputConsumed0 = IO(Output(Bool()))
-  uart0.hostInput := hostInput0
-  hostInputConsumed0 := uart0.hostInputConsumed
-  uart1.hostInput.valid := false.B
-  uart1.hostInput.char  := 0.U
-  uart2.hostInput.valid := false.B
-  uart2.hostInput.char  := 0.U
-  uart3.hostInput.valid := false.B
-  uart3.hostInput.char  := 0.U
+  // Broadcast to EVERY port, not just uart0. Each hart reads the console through
+  // its own uartPort, and Linux gives no guarantee that getty lands on hart0 —
+  // delivering only to uart0 would make typing work or not work depending on
+  // which core the console task happened to be scheduled on.
+  //
+  // hostTaken turns the per-port one-cycle pop into a proper four-phase
+  // handshake, which matters for two independent reasons:
+  //
+  //  * The host cannot be required to watch every cycle. linux_sim.cpp advances
+  //    commit-to-commit (step_any_nodump), which can span many cycles, so a
+  //    one-cycle `consumed` pulse is missed far more often than it is seen — the
+  //    byte is never retired, the same character is re-offered, and the console
+  //    wedges after a couple of keystrokes. uartrx_test reproduced exactly that.
+  //    Held until the host drops `valid`, the handshake is sample-rate agnostic.
+  //
+  //  * The character is broadcast, so without a shared interlock two harts
+  //    reading the console in the same window would each pop the same byte, and
+  //    one keystroke would be delivered twice. Gating every port on !hostTaken
+  //    makes a byte popable exactly once per assertion of `valid`.
+  val hostTaken   = RegInit(false.B)
+  val anyConsumed = Seq(uart0, uart1, uart2, uart3)
+    .map(_.hostInputConsumed).reduce(_ || _)
+  when(!hostInput0.valid) {
+    hostTaken := false.B          // host retracted the byte; arm for the next
+  }.elsewhen(anyConsumed) {
+    hostTaken := true.B           // some port popped it; hold until retracted
+  }
+  Seq(uart0, uart1, uart2, uart3).foreach { u =>
+    u.hostInput.valid := hostInput0.valid && !hostTaken
+    u.hostInput.char  := hostInput0.char
+  }
+  hostInputConsumed0 := hostTaken || anyConsumed
+
+  // Pool the "buildroot login: " / "~ # " detections across all four ports for
+  // the same reason: only the port that printed the banner sees it locally.
+  val promptPool = Seq(uart0, uart1, uart2, uart3).map(_.sawPrompt).reduce(_ || _)
+  val loginPool  = Seq(uart0, uart1, uart2, uart3).map(_.sawLogin).reduce(_ || _)
+  Seq(uart0, uart1, uart2, uart3).foreach { u =>
+    u.promptSeen := promptPool
+    u.loginSeen  := loginPool
+  }
 
   // ── Shared CLINT msip + mtimecmp (one array each, any hart → any hart) ──────
   // SMP IPIs write foreign msip; the kernel also expects a single mtimecmp[]

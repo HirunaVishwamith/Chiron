@@ -28,6 +28,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "sim/rtl/rtl_model.h"
 
@@ -68,6 +70,25 @@ int main(int argc, char **argv) {
   uint64_t prev_lo[4] = {}, prev_hi[4] = {};
   for (int i = 0; i < 4; ++i) { band_lo[i] = ~0ULL; band_hi[i] = 0; }
 
+  // ── Console input ──────────────────────────────────────────────────────────
+  // Forward the host's stdin to uart0's RX so this is a real interactive
+  // console: at "buildroot login: " you can type root, then nproc. Before this,
+  // system.scala tied hostInput off and the only input was uartPort's
+  // compiled-in ROM, which spoke a register map the Linux uartlite driver never
+  // reads — so the console was output-only and the boot parked at the prompt.
+  //
+  // stdin is put in non-blocking mode so a cycle is never spent waiting on a
+  // keystroke, and it is polled every kInputPoll cycles rather than every cycle
+  // because a read() syscall per simulated cycle would dominate the run time.
+  // The ROM still auto-logs-in when nobody types, so redirected/idle stdin
+  // behaves exactly as before.
+  Vsystem *tb = bench.raw();
+  tb->hostInput_valid = 0;
+  tb->hostInput_char  = 0;
+  fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL, 0) | O_NONBLOCK);
+  const uint64_t kInputPoll = 4096;
+  uint64_t input_tick = 0;
+
   // Run forever; UART TX from all four cores' uartPorts is streamed to stdout
   // from inside step_any_nodump() (the SHOW_TERMINAL hook in rtl_model.h).
   // Progress/stall is judged on ANY core committing, not just core 0 — under
@@ -84,6 +105,31 @@ int main(int argc, char **argv) {
       return 1;
     }
     ++steps;
+
+    // Retire a delivered character, then offer the next one.
+    //
+    // This loop advances commit-to-commit, and a single step_any_nodump() can
+    // span many cycles, so it CANNOT reliably observe a one-cycle signal.
+    // hostInputConsumed is therefore held by MultiUart's hostTaken latch until
+    // this side drops hostInput_valid (a four-phase handshake) — that is what
+    // makes sampling here safe. Do not "simplify" the RTL back to a pulse:
+    // uartrx_test showed the console then wedges after two or three keystrokes,
+    // which is a failure you only discover 14 h into a boot, at the login
+    // prompt, with no way to type.
+    if (tb->hostInputConsumed) tb->hostInput_valid = 0;
+    // The !hostInputConsumed term completes phase 3: valid must be low long
+    // enough for hostTaken to clear before the next byte is presented, or the
+    // handshake never re-arms. The kInputPoll gap makes that true in practice
+    // anyway; this makes it true by construction.
+    if (!tb->hostInput_valid && !tb->hostInputConsumed &&
+        ++input_tick >= kInputPoll) {
+      input_tick = 0;
+      unsigned char ch;
+      if (::read(STDIN_FILENO, &ch, 1) == 1) {
+        tb->hostInput_char  = ch;
+        tb->hostInput_valid = 1;
+      }
+    }
 
     // Fold every committed PC into the per-hart band for this window.
     for (int i = 0; i < 4; ++i) {
