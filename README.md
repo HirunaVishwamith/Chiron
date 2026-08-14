@@ -463,6 +463,9 @@ JSON reports are written to `build/profile_results/`.
 | `make linux-emu [LINUX_IMAGE=…]` | Interactive Linux shell on the golden model (fast) |
 | `make linux-emu-check [LINUX_IMAGE=…]` | Scripted boot-to-login check (CI, non-interactive) |
 | `make linux-sim [LINUX_IMAGE=…]` | Boot Linux on the Verilated RTL (live console, slow) |
+| `make linux-sim DEBUG=1` | Same, plus a harness log and 20 M-cycle checkpoints |
+| `make linux-sim RESUME=1` | Continue from the newest checkpoint |
+| `make linux-ckpts` | List checkpoints available to resume from |
 | `make linux-lockstep [LINUX_IMAGE=…]` | Bounded RTL-vs-emulator lock-step of the Linux boot (debug) |
 | `make clean` | Remove generated artifacts (`build/`, `obj_dir`, logs) |
 | `make distclean` | `clean` + drop sbt/Verilator build trees |
@@ -509,10 +512,34 @@ make linux-sim                             # boot the same image on the RTL (liv
 - **`linux-sim`** boots the image on the Verilated RTL with a live uartlite
   console, and **stdin is wired through** — you can log in and run commands.
   Expect ~5–10K cycles/s: the kernel banner appears after ~20 minutes and the
-  login prompt after ~3 billion cycles, so plan on leaving it overnight. It
-  prints a heartbeat line every 5 s (`steps/s`, per-hart PCs) so progress and
-  wedges are obvious at a glance. `make uartrx-test` is the fast regression for
-  the console-input path.
+  login prompt after ~3 billion cycles, so plan on leaving it overnight.
+  **Its stdout is the guest console and nothing else**, so `make linux-sim |
+  tee boot.log` produces a log of the boot rather than a log of the harness.
+  `make uartrx-test` is the fast regression for the console-input path.
+
+  A run that long should not have to be repeated from cycle zero, so the
+  harness can snapshot itself:
+
+  ```bash
+  make linux-sim DEBUG=1            # + harness log (build/linux-sim.log) and a
+                                    #   checkpoint every 20 M cycles
+  make linux-ckpts                  # what is available to resume from
+  make linux-sim DEBUG=1 RESUME=1   # continue from the newest checkpoint
+  make linux-sim RESTORE=<file>     # or from a specific one
+  ```
+
+  `DEBUG=1` also turns on the progress heartbeat — cycles, steps/s, and all
+  four harts' PCs every 100 K cycles — which is what distinguishes a slow boot
+  from a wedge. It flags harts whose PC band is both tiny and unchanged
+  between windows, the signature of a livelock. All of it goes to the log file;
+  none of it touches the console.
+
+  Checkpoints are ~256 MB each (the model contains all of DRAM), so `CKPT_KEEP`
+  prunes to the newest 8 and none are written without `DEBUG=1`. Restoring is
+  cycle-exact: a resumed run reproduces the original's step count and per-hart
+  PCs beat for beat. A checkpoint is only valid for the netlist that wrote it —
+  any RTL change invalidates every one, and the harness refuses to load a
+  foreign or stale file rather than restoring garbage.
 - `LINUX_IMAGE` defaults to `bins/linux-q4.bin` (see `mk/run.mk`).
 
 **Status (2026-08-14): the quad-core image boots to an interactive shell on the

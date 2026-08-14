@@ -23,6 +23,12 @@
 #include "verilated.h"
 #include "verilated_vcd_c.h"
 
+// Image-loading chatter is harness output, not program output, so it goes to
+// the debug sink (off unless a run passes --debug) rather than stdout. Without
+// this a Linux boot log opens with four lines about DRAM offsets before the
+// guest has executed a single instruction.
+#include "sim/harness/common/simlog.h"
+
 // Safety net: how many clocks to spin waiting for one commit before declaring a
 // timeout. The makefile passes -DSTEP_TIMEOUT for trace builds; this is the
 // fallback for anyone compiling the header standalone.
@@ -80,11 +86,11 @@ class simulator {
     tb->reset = 0;
     for (int i = 0; i < 20; ++i) tick_nodump();
 
-    printf("***** Loading kernel image *****\n");
+    SIMLOG("***** Loading kernel image *****\n");
     load_segment(image_name, 0x0UL);
-    printf("loading dtb\n");
+    SIMLOG("loading dtb\n");
     load_segment(dtb_name, 0x07e00000UL);
-    printf("loading boot rom\n");
+    SIMLOG("loading boot rom\n");
     load_segment(boot_rom, 0x07ffff00UL);
 
     tb->finishedProgramming = 1;
@@ -434,8 +440,8 @@ class simulator {
     }
     std::memcpy(&tb->system__DOT__memory__DOT__memory[base],
                 buffer.data(), buffer.size());
-    std::printf("loaded %zu bytes @ 0x%08lx (%s)\n",
-                buffer.size(), base, path.c_str());
+    SIMLOG("loaded %zu bytes @ 0x%08lx (%s)\n",
+           buffer.size(), base, path.c_str());
   }
 };
 

@@ -176,18 +176,25 @@ lockstep: $(BUILD)/lockstep.out      ## Lock-step RTL vs emulator for BENCH
 	$(BUILD)/lockstep.out --image $(BIN) $(DONE) --logdir $(BUILD) \
 	    $(_SHOW_STATE_FLAG) $(_DUMP_WAVES_FLAG)
 
+# DEBUG=1 sends the harness's own progress to a log file instead of discarding
+# it; stdout stays the benchmark's UART output plus the final verdict. No
+# checkpoints here -- these runs are minutes long, so there is nothing to
+# resume from (see linux-sim for the case that needs it).
+DEBUG_FLAGS := $(if $(DEBUG),--debug --log $(BUILD)/$(if $(BENCH),$(BENCH),profile)-debug.log)
+
 profile: $(BUILD)/profile.out        ## Cycle-accurate profile (IPC) for BENCH
 	@mkdir -p $(BUILD)/profile_results
-	@echo "[profile] $(BENCH)"
-	$(BUILD)/profile.out --image $(BIN) --name $(BENCH) $(DONE) \
+	@echo "[profile] $(BENCH)" >&2
+	$(BUILD)/profile.out --image $(BIN) --name $(BENCH) $(DONE) $(DEBUG_FLAGS) \
 		--output $(BUILD)/profile_results/$(BENCH).json --timeout 100000000
 
 profile-quad: $(BUILD)/profile_quad.out    ## Quad-core profile (IPC) for FAM (e.g. make profile-quad FAM=vvadd)
 	@mkdir -p $(BUILD)/profile_results
-	@echo "[profile-quad] $(FAM)-q4"
+	@echo "[profile-quad] $(FAM)-q4" >&2
 	$(BUILD)/profile_quad.out \
 	    --image $(BINS)/$($(FAM)_base)-q4.bin \
 	    --name $(FAM)-q4 $($(FAM)_DONE) \
+	    $(if $(DEBUG),--debug --log $(BUILD)/$(FAM)-q4-debug.log) \
 	    --output $(BUILD)/profile_results/$(FAM)-q4.json --timeout 100000000
 
 profile-all: $(BUILD)/profile_quad.out    ## Profile all quad-core benchmarks (default: q4 bins)
@@ -376,9 +383,48 @@ linux-emu: $(BUILD)/emu.out          ## Interactive Linux shell on the golden mo
 linux-emu-check: $(BUILD)/emu.out    ## Non-interactive boot-to-login check (CI)
 	@scripts/run_linux.sh emu $(LINUX_IMAGE) $(if $(TIMEOUT),$(TIMEOUT),300)
 
-linux-sim: $(BUILD)/linux_sim.out    ## Boot LINUX_IMAGE on the RTL core (live console, no dump)
-	@echo "== RTL boot: $(LINUX_IMAGE) (Verilator ~thousands of cyc/s; no input) =="
-	$(BUILD)/linux_sim.out $(LINUX_IMAGE) $(DATA)/qemu.dtb $(DATA)/boot.bin
+# ── linux-sim: the RTL boot ───────────────────────────────────────────────────
+# Its stdout is the guest console and nothing else, so `make linux-sim | tee
+# boot.log` gives a log that is purely what Linux printed. Everything the
+# harness has to say is opt-in:
+#
+#   make linux-sim                  quiet: guest output only
+#   make linux-sim DEBUG=1          + harness log ($(LINUX_SIM_LOG)) and
+#                                     checkpoints every $(CKPT_EVERY) cycles
+#   make linux-sim DEBUG=1 RESUME=1 resume from the newest checkpoint
+#   make linux-sim RESTORE=<file>   resume from a specific one
+#   make linux-ckpts                list what is available to resume from
+#
+# Checkpoints are ~256 MB each (the model includes all of DRAM), which is why
+# CKPT_KEEP prunes old ones and why none are written unless DEBUG=1.
+LINUX_SIM_LOG ?= $(BUILD)/linux-sim.log
+CKPT_DIR      ?= ckpt
+CKPT_EVERY    ?= 20000000
+CKPT_KEEP     ?= 8
+
+LINUX_SIM_FLAGS := $(if $(DEBUG),--debug --log $(LINUX_SIM_LOG) \
+                     --ckpt-dir $(CKPT_DIR) --ckpt-every $(CKPT_EVERY) \
+                     --ckpt-keep $(CKPT_KEEP))
+LINUX_SIM_FLAGS += $(if $(RESTORE),--restore $(RESTORE))
+
+linux-sim: $(BUILD)/linux_sim.out    ## Boot LINUX_IMAGE on the RTL core (guest console only; DEBUG=1 for logs+checkpoints)
+	@echo "== RTL boot: $(LINUX_IMAGE) (Verilator ~thousands of cyc/s) ==" >&2
+	@$(if $(DEBUG),echo "   debug log: $(LINUX_SIM_LOG)   checkpoints: $(CKPT_DIR)/ every $(CKPT_EVERY) cyc" >&2,\
+	   echo "   (quiet: only what the kernel transmits. DEBUG=1 adds a log + checkpoints)" >&2)
+	@flags="$(LINUX_SIM_FLAGS)"; \
+	if [ -n "$(RESUME)" ] && [ -z "$(RESTORE)" ]; then \
+	  ck=$$(ls -1 $(CKPT_DIR)/ckpt_*.bin 2>/dev/null | sort | tail -1); \
+	  if [ -z "$$ck" ]; then \
+	    echo "no checkpoints in $(CKPT_DIR)/ — run once with DEBUG=1 first" >&2; exit 1; \
+	  fi; \
+	  echo "   resuming from $$ck" >&2; \
+	  flags="$$flags --restore $$ck"; \
+	fi; \
+	exec $(BUILD)/linux_sim.out $(LINUX_IMAGE) $(DATA)/qemu.dtb $(DATA)/boot.bin $$flags
+
+.PHONY: linux-ckpts
+linux-ckpts:                         ## List checkpoints available to resume from
+	@ls -lh $(CKPT_DIR)/ckpt_*.bin 2>/dev/null || echo "no checkpoints in $(CKPT_DIR)/"
 
 linux-lockstep: $(BUILD)/lockstep_linux.out  ## Bounded RTL lock-step of LINUX_IMAGE (debug; slow)
 	@scripts/run_linux.sh lockstep $(LINUX_IMAGE) $(if $(TIMEOUT),$(TIMEOUT),180)

@@ -33,6 +33,7 @@
 #include "sim/harness/common/args.h"
 #include "sim/harness/common/image.h"
 #include "sim/harness/common/completion.h"
+#include "sim/harness/common/simlog.h"
 
 using namespace std;
 using namespace harness;
@@ -57,6 +58,8 @@ int main(int argc, char *argv[]) {
         printf("  --name     Benchmark name for JSON output (default: basename of image)\n");
         printf("  --output   Path to write JSON report (default: stdout only)\n");
         printf("  --timeout  Maximum simulation cycles (default: 2000000000)\n");
+        printf("  --debug    Write harness progress to a log file\n");
+        printf("  --log      Where that log goes (default: build/profile.log)\n");
         return 0;
     }
 
@@ -64,6 +67,11 @@ int main(int argc, char *argv[]) {
     const char *output_path = find_arg(argc, argv, "--output", "");
     const char *bench_name  = find_arg(argc, argv, "--name", nullptr);
     const char *timeout_str = find_arg(argc, argv, "--timeout", "2000000000");
+    // Progress and load chatter go to the --debug log so stdout carries only
+    // what the benchmark itself transmits, plus the final verdict.
+    const bool  debug       = has_flag(argc, argv, "--debug");
+    const char *log_path    = find_arg(argc, argv, "--log", "build/profile.log");
+    if (debug) simlog::open(log_path);
 
     uint64_t max_cycles = static_cast<uint64_t>(strtoull(timeout_str, nullptr, 10));
 
@@ -85,8 +93,8 @@ int main(int argc, char *argv[]) {
         if (dot != string::npos) benchmark_name = benchmark_name.substr(0, dot);
     }
 
-    printf("[profile_run] Benchmark : %s\n", benchmark_name.c_str());
-    printf("[profile_run] Max cycles: %llu\n", (unsigned long long)max_cycles);
+    SIMLOG("[profile_run] Benchmark : %s\n", benchmark_name.c_str());
+    SIMLOG("[profile_run] Max cycles: %llu\n", (unsigned long long)max_cycles);
 
     // ── Initialise Verilator ───────────────────────────────────────────
     Verilated::commandArgs(argc, argv);
@@ -99,7 +107,8 @@ int main(int argc, char *argv[]) {
 
     // ── Reset + image load ─────────────────────────────────────────────
     reset(tb, tickcount);
-    if (!load_image(tb, string(image_path), tickcount, "[profile_run]")) {
+    if (!load_image(tb, string(image_path), tickcount, "[profile_run]",
+                    simlog::sink(), simlog::enabled())) {
         delete tb;
         return 2;
     }
@@ -107,7 +116,7 @@ int main(int argc, char *argv[]) {
     Profiler profiler(tb);
 
     // ── Simulation loop ─────────────────────────────────────────────────
-    printf("[profile_run] Starting simulation (max %llu cycles)...\n",
+    SIMLOG("[profile_run] Starting simulation (max %llu cycles)...\n",
            (unsigned long long)max_cycles);
 
     uint64_t sim_cycles   = 0ULL;
@@ -124,10 +133,9 @@ int main(int argc, char *argv[]) {
 
         // Progress indicator every 10 M cycles
         if (sim_cycles - last_print >= PRINT_INTERVAL) {
-            printf("[profile_run] %llu M cycles, PC=0x%016llx\r",
+            SIMLOG("[profile_run] %llu M cycles, PC=0x%016llx\n",
                    (unsigned long long)(sim_cycles / 1000000),
                    (unsigned long long)tb->robOut0_pc);
-            fflush(stdout);
             last_print = sim_cycles;
         }
 
