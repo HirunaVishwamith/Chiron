@@ -603,7 +603,31 @@ class core (
                extnMRequest.rs1(63).asBool ^ extnMRequest.rs2(63).asBool))
   }
 
-  when(division.request.valid && !division.counter.orR) {
+  // The divider and the multiply pipeline SHARE extnMResponse, and this block is
+  // textually last, so under Chisel last-connect a completing divide silently
+  // overwrites a multiply that is landing the same cycle. The multiply's
+  // response never reaches the ROB, its ready bit is never written, and the
+  // machine wedges with that multiply at the ROB head.
+  //
+  // `!extnMServicing.valid` is the whole interlock: hold the divide until the
+  // response port is free. Nothing about the held state decays — the recurrence
+  // is guarded on `counter.orR` (already 0), divEarly/quotient/remainder are only
+  // written on arming (which requires !division.request.valid) or by this block,
+  // and mExtensionReady stays false so no new M-op is released.
+  //
+  // It cannot starve. While a divide is in flight extnMRequest holds that divide,
+  // and line ~254 kills div-typed requests out of the multiply pipeline, so
+  // extnMServicing.valid drains within two cycles and the divide retires.
+  //
+  // Repro: `make solid`, wedged at the `mul` at 0x80001458 with two `div`s right
+  // behind it — g3d_triangle's inlined lerp_i/lerp_z, which are literally
+  // `(int64)(b-a)*num / den` twice in a row. The dividend of an interpolation
+  // fraction is smaller than its divisor, so divSmaller makes these early-out
+  // divides, completing exactly 2 cycles after arming — precisely when a multiply
+  // issued one cycle earlier is sitting in extnMServicing. A `mul` immediately
+  // followed by a `div` is the collision, and that is the exact instruction
+  // sequence at the wedge PC.
+  when(division.request.valid && !division.counter.orR && !extnMServicing.valid) {
     extnMResponse.prfDest := division.request.prfDest
     extnMResponse.result := {
       val isRem = division.request.instruction(13).asBool

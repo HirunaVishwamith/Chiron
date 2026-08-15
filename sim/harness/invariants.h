@@ -131,6 +131,16 @@ class chiron_invariants {
     unsigned aluValid, aluRob;
     unsigned mValid, mRob;
     unsigned loadValid;
+    // DIAG: which sub-path of the load port produced the robAddr.
+    unsigned aceRespRob, aceReadRob, periphRespRob, loadPrf;
+    uint32_t loadInsn;
+    unsigned bevMask;                       // branchEvals.branchMask
+    unsigned rbOpValid, rbReqType; uint32_t rbAddr;
+    unsigned allocMask;                     // scheduler.allocate.branchMask
+    unsigned mrValid, mrMask; uint32_t mrAddr;   // core memoryRequest stage
+    unsigned rbRob, rbMask, rbBrValid;      // cacheLookup.readBuffer (the load
+                                            // in the lookup stage that drives
+                                            // toResponse the following cycle)
     unsigned ready[CHIRON_ROB_DEPTH];
     uint32_t insn[CHIRON_ROB_DEPTH];
   };
@@ -145,6 +155,29 @@ class chiron_invariants {
     // previous-cycle port state (see sampling rule 2 at the top)
     unsigned pBev = 0, pBrob = 0, pAlloc = 0, pWrite = 0;
     unsigned pAluV = 0, pAluRob = 0, pMV = 0, pMRob = 0, pLoadV = 0;
+    unsigned pAceRespRob = 0, pAceReadRob = 0, pPeriphRespRob = 0, pLoadPrf = 0;
+    uint32_t pLoadInsn = 0;
+    // DIAG: per-slot history, to tell a DUPLICATE response (slot already
+    // readied+retired normally) from a stale SQUASHED one (never readied).
+    uint64_t lastAllocCyc[CHIRON_ROB_DEPTH] = {};
+    uint64_t lastReadyCyc[CHIRON_ROB_DEPTH] = {};
+    uint64_t lastRetireCyc[CHIRON_ROB_DEPTH] = {};
+    unsigned pBevMask = 0, pRbRob = 0, pRbMask = 0, pRbBrValid = 0;
+    // DIAG: rolling log of the last 16 branch resolutions, so a violation can
+    // name the squash that rolled the slot back and show whether its mask
+    // intersected the load's.
+    struct sq_ev { uint64_t cyc; unsigned rob, passed, mask; };
+    sq_ev sq[16] = {};
+    unsigned sqn = 0;
+    // DIAG: rolling trace of every cacheLookup service cycle, to see whether the
+    // same robAddr is serviced twice.
+    struct lk_ev { uint64_t cyc; unsigned rob, mask, bv, type; uint32_t addr; };
+    lk_ev lk[48] = {};
+    unsigned lkn = 0;
+    unsigned allocMask[CHIRON_ROB_DEPTH] = {};
+    struct mr_ev { uint64_t cyc; unsigned mask; uint32_t addr; };
+    mr_ev mr[48] = {};
+    unsigned mrn = 0;
     uint64_t n_ready_no_resolve = 0, first_rnr = 0;
     uint64_t n_ready_outside_window = 0, first_row = 0;
     uint64_t n_double_resolve = 0, first_dr = 0;
@@ -198,6 +231,27 @@ class chiron_invariants {
     }
     if (s.readPtr != x.prevRead) x.wedgeReported = false;
 
+    // DIAG history: allocation stamps the slot it wrote; retirement stamps
+    // every slot the read pointer walked past this cycle.
+    if (s.allocFired) {
+      x.lastAllocCyc[s.writePtr] = cyc;
+      x.allocMask[s.writePtr] = s.allocMask;
+    }
+    if (s.mrValid) {
+      x.mr[x.mrn % 48] = {cyc, s.mrMask, s.mrAddr};
+      x.mrn++;
+    }
+    if (x.prevRead != 0xffff && s.readPtr != x.prevRead)
+      for (unsigned r = x.prevRead; r != s.readPtr;
+           r = (r + 1) & (CHIRON_ROB_DEPTH - 1))
+        x.lastRetireCyc[r] = cyc;
+
+    if (s.rbOpValid) {
+      x.lk[x.lkn % 48] = {cyc, s.rbRob, s.rbMask, s.rbBrValid, s.rbReqType,
+                          s.rbAddr};
+      x.lkn++;
+    }
+
     // Track resolutions so we can spot a branch readied without one, and a
     // branch resolved twice with no allocation between.
     if (s.bevValid) {
@@ -208,6 +262,8 @@ class chiron_invariants {
                (unsigned long long)cyc, c, s.bevRob, s.bevPassed);
       }
       x.pendingResolve[s.bevRob] = 1;
+      x.sq[x.sqn & 15] = {cyc, s.bevRob, s.bevPassed, s.bevMask};
+      x.sqn++;
     }
     if (s.allocFired) x.pendingResolve[s.writePtr] = 0;
 
@@ -239,15 +295,57 @@ class chiron_invariants {
         // V2: the same defect one step earlier, and not specific to branches —
         // no port may ready a slot that is not currently allocated. Catches the
         // reallocated-slot class before the new occupant happens to be a branch.
+        //
+        // The write that set this bit happened during the PREVIOUS cycle
+        // (sampling rule 2). If the slot was in-window then, the port was
+        // legal and the pointers simply moved — retirement (readPtr walked
+        // past the slot) or a same-cycle squash (writePtr rewound). That is
+        // a sampling artefact, not a completion onto an unallocated slot.
+        // A real stale write has wasIn==0: the slot was already outside
+        // the window when the port fired.
         if (!alloc && !in_window(i, s.readPtr, s.writePtr)) {
+          const bool wasIn = (x.prevRead != 0xffff) &&
+                             in_window(i, x.prevRead, x.pWrite);
+          if (!wasIn) {
           x.n_ready_outside_window++;
           if (!x.first_row) x.first_row = cyc;
           printf("[cyc %llu] INVARIANT hart%d READY-OUTSIDE-ROB-WINDOW slot=%u "
-                 "insn=%08x (rd=%u wr=%u) [alu{v=%u rob=%u} mext{v=%u rob=%u}]\n",
+                 "insn=%08x (rd=%u wr=%u) [alu{v=%u rob=%u} mext{v=%u rob=%u}] "
+                 "DIAG prev(rd=%u wr=%u) wasInWindowPrev=%d load{v=%u prf=%u "
+                 "insn=%08x} aceResp=%u aceRead=%u periphResp=%u "
+                 "HIST slot%u{alloc@%llu ready@%llu retire@%llu}\n",
                  (unsigned long long)cyc, c, i, s.insn[i], s.readPtr,
-                 s.writePtr, x.pAluV, x.pAluRob, x.pMV, x.pMRob);
+                 s.writePtr, x.pAluV, x.pAluRob, x.pMV, x.pMRob,
+                 x.prevRead, x.pWrite, (int)wasIn, x.pLoadV, x.pLoadPrf,
+                 x.pLoadInsn, x.pAceRespRob, x.pAceReadRob, x.pPeriphRespRob,
+                 i, (unsigned long long)x.lastAllocCyc[i],
+                 (unsigned long long)x.lastReadyCyc[i],
+                 (unsigned long long)x.lastRetireCyc[i]);
+          printf("        DIAG readBuffer{rob=%u mask=%02x bv=%u}  SQUASHLOG",
+                 x.pRbRob, x.pRbMask, x.pRbBrValid);
+          for (unsigned k = (x.sqn >= 12 ? x.sqn - 12 : 0); k < x.sqn; k++) {
+            const st::sq_ev &e = x.sq[k & 15];
+            printf(" @%llu{rob=%u pass=%u mask=%02x}",
+                   (unsigned long long)e.cyc, e.rob, e.passed, e.mask);
+          }
+          printf("\n        DIAG allocMask[%u]=%02x  MEMREQLOG", i, x.allocMask[i]);
+          for (unsigned k = (x.mrn >= 40 ? x.mrn - 40 : 0); k < x.mrn; k++) {
+            const st::mr_ev &e = x.mr[k % 48];
+            printf(" @%llu{m=%02x a=%08x}", (unsigned long long)e.cyc, e.mask,
+                   e.addr);
+          }
+          printf("\n        DIAG LOOKUPLOG(type 1=inorder/spec 2=replay 3=snoop)");
+          for (unsigned k = (x.lkn >= 48 ? x.lkn - 48 : 0); k < x.lkn; k++) {
+            const st::lk_ev &e = x.lk[k % 48];
+            printf(" @%llu{rob=%u m=%02x bv=%u t=%u a=%08x}",
+                   (unsigned long long)e.cyc, e.rob, e.mask, e.bv, e.type,
+                   e.addr);
+          }
+          printf("\n");
+          }
         }
       }
+      if (s.ready[i] && !x.prevReady[i]) x.lastReadyCyc[i] = cyc;
       x.prevReady[i] = s.ready[i];
     }
 
@@ -257,6 +355,11 @@ class chiron_invariants {
     x.pAluV = s.aluValid; x.pAluRob = s.aluRob;
     x.pMV = s.mValid; x.pMRob = s.mRob;
     x.pLoadV = s.loadValid;
+    x.pAceRespRob = s.aceRespRob; x.pAceReadRob = s.aceReadRob;
+    x.pPeriphRespRob = s.periphRespRob;
+    x.pLoadPrf = s.loadPrf; x.pLoadInsn = s.loadInsn;
+    x.pBevMask = s.bevMask;
+    x.pRbRob = s.rbRob; x.pRbMask = s.rbMask; x.pRbBrValid = s.rbBrValid;
   }
 
 // Verilator exposes each hart as a distinct member, so the sampler is generated
@@ -270,11 +373,27 @@ class chiron_invariants {
     s.bevValid  = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__branchEvals_valid;  \
     s.bevPassed = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__branchEvals_passed; \
     s.bevRob    = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__branchEvals_robAddr;\
+    s.bevMask   = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__branchEvals_branchMask;\
+    s.rbRob     = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess__DOT__cacheLookup__DOT__readBuffer_core_robAddr;   \
+    s.rbMask    = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess__DOT__cacheLookup__DOT__readBuffer_branch_mask;    \
+    s.rbBrValid = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess__DOT__cacheLookup__DOT__readBuffer_branch_valid;   \
+    s.rbOpValid = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess__DOT__cacheLookup__DOT__operationValid;            \
+    s.rbReqType = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess__DOT__cacheLookup__DOT__requestType;               \
+    s.rbAddr    = (uint32_t)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess__DOT__cacheLookup__DOT__readBuffer_address;        \
+    s.allocMask = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__scheduler_allocate_branchMask;                               \
+    s.mrValid   = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memoryRequest_valid;                                         \
+    s.mrMask    = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memoryRequest_branchMask;                                    \
+    s.mrAddr    = (uint32_t)tb_->system__DOT__chiron__DOT__core##N##__DOT__memoryRequest_address;                                       \
     s.aluValid  = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__singleCycleArithmeticResponse_valid;   \
     s.aluRob    = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__singleCycleArithmeticResponse_robAddr; \
     s.mValid    = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__extnMResponse_valid;   \
     s.mRob      = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__extnMResponse_robAddr; \
     s.loadValid = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess_responseOut_valid; \
+    s.loadPrf   = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess_responseOut_prfDest;     \
+    s.loadInsn  = (uint32_t)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess_responseOut_instruction; \
+    s.aceRespRob = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess__DOT__aceUnit__DOT__responseBuffer_core_robAddr; \
+    s.aceReadRob = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess__DOT__aceUnit__DOT__readBuffer_core_robAddr;     \
+    s.periphRespRob = (unsigned)tb_->system__DOT__chiron__DOT__core##N##__DOT__memAccess__DOT__peripheralUnit__DOT__responseOutBuffer_core_robAddr; \
     for (unsigned i = 0; i < CHIRON_ROB_DEPTH; i++) {                          \
       s.ready[i] = (unsigned)(tb_->system__DOT__chiron__DOT__core##N##__DOT__rob__DOT__results__DOT__memReg[i][0] & 1u); \
       s.insn[i]  = insn_of((const uint32_t *)                                  \

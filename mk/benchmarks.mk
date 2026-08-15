@@ -44,13 +44,13 @@ lrscirq_base := mt-lrscirq
 # completion and burns its whole cycle budget instead of failing fast.
 #
 # `make done-pcs` prints the current exit address for every family so the table
-# can be re-derived rather than guessed. (The 2026-08-15 crt.S stack fix shifted
-# everything by +0x0c.)
-vvadd_DONE  := --done-pc 0x800009ac --done-pc 0x800009b8 --done-a0 2
-matmul_DONE := --done-pc 0x80000a10
-filter_DONE := --done-pc 0x80000bd4 --done-pc 0x80000bd8
-csaxpy_DONE := --done-pc 0x800009b0 --done-pc 0x800009a4 --done-a0 0
-histo_DONE  := --done-pc 0x80000a4c
+# can be re-derived rather than guessed. (The extra-hart park in crt.S shifted
+# everything by +0x08 from the 2026-08-15 stack-fix addresses.)
+vvadd_DONE  := --done-pc 0x800009b4 --done-pc 0x800009c0 --done-a0 2
+matmul_DONE := --done-pc 0x80000a18
+filter_DONE := --done-pc 0x80000bdc --done-pc 0x80000be0
+csaxpy_DONE := --done-pc 0x800009b8 --done-pc 0x800009ac --done-a0 0
+histo_DONE  := --done-pc 0x80000a54
 seqlock_DONE := --done-pc 0x80000aac
 radix_DONE  := --done-pc 0x80000c74
 spinwait_DONE := --done-pc 0x80000aa8

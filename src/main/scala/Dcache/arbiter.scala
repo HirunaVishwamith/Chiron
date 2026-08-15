@@ -74,13 +74,42 @@ class arbiter extends Module {
   request.inorderReady :=  inorderBufferReadyWire && operationBufferReadyWire                        
 
   //---------------------Request Enqueue---------------------//
+  // True on a cycle the corresponding buffer is (re)loaded. The ageing
+  // blocks below must skip such cycles: regRecordUpdate's branch-PASS arm
+  // ends in `buffer.valid := buffer.valid` (utils.scala:137), which writes
+  // back the PREVIOUS occupant's valid bit / mask. That is the same last-
+  // connect hole as ACEUnit.responseBuffer and peripheralUnit.requestBuffer.
+  //
+  // Ready allows a new request in when the occupant is empty OR already
+  // squashed (valid && !branch.valid). The squashed-overwrite case is the
+  // one that fires: a fresh speculative load is written, then ageing
+  // clobbers its mask with the dead occupant's (often 0). The load looks
+  // non-speculative, survives its own mispredict, and completes onto a ROB
+  // slot speculation has already freed — READY-OUTSIDE-ROB-WINDOW on
+  // ci-check's csaxpy-s5-q4 / filter-s5-q4.
+  val specLoading = request.request.valid && request.request.branch.valid && request.isSpeculative
+  val opLoading   = request.request.valid && request.request.branch.valid && !request.isSpeculative
   when(request.request.valid && request.request.branch.valid){
     when(request.isSpeculative){
-      speculativeBuffer:= request.request
-    } .otherwise {   
+      speculativeBuffer := request.request
+      regWriteUpdate(speculativeBuffer.branch, branchOps, request.request.branch)
+    } .otherwise {
       operationBuffer := request.request
+      regWriteUpdate(operationBuffer.branch, branchOps, request.request.branch)
     }
-  } 
+  }
+
+  // Age sitting occupants BEFORE the FSM / dequeue assign, so a later
+  // `valid := false.B` last-connects over the PASS arm's resurrection.
+  when(speculativeBuffer.valid && !specLoading){
+    regRecordUpdate(speculativeBuffer.branch, branchOps)
+  }
+  when(operationBuffer.valid && !opLoading){
+    regRecordUpdate(operationBuffer.branch, branchOps)
+  }
+  when(inorderBuffer.valid){
+    regRecordUpdate(inorderBuffer.branch, branchOps)
+  }
 
   //--------------------Operations State Machine-----------------//
   val idleState :: commitReadyState :: commitFiredState :: waitState :: writeInstructionFiredState :: Nil = Enum(5)
@@ -160,16 +189,6 @@ class arbiter extends Module {
     }
   }
 
-  when(speculativeBuffer.valid){
-    regRecordUpdate(speculativeBuffer.branch, branchOps)
-  }
-  when(operationBuffer.valid){
-    regRecordUpdate(operationBuffer.branch, branchOps)
-  }
-  when(inorderBuffer.valid){
-    regRecordUpdate(inorderBuffer.branch, branchOps)
-  }
-  
   val inorderBufferValidWire = WireDefault(inorderBuffer.valid && inorderBuffer.branch.valid)
   val speculativeBufferValidWire = WireDefault(speculativeBuffer.valid && speculativeBuffer.branch.valid)
   // val replayRequestValidWire = WireDefault(replayRequest.request.valid && replayRequest.request.branch.valid)

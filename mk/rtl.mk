@@ -32,29 +32,19 @@ $(SIM)/system.v: $(SCALA_SRCS)
 
 # Trace model (obj_dir): Verilated with --trace for the lock-step debug harnesses
 # (VCD via DUMP_WAVES=1). Generated C++ now compiled at -O3 (was -Os).
-$(VSYS_LIB): $(SIM)/system.v
+$(VSYS_LIB): $(SIM)/system.v mk/rtl.mk mk/config.mk
 	cd $(SIM)/; \
-	verilator -Wall --trace -cc system.v; \
-	cd obj_dir/; make -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
+	verilator $(VFLAGS_COMMON) --trace -cc system.v; \
+	$(MAKE) -C obj_dir -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)" VM_PARALLEL_BUILDS=1
 
-# Fast model (obj_dir_fast): same Verilog, NO --trace, -O3 codegen — for the
-# run-only harnesses (linux_sim). ~1.2x faster; cannot dump waveforms.
-#
-# --savable adds Verilator's model save/restore (VerilatedSave/VerilatedRestore).
-# It only emits extra serialisation methods; it does not change simulation
-# behaviour. It exists because the Linux SMP boot takes ~16 h to reach the
-# post-/init hang, which made every hypothesis cost a full day. With
-# checkpoints, a run snapshots itself periodically and a debug session restores
-# just before the failure and iterates in minutes. It also makes cycle-bisection
-# of a hang practical. See `make linux-ckpt` / CKPT_* in mk/run.mk.
-#
-# NOTE the checkpoint contains the whole model INCLUDING the 256 MB DRAM array
-# (system.memory.memory), so each file is ~256 MB. CKPT_KEEP bounds how many are
-# retained.
-$(VSYS_LIB_FAST): $(SIM)/system.v
+# Fast model (obj_dir_fast): same Verilog, NO --trace, NO --savable, -O3
+# codegen. Used by ci-bench / ci-check / profile. Checkpoints live on
+# sim-ckpt (obj_dir_save) so the CI path does not pay --savable's extra
+# generated C++ (~150 TUs) or eval cost.
+$(VSYS_LIB_FAST): $(SIM)/system.v mk/rtl.mk mk/config.mk
 	cd $(SIM)/; \
-	verilator -Wall -O3 --savable -cc system.v --Mdir obj_dir_fast; \
-	cd obj_dir_fast/; make -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
+	verilator $(VFLAGS_COMMON) -O3 -cc system.v --Mdir obj_dir_fast; \
+	$(MAKE) -C obj_dir_fast -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)" VM_PARALLEL_BUILDS=1
 
 # ── Optional walker-disabled model (A/B debug only) ───────────────────────────
 # Same Chisel → Verilog flow as system.v, but patches
@@ -77,14 +67,27 @@ $(SIM)/system_linux.v: $(SCALA_SRCS)
 	  done; \
 	done
 
-$(VSYS_LIB_LINUX): $(SIM)/system_linux.v
+$(VSYS_LIB_LINUX): $(SIM)/system_linux.v mk/rtl.mk mk/config.mk
 	cd $(SIM)/; \
-	verilator -Wall -O3 -cc system_linux.v --top-module system --Mdir obj_dir_linux; \
-	cd obj_dir_linux/; make -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)"
+	verilator $(VFLAGS_COMMON) -O3 -cc system_linux.v --top-module system --Mdir obj_dir_linux; \
+	$(MAKE) -C obj_dir_linux -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)" VM_PARALLEL_BUILDS=1
 
-.PHONY: sim sim-fast sim-linux
+# Checkpointable copy of the fast model (--savable). Only linux-sim and the
+# Linux debug probes need this; CI never builds it.
+SIM_CKPT          := $(SIM)/obj_dir_save
+VSYS_LIB_CKPT     := $(SIM_CKPT)/Vsystem__ALL.a
+HARNESS_INCS_CKPT := -I . -I $(VINC) -I $(SIM_CKPT)
+CXX_CKPT          := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_CKPT) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD) $(VERILATED_SAVE)
+
+$(VSYS_LIB_CKPT): $(SIM)/system.v mk/rtl.mk mk/config.mk
+	cd $(SIM)/; \
+	verilator $(VFLAGS_COMMON) -O3 --savable -cc system.v --Mdir obj_dir_save; \
+	$(MAKE) -C obj_dir_save -j$(VJOBS) -f Vsystem.mk OPT_FAST="$(VOPT_FAST)" VM_PARALLEL_BUILDS=1
+
+.PHONY: sim sim-fast sim-ckpt sim-linux
 sim: $(VSYS_LIB)             ## Build the RTL: Chisel → Verilog → Verilator library
-sim-fast: $(VSYS_LIB_FAST)   ## Build the fast no-trace RTL model (used by benchmarks + linux-sim)
+sim-fast: $(VSYS_LIB_FAST)   ## Fast no-trace model for benches / ci-check (no --savable)
+sim-ckpt: $(VSYS_LIB_CKPT)   ## Fast model + --savable (linux-sim checkpoints)
 sim-linux: $(VSYS_LIB_LINUX) ## Optional: walker-disabled model (A/B debug only)
 
 # ── Kintex-7 FPGA flavour (quad-core, PCIe/XDMA — see fpga/) ──────────────────

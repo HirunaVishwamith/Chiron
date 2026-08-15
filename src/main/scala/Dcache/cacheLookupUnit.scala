@@ -382,8 +382,13 @@ class cacheLookupUnit extends Module{
   when(replayBuffer.valid && replayBuffer.branch.valid){
     regRecordUpdate(replayBuffer.branch, branchOps)
   }
-  //Input buffers
-  when(readBuffer.valid && readBuffer.branch.valid && !operationValid){
+  // Input buffers. Skip a cycle the buffer is being loaded: same last-connect
+  // hole as ACEUnit.responseBuffer (utils.scala:137 writes back the previous
+  // occupant's valid/mask). The accept handshake usually makes load and
+  // !operationValid exclusive; the guard makes that structural rather than
+  // coincidental.
+  val loadingReadBuffer = request.request.valid && request.request.branch.valid
+  when(readBuffer.valid && readBuffer.branch.valid && !operationValid && !loadingReadBuffer){
     regRecordUpdate(readBuffer.branch, branchOps)
   }
   when(lastInorderMissRecordRegister.valid && lastInorderMissRecordRegister.branch.valid){

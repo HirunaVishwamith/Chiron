@@ -141,6 +141,15 @@ sync_all_harts:
   # load number of cores into a1
   li a1, NUM_CORES
 
+  # The RTL always brings up 4 harts. A NUM_CORES=1 image must not let
+  # harts 1-3 enter thread_entry: blocked-row kernels (matmul, filter)
+  # compute start = (lda/ncores)*cid with ncores==1, so cid>=1 walks off
+  # the end of the result array and never reaches the exit stub. That is
+  # why single-core matmul ran past 150 M cycles on the RTL while the
+  # golden model (one hart) finished in seconds. Extra harts have already
+  # waited out BSS init above; park them here.
+  bgeu    a0, a1, park_extra_hart
+
   # Define constants:
   # REGION_SIZE = TLS_SIZE (0x100) + STACK_SIZE (0x1000) = 0x1100
   li      t3, 0x1
@@ -192,6 +201,9 @@ sync_all_harts:
 
   # jump to _init with cid in a0 and nc in a1
   jal thread_entry // Jump and Link to _init
+
+park_extra_hart:
+  j       park_extra_hart
 
   .align 2
 trap_entry:

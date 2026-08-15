@@ -258,15 +258,15 @@ make profile-all-sc              # → build/profile_results/<fam>-s<N>.json + c
 | vvadd-s1 | 329 665 | **0.308** | 73.3 % | 1.43 % | 1.40 MB/s |
 | csaxpy-s1 | 383 297 | **0.281** | 69.5 % | 1.12 % | 1.16 MB/s |
 | histo-s1 | 1 872 971 | **0.262** | 67.6 % | 1.10 % | 1.21 MB/s |
-| matmul-s1 | — | n/a | — | — | — |
+| matmul-s1 | 1 114 553 | **0.335** | 27.5 % | 0.55 % | 0.40 MB/s |
 
 > Single-core IPC now sits at 0.26–0.41, roughly 2.3× the pre-TAGE numbers, with
-> branch accuracy up from ~50–60 % to 68–80 % — the predictor change is most of
-> the gain. filter leads because its stencil inner loop is long and
-> well-predicted; histo trails because its scatter pattern serialises on the
-> store path. **matmul has no single-core row**: it does not complete on the RTL
-> at any scale (see *Known issues*), so the figure labels it `n/a` rather than
-> plotting a partial-run number as if it were a result.
+> branch accuracy up from ~50–60 % to 68–80 % on the streaming kernels — the
+> predictor change is most of the gain. filter leads because its stencil inner
+> loop is long and well-predicted; histo trails because its scatter pattern
+> serialises on the store path. matmul's branch accuracy is low because the
+> trip-count-3 inner loop is a hard pattern for TAGE; the IPC is still
+> competitive because the inner body is mul-heavy and cache-resident.
 
 ---
 
@@ -483,7 +483,7 @@ JSON reports are written to `build/profile_results/`.
 | `make profile-all-sc` | Single-core profile for all benchmarks, all scales |
 | `make fire [FIRE_FRAMES=N]` | Bare-metal Doom-fire demo |
 | `make cube [FIRE_FRAMES=N]` | Rotating wireframe cube (fixed-point 3D, 4 harts) |
-| `make solid [FIRE_FRAMES=N]` | Filled, shaded cube — **currently wedges, see below** |
+| `make solid [FIRE_FRAMES=N]` | Filled, shaded rotating cube (z-buffered, ~210 K cycles/frame) |
 | `make linux-emu [LINUX_IMAGE=…]` | Interactive Linux shell on the golden model (fast) |
 | `make linux-emu-check [LINUX_IMAGE=…]` | Scripted boot-to-login check (CI, non-interactive) |
 | `make linux-sim [LINUX_IMAGE=…]` | Boot Linux on the Verilated RTL (live console, slow) |
@@ -600,23 +600,12 @@ D-caches; on chiron the fetch reads stale L2. The two-line kernel fix lives in
 [`mc-linux/patches/`](mc-linux/patches/).
 
 All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
-`smp-repro` 3/3.
+`ci-check` 5/5, `smp-repro` 3/3.
 
 ---
 
 ## Known issues
 
-- **`make solid` wedges.** Core 0 stops committing entirely for 500 K cycles
-  with its ROB head on a `mul` that is immediately followed by two `div`s
-  (`0x80001458` in `mt-solid`), i.e. an M-extension issue rather than anything in
-  the 3D code — `make cube`, which shares the same g3d library, renders fine.
-  Confirmed to predate the merge of main into this branch: the pre-merge netlist
-  wedges at the identical PC.
-- **Single-core `matmul` does not complete on the RTL** at any scale. It runs
-  past 150 M cycles without reaching its exit stub, while the golden model
-  finishes it in seconds and every other family's single-core runs pass. The
-  quad-core matmul runs are unaffected, which is why the profile report shows
-  matmul's 1-core bars as `n/a`.
 - **`mask-sfilter` only has three distinct scales.** `s3.h`, `s4.h` and `s5.h`
   are byte-identical (`DATA_SIZE 156`), so `filter-s3`, `-s4` and `-s5` build the
   same image and unsurprisingly profile to the same number (1.472 aggregate IPC

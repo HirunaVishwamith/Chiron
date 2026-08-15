@@ -99,20 +99,20 @@ $(BUILD)/mextpath_probe.out: $(HARNESS)/probes/mextpath_probe.cpp $(SIM_HDR) $(V
 # Boots the full Linux image while counting CLINT msip writes per target hart.
 # Uses CXX_LINUX (raised STEP_TIMEOUT) like linux_sim.out, since legitimate boot
 # phases stall far longer than a benchmark ever does.
-$(BUILD)/linux_ipi_probe.out: $(HARNESS)/probes/linux_ipi_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) $(HARNESS)/probes/linux_ipi_probe.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_ipi_probe.out: $(HARNESS)/probes/linux_ipi_probe.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) $(HARNESS)/probes/linux_ipi_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # Restores a linux_ipi_probe checkpoint and dissects the csd_lock_wait hang:
 # reads hart1's a4 (the csd address), what its reload actually returns, and the
 # same word straight out of DRAM. Same checkpoint format as linux_ipi_probe.
-$(BUILD)/linux_csd_probe.out: $(HARNESS)/probes/linux_csd_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) $(HARNESS)/probes/linux_csd_probe.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_csd_probe.out: $(HARNESS)/probes/linux_csd_probe.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) $(HARNESS)/probes/linux_csd_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # Push/pop ledger for call_single_queue, watching the sc.d in llist_add_batch
 # and the amoswap in __flush_smp_call_function_queue. Decides whether the lost
 # cross-call entry was dropped before or after the dequeue.
-$(BUILD)/linux_llist_probe.out: $(HARNESS)/probes/linux_llist_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) $(HARNESS)/probes/linux_llist_probe.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_llist_probe.out: $(HARNESS)/probes/linux_llist_probe.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) $(HARNESS)/probes/linux_llist_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
 # its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
@@ -123,8 +123,8 @@ $(BUILD)/linux_llist_probe.out: $(HARNESS)/probes/linux_llist_probe.cpp $(SIM_HD
 # Uses the same walker-ON RTL as CI (obj_dir_fast): walkerWriteBackBuffer keeps
 # fence.i from deadlocking the snoop path under SMP, so a separate walker-off
 # model is no longer required.
-$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_CKPT) -o $@
 
 # Same boot, but watches for the known timekeeping-seqlock SMP wedge (see the
 # file's own comment) and captures a bounded VCD right around the point it
@@ -288,23 +288,31 @@ $(BUILD)/profile_quad_check.out: $(HARNESS)/profile_quad.cpp $(HARNESS)/invarian
 # "BENCHMARK COMPLETE" (not "Simulation cycles", which prints on TIMEOUT too) is
 # the success marker.
 ci-bench: $(BUILD)/profile_quad_fast.out   ## CI gate: 5 quad-core benchmarks must all complete cleanly
-	@fail=0; \
-	run() { \
-	  echo "== CI bench: $$1 =="; \
-	  out=$$(timeout 1500 $(BUILD)/profile_quad_fast.out --image $(BINS)/$$2 --name $$1 $$3 \
-	       --timeout 120000000 2>&1); \
-	  echo "$$out" | tail -4; \
-	  if echo "$$out" | grep -q 'BENCHMARK COMPLETE' && \
-	     ! echo "$$out" | grep -qiE 'Register mismatch|Deadlock|TIMEOUT|VERIFY FAIL' && \
-	     ! echo "$$out" | grep -E 'error code: [1-9]'; \
-	  then echo "$$1: PASS"; echo "$$1: pass" >> test_results.txt; \
-	  else echo "$$1: FAIL"; echo "$$1: fail" >> test_results.txt; fail=1; fi; }; \
-	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
-	run matmul-s1-q4 mt-matmul-s1-q4.bin       "$(matmul_DONE)"; \
-	run filter-s5-q4 mt-mask-sfilter-s5-q4.bin "$(filter_DONE)"; \
-	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
-	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"; \
-	if [ $$fail -eq 0 ]; then echo "ci-bench: ALL 5 PASS"; else echo "ci-bench: FAILURES"; exit 1; fi
+	@echo "[ci-bench] CI_JOBS=$(CI_JOBS)  nproc=$(NPROC)  verilator=$$(verilator --version 2>/dev/null | awk '{print $$2}')"
+	@mkdir -p $(BUILD)/ci; rm -f $(BUILD)/ci/bench-*.ok $(BUILD)/ci/bench-*.log
+	@printf '%s\0' \
+	    "vvadd-s5-q4|mt-vvadd-s5-q4.bin|$(vvadd_DONE)" \
+	    "matmul-s1-q4|mt-matmul-s1-q4.bin|$(matmul_DONE)" \
+	    "filter-s5-q4|mt-mask-sfilter-s5-q4.bin|$(filter_DONE)" \
+	    "csaxpy-s5-q4|mt-csaxpy-s5-q4.bin|$(csaxpy_DONE)" \
+	    "histo-s5-q4|mt-histo-s5-q4.bin|$(histo_DONE)" \
+	  | xargs -0 -P $(CI_JOBS) -I{} sh -c ' \
+	      rec="{}"; IFS="|"; set -- $$rec; name=$$1; bin=$$2; done=$$3; \
+	      echo "== CI bench: $$name =="; \
+	      if timeout 1500 $(BUILD)/profile_quad_fast.out --image $(BINS)/$$bin --name $$name $$done \
+	           --timeout 120000000 > $(BUILD)/ci/bench-$$name.log 2>&1 \
+	         && grep -q "BENCHMARK COMPLETE" $(BUILD)/ci/bench-$$name.log \
+	         && ! grep -qiE "Register mismatch|Deadlock|TIMEOUT|VERIFY FAIL" $(BUILD)/ci/bench-$$name.log \
+	         && ! grep -E "error code: [1-9]" $(BUILD)/ci/bench-$$name.log; then \
+	        tail -4 $(BUILD)/ci/bench-$$name.log; echo "$$name: PASS"; \
+	        echo "$$name: pass" >> test_results.txt; : > $(BUILD)/ci/bench-$$name.ok; \
+	      else \
+	        tail -8 $(BUILD)/ci/bench-$$name.log; echo "$$name: FAIL"; \
+	        echo "$$name: fail" >> test_results.txt; \
+	      fi'; \
+	ok=$$(ls $(BUILD)/ci/bench-*.ok 2>/dev/null | wc -l); \
+	if [ $$ok -eq 5 ]; then echo "ci-bench: ALL 5 PASS"; \
+	else echo "ci-bench: FAILURES ($$ok/5)"; exit 1; fi
 
 # ── CI correctness gate ───────────────────────────────────────────────────────
 # ci-bench asks "did the benchmark produce the right answer?". This asks the
@@ -316,20 +324,26 @@ ci-bench: $(BUILD)/profile_quad_fast.out   ## CI gate: 5 quad-core benchmarks mu
 # invariants they violated on every cycle; a violation fails the run even if the
 # benchmark still happened to compute the right result.
 ci-check: $(BUILD)/profile_quad_check.out   ## Strict gate: benchmarks + per-cycle microarchitectural assertions
-	@fail=0; \
-	run() { \
-	  echo "== CI check: $$1 =="; \
-	  out=$$(timeout 3000 $(BUILD)/profile_quad_check.out --image $(BINS)/$$2 --name $$1 $$3 \
-	       --timeout 120000000 2>&1); rc=$$?; \
-	  echo "$$out" | grep -E 'INVARIANT|chiron invariants|no violations|VIOLATION|BENCHMARK COMPLETE|TIMEOUT|DEADLOCK' || true; \
-	  if [ $$rc -eq 0 ]; then echo "$$1: CLEAN"; \
-	  else echo "$$1: FAIL (rc=$$rc: 2=timeout 3=deadlock 4=invariant-violation 124=wall-clock)"; fail=1; fi; }; \
-	run vvadd-s5-q4  mt-vvadd-s5-q4.bin        "$(vvadd_DONE)"; \
-	run matmul-s1-q4 mt-matmul-s1-q4.bin       "$(matmul_DONE)"; \
-	run filter-s5-q4 mt-mask-sfilter-s5-q4.bin "$(filter_DONE)"; \
-	run csaxpy-s5-q4 mt-csaxpy-s5-q4.bin       "$(csaxpy_DONE)"; \
-	run histo-s5-q4  mt-histo-s5-q4.bin        "$(histo_DONE)"; \
-	if [ $$fail -eq 0 ]; then echo "ci-check: ALL 5 CLEAN"; else echo "ci-check: FAILURES"; exit 1; fi
+	@echo "[ci-check] CI_JOBS=$(CI_JOBS)  nproc=$(NPROC)  verilator=$$(verilator --version 2>/dev/null | awk '{print $$2}')"
+	@mkdir -p $(BUILD)/ci; rm -f $(BUILD)/ci/check-*.ok $(BUILD)/ci/check-*.log
+	@printf '%s\0' \
+	    "vvadd-s5-q4|mt-vvadd-s5-q4.bin|$(vvadd_DONE)" \
+	    "matmul-s1-q4|mt-matmul-s1-q4.bin|$(matmul_DONE)" \
+	    "filter-s5-q4|mt-mask-sfilter-s5-q4.bin|$(filter_DONE)" \
+	    "csaxpy-s5-q4|mt-csaxpy-s5-q4.bin|$(csaxpy_DONE)" \
+	    "histo-s5-q4|mt-histo-s5-q4.bin|$(histo_DONE)" \
+	  | xargs -0 -P $(CI_JOBS) -I{} sh -c ' \
+	      rec="{}"; IFS="|"; set -- $$rec; name=$$1; bin=$$2; done=$$3; \
+	      echo "== CI check: $$name =="; \
+	      timeout 3000 $(BUILD)/profile_quad_check.out --image $(BINS)/$$bin --name $$name $$done \
+	           --timeout 120000000 > $(BUILD)/ci/check-$$name.log 2>&1; rc=$$?; \
+	      grep -E "INVARIANT|chiron invariants|no violations|VIOLATION|BENCHMARK COMPLETE|TIMEOUT|DEADLOCK" \
+	           $(BUILD)/ci/check-$$name.log || true; \
+	      if [ $$rc -eq 0 ]; then echo "$$name: CLEAN"; : > $(BUILD)/ci/check-$$name.ok; \
+	      else echo "$$name: FAIL (rc=$$rc: 2=timeout 3=deadlock 4=invariant-violation 124=wall-clock)"; fi'; \
+	ok=$$(ls $(BUILD)/ci/check-*.ok 2>/dev/null | wc -l); \
+	if [ $$ok -eq 5 ]; then echo "ci-check: ALL 5 CLEAN"; \
+	else echo "ci-check: FAILURES ($$ok/5)"; exit 1; fi
 
 # ── Constrained-random stress campaign ────────────────────────────────────────
 # The generated program's <exit> address moves with every seed and block count,
@@ -553,39 +567,39 @@ $(BUILD)/lifetime_probe.out: $(HARNESS)/probes/lifetime_probe.cpp $(SIM_HDR) $(V
 # walker FSM and both writeback staging slots, through the cycle window where
 # csd_unlock's committed store goes missing. See linux_llist_probe for how that
 # window was located.
-$(BUILD)/linux_dcache_probe.out: $(HARNESS)/probes/linux_dcache_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) $(HARNESS)/probes/linux_dcache_probe.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_dcache_probe.out: $(HARNESS)/probes/linux_dcache_probe.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) $(HARNESS)/probes/linux_dcache_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # Follows ONE line (the rt_sigreturn trampoline) through every place a stale
 # copy can hide at once: hart1's I-cache line and its refill data, all four
 # harts' D-cache copies, and every hart's fence.i walker sweep. Answers why an
 # I-fetch returned zeros for an address whose data read was correct.
-$(BUILD)/linux_tramp_probe.out: $(HARNESS)/probes/linux_tramp_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) $(HARNESS)/probes/linux_tramp_probe.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_tramp_probe.out: $(HARNESS)/probes/linux_tramp_probe.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) $(HARNESS)/probes/linux_tramp_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # Watches ACEUnit's snoop-answer path for one line: does writePipeHit steer a
 # peer's snoop into the writeback pipeline and serve the pre-store copy? Run on
 # the PRE-FIX model, where the bug is live and the checkpoints still restore.
-$(BUILD)/linux_snoop_probe.out: $(HARNESS)/probes/linux_snoop_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) $(HARNESS)/probes/linux_snoop_probe.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_snoop_probe.out: $(HARNESS)/probes/linux_snoop_probe.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) $(HARNESS)/probes/linux_snoop_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # Restores a linux_ipi_probe checkpoint and traces the interrupt-injection FSM
 # (core.scala waitForMTIP/waitToInjectInterr) for whichever hart has an
 # unserviced MSIP pending — see inject_fsm_probe.cpp's header for the known
 # branchCounter-stuck failure mode this was built to catch.
-$(BUILD)/linux_injfsm_probe.out: $(HARNESS)/probes/linux_injfsm_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) $(HARNESS)/probes/linux_injfsm_probe.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_injfsm_probe.out: $(HARNESS)/probes/linux_injfsm_probe.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) $(HARNESS)/probes/linux_injfsm_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # Tests whether the Linux 1,235M freeze is a jammed ROB head with a lost branch
 # resolution (the reallocated-slot defect class, task #40). See the probe's
 # header: the interrupt-injection FSM was proven to be a symptom, not the cause.
-$(BUILD)/linux_robjam_probe.out: $(HARNESS)/probes/linux_robjam_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) $(HARNESS)/probes/linux_robjam_probe.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_robjam_probe.out: $(HARNESS)/probes/linux_robjam_probe.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) $(HARNESS)/probes/linux_robjam_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # Reads DRAM straight out of a checkpoint (no simulation, runs in seconds) to
 # ask whether the address hart0 fetched zeros from actually contains code.
-$(BUILD)/linux_itext_probe.out: $(HARNESS)/probes/linux_itext_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
-	$(CXX_LINUX) $(HARNESS)/probes/linux_itext_probe.cpp $(VSYS_LIB_FAST) -o $@
+$(BUILD)/linux_itext_probe.out: $(HARNESS)/probes/linux_itext_probe.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+	$(CXX_CKPT) $(HARNESS)/probes/linux_itext_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # Console RX round trip: drives the same hostInput pins linux_sim.cpp drives,
 # against bins/mt-uartrx-q4.bin, and checks the bytes come back intact.

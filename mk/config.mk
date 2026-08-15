@@ -112,13 +112,33 @@ endif
 # is -Os = size; -O3 is markedly faster for long simulations). Behaviour-neutral.
 VOPT_FAST ?= -O3 -march=native -fno-math-errno
 
+# Host cores. GitHub Actions cgroups sometimes make `nproc` print 1 even
+# though the hosted runner has 2-4 CPUs; a 1 here serialises both the
+# Verilator C++ compile (VJOBS) and ci-bench/ci-check (CI_JOBS) and is
+# what turns a 12-minute 5-bench run into ~25 minutes. Floor at 2.
+NPROC := $(shell nproc 2>/dev/null || echo 2)
+ifeq ($(NPROC),1)
+NPROC := 2
+endif
+
 # Parallelism for compiling the Verilated C++. Verilator splits system.v into
-# ~45 translation units and each takes tens of seconds at -O3 -march=native, so
-# building them one at a time costs 15-20 min -- long enough that people
-# reasonably mistake a rebuild for the simulation itself having got slower.
-# Rebuilds happen more often than you would think: `git checkout` rewrites the
-# mtime of every .scala file, which is enough to invalidate system.v.
-VJOBS ?= $(shell nproc)
+# many translation units and each takes tens of seconds at -O3, so building
+# them one at a time costs 15-20 min.
+VJOBS   ?= $(NPROC)
+# How many of the five ci-bench / ci-check simulations to run at once.
+# Each process holds the Verilated DRAM (~256 MB); 2-4 is safe on CI.
+CI_JOBS ?= $(NPROC)
+
+# Verilator CLI flags shared by every model. --output-split is what sets
+# VM_PARALLEL_BUILDS=1 in Vsystem.mk; without it some versions concatenate
+# every .cpp into one translation unit and `make -j` compiles a single file.
+# --no-timing is 5.x-only: 5.x default timing-eval is much slower and we
+# do not use SV timing. 4.038 rejects the flag, so it is added only on 5.x.
+VERILATOR_MAJ := $(shell verilator --version 2>/dev/null | awk '{print int($$2)}')
+VFLAGS_COMMON := -Wall --output-split 20000
+ifeq ($(VERILATOR_MAJ),5)
+VFLAGS_COMMON += --no-timing
+endif
 
 # Optional runtime diagnostic flags — passed to harness binaries at run time.
 # Use: make lockstep SHOW_STATE=1   (print golden-model register state each step)
