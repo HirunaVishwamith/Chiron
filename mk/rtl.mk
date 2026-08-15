@@ -86,7 +86,7 @@ $(VSYS_LIB_CKPT): $(SIM)/system.v mk/rtl.mk mk/config.mk
 
 .PHONY: sim sim-fast sim-ckpt sim-linux
 sim: $(VSYS_LIB)             ## Build the RTL: Chisel → Verilog → Verilator library
-sim-fast: $(VSYS_LIB_FAST)   ## Fast no-trace model for benches / ci-check (no --savable)
+sim-fast: $(VSYS_LIB_FAST)   ## Fast no-trace model for benches / ci-check / linux-sim-fast (no --savable)
 sim-ckpt: $(VSYS_LIB_CKPT)   ## Fast model + --savable (linux-sim checkpoints)
 sim-linux: $(VSYS_LIB_LINUX) ## Optional: walker-disabled model (A/B debug only)
 

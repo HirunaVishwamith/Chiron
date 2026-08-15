@@ -115,16 +115,20 @@ $(BUILD)/linux_llist_probe.out: $(HARNESS)/probes/linux_llist_probe.cpp $(SIM_HD
 	$(CXX_CKPT) $(HARNESS)/probes/linux_llist_probe.cpp $(VSYS_LIB_CKPT) -o $@
 
 # RTL-only Linux boot: no golden model, no run.log, just the Verilated core with
-# its UART TX streamed to stdout (-DSHOW_TERMINAL). Links the FAST no-trace model
-# (CXX_FAST sets -DCHIRON_NO_TRACE so rtl_model.h's tb->trace() compiles out) for
-# the long Linux boot. STEP_TIMEOUT is raised (CXX_LINUX) so legitimate boot
-# phases (bbl kernel copy, rootfs) aren't misclassified as hangs. The image is
-# loaded by a direct memcpy into the Verilated DRAM (see rtl_model.h).
-# Uses the same walker-ON RTL as CI (obj_dir_fast): walkerWriteBackBuffer keeps
-# fence.i from deadlocking the snoop path under SMP, so a separate walker-off
-# model is no longer required.
+# its UART TX streamed to stdout (-DSHOW_TERMINAL). Two binaries share the
+# source: linux_sim.out links the --savable model (obj_dir_save) so DEBUG=1 can
+# snapshot DRAM; linux_sim_fast.out links the same no-trace model as CI
+# (obj_dir_fast, no --savable) and is the fastest host-speed boot. STEP_TIMEOUT
+# is raised so legitimate boot phases (bbl kernel copy, rootfs) aren't
+# misclassified as hangs. The image is loaded by a direct memcpy into the
+# Verilated DRAM (see rtl_model.h). walkerWriteBackBuffer keeps fence.i from
+# deadlocking the snoop path under SMP, so a separate walker-off model is no
+# longer required.
 $(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
 	$(CXX_CKPT) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_CKPT) -o $@
+
+$(BUILD)/linux_sim_fast.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_LINUX) -DSHOW_TERMINAL -DCHIRON_NO_SAVE $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
 
 # Same boot, but watches for the known timekeeping-seqlock SMP wedge (see the
 # file's own comment) and captures a bounded VCD right around the point it
@@ -155,8 +159,8 @@ $(BUILD)/profile_quad.out: $(HARNESS)/profile_quad.cpp $(SIM)/profiler_quad.h $(
 # input from stdin — both required to boot Linux. (The lock-step harnesses keep
 # -DLOCKSTEP, which force-fires a timer interrupt every step for RTL sync.)
 # Reads its image path from argv[1].
-$(BUILD)/emu.out: $(EMU)/emulator_linux.cpp $(EMU_HDRS) | $(BUILD)
-	g++ -O2 -I $(EMU) -o $@ $(EMU)/emulator_linux.cpp
+$(BUILD)/emu.out: $(EMU)/emulator_linux.cpp $(EMU_HDRS) $(HARNESS)/common/args.h $(HARNESS)/common/completion.h | $(BUILD)
+	g++ -O2 -I . -I $(EMU) -o $@ $(EMU)/emulator_linux.cpp
 
 # ── Runtime flag helpers ──────────────────────────────────────────────────────
 # Expand to the appropriate CLI flag when the user passes SHOW_STATE=1 or
@@ -175,11 +179,12 @@ ISA_IMAGES := $(ISA_DIR)/images
 
 .PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa \
         fire cube solid test linux linux-emu linux-emu-check linux-sim \
+        linux-sim-fast \
         linux-lockstep demo compare snapshot-baseline gate regress-q4 \
         ci-bench ci-check
 
-emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast)
-	$(BUILD)/emu.out $(BIN)
+emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast; exits at the done-PC)
+	$(BUILD)/emu.out $(BIN) $(DONE)
 
 lockstep: $(BUILD)/lockstep.out      ## Lock-step RTL vs emulator for BENCH
 	$(BUILD)/lockstep.out --image $(BIN) $(DONE) --logdir $(BUILD) \
@@ -191,38 +196,38 @@ lockstep: $(BUILD)/lockstep.out      ## Lock-step RTL vs emulator for BENCH
 # resume from (see linux-sim for the case that needs it).
 DEBUG_FLAGS := $(if $(DEBUG),--debug --log $(BUILD)/$(if $(BENCH),$(BENCH),profile)-debug.log)
 
-profile: $(BUILD)/profile.out        ## Cycle-accurate profile (IPC) for BENCH
+profile: $(BUILD)/profile_fast.out    ## Cycle-accurate profile (IPC) for BENCH (fast model)
 	@mkdir -p $(BUILD)/profile_results
 	@echo "[profile] $(BENCH)" >&2
-	$(BUILD)/profile.out --image $(BIN) --name $(BENCH) $(DONE) $(DEBUG_FLAGS) \
+	$(BUILD)/profile_fast.out --image $(BIN) --name $(BENCH) $(DONE) $(DEBUG_FLAGS) \
 		--output $(BUILD)/profile_results/$(BENCH).json --timeout 100000000
 
-profile-quad: $(BUILD)/profile_quad.out    ## Quad-core profile (IPC) for FAM (e.g. make profile-quad FAM=vvadd)
+profile-quad: $(BUILD)/profile_quad_fast.out    ## Quad-core profile (IPC) for FAM (e.g. make profile-quad FAM=vvadd)
 	@mkdir -p $(BUILD)/profile_results
-	@echo "[profile-quad] $(FAM)-q4" >&2
-	$(BUILD)/profile_quad.out \
-	    --image $(BINS)/$($(FAM)_base)-q4.bin \
+	@echo "[profile-quad] $(FAM)-q4  image=$($(FAM)_base)-s$($(FAM)_DEFAULT_SCALE)-q4.bin" >&2
+	$(BUILD)/profile_quad_fast.out \
+	    --image $(BINS)/$($(FAM)_base)-s$($(FAM)_DEFAULT_SCALE)-q4.bin \
 	    --name $(FAM)-q4 $($(FAM)_DONE) \
 	    $(if $(DEBUG),--debug --log $(BUILD)/$(FAM)-q4-debug.log) \
 	    --output $(BUILD)/profile_results/$(FAM)-q4.json --timeout 100000000
 
-profile-all: $(BUILD)/profile_quad.out    ## Profile all quad-core benchmarks (default: q4 bins)
+profile-all: $(BUILD)/profile_quad_fast.out    ## Profile all quad-core families at their default scale (fast model)
 	@mkdir -p $(BUILD)/profile_results
 	$(foreach fam,$(BENCHES), \
 	  echo "[profile-all] $(fam)-q4" && \
-	  test -f $(BINS)/$($(fam)_base)-q4.bin && \
-	  timeout $(PROFILE_TIMEOUT) $(BUILD)/profile_quad.out \
-	    --image $(BINS)/$($(fam)_base)-q4.bin \
+	  test -f $(BINS)/$($(fam)_base)-s$($(fam)_DEFAULT_SCALE)-q4.bin && \
+	  timeout $(PROFILE_TIMEOUT) $(BUILD)/profile_quad_fast.out \
+	    --image $(BINS)/$($(fam)_base)-s$($(fam)_DEFAULT_SCALE)-q4.bin \
 	    --name $(fam)-q4 $($(fam)_DONE) \
 	    --output $(BUILD)/profile_results/$(fam)-q4.json --timeout 100000000 || exit 1; )
 	python3 scripts/profile_visualize.py $(BUILD)/profile_results/
 
-profile-all-sc: $(BUILD)/profile.out    ## Profile single-core (NUM_CORES=1) bins, all scales
+profile-all-sc: $(BUILD)/profile_fast.out    ## Profile single-core (NUM_CORES=1) bins, all scales (fast model)
 	@mkdir -p $(BUILD)/profile_results
 	$(foreach fam,$(BENCHES),$(foreach s,1 2 3 4 5, \
 	  echo "[profile-all-sc] $(fam)-s$(s)" && \
 	  test -f $(BINS)/$($(fam)_base)-s$(s).bin && \
-	  timeout $(PROFILE_TIMEOUT) $(BUILD)/profile.out --image $(BINS)/$($(fam)_base)-s$(s).bin \
+	  timeout $(PROFILE_TIMEOUT) $(BUILD)/profile_fast.out --image $(BINS)/$($(fam)_base)-s$(s).bin \
 	    --name $(fam)-s$(s) $($(fam)_DONE) \
 	    --output $(BUILD)/profile_results/$(fam)-s$(s).json --timeout 100000000 || exit 1; ))
 	python3 scripts/profile_visualize.py $(BUILD)/profile_results/
@@ -239,7 +244,7 @@ cube: $(BUILD)/fire.out $(BINS)/mt-cube.bin   ## Wireframe rotating cube (UART t
 solid: $(BUILD)/fire.out $(BINS)/mt-solid.bin ## Filled, shaded rotating cube
 	$(BUILD)/fire.out --image $(BINS)/mt-solid.bin --frames $(FIRE_FRAMES)
 
-test-q4: $(BUILD)/profile_quad.out   ## Pass/fail check for quad-core benchmarks (uses -q4 bins)
+test-q4: $(BUILD)/profile_quad_fast.out   ## Pass/fail check for quad-core vvadd (default-scale -sN-q4.bin)
 	@for fam in $(REGRESSION_Q4); do \
 	  echo "== quad-core $$fam-q4 =="; \
 	  $(MAKE) --no-print-directory profile-quad FAM=$$fam || exit 1; \
@@ -259,12 +264,12 @@ snapshot-baseline:   ## Copy current q4 JSON into testdata/baseline/q4 (commit t
 	  echo "updated $(BASELINE_Q4)/$$fam-q4.json"; \
 	done
 
-gate: $(BUILD)/lockstep.out $(BUILD)/profile_quad.out   ## Everyday RTL gate: lockstep vvadd-s1 + vvadd-q4 vs baseline
+gate: $(BUILD)/lockstep.out $(BUILD)/profile_quad_fast.out   ## Everyday RTL gate: lockstep vvadd-s1 + vvadd-q4 vs baseline
 	@$(MAKE) --no-print-directory runLockStep
 	@$(MAKE) --no-print-directory profile-quad FAM=vvadd
 	python3 scripts/profile_compare.py $(BASELINE_Q4) $(BUILD)/profile_results --only vvadd-q4
 
-regress-q4: $(BUILD)/profile_quad.out   ## All five q4 benches, then compare against the committed baseline
+regress-q4: $(BUILD)/profile_quad_fast.out   ## All five q4 benches (fast model), then compare against the committed baseline
 	@for fam in $(REGRESSION_Q4_ALL); do \
 	  $(MAKE) --no-print-directory profile-quad FAM=$$fam || exit 1; \
 	done
@@ -442,15 +447,18 @@ linux-emu-check: $(BUILD)/emu.out    ## Non-interactive boot-to-login check (CI)
 # boot.log` gives a log that is purely what Linux printed. Everything the
 # harness has to say is opt-in:
 #
-#   make linux-sim                  quiet: guest output only
+#   make linux-sim                  quiet: guest output only (savable model)
 #   make linux-sim DEBUG=1          + harness log ($(LINUX_SIM_LOG)) and
 #                                     checkpoints every $(CKPT_EVERY) cycles
 #   make linux-sim DEBUG=1 RESUME=1 resume from the newest checkpoint
 #   make linux-sim RESTORE=<file>   resume from a specific one
+#   make linux-sim-fast             same boot, no --savable, host-optimum speed
+#   make linux-sim-fast DEBUG=1     + harness log, no checkpoints
 #   make linux-ckpts                list what is available to resume from
 #
 # Checkpoints are ~256 MB each (the model includes all of DRAM), which is why
-# CKPT_KEEP prunes old ones and why none are written unless DEBUG=1.
+# CKPT_KEEP prunes old ones and why none are written unless DEBUG=1. They
+# require the savable model; linux-sim-fast refuses RESTORE/RESUME.
 LINUX_SIM_LOG ?= $(BUILD)/linux-sim.log
 CKPT_DIR      ?= ckpt
 CKPT_EVERY    ?= 20000000
@@ -475,6 +483,23 @@ linux-sim: $(BUILD)/linux_sim.out    ## Boot LINUX_IMAGE on the RTL core (guest 
 	  flags="$$flags --restore $$ck"; \
 	fi; \
 	exec $(BUILD)/linux_sim.out $(LINUX_IMAGE) $(DATA)/qemu.dtb $(DATA)/boot.bin $$flags
+
+# Same console boot on the non-savable fast model (obj_dir_fast, -O3
+# -march=native). Use this when you want the highest cycles/s this host can
+# deliver and do not need to snapshot or resume. DEBUG=1 still writes the
+# heartbeat log; RESTORE/RESUME belong on linux-sim.
+LINUX_SIM_FAST_LOG ?= $(BUILD)/linux-sim-fast.log
+LINUX_SIM_FAST_FLAGS := $(if $(DEBUG),--debug --log $(LINUX_SIM_FAST_LOG) --no-ckpt)
+
+linux-sim-fast: $(BUILD)/linux_sim_fast.out   ## Boot LINUX_IMAGE on the fast RTL model (no --savable; host-optimum speed)
+	@if [ -n "$(RESTORE)$(RESUME)" ]; then \
+	  echo "linux-sim-fast has no checkpoints — use \`make linux-sim RESTORE=...\` / RESUME=1" >&2; \
+	  exit 1; \
+	fi
+	@echo "== RTL boot (fast, no --savable): $(LINUX_IMAGE) ==" >&2
+	@$(if $(DEBUG),echo "   debug log: $(LINUX_SIM_FAST_LOG)  (no checkpoints on this model)" >&2,\
+	   echo "   (quiet: only what the kernel transmits. DEBUG=1 adds a heartbeat log)" >&2)
+	@exec $(BUILD)/linux_sim_fast.out $(LINUX_IMAGE) $(DATA)/qemu.dtb $(DATA)/boot.bin $(LINUX_SIM_FAST_FLAGS)
 
 .PHONY: linux-ckpts
 linux-ckpts:                         ## List checkpoints available to resume from

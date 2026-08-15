@@ -5,8 +5,12 @@
 #
 # Usage:  make bins-q4      → produces bins/mt-*-q4.bin for all listed benchmarks
 
-QUAD_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy mt-seqlock mt-radix mt-spinwait mt-divburst mt-divirq \
-               mt-ipi mt-ipitmr mt-ipimux mt-lrsc mt-lrscirq
+# The five scale families are built by bins-scale-q4 (every s1–s5 + the
+# unscaled default-scale name). bins-q4 runs that, then these diagnostics.
+QUAD_SCALE_BMARKS := mt-vvadd mt-matmul mt-mask-sfilter mt-histo mt-csaxpy
+QUAD_MICRO_BMARKS := mt-seqlock mt-radix mt-spinwait mt-divburst mt-divirq \
+                     mt-ipi mt-ipitmr mt-ipimux mt-lrsc mt-lrscirq
+QUAD_BMARKS := $(QUAD_SCALE_BMARKS) $(QUAD_MICRO_BMARKS)
 
 # Number of harts baked into the -q4 (and scale-q4) benchmarks. Override on the
 # command line, e.g.  make bins-q4 NUM_CORES=8 .  crt.S guards its own default
@@ -22,14 +26,14 @@ QUAD_GCC_OPTS := -mcmodel=medany -static -std=gnu99 -O2 -fno-common \
 # memcpy, which don't exist here and fail at link time.
 
 .PHONY: bins-q4 bins-all
-bins-q4:    ## Build all benchmarks with NUM_CORES=4 → bins/mt-*-q4.bin
-	@echo "[bins-q4] Building all benchmarks with NUM_CORES=4..."
+bins-q4: bins-scale-q4   ## All quad-core s1–s5 benches + diagnostic micros → bins/mt-*-q4.bin
+	@echo "[bins-q4] diagnostic micros with NUM_CORES=$(NUM_CORES)..."
 	@$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) clean 2>/dev/null || true
 	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
-	    bmarks="$(QUAD_BMARKS)" \
+	    bmarks="$(QUAD_MICRO_BMARKS)" \
 	    RISCV_GCC_OPTS="$(QUAD_GCC_OPTS)"
 	@mkdir -p $(BINS)
-	@for bm in $(QUAD_BMARKS); do \
+	@for bm in $(QUAD_MICRO_BMARKS); do \
 	    src="$(BENCH_SRC)/$${bm}.bin"; \
 	    dst="$(BINS)/$${bm}-q4.bin"; \
 	    if [ -f "$$src" ]; then \
@@ -42,7 +46,7 @@ bins-q4:    ## Build all benchmarks with NUM_CORES=4 → bins/mt-*-q4.bin
 	@$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) clean 2>/dev/null || true
 	@echo "[bins-q4] Done."
 
-bins-all: bench-bin bins-q4   ## Build both single-core and quad-core bins
+bins-all: bins bins-q4   ## Demos + all single-core and quad-core s1–s5 benches + micros
 
 .PHONY: seqlock-bin
 seqlock-bin:    ## Build just bins/mt-seqlock-q4.bin (fast iteration, no clean)

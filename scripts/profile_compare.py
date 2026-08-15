@@ -19,6 +19,32 @@ import sys
 
 DEFAULT_BENCHES = ("vvadd-q4", "matmul-q4", "filter-q4", "histo-q4", "csaxpy-q4")
 
+# Unscaled compare name -> the scale `make profile-quad` / the sweep uses.
+# Matches mk/benchmarks.mk *_DEFAULT_SCALE. A sweep writes fam-sN-q4.json;
+# profile-quad writes fam-q4.json. Accept either.
+DEFAULT_SCALE = {
+    "vvadd": 1,
+    "matmul": 1,
+    "filter": 1,
+    "histo": 5,
+    "csaxpy": 5,
+}
+
+
+def result_json(current_dir: str, name: str) -> str | None:
+    """Return the first existing result path for a baseline name like vvadd-q4."""
+    direct = os.path.join(current_dir, f"{name}.json")
+    if os.path.isfile(direct):
+        return direct
+    if name.endswith("-q4"):
+        fam = name[:-3]
+        scale = DEFAULT_SCALE.get(fam)
+        if scale is not None:
+            scaled = os.path.join(current_dir, f"{fam}-s{scale}-q4.json")
+            if os.path.isfile(scaled):
+                return scaled
+    return None
+
 
 def load(path: str) -> dict:
     with open(path) as fh:
@@ -70,12 +96,12 @@ def main() -> int:
 
     for name in benches:
         base_path = os.path.join(args.baseline_dir, f"{name}.json")
-        now_path = os.path.join(args.current_dir, f"{name}.json")
+        now_path = result_json(args.current_dir, name)
         if not os.path.isfile(base_path):
             print(f"{name:12} {'':>10} {'':>10} {'':>8} {'':>8} {'':>8} FAIL missing baseline")
             failed += 1
             continue
-        if not os.path.isfile(now_path):
+        if not now_path:
             print(f"{name:12} {'':>10} {'':>10} {'':>8} {'':>8} {'':>8} FAIL missing result")
             failed += 1
             continue

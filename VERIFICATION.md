@@ -279,7 +279,8 @@ Stated plainly, because they bound what the results above mean.
 ```sh
 # Build the RTL (Chisel -> Verilog -> Verilator). ~20 min.
 make sim          # traced model, used by the ISA lock-step suite
-make sim-fast     # no-trace -O3 model, used by benchmarks and Linux
+make sim-fast     # no-trace -O3 model, used by benchmarks and linux-sim-fast
+make sim-ckpt     # same model + --savable, used by linux-sim checkpoints
 
 # The gates, cheapest first
 make isa          # 84 ISA tests in lock-step vs the golden model
@@ -288,7 +289,8 @@ make ci-check     # the same 5, with per-cycle assertions
 make stress-sweep # seeded random speculation stress (needs riscv-gcc)
 
 # Linux
-make linux-sim    # boot the SMP image on the RTL, live console
+make linux-sim-fast  # boot the SMP image on the fast RTL model (no checkpoints)
+make linux-sim       # same boot on the savable model (DEBUG=1 snapshots)
 ```
 
 Gates report by exit code, not by grepping their own output:

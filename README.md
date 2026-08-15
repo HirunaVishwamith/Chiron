@@ -165,7 +165,8 @@ chiron/
 │   └── demos/             # bare-metal demos (fire 🔥)
 ├── bins/                  # staged .bin images
 │   ├── mt-*-s1..s5.bin    #   single-core scaled variants
-│   └── mt-*-q4.bin        #   quad-core (NUM_CORES=4) base variants
+│   ├── mt-*-sN-q4.bin     #   quad-core scaled variants (NUM_CORES=4)
+│   └── mt-*-q4.bin        #   default-scale alias, refreshed when bins are built
 ├── mk/                    # modular makefiles
 │   ├── config.mk          #   paths, compiler flags, SHOW_STATE / DUMP_WAVES vars
 │   ├── benchmarks.mk      #   benchmark manifest (done-PCs, families)
@@ -194,10 +195,12 @@ make fix-inotify
 ### Step 1 — Build the RTL
 
 ```bash
-make sim        # Chisel → Verilog → Verilator library (~5 min first time)
+make sim        # traced model (ISA lock-step, DUMP_WAVES)
+make sim-fast   # no-trace -O3 model (benches, ci-check, linux-sim-fast)
 ```
 
 > `make sim` fails if `sbt` fails. It will not copy a stale `system.v`.
+> `make linux-sim` needs `make sim-ckpt` (same RTL with `--savable`).
 
 ### Everyday RTL gate
 
@@ -254,14 +257,14 @@ make profile-all-sc              # → build/profile_results/<fam>-s<N>.json + c
 
 | Benchmark | Cycles | IPC | Branch Acc | D$ Miss | DRAM RD BW |
 |---|---|---|---|---|---|
-| filter-s1 | 1 074 831 | **0.408** | 80.3 % | 2.13 % | 2.39 MB/s |
-| vvadd-s1 | 329 665 | **0.308** | 73.3 % | 1.43 % | 1.40 MB/s |
-| csaxpy-s1 | 383 297 | **0.281** | 69.5 % | 1.12 % | 1.16 MB/s |
-| histo-s1 | 1 872 971 | **0.262** | 67.6 % | 1.10 % | 1.21 MB/s |
+| filter-s1 | 1 023 495 | **0.428** | 78.8 % | 2.11 % | 1.39 MB/s |
+| vvadd-s1 | 328 451 | **0.310** | 73.1 % | 1.42 % | 1.33 MB/s |
+| csaxpy-s1 | 379 275 | **0.284** | 69.4 % | 1.17 % | 1.04 MB/s |
+| histo-s1 | 1 855 397 | **0.264** | 67.7 % | 1.11 % | 1.21 MB/s |
 | matmul-s1 | 1 114 553 | **0.335** | 27.5 % | 0.55 % | 0.40 MB/s |
 
-> Single-core IPC now sits at 0.26–0.41, roughly 2.3× the pre-TAGE numbers, with
-> branch accuracy up from ~50–60 % to 68–80 % on the streaming kernels — the
+> Single-core IPC now sits at 0.26–0.43, roughly 2.3× the pre-TAGE numbers, with
+> branch accuracy up from ~50–60 % to 68–79 % on the streaming kernels — the
 > predictor change is most of the gain. filter leads because its stencil inner
 > loop is long and well-predicted; histo trails because its scatter pattern
 > serialises on the store path. matmul's branch accuracy is low because the
@@ -272,8 +275,11 @@ make profile-all-sc              # → build/profile_results/<fam>-s<N>.json + c
 
 ## Running in quad-core mode
 
-Quad-core runs use the `bins/mt-*-q4.bin` images (compiled with `NUM_CORES=4`).
-All 4 harts execute cooperatively; the profiler reads all 164 performance counters.
+Quad-core runs use the restaged `bins/mt-*-sN-q4.bin` images (`NUM_CORES=4`).
+`make bins-scale` / `make bins-scale-q4` also write the unscaled
+`mt-*.bin` / `mt-*-q4.bin` names from each family's default scale, so those
+paths stay on the same `crt.S` as the done-PC table. All 4 harts execute
+cooperatively; the profiler reads all 164 performance counters.
 
 ### Quad-core profile for a single benchmark
 
@@ -309,13 +315,13 @@ family at every scale, single-core and quad-core.
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **1.279** | 0.302 | ~0.326 |
-| Instructions retired | 401 962 | 94 967 | ~102 330 each |
-| Max cycles | 314 347 | — | — |
-| Branch accuracy | — | 76.2 % | 77.9 % |
-| D-cache miss rate | — | 1.7 % | ~4.3 % |
-| ROB stall % | — | 29.8 % | ~5.4 % |
-| Decode efficiency | — | 66.3 % | ~94.6 % |
+| **IPC** | **1.238** | 0.298 | ~0.314 |
+| Instructions retired | 394 836 | 94 970 | ~99 955 each |
+| Max cycles | 318 813 | — | — |
+| Branch accuracy | — | 75.0 % | 77.3 % |
+| D-cache miss rate | — | 1.7 % | ~7.9 % |
+| ROB stall % | — | 28.4 % | ~5.3 % |
+| Decode efficiency | — | 67.6 % | ~94.7 % |
 
 > Core 0 acts as the coordinator (barrier + result check), hence its lower IPC
 > and high ROB stall fraction. Cores 1–3 execute the compute kernel.
@@ -324,12 +330,12 @@ family at every scale, single-core and quad-core.
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **1.298** | 0.263 | ~0.345 |
-| Instructions retired | 2 125 836 | 430 506 | ~565 100 each |
-| Max cycles | 1 637 361 | — | — |
-| Branch accuracy | — | 71.8 % | 78.7 % |
-| D-cache miss rate | — | 1.0 % | ~1.2 % |
-| ROB stall % | — | 35.6 % | ~4.0 % |
+| **IPC** | **1.138** | 0.255 | ~0.294 |
+| Instructions retired | 1 919 539 | 430 510 | ~496 340 each |
+| Max cycles | 1 687 203 | — | — |
+| Branch accuracy | — | 71.0 % | 76.1 % |
+| D-cache miss rate | — | 1.2 % | ~2.8 % |
+| ROB stall % | — | 37.1 % | ~5.1 % |
 
 ---
 
@@ -464,33 +470,43 @@ JSON reports are written to `build/profile_results/`.
 
 | Target | What it does |
 |---|---|
-| `make sim` | Build the RTL (Chisel → Verilog → Verilator) |
-| `make bins` | Build + stage single-core `.bin` images |
-| `make bins-q4` | Build + stage quad-core `.bin` images (`-DNUM_CORES=4`) |
-| `make bins-all` | Both of the above |
-| `make emu BENCH=…` | Run benchmark on the golden emulator (fast, no RTL) |
-| `make lockstep BENCH=…` | Lock-step RTL vs emulator; writes logs to `build/` |
+| `make sim` | Traced RTL model (ISA lock-step, `DUMP_WAVES`) |
+| `make sim-fast` | No-trace `-O3` model (benches, `ci-check`, `linux-sim-fast`) |
+| `make sim-ckpt` | Fast model + `--savable` (`linux-sim` checkpoints) |
+| `make bins` | Demos + all single-core `s1`–`s5` benches (and unscaled defaults) |
+| `make bins-q4` | All quad-core `s1`–`s5` benches + diagnostic micros |
+| `make bins-scale` / `bins-scale-q4` | Just the scale matrices (same images `bins` / `bins-q4` build) |
+| `make bins-all` | `bins` + `bins-q4` |
+| `make emu BENCH=…` | Run that bench on the golden emulator; exits at the done-PC |
+| `make lockstep BENCH=…` | Lock-step RTL vs emulator; logs in `build/` |
 | `make lockstep … SHOW_STATE=1` | Same, plus per-step golden-model register dump |
 | `make lockstep … DUMP_WAVES=1` | Same, plus VCD to `build/system_trace.vcd` |
-| `make isa` | Full RISC-V ISA regression suite (84/84 expected) — progress per test |
+| `make isa` | Full RISC-V ISA regression (84/84 expected) |
 | `make test` | ISA suite + quad-core vvadd pass/fail |
-| `make ci-bench` | All 5 quad-core benchmark families must complete cleanly |
-| `make smp-repro` | Multi-core repros: illegal-instruction trap + cross-hart `fence.i` |
+| `make test-q4` | Quad-core vvadd only (fast model) |
+| `make ci-bench` | 5 max-scale quad-core benches must complete cleanly |
+| `make ci-check` | Same 5, plus per-cycle microarchitectural assertions |
+| `make gate` | Everyday gate: lockstep vvadd-s1 + vvadd-q4 vs baseline |
+| `make compare` | Diff `build/profile_results` against `testdata/baseline/q4` |
+| `make smp-repro` | Illegal-instruction trap + cross-hart `fence.i` |
 | `make uartrx-test` | Console-input (uartlite RX) round trip through the RTL |
-| `make profile BENCH=…` | Single-core cycle-accurate profile |
-| `make profile-quad FAM=…` | Quad-core profile for one benchmark family |
-| `make profile-all` | Quad-core profile for all benchmarks + chart |
-| `make profile-all-sc` | Single-core profile for all benchmarks, all scales |
+| `make profile BENCH=…` | Single-core cycle-accurate profile (fast model) |
+| `make profile-quad FAM=…` | Quad-core profile for one family at its default scale (fast model) |
+| `make profile-all` | All five families at their default scale + chart |
+| `make profile-all-sc` | Single-core, every family × every scale |
+| `make profile-sweep` | Full single + quad sweep (every family/scale) |
+| `make profile-report` | Redraw `docs/profile_report.png` from existing JSON (no new sims) |
 | `make fire [FIRE_FRAMES=N]` | Bare-metal Doom-fire demo |
 | `make cube [FIRE_FRAMES=N]` | Rotating wireframe cube (fixed-point 3D, 4 harts) |
-| `make solid [FIRE_FRAMES=N]` | Filled, shaded rotating cube (z-buffered, ~210 K cycles/frame) |
+| `make solid [FIRE_FRAMES=N]` | Filled, shaded rotating cube |
 | `make linux-emu [LINUX_IMAGE=…]` | Interactive Linux shell on the golden model (fast) |
 | `make linux-emu-check [LINUX_IMAGE=…]` | Scripted boot-to-login check (CI, non-interactive) |
-| `make linux-sim [LINUX_IMAGE=…]` | Boot Linux on the Verilated RTL (live console, slow) |
+| `make linux-sim [LINUX_IMAGE=…]` | Boot Linux on the savable RTL model (needs `sim-ckpt`) |
 | `make linux-sim DEBUG=1` | Same, plus a harness log and 20 M-cycle checkpoints |
 | `make linux-sim RESUME=1` | Continue from the newest checkpoint |
+| `make linux-sim-fast [LINUX_IMAGE=…]` | Same boot on the non-savable fast model (needs `sim-fast`) |
 | `make linux-ckpts` | List checkpoints available to resume from |
-| `make linux-lockstep [LINUX_IMAGE=…]` | Bounded RTL-vs-emulator lock-step of the Linux boot (debug) |
+| `make linux-lockstep [LINUX_IMAGE=…]` | Bounded RTL-vs-emulator lock-step of the Linux boot |
 | `make clean` | Remove generated artifacts (`build/`, `obj_dir`, logs) |
 | `make distclean` | `clean` + drop sbt/Verilator build trees |
 | `make help` | List all targets with descriptions |
@@ -521,28 +537,34 @@ export RISCV=$PWD/buildroot/output/host
 ./build_image.sh q4                      # -> bins/linux-q4.bin (quad-core SMP)
 ```
 
-Then, from this repo root (RTL targets need `make sim` / `make sim-fast` first):
+Then, from this repo root (`linux-sim-fast` needs `make sim-fast`; `linux-sim` needs `make sim-ckpt`):
 
 ```
 make linux-emu                             # quad-core shell on the golden model (default image)
 make linux-emu  LINUX_IMAGE=bins/linux-s1.bin   # single-core variant
-make linux-sim                             # boot the same image on the RTL (live console)
+make linux-sim-fast                        # fastest RTL boot (no checkpoints)
+make linux-sim                             # same boot on the savable model
 ```
 
 - **`linux-emu`** attaches the golden-model emulator to your terminal: it
   reaches `buildroot login:` in about a minute; log in as `root` (no password) —
   interactive input works (emulator UART RX + the kernel uartlite RX-poll patch).
   `linux-emu-check` is the non-interactive CI variant of the same boot.
+- **`linux-sim-fast`** is the same RTL boot on the non-savable fast model
+  (`obj_dir_fast`, `-O3 -march=native`, no `--savable`). Use this when you want
+  the highest cycles/s this host can deliver. `DEBUG=1` still writes a
+  heartbeat log; `RESTORE` / `RESUME` are refused — those need `linux-sim`.
 - **`linux-sim`** boots the image on the Verilated RTL with a live uartlite
   console, and **stdin is wired through** — you can log in and run commands.
-  Expect ~5–10K cycles/s: the kernel banner appears after ~20 minutes and the
-  login prompt after ~3 billion cycles, so plan on leaving it overnight.
-  **Its stdout is the guest console and nothing else**, so `make linux-sim |
-  tee boot.log` produces a log of the boot rather than a log of the harness.
-  `make uartrx-test` is the fast regression for the console-input path.
+  Expect ~5–10K cycles/s on the savable model: the kernel banner appears after
+  ~20 minutes and the login prompt after ~3 billion cycles, so plan on leaving
+  it overnight. **Its stdout is the guest console and nothing else**, so
+  `make linux-sim | tee boot.log` produces a log of the boot rather than a log
+  of the harness. `make uartrx-test` is the fast regression for the
+  console-input path.
 
   A run that long should not have to be repeated from cycle zero, so the
-  harness can snapshot itself:
+  savable harness can snapshot itself:
 
   ```bash
   make linux-sim DEBUG=1            # + harness log (build/linux-sim.log) and a
@@ -608,7 +630,7 @@ All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
 
 - **`mask-sfilter` only has three distinct scales.** `s3.h`, `s4.h` and `s5.h`
   are byte-identical (`DATA_SIZE 156`), so `filter-s3`, `-s4` and `-s5` build the
-  same image and unsurprisingly profile to the same number (1.472 aggregate IPC
+  same image and unsurprisingly profile to the same number (1.385 aggregate IPC
   at all three). The flat tail of filter's scaling curve is a dataset artifact,
   not a saturation effect. Regenerating the larger datasets with
   `mask-sfilter_gendata.py` would fix it, at the cost of re-deriving that
@@ -620,8 +642,8 @@ All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
 
 - Port the single-core IPC optimisations (radix-4 divider, store-data trim,
   load-queue flow-through) to the quad-core back-end. Aggregate quad-core IPC is
-  currently **1.18–1.88** across the five families (see
-  `docs/profile_report.png`), i.e. roughly 0.3–0.47 per core — the headroom is
+  currently **1.09–1.86** across the five families (see
+  `docs/profile_report.png`), i.e. roughly 0.27–0.47 per core — the headroom is
   still large.
 - Add an ownership check to the ROB execute write ports. Four separate bugs so
   far shared one shape: a completion landing on a slot that was rolled back and

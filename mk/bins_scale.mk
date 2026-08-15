@@ -49,6 +49,41 @@ define SCALE_WIPE
 	rm -f $(BENCH_SRC)/*.o $(BENCH_SRC)/*.riscv $(BENCH_SRC)/*.riscv.dump $(BENCH_SRC)/*.bin
 endef
 
+# After staging <dir>-sN<suffix>, also write the unscaled name when N is
+# that family's DEFAULT_SCALE. suffix is `.bin` (single-core) or `-q4.bin`.
+define SCALE_PUBLISH_DEFAULT
+	case $$dir in \
+	  $(vvadd_base))  def=$(vvadd_DEFAULT_SCALE);; \
+	  $(matmul_base)) def=$(matmul_DEFAULT_SCALE);; \
+	  $(filter_base)) def=$(filter_DEFAULT_SCALE);; \
+	  $(csaxpy_base)) def=$(csaxpy_DEFAULT_SCALE);; \
+	  $(histo_base))  def=$(histo_DEFAULT_SCALE);; \
+	  *) def=;; \
+	esac; \
+	if [ -n "$$def" ] && [ "$$n" = "$$def" ]; then \
+	  cp "$(BINS)/$$dir-s$$n$(1)" "$(BINS)/$$dir$(1)"; \
+	  echo "[scale] $(BINS)/$$dir$(1) <- $$dir-s$$n$(1)"; \
+	fi
+endef
+
+# Prefer the restaged default-scale image for the unscaled name, when it exists.
+# Used by bench-bin / bins-q4 so those paths cannot leave a stale crt.S behind.
+define SCALE_SYNC_UNSCALED
+	for pair in \
+	  "$(vvadd_base) $(vvadd_DEFAULT_SCALE)" \
+	  "$(matmul_base) $(matmul_DEFAULT_SCALE)" \
+	  "$(filter_base) $(filter_DEFAULT_SCALE)" \
+	  "$(csaxpy_base) $(csaxpy_DEFAULT_SCALE)" \
+	  "$(histo_base) $(histo_DEFAULT_SCALE)"; do \
+	  set -- $$pair; \
+	  src="$(BINS)/$$1-s$$2$(1)"; dst="$(BINS)/$$1$(1)"; \
+	  if [ -f "$$src" ]; then \
+	    cp -f "$$src" "$$dst"; \
+	    echo "[scale] $$dst <- $$src"; \
+	  fi; \
+	done
+endef
+
 .PHONY: bins-scale bins-scale-q4 bins-scale-all
 bins-scale:         ## Build bins/<dir>-sN.bin for all families/scales
 	@mkdir -p $(BINS)
@@ -60,6 +95,7 @@ bins-scale:         ## Build bins/<dir>-sN.bin for all families/scales
 	    $(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv bmarks="$$dir" RISCV_GCC_OPTS="$(SCALE_GCC_OPTS)"; \
 	    cp "$(BENCH_SRC)/$$dir.bin" "$(BINS)/$$dir-s$$n.bin"; \
 	    echo "[bins-scale] staged: $(BINS)/$$dir-s$$n.bin"; \
+	    $(call SCALE_PUBLISH_DEFAULT,.bin); \
 	  done; \
 	done
 	@$(SCALE_WIPE)
@@ -74,6 +110,7 @@ bins-scale-q4:      ## Build bins/<dir>-sN-q4.bin for all families/scales
 	    $(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv bmarks="$$dir" RISCV_GCC_OPTS="$(SCALE_GCC_OPTS_Q4)"; \
 	    cp "$(BENCH_SRC)/$$dir.bin" "$(BINS)/$$dir-s$$n-q4.bin"; \
 	    echo "[bins-scale-q4] staged: $(BINS)/$$dir-s$$n-q4.bin"; \
+	    $(call SCALE_PUBLISH_DEFAULT,-q4.bin); \
 	  done; \
 	done
 	@$(SCALE_WIPE)

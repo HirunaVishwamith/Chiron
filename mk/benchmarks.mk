@@ -74,3 +74,13 @@ DONE  := $($(FAM)_DONE)
 # error code 0. The everyday gate is vvadd; the full set is REGRESSION_Q4_ALL.
 REGRESSION_Q4 := vvadd
 REGRESSION_Q4_ALL := vvadd matmul filter histo csaxpy
+
+# Unscaled name (`bins/mt-vvadd.bin`, `bins/mt-vvadd-q4.bin`) means this scale.
+# bins-scale / bins-scale-q4 / bench-bin / bins-q4 refresh that name from the
+# matching -sN image as part of creating the bins — there is no extra step.
+# ci-bench still uses the max-scale images (s5, except matmul-s1).
+vvadd_DEFAULT_SCALE  := 1
+matmul_DEFAULT_SCALE := 1
+filter_DEFAULT_SCALE := 1
+csaxpy_DEFAULT_SCALE := 5
+histo_DEFAULT_SCALE  := 5

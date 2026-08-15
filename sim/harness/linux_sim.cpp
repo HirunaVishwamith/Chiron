@@ -8,6 +8,10 @@
 //
 //   usage: linux_sim.out <image.bin> <dtb> <bootrom> [options]
 //
+// Built twice from this file:
+//   linux_sim.out       --savable model (make linux-sim); checkpoints work
+//   linux_sim_fast.out  no --savable     (make linux-sim-fast); same boot, faster
+//
 //     --debug              write a harness log and take periodic checkpoints
 //     --log <path>         where the debug log goes   (default build/linux-sim.log)
 //     --ckpt-dir <dir>     where checkpoints go       (default ckpt)
@@ -16,6 +20,7 @@
 //     --no-ckpt            --debug logging, but no checkpoints
 //     --hb <n>             cycles between log heartbeats (default 100,000)
 //     --restore <file>     resume from a checkpoint instead of booting
+//                          (not available in linux_sim_fast.out)
 //
 // STDOUT IS THE GUEST'S CONSOLE AND NOTHING ELSE. Every byte on it was
 // transmitted by the running kernel, so `make linux-sim | tee boot.log` yields a
@@ -40,15 +45,19 @@
 #include <unistd.h>
 
 #include "sim/rtl/rtl_model.h"
+#ifndef CHIRON_NO_SAVE
 #include "verilated_save.h"
+#endif
 #include "sim/harness/common/args.h"
 #include "sim/harness/common/simlog.h"
 
+#ifndef CHIRON_NO_SAVE
 // Bumped whenever the harness state written alongside the model changes, so a
 // stale checkpoint is rejected instead of silently restoring garbage into a
 // 256 MB DRAM array.
 static const uint64_t kCkptMagic = 0x434849524F4E4C58ULL;  // "CHIRONLX"
 static const uint64_t kCkptVersion = 1;
+#endif
 
 int main(int argc, char **argv) {
   // Positional args stay first for backward compatibility with every script
@@ -70,13 +79,30 @@ int main(int argc, char **argv) {
       std::strtoull(harness::find_arg(argc, argv, "--hb", "100000"), nullptr, 0);
 
   if (debug) simlog::open(log_path);
+#ifdef CHIRON_NO_SAVE
+  // Fast binary: same console boot, no Verilator --savable surface. Checkpoints
+  // live on linux_sim.out (make linux-sim / make sim-ckpt).
+  if (restore) {
+    std::fprintf(stderr,
+      "[linux_sim] this binary has no checkpoints (make linux-sim-fast). "
+      "Use `make linux-sim RESTORE=%s` on the savable model.\n", restore);
+    return 1;
+  }
+  const bool ckpt_on = false;
+  (void)no_ckpt; (void)ckpt_every; (void)ckpt_keep; (void)ckpt_dir;
+#else
   // Checkpointing is a debugging aid and rides on --debug: a normal boot should
   // not quietly start writing 256 MB files into the working tree.
   const bool ckpt_on = debug && !no_ckpt && ckpt_every > 0;
+#endif
 
   simulator bench;
   uint64_t steps = 0;
 
+#ifdef CHIRON_NO_SAVE
+  bench.init(image, dtb, bootrom);
+  SIMLOG("[boot] image=%s dtb=%s bootrom=%s\n", image, dtb, bootrom);
+#else
   if (restore) {
     // Restore overwrites every register and all of DRAM, so the model must not
     // be reset or loaded first — see rtl_model.h::init_no_image().
@@ -100,6 +126,7 @@ int main(int argc, char **argv) {
     bench.init(image, dtb, bootrom);
     SIMLOG("[boot] image=%s dtb=%s bootrom=%s\n", image, dtb, bootrom);
   }
+#endif
 
   if (ckpt_on) {
     char cmd[1100];
@@ -137,9 +164,11 @@ int main(int argc, char **argv) {
   for (int i = 0; i < 4; ++i) { band_lo[i] = ~0ULL; band_hi[i] = 0; }
 
   uint64_t next_hb   = bench.tickcount + hb_every;
+#ifndef CHIRON_NO_SAVE
   uint64_t next_ckpt = ckpt_on
       ? ((bench.tickcount / ckpt_every) + 1) * ckpt_every : ~0ULL;
   std::deque<std::string> ckpts;
+#endif
 
   // UART TX from all four cores' uartPorts is streamed to stdout from inside
   // step_any_nodump() (the SHOW_TERMINAL hook in rtl_model.h). Progress is
@@ -239,6 +268,7 @@ int main(int argc, char **argv) {
       }
     }
 
+#ifndef CHIRON_NO_SAVE
     if (bench.tickcount >= next_ckpt) {
       next_ckpt = bench.tickcount + ckpt_every;
       char path[1024];
@@ -271,6 +301,7 @@ int main(int argc, char **argv) {
         }
       }
     }
+#endif
   }
   simlog::close();
   return 0;

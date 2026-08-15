@@ -45,11 +45,11 @@ EMU_IMAGE := $(DATA)/Image
 HARNESS_INCS  := -I . -I $(VINC) -I $(SIM)/obj_dir
 VERILATED     := $(VINC)/verilated.cpp
 VERILATED_VCD := $(VINC)/verilated_vcd_c.cpp
-# The fast model is Verilated with --savable (checkpoint/restore for the long
-# Linux boot — see mk/rtl.mk). Verilator 4.x emits calls into
-# VerilatedSerialize/VerilatedDeserialize but does NOT bundle their
-# implementation into Vsystem__ALL.a, so this must be compiled alongside or the
-# link fails with `undefined reference to VerilatedDeserialize::readAssert`.
+# The checkpoint model (obj_dir_save, --savable) is used by linux-sim. Verilator
+# 4.x emits calls into VerilatedSerialize/VerilatedDeserialize but does NOT
+# bundle their implementation into Vsystem__ALL.a, so this must be compiled
+# alongside or the link fails with `undefined reference to
+# VerilatedDeserialize::readAssert`.
 VERILATED_SAVE := $(VINC)/verilated_save.cpp
 
 # Verilator 5.x splits the runtime into a separate libverilated.a (containing
@@ -70,7 +70,7 @@ else
   CXX_NOTRACE := g++ -O3 $(HARNESS_INCS) -I $(SIM) $(VERILATED)
 endif
 
-# ── Fast no-trace model (the run-only path, e.g. linux-sim) ───────────────────
+# ── Fast no-trace model (benches, ci-check, linux-sim-fast) ───────────────────
 # Same RTL as obj_dir, but Verilated WITHOUT --trace and with -O3 codegen — for
 # long runs (a full Linux boot) where VCD is never dumped. Harnesses link with
 # -DCHIRON_NO_TRACE so rtl_model.h's single tb->trace() call compiles out. The
@@ -88,10 +88,11 @@ else
 endif
 
 # ── Linux boot harness flags ──────────────────────────────────────────────────
-# linux-sim links the same walker-ON fast model as CI (obj_dir_fast). A larger
-# STEP_TIMEOUT is used: legitimate boot phases (bbl kernel copy, rootfs) can
-# idle-commit for a while without it being a wedge. The old walker-disabled
-# obj_dir_linux path (sim-linux) is kept only for A/B debugging.
+# linux-sim-fast links the same walker-ON fast model as CI (obj_dir_fast).
+# linux-sim itself links obj_dir_save (--savable). A larger STEP_TIMEOUT is
+# used: legitimate boot phases (bbl kernel copy, rootfs) can idle-commit for
+# a while without it being a wedge. The old walker-disabled obj_dir_linux
+# path (sim-linux) is kept only for A/B debugging.
 SIM_LINUX          := $(SIM)/obj_dir_linux
 HARNESS_INCS_LINUX := -I . -I $(VINC) -I $(SIM_LINUX)
 _VLIB_LINUX := $(wildcard $(SIM_LINUX)/libverilated.a)
@@ -103,9 +104,9 @@ endif
 # Prefer the fast-model include path (single-build fix); fall back to compiling
 # verilated sources ourselves on Verilator 4.x.
 ifneq ($(_VLIB_FAST),)
-  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED_SAVE)
+  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000
 else
-  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD) $(VERILATED_SAVE)
+  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD)
 endif
 
 # Optimization for the Verilator-generated C++ (verilated.mk's OPT_FAST default

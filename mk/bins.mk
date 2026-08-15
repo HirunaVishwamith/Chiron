@@ -5,7 +5,7 @@
 # untouched (scale generation via gendata is a separate, manual step).
 
 .PHONY: bins fire-bin cube-bin solid-bin bench-bin
-bins: fire-bin cube-bin solid-bin bench-bin   ## Build + stage all workload .bin images into bins/
+bins: fire-bin cube-bin solid-bin bins-scale   ## Demos + all single-core s1–s5 benches (and unscaled defaults)
 
 # Doom-fire bare-metal demo. (test.ld base / NUM_CORES / DATA_BASE / UART are
 # already adapted for this single-core target.)
@@ -21,10 +21,11 @@ solid-bin:                 ## Build + stage the filled-cube demo
 	$(TOOLPATH) $(MAKE) -C $(DEMO_SRC) mt-solid.bin
 	cp $(DEMO_SRC)/mt-solid.bin $(BINS)/mt-solid.bin
 
-# Base (unscaled) benchmark bins — builds whatever `bmarks` the sub-Makefile sets.
-bench-bin:                 ## Build + stage base benchmark bins
-	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv
-	@for f in $(BENCH_SRC)/*.bin; do cp $$f $(BINS)/; done
+# Old name: the sub-Makefile only builds mt-vvadd from whatever active.h is.
+# That cannot produce the s1–s5 images profile/lockstep/emu expect, so this
+# now builds the full single-core scale matrix (and publishes the unscaled
+# default-scale names as part of that).
+bench-bin: bins-scale          ## Alias for bins-scale (s1–s5 single-core + unscaled defaults)
 
 # File rule so `make fire` rebuilds the demo only when its sources change.
 $(BINS)/mt-fire.bin: $(DEMO_SRC)/mt-fire.c $(DEMO_SRC)/common/crt.S $(DEMO_SRC)/common/test.ld
