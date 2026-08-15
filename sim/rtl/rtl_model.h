@@ -51,6 +51,9 @@ class simulator {
   uint64_t      last_commit_pc[4] = {};  // per-hart PC of last commit seen
   unsigned long tickcount = 0;   // clocks advanced via step_nodump()
   unsigned      dump_tick = 0;   // clocks advanced via step() (VCD timeline)
+  // Wall of simulated time. dump_tick only moves when VCD dumping is on, so
+  // logs must use this sum — otherwise every run.log line looks like cycle 0.
+  unsigned long cycles() const { return tickcount + dump_tick; }
 
   // Bring the core up and stream the image (+ dtb + boot ROM) into DRAM.
   void init(std::string image_name   = "Image",

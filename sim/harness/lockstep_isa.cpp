@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
       outFile << "keyhit\n";
     }
 
-    outFile  << setfill('0') << setw(16) << dec << bench.dump_tick << " "
+    outFile  << setfill('0') << setw(16) << dec << bench.cycles() << " "
              << setfill('0') << setw(16) << hex << golden_model.get_pc(0) << " "
              << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << "\n";
     outState << setfill('0') << setw(16) << hex << golden_model.get_instruction(0) << "\n";
