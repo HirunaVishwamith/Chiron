@@ -110,10 +110,38 @@ make stress-bin SEED=<n> BLOCKS=300 && make stress-run SEED=<n>   # replay one
 Requires the RISC-V toolchain (it compiles generated C), so unlike the layers
 above it does **not** run in CI as configured — see [CI](#continuous-integration).
 
-### 5. Linux SMP boot
+### 5. Quad-core lock-step — `make lockstep-q4`
 
-A single-node nommu Linux 6.3 SMP image boots on the RTL. See
-[Current status](#current-status) — this is the one layer that is not green.
+The same RTL-vs-golden compare as layer 1, but every committing hart is
+checked — not just core 0. Shared-memory races that are legal under
+commit-order interleaving (load / LR / SC / AMO) are reconciled rather
+than reported as RTL bugs.
+
+```sh
+make lockstep-q4 BENCH=vvadd-s1              # bins/mt-vvadd-s1-q4.bin
+make lockstep BENCH=vvadd-s1-q4              # same harness, existing target
+make lockstep-q4 BENCH=vvadd-s1 DUMP_WAVES=1 # + build/system_trace.vcd
+make lockstep-q4 BENCH=vvadd-s1 SHOW_STATE=1 # + per-commit golden dump
+```
+
+Logs land in `build/run.log`, `build/states.log`, `build/regs.log` (a hart
+column on every line). This is **not** a CI gate yet — `make ci-check`
+remains the everyday SMP structural check.
+
+**What it does not prove.** It is still simulation. A racy-fixup flood is
+a warning, not a pass. Linux uses a separate bounded harness
+(`make linux-lockstep`).
+
+### 6. Linux SMP boot
+
+A single-node nommu Linux 6.3 SMP image boots on the RTL to an interactive
+Buildroot shell. All four harts come online and `nproc` answers `4`.
+**Result: boots to login** (`docs/linux-quad-boot.log`).
+
+**What it does not prove.** It is one image, one device tree, and it is not a
+CI gate. There is no userspace test suite on the target. The emulator
+(`make linux-emu-check`) is the fast non-interactive check; a full RTL login
+is overnight-scale.
 
 ---
 
@@ -218,34 +246,45 @@ To add the stress sweep to CI, install the toolchain in the workflow and append
 | Assertions on those 5 | **5/5 CLEAN** |
 | Random stress (8 seeds × 300 blocks) | **all CLEAN** |
 | Assertion true-positive | **proven** (233 detections on known-bad RTL, 750× earlier than the manual find) |
-| Linux SMP boot | **boots to `Run /init as init process`, then hangs** |
+| Quad-core lock-step | **vvadd-s1-q4 PASS** (394 814 commits, all 4 harts, racy=0; not a CI gate) |
+| Linux SMP boot | **boots to `buildroot login:`; `nproc` prints `4`** |
 
-### The open Linux failure
+### Linux SMP boot — current result
 
-The kernel reaches `/init` at ~763M cycles and the console then goes silent.
-At 1.589 billion cycles: hart 1 sits in `smp_call_function_many_cond+0x2e4`
-(`csd_lock_wait`, awaiting a cross-call) while harts 0/2/3 cycle through the
-idle loop. **Nothing is wedged** — every hart advances and the assertions report
-zero violations — so this is *not* the reallocated-slot class above.
+`bins/linux-q4.bin` on the Verilated RTL (`make linux-sim` /
+`make linux-sim-fast`) reaches `buildroot login:`, accepts `root`, and
+`nproc` prints `4`. The captured console is `docs/linux-quad-boot.log`.
+All four harts come online (`smp: Brought up 1 node, 4 CPUs`) and `/init`
+runs. The same image also boots on the golden emulator (`make linux-emu`,
+`make linux-emu-check`).
 
-Ruled out by fast bare-metal repros (~1M cycles instead of 1.6B):
+Neither RTL boot is a CI gate: a full RTL login is overnight-scale
+(~3 billion cycles to the prompt).
 
-* `mt-ipiwfi` **PASSES** — IPIs are delivered even to a hart idling on `wfi`.
-  (Found along the way: the RTL implements no WFI at all. `decode.scala` handles
-  only `funct12` `0x302`/`0x000`/`0x800`, so `0x105` falls through and retires
-  as a NOP. That is spec-legal, but the path had zero coverage — no other
-  workload in the tree executes a `wfi`. The *emulator* does implement WFI, and
-  `lockstep_linux.cpp` calls `clear_wfi()` purely to hide the divergence.)
-* `mt-csdwait` **PASSES** — a spin-on-load loop containing `cpu_relax()` (which
-  on RISC-V is literally `div x,x,zero`) does observe a peer's store, so this is
-  not a stale-load or coherence fault.
+Expected noise in that log, not treated as a hang: nommu Buildroot cannot
+mount `/proc`, `/sys`, or `/dev/pts`, and `ip` fails with
+`Function not implemented`. The shell still comes up.
 
-Both negative, both narrowing: delivery and visibility are fine, so the fault is
-upstream — the target hart never runs the callback.
-`sim/harness/probes/linux_ipi_probe.cpp` boots the real image counting CLINT
-msip writes per target hart plus each hart's `mstatus.MIE` / `mie.MSIE` /
-`mip.MSIP`, which separates "the kernel never raised the IPI" from "it raised it
-and the hart would not take it". PC sampling cannot.
+### The post-`/init` hang (closed)
+
+An earlier revision of this page described a hang after
+`Run /init as init process`: at ~1.589 billion cycles hart 1 sat in
+`smp_call_function_many_cond+0x2e4` (`csd_lock_wait`) while harts 0/2/3
+cycled through idle. Nothing was wedged and the assertions were clean, so
+it was not the reallocated-slot class above. That is no longer the
+observed behaviour on this branch.
+
+The narrowing repros still exist and still pass:
+
+* `mt-ipiwfi` — IPIs are delivered even to a hart idling on `wfi`.
+* `mt-csdwait` — a spin-on-load loop containing `cpu_relax()`
+  (`div x,x,zero`) observes a peer's store.
+
+WFI itself is still a NOP in RTL (`decode.scala` only handles `funct12`
+`0x302`/`0x000`/`0x800`, so `0x105` falls through). That is spec-legal.
+The emulator implements WFI, and `lockstep_linux.cpp` calls `clear_wfi()`
+to hide the divergence. The probes under `sim/harness/probes/linux_*`
+remain the tools for a regression of this shape.
 
 ---
 
@@ -253,10 +292,10 @@ and the hart would not take it". PC sampling cannot.
 
 Stated plainly, because they bound what the results above mean.
 
-* **No quad-core lock-step.** Lock-step against the golden model is single-core
-  only. SMP divergence is caught structurally (assertions) or by a benchmark
-  producing a wrong answer — not architecturally at the first wrong register.
-  This is the largest single gap.
+* **Quad-core lock-step is not a CI gate.** `make lockstep-q4` compares all
+  four harts on bench images, but CI still uses `make lockstep` (core 0 /
+  `vvadd-s1`) plus `make ci-check` for SMP. A silent SMP architectural
+  bug on a family that is not being lock-stepped can still slip through.
 * **No formal verification.** No model checking, no equivalence checking, no
   proofs. Everything here is simulation.
 * **Coverage is not measured.** There is no functional-coverage instrumentation,
@@ -265,10 +304,13 @@ Stated plainly, because they bound what the results above mean.
 * **The assertions cover the ROB completion path only.** They say nothing about
   the cache coherence protocol, the AXI/ACE interfaces, or the L2 — areas that
   have historically had bugs.
-* **WFI is not implemented in RTL** (see above). Legal, but it means the idle
-  path diverges from the emulator and lock-step is deliberately blinded there.
-* **Single Linux image.** One kernel configuration, one device tree. No
-  userspace test suite runs on the target.
+* **WFI is not implemented in RTL.** `decode.scala` does not handle
+  `funct12=0x105`, so `wfi` retires as a NOP. Legal, but the idle path
+  diverges from the emulator and lock-step is deliberately blinded there
+  (`lockstep_linux.cpp` / `clear_wfi()`).
+* **Single Linux image.** One kernel configuration, one device tree. The
+  RTL boot is demonstrated (`docs/linux-quad-boot.log`) but is not in CI,
+  and no userspace test suite runs on the target.
 * **Performance numbers are simulation-only.** No synthesis timing closure, area
   or power figures are claimed here; see `fpga/` for the Kintex-7 flow.
 
@@ -284,6 +326,7 @@ make sim-ckpt     # same model + --savable, used by linux-sim checkpoints
 
 # The gates, cheapest first
 make isa          # 84 ISA tests in lock-step vs the golden model
+make lockstep-q4 BENCH=vvadd-s1  # 4-hart lock-step of the smallest q4 bench
 make ci-bench     # 5 quad-core benchmarks
 make ci-check     # the same 5, with per-cycle assertions
 make stress-sweep # seeded random speculation stress (needs riscv-gcc)

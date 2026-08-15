@@ -8,6 +8,7 @@
 #   make gate                      Everyday RTL gate: lockstep + vvadd-q4 vs baseline
 #   make compare                   Diff build/profile_results against testdata/baseline/q4
 #   make lockstep  BENCH=matmul-s2 Lock-step the RTL against the emulator
+#   make lockstep-q4 BENCH=vvadd-s1  4-hart lock-step of the matching -q4 image
 #   make profile-quad FAM=vvadd    Cycle-accurate quad-core IPC / stall profile
 #   make isa                       Full RISC-V ISA regression suite
 #   make test                      ISA suite + quad-core benchmark tests

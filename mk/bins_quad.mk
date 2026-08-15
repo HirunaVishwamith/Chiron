@@ -156,7 +156,8 @@ llist-bin:  ## Build bins/mt-llist-q4.bin (PUSH_CAS=0 builds the control)
 #
 # The program is NOT self-checking on purpose. The oracle is external:
 #   single core -> `make lockstep` compares every commit against the emulator,
-#   quad core   -> `make ci-check` asserts the invariants every cycle.
+#   quad core   -> `make lockstep-q4` (or `make lockstep BENCH=…-q4`) compares
+#                  every hart; `make ci-check` asserts the invariants every cycle.
 # Everything derives from SEED, so a failing run replays exactly.
 SEED   ?= 1
 BLOCKS ?= 240

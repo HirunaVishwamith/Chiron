@@ -9,6 +9,9 @@ SIM_HDR  := $(SIM)/rtl_model.h
 $(BUILD)/lockstep.out: $(HARNESS)/lockstep.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_TRACE) $(HARNESS)/lockstep.cpp $(VSYS_LIB) -o $@
 
+$(BUILD)/lockstep_quad.out: $(HARNESS)/lockstep_quad.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
+	$(CXX_TRACE) $(HARNESS)/lockstep_quad.cpp $(VSYS_LIB) -o $@
+
 $(BUILD)/lockstep_isa.out: $(HARNESS)/lockstep_isa.cpp $(EMU_HDRS) $(SIM_HDR) $(VSYS_LIB) | $(BUILD)
 	$(CXX_TRACE) $(HARNESS)/lockstep_isa.cpp $(VSYS_LIB) -o $@
 
@@ -177,7 +180,7 @@ _DUMP_WAVES_FLAG := $(if $(filter 1,$(DUMP_WAVES)),--dump-waves,)
 # ── Run targets — one entry point per task, no file copying ───────────────────
 ISA_IMAGES := $(ISA_DIR)/images
 
-.PHONY: emu lockstep profile profile-all profile-all-sc profile-quad test-q4 isa \
+.PHONY: emu lockstep lockstep-q4 profile profile-all profile-all-sc profile-quad test-q4 isa \
         fire cube solid test linux linux-emu linux-emu-check linux-sim \
         linux-sim-fast \
         linux-lockstep demo compare snapshot-baseline gate regress-q4 \
@@ -186,8 +189,26 @@ ISA_IMAGES := $(ISA_DIR)/images
 emu: $(BUILD)/emu.out                ## Run BENCH on the golden emulator (fast; exits at the done-PC)
 	$(BUILD)/emu.out $(BIN) $(DONE)
 
-lockstep: $(BUILD)/lockstep.out      ## Lock-step RTL vs emulator for BENCH
+# BENCH=family-sN-q4 already resolves BIN to the q4 image; use the 4-hart
+# harness. BENCH=family-sN stays on the core-0-only lockstep.
+ifeq ($(findstring -q4,$(BENCH)),-q4)
+lockstep: $(BUILD)/lockstep_quad.out
+	$(BUILD)/lockstep_quad.out --image $(BIN) $(DONE) --logdir $(BUILD) \
+	    $(_SHOW_STATE_FLAG) $(_DUMP_WAVES_FLAG)
+else
+lockstep: $(BUILD)/lockstep.out      ## Lock-step RTL vs emulator for BENCH (4-hart if *-q4)
 	$(BUILD)/lockstep.out --image $(BIN) $(DONE) --logdir $(BUILD) \
+	    $(_SHOW_STATE_FLAG) $(_DUMP_WAVES_FLAG)
+endif
+
+# Same flags as lockstep (SHOW_STATE=1, DUMP_WAVES=1). BENCH=family-sN or
+# family-sN-q4 both load bins/*-sN-q4.bin.
+Q4_SCALE := $(patsubst %-q4,%,$(SCALE))
+BIN_Q4   := $(BINS)/$($(FAM)_base)-s$(Q4_SCALE)-q4.bin
+
+lockstep-q4: $(BUILD)/lockstep_quad.out  ## Quad-core lock-step RTL vs emulator for BENCH-q4
+	@echo "[lockstep-q4] image=$(BIN_Q4)" >&2
+	$(BUILD)/lockstep_quad.out --image $(BIN_Q4) $(DONE) --logdir $(BUILD) \
 	    $(_SHOW_STATE_FLAG) $(_DUMP_WAVES_FLAG)
 
 # DEBUG=1 sends the harness's own progress to a log file instead of discarding

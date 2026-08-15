@@ -153,6 +153,7 @@ chiron/
 │   ├── harness/           #   test/run drivers
 │   │   ├── common/        #     shared helpers: args.h · image.h · completion.h
 │   │   ├── lockstep.cpp   #     RTL-vs-emulator lock-step (core 0)
+│   │   ├── lockstep_quad.cpp  #     4-hart lock-step (q4 benches)
 │   │   ├── lockstep_isa.cpp   # ISA regression completion
 │   │   ├── lockstep_linux.cpp # Linux-boot variant
 │   │   ├── profile.cpp    #     single-core cycle-accurate profiler
@@ -232,9 +233,12 @@ Compares RTL output against the golden emulator instruction-by-instruction:
 make lockstep BENCH=vvadd-s1     # smallest, fastest (~30 s)
 make lockstep BENCH=csaxpy-s2    # ~5 min
 make lockstep BENCH=matmul-s2    # ~8 min
+make lockstep-q4 BENCH=vvadd-s1  # same image as profile-quad; all 4 harts
+make lockstep BENCH=vvadd-s1-q4  # identical to lockstep-q4 (existing target)
 ```
 
 Logs are written to `build/run.log`, `build/states.log`, `build/regs.log`.
+`DUMP_WAVES=1` adds `build/system_trace.vcd`.
 
 ### Cycle-accurate profiling (IPC)
 
@@ -297,6 +301,29 @@ make profile-quad FAM=histo
 make profile-all                 # profiles every family, generates profile_report.png
 ```
 
+### HTML performance dashboard
+
+`make dashboard` is post-processing only: it reads profiler JSON and writes a
+self-contained `build/chiron_dashboard.html` (no new sims, no extra libraries).
+Open that file in a browser.
+
+```bash
+make profiles                    # five max-scale q4 benches → build/profiles/*.json
+make dashboard                   # → build/chiron_dashboard.html
+```
+
+If the JSON is already on disk, skip `make profiles`. Point it at the full
+sweep instead of the default five-bench set:
+
+```bash
+make dashboard PROFILE_DIR=build/profile_results
+```
+
+`PROFILE_DIR` defaults to `build/profiles/`. `DASHBOARD` defaults to
+`build/chiron_dashboard.html`. The PNG chart is a different target:
+`make profile-report` redraws `docs/profile_report.png` from
+`build/profile_results/` (also no new sims).
+
 ### Quad-core pass/fail regression
 
 ```bash
@@ -348,9 +375,10 @@ for diagnosing mismatches or tracing program flow:
 
 ```bash
 make lockstep BENCH=vvadd-s1 SHOW_STATE=1
+make lockstep-q4 BENCH=vvadd-s1 SHOW_STATE=1
 ```
 
-Works on any `lockstep` variant. Writes to stdout alongside the existing log files.
+Works on `lockstep` and `lockstep-q4`. Writes to stdout alongside the existing log files.
 
 ### Capture waveforms (`DUMP_WAVES`)
 
@@ -358,6 +386,7 @@ Writes a VCD waveform to `build/system_trace.vcd` for viewing in GTKWave:
 
 ```bash
 make lockstep BENCH=vvadd-s1 DUMP_WAVES=1
+make lockstep-q4 BENCH=vvadd-s1 DUMP_WAVES=1
 # Then open:
 gtkwave build/system_trace.vcd
 ```
@@ -370,6 +399,7 @@ Both flags can be combined:
 
 ```bash
 make lockstep BENCH=csaxpy-s2 SHOW_STATE=1 DUMP_WAVES=1
+make lockstep-q4 BENCH=vvadd-s1 SHOW_STATE=1 DUMP_WAVES=1
 ```
 
 ---
@@ -408,19 +438,22 @@ lock-step, comparing architectural state after **every committed instruction**:
 ```mermaid
 sequenceDiagram
     participant R as RTL (Verilator)
-    participant G as Golden model (hart 0)
+    participant G as Golden model
     loop per committed instruction
-        R->>R: tick until core 0 commits
-        G->>G: step one instruction
+        R->>R: tick until a hart commits
+        G->>G: step that hart one instruction
         R-->>G: compare 32 GPRs + CSRs + PC
         Note over R,G: mismatch → dump states.log / regs.log, exit ≠ 0
     end
 ```
 
-Divergences dump `run.log`, `states.log`, `regs.log` to `build/` for debugging.
+`make lockstep` compares core 0 (single-core images). `make lockstep-q4`
+(or `make lockstep BENCH=…-q4`) compares all four harts. `make linux-lockstep`
+is the same 4-hart compare on a Linux image (bounded). Divergences dump
+`run.log`, `states.log`, `regs.log` to `build/` for debugging.
 
-Lock-step is the strongest oracle but it is **single-core only**, and it asks
-only "is the architectural state right?". Two further layers sit above it:
+Lock-step asks only "is the architectural state right?". Two further layers
+sit above it:
 
 | Gate | Question it answers |
 |---|---|
@@ -478,7 +511,8 @@ JSON reports are written to `build/profile_results/`.
 | `make bins-scale` / `bins-scale-q4` | Just the scale matrices (same images `bins` / `bins-q4` build) |
 | `make bins-all` | `bins` + `bins-q4` |
 | `make emu BENCH=…` | Run that bench on the golden emulator; exits at the done-PC |
-| `make lockstep BENCH=…` | Lock-step RTL vs emulator; logs in `build/` |
+| `make lockstep BENCH=…` | Lock-step RTL vs emulator; logs in `build/` (`*-q4` uses the 4-hart harness) |
+| `make lockstep-q4 BENCH=…` | 4-hart lock-step of the matching `-q4` image (same logs / flags) |
 | `make lockstep … SHOW_STATE=1` | Same, plus per-step golden-model register dump |
 | `make lockstep … DUMP_WAVES=1` | Same, plus VCD to `build/system_trace.vcd` |
 | `make isa` | Full RISC-V ISA regression (84/84 expected) |
@@ -496,6 +530,8 @@ JSON reports are written to `build/profile_results/`.
 | `make profile-all-sc` | Single-core, every family × every scale |
 | `make profile-sweep` | Full single + quad sweep (every family/scale) |
 | `make profile-report` | Redraw `docs/profile_report.png` from existing JSON (no new sims) |
+| `make profiles` | Five max-scale q4 benches → `build/profiles/*.json` |
+| `make dashboard` | Render `build/chiron_dashboard.html` from `PROFILE_DIR` (default `build/profiles`) |
 | `make fire [FIRE_FRAMES=N]` | Bare-metal Doom-fire demo |
 | `make cube [FIRE_FRAMES=N]` | Rotating wireframe cube (fixed-point 3D, 4 harts) |
 | `make solid [FIRE_FRAMES=N]` | Filled, shaded rotating cube |

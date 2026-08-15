@@ -305,18 +305,20 @@ class simulator {
   }
 
   // Human-readable GPR dump (x0..x31), 8 per line — for the regs.log trace.
-  std::string return_registers() const {
+  std::string return_registers(int hart) const {
     std::string out;
     char buf[40];
     for (int i = 0; i < 32; ++i) {
       std::snprintf(buf, sizeof(buf), "x%-2d: %016lx%s", i,
-                    (unsigned long)reg(i), (i % 8 == 7) ? "\n" : " ");
+                    (unsigned long)reg(hart, i), (i % 8 == 7) ? "\n" : " ");
       out += buf;
     }
     return out;
   }
+  std::string return_registers() const { return return_registers(0); }
 
-  int return_instruction() const { return tb->robOut0_pc; }
+  int return_instruction(int hart) const { return (int)core_pc(hart); }
+  int return_instruction() const { return (int)tb->robOut0_pc; }
 
   // Memory-probe port (the lock-step harnesses point it at a known DRAM word).
   void          set_probe(unsigned long address) { tb->prober_offset = address; }

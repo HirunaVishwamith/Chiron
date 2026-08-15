@@ -80,6 +80,13 @@ int main(int argc, char* argv[]) {
     std::cerr << "Error opening log files under " << logp << std::endl;
     return 1;
   }
+  outFile  << "# lockstep-isa run.log  — core 0 commit trace\n"
+           << "# cycle            pc               insn\n";
+  outState << "# lockstep-isa states.log  — core 0 instruction word each commit\n"
+           << "# insn\n";
+  outregs  << "# lockstep-isa regs.log  — core 0 RTL GPRs each commit\n"
+           << "# pc\n"
+           << "# x0 .. x31\n";
 
   printf("stepping\n");
   signal(SIGINT, signal_callback_handler);

@@ -113,22 +113,22 @@ endif
 # is -Os = size; -O3 is markedly faster for long simulations). Behaviour-neutral.
 VOPT_FAST ?= -O3 -march=native -fno-math-errno
 
-# Host cores. GitHub Actions cgroups sometimes make `nproc` print 1 even
-# though the hosted runner has 2-4 CPUs; a 1 here serialises both the
-# Verilator C++ compile (VJOBS) and ci-bench/ci-check (CI_JOBS) and is
-# what turns a 12-minute 5-bench run into ~25 minutes. Floor at 2.
-NPROC := $(shell nproc 2>/dev/null || echo 2)
-ifeq ($(NPROC),1)
-NPROC := 2
-endif
+# Host cores. Used only for the Verilator C++ compile (VJOBS). Do not feed
+# this into ci-bench / ci-check: running several RTL sims at once OOMs or
+# flakes GitHub-hosted runners. Default CI_JOBS is 1; override locally if
+# you have the RAM. --savable is already off on the fast model, so a
+# sequential 5-bench gate is the old 12–14 min path, not the 27 min one.
+NPROC := $(shell nproc 2>/dev/null || echo 1)
 
 # Parallelism for compiling the Verilated C++. Verilator splits system.v into
 # many translation units and each takes tens of seconds at -O3, so building
-# them one at a time costs 15-20 min.
+# them one at a time costs 15-20 min. Local `make sim` still uses nproc;
+# CI does not pass VJOBS (the workflow must not enable nproc).
 VJOBS   ?= $(NPROC)
 # How many of the five ci-bench / ci-check simulations to run at once.
-# Each process holds the Verilated DRAM (~256 MB); 2-4 is safe on CI.
-CI_JOBS ?= $(NPROC)
+# Default 1: one Verilated DRAM (~256 MB) at a time. Do not default this
+# to nproc — that is what fails CI.
+CI_JOBS ?= 1
 
 # Verilator CLI flags shared by every model. --output-split is what sets
 # VM_PARALLEL_BUILDS=1 in Vsystem.mk; without it some versions concatenate
@@ -144,6 +144,7 @@ endif
 # Optional runtime diagnostic flags — passed to harness binaries at run time.
 # Use: make lockstep SHOW_STATE=1   (print golden-model register state each step)
 #      make lockstep DUMP_WAVES=1   (write VCD waveform to build/system_trace.vcd)
+#      make lockstep-q4 …           (same flags; 4-hart compare)
 SHOW_STATE ?= 0
 DUMP_WAVES ?= 0
 

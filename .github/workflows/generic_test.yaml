@@ -53,7 +53,7 @@ jobs:
         # Pin 4.038: ubuntu-22.04's apt package. 5.x renames internal nets
         # (rtl_model.h) and its default timing-eval is much slower.
         sudo apt-get install -y verilator=4.038-1 libfl2 libfl-dev zlib1g-dev
-        echo "nproc=$(nproc)  verilator=$(verilator --version)"
+        echo "verilator=$(verilator --version)"
 
     # =========================
     # Fix Verilator strict warning (EOF newline)
@@ -99,10 +99,7 @@ jobs:
     # Build RTL from Scala (traced model, used by the ISA lockstep suite)
     # =========================
     - name: Build RTL (SBT + Verilator flow)
-      run: |
-        CORES=$(nproc); [ "$CORES" -ge 2 ] || CORES=2
-        echo "using VJOBS=$CORES"
-        make sim VJOBS=$CORES
+      run: make sim
 
     # =========================
     # Run lockstep smoke test (now a hard gate)
@@ -149,18 +146,14 @@ jobs:
     # the quad-core benchmark gate.
     # =========================
     - name: Build fast RTL model
-      run: |
-        CORES=$(nproc); [ "$CORES" -ge 2 ] || CORES=2
-        make sim-fast VJOBS=$CORES
+      run: make sim-fast
 
     # =========================
     # Quad-core benchmark gate: the 5 max-scale q4 benchmarks must all complete.
     # Now also fails CI on any "Register mismatch" or failure indicators from fast model / bench.
     # =========================
     - name: Run quad-core benchmark suite
-      run: |
-        CORES=$(nproc); [ "$CORES" -ge 2 ] || CORES=2
-        make ci-bench CI_JOBS=$CORES
+      run: make ci-bench
 
     - name: Verify quad-core / fast RTL benchmark has no mismatches or failures
       run: |
@@ -200,9 +193,7 @@ jobs:
     # keeping the seed list short -- each seed is a full RTL simulation.
     # =========================
     - name: Run microarchitectural assertion gate
-      run: |
-        CORES=$(nproc); [ "$CORES" -ge 2 ] || CORES=2
-        make ci-check CI_JOBS=$CORES
+      run: make ci-check
 
     # =========================
     # Upload results (always, even if previous steps failed, for debugging)
