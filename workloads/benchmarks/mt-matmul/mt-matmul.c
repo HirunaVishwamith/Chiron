@@ -12,7 +12,7 @@
 // dataset.h.
 
 // print out arrays, etc.
-#define DEBUG
+// Result-matrix UART dumps are opt-in (`-DDEBUG`). The gate is "error code: 0".
 
 //--------------------------------------------------------------------------
 // Includes

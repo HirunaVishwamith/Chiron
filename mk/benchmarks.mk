@@ -46,11 +46,20 @@ lrscirq_base := mt-lrscirq
 # `make done-pcs` prints the current exit address for every family so the table
 # can be re-derived rather than guessed. (The extra-hart park in crt.S shifted
 # everything by +0x08 from the 2026-08-15 stack-fix addresses.)
-vvadd_DONE  := --done-pc 0x800009b4 --done-pc 0x800009c0 --done-a0 2
-matmul_DONE := --done-pc 0x80000a18
-filter_DONE := --done-pc 0x80000bdc --done-pc 0x80000be0
-csaxpy_DONE := --done-pc 0x800009b8 --done-pc 0x800009ac --done-a0 0
-histo_DONE  := --done-pc 0x80000a54
+#
+# s1 and s5 of the same family do not share one exit PC: DATA_SIZE changes
+# immediates in verify/print and slides `exit`. List every scale's `j .`
+# at exit. park_extra_hart at 0x80000148 is not an exit.
+#
+# Do NOT gate these on --done-a0. exit() is `while(1)` and does not keep
+# the status argument in a0. The UART "error code: 0" line is the result
+# check (`profile_quad` already fails on a nonzero error code). Result
+# arrays are not printed unless the bin is built with -DDEBUG.
+vvadd_DONE  := --done-pc 0x8000099c --done-pc 0x800009a4 --done-pc 0x800009ac
+matmul_DONE := --done-pc 0x80000a00 --done-pc 0x80000a08
+filter_DONE := --done-pc 0x80000bc4 --done-pc 0x80000bcc --done-pc 0x80000bc8 --done-pc 0x80000bd0
+csaxpy_DONE := --done-pc 0x80000994 --done-pc 0x8000099c --done-pc 0x800009a4
+histo_DONE  := --done-pc 0x80000a3c --done-pc 0x80000a44
 seqlock_DONE := --done-pc 0x80000aac
 radix_DONE  := --done-pc 0x80000c74
 spinwait_DONE := --done-pc 0x80000aa8

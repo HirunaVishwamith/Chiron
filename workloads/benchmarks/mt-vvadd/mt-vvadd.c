@@ -10,8 +10,9 @@
 // generated using the vvadd_gendata.pl perl script and dumped
 // to a file named dataset.h
 
-// to print out arrays, etc.
-#define DEBUG
+// Result-array UART dumps are opt-in: `make … CFLAGS+=-DDEBUG`.
+// The gate is the "error code: 0" line; printing 10k s5 elements is
+// what turned a 2-minute bench into a 15-minute hang.
 
 //--------------------------------------------------------------------------
 // Includes

@@ -323,7 +323,7 @@ ci-bench: $(BUILD)/profile_quad_fast.out   ## CI gate: 5 quad-core benchmarks mu
 	    "csaxpy-s5-q4|mt-csaxpy-s5-q4.bin|$(csaxpy_DONE)" \
 	    "histo-s5-q4|mt-histo-s5-q4.bin|$(histo_DONE)" \
 	  | xargs -0 -P $(CI_JOBS) -I{} sh -c ' \
-	      rec="{}"; IFS="|"; set -- $$rec; name=$$1; bin=$$2; done=$$3; \
+	      rec="{}"; name=$${rec%%|*}; rest=$${rec#*|}; bin=$${rest%%|*}; done=$${rest#*|}; \
 	      echo "== CI bench: $$name =="; \
 	      if timeout 1500 $(BUILD)/profile_quad_fast.out --image $(BINS)/$$bin --name $$name $$done \
 	           --timeout 120000000 > $(BUILD)/ci/bench-$$name.log 2>&1 \
@@ -359,7 +359,7 @@ ci-check: $(BUILD)/profile_quad_check.out   ## Strict gate: benchmarks + per-cyc
 	    "csaxpy-s5-q4|mt-csaxpy-s5-q4.bin|$(csaxpy_DONE)" \
 	    "histo-s5-q4|mt-histo-s5-q4.bin|$(histo_DONE)" \
 	  | xargs -0 -P $(CI_JOBS) -I{} sh -c ' \
-	      rec="{}"; IFS="|"; set -- $$rec; name=$$1; bin=$$2; done=$$3; \
+	      rec="{}"; name=$${rec%%|*}; rest=$${rec#*|}; bin=$${rest%%|*}; done=$${rest#*|}; \
 	      echo "== CI check: $$name =="; \
 	      timeout 3000 $(BUILD)/profile_quad_check.out --image $(BINS)/$$bin --name $$name $$done \
 	           --timeout 120000000 > $(BUILD)/ci/check-$$name.log 2>&1; rc=$$?; \

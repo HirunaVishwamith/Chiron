@@ -14,7 +14,7 @@
 
 #include "active.h"
 
-#define DEBUG
+// Result-array UART dumps are opt-in (`-DDEBUG`). The gate is "error code: 0".
 
 extern void uart_send_string(const char *s);
 

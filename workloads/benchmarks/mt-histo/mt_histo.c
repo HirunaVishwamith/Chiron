@@ -7,7 +7,7 @@
 // #include <string.h>
 
 // #define NTHREADS 16
-#define DEBUG
+// Per-bin UART dumps are opt-in (`-DDEBUG`). The gate is "error code: 0".
 
 extern void printf(const char *format, ...);
 extern void exit(int status);
