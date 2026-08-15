@@ -241,6 +241,14 @@ def render(recs, out_path):
                     ax.text(b.get_x() + b.get_width() / 2, v + ipc_max * 0.02,
                             f"{v:.2f}", ha="center", va="bottom",
                             fontsize=7.4, color=INK_2)
+                else:
+                    # A configuration that produced no result is called out
+                    # rather than left as blank space, so a gap in the data is
+                    # never mistaken for a measurement of zero -- which is the
+                    # exact failure this script had.
+                    ax.text(b.get_x() + b.get_width() / 2, ipc_max * 0.02,
+                            "n/a", ha="center", va="bottom", rotation=90,
+                            fontsize=6.8, color=INK_MUTED)
         ax.set_xticks(x)
         ax.set_xticklabels([f"s{s}" for s in scales])
         ax.set_ylim(0, ipc_max)

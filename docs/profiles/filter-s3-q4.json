@@ -1,5 +1,5 @@
 {
-  "benchmark": "filter-s5-q4",
+  "benchmark": "filter-s3-q4",
   "aggregate": {
     "total_inst_retired": 7075963,
     "max_cycles": 4807055,
