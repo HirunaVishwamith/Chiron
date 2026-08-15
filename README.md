@@ -34,8 +34,10 @@
   centralized issue queue with wake-up, and in-order commit.
 - **Full memory hierarchy** — split L1 I/D caches, non-blocking L2 with MSHRs
   and pseudo-LRU, ACE-style coherent interconnect.
-- **Modern branch prediction** — bimodal + BTB (64 sets, 2-way LRU) + a
-  **4-table TAGE** predictor.
+- **Modern branch prediction** — a **4-table TAGE** direction predictor
+  (512 entries each, histories 4/9/19/40) over a 2048-entry bimodal base, plus a
+  256-entry direct-mapped BTB, a 512-entry pre-decode CFI classifier and a
+  16-deep RAS. TAGE drives next-PC combinationally, in the fetch cycle.
 - **Cycle-accurate, lock-step verified** against a C++ golden-model emulator,
   one committed instruction at a time — **84/84 official `riscv-tests` pass**.
 - **Boots quad-core Linux SMP to an interactive shell** — a nommu RISC-V kernel
@@ -252,17 +254,19 @@ make profile-all-sc              # → build/profile_results/<fam>-s<N>.json + c
 
 | Benchmark | Cycles | IPC | Branch Acc | D$ Miss | DRAM RD BW |
 |---|---|---|---|---|---|
-| matmul-s1 | 501 899 (partial) | **0.290** | 10.4 % | 0.4 % | 0.70 MB/s |
-| histo-s1 | 2 922 556 | **0.168** | 43.1 % | 0.9 % | 0.78 MB/s |
-| filter-s1 | 116 208 | **0.153** | 49.9 % | 6.6 % | 3.88 MB/s |
-| csaxpy-s1 | 925 833 | **0.117** | 59.4 % | 1.0 % | 0.45 MB/s |
-| vvadd-s1 | 810 375 | **0.126** | 59.5 % | 1.6 % | 0.57 MB/s |
+| filter-s1 | 1 074 831 | **0.408** | 80.3 % | 2.13 % | 2.39 MB/s |
+| vvadd-s1 | 329 665 | **0.308** | 73.3 % | 1.43 % | 1.40 MB/s |
+| csaxpy-s1 | 383 297 | **0.281** | 69.5 % | 1.12 % | 1.16 MB/s |
+| histo-s1 | 1 872 971 | **0.262** | 67.6 % | 1.10 % | 1.21 MB/s |
+| matmul-s1 | — | n/a | — | — | — |
 
-> matmul runs at ~0.29 IPC because its tight inner loop rarely stalls the ROB;
-> vvadd and csaxpy sit near 0.12–0.13 because the coordinator hart stalls heavily
-> on the ROB waiting for the compute harts (even in single-core mode the barrier
-> logic dominates). The low branch accuracy reflects the bimodal predictor
-> struggling with infrequent loop-exit branches.
+> Single-core IPC now sits at 0.26–0.41, roughly 2.3× the pre-TAGE numbers, with
+> branch accuracy up from ~50–60 % to 68–80 % — the predictor change is most of
+> the gain. filter leads because its stencil inner loop is long and
+> well-predicted; histo trails because its scatter pattern serialises on the
+> store path. **matmul has no single-core row**: it does not complete on the RTL
+> at any scale (see *Known issues*), so the figure labels it `n/a` rather than
+> plotting a partial-run number as if it were a result.
 
 ---
 
@@ -613,6 +617,13 @@ All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
   finishes it in seconds and every other family's single-core runs pass. The
   quad-core matmul runs are unaffected, which is why the profile report shows
   matmul's 1-core bars as `n/a`.
+- **`mask-sfilter` only has three distinct scales.** `s3.h`, `s4.h` and `s5.h`
+  are byte-identical (`DATA_SIZE 156`), so `filter-s3`, `-s4` and `-s5` build the
+  same image and unsurprisingly profile to the same number (1.472 aggregate IPC
+  at all three). The flat tail of filter's scaling curve is a dataset artifact,
+  not a saturation effect. Regenerating the larger datasets with
+  `mask-sfilter_gendata.py` would fix it, at the cost of re-deriving that
+  family's completion PCs and re-running the sweep.
 
 ---
 
