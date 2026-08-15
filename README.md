@@ -53,7 +53,13 @@
 
 ```bash
 make fire            # bare-metal Doom-fire demo, UART → terminal
+make cube            # rotating wireframe cube, software 3D on four harts
 ```
+
+Both render over the UART with truecolor escapes — no framebuffer, no FPU.
+`workloads/demos/g3d/` is a small fixed-point 3D library (matrices, projection,
+line and triangle raster) written for exactly this: the harts transform vertices
+in parallel and core 0 rasterises and presents.
 
 <div align="center">
 <img src="docs/fire.gif" alt="Chiron fire demo" width="720"/>
@@ -472,6 +478,8 @@ JSON reports are written to `build/profile_results/`.
 | `make profile-all` | Quad-core profile for all benchmarks + chart |
 | `make profile-all-sc` | Single-core profile for all benchmarks, all scales |
 | `make fire [FIRE_FRAMES=N]` | Bare-metal Doom-fire demo |
+| `make cube [FIRE_FRAMES=N]` | Rotating wireframe cube (fixed-point 3D, 4 harts) |
+| `make solid [FIRE_FRAMES=N]` | Filled, shaded cube — **currently wedges, see below** |
 | `make linux-emu [LINUX_IMAGE=…]` | Interactive Linux shell on the golden model (fast) |
 | `make linux-emu-check [LINUX_IMAGE=…]` | Scripted boot-to-login check (CI, non-interactive) |
 | `make linux-sim [LINUX_IMAGE=…]` | Boot Linux on the Verilated RTL (live console, slow) |
@@ -589,6 +597,22 @@ D-caches; on chiron the fetch reads stale L2. The two-line kernel fix lives in
 
 All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
 `smp-repro` 3/3.
+
+---
+
+## Known issues
+
+- **`make solid` wedges.** Core 0 stops committing entirely for 500 K cycles
+  with its ROB head on a `mul` that is immediately followed by two `div`s
+  (`0x80001458` in `mt-solid`), i.e. an M-extension issue rather than anything in
+  the 3D code — `make cube`, which shares the same g3d library, renders fine.
+  Confirmed to predate the merge of main into this branch: the pre-merge netlist
+  wedges at the identical PC.
+- **Single-core `matmul` does not complete on the RTL** at any scale. It runs
+  past 150 M cycles without reaching its exit stub, while the golden model
+  finishes it in seconds and every other family's single-core runs pass. The
+  quad-core matmul runs are unaffected, which is why the profile report shows
+  matmul's 1-core bars as `n/a`.
 
 ---
 
