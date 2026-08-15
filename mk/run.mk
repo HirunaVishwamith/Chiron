@@ -657,8 +657,8 @@ profile-sweep: $(BUILD)/profile_fast.out $(BUILD)/profile_quad_fast.out  ## Prof
 	     $(if $(shell test $(s) -le $(word 3,$(subst :, ,$(f))) && echo y), \
 	       $(eval FAM := $(word 1,$(subst :, ,$(f)))) \
 	       $(eval DIR := $(word 2,$(subst :, ,$(f)))) \
-	       $(file >>$(BUILD)/.sweep.cmds,$(BUILD)/profile_fast.out --image $(BINS)/$(DIR)-s$(s).bin --name $(FAM)-s$(s) $($(FAM)_DONE) --output $(PSWEEP_DIR)/$(FAM)-s$(s).json --timeout 400000000 > $(BUILD)/.sweep-$(FAM)-s$(s).log 2>&1) \
-	       $(file >>$(BUILD)/.sweep.cmds,$(BUILD)/profile_quad_fast.out --image $(BINS)/$(DIR)-s$(s)-q4.bin --name $(FAM)-s$(s)-q4 $($(FAM)_DONE) --output $(PSWEEP_DIR)/$(FAM)-s$(s)-q4.json --timeout 400000000 > $(BUILD)/.sweep-$(FAM)-s$(s)-q4.log 2>&1))))
+	       $(file >>$(BUILD)/.sweep.cmds,$(BUILD)/profile_fast.out --image $(BINS)/$(DIR)-s$(s).bin --name $(FAM)-s$(s) $($(FAM)_DONE) --output $(PSWEEP_DIR)/$(FAM)-s$(s).json --timeout 150000000 > $(BUILD)/.sweep-$(FAM)-s$(s).log 2>&1) \
+	       $(file >>$(BUILD)/.sweep.cmds,$(BUILD)/profile_quad_fast.out --image $(BINS)/$(DIR)-s$(s)-q4.bin --name $(FAM)-s$(s)-q4 $($(FAM)_DONE) --output $(PSWEEP_DIR)/$(FAM)-s$(s)-q4.json --timeout 150000000 > $(BUILD)/.sweep-$(FAM)-s$(s)-q4.log 2>&1))))
 	@wc -l < $(BUILD)/.sweep.cmds | xargs echo "[sweep] runs:"
 	@xargs -a $(BUILD)/.sweep.cmds -d '\n' -P $(PSWEEP_JOBS) -I{} sh -c '{}' ; rm -f $(BUILD)/.sweep.cmds
 	@echo "[sweep] done -> $(PSWEEP_DIR)"
