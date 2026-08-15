@@ -291,34 +291,35 @@ make test-q4                     # profile-based pass/fail on vvadd-q4
 
 ## Profiling values — reference numbers
 
-Results from the Verilator simulation at ~6 500 RTL cycles/sec. Quad-core
-benchmarks are compiled with `DATA_SIZE` matching the `s1` scale unless noted.
+Measured on the current RTL over the full sweep (`make profile-sweep`); the
+figures below are the `s1` scale, and `docs/profile_report.png` covers every
+family at every scale, single-core and quad-core.
 
-### vvadd-q4 (vector-vector add, all 4 cores)
+### vvadd-s1-q4 (vector-vector add, all 4 cores)
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **1.085** | 0.119 | ~0.322 |
-| Instructions retired | 862 770 | 94 966 | ~255 900 each |
-| Max cycles | 795 033 | — | — |
-| Branch accuracy | — | 61.6 % | 77.4 % |
-| D-cache miss rate | — | 1.7 % | 5.7 % |
-| ROB stall % | — | 64.4 % | ~2.1 % |
-| Decode efficiency | — | 26.0 % | ~98 % |
+| **IPC** | **1.279** | 0.302 | ~0.326 |
+| Instructions retired | 401 962 | 94 967 | ~102 330 each |
+| Max cycles | 314 347 | — | — |
+| Branch accuracy | — | 76.2 % | 77.9 % |
+| D-cache miss rate | — | 1.7 % | ~4.3 % |
+| ROB stall % | — | 29.8 % | ~5.4 % |
+| Decode efficiency | — | 66.3 % | ~94.6 % |
 
 > Core 0 acts as the coordinator (barrier + result check), hence its lower IPC
 > and high ROB stall fraction. Cores 1–3 execute the compute kernel.
 
-### histo-q4 (histogram, all 4 cores)
+### histo-s1-q4 (histogram, all 4 cores)
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **1.017** | 0.171 | ~0.282 |
-| Instructions retired | 3 716 508 | 624 914 | ~1 030 000 each |
-| Max cycles | 3 653 789 | — | — |
-| Branch accuracy | — | 39.1 % | ~74.0 % |
-| D-cache miss rate | — | 1.2 % | ~2.1 % |
-| ROB stall % | — | 45.9 % | ~5.3 % |
+| **IPC** | **1.298** | 0.263 | ~0.345 |
+| Instructions retired | 2 125 836 | 430 506 | ~565 100 each |
+| Max cycles | 1 637 361 | — | — |
+| Branch accuracy | — | 71.8 % | 78.7 % |
+| D-cache miss rate | — | 1.0 % | ~1.2 % |
+| ROB stall % | — | 35.6 % | ~4.0 % |
 
 ---
 
@@ -595,8 +596,9 @@ All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
 
 - Port the single-core IPC optimisations (radix-4 divider, store-data trim,
   load-queue flow-through) to the quad-core back-end. Aggregate quad-core IPC is
-  currently **~1.0–1.17** across the five families (see the dashboard), i.e.
-  roughly 0.27 per core — the headroom is still large.
+  currently **1.18–1.88** across the five families (see
+  `docs/profile_report.png`), i.e. roughly 0.3–0.47 per core — the headroom is
+  still large.
 - Add an ownership check to the ROB execute write ports. Four separate bugs so
   far shared one shape: a completion landing on a slot that was rolled back and
   reallocated underneath it. A structural guard would close the class rather
