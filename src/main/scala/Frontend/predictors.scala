@@ -181,6 +181,26 @@ class advancedPredictor extends nextPCPredictor {
 
   io.branchres.ready := 1.B
 
+  // ─────────────────── packed bit-vector predictor state ──────────────────
+  // The valid/useful arrays below are read AND written at a dynamic index, so
+  // `Reg(Vec(N, Bool()))` is the wrong container for them: FIRRTL's LowerTypes
+  // pass explodes such a Vec into N individual registers, and each dynamic read
+  // then elaborates as an N-deep mux tree that Verilator re-evaluates every
+  // cycle. Measured on the quad-core Linux boot, the four arrays here (4864
+  // bits) accounted for ~42k of system.v's 269k lines and halved host
+  // throughput -- 29k -> 16k cycles/s -- without changing behaviour by a single
+  // cycle. Held as packed UInts each array is ONE register: a read is a dynamic
+  // bit-extract, a write a one-hot mask.
+  //
+  // Read sites are unchanged (`vec(idx)` on a UInt is a bit-extract). Every
+  // write site targets exactly one index of one array per cycle, so the
+  // read-modify-write form below preserves last-connect semantics: a later
+  // `when` still overrides an earlier one for the same bit, and the bulk clear
+  // at the end of the update path still wins over all of them.
+  private def bitClear(v: UInt, oh: UInt): UInt = v & (~oh).asUInt
+  private def bitPut(v: UInt, oh: UInt, set: Bool): UInt =
+    Mux(set, v | oh, bitClear(v, oh))
+
   // ───────────────────────── CFI classifier table ─────────────────────────
   // Direct-mapped, tagged, written from pre-decode. Only control transfers are
   // allocated, so plain arithmetic does not evict branch entries.
@@ -188,13 +208,13 @@ class advancedPredictor extends nextPCPredictor {
   private def cfiIdx(pc: UInt) = pc(cfiIdxW + 1, 2)
   private def cfiTag(pc: UInt) = pc(63, cfiIdxW + 2)
 
-  val cfiValid = RegInit(VecInit(Seq.fill(cfg.cfiEntries)(false.B)))
+  val cfiValid = RegInit(0.U(cfg.cfiEntries.W))
   val cfiTags  = Mem(cfg.cfiEntries, UInt((62 - cfiIdxW).W))
   val cfiTypes = Mem(cfg.cfiEntries, UInt(cfiType.width.W))
 
   private val pdType = cfiType.classify(predecode.instruction)
   when(predecode.valid && (pdType =/= cfiType.NONE.U)) {
-    cfiValid(cfiIdx(predecode.pc)) := true.B
+    cfiValid := cfiValid | UIntToOH(cfiIdx(predecode.pc), cfg.cfiEntries)
     cfiTags(cfiIdx(predecode.pc))  := cfiTag(predecode.pc)
     cfiTypes(cfiIdx(predecode.pc)) := pdType
   }
@@ -219,7 +239,7 @@ class advancedPredictor extends nextPCPredictor {
   private def btbTag(pc: UInt) = pc(63, btbIdxW + 2)
 
   val btb      = Mem(cfg.btbEntries, UInt(64.W))
-  val btbValid = RegInit(VecInit(Seq.fill(cfg.btbEntries)(false.B)))
+  val btbValid = RegInit(0.U(cfg.btbEntries.W))
   val btbTags  = Mem(cfg.btbEntries, UInt((62 - btbIdxW).W))
 
   // `branchres.branchTaken` is only meaningful for conditional branches — the
@@ -233,7 +253,7 @@ class advancedPredictor extends nextPCPredictor {
   // branch (as the original did) makes the BTB actively wrong the moment the
   // direction predictor says "taken".
   when(io.branchres.fired && takenR) {
-    btbValid(btbIdx(io.branchres.pc)) := true.B
+    btbValid := btbValid | UIntToOH(btbIdx(io.branchres.pc), cfg.btbEntries)
     btbTags(btbIdx(io.branchres.pc))  := btbTag(io.branchres.pc)
     btb(btbIdx(io.branchres.pc))      := io.branchres.pcAfterBrnach
   }
@@ -278,8 +298,8 @@ class advancedPredictor extends nextPCPredictor {
 
   val tageTags  = Seq.fill(nTables)(Mem(cfg.tageTableEntries, UInt(tagW.W)))
   val tageCtrs  = Seq.fill(nTables)(Mem(cfg.tageTableEntries, UInt(3.W)))
-  val tageValid = Seq.fill(nTables)(RegInit(VecInit(Seq.fill(cfg.tageTableEntries)(false.B))))
-  val tageU     = Seq.fill(nTables)(RegInit(VecInit(Seq.fill(cfg.tageTableEntries)(false.B))))
+  val tageValid = Seq.fill(nTables)(RegInit(0.U(cfg.tageTableEntries.W)))
+  val tageU     = Seq.fill(nTables)(RegInit(0.U(cfg.tageTableEntries.W)))
 
   // Bimodal base predictor.
   private val baseIdxW = log2Ceil(cfg.bimodalEntries)
@@ -433,6 +453,8 @@ class advancedPredictor extends nextPCPredictor {
   // Indices are recomputed from the committed history, which equals the history
   // this branch was predicted with (see the class comment).
   private val idxU  = (0 until nTables).map(t => tageIdx(io.branchres.pc, ghrCommit, t))
+  // One decoder per table, shared by every write site below.
+  private val ohU   = (0 until nTables).map(t => UIntToOH(idxU(t), cfg.tageTableEntries))
   private val tagsU = (0 until nTables).map(t => tageTag(io.branchres.pc, ghrCommit, t))
   private val hitU  = (0 until nTables).map(t => tageValid(t)(idxU(t)) && (tageTags(t)(idxU(t)) === tagsU(t)))
   private val ctrsU = (0 until nTables).map(t => tageCtrs(t)(idxU(t)))
@@ -462,7 +484,7 @@ class advancedPredictor extends nextPCPredictor {
       tageCtrs(t)(idxU(t)) := Mux(takenU, satUp3(c), satDown3(c))
       // Usefulness only carries information when provider and alt disagree.
       when(selU.provPred =/= selU.altPred) {
-        tageU(t)(idxU(t)) := (selU.provPred === takenU)
+        tageU(t) := bitPut(tageU(t), ohU(t), selU.provPred === takenU)
       }
     }
   }
@@ -488,16 +510,16 @@ class advancedPredictor extends nextPCPredictor {
     when(anyCand) {
       for (t <- 0 until nTables) {
         when(allocSel === t.U) {
-          tageValid(t)(idxU(t)) := true.B
+          tageValid(t)          := tageValid(t) | ohU(t)
           tageTags(t)(idxU(t))  := tagsU(t)
           tageCtrs(t)(idxU(t))  := Mux(takenU, 4.U, 3.U) // weakest of the right sign
-          tageU(t)(idxU(t))     := false.B
+          tageU(t)              := bitClear(tageU(t), ohU(t))
         }
       }
     }.otherwise {
       // Nothing free: age the candidates so the next mispredict can allocate.
       for (t <- 0 until nTables) {
-        when(t.U(tblSelW.W) >= startTbl) { tageU(t)(idxU(t)) := false.B }
+        when(t.U(tblSelW.W) >= startTbl) { tageU(t) := bitClear(tageU(t), ohU(t)) }
       }
     }
   }
@@ -507,6 +529,6 @@ class advancedPredictor extends nextPCPredictor {
   val ageCounter = RegInit(0.U(cfg.tageAgeCounterWidth.W))
   when(doUpdate) {
     ageCounter := ageCounter + 1.U
-    when(ageCounter.andR) { tageU.foreach(_.foreach(_ := false.B)) }
+    when(ageCounter.andR) { tageU.foreach(_ := 0.U) }
   }
 }

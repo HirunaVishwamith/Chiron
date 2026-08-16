@@ -76,15 +76,25 @@ endif
 # -DCHIRON_NO_TRACE so rtl_model.h's single tb->trace() call compiles out. The
 # behaviour-changing --x-assign/--x-initial fast flags are deliberately NOT used
 # (they wedge the uartlite MMIO read path); only behaviour-neutral flags here.
+# Every model except the trace one (obj_dir) is Verilated with --threads, so
+# the harnesses that link them need Verilator's thread flags. Verilator supplies
+# these from its own verilated.mk when you build inside obj_dir; our harness
+# link lines are hand-rolled, so without them the build dies inside
+# verilated_threads.h ("memory_order_relaxed is not a member of std",
+# "VL_LOCK_SPINS was not declared").
+VTHREADS   ?= 4
+VTHREAD_CXX := -DVL_THREADED=1 -pthread
+VTHREAD_SRC := $(VINC)/verilated_threads.cpp
+
 SIM_FAST          := $(SIM)/obj_dir_fast
 HARNESS_INCS_FAST := -I . -I $(VINC) -I $(SIM_FAST)
 _VLIB_FAST := $(wildcard $(SIM_FAST)/libverilated.a)
 ifneq ($(_VLIB_FAST),)
   VSYS_LIB_FAST := $(_VLIB_FAST) $(SIM_FAST)/Vsystem__ALL.a
-  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED_SAVE)
+  CXX_FAST      := g++ -O3 $(VTHREAD_CXX) -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED_SAVE) $(VTHREAD_SRC)
 else
   VSYS_LIB_FAST := $(SIM_FAST)/Vsystem__ALL.a
-  CXX_FAST      := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD) $(VERILATED_SAVE)
+  CXX_FAST      := g++ -O3 $(VTHREAD_CXX) -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=500000 $(VERILATED) $(VERILATED_VCD) $(VERILATED_SAVE) $(VTHREAD_SRC)
 endif
 
 # ── Linux boot harness flags ──────────────────────────────────────────────────
@@ -104,9 +114,9 @@ endif
 # Prefer the fast-model include path (single-build fix); fall back to compiling
 # verilated sources ourselves on Verilator 4.x.
 ifneq ($(_VLIB_FAST),)
-  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000
+  CXX_LINUX := g++ -O3 $(VTHREAD_CXX) -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VTHREAD_SRC)
 else
-  CXX_LINUX := g++ -O3 -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD)
+  CXX_LINUX := g++ -O3 $(VTHREAD_CXX) -DCHIRON_NO_TRACE $(HARNESS_INCS_FAST) -DSTEP_TIMEOUT=5000000 $(VERILATED) $(VERILATED_VCD) $(VTHREAD_SRC)
 endif
 
 # Optimization for the Verilator-generated C++ (verilated.mk's OPT_FAST default

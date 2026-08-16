@@ -473,8 +473,13 @@ linux-emu-check: $(BUILD)/emu.out    ## Non-interactive boot-to-login check (CI)
 #                                     checkpoints every $(CKPT_EVERY) cycles
 #   make linux-sim DEBUG=1 RESUME=1 resume from the newest checkpoint
 #   make linux-sim RESTORE=<file>   resume from a specific one
-#   make linux-sim-fast             same boot, no --savable, host-optimum speed
+#   make linux-sim-fast             same boot, no --savable, no checkpoints
 #   make linux-sim-fast DEBUG=1     + harness log, no checkpoints
+#
+# EVERY path here is Verilated with --threads $(VTHREADS) -- threading is built
+# into the models, not bolted on as a separate target -- so linux-sim keeps its
+# checkpoints at full speed and there is no slow variant to remember. VTHREADS=1
+# opts out.
 #   make linux-ckpts                list what is available to resume from
 #
 # Checkpoints are ~256 MB each (the model includes all of DRAM), which is why

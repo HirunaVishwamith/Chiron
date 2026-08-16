@@ -197,7 +197,39 @@ class decode (
   val stallReg = RegInit(false.B)
   val ecallPC = Reg(UInt(64.W))
 
-  val PRFValidList = RegInit(VecInit(Seq.fill(regCount)(true.B) ++ Seq.fill(PRFCount-regCount)(false.B)))
+  // ─────────── PRF valid/free lists: packed, not Reg(Vec(N, Bool())) ──────────
+  // Both are read AND written at a dynamic index. As a Vec, FIRRTL's LowerTypes
+  // pass explodes each into PRFCount discrete registers and every dynamic read
+  // becomes a PRFCount-deep mux tree; together with the reserved* checkpoints
+  // these accounted for 24% of system.v. Packed as UInt they are one register
+  // each. See the predictors.scala comment for the measured cost.
+  //
+  // The write sites CANNOT be converted one-by-one into read-modify-writes: a
+  // Vec lets several `when`s write DIFFERENT indices in the same cycle and all
+  // of them land, whereas `reg := f(reg)` makes the textually-last one win and
+  // silently drops the rest. Worse, the whole-vector writes (the branch-recovery
+  // ones) read the register's CURRENT value, so they discard the per-bit writes
+  // above them. Both effects are reproduced exactly by collecting each site into
+  // an accumulator below and resolving them once, in original textual order, at
+  // the bottom of this file (search "PRF list resolve"):
+  //
+  //   valid : set(jump) -> clear(alloc) -> [restore | flush+arch] -> set(exec)
+  //   free  : clear(collide) -> clear(alloc) -> [restore | flush\arch] -> set(retire)
+  //
+  // Anything new that writes these lists must add to an accumulator, never
+  // assign the register directly, or it will be overwritten by the resolve.
+  val PRFValidList = RegInit(
+    (((BigInt(1) << regCount) - 1)).U(PRFCount.W))          // x0..x31 valid at reset
+
+  private val validSetJump  = WireDefault(0.U(PRFCount.W))  // jump link writeback
+  private val validClrAlloc = WireDefault(0.U(PRFCount.W))  // freshly renamed dest
+  private val listRestore   = WireDefault(false.B)          // mispredict -> checkpoint 0
+  private val listFlush     = WireDefault(false.B)          // mispredict -> architectural
+  private val validSetExec  = WireDefault(0.U(PRFCount.W))  // exec1/2/3 writebacks
+  private val freeClrCollide = WireDefault(0.U(PRFCount.W)) // rename/free collision
+  private val freeClrAlloc   = WireDefault(0.U(PRFCount.W)) // freshly renamed dest
+  private val freeSetRetire  = WireDefault(0.U(PRFCount.W)) // retired physical reg
+  private val reservedFreeSet = WireDefault(0.U(PRFCount.W))// same, into every ckpt
 
   /** Storing instruction and pc in the fetch buffer */
   when(fromFetch.fired && readyInputBuf) {     /** Data from the fetch unit is valid and fetch buffer is ready */
@@ -308,7 +340,8 @@ class decode (
 
   val frontEndRegMap      = RegInit(VecInit(Seq.tabulate(regCount)(i => i.U(PRFAddrWidth.W))))
   val architecturalRegMap = RegInit(VecInit(Seq.tabulate(regCount)(i => i.U(PRFAddrWidth.W))))
-  val PRFFreeList         = RegInit(VecInit(Seq.fill(regCount)(false.B) ++ Seq.fill(PRFCount-regCount)(true.B)))
+  val PRFFreeList         = RegInit(
+    (((BigInt(1) << PRFCount) - 1) ^ ((BigInt(1) << regCount) - 1)).U(PRFCount.W)) // p32..p63 free at reset
 
   var i = 0;
   for (i <- 0 to 31) {
@@ -321,6 +354,14 @@ class decode (
   val reservedRegMap    = Reg(Vec(nCheckpoints, frontEndRegMap.cloneType))
   val reservedFreeList  = Reg(Vec(nCheckpoints, PRFFreeList.cloneType))
   val reservedValidList = Reg(Vec(nCheckpoints, PRFValidList.cloneType))
+  // Staging for reservedFreeList: the shift and the snapshot below write whole
+  // checkpoints, but a retiring writeback then sets one bit in EVERY checkpoint
+  // (reservedFreeSet). As a Vec those were independent element writes; packed,
+  // the bit-set has to be applied on top of whatever the shift/snapshot chose,
+  // so they write this wire and the resolve at the bottom ORs the bit in.
+  // reservedValidList needs no staging — nothing writes it after the snapshot.
+  private val reservedFreeNext = Wire(Vec(nCheckpoints, UInt(PRFCount.W)))
+  reservedFreeNext := reservedFreeList
 
   rs1Addr  := frontEndRegMap(rs1)
   rs2Addr  := frontEndRegMap(rs2)
@@ -335,9 +376,9 @@ class decode (
   when(rs1Addr === freeRegAddr || rs2Addr === freeRegAddr) {
     stall := true.B
     when(rs1Addr === freeRegAddr) {
-      PRFFreeList(rs1Addr) := false.B
+      freeClrCollide := UIntToOH(rs1Addr, PRFCount)
     }.elsewhen(rs2Addr === freeRegAddr) {
-      PRFFreeList(rs2Addr) := false.B
+      freeClrCollide := UIntToOH(rs2Addr, PRFCount)
     }
   }
 
@@ -375,12 +416,14 @@ class decode (
   stallReason.branchMaskFull  := stallBlocking && !prfExhausted && branchMaskFull
   stallReason.renameCollision := stallBlocking && !prfExhausted && !branchMaskFull && renameCollision
 
-  when(jumpAddrWrite.fired && outputBuffer.instruction(11,7) =/= 0.U) { PRFValidList(outputBuffer.PRFDest) := true.B }
+  when(jumpAddrWrite.fired && outputBuffer.instruction(11,7) =/= 0.U) {
+    validSetJump := UIntToOH(outputBuffer.PRFDest, PRFCount)
+  }
 
   when(validInputBuf && readyOutputBuf && (insType === itype.U || insType === rtype.U || insType === utype.U || insType === jtype.U) && rd =/= 0.U) {
     when(!branchEvalIn.fired || branchEvalIn.passFail){
-      PRFFreeList(freeRegAddr)  := false.B
-      PRFValidList(freeRegAddr) := false.B
+      freeClrAlloc              := UIntToOH(freeRegAddr, PRFCount)
+      validClrAlloc             := UIntToOH(freeRegAddr, PRFCount)
       frontEndRegMap(rd)        := freeRegAddr
     }
   }
@@ -405,25 +448,20 @@ class decode (
 
       when(branchEvalIn.branchMask(configuration.branchMaskWidth - 1, 0).orR){
         frontEndRegMap := reservedRegMap(0)
-        PRFFreeList    := (reservedFreeList(0) zip PRFFreeList map{case(reserved, current) => reserved | current})
-        PRFValidList   := (reservedValidList(0) zip PRFValidList map{case(reserved, current) => reserved | current})
+        // was: PRF{Free,Valid}List := reserved*(0) zip current map (_ | _)
+        listRestore := true.B
       }.otherwise{
         frontEndRegMap := architecturalRegMap
-        PRFFreeList    := VecInit(Seq.fill(PRFCount)(true.B))
-        PRFValidList   := VecInit(Seq.fill(PRFCount)(false.B))
         coherency := true.B  //leon coherency
-
-        for (i <- 0 until regCount){
-          PRFValidList(architecturalRegMap(i)):=true.B
-          PRFFreeList(architecturalRegMap(i)):=false.B
-        }
+        // was: free := all-ones then clear arch; valid := all-zero then set arch
+        listFlush := true.B
       }
 
       branchTracker := 0.U
     }.otherwise {
       for (i <- 0 until nCheckpoints - 1) {
         reservedRegMap(i)    := reservedRegMap(i + 1)
-        reservedFreeList(i)  := reservedFreeList(i + 1)
+        reservedFreeNext(i)  := reservedFreeList(i + 1)
         reservedValidList(i) := reservedValidList(i + 1)
       }
     }
@@ -442,12 +480,13 @@ class decode (
       val snapFree  = WireDefault(PRFFreeList)
       val snapValid = WireDefault(PRFValidList)
       when(opcode(2).asBool && rd.orR) {
-        snapMap(rd)            := freeRegAddr
-        snapFree(freeRegAddr)  := false.B
-        snapValid(freeRegAddr) := false.B
+        snapMap(rd) := freeRegAddr
+        val allocOH = UIntToOH(freeRegAddr, PRFCount)
+        snapFree    := PRFFreeList  & (~allocOH).asUInt
+        snapValid   := PRFValidList & (~allocOH).asUInt
       }
       reservedRegMap(branchTracker)    := snapMap
-      reservedFreeList(branchTracker)  := snapFree
+      reservedFreeNext(branchTracker)  := snapFree
       reservedValidList(branchTracker) := snapValid
       branchTracker := branchTracker + 1.U
     }.otherwise {
@@ -790,9 +829,13 @@ class decode (
   } */
 
 
-  when(writeAddrPRF.exec1Valid) { PRFValidList(writeAddrPRF.exec1Addr) := true.B }
-  when(writeAddrPRF.exec2Valid) { PRFValidList(writeAddrPRF.exec2Addr) := true.B }
-  when(writeAddrPRF.exec3Valid) { PRFValidList(writeAddrPRF.exec3Addr) := true.B }
+  // Three independent write ports, three DIFFERENT indices in the same cycle —
+  // this is exactly the case a naive `reg := reg | oh` per site would break, so
+  // they are OR-ed into one accumulator instead.
+  validSetExec :=
+    Mux(writeAddrPRF.exec1Valid, UIntToOH(writeAddrPRF.exec1Addr, PRFCount), 0.U) |
+    Mux(writeAddrPRF.exec2Valid, UIntToOH(writeAddrPRF.exec2Addr, PRFCount), 0.U) |
+    Mux(writeAddrPRF.exec3Valid, UIntToOH(writeAddrPRF.exec3Addr, PRFCount), 0.U)
 
 //  when(jumpAddrWrite.fired) { PRFValidList(outputBuffer.PRFDest) := true.B }
 
@@ -885,7 +928,7 @@ class decode (
     }
   }
   val freeCount = IO(Output(UInt(7.W)))
-  freeCount := PRFFreeList.map(_.asUInt).reduce(_ +& _)
+  freeCount := PopCount(PRFFreeList)
 
 
 
@@ -896,11 +939,35 @@ class decode (
     architecturalRegMap(writeBackResult.rdAddr) =/= writeBackResult.PRFDest &&
     writeBackResult.instruction =/= "h80000073".U
   ) {
-    architecturalRegMap(writeBackResult.rdAddr)              := writeBackResult.PRFDest
-    PRFFreeList(architecturalRegMap(writeBackResult.rdAddr)) := true.B
-    for (i <- 0 until nCheckpoints) {
-      reservedFreeList(i)(architecturalRegMap(writeBackResult.rdAddr)) := true.B
-    }
+    architecturalRegMap(writeBackResult.rdAddr) := writeBackResult.PRFDest
+    // Frees the PREVIOUS physical register for this architectural reg (the read
+    // of architecturalRegMap sees the register's current value, not the write
+    // above), in the main free list and in every branch checkpoint.
+    freeSetRetire   := UIntToOH(architecturalRegMap(writeBackResult.rdAddr), PRFCount)
+    reservedFreeSet := UIntToOH(architecturalRegMap(writeBackResult.rdAddr), PRFCount)
+  }
+
+  // ───────────────────────────── PRF list resolve ─────────────────────────────
+  // Single point of truth for the two packed lists. Layers are applied in the
+  // same order the original Vec write sites appeared, and the branch-recovery
+  // layer deliberately rebuilds from the CURRENT register value (not from
+  // layer 1) because a whole-Vec assignment used to override the per-bit writes
+  // above it. Keep this block LAST — it is the only writer of these registers.
+  private val archOneHot =
+    (0 until regCount).map(i => UIntToOH(architecturalRegMap(i), PRFCount)).reduce(_ | _)
+
+  PRFValidList := Mux(listRestore, reservedValidList(0) | PRFValidList,
+                  Mux(listFlush,   archOneHot,
+                                   (PRFValidList | validSetJump) & (~validClrAlloc).asUInt)) |
+                  validSetExec
+
+  PRFFreeList  := Mux(listRestore, reservedFreeList(0) | PRFFreeList,
+                  Mux(listFlush,   (~archOneHot).asUInt,
+                                   PRFFreeList & (~freeClrCollide).asUInt & (~freeClrAlloc).asUInt)) |
+                  freeSetRetire
+
+  for (i <- 0 until nCheckpoints) {
+    reservedFreeList(i) := reservedFreeNext(i) | reservedFreeSet
   }
 
   val canTakeInterrupt = IO(Output(Bool()))
