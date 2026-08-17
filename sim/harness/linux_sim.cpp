@@ -3,8 +3,8 @@
 // Unlike lockstep_linux.cpp this runs *only* the RTL: no golden model, no
 // per-instruction run.log, no register comparison. That debug machinery is what
 // makes lock-step crawl; dropping it lets the core run as fast as Verilator
-// allows (~thousands of cycles/sec) so you can watch Linux boot on the actual
-// RTL and type at its console.
+// allows (~40K cycles/sec on a 4-threaded model) so you can watch Linux boot on
+// the actual RTL and type at its console.
 //
 //   usage: linux_sim.out <image.bin> <dtb> <bootrom> [options]
 //
@@ -27,10 +27,11 @@
 // boot log that is purely the boot. Harness chatter — image loading, progress,
 // checkpoint bookkeeping — goes to the --debug log file or nowhere at all.
 //
-// This is SLOW: the core runs at ~thousands of cycles/sec and bbl must memcpy a
-// multi-MB kernel before the first UART byte appears, so several minutes of
-// silence at the start is normal, not a hang. If you want to watch progress,
-// run with --debug and tail the log.
+// This is SLOW in absolute terms: ~40K cycles/sec, and a full boot to the login
+// prompt is ~3 billion cycles, so budget the better part of a day. bbl must also
+// memcpy a multi-MB kernel before the first UART byte appears, so several
+// minutes of silence at the start is normal, not a hang. If you want to watch
+// progress, run with --debug and tail the log.
 //
 // Input: the host's stdin is forwarded to uart0's RX, so this is a real
 // interactive console — at "buildroot login: " type root, then nproc.

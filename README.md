@@ -43,6 +43,9 @@
 - **Boots quad-core Linux SMP to an interactive shell** — a nommu RISC-V kernel
   brings up all four harts, runs userspace, and answers `nproc` with `4`, typed
   live at the console (`docs/linux-quad-boot.log`).
+- **Fast enough to actually boot it** — the Verilated model runs at **~40 K RTL
+  cycles/s** (4-threaded, `-O3`), so a 3-billion-cycle Linux boot finishes in a
+  day rather than a week, and it checkpoints so you never repeat one.
 - **One command per task.** No copying files around: every harness loads images
   by path, driven from a single benchmark manifest.
 - **164 hardware performance counters** exposed from the RTL (41 per core × 4)
@@ -261,19 +264,27 @@ make profile-all-sc              # → build/profile_results/<fam>-s<N>.json + c
 
 | Benchmark | Cycles | IPC | Branch Acc | D$ Miss | DRAM RD BW |
 |---|---|---|---|---|---|
-| filter-s1 | 1 023 495 | **0.428** | 78.8 % | 2.11 % | 1.39 MB/s |
-| vvadd-s1 | 328 451 | **0.310** | 73.1 % | 1.42 % | 1.33 MB/s |
-| csaxpy-s1 | 379 275 | **0.284** | 69.4 % | 1.17 % | 1.04 MB/s |
-| histo-s1 | 1 855 397 | **0.264** | 67.7 % | 1.11 % | 1.21 MB/s |
-| matmul-s1 | 1 114 553 | **0.335** | 27.5 % | 0.55 % | 0.40 MB/s |
+| filter-s1 | 482 231 | **0.492** | 77.5 % | 3.82 % | 3.01 MB/s |
+| matmul-s1 | 938 727 | **0.331** | 11.1 % | 0.34 % | 0.46 MB/s |
+| histo-s1 | 581 807 | **0.275** | 78.0 % | 3.92 % | 3.83 MB/s |
+| vvadd-s1 | 69 657 | **0.272** | 71.7 % | 7.11 % | 6.13 MB/s |
+| csaxpy-s1 | 62 211 | **0.233** | 62.9 % | 6.47 % | 6.17 MB/s |
 
-> Single-core IPC now sits at 0.26–0.43, roughly 2.3× the pre-TAGE numbers, with
-> branch accuracy up from ~50–60 % to 68–79 % on the streaming kernels — the
-> predictor change is most of the gain. filter leads because its stencil inner
-> loop is long and well-predicted; histo trails because its scatter pattern
-> serialises on the store path. matmul's branch accuracy is low because the
-> trip-count-3 inner loop is a hard pattern for TAGE; the IPC is still
-> competitive because the inner body is mul-heavy and cache-resident.
+> Single-core IPC sits at 0.23–0.49, with branch accuracy 63–78 % on the
+> streaming kernels — the TAGE frontend is most of that. filter leads because
+> its stencil inner loop is long and well-predicted; csaxpy trails because at
+> `s1` the kernel is only ~62 K cycles, so loop prologue and the barrier
+> dominate what little work there is.
+>
+> **`s1` is the smallest scale and flatters nothing** — the D$ miss rates above
+> are cold-start artefacts (vvadd's 7.1 % falls out of a 70 K-cycle run whose
+> working set is touched exactly once). Read the scaling curves in
+> `docs/profile_report.png` for steady-state behaviour.
+>
+> matmul-s1's 11.1 % branch accuracy is the trip-count-3 inner loop: at this
+> size almost every branch is a fresh one TAGE never sees twice. It is a
+> small-input artefact, not a predictor limit — the same kernel reaches
+> **67.6 % at s2 and 98.9 % at s3** as the loops get long enough to learn.
 
 ---
 
@@ -334,35 +345,51 @@ make test-q4                     # profile-based pass/fail on vvadd-q4
 
 ## Profiling values — reference numbers
 
-Measured on the current RTL over the full sweep (`make profile-sweep`); the
+Measured on the current RTL over the full sweep (`make profile-sweep`,
+**2026-08-17**, 46 configurations, all completing with `error code: 0`); the
 figures below are the `s1` scale, and `docs/profile_report.png` covers every
 family at every scale, single-core and quad-core.
+
+> **These numbers are not comparable to any published before 2026-08-17.** The
+> benchmarks used to dump their result arrays over the UART, and that serial
+> tail dominated the shorter runs — vvadd-s1 was 328 451 cycles, of which most
+> was printing. With the dump removed it is 69 657. Cycle counts fell across
+> the board (vvadd 4.7×, filter 2.1×, matmul 1.2× — in proportion to how much
+> each family printed), so absolute cycles and IPC both moved. Compare against
+> this sweep, not the old one.
 
 ### vvadd-s1-q4 (vector-vector add, all 4 cores)
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **1.238** | 0.298 | ~0.314 |
-| Instructions retired | 394 836 | 94 970 | ~99 955 each |
-| Max cycles | 318 813 | — | — |
-| Branch accuracy | — | 75.0 % | 77.3 % |
-| D-cache miss rate | — | 1.7 % | ~7.9 % |
-| ROB stall % | — | 28.4 % | ~5.3 % |
-| Decode efficiency | — | 67.6 % | ~94.7 % |
+| **IPC** | **0.876** | 0.212 | ~0.221 |
+| Instructions retired | 50 267 | 12 195 | ~12 691 each |
+| Max cycles | 57 375 | — | — |
+| Branch accuracy | — | 85.0 % | 72.5 % |
+| D-cache miss rate | — | 11.8 % | ~7.9 % |
+| ROB stall % | — | 58.3 % | ~26.0 % |
+| Decode efficiency | — | 41.7 % | ~74.0 % |
 
 > Core 0 acts as the coordinator (barrier + result check), hence its lower IPC
 > and high ROB stall fraction. Cores 1–3 execute the compute kernel.
+> vvadd-s1-q4 is only 57 K cycles end to end, so fixed startup cost is a large
+> share of it; `vvadd-s5-q4` reaches **0.946** aggregate IPC on the same code.
 
 ### histo-s1-q4 (histogram, all 4 cores)
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **1.138** | 0.255 | ~0.294 |
-| Instructions retired | 1 919 539 | 430 510 | ~496 340 each |
-| Max cycles | 1 687 203 | — | — |
-| Branch accuracy | — | 71.0 % | 76.1 % |
-| D-cache miss rate | — | 1.2 % | ~2.8 % |
-| ROB stall % | — | 37.1 % | ~5.1 % |
+| **IPC** | **0.768** | 0.249 | ~0.173 |
+| Instructions retired | 307 806 | 99 883 | ~69 308 each |
+| Max cycles | 400 787 | — | — |
+| Branch accuracy | — | 91.1 % | 43.6 % |
+| D-cache miss rate | — | 6.6 % | ~2.6 % |
+| ROB stall % | — | 60.7 % | ~15.1 % |
+
+> histo inverts the usual split: core 0 retires the *most* instructions and the
+> worker harts the fewest, because the scatter kernel's data-dependent branches
+> are close to unpredictable (43.6 % on cores 1–3). It is the weakest family on
+> this machine and the clearest remaining headroom.
 
 ---
 
@@ -487,15 +514,28 @@ JSON reports are written to `build/profile_results/`.
 
 ---
 
-## Timing reference (Verilator, ~6 500 RTL cycles/sec)
+## Timing reference (Verilator, ~38.5 K RTL cycles/sec)
 
-| Benchmark | Approx wall time |
-|---|---|
-| vvadd-s1 (lock-step) | ~30 s |
-| vvadd-q4 (profile) | ~2 min |
-| csaxpy-s2 (lock-step) | ~5 min |
-| csaxpy-s5 / csaxpy-q4 | ~25 min |
-| matmul / filter / histo (q4) | 5–15 min |
+Measured on an 8-core host with the 4-threaded fast model, one simulation at a
+time. Lock-step runs are far slower than this — they step a golden model in
+parallel and compare every retired instruction.
+
+| Run | Cycles | Approx wall time |
+|---|---|---|
+| `make profile-sweep` (all 46 configs) | 100 268 018 | ~45 min at `PSWEEP_JOBS=2` |
+| matmul-s3 (single-core, longest run) | 40 990 627 | ~18 min |
+| matmul-s3-q4 | 15 611 545 | ~7 min |
+| filter-s5 / filter-s5-q4 | 2.9 M / 1.6 M | ~75 s / ~45 s |
+| vvadd-s1-q4 (shortest) | 57 375 | ~2 s |
+| Full quad-core Linux boot to login | ~3.06 G | ~21 h |
+
+**`PSWEEP_JOBS` is not `nproc`.** The fast model is Verilated with
+`--threads $(VTHREADS)`, so one simulation already occupies `VTHREADS` cores and
+the sweep must run `nproc / VTHREADS` at a time. Verilator's thread pool
+busy-waits, so oversubscribing collapses throughput rather than merely flattening
+it — measured here, 2 jobs gives ~1.79× over serial, while 4 jobs gives **0.22×,
+i.e. 4.5× slower than running them one at a time**. The default now computes
+this; override only if your host is bigger than the arithmetic.
 
 ---
 
@@ -592,9 +632,11 @@ make linux-sim                             # same boot on the savable model
   heartbeat log; `RESTORE` / `RESUME` are refused — those need `linux-sim`.
 - **`linux-sim`** boots the image on the Verilated RTL with a live uartlite
   console, and **stdin is wired through** — you can log in and run commands.
-  Expect ~5–10K cycles/s on the savable model: the kernel banner appears after
-  ~20 minutes and the login prompt after ~3 billion cycles, so plan on leaving
-  it overnight. **Its stdout is the guest console and nothing else**, so
+  Expect **~40 K cycles/s** on the savable model (it is Verilated with
+  `--threads` too — `--savable` and `--threads` coexist, so checkpointing costs
+  no speed). A full boot to the login prompt is ~3 billion cycles, i.e. the
+  better part of a day; the kernel banner shows up in the first few minutes.
+  **Its stdout is the guest console and nothing else**, so
   `make linux-sim | tee boot.log` produces a log of the boot rather than a log
   of the harness. `make uartrx-test` is the fast regression for the
   console-input path.
@@ -624,9 +666,10 @@ make linux-sim                             # same boot on the savable model
   foreign or stale file rather than restoring garbage.
 - `LINUX_IMAGE` defaults to `bins/linux-q4.bin` (see `mk/run.mk`).
 
-**Status (2026-08-14): the quad-core image boots to an interactive shell on the
+**Status (2026-08-17): the quad-core image boots to an interactive shell on the
 RTL.** All four harts come online, `/init` runs, and `nproc` answers `4` typed
-live at the console — `docs/linux-quad-boot.log` is that boot.
+live at the console — `docs/linux-quad-boot.log` is that boot, captured from
+`make linux-sim DEBUG=1` on the current netlist.
 
 Booting a real SMP kernel turned out to be the sharpest verification tool in the
 project: it exercises coherence, speculation, and traps in combinations no
@@ -666,8 +709,9 @@ All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
 
 - **`mask-sfilter` only has three distinct scales.** `s3.h`, `s4.h` and `s5.h`
   are byte-identical (`DATA_SIZE 156`), so `filter-s3`, `-s4` and `-s5` build the
-  same image and unsurprisingly profile to the same number (1.385 aggregate IPC
-  at all three). The flat tail of filter's scaling curve is a dataset artifact,
+  same image and unsurprisingly profile to the same number (1.425 aggregate IPC
+  and 1 643 293 cycles at all three, bit-for-bit). The flat tail of filter's
+  scaling curve is a dataset artifact,
   not a saturation effect. Regenerating the larger datasets with
   `mask-sfilter_gendata.py` would fix it, at the cost of re-deriving that
   family's completion PCs and re-running the sweep.
@@ -677,10 +721,12 @@ All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
 ## Roadmap
 
 - Port the single-core IPC optimisations (radix-4 divider, store-data trim,
-  load-queue flow-through) to the quad-core back-end. Aggregate quad-core IPC is
-  currently **1.09–1.86** across the five families (see
-  `docs/profile_report.png`), i.e. roughly 0.27–0.47 per core — the headroom is
-  still large.
+  load-queue flow-through) to the quad-core back-end. Aggregate quad-core IPC
+  spans **0.77–2.27** across the five families (see `docs/profile_report.png`),
+  i.e. roughly 0.19–0.57 per core — the headroom is still large. matmul is
+  already at 2.27 aggregate; histo is the floor at 0.77 and is branch-bound
+  (43.6 % accuracy on the worker harts), so it wants a better predictor for
+  data-dependent branches rather than more back-end width.
 - Add an ownership check to the ROB execute write ports. Four separate bugs so
   far shared one shape: a completion landing on a slot that was rolled back and
   reallocated underneath it. A structural guard would close the class rather

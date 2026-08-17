@@ -496,7 +496,7 @@ LINUX_SIM_FLAGS := $(if $(DEBUG),--debug --log $(LINUX_SIM_LOG) \
 LINUX_SIM_FLAGS += $(if $(RESTORE),--restore $(RESTORE))
 
 linux-sim: $(BUILD)/linux_sim.out    ## Boot LINUX_IMAGE on the RTL core (guest console only; DEBUG=1 for logs+checkpoints)
-	@echo "== RTL boot: $(LINUX_IMAGE) (Verilator ~thousands of cyc/s) ==" >&2
+	@echo "== RTL boot: $(LINUX_IMAGE) (Verilator ~40K cyc/s; full boot ~3G cycles) ==" >&2
 	@$(if $(DEBUG),echo "   debug log: $(LINUX_SIM_LOG)   checkpoints: $(CKPT_DIR)/ every $(CKPT_EVERY) cyc" >&2,\
 	   echo "   (quiet: only what the kernel transmits. DEBUG=1 adds a log + checkpoints)" >&2)
 	@flags="$(LINUX_SIM_FLAGS)"; \
@@ -704,11 +704,19 @@ image-check: $(BUILD)/image_load_probe.out  ## Verify an image lands in DRAM int
 
 # ── Full profiling sweep (the data behind docs/profile_report.png) ────────────
 # Every family at every scale it has a dataset for, single-core AND quad-core,
-# on the no-trace model. Runs PSWEEP_JOBS at a time: each simulation is
-# single-threaded, so the sweep is embarrassingly parallel and goes from hours
-# to tens of minutes on a multi-core host.
+# on the no-trace model. Runs PSWEEP_JOBS simulations at a time.
+#
+# Each simulation is NOT single-threaded any more: the fast model is Verilated
+# with --threads $(VTHREADS), so one run already occupies VTHREADS cores. The
+# job count must therefore be nproc/VTHREADS, not nproc. This is not a mild
+# preference -- Verilator's thread pool busy-waits, so oversubscribing it
+# collapses throughput instead of merely flattening it. Measured on an 8-core
+# host with a 4-threaded model, one run at a time = 38.5K cyc/s:
+#     2 jobs (8 threads, exactly nproc)  ~1.79x throughput
+#     4 jobs (16 threads, 2x oversubscribed)  ~0.22x -- 4.5x SLOWER than serial
+# Override explicitly if you know your host is bigger than the arithmetic.
 PSWEEP_DIR  ?= $(BUILD)/profile_results
-PSWEEP_JOBS ?= $(shell nproc)
+PSWEEP_JOBS ?= $(shell n=$$(( $$(nproc) / $(VTHREADS) )); echo $${n:-1} | awk '{print ($$1<1)?1:$$1}')
 
 $(BUILD)/profile_fast.out: $(HARNESS)/profile.cpp $(SIM)/profiler.h $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) -I $(SIM) $(HARNESS)/profile.cpp $(VSYS_LIB_FAST) -o $@

@@ -1,16 +1,7 @@
-== RTL boot: bins/linux-q4.bin (Verilator ~thousands of cyc/s; no input) ==
-build/linux_sim.out bins/linux-q4.bin sim/data/qemu.dtb sim/data/boot.bin
-***** Loading kernel image *****
-loaded 7962048 bytes @ 0x00000000 (bins/linux-q4.bin)
-loading dtb
-loaded 1018 bytes @ 0x07e00000 (sim/data/qemu.dtb)
-loading boot rom
-loaded 40 bytes @ 0x07ffff00 (sim/data/boot.bin)
-
-***** booting Linux on the RTL core (Ctrl-C to stop) *****
-      (RTL is slow: expect no console output for several minutes
-       while bbl copies the kernel into place)
-
+hv@hv-IdeaPad-Gaming-3-15IHU6:/media/hv/D1/Projects/chiron$ make linux-sim DEBUG=1
+g++ -O3 -DVL_THREADED=1 -pthread -DCHIRON_NO_TRACE -I . -I /usr/share/verilator/include -I sim/rtl/obj_dir_save -DSTEP_TIMEOUT=5000000 /usr/share/verilator/include/verilated.cpp /usr/share/verilator/include/verilated_vcd_c.cpp /usr/share/verilator/include/verilated_save.cpp /usr/share/verilator/include/verilated_threads.cpp -DSHOW_TERMINAL sim/harness/linux_sim.cpp sim/rtl/obj_dir_save/Vsystem__ALL.a -o build/linux_sim.out
+== RTL boot: bins/linux-q4.bin (Verilator ~thousands of cyc/s) ==
+   debug log: build/linux-sim.log   checkpoints: ckpt/ every 20000000 cyc
 [    0.000000] Linux version 6.3.0-rc4-dirty (hv@hv-IdeaPad-Gaming-3-15IHU6) (riscv64-buildroot-linux-uclibc-gcc.br_real (Buildroot -g873407b4) 13.3.0, GNU ld (GNU Binutils) 2.43.1) #4 SMP Thu Aug 13 10:15:31 +0530 2026
 [    0.000000] OF: fdt: Ignoring memory range 0x80000000 - 0x80200000
 [    0.000000] Machine model: shakti,spike-bare
@@ -37,8 +28,8 @@ loaded 40 bytes @ 0x07ffff00 (sim/data/boot.bin)
 [    0.000000] Memory: 120800K/129024K available (3385K kernel code, 638K rwdata, 669K rodata, 816K init, 211K bss, 8224K reserved, 0K cma-reserved)
 [    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=4, Nodes=1
 [    0.000000] rcu: Hierarchical RCU implementation.
-[    0.000000] rcu: 	RCU debug extended QS entry/exit.
-[    0.000000] 	Tracing variant of Tasks RCU enabled.
+[    0.000000] rcu:     RCU debug extended QS entry/exit.
+[    0.000000]  Tracing variant of Tasks RCU enabled.
 [    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
 [    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
 [    0.000000] riscv-intc: 64 local interrupts mapped
@@ -47,37 +38,37 @@ loaded 40 bytes @ 0x07ffff00 (sim/data/boot.bin)
 [    0.000000] clint: clint@2000000: timer running at 6250000 Hz
 [    0.000000] clocksource: clint_clocksource: mask: 0xffffffffffffffff max_cycles: 0x171024e6b, max_idle_ns: 440795202301 ns
 [    0.000028] sched_clock: 64 bits at 6MHz, resolution 160ns, wraps every 4398046511040ns
-[    0.007649] Console: colour dummy device 80x25
-[    0.009379] Calibrating delay loop (skipped), value calculated using timer frequency.. 12.50 BogoMIPS (lpj=25000)
-[    0.011488] pid_max: default: 32768 minimum: 301
-[    0.017008] Mount-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
-[    0.018512] Mountpoint-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
-[    0.054510] cacheinfo: Unable to detect cache hierarchy for CPU 0
-[    0.085959] cblist_init_generic: Setting adjustable number of callback queues.
-[    0.087067] cblist_init_generic: Setting shift to 2 and lim to 1.
-[    0.098444] rcu: Hierarchical SRCU implementation.
-[    0.099303] rcu: 	Max phase no-delay instances is 1000.
-[    0.127240] smp: Bringing up secondary CPUs ...
-[    0.152470] cacheinfo: Unable to detect cache hierarchy for CPU 1
-[    0.184576] cacheinfo: Unable to detect cache hierarchy for CPU 2
-[    0.229814] cacheinfo: Unable to detect cache hierarchy for CPU 3
-[    0.239425] smp: Brought up 1 node, 4 CPUs
-[    0.283386] devtmpfs: initialized
-[    0.297303] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
-[    0.300347] futex hash table entries: 1024 (order: 4, 65536 bytes, linear)
-[    0.338012] cpuidle: using governor menu
-[    0.477736] clocksource: Switched to clocksource clint_clocksource
-[    1.159091] workingset: timestamp_bits=46 max_order=15 bucket_order=0
-[    2.050036] 40600000.uart: ttyUL0 at MMIO 0x40600000 (irq = 1, base_baud = 0) is a uartlite
-[    2.053490] printk: console [ttyUL0] enabled
-[    2.053490] printk: console [ttyUL0] enabled
-[    2.058169] printk: bootconsole [uartlite0] disabled
-[    2.058169] printk: bootconsole [uartlite0] disabled
-[    2.083250] cacheinfo: Unable to detect cache hierarchy for CPU 0
-[    2.357814] Legacy PMU implementation is available
-[    6.890103] Freeing unused kernel image (initmem) memory: 812K
-[    6.895671] This architecture does not have kernel memory protection.
-[    6.902086] Run /init as init process
+[    0.007460] Console: colour dummy device 80x25
+[    0.009043] Calibrating delay loop (skipped), value calculated using timer frequency.. 12.50 BogoMIPS (lpj=25000)
+[    0.010967] pid_max: default: 32768 minimum: 301
+[    0.016152] Mount-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    0.017454] Mountpoint-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+[    0.049794] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    0.078667] cblist_init_generic: Setting adjustable number of callback queues.
+[    0.080191] cblist_init_generic: Setting shift to 2 and lim to 1.
+[    0.090236] rcu: Hierarchical SRCU implementation.
+[    0.090991] rcu:     Max phase no-delay instances is 1000.
+[    0.116735] smp: Bringing up secondary CPUs ...
+[    0.139700] cacheinfo: Unable to detect cache hierarchy for CPU 1
+[    0.170067] cacheinfo: Unable to detect cache hierarchy for CPU 2
+[    0.212374] cacheinfo: Unable to detect cache hierarchy for CPU 3
+[    0.222104] smp: Brought up 1 node, 4 CPUs
+[    0.262299] devtmpfs: initialized
+[    0.275672] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+[    0.278307] futex hash table entries: 1024 (order: 4, 65536 bytes, linear)
+[    0.315038] cpuidle: using governor menu
+[    0.446162] clocksource: Switched to clocksource clint_clocksource
+[    1.118030] workingset: timestamp_bits=46 max_order=15 bucket_order=0
+[    2.019971] 40600000.uart: ttyUL0 at MMIO 0x40600000 (irq = 1, base_baud = 0) is a uartlite
+[    2.023058] printk: console [ttyUL0] enabled
+[    2.023058] printk: console [ttyUL0] enabled
+[    2.027238] printk: bootconsole [uartlite0] disabled
+[    2.027238] printk: bootconsole [uartlite0] disabled
+[    2.051312] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    2.305294] Legacy PMU implementation is available
+[    6.635010] Freeing unused kernel image (initmem) memory: 812K
+[    6.640179] This architecture does not have kernel memory protection.
+[    6.646859] Run /init as init process
 mount: mounting proc on /proc failed: No such device
 mount: can't read '/proc/mounts': No such file or directory
 mount: mounting proc on /proc failed: No such device
@@ -93,14 +84,23 @@ ip: socket: Function not implemented
 FAIL
 
 Welcome to Buildroot
-
 buildroot login: root
-Jan  1 00:00:29 login[104]: root login on 'console'
+Jan  1 00:00:28 login[104]: root login on 'console'
 sh: can't execute 'export': No such file or directory
 sh: can't execute 'export': No such file or directory
 sh: can't execute 'umask': No such file or directory
 sh: can't execute 'unset': No such file or directory
-~ # root
-sh: can't execute 'root': No such file or directory
 ~ # nproc
-~ # 4
+nnproc
+c
+sh: can't execute 'nnproc': No such file or directory
+~ # nproc 
+roc
+pro
+sh: can't execute 'proc': No such file or directory
+~ # npro
+sh: can't execute 'npro': No such file or directory
+~ # nproc
+nproc
+4
+~ #  
