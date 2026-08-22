@@ -541,6 +541,17 @@ into:
 | Decode efficiency | `decode_fired / decode_ready` |
 | DRAM read BW | `l2_to_mem_rd_beats × 8 B × 75 MHz` |
 
+> **What "branch accuracy" counts.** `branch_total` is every *speculation token*
+> resolved, and the core allocates one for every control transfer — `jal` and
+> `jalr` as well as the conditional branches. Unconditional jumps essentially
+> never mispredict, so the published figure is an **upper bound** on
+> conditional-branch accuracy; the gap matters only where accuracy is already
+> low (csaxpy-s1 at 85.6 %). The counter also shares its channel with the
+> coherent load-squash, which would show up as a "mispredict" — but
+> `flush_coherent` is **0** on all 46 runs, so nothing in this suite is
+> contaminated that way. `flush_branch` / `flush_coherent` / `retired_branch`
+> split it apart in the JSON if you need the exact decomposition.
+
 JSON reports are written to `build/profile_results/`.
 
 ---
