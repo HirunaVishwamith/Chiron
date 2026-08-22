@@ -18,7 +18,10 @@ module iCacheRegisters #(
 
   reg [31:0] cache [cache_depth-1:0][block_size-1:0];
   reg [tag_width-1:0] tags [cache_depth-1:0];
-  reg validBits [cache_depth-1:0];
+  // Packed so reset/invalidate is one NBA. An unpacked loop of `<=` hits
+  // BLKLOOPINIT once cache_depth exceeds the tool's unroll limit (64).
+  // line_width=9 → 512 lines; a 512-bit vector is equivalent and cheaper.
+  reg [cache_depth-1:0] validBits;
 
   integer w;
   always@(posedge clock) begin
@@ -36,12 +39,10 @@ module iCacheRegisters #(
   assign tag = tags[address[line_width+offset_width+2-1:offset_width+2]]; */
   // assign tag_valid = validBits[address[line_width+offset_width+2-1:offset_width+2]];
 
-  integer i, j;
+  integer j;
   always @(posedge clock) begin
     if (reset || invalidate_all) begin
-      for (i = 0; i < cache_depth; i=i+1) begin
-        validBits[i] <= 1'b0;
-      end
+      validBits <= {cache_depth{1'b0}};
     end else if (write_in) begin
       for (j = 0; j < block_size; j=j+1) begin
         cache[write_line_index][j] <= write_block[32*j +: 32];

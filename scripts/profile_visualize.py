@@ -321,9 +321,15 @@ def render(recs, out_path):
     ax.set_xticklabels([f"{r['family']}\ns{r['scale']}" for r in largest],
                        fontsize=8.5)
     ax.set_ylim(0, 108)
+    # Legend goes ABOVE the axes, not inside them. Branch accuracy is now
+    # 85-100% across every family, so the bars and their value labels fill the
+    # top-left corner an inside legend used to occupy — "branch accuracy" and
+    # the "99" on top of the first bar collided. Anchoring it outside makes the
+    # placement independent of how tall the bars happen to be.
     ax.set_title("Behaviour at each family's largest scale (4 cores)",
-                 fontsize=11, fontweight="bold", color=INK, pad=8)
-    ax.legend(frameon=False, fontsize=8.5, ncol=3, loc="upper left",
+                 fontsize=11, fontweight="bold", color=INK, pad=26)
+    ax.legend(frameon=False, fontsize=8.5, ncol=3, loc="lower left",
+              bbox_to_anchor=(0.0, 1.005), borderaxespad=0.0,
               labelcolor=INK_2)
 
     box3 = ax.get_position()

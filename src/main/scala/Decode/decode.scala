@@ -15,6 +15,7 @@ class composableInterface extends Bundle {
 class RecivInstrFrmFetch extends composableInterface {
   val pc          = Input(UInt(dataWidth.W))
   val instruction = Input(UInt(insAddrWidth.W))
+  val predictedNextPC = Input(UInt(dataWidth.W))
   val expected    = Output(new Bundle {
     val valid = Bool()
     val pc    = UInt(dataWidth.W)
@@ -109,11 +110,13 @@ class decode (
   /** ---------------------------------------------------------------------------------------------------------------------- */
   /** Initializing a buffer for storing the input values from the fetch unit */
   val inputBuffer = RegInit(new Bundle {
-    val pc          = UInt(dataWidth.W)
-    val instruction = UInt(insAddrWidth.W)
+    val pc              = UInt(dataWidth.W)
+    val instruction     = UInt(insAddrWidth.W)
+    val predictedNextPC = UInt(dataWidth.W)
   }.Lit(
-    _.pc          -> initialPC.U,            /** Initial value is set for the expectedPC */
-    _.instruction -> 0.U
+    _.pc              -> initialPC.U,            /** Initial value is set for the expectedPC */
+    _.instruction     -> 0.U,
+    _.predictedNextPC -> 0.U
   ))
 
   /** Initializing a buffer for storing the output values to the exec unit */
@@ -197,6 +200,31 @@ class decode (
   val stallReg = RegInit(false.B)
   val ecallPC = Reg(UInt(64.W))
 
+  // Hardware JAL issue-fence state. Combinational demand is derived later,
+  // once opcode/pc are known. See the block after getImmediate.
+  val jalWaitTarget = RegInit(false.B)
+  val jalWaitTgtPC  = RegInit(0.U(dataWidth.W))
+  val jalSuppress   = RegInit(false.B)
+  // Decode-side RAS. Fetch's RAS is updated on speculative I$ requests and
+  // pipelineFlush only restores the stack pointer, so wrong-path CALL after
+  // RET clobbers a live slot. Decode only sees handshake instructions and
+  // already checkpoints rename on every CFI, so a RAS here is rolled back
+  // with the rest of decode. RET/RETCALL can then use the JAL issue-fence
+  // with an architectural return address (pass iff rasTop === rs1+imm).
+  private val decRasDepth = 16
+  private val decRasSpW   = log2Ceil(decRasDepth)
+  private val decRasCntW  = log2Ceil(decRasDepth + 1)
+  val decodeRas    = Reg(Vec(decRasDepth, UInt(dataWidth.W)))
+  val decodeRasSp  = RegInit(0.U(decRasSpW.W))
+  val decodeRasCnt = RegInit(0.U(decRasCntW.W))
+  // Most recent AUIPC/LUI at decode, valid only for the immediately next
+  // instruction. Used to compute a JALR target when the pair is auipc/lui
+  // then jalr (the ABI far-call). Decode has no PRF read, so any other
+  // JALR keeps the fetch snapshot.
+  val lastUtypeValid = RegInit(false.B)
+  val lastUtypeRd    = RegInit(0.U(rdWidth.W))
+  val lastUtypeVal   = RegInit(0.U(dataWidth.W))
+
   // ─────────── PRF valid/free lists: packed, not Reg(Vec(N, Bool())) ──────────
   // Both are read AND written at a dynamic index. As a Vec, FIRRTL's LowerTypes
   // pass explodes each into PRFCount discrete registers and every dynamic read
@@ -233,8 +261,9 @@ class decode (
 
   /** Storing instruction and pc in the fetch buffer */
   when(fromFetch.fired && readyInputBuf) {     /** Data from the fetch unit is valid and fetch buffer is ready */
-    inputBuffer.instruction := fromFetch.instruction
-    inputBuffer.pc          := fromFetch.pc
+    inputBuffer.instruction     := fromFetch.instruction
+    inputBuffer.pc              := fromFetch.pc
+    inputBuffer.predictedNextPC := fromFetch.predictedNextPC
     when(fromFetch.instruction(6,0) === system.U/*  && fromFetch.instruction(14,12) =/= 0.U */) {
       stallReg := true.B
       ecallPC := fromFetch.pc
@@ -249,6 +278,18 @@ class decode (
     outputBuffer.rs1Addr     := rs1Addr
     outputBuffer.rs2Addr     := rs2Addr
     outputBuffer.immediate   := immediate
+  }
+
+  // AUIPC/LUI result for a following JALR. Valid only until the next
+  // instruction is transferred — so we pair auipc/lui; jalr and nothing else.
+  when(validInputBuf && readyOutputBuf && !(branchEvalIn.fired && !branchEvalIn.passFail)) {
+    when((opcode === lui.U || opcode === auipc.U) && rd.orR) {
+      lastUtypeValid := true.B
+      lastUtypeRd    := rd
+      lastUtypeVal   := Mux(opcode === lui.U, immediate, pc + immediate)
+    }.otherwise {
+      lastUtypeValid := false.B
+    }
   }
 
   outputBuffer.branchEvalReady := branchEvalIn.fired
@@ -291,8 +332,6 @@ class decode (
   toExec.branchMask  := branchBuffer.branchMask.asUInt
 
   fromFetch.ready          := readyInputBuf
-  fromFetch.expected.valid := expectedPC =/= 0.U
-  fromFetch.expected.pc    := expectedPC
   fromFetch.expected.coherency := coherency //leon coherency
 
   jumpAddrWrite.ready    := validOutputBuf && (unconditionalJumps || csrIns)
@@ -335,6 +374,66 @@ class decode (
   insType   := getInsType(opcode)                   /** Deciding the instruction type */
   immediate := getImmediate(ins, insType)         /** Calculating the immediate value */
 
+  // Hardware JAL issue-fence (not a software fence.i). JAL's target is
+  // pc+imm, known at decode. Until fetch delivers that PC:
+  //   1. overlay expected so sequential mismatches and fetch redirects
+  //   2. drop ready so the handshake cannot sneak a younger insn in
+  //   3. drop a younger insn that already sat in the input buffer
+  // predictedPC is the architectural target, so execute PASSES and does
+  // not squash the redirected path. Overlay only after the JAL is in the
+  // input buffer — doing it on fromFetch would reject the JAL itself.
+  //
+  // Recovery (mispredict / mret / ecall / interrupt / illegal) wins the
+  // expected PC. A sticky overlay after the target has already been
+  // accepted would redirect target+4 back to the target forever.
+  //
+  // Backward-branch BTFNT (same recipe on cjump && imm<0) was tried and
+  // reverted: Linux hung after bootconsole with C0 IPC 0.55 / 99.6% BPred,
+  // the same fake-pass shape as 1-in-flight CFI. JAL is unconditional so
+  // the taken target is always architectural; a conditional's taken target
+  // is not.
+  val jalTarget = pc + immediate
+  // JALR target is (rs1+imm)&~1. Known at decode only for x0 or the
+  // immediately preceding AUIPC/LUI that wrote rs1.
+  val jalrBase = Mux(rs1 === 0.U, 0.U(dataWidth.W), lastUtypeVal)
+  val jalrKnown = (opcode === jumpr.U) &&
+                  ((rs1 === 0.U) || (lastUtypeValid && (rs1 === lastUtypeRd)))
+  // Match execute's JALR next-PC (rs1+imm, no ~1) so a fence pass is a
+  // real pass. Spec alignment is the same value on this 4-byte-only core.
+  val jalrTarget = jalrBase + immediate
+  // Backward conditional, sources already in the PRF: same recipe as JAL.
+  // Ungated BTFNT hung Linux (C0 0.55 / 99.6% BPred, stuck at bootconsole)
+  // because a branch can execute with stale rs1 and PASS a taken prediction
+  // that is not architectural. PRF-valid means the scheduler will issue
+  // with the real operands, so a pass is a real pass. Forward branches
+  // and not-ready sources keep the fetch snapshot (fail+recover is safe).
+  val brSrcReady = PRFValidList(rs1Addr) && PRFValidList(rs2Addr)
+  val brTakenKnown = (opcode === cjump.U) && immediate(63).asBool && brSrcReady
+  val brTarget = pc + immediate
+  val rdLink  = (rd === 1.U) || (rd === 5.U)
+  val rs1Link = (rs1 === 1.U) || (rs1 === 5.U)
+  val isCall = ((opcode === jump.U) && rdLink) ||
+               ((opcode === jumpr.U) && rdLink && !(rs1Link && (rd =/= rs1)))
+  val isRet = (opcode === jumpr.U) && rs1Link && !rdLink
+  val isRetCall = (opcode === jumpr.U) && rdLink && rs1Link && (rd =/= rs1)
+  val rasEmpty = decodeRasCnt === 0.U
+  val rasTop   = decodeRas(decodeRasSp - 1.U)
+  val retKnown = (isRet || isRetCall) && !rasEmpty
+  val knownTarget = (opcode === jump.U) || jalrKnown || brTakenKnown || retKnown
+  val knownTargetPC = Mux(opcode === jump.U, jalTarget,
+                      Mux(jalrKnown, jalrTarget,
+                      Mux(retKnown, rasTop, brTarget)))
+  val jalInBuf  = (stateRegInputBuf === fullState) && knownTarget
+  val jalArchRedirect =
+    (branchEvalIn.fired && !branchEvalIn.passFail) ||
+    (writeBackResult.fired && writeBackResult.instruction(6, 0) === system.U &&
+      writeBackResult.instruction(14, 12) === 0.U) ||
+    (writeBackResult.fired && writeBackResult.instruction(1, 0) =/= "b11".U)
+  val jalDemand   = (jalInBuf || jalWaitTarget) && !jalArchRedirect && !jalSuppress
+  val jalDemandPC = Mux(jalInBuf, knownTargetPC, jalWaitTgtPC)
+  fromFetch.expected.valid := (expectedPC =/= 0.U) || jalDemand
+  fromFetch.expected.pc    := Mux(jalDemand, jalDemandPC, expectedPC)
+
   unconditionalJumps := outputBuffer.instruction(6,0) === jump.U || outputBuffer.instruction(6,0) === jumpr.U || outputBuffer.instruction(6,0) === lui.U || outputBuffer.instruction(6,0) === auipc.U
   csrIns := outputBuffer.instruction(6,0) === system.U && outputBuffer.instruction(14,12) =/= 0.U
 
@@ -354,6 +453,9 @@ class decode (
   val reservedRegMap    = Reg(Vec(nCheckpoints, frontEndRegMap.cloneType))
   val reservedFreeList  = Reg(Vec(nCheckpoints, PRFFreeList.cloneType))
   val reservedValidList = Reg(Vec(nCheckpoints, PRFValidList.cloneType))
+  val reservedRas       = Reg(Vec(nCheckpoints, decodeRas.cloneType))
+  val reservedRasSp     = Reg(Vec(nCheckpoints, decodeRasSp.cloneType))
+  val reservedRasCnt    = Reg(Vec(nCheckpoints, decodeRasCnt.cloneType))
   // Staging for reservedFreeList: the shift and the snapshot below write whole
   // checkpoints, but a retiring writeback then sets one bit in EVERY checkpoint
   // (reservedFreeSet). As a Vec those were independent element writes; packed,
@@ -368,8 +470,14 @@ class decode (
 
   freeRegAddr := PriorityEncoder(PRFFreeList)
 
-  //leon kept the logic as it is because branchBuffer.branchMask=10000 and should stall when 11111
-  when(freeRegAddr === 63.U || (Seq(jump.U, jumpr.U, cjump.U).map(_ === opcode).reduce(_ || _) && branchBuffer.branchMask.map(_.asBool).reduce(_ && _))) {
+  // Stall a new CFI only when every mask slot is taken. The 2-in-flight cap
+  // was a bandage for a 5% predictor filling the ROB with wrong-path; with
+  // BTB-hit=taken those slots are useful overlap. 1-in-flight hung Linux.
+  private val cfiOpcode = Seq(jump.U, jumpr.U, cjump.U).map(_ === opcode).reduce(_ || _)
+  private val cfiMaskOccupied =
+    (branchBuffer.branchMask.asUInt & ((BigInt(1) << configuration.branchMaskWidth) - 1).U) ===
+      ((BigInt(1) << configuration.branchMaskWidth) - 1).U
+  when(freeRegAddr === 63.U || (cfiOpcode && cfiMaskOccupied)) {
     stall := true.B
   }
 
@@ -381,6 +489,18 @@ class decode (
       freeClrCollide := UIntToOH(rs2Addr, PRFCount)
     }
   }
+
+  // Younger than a waiting JAL must not transfer input→output (rename + ROB
+  // allocate). stall already gates that path; the drop at the input FSM then
+  // empties the buffer so this does not stick.
+  when(jalWaitTarget && (stateRegInputBuf === fullState) &&
+       !knownTarget && (pc =/= jalWaitTgtPC)) {
+    stall := true.B
+  }
+  // Do not stall backward cjump until brSrcReady. Tried; Linux hung after
+  // bootconsole (C0 0.27 / 96–98% BPred, C1/C2 identical idle). Same
+  // fake-pass shape as ungated BTFNT: predictedPC = taken target lets
+  // execute PASS. Keep brTakenKnown for the rare already-ready case.
 
   /**
     * Attribution of the rename stalls above, for profiling only — no logic
@@ -400,9 +520,7 @@ class decode (
     * flushed by a mispredict), so idle and squash cycles are not charged.
     */
   private val prfExhausted = freeRegAddr === 63.U
-  private val branchMaskFull =
-    Seq(jump.U, jumpr.U, cjump.U).map(_ === opcode).reduce(_ || _) &&
-    branchBuffer.branchMask.map(_.asBool).reduce(_ && _)
+  private val branchMaskFull = cfiOpcode && cfiMaskOccupied
   private val renameCollision = (rs1Addr === freeRegAddr) || (rs2Addr === freeRegAddr)
   private val stallBlocking =
     (stateRegInputBuf === fullState) && !(branchEvalIn.fired && !branchEvalIn.passFail)
@@ -438,6 +556,7 @@ class decode (
 
     when(!branchEvalIn.passFail) {
       branchReg := false.B
+      jalWaitTarget := false.B
 
       for (i <- 0 until configuration.newBranchMaskWidth - 1) {
         branchBuffer.branchMask(i) := 0.U
@@ -450,11 +569,16 @@ class decode (
         frontEndRegMap := reservedRegMap(0)
         // was: PRF{Free,Valid}List := reserved*(0) zip current map (_ | _)
         listRestore := true.B
+        decodeRas    := reservedRas(0)
+        decodeRasSp  := reservedRasSp(0)
+        decodeRasCnt := reservedRasCnt(0)
       }.otherwise{
         frontEndRegMap := architecturalRegMap
         coherency := true.B  //leon coherency
         // was: free := all-ones then clear arch; valid := all-zero then set arch
         listFlush := true.B
+        decodeRasSp  := 0.U
+        decodeRasCnt := 0.U
       }
 
       branchTracker := 0.U
@@ -463,6 +587,9 @@ class decode (
         reservedRegMap(i)    := reservedRegMap(i + 1)
         reservedFreeNext(i)  := reservedFreeList(i + 1)
         reservedValidList(i) := reservedValidList(i + 1)
+        reservedRas(i)       := reservedRas(i + 1)
+        reservedRasSp(i)     := reservedRasSp(i + 1)
+        reservedRasCnt(i)    := reservedRasCnt(i + 1)
       }
     }
   }
@@ -473,6 +600,10 @@ class decode (
     when(opcode === jump.U || opcode === jumpr.U || opcode === cjump.U) {
       branchReg := true.B
       branchBuffer.branchPC := pc
+      // JAL, and JALR whose rs1 is x0 or the previous AUIPC/LUI: architectural
+      // target. Sequential never allocated (jalDemand refused it), so execute
+      // may pass without a squash. Other CFIs keep the fetch snapshot.
+      branchBuffer.predictedPC := Mux(knownTarget, knownTargetPC, inputBuffer.predictedNextPC)
       branchBuffer.branchMask(bitPosition) := 1.U
       branchPCMask := (1.U(configuration.newBranchMaskWidth.W) << bitPosition)
 
@@ -488,23 +619,75 @@ class decode (
       reservedRegMap(branchTracker)    := snapMap
       reservedFreeNext(branchTracker)  := snapFree
       reservedValidList(branchTracker) := snapValid
+
+      // RAS push/pop on this CFI, then snapshot the *next* stack so a
+      // restore keeps this instruction's effect and drops younger ones.
+      val doPop  = (isRet || isRetCall) && !rasEmpty
+      val doPush = isCall || isRetCall
+      val spAfterPop  = Mux(doPop, decodeRasSp - 1.U, decodeRasSp)
+      val cntAfterPop = Mux(doPop, decodeRasCnt - 1.U, decodeRasCnt)
+      val nextSp  = Mux(doPush, spAfterPop + 1.U, spAfterPop)
+      val nextCnt = Mux(doPush,
+        Mux(cntAfterPop === decRasDepth.U, cntAfterPop, cntAfterPop + 1.U),
+        cntAfterPop)
+      val rasSnap = Wire(decodeRas.cloneType)
+      rasSnap := decodeRas
+      when(doPush) { rasSnap(spAfterPop) := pc + 4.U }
+      reservedRas(branchTracker)    := rasSnap
+      reservedRasSp(branchTracker)  := nextSp
+      reservedRasCnt(branchTracker) := nextCnt
+      // A same-cycle mispredict restore (above) must win; do not push/pop
+      // onto a stack we are about to roll back.
+      when(!(branchEvalIn.fired && !branchEvalIn.passFail)) {
+        when(doPush) { decodeRas(spAfterPop) := pc + 4.U }
+        decodeRasSp  := nextSp
+        decodeRasCnt := nextCnt
+      }
+
       branchTracker := branchTracker + 1.U
     }.otherwise {
       branchReg := false.B
     }
   }
 
-  //leon (no need to change this also branchBuffer.predictedPCReady become false)
-  when(branchBuffer.branchMask.asUInt =/= 0.U && validInputBuf && readyOutputBuf) {
-    branchBuffer.predictedPC := pc
-  }
-
+  // Lockstep: enqueue the fetch-time next-PC with the CFI itself. The old
+  // path waited for the *next* decoded instruction (branchReg delay) and
+  // left predictedPCs empty when that successor lost the race to execute.
   branchBuffer.branchPCReady := (opcode === cjump.U || opcode === jump.U || opcode === jumpr.U) && validInputBuf && readyOutputBuf
-  branchBuffer.predictedPCReady := branchReg && validInputBuf && readyOutputBuf
+  branchBuffer.predictedPCReady := (opcode === cjump.U || opcode === jump.U || opcode === jumpr.U) && validInputBuf && readyOutputBuf
 
+  when(jalArchRedirect) {
+    jalWaitTarget  := false.B
+    jalSuppress    := true.B
+    lastUtypeValid := false.B
+  }.otherwise {
+    when(jalInBuf) {
+      jalWaitTgtPC := knownTargetPC
+      val jalTgtHere = fromFetch.fired && (fromFetch.pc === knownTargetPC)
+      jalWaitTarget := !jalTgtHere
+      // Same-cycle BTB/RAS hit already handshaked the target. Leaving
+      // expectedPC at the target would redirect the next sequential fetch
+      // (target+4) back to the target forever. 0 = open-loop, matching
+      // the existing accept path.
+      when(jalTgtHere) {
+        expectedPC := 0.U
+      }.otherwise {
+        expectedPC := knownTargetPC
+      }
+    }.elsewhen(jalWaitTarget && fromFetch.fired && (fromFetch.pc === jalWaitTgtPC)) {
+      jalWaitTarget := false.B
+    }
+  }
   when(expectedPC =/= 0.U && fromFetch.fired && fromFetch.expected.pc === fromFetch.pc) {
-    expectedPC := 0.U
-    coherency := false.B //leon coherency
+    expectedPC  := 0.U
+    jalSuppress := false.B
+    coherency   := false.B //leon coherency
+  }
+  // Last-connect: a recovery this cycle must keep suppress on even if the
+  // outgoing expectedPC happened to match a fetch (mispredict sets ready low,
+  // but traps do not).
+  when(jalArchRedirect) {
+    jalSuppress := true.B
   }
 
   when(toExec.fired) { issueRobBuff := toExec.robAddr }
@@ -890,6 +1073,21 @@ class decode (
         readyInputBuf := false.B
       }
     }
+  }
+  // Issue-fence: do not handshake a sequential fetch while a JAL has
+  // named its target. expectedPC mismatch also refuses fired; this
+  // drops ready so fetch takes the redirect_bit drain path.
+  when(jalDemand && (fromFetch.pc =/= jalDemandPC)) {
+    readyInputBuf := false.B
+  }
+  // If a sequential insn snuck into the input buffer, drop it without
+  // transferring to output. Otherwise it would issue behind the JAL and
+  // a passing JAL would commit the wrong path.
+  when(jalWaitTarget && (stateRegInputBuf === fullState) &&
+       !knownTarget && (pc =/= jalWaitTgtPC) && !jalArchRedirect) {
+    stateRegInputBuf := emptyState
+    validInputBuf    := false.B
+    readyInputBuf    := false.B
   }
   /** ------------------------------------------------------------------------------------------------------------------- */
 

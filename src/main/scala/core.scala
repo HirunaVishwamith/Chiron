@@ -71,6 +71,7 @@ class core (
   fetch.toDecode.expected := decode.fromFetch.expected
   decode.fromFetch.instruction := fetch.toDecode.instruction
   decode.fromFetch.pc := fetch.toDecode.pc
+  decode.fromFetch.predictedNextPC := fetch.predictedNextPC
 
   val dataQueue = Module(new storeDataIssue)
   val rob = Module(new rob(common.configuration.robAddrWidth, 4))
@@ -949,11 +950,33 @@ class core (
   coherentLoadInvalidReg := coherentLoadInvalid
 
 
-  fetch.branchRes.branchTaken := branchTaken
+  // ── frontend training bundle: one branch, one pipeline stage ─────────────
+  // `fired` and `pcAfterBrnach` come from branchEvals, which is registered one
+  // stage after branchInstruction. pc / instruction / branchTaken used to be
+  // read combinationally from the branchInstruction stage instead -- and
+  // branchPCs has already shifted by the time branchEvals.valid rises, because
+  // the shift is clocked on branchInstruction.valid. The BTB was therefore
+  // written as BTB[pc of the NEXT branch] := target of THIS branch, and TAGE /
+  // bimodal / the CFI lookup were indexed with the same wrong PC.
+  //
+  // That is why accuracy scaled backwards with BTB size (more poisoned hits)
+  // and why only tight-loop harts looked healthy: in a 1-2 instruction loop
+  // pc(k+1) == pc(k), so the off-by-one trained the right entry by accident.
+  // Snapshot the three so the whole bundle describes the branch being resolved.
+  val branchResSnap = Reg(new Bundle {
+    val pc          = UInt(64.W)
+    val instruction = UInt(32.W)
+    val taken       = Bool()
+  })
+  branchResSnap.pc          := branchPCs(0).pc
+  branchResSnap.instruction := branchInstruction.instruction
+  branchResSnap.taken       := branchTaken
+
+  fetch.branchRes.branchTaken := branchResSnap.taken
   fetch.branchRes.isBranch := true.B
-  fetch.branchRes.pc := branchPCs(0).pc
+  fetch.branchRes.pc := branchResSnap.pc
   fetch.branchRes.pcAfterBrnach := branchEvals.nextPC
-  fetch.branchRes.instruction := branchInstruction.instruction
+  fetch.branchRes.instruction := branchResSnap.instruction
   fetch.branchRes.fired := fetch.branchRes.ready && branchEvals.valid && !coherentLoadInvalidReg
 
   decode.writeBackResult.PRFDest := rob.commit.prfDest
@@ -1148,21 +1171,26 @@ class core (
     val rs2  = decode.toExec.rs2Addr
     val isX0 = decode.toExec.instruction(24, 20) === 0.U
     val (hit, dat) = prfWriteHit(rs2)
-    sdb(idx).valid   := true.B
-    sdb(idx).issued  := false.B
-    sdb(idx).rs2     := rs2
-    sdb(idx).robAddr := idx
-    when(isX0) {
-      sdb(idx).data      := 0.U
-      sdb(idx).dataValid := true.B
-      sdb(idx).rs2Ready  := true.B
-    }.elsewhen(hit) {
-      sdb(idx).data      := dat
-      sdb(idx).dataValid := true.B
-      sdb(idx).rs2Ready  := true.B
-    }.otherwise {
-      sdb(idx).dataValid := false.B
-      sdb(idx).rs2Ready  := decode.toExec.rs2Ready
+    // Do not clobber the live head's store-data if allocate aliased it
+    // (the wrap-only freeze should already prevent this).
+    val clobberHead = rob.commit.ready && !rob.commit.fired && (idx === rob.commit.robAddr)
+    when(!clobberHead) {
+      sdb(idx).valid   := true.B
+      sdb(idx).issued  := false.B
+      sdb(idx).rs2     := rs2
+      sdb(idx).robAddr := idx
+      when(isX0) {
+        sdb(idx).data      := 0.U
+        sdb(idx).dataValid := true.B
+        sdb(idx).rs2Ready  := true.B
+      }.elsewhen(hit) {
+        sdb(idx).data      := dat
+        sdb(idx).dataValid := true.B
+        sdb(idx).rs2Ready  := true.B
+      }.otherwise {
+        sdb(idx).dataValid := false.B
+        sdb(idx).rs2Ready  := decode.toExec.rs2Ready
+      }
     }
   }
 

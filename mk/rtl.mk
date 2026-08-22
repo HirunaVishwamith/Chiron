@@ -9,7 +9,7 @@ SCALA_SRCS := $(shell find src/main/scala/ -type f -name '*.scala')
 # below so the sbt run happens once. Patches instructionBase to the sim RAM base
 # (0x8000_0000); the configuration.scala patch is always reverted, even if sbt
 # fails.
-$(SIM)/system.v: $(SCALA_SRCS)
+$(SIM)/system.v: $(SCALA_SRCS) iCacheRegisters.v
 	@set -e; \
 	cp src/main/scala/common/configuration.scala configuration.txt; \
 	sed 's/instructionBase/instructionBase = 0x0000000080000000L\/\//' configuration.txt \

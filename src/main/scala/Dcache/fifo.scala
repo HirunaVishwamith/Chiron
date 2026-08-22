@@ -22,6 +22,25 @@ class fifoBaseModule[T <: baseTrait](depth: Int, traitType: T) extends Module {
     val data = Output(traitType.cloneType)
   })
   val isEmpty = IO(Output(Bool()))
+  // Free-slot headroom for a fire-and-forget producer. requestScheduler's
+  // enqueue is `when(!fullReg) { ... }` with no retry, and the only
+  // backpressure it offers -- canAllocate -> scheduler.memoryReady -- is
+  // sampled by the core's ISSUE scheduler several register stages upstream
+  // (releasedBuffer -> prf.toExec -> addressGenerationInput -> memoryRequest).
+  // Memory ops already inside that shadow when the queue fills land on a full
+  // queue and are silently DISCARDED. The discarded access never reaches the
+  // cache, so its ROB entry sits at the head forever waiting for a response /
+  // write-commit that nobody will produce -- a hard core wedge.
+  //
+  // Measured on the Linux boot (hart2, __memset at 0x8053df3c) once branch
+  // accuracy rose: 14 stores of 63,236 dropped in 2.75M cycles, and the last
+  // one wedged the hart. gateRise == gateFire == 62,034 at the wedge, i.e. the
+  // cache produced exactly as many write-commit openings as it consumed -- the
+  // ROB was simply short by the number of dropped stores.
+  //
+  // `hasHeadroom` deasserts while fewer than `reserveSlots` entries are free,
+  // so every request already in the producer's shadow has somewhere to land.
+  val hasHeadroom = IO(Output(Bool()))
 
   // Zero initialize requestOut and internal memory
   zeroInit(read.data)
@@ -91,6 +110,17 @@ class fifoBaseModule[T <: baseTrait](depth: Int, traitType: T) extends Module {
   read.data.valid := !emptyReg
   write.ready := !fullReg
   isEmpty := emptyReg
+
+  // One memory op issues per cycle at most (scheduler.readyVector allows only
+  // the oldest isMemAccess entry), so the shadow is bounded by the number of
+  // register stages between issue and this queue. Four covers it; the fifth is
+  // margin.
+  protected val reserveSlots = 5
+  private val ptrW = log2Ceil(depth)
+  private val occupancy = Mux(emptyReg, 0.U((ptrW + 1).W),
+                          Mux(fullReg, depth.U((ptrW + 1).W),
+                              0.U(1.W) ## (writePtr - readPtr)))
+  hasHeadroom := occupancy < (depth - reserveSlots).U
 }
 
 //Use in replayUnit

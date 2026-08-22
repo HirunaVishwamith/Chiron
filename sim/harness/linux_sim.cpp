@@ -16,11 +16,20 @@
 //     --log <path>         where the debug log goes   (default build/linux-sim.log)
 //     --ckpt-dir <dir>     where checkpoints go       (default ckpt)
 //     --ckpt-every <n>     cycles between checkpoints (default 20,000,000)
-//     --ckpt-keep <n>      checkpoints to retain, 0 = all (default 8)
+//     --ckpt-keep <n>      checkpoints to retain, 0 = all (default 16)
 //     --no-ckpt            --debug logging, but no checkpoints
 //     --hb <n>             cycles between log heartbeats (default 100,000)
 //     --restore <file>     resume from a checkpoint instead of booting
 //                          (not available in linux_sim_fast.out)
+//     --max-cycles <n>     stop after N RTL cycles and dump the 164
+//                          perf counters to stderr (IPC, I$/D$ miss,
+//                          branch accuracy, ROB stall). Guest console
+//                          stays on stdout. Use this for a bounded
+//                          Linux-SMP IPC window without a 21 h boot.
+//     --profile-out <json> also write the same counters as JSON
+//     --profile-every <n>  compact IPC/I$/D$/branch line on stderr
+//                          every N cycles (default 5e6 with --max-cycles)
+//     SIGINT/SIGTERM       dump the same counters, then exit 0
 //
 // STDOUT IS THE GUEST'S CONSOLE AND NOTHING ELSE. Every byte on it was
 // transmitted by the running kernel, so `make linux-sim | tee boot.log` yields a
@@ -40,6 +49,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <csignal>
 #include <deque>
 #include <string>
 #include <fcntl.h>
@@ -51,6 +61,7 @@
 #endif
 #include "sim/harness/common/args.h"
 #include "sim/harness/common/simlog.h"
+#include "sim/rtl/profiler_quad.h"
 
 #ifndef CHIRON_NO_SAVE
 // Bumped whenever the harness state written alongside the model changes, so a
@@ -59,6 +70,29 @@
 static const uint64_t kCkptMagic = 0x434849524F4E4C58ULL;  // "CHIRONLX"
 static const uint64_t kCkptVersion = 1;
 #endif
+
+// SIGINT/SIGTERM just set a flag; dumping happens on the main loop so we
+// never call into Verilator from a signal handler.
+static volatile sig_atomic_t g_interrupt = 0;
+static void linux_sim_on_signal(int) { g_interrupt = 1; }
+
+// Mirror of the guest console into the --debug log. stdout is still THE
+// console and is untouched; this exists so linux-sim.log holds the boot
+// narrative ("smp: Bringing up secondary CPUs ...") on the same timeline as
+// the checkpoint bookkeeping and the IPC snapshots, which is what you actually
+// want when a 3-billion-cycle boot dies overnight and all you have is the log.
+// Buffered per line so the log stays readable, with a hard cap so a kernel that
+// never emits a newline cannot grow it without bound.
+static void linux_sim_console_mirror(char c) {
+  static std::string line;
+  if (c == '\n') {
+    SIMLOG("[guest] %s\n", line.c_str());
+    line.clear();
+  } else if (c != '\r') {
+    line.push_back(c);
+    if (line.size() >= 512) { SIMLOG("[guest] %s\n", line.c_str()); line.clear(); }
+  }
+}
 
 int main(int argc, char **argv) {
   // Positional args stay first for backward compatibility with every script
@@ -74,10 +108,20 @@ int main(int argc, char **argv) {
   const bool no_ckpt    = harness::has_flag(argc, argv, "--no-ckpt");
   const uint64_t ckpt_every =
       std::strtoull(harness::find_arg(argc, argv, "--ckpt-every", "20000000"), nullptr, 0);
+  // Retention is a COUNT, but what matters when a boot dies is how far BACK you
+  // can restart from: keep x every = the rewind window. 16 x 20M = 320M cycles
+  // (was 8 = 160M). Each checkpoint is ~271 MB, so this window costs ~4.3 GB of
+  // disk instead of ~2.2 GB -- raise CKPT_EVERY instead if that is too much.
   const uint64_t ckpt_keep =
-      std::strtoull(harness::find_arg(argc, argv, "--ckpt-keep", "8"), nullptr, 0);
+      std::strtoull(harness::find_arg(argc, argv, "--ckpt-keep", "16"), nullptr, 0);
   const uint64_t hb_every =
       std::strtoull(harness::find_arg(argc, argv, "--hb", "100000"), nullptr, 0);
+  const char *max_cyc_s = harness::find_arg(argc, argv, "--max-cycles", nullptr);
+  const uint64_t max_cycles = max_cyc_s ? std::strtoull(max_cyc_s, nullptr, 0) : 0;
+  const char *profile_out = harness::find_arg(argc, argv, "--profile-out", nullptr);
+  const char *prof_every_s = harness::find_arg(argc, argv, "--profile-every", nullptr);
+  const uint64_t profile_every = prof_every_s ? std::strtoull(prof_every_s, nullptr, 0)
+                               : (max_cycles ? 5000000ULL : 0);
 
   if (debug) simlog::open(log_path);
 #ifdef CHIRON_NO_SAVE
@@ -143,6 +187,51 @@ int main(int argc, char **argv) {
   // it is polled every kInputPoll cycles rather than every cycle because a
   // read() syscall per simulated cycle would dominate the run time.
   Vsystem *tb = bench.raw();
+  if (simlog::enabled()) bench.tx_mirror = linux_sim_console_mirror;
+  ProfilerQuad profiler(tb);
+  // Harness chatter never shares the terminal the guest kernel is printing on.
+  // With a debug log open, EVERYTHING the profiler emits goes there -- the
+  // periodic [prof] lines, the final summary, and the profiler's own
+  // "JSON written to" note. Without a log (a bounded --max-cycles window on
+  // linux_sim_fast, say) stderr is the only sink there is, so it stays.
+  if (simlog::enabled()) ProfilerQuad::set_note_sink(simlog::sink());
+  std::signal(SIGINT, linux_sim_on_signal);
+  std::signal(SIGTERM, linux_sim_on_signal);
+  // Same rule as the counters themselves: announce to the log when there is
+  // one, to stderr only when there is not. A booting kernel owns the terminal.
+  {
+    FILE *note = simlog::enabled() ? simlog::sink() : stderr;
+    if (max_cycles || profile_every || profile_out)
+      fprintf(note,
+              "[linux_sim] counters -> %s (IPC, I$/D$ miss, branch acc)%s%s\n",
+              simlog::enabled() ? "this log" : "stderr",
+              max_cycles ? " ; stop at --max-cycles" : " ; SIGINT dumps and exits",
+              profile_out ? " ; JSON on --profile-out" : "");
+    if (max_cycles)
+      fprintf(note, "[linux_sim] bounded run: stop at %llu cycles\n",
+              (unsigned long long)max_cycles);
+    if (profile_every)
+      fprintf(note, "[linux_sim] compact snapshot every %llu cycles\n",
+              (unsigned long long)profile_every);
+    if (simlog::enabled()) fflush(note);
+  }
+
+  auto dump_profile = [&](const char *why) {
+    // The debug log is the artifact that survives an overnight boot, and it is
+    // the only place these belong while a kernel owns the terminal.
+    if (simlog::enabled()) {
+      SIMLOG("[prof] profile dump (%s) at cycle %lu\n", why, bench.tickcount);
+      profiler.print_summary(simlog::sink());
+    } else {
+      fprintf(stderr, "[linux_sim] profile dump (%s) at cycle %lu\n",
+              why, bench.tickcount);
+      profiler.print_summary(stderr);
+    }
+    if (profile_out) {
+      profiler.print_json("linux-smp-window", profile_out);
+      SIMLOG("[prof] counters written to %s\n", profile_out);
+    }
+  };
   tb->hostInput_valid = 0;
   tb->hostInput_char  = 0;
   fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL, 0) | O_NONBLOCK);
@@ -165,6 +254,7 @@ int main(int argc, char **argv) {
   for (int i = 0; i < 4; ++i) { band_lo[i] = ~0ULL; band_hi[i] = 0; }
 
   uint64_t next_hb   = bench.tickcount + hb_every;
+  uint64_t next_prof = profile_every ? (bench.tickcount + profile_every) : ~0ULL;
 #ifndef CHIRON_NO_SAVE
   uint64_t next_ckpt = ckpt_on
       ? ((bench.tickcount / ckpt_every) + 1) * ckpt_every : ~0ULL;
@@ -187,10 +277,30 @@ int main(int argc, char **argv) {
         (unsigned long)bench.core_pc(0), (unsigned long)bench.core_pc(1),
         (unsigned long)bench.core_pc(2), (unsigned long)bench.core_pc(3));
       SIMLOG("[wedge] no commit on any hart at cycle %lu\n", bench.tickcount);
+      dump_profile("wedge");
       simlog::close();
       return 1;
     }
     ++steps;
+
+    if (profile_every && bench.tickcount >= next_prof) {
+      if (simlog::enabled()) profiler.print_compact(simlog::sink());
+      else                   profiler.print_compact(stderr);
+      if (profile_out)
+        profiler.print_json("linux-smp-window", profile_out);
+      next_prof = bench.tickcount + profile_every;
+    }
+
+    if (max_cycles && bench.tickcount >= max_cycles) {
+      dump_profile("max-cycles");
+      simlog::close();
+      return 0;
+    }
+    if (g_interrupt) {
+      dump_profile("signal");
+      simlog::close();
+      return 0;
+    }
 
     // Retire a delivered character, then offer the next one.
     //

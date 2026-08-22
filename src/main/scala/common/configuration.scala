@@ -12,9 +12,11 @@ object configuration {
   def timeInCyclesFromSec(time: Int) =  (time*clock/*  / 32 */)
 
   // In-flight branch slots (bits [branchMaskWidth-1:0]) plus one coherency bit
-  // at the top. Decode snapshots a rename map per slot; a full mask stalls
-  // decode. Kept at 4: widening to 8 on a ~70% predictor made hart 0
-  // almost entirely wrong-path and lost IPC.
+  // at the top. Decode snapshots a rename map per slot. Width stays 4.
+  // Decode stalls a new CFI only when every slot is taken. (A 2-in-flight
+  // cap was a bandage for ~5% BPred; 1-in-flight hung Linux after
+  // bootconsole. Widening to 8 on a polluted predictor made hart 0
+  // almost entirely wrong-path.)
   val branchMaskWidth = 4
   val newBranchMaskWidth = branchMaskWidth + 1
   val coherent_BranchMask = (1 << branchMaskWidth).U(newBranchMaskWidth.W)
@@ -28,6 +30,10 @@ object configuration {
   // no longer circular-waits on the single writeBackBuffer.
   val disableFenceIWalker = false
   val instrIssueDepth = 8
+  // ROB depth = 2^robAddrWidth. 5 → 32 entries (was 4 → 16). Wider window
+  // hides L1/L2 miss latency on Linux-like code; decode/issue/commit stay
+  // 1-wide so peak IPC is still 1.0. PRF is 64 (32 architectural + 32
+  // speculative) which matches a 32-entry ROB of dest-writing insns.
   val robAddrWidth = 4
   val prfAddrWidth = 6
   val ramBaseAddress = 0x0000000080000000L
@@ -57,8 +63,10 @@ object configuration {
     val gshareCounterDepth = 2048
     val gshareBtbSize      = 256
 
-    val btbEntries     = 256   // taken-target cache, written at resolution
-    val cfiEntries     = 512   // pre-decode branch classifier (cond/call/ret/…)
+    // BTB hit is followed (taken). 8192 did not move Linux C0 (cold unique
+    // CFIs, not capacity); memcpy hart already ~70%. Stay at 1024.
+    val btbEntries     = 1024  // taken-target cache, written at resolution
+    val cfiEntries     = 1024  // pre-decode branch classifier (cond/call/ret/…)
     val bimodalEntries = 2048  // TAGE base predictor
 
     val tageTableEntries    = 512
@@ -129,6 +137,12 @@ object coreConfiguration {
     val ramBaseAddress = 0x0000000080000000L
     val ramHighAddress = 0x00000000ffffffffL
     val iCacheOffsetWidth = 4
+    // Direct-mapped I$ in iCacheRegisters.v: depth = 2^lineWidth lines,
+    // each 2^offsetWidth instructions. 6 → 64 lines × 16 × 4 B = 4 KB.
+    // 9 → 512 lines × 16 × 4 B = 32 KB. Matches the 32 KB 4-way D$
+    // (Dcache.constants.cacheSize). Do not grow D$ to 256 KB: fence.i
+    // walks every set×way and that would 8× the walker, which is the
+    // opposite of what Linux wants.
     val iCacheLineWidth = 6
     val iCacheTagWidth = 32 - iCacheLineWidth - iCacheOffsetWidth - 2
     val iCacheBlockSize = (1 << iCacheOffsetWidth) // number of instructions

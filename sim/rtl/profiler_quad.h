@@ -342,6 +342,12 @@ public:
 
     // Emit a JSON object with per-core breakdown and aggregate summary.
     // Aggregate IPC = total instructions / max-cycle (throughput from wall-clock).
+    // Where this profiler's own chatter goes. Defaults to stderr, which is right
+    // for a benchmark harness; linux_sim points it at the debug log instead so
+    // nothing shares the terminal the guest kernel is printing on.
+    static FILE *&note_sink() { static FILE *f = stderr; return f; }
+    static void set_note_sink(FILE *f) { note_sink() = f ? f : stderr; }
+
     void print_json(const std::string &benchmark_name,
                     const std::string &output_path = "",
                     int harness_exit = 0,
@@ -460,21 +466,21 @@ public:
         ss << "}\n";
 
         std::string json_str = ss.str();
-        printf("%s", json_str.c_str());
-
-        if (!output_path.empty()) {
+        if (output_path.empty()) {
+            printf("%s", json_str.c_str());
+        } else {
             std::ofstream out(output_path);
             if (out.is_open()) {
                 out << json_str;
                 out.close();
-                printf("[profiler_quad] JSON written to: %s\n", output_path.c_str());
+                fprintf(note_sink(), "[profiler_quad] JSON written to: %s\n", output_path.c_str());
             } else {
-                fprintf(stderr, "[profiler_quad] ERROR: cannot open: %s\n", output_path.c_str());
+                fprintf(note_sink(), "[profiler_quad] ERROR: cannot open: %s\n", output_path.c_str());
             }
         }
     }
 
-    void print_summary() const {
+    void print_summary(FILE *out = stdout) const {
         PerfMetrics c[4];
         for (int i = 0; i < 4; ++i) c[i] = compute_core_metrics(i);
 
@@ -485,15 +491,15 @@ public:
         }
         double agg_ipc = (double)agg_inst / (double)safe_max1(agg_cyc);
 
-        printf("\n========== Quad-Core Performance Summary ==========\n");
-        printf("  Aggregate IPC:     %20.4f  (sum_insts / max_cycles)\n", agg_ipc);
-        printf("  Total instructions:%20llu\n", (unsigned long long)agg_inst);
-        printf("  Max cycles:        %20llu\n", (unsigned long long)agg_cyc);
-        printf("\n  Core | Cycles         | Insts          | IPC    | D$miss%% | I$miss%%\n");
-        printf("  -----|----------------|----------------|--------|---------|--------\n");
+        fprintf(out, "\n========== Quad-Core Performance Summary ==========\n");
+        fprintf(out, "  Aggregate IPC:     %20.4f  (sum_insts / max_cycles)\n", agg_ipc);
+        fprintf(out, "  Total instructions:%20llu\n", (unsigned long long)agg_inst);
+        fprintf(out, "  Max cycles:        %20llu\n", (unsigned long long)agg_cyc);
+        fprintf(out, "\n  Core | Cycles         | Insts          | IPC    | D$miss%% | I$miss%%\n");
+        fprintf(out, "  -----|----------------|----------------|--------|---------|--------\n");
         for (int i = 0; i < 4; ++i) {
             const PerfMetrics &m = c[i];
-            printf("    %d  | %14llu | %14llu | %6.4f | %6.2f%% | %6.2f%%\n",
+            fprintf(out, "    %d  | %14llu | %14llu | %6.4f | %6.2f%% | %6.2f%%\n",
                    i,
                    (unsigned long long)m.cycles,
                    (unsigned long long)m.inst_retired,
@@ -501,14 +507,55 @@ public:
                    m.dcache_miss_rate_pct,
                    m.icache_miss_rate_pct);
         }
-        printf("\n  Core | Sched-stall%%  | ROB-stall%%   | Dec-eff%%  | BPred%%\n");
-        printf("  -----|--------------|--------------|----------|--------\n");
+        fprintf(out, "\n  Core | Sched-stall%%  | ROB-stall%%   | Dec-eff%%  | BPred%%\n");
+        fprintf(out, "  -----|--------------|--------------|----------|--------\n");
         for (int i = 0; i < 4; ++i) {
             const PerfMetrics &m = c[i];
-            printf("    %d  | %12.2f | %12.2f | %8.2f | %6.2f\n",
+            fprintf(out, "    %d  | %12.2f | %12.2f | %8.2f | %6.2f\n",
                    i, m.scheduler_stall_pct, m.rob_stall_pct,
                    m.decode_efficiency_pct, m.branch_accuracy_pct);
         }
-        printf("====================================================\n\n");
+        fprintf(out, "\n  Core | I$stall%% | I$miss     | D$req      | D$miss     | L2rd beats | hnr_load%%\n");
+        fprintf(out, "  -----|----------|------------|------------|------------|------------|----------\n");
+        for (int i = 0; i < 4; ++i) {
+            const PerfMetrics &m = c[i];
+            fprintf(out,
+                   "    %d  | %8.2f | %10llu | %10llu | %10llu | %10llu | %8.2f\n",
+                   i,
+                   100.0 * (double)m.icache_stalls / (double)safe_max1(m.cycles),
+                   (unsigned long long)m.icache_miss,
+                   (unsigned long long)m.dcache_reqs,
+                   (unsigned long long)m.dcache_miss,
+                   (unsigned long long)m.l2_to_mem_rd_beats,
+                   100.0 * (double)m.hnr_load / (double)safe_max1(m.cycles));
+        }
+        fprintf(out, "====================================================\n\n");
+    }
+
+    // One-line snapshot for a long linux-sim-fast window. Guest console stays
+    // on stdout; this is meant for stderr so UART output is not polluted.
+    void print_compact(FILE *out) const {
+        PerfMetrics c[4];
+        uint64_t agg_inst = 0, agg_cyc = 0;
+        for (int i = 0; i < 4; ++i) {
+            c[i] = compute_core_metrics(i);
+            agg_inst += c[i].inst_retired;
+            if (c[i].cycles > agg_cyc) agg_cyc = c[i].cycles;
+        }
+        fprintf(out, "[prof] cyc=%llu aggIPC=%.4f inst=%llu",
+                (unsigned long long)agg_cyc,
+                (double)agg_inst / (double)safe_max1(agg_cyc),
+                (unsigned long long)agg_inst);
+        for (int i = 0; i < 4; ++i) {
+            const PerfMetrics &m = c[i];
+            fprintf(out,
+                    " | C%d ipc=%.4f I$=%.2f%% D$=%.2f%% br=%.1f%% I$st=%.1f%% rob=%.1f%%",
+                    i, m.ipc, m.icache_miss_rate_pct, m.dcache_miss_rate_pct,
+                    m.branch_accuracy_pct,
+                    100.0 * (double)m.icache_stalls / (double)safe_max1(m.cycles),
+                    m.rob_stall_pct);
+        }
+        fprintf(out, "\n");
+        fflush(out);
     }
 };

@@ -99,6 +99,19 @@ $(BUILD)/robready_probe.out: $(HARNESS)/probes/robready_probe.cpp $(SIM_HDR) $(V
 $(BUILD)/mextpath_probe.out: $(HARNESS)/probes/mextpath_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/mextpath_probe.cpp $(VSYS_LIB_FAST) -o $@
 
+# Boots Linux from reset and dumps the whole D-cache miss/replay path for one
+# hart once its write-commit port (cacheLookupUnit writeCommitInstructionBuffer)
+# has stayed shut for STALL cycles -- the core2 memset wedge.
+$(BUILD)/linux_storegate_probe.out: $(HARNESS)/probes/linux_storegate_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/linux_storegate_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Runs ci-check's per-cycle microarchitectural assertions against the LINUX
+# BOOT instead of the five short benchmarks -- that is where the
+# reallocated-ROB-slot defect class actually lives. Nonzero exit = a gate
+# tripped, so this can gate CI as well.
+$(BUILD)/linux_invariants_probe.out: $(HARNESS)/probes/linux_invariants_probe.cpp $(HARNESS)/invariants.h $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) -DCHIRON_INVARIANTS -I $(SIM) $(HARNESS)/probes/linux_invariants_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 # Boots the full Linux image while counting CLINT msip writes per target hart.
 # Uses CXX_LINUX (raised STEP_TIMEOUT) like linux_sim.out, since legitimate boot
 # phases stall far longer than a benchmark ever does.
@@ -127,10 +140,10 @@ $(BUILD)/linux_llist_probe.out: $(HARNESS)/probes/linux_llist_probe.cpp $(SIM_HD
 # Verilated DRAM (see rtl_model.h). walkerWriteBackBuffer keeps fence.i from
 # deadlocking the snoop path under SMP, so a separate walker-off model is no
 # longer required.
-$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
+$(BUILD)/linux_sim.out: $(HARNESS)/linux_sim.cpp $(SIM)/profiler_quad.h $(SIM_HDR) $(VSYS_LIB_CKPT) | $(BUILD)
 	$(CXX_CKPT) -DSHOW_TERMINAL $(HARNESS)/linux_sim.cpp $(VSYS_LIB_CKPT) -o $@
 
-$(BUILD)/linux_sim_fast.out: $(HARNESS)/linux_sim.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+$(BUILD)/linux_sim_fast.out: $(HARNESS)/linux_sim.cpp $(SIM)/profiler_quad.h $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_LINUX) -DSHOW_TERMINAL -DCHIRON_NO_SAVE $(HARNESS)/linux_sim.cpp $(VSYS_LIB_FAST) -o $@
 
 # Same boot, but watches for the known timekeeping-seqlock SMP wedge (see the
@@ -488,12 +501,35 @@ linux-emu-check: $(BUILD)/emu.out    ## Non-interactive boot-to-login check (CI)
 LINUX_SIM_LOG ?= $(BUILD)/linux-sim.log
 CKPT_DIR      ?= ckpt
 CKPT_EVERY    ?= 20000000
-CKPT_KEEP     ?= 8
+# keep x every = the rewind window you actually have when a boot dies:
+# 16 x 20M = 320M cycles (was 8 = 160M). ~271 MB per checkpoint, so ~4.3 GB.
+CKPT_KEEP     ?= 16
+# Bounded Linux IPC window (both linux-sim and linux-sim-fast).
+# Guest console stays on stdout; IPC / I$ / D$ / branch counters go to stderr.
+#   make linux-sim-fast LINUX_MAX_CYCLES=50000000 \
+#                       LINUX_PROFILE_OUT=build/linux-profile.json
+LINUX_MAX_CYCLES    ?=
+LINUX_PROFILE_OUT   ?=
+LINUX_PROFILE_EVERY ?=
 
 LINUX_SIM_FLAGS := $(if $(DEBUG),--debug --log $(LINUX_SIM_LOG) \
                      --ckpt-dir $(CKPT_DIR) --ckpt-every $(CKPT_EVERY) \
                      --ckpt-keep $(CKPT_KEEP))
 LINUX_SIM_FLAGS += $(if $(RESTORE),--restore $(RESTORE))
+LINUX_SIM_FLAGS += $(if $(LINUX_MAX_CYCLES),--max-cycles $(LINUX_MAX_CYCLES))
+# IPC accounting belongs to the DEBUG=1 full boot -- that is the only run long
+# enough for the numbers to mean anything, and the only one whose log survives
+# it. So DEBUG=1 turns profiling on by default here: counters land in
+# $(LINUX_PROFILE_JSON) and a compact IPC line is appended to the debug log
+# every $(LINUX_DEBUG_EVERY) cycles. Explicit LINUX_PROFILE_* still win, and
+# linux-sim-fast is deliberately NOT given these defaults -- bounded IPC windows
+# there stay opt-in via LINUX_PROFILE_OUT.
+LINUX_PROFILE_JSON ?= $(BUILD)/linux-profile.json
+LINUX_DEBUG_EVERY  ?= 20000000
+LINUX_SIM_FLAGS += $(if $(LINUX_PROFILE_OUT),--profile-out $(LINUX_PROFILE_OUT),\
+                     $(if $(DEBUG),--profile-out $(LINUX_PROFILE_JSON)))
+LINUX_SIM_FLAGS += $(if $(LINUX_PROFILE_EVERY),--profile-every $(LINUX_PROFILE_EVERY),\
+                     $(if $(DEBUG),--profile-every $(LINUX_DEBUG_EVERY)))
 
 linux-sim: $(BUILD)/linux_sim.out    ## Boot LINUX_IMAGE on the RTL core (guest console only; DEBUG=1 for logs+checkpoints)
 	@echo "== RTL boot: $(LINUX_IMAGE) (Verilator ~40K cyc/s; full boot ~3G cycles) ==" >&2
@@ -516,6 +552,9 @@ linux-sim: $(BUILD)/linux_sim.out    ## Boot LINUX_IMAGE on the RTL core (guest 
 # heartbeat log; RESTORE/RESUME belong on linux-sim.
 LINUX_SIM_FAST_LOG ?= $(BUILD)/linux-sim-fast.log
 LINUX_SIM_FAST_FLAGS := $(if $(DEBUG),--debug --log $(LINUX_SIM_FAST_LOG) --no-ckpt)
+LINUX_SIM_FAST_FLAGS += $(if $(LINUX_MAX_CYCLES),--max-cycles $(LINUX_MAX_CYCLES))
+LINUX_SIM_FAST_FLAGS += $(if $(LINUX_PROFILE_OUT),--profile-out $(LINUX_PROFILE_OUT))
+LINUX_SIM_FAST_FLAGS += $(if $(LINUX_PROFILE_EVERY),--profile-every $(LINUX_PROFILE_EVERY))
 
 linux-sim-fast: $(BUILD)/linux_sim_fast.out   ## Boot LINUX_IMAGE on the fast RTL model (no --savable; host-optimum speed)
 	@if [ -n "$(RESTORE)$(RESUME)" ]; then \
@@ -672,6 +711,51 @@ uartrx-test: $(BUILD)/uartrx_test.out   ## Verify the console RX path end to end
 # SELF=1 land on different addresses; a hardcoded constant silently never
 # matches).
 .PHONY: smp-repro
+# ── Pre-boot gate ─────────────────────────────────────────────────────────────
+# Run this after any non-trivial RTL change, BEFORE committing to a multi-hour
+# Linux boot.
+#
+# Why a Linux-specific gate exists at all: ISA + ci-bench + ci-check are five
+# short numeric kernels with no traps, no CSR work and no cross-hart IPI. A
+# green suite does NOT validate a speculation-path change -- the injFSM escape
+# fix passed ISA 84/84, ci-bench 5/5 and two open repros, and still killed the
+# boot. Both bugs found on 2026-08-22 (branchRes off-by-one training, and the
+# D-cache requestScheduler dropping requests at a full queue) were invisible to
+# every existing gate and only reachable with a kernel running.
+#
+#   1. linux_invariants_probe -- ci-check's per-cycle assertions (branch
+#      readied-without-resolution / ready-outside-ROB-window / double-resolve /
+#      wedge) against the real boot, all four harts.
+#   2. linux_storegate_probe  -- request accounting on the D-cache queues.
+#      storeDROPPED must be 0; a dropped request wedges a hart millions of
+#      cycles later, so the COUNTER is the detector, not the hang.
+#
+# LINUX_CHECK_CYCLES is 1.3% of a full boot: this covers early boot through mm
+# init, NOT userspace or /init. It raises confidence; it does not replace the
+# boot. Raise it for an invasive change.
+LINUX_CHECK_CYCLES ?= 40000000
+LINUX_CHECK_STALL  ?= 100000
+
+.PHONY: linux-check
+linux-check: $(BUILD)/linux_invariants_probe.out $(BUILD)/linux_storegate_probe.out  ## Pre-boot gate: kernel-level invariants + D-cache request accounting
+	@echo "[linux-check] $(LINUX_IMAGE), $(LINUX_CHECK_CYCLES) cycles"
+	@echo "[linux-check] NOTE: run this on an IDLE box. Verilator's thread pool"
+	@echo "              busy-waits, so a concurrent sweep costs ~4x throughput."
+	@fail=0; \
+	echo "== 1/2 per-cycle invariants (all 4 harts) =="; \
+	if END=$(LINUX_CHECK_CYCLES) $(BUILD)/linux_invariants_probe.out $(LINUX_IMAGE) \
+	     $(DATA)/qemu.dtb $(DATA)/boot.bin; \
+	then echo "invariants: CLEAN"; else echo "invariants: VIOLATIONS"; fail=1; fi; \
+	echo "== 2/2 D-cache request accounting (kernel hart) =="; \
+	if HART=2 STALL=$(LINUX_CHECK_STALL) END=$(LINUX_CHECK_CYCLES) TRACE=2 \
+	     $(BUILD)/linux_storegate_probe.out $(LINUX_IMAGE) \
+	     $(DATA)/qemu.dtb $(DATA)/boot.bin; \
+	then echo "storegate: PASS"; else echo "storegate: FAIL"; fail=1; fi; \
+	if [ $$fail -eq 0 ]; then \
+	  echo "linux-check: PASS — safe to start the long boot"; \
+	else \
+	  echo "linux-check: FAIL — do NOT start a multi-hour boot"; exit 1; fi
+
 smp-repro: $(BUILD)/profile_quad_fast.out  ## mt-illegal + mt-icoh (cross & self)
 	@fail=0; \
 	run() { \

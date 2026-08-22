@@ -34,10 +34,12 @@
   centralized issue queue with wake-up, and in-order commit.
 - **Full memory hierarchy** — split L1 I/D caches, non-blocking L2 with MSHRs
   and pseudo-LRU, ACE-style coherent interconnect.
-- **Modern branch prediction** — a **4-table TAGE** direction predictor
-  (512 entries each, histories 4/9/19/40) over a 2048-entry bimodal base, plus a
-  256-entry direct-mapped BTB, a 512-entry pre-decode CFI classifier and a
-  16-deep RAS. TAGE drives next-PC combinationally, in the fetch cycle.
+- **Modern branch prediction** — a 1024-entry tagged BTB drives next-PC in the
+  fetch cycle (a hit *is* the prediction, since the BTB is only written on a
+  taken resolve), backed by a 1024-entry pre-decode CFI classifier, a 16-deep
+  RAS, and a **4-table TAGE** (512 entries each, histories 4/9/19/40) over a
+  2048-entry bimodal base that arbitrates as a next-cycle override.
+  **85–100 % accuracy across the benchmark sweep.**
 - **Cycle-accurate, lock-step verified** against a C++ golden-model emulator,
   one committed instruction at a time — **84/84 official `riscv-tests` pass**.
 - **Boots quad-core Linux SMP to an interactive shell** — a nommu RISC-V kernel
@@ -112,8 +114,8 @@ flowchart LR
 | Issue queue | 8 entries, centralized |
 | Commit width | 1-wide (decode is also 1-wide) |
 | Divider | Radix-4 (2 bits/cycle), clz-normalized, /0 /1 /small early-out |
-| L1 I-Cache | 2-way · 64 sets · 16-instr lines |
-| L1 D-Cache | 2-way · 64 sets · 8×8-byte lines |
+| L1 I-Cache | Direct-mapped · 64 lines · 16-instr (4 KB) |
+| L1 D-Cache | 4-way · 256 sets · 64-byte lines (64 KB) |
 | Branch predictor | Bimodal + BTB + 4×512 TAGE |
 | Clock target | 75 MHz |
 
@@ -155,10 +157,14 @@ chiron/
 │   │   └── profiler.h · profiler_quad.h   # perf-counter read-out
 │   ├── harness/           #   test/run drivers
 │   │   ├── common/        #     shared helpers: args.h · image.h · completion.h
+│   │   ├── probes/        #     ~50 single-purpose forensic probes (one bug each)
 │   │   ├── lockstep.cpp   #     RTL-vs-emulator lock-step (core 0)
 │   │   ├── lockstep_quad.cpp  #     4-hart lock-step (q4 benches)
 │   │   ├── lockstep_isa.cpp   # ISA regression completion
 │   │   ├── lockstep_linux.cpp # Linux-boot variant
+│   │   ├── invariants.h   #     per-cycle microarchitectural assertions
+│   │   ├── linux_sim.cpp  #     Linux boot driver (console · checkpoints · IPC)
+│   │   ├── uartrx_test.cpp    # console-input round-trip regression
 │   │   ├── profile.cpp    #     single-core cycle-accurate profiler
 │   │   ├── profile_quad.cpp   # quad-core profiler (all 4 cores + aggregate IPC)
 │   │   └── fire.cpp       #     bare-metal UART → terminal streamer
@@ -178,7 +184,11 @@ chiron/
 │   ├── bins.mk            #   single-core .bin build + stage
 │   ├── bins_quad.mk       #   quad-core .bin build + stage (NUM_CORES=4)
 │   └── run.mk             #   all harness build + run targets
-├── scripts/               # profiling visualisation, log decoders
+├── mc-linux/              # submodule: kernel + buildroot + bbl image pipeline
+├── scripts/ · tools/      # profiling visualisation, log decoders, stress generator
+├── testdata/baseline/     # reference profiler JSON for `make compare`
+├── docs/                  # figures, dashboard, captured boot logs
+├── ckpt/                  # Linux boot checkpoints (gitignored, ~256 MB each)
 ├── build/                 # all generated artifacts (gitignored)
 └── Makefile               # thin orchestrator — one entry point per task
 ```
@@ -262,29 +272,34 @@ make profile-all-sc              # → build/profile_results/<fam>-s<N>.json + c
 <img src="docs/profile_report.png" alt="Single-core benchmark profile report" width="720"/>
 </div>
 
-| Benchmark | Cycles | IPC | Branch Acc | D$ Miss | DRAM RD BW |
-|---|---|---|---|---|---|
-| filter-s1 | 482 231 | **0.492** | 77.5 % | 3.82 % | 3.01 MB/s |
-| matmul-s1 | 938 727 | **0.331** | 11.1 % | 0.34 % | 0.46 MB/s |
-| histo-s1 | 581 807 | **0.275** | 78.0 % | 3.92 % | 3.83 MB/s |
-| vvadd-s1 | 69 657 | **0.272** | 71.7 % | 7.11 % | 6.13 MB/s |
-| csaxpy-s1 | 62 211 | **0.233** | 62.9 % | 6.47 % | 6.17 MB/s |
+| Benchmark | Cycles | IPC | Branch Acc | D$ Miss | ROB stall | DRAM RD BW |
+|---|---|---|---|---|---|---|
+| matmul-s1 | 478 849 | **0.649** | 97.1 % | 0.39 % | 26.1 % | 1.05 MB/s |
+| filter-s1 | 445 745 | **0.532** | 91.1 % | 3.32 % | 34.9 % | 3.61 MB/s |
+| histo-s1 | 462 175 | **0.346** | 99.97 % | 4.04 % | 52.8 % | 4.81 MB/s |
+| vvadd-s1 | 64 369 | **0.294** | 99.7 % | 9.30 % | 65.7 % | 7.68 MB/s |
+| csaxpy-s1 | 55 275 | **0.262** | 85.6 % | 10.22 % | 53.8 % | 6.86 MB/s |
 
-> Single-core IPC sits at 0.23–0.49, with branch accuracy 63–78 % on the
-> streaming kernels — the TAGE frontend is most of that. filter leads because
-> its stencil inner loop is long and well-predicted; csaxpy trails because at
-> `s1` the kernel is only ~62 K cycles, so loop prologue and the barrier
-> dominate what little work there is.
+> Single-core IPC sits at 0.26–0.65 against a hard 1.0 ceiling (decode, issue
+> and commit are each 1-wide). **The ordering is now set by memory, not by
+> branches.** Accuracy is 85 % or better everywhere at `s1` and above 97 % on
+> three of the five families, so the ROB-stall column tracks the D$ miss column
+> almost exactly: matmul leads because its inner loop misses 0.39 % of the time,
+> and the streaming kernels trail at 9–10 % miss, with half to two thirds of all
+> decode slots lost waiting at the ROB head.
 >
-> **`s1` is the smallest scale and flatters nothing** — the D$ miss rates above
-> are cold-start artefacts (vvadd's 7.1 % falls out of a 70 K-cycle run whose
-> working set is touched exactly once). Read the scaling curves in
-> `docs/profile_report.png` for steady-state behaviour.
+> **These misses are not cold-start artefacts.** They *grow* with scale on the
+> streaming families — vvadd 9.30 % → 14.07 % and csaxpy 10.22 % → 13.92 %
+> from `s1` to `s5` — because each element is touched once and the 64 KB D$
+> cannot help a stream. histo moves the other way (4.04 % → 2.40 %) since its
+> bins stay resident while only the input streams past. Read the scaling curves
+> in `docs/profile_report.png` for the full shape.
 >
-> matmul-s1's 11.1 % branch accuracy is the trip-count-3 inner loop: at this
-> size almost every branch is a fresh one TAGE never sees twice. It is a
-> small-input artefact, not a predictor limit — the same kernel reaches
-> **67.6 % at s2 and 98.9 % at s3** as the loops get long enough to learn.
+> matmul-s1 previously profiled at **11.1 %** branch accuracy here, and this
+> README explained it as a trip-count-3 inner loop TAGE could never learn. That
+> explanation was wrong: it was the training off-by-one described below. The
+> same binary, unchanged, now predicts at **97.1 % at `s1`, 98.5 % at `s2` and
+> 99.2 % at `s3`**.
 
 ---
 
@@ -346,50 +361,70 @@ make test-q4                     # profile-based pass/fail on vvadd-q4
 ## Profiling values — reference numbers
 
 Measured on the current RTL over the full sweep (`make profile-sweep`,
-**2026-08-17**, 46 configurations, all completing with `error code: 0`); the
+**2026-08-22**, 46 configurations, all completing with `error code: 0`); the
 figures below are the `s1` scale, and `docs/profile_report.png` covers every
 family at every scale, single-core and quad-core.
 
-> **These numbers are not comparable to any published before 2026-08-17.** The
-> benchmarks used to dump their result arrays over the UART, and that serial
-> tail dominated the shorter runs — vvadd-s1 was 328 451 cycles, of which most
-> was printing. With the dump removed it is 69 657. Cycle counts fell across
-> the board (vvadd 4.7×, filter 2.1×, matmul 1.2× — in proportion to how much
-> each family printed), so absolute cycles and IPC both moved. Compare against
-> this sweep, not the old one.
+> **These numbers are not comparable to any published before 2026-08-22.** The
+> branch predictor was being trained with the *wrong PC*: `fetch.branchRes` took
+> `fired`/`pcAfterBrnach` from the registered `branchEvals` stage but
+> `pc`/`instruction`/`branchTaken` combinationally from the earlier
+> `branchInstruction` stage, and `branchPCs` has already shifted by then. Every
+> BTB write was `BTB[pc of the NEXT branch] := target of THIS branch`, and TAGE,
+> bimodal and the CFI table were indexed with the same wrong PC. Only tight 1–2
+> instruction loops looked healthy, because there `pc(k+1) == pc(k)` and the
+> off-by-one trained the right entry by accident — which is why accuracy used to
+> scale *backwards* with BTB size. Fixing it moved branch accuracy from as low
+> as 43.6 % to **85–100 %** and aggregate quad-core IPC from **0.77–2.27** to
+> **1.27–2.54**. Compare against this sweep, not the old one.
+
+**Quad-core aggregate IPC, every family and scale:**
+
+| family | s1 | s2 | s3 | s4 | s5 |
+|---|---|---|---|---|---|
+| matmul | 2.157 | 2.467 | **2.537** | — | — |
+| filter | 1.849 | 1.905 | 1.893 | 1.893 | 1.893 |
+| histo  | 1.486 | 1.447 | 1.622 | 1.568 | 1.581 |
+| vvadd  | 1.344 | 1.405 | 1.440 | 1.448 | 1.468 |
+| csaxpy | 1.267 | 1.294 | 1.367 | 1.390 | 1.369 |
+
+Single-core IPC spans 0.249–0.684 over the same 46 runs (decode, issue and
+commit are all 1-wide, so 1.0 is the per-core ceiling).
 
 ### vvadd-s1-q4 (vector-vector add, all 4 cores)
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **0.876** | 0.212 | ~0.221 |
-| Instructions retired | 50 267 | 12 195 | ~12 691 each |
-| Max cycles | 57 375 | — | — |
-| Branch accuracy | — | 85.0 % | 72.5 % |
-| D-cache miss rate | — | 11.8 % | ~7.9 % |
-| ROB stall % | — | 58.3 % | ~26.0 % |
-| Decode efficiency | — | 41.7 % | ~74.0 % |
+| **IPC** | **1.344** | 0.196 | ~0.383 |
+| Instructions retired | 83 514 | 12 195 | ~23 773 each |
+| Max cycles | 62 129 | — | — |
+| Branch accuracy | — | 99.6 % | ~99.9 % |
+| D-cache miss rate | — | 14.8 % | ~3.5 % |
+| ROB stall % | — | 76.4 % | ~30.9 % |
+| Decode efficiency | — | 23.6 % | ~69.1 % |
 
 > Core 0 acts as the coordinator (barrier + result check), hence its lower IPC
 > and high ROB stall fraction. Cores 1–3 execute the compute kernel.
-> vvadd-s1-q4 is only 57 K cycles end to end, so fixed startup cost is a large
-> share of it; `vvadd-s5-q4` reaches **0.946** aggregate IPC on the same code.
+> vvadd-s1-q4 is only 62 K cycles end to end, so fixed startup cost is a large
+> share of it; `vvadd-s5-q4` reaches **1.468** aggregate IPC on the same code.
 
 ### histo-s1-q4 (histogram, all 4 cores)
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **0.768** | 0.249 | ~0.173 |
-| Instructions retired | 307 806 | 99 883 | ~69 308 each |
-| Max cycles | 400 787 | — | — |
-| Branch accuracy | — | 91.1 % | 43.6 % |
-| D-cache miss rate | — | 6.6 % | ~2.6 % |
-| ROB stall % | — | 60.7 % | ~15.1 % |
+| **IPC** | **1.486** | 0.247 | ~0.413 |
+| Instructions retired | 600 929 | 99 883 | ~167 015 each |
+| Max cycles | 404 273 | — | — |
+| Branch accuracy | — | 97.7 % | ~98.1 % |
+| D-cache miss rate | — | 6.8 % | ~1.2 % |
+| ROB stall % | — | 66.0 % | ~17.7 % |
 
-> histo inverts the usual split: core 0 retires the *most* instructions and the
-> worker harts the fewest, because the scatter kernel's data-dependent branches
-> are close to unpredictable (43.6 % on cores 1–3). It is the weakest family on
-> this machine and the clearest remaining headroom.
+> histo used to be the weakest family precisely because it was the one hurt most
+> by the training bug: its scatter kernel's loop bodies are too long for
+> `pc(k+1) == pc(k)` to mask an off-by-one, so the worker harts predicted at
+> **43.6 %** and the family sat at 0.768 aggregate IPC. With the BTB trained on
+> the right PC they run at ~98 % and the family is at **1.486** — a 93 % gain,
+> the largest in the suite.
 
 ---
 
@@ -422,12 +457,7 @@ gtkwave build/system_trace.vcd
 > (`traceEverOn`), which substantially increases simulation overhead. Use only
 > when you need waveforms; omit it for routine lock-step runs.
 
-Both flags can be combined:
-
-```bash
-make lockstep BENCH=csaxpy-s2 SHOW_STATE=1 DUMP_WAVES=1
-make lockstep-q4 BENCH=vvadd-s1 SHOW_STATE=1 DUMP_WAVES=1
-```
+Both flags can be combined on either target.
 
 ---
 
@@ -485,6 +515,7 @@ sit above it:
 | Gate | Question it answers |
 |---|---|
 | `make ci-check` | Did the *microarchitecture* stay self-consistent? Per-cycle assertions (`sim/harness/invariants.h`) catch a completion landing on a ROB slot speculation already reallocated — the bug shape behind four separate wedges in this design. |
+| `make linux-check` | Does it still survive a *kernel*? The same assertions, but on a booting Linux instead of five numeric kernels — plus a check that no D-cache request was silently dropped. A green benchmark suite does not validate a speculation-path change. |
 | `make stress-sweep` | Seeded constrained-random programs aimed at the speculation corners the directed benchmarks never reach (divides in branch shadows, speculative MMIO, cross-hart AMO/LR-SC). |
 
 **See [VERIFICATION.md](VERIFICATION.md)** for what each layer proves, the exact
@@ -510,11 +541,22 @@ into:
 | Decode efficiency | `decode_fired / decode_ready` |
 | DRAM read BW | `l2_to_mem_rd_beats × 8 B × 75 MHz` |
 
+> **What "branch accuracy" counts.** `branch_total` is every *speculation token*
+> resolved, and the core allocates one for every control transfer — `jal` and
+> `jalr` as well as the conditional branches. Unconditional jumps essentially
+> never mispredict, so the published figure is an **upper bound** on
+> conditional-branch accuracy; the gap matters only where accuracy is already
+> low (csaxpy-s1 at 85.6 %). The counter also shares its channel with the
+> coherent load-squash, which would show up as a "mispredict" — but
+> `flush_coherent` is **0** on all 46 runs, so nothing in this suite is
+> contaminated that way. `flush_branch` / `flush_coherent` / `retired_branch`
+> split it apart in the JSON if you need the exact decomposition.
+
 JSON reports are written to `build/profile_results/`.
 
 ---
 
-## Timing reference (Verilator, ~38.5 K RTL cycles/sec)
+## Timing reference (Verilator, ~42 K RTL cycles/sec)
 
 Measured on an 8-core host with the 4-threaded fast model, one simulation at a
 time. Lock-step runs are far slower than this — they step a golden model in
@@ -522,12 +564,17 @@ parallel and compare every retired instruction.
 
 | Run | Cycles | Approx wall time |
 |---|---|---|
-| `make profile-sweep` (all 46 configs) | 100 268 018 | ~45 min at `PSWEEP_JOBS=2` |
-| matmul-s3 (single-core, longest run) | 40 990 627 | ~18 min |
-| matmul-s3-q4 | 15 611 545 | ~7 min |
-| filter-s5 / filter-s5-q4 | 2.9 M / 1.6 M | ~75 s / ~45 s |
-| vvadd-s1-q4 (shortest) | 57 375 | ~2 s |
+| `make profile-sweep` (all 46 configs) | 72 954 022 | ~25 min at `PSWEEP_JOBS=2` |
+| matmul-s3 (single-core, longest run) | 27 975 789 | ~11 min |
+| matmul-s3-q4 | 7 941 963 | ~3 min |
+| filter-s5 / filter-s5-q4 | 3.0 M / 1.6 M | ~72 s / ~38 s |
+| vvadd-s1-q4 (shortest) | 62 129 | ~1.5 s |
 | Full quad-core Linux boot to login | ~3.06 G | ~21 h |
+
+> The sweep's cycle total fell from 100 268 018 to 72 954 022 for identical
+> binaries — the same 46 programs, 27 % fewer cycles. That drop *is* the
+> branch-training fix, and it is why the wall times above no longer match any
+> figure published before 2026-08-22.
 
 **`PSWEEP_JOBS` is not `nproc`.** The fast model is Verilated with
 `--threads $(VTHREADS)`, so one simulation already occupies `VTHREADS` cores and
@@ -563,6 +610,7 @@ this; override only if your host is bigger than the arithmetic.
 | `make gate` | Everyday gate: lockstep vvadd-s1 + vvadd-q4 vs baseline |
 | `make compare` | Diff `build/profile_results` against `testdata/baseline/q4` |
 | `make smp-repro` | Illegal-instruction trap + cross-hart `fence.i` |
+| `make linux-check` | Pre-boot gate: per-cycle invariants **on a booting kernel** + D-cache request accounting (`LINUX_CHECK_CYCLES`) |
 | `make uartrx-test` | Console-input (uartlite RX) round trip through the RTL |
 | `make profile BENCH=…` | Single-core cycle-accurate profile (fast model) |
 | `make profile-quad FAM=…` | Quad-core profile for one family at its default scale (fast model) |
@@ -619,6 +667,10 @@ Then, from this repo root (`linux-sim-fast` needs `make sim-fast`; `linux-sim` n
 make linux-emu                             # quad-core shell on the golden model (default image)
 make linux-emu  LINUX_IMAGE=bins/linux-s1.bin   # single-core variant
 make linux-sim-fast                        # fastest RTL boot (no checkpoints)
+make linux-sim-fast LINUX_MAX_CYCLES=50000000 \
+                    LINUX_PROFILE_OUT=build/linux-profile.json
+                                           # bounded window: IPC / I$ / D$ / branch
+                                           # counters on stderr (guest console stays stdout)
 make linux-sim                             # same boot on the savable model
 ```
 
@@ -659,7 +711,7 @@ make linux-sim                             # same boot on the savable model
   none of it touches the console.
 
   Checkpoints are ~256 MB each (the model contains all of DRAM), so `CKPT_KEEP`
-  prunes to the newest 8 and none are written without `DEBUG=1`. Restoring is
+  prunes to the newest 16 and none are written without `DEBUG=1`. Restoring is
   cycle-exact: a resumed run reproduces the original's step count and per-hart
   PCs beat for beat. A checkpoint is only valid for the netlist that wrote it —
   any RTL change invalidates every one, and the harness refuses to load a
@@ -693,6 +745,103 @@ In the order they were found and fixed:
    jump filled the ROB with zeros and stopped forever instead of faulting. The
    core now traps (`mcause=2`); `mt-illegal` is the regression, and note that
    pre-fix RTL *hangs* on it rather than failing.
+5. **The D-cache request scheduler dropped requests on the floor.** Its enqueue
+   is `when(!fullReg) { ... }` with no retry, while the only backpressure
+   (`canAllocate` → `scheduler.memoryReady`) is sampled by the core's *issue*
+   scheduler several register stages upstream. A memory op already inside that
+   shadow when the queue filled was silently discarded; it never reached the
+   cache, so its ROB entry reached the head and waited forever for a write
+   commit nobody would produce. Measured on the boot: 14 stores of 63 236
+   dropped in 2.75 M cycles, and the last one wedged the hart in `__memset`.
+   Fixed with `hasHeadroom` in `Dcache/fifo.scala`. Only *reachable* once branch
+   accuracy rose enough to keep 16 requests in flight — a faster machine found a
+   bug a slower one could not.
+
+### IPC accounting on the boot
+
+`make linux-sim DEBUG=1` is the profiling stage: it writes the 164 performance
+counters to `build/linux-profile.json` (rewritten every 20 M cycles, so the file
+survives a kill), appends a compact IPC/I$/D$/branch line to the debug log at the
+same cadence, and mirrors the kernel's own console into that log as `[guest] …`
+so the boot narrative, the checkpoint bookkeeping and the counters share one
+timeline. `linux-sim-fast` deliberately does *not* get these defaults — bounded
+IPC windows there stay opt-in via `LINUX_PROFILE_OUT`.
+
+All harness output — the periodic `[prof]` lines, the final counter summary and
+the profiler's own "JSON written to" note — goes to the **log, not the terminal**,
+because a booting kernel owns the terminal. Without a debug log (a bounded
+`--max-cycles` window on `linux-sim-fast`) they fall back to stderr, since that
+is then the only sink there is.
+
+**Measured — first 10 M cycles of the quad-core boot**, reproducible with:
+
+```bash
+make linux-sim-fast LINUX_MAX_CYCLES=10000000 \
+                    LINUX_PROFILE_OUT=build/linux-profile-10m.json
+```
+
+| | Aggregate | Core 2 (kernel) | Cores 0/1/3 |
+|---|---|---|---|
+| **IPC** | **2.306** | 0.219 | 0.693 / 0.697 / 0.697 |
+| Instructions retired | 23 062 463 | 2 190 071 | ~6.96 M each |
+| Branch accuracy | — | 93.4 % | 99.47 % / 99.999 % / 99.999 % |
+| ROB stall % | — | 67.3 % | 0.6 % / 0.0 % / 0.0 % |
+| D-cache miss rate | — | 6.14 % | ~0.00 % |
+| Decode efficiency | — | 31.5 % | ~99.8 % |
+
+> **Read that aggregate with suspicion.** At 10 M cycles only one hart is
+> running the kernel — the other three are still in the secondary-CPU wait
+> loop, which is a handful of perfectly-predicted instructions with no memory
+> traffic. They retire at 0.697 IPC *because they are spinning*, and they
+> contribute 90 % of the 2.306. **The honest number on this window is core 2's
+> 0.219**, and its 67.3 % ROB stall against 6.14 % D$ miss is the serialised
+> store commit described under [What's next](#whats-next).
+>
+> The same window before the branch-training fix aggregated **0.56**, with the
+> spinning harts at **0.122** and ~6 % branch accuracy: a spin loop is trivially
+> predictable, so training it with the wrong PC was what made it slow. That is
+> most of the 4x. Note the comparison is indicative, not exact — the archived
+> pre-fix window is 15 M cycles, and which hart the kernel lands on is not
+> stable across builds (it was core 1 then, core 2 now).
+
+### Before a long boot: `make linux-check`
+
+```bash
+make linux-check                               # 40 M cycles, ~26 min
+make linux-check LINUX_CHECK_CYCLES=100000000  # deeper, for an invasive change
+```
+
+Two gates, both exiting nonzero on failure:
+
+1. **Per-cycle invariants on a real kernel** — `ci-check`'s assertions
+   (branch-readied-without-resolution, ready-outside-ROB-window, double-resolve,
+   wedge) across all four harts.
+2. **D-cache request accounting** — `storeDROPPED` must be 0. A dropped request
+   is *silent*: it wedges a hart millions of cycles later, and only sometimes, so
+   the counter is the detector and the hang is merely the eventual symptom.
+
+Why this exists separately from `ci-check`: those five benchmarks are tight
+numeric kernels with no traps, no CSR work and no cross-hart IPI. **A green suite
+does not validate a speculation-path change** — the injFSM escape fix passed ISA
+84/84, `ci-bench` 5/5 and two open repros, and still killed the boot. Both bugs
+fixed on 2026-08-22 were invisible to every existing gate and only reachable with
+a kernel running.
+
+The recommended ladder after any non-trivial RTL change, cheapest first so it
+fails fast — roughly 70 minutes to protect a multi-hour boot:
+
+```bash
+make isa && make ci-bench && make ci-check && make smp-repro && make linux-check
+```
+
+> **Run it on an idle box.** Verilator's thread pool busy-waits, so a concurrent
+> `profile-sweep` (2 jobs x 4 threads on 8 cores) costs ~4x throughput — measured
+> 42 106 cycles/s solo vs ~9 100 contended, on byte-identical RTL.
+
+> **What it does not cover:** 40 M cycles is ~1.3 % of a ~3 G-cycle boot. It
+> reaches mm init, not userspace or `/init` — historically where the csd hang and
+> the `rt_sigreturn` trampoline bug lived. It raises confidence; it does not
+> replace the boot.
 
 One bug turned out not to be ours: on nommu RISC-V the kernel writes the
 `rt_sigreturn` trampoline to the user stack with `copy_to_user` and jumps to it
@@ -709,8 +858,8 @@ All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
 
 - **`mask-sfilter` only has three distinct scales.** `s3.h`, `s4.h` and `s5.h`
   are byte-identical (`DATA_SIZE 156`), so `filter-s3`, `-s4` and `-s5` build the
-  same image and unsurprisingly profile to the same number (1.425 aggregate IPC
-  and 1 643 293 cycles at all three, bit-for-bit). The flat tail of filter's
+  same image and unsurprisingly profile to the same number (1.893 aggregate IPC
+  and 1 598 019 cycles at all three, bit-for-bit). The flat tail of filter's
   scaling curve is a dataset artifact,
   not a saturation effect. Regenerating the larger datasets with
   `mask-sfilter_gendata.py` would fix it, at the cost of re-deriving that
@@ -718,22 +867,27 @@ All of the above hold under the full suite: ISA 84/84, `ci-bench` 5/5,
 
 ---
 
-## Roadmap
+## What's next
 
-- Port the single-core IPC optimisations (radix-4 divider, store-data trim,
-  load-queue flow-through) to the quad-core back-end. Aggregate quad-core IPC
-  spans **0.77–2.27** across the five families (see `docs/profile_report.png`),
-  i.e. roughly 0.19–0.57 per core — the headroom is still large. matmul is
-  already at 2.27 aggregate; histo is the floor at 0.77 and is branch-bound
-  (43.6 % accuracy on the worker harts), so it wants a better predictor for
-  data-dependent branches rather than more back-end width.
-- Add an ownership check to the ROB execute write ports. Four separate bugs so
-  far shared one shape: a completion landing on a slot that was rolled back and
-  reallocated underneath it. A structural guard would close the class rather
-  than the instances.
-- Add **SPLASH-3** multi-threaded benchmarks for academically comparable results.
-- Target IPC approaching 1.0 per core (4× aggregate) through microarchitectural
-  tuning of the OoO window, commit width, and cache hierarchy.
+Branch prediction is no longer the limiter anywhere in the suite. What is:
+
+1. **Store commit is serialised** — the largest remaining lever, and the
+   riskiest. `writeCommit`/`writeInstructionCommit` are untagged 1-bit
+   handshakes, so the arbiter parks in `writeInstructionFiredState` until the
+   ROB commits: exactly one store in flight. A hitting store costs ~6 cycles
+   and a missing one ~60, with no overlap, which is why a pure store stream
+   (`memset` during the Linux boot) shows ~78 % ROB stall with only ~3 %
+   head-not-ready *loads*. Pipelining stores, or skipping write-allocate on a
+   full-line store, would attack it — but those untagged handshakes are exactly
+   what currently make the path safe.
+2. **Decode/commit are 1-wide**, which caps per-core IPC at 1.0 by
+   construction. Widening is the only way past ~0.65 single-core, and it
+   touches rename, the issue queue and the ROB together.
+3. **An ownership check on the ROB execute write ports.** Four bugs so far have
+   shared one shape — a completion landing on a slot that was rolled back and
+   reallocated underneath it. A structural guard would close the class instead
+   of the instances.
+4. **SPLASH-3**, for numbers comparable to published work.
 
 ---
 

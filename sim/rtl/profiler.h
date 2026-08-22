@@ -30,6 +30,19 @@
 //   15 l2ToMemRdReqs (L2 -> DRAM read requests)
 //   16 l2ToMemRdBeats(L2 -> DRAM read data beats)
 //   17 l2ToMemWrBeats(L2 -> DRAM write data beats)
+// Frontend bubbles (18-20), rename stalls (21-23), flush causes (24-26):
+//   18 feFetchNotReady  19 feDecodeNotReady  20 feExpectedBlock
+//   21 dsPrfExhausted   22 dsBranchMaskFull  23 dsRenameCollide
+//   24 flushBranch      25 flushCoherent     26 retiredBranch
+//   27-28 unused (tied 0)
+// Commit-port stall decomposition (29-38), issue/commit width (39-40):
+//   29 robHeadNotReady  30 robReadyBlocked
+//   31 hnrLoad  32 hnrBranch  33 hnrMext  34 hnrAmo  35 hnrOther
+//   36 rnrStoreGate  37 rnrWbGate  38 rnrLoadGate
+//   39 issueReadyGE2  40 commitTwoOpp
+// There is one `system` RTL for both harnesses, so this map is the same as
+// profiler_quad.h's; keep the two in step with chironCore.scala's
+// perfCountersOut0 assignment.
 
 struct PerfMetrics {
     // Raw counters
@@ -55,6 +68,9 @@ struct PerfMetrics {
     uint64_t fe_fetch_not_ready;
     uint64_t fe_decode_not_ready;
     uint64_t fe_expected_block;
+    // Dead with the lineStreamer fetch path. No longer read from the RTL or
+    // emitted to JSON; the fields stay only because profiler_quad.h shares
+    // this struct and also zeroes them.
     uint64_t fe_resp_valid_idle;
     uint64_t fe_cache_not_prod;
     uint64_t fe_req_fire;
@@ -183,19 +199,20 @@ public:
         m.fe_fetch_not_ready  = get_perf_counter(18);
         m.fe_decode_not_ready = get_perf_counter(19);
         m.fe_expected_block   = get_perf_counter(20);
-        m.fe_resp_valid_idle  = get_perf_counter(21);
-        m.fe_cache_not_prod   = get_perf_counter(22);
-        m.fe_req_fire         = get_perf_counter(23);
-        m.fe_req_refused      = get_perf_counter(24);
-        // Single-core `system` spends slots 21-24 on the lineStreamer counters
-        // above; the decode rename-stall attribution is quad-core only (see
-        // profiler_quad.h), so report it as absent rather than as garbage.
-        m.ds_prf_exhausted    = 0;
-        m.ds_branch_mask_full = 0;
-        m.ds_rename_collide   = 0;
-        m.flush_branch        = 0;
-        m.flush_coherent      = 0;
-        m.retired_branch      = 0;
+        m.ds_prf_exhausted    = get_perf_counter(21);
+        m.ds_branch_mask_full = get_perf_counter(22);
+        m.ds_rename_collide   = get_perf_counter(23);
+        m.flush_branch        = get_perf_counter(24);
+        m.flush_coherent      = get_perf_counter(25);
+        m.retired_branch      = get_perf_counter(26);
+        // Slots 21-26 used to carry the lineStreamer fetch counters; that
+        // fetch path is gone and chironCore.scala now drives the rename-stall
+        // and flush-cause counters there, for every core. There is one `system`
+        // RTL, so this map is identical to profiler_quad.h's.
+        m.fe_resp_valid_idle  = 0;
+        m.fe_cache_not_prod   = 0;
+        m.fe_req_fire         = 0;
+        m.fe_req_refused      = 0;
         m.rob_head_not_ready  = get_perf_counter(29);
         m.rob_ready_blocked   = get_perf_counter(30);
         m.hnr_load            = get_perf_counter(31);
@@ -290,10 +307,22 @@ public:
         ss << "    \"fe_fetch_not_ready\": " << m.fe_fetch_not_ready << ",\n";
         ss << "    \"fe_decode_not_ready\": "<< m.fe_decode_not_ready<< ",\n";
         ss << "    \"fe_expected_block\": "  << m.fe_expected_block  << ",\n";
-        ss << "    \"fe_resp_valid_idle\": " << m.fe_resp_valid_idle << ",\n";
-        ss << "    \"fe_cache_not_prod\": "  << m.fe_cache_not_prod  << ",\n";
-        ss << "    \"fe_req_fire\": "        << m.fe_req_fire        << ",\n";
-        ss << "    \"fe_req_refused\": "     << m.fe_req_refused     << "\n";
+        ss << "    \"ds_prf_exhausted\": "    << m.ds_prf_exhausted   << ",\n";
+        ss << "    \"ds_branch_mask_full\": " << m.ds_branch_mask_full<< ",\n";
+        ss << "    \"ds_rename_collide\": "   << m.ds_rename_collide  << ",\n";
+        ss << "    \"flush_branch\": "        << m.flush_branch       << ",\n";
+        ss << "    \"flush_coherent\": "      << m.flush_coherent     << ",\n";
+        ss << "    \"retired_branch\": "      << m.retired_branch     << ",\n";
+        ss << "    \"rob_head_not_ready\": "  << m.rob_head_not_ready << ",\n";
+        ss << "    \"rob_ready_blocked\": "   << m.rob_ready_blocked  << ",\n";
+        ss << "    \"hnr_load\": "            << m.hnr_load           << ",\n";
+        ss << "    \"hnr_branch\": "          << m.hnr_branch         << ",\n";
+        ss << "    \"hnr_mext\": "            << m.hnr_mext           << ",\n";
+        ss << "    \"hnr_amo\": "             << m.hnr_amo            << ",\n";
+        ss << "    \"hnr_other\": "           << m.hnr_other          << ",\n";
+        ss << "    \"rnr_store_gate\": "      << m.rnr_store_gate     << ",\n";
+        ss << "    \"rnr_wb_gate\": "         << m.rnr_wb_gate        << ",\n";
+        ss << "    \"rnr_load_gate\": "       << m.rnr_load_gate      << "\n";
         ss << "  },\n";
         ss << "  \"derived\": {\n";
         ss << "    \"ipc\": "                             << m.ipc                           << ",\n";
@@ -368,26 +397,22 @@ public:
                100.0 * m.fe_decode_not_ready / sc, (unsigned long long)m.fe_decode_not_ready);
         printf("  Expected mismatch: %19.2f%%  (%llu)\n",
                100.0 * m.fe_expected_block / sc,   (unsigned long long)m.fe_expected_block);
-        printf("  I$ resp idle:      %19.2f%%  (%llu)\n",
-               100.0 * m.fe_resp_valid_idle / sc,  (unsigned long long)m.fe_resp_valid_idle);
-        printf("  -- of which / I$ boundary --\n");
-        printf("  I$ not producing:  %19.2f%%  (%llu)\n",
-               100.0 * m.fe_cache_not_prod / sc,   (unsigned long long)m.fe_cache_not_prod);
-        printf("  Req fired:         %19.2f%%  (%llu)\n",
-               100.0 * m.fe_req_fire / sc,         (unsigned long long)m.fe_req_fire);
-        printf("  Req refused by I$: %19.2f%%  (%llu)\n",
-               100.0 * m.fe_req_refused / sc,      (unsigned long long)m.fe_req_refused);
-        printf("  -- streamer internals --\n");
-        printf("  curValid:          %19.2f%%  (%llu)\n",
-               100.0 * get_perf_counter(25) / sc, (unsigned long long)get_perf_counter(25));
-        printf("  validMiss(bug):    %19.2f%%  (%llu)\n",
-               100.0 * get_perf_counter(26) / sc, (unsigned long long)get_perf_counter(26));
+
+        printf("\n--- Rename Stalls (%% of cycles decode refused) ---\n");
+        printf("  PRF exhausted:     %19.2f%%  (%llu)\n",
+               100.0 * m.ds_prf_exhausted / sc,    (unsigned long long)m.ds_prf_exhausted);
+        printf("  Branch mask full:  %19.2f%%  (%llu)\n",
+               100.0 * m.ds_branch_mask_full / sc, (unsigned long long)m.ds_branch_mask_full);
+        printf("  Rename collision:  %19.2f%%  (%llu)\n",
+               100.0 * m.ds_rename_collide / sc,   (unsigned long long)m.ds_rename_collide);
+
+        printf("\n--- Pipeline Flushes ---\n");
         {
-          unsigned long long fillActive = get_perf_counter(27);
-          unsigned long long fillStarts = get_perf_counter(28);
-          printf("  fill-active cyc:   %19.2f%%  (%llu)\n", 100.0 * fillActive / sc, fillActive);
-          printf("  fill starts:       %20llu   avg latency: %.1f cyc/fill\n",
-                 fillStarts, fillStarts ? (double)fillActive / fillStarts : 0.0);
+          double srb = static_cast<double>(safe_max1(m.retired_branch));
+          printf("  Retired branches:  %20llu\n", (unsigned long long)m.retired_branch);
+          printf("  Branch mispredict: %20llu   (%.2f%% of retired branches)\n",
+                 (unsigned long long)m.flush_branch, 100.0 * m.flush_branch / srb);
+          printf("  Coherent squash:   %20llu\n", (unsigned long long)m.flush_coherent);
         }
         printf("  -- ROB head stall split (B1) --\n");
         {

@@ -115,7 +115,11 @@ class requestScheduler extends Module{
     }
   }
   // Output connections
-  canAllocate := inorderQueue.write.ready && speculativeQueue.write.ready
+  // NOT `write.ready` (= !fullReg): that is one cycle of headroom for a
+  // producer whose requests are already several stages down the pipe, and the
+  // overshoot is dropped on the floor rather than stalled. See
+  // fifoBaseModule.hasHeadroom for the measured wedge.
+  canAllocate := inorderQueue.hasHeadroom && speculativeQueue.hasHeadroom
   fenceReady := inorderQueue.isEmpty && speculativeQueue.isEmpty
 
   //Resource optimization

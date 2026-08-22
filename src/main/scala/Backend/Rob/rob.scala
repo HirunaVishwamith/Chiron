@@ -88,7 +88,7 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
   // its ready bit, and the ROB head waits for a completion that can never come.
   // The machine then wedges SILENTLY and forever -- measured on the quad-core
   // Linux boot, where hart0 jumped to 0x81b03840 (past the end of allocated
-  // memory), filled all 16 ROB entries with 0x00000000 and stopped, ~1.23e9
+  // memory), filled the ROB with 0x00000000 and stopped, ~1.23e9
   // cycles in, with every functional unit idle.
   //
   // Retiring it with an exception instead turns that silent hang into a normal
@@ -156,10 +156,18 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
   val robAddrRelease = IO(Output(results.robAddrRelease.cloneType))
   robAddrRelease := results.robAddrRelease
 
-  // To avoid the rob address of an instruction not yet commited
-  // (i.e. commit.ready and !commit.fired) from being prematurely
-  // reused in a new instruction
-  when(commit.ready && !commit.fired) { allocate.ready := false.B }
+  // Head waiting to commit used to freeze ALL allocate, so the ROB drained
+  // behind every store and could not hide D$ latency. Stores still cannot
+  // allocate behind a waiting store: writeCommit/writeInstructionCommit are
+  // untagged 1-bit handshakes (extra stores in the data queue corrupt or
+  // deadlock). ALU/other fill is safe. Always refuse wrap into the live head.
+  when(commit.ready && !commit.fired) {
+    val wouldWrap = allocate.robAddr === commit.robAddr
+    val incomingStore = allocate.instruction(6, 4) === "b010".U
+    when(wouldWrap || !commit.isStore || incomingStore) {
+      allocate.ready := false.B
+    }
+  }
 
   val headValid = IO(Output(Bool()))
   headValid := fifo.io.deq.valid & results.io.deq.valid
@@ -169,7 +177,7 @@ class rob(addr_w: Int, numWritePorts: Int) extends Module{
 }
 
 object robVerilog extends App {
-  (new chisel3.stage.ChiselStage).emitVerilog(new rob(4,3))
+  (new chisel3.stage.ChiselStage).emitVerilog(new rob(configuration.robAddrWidth,3))
 }
 
 

@@ -156,8 +156,10 @@ class storeDataIssue extends Module{
   }
   robMapUpdate.ready := 1.B
 
-  // Debug structure, map sdFifo readPtr to robAddr
-  val sdAddrToRobAddr = Reg(Vec(fifo_depth, robMapUpdate.robAddr.cloneType))
+  // Maps each store-data FIFO slot to the ROB address that allocated it.
+  // Used to keep writeCommit.readyNow from draining a younger store while
+  // an older store is still the ROB head.
+  val sdAddrToRobAddr = RegInit(VecInit(Seq.fill(fifo_depth)(0.U(robAddrWidth.W))))
   when(fromDecode.valid && fromDecode.ready) {
     sdAddrToRobAddr(sdiFifo.allocatedAddr) := robMapUpdate.robAddr
   }
