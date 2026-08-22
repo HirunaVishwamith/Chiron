@@ -100,7 +100,7 @@ class robFifo[T <: Data ]( gen: T, depth: Int) extends Fifo(gen:
   // 218,231, and it is the one that wedges the core:
   //   cyc 26814119  pre{rd=14 wr=11 occ=13} modify=1 mVal=12 rel=14  <- retired
   //                 post{rd=14 wr=13 occ=15}                          <- grew
-  //   cyc 26814132  post{rd=14 wr=14 full=1 occ=16}                   <- FULL
+  //   cyc 26814132  post{rd=14 wr=14 full=1 occ=depth}                <- FULL
   // A permanently full ROB blocks allocation, so decode stalls, the scheduler
   // drains, branchCounter can never reach 0, and the interrupt-injection FSM
   // parks in waitToInjectInterr with fetch frozen (core.scala:1197) — the hart

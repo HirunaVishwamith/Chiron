@@ -46,9 +46,10 @@
 #include <cstdint>
 #include "Vsystem.h"
 
-// ROB depth = 2^configuration.robAddrWidth. If you change robAddrWidth, also
-// update Dcache/constants.scala:21 and the hardcoded 4.W in
-// storeDataIssue.scala:126 — and this constant.
+// ROB depth = 2^configuration.robAddrWidth. Keep this equal to that
+// (currently 5 → 32). The store-data FIFO and D-cache robAddr ports
+// already take the Scala parameter; only this host-side walker is a
+// compile-time constant because it indexes Verilated memReg[].
 #ifndef CHIRON_ROB_DEPTH
 #define CHIRON_ROB_DEPTH 16
 #endif

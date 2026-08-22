@@ -12,9 +12,9 @@ import common.configuration
 
 
 /**
- * Question: does the fetch unit need to communicate the predicted next address along with
- * instruction to the decode unit?
- * It will be 64-bit that will be rarely used(Only for branch instructions it will be used)
+ * Yes: decode records this with every CFI so predictedPCs is never empty at
+ * resolve. Waiting for the successor instruction to decode was a race that
+ * flushed correct predictions (Linux hart 0 BPred collapsed to ~3%).
  */
 
 /**
@@ -225,6 +225,9 @@ class fetch(val fifo_size: Int) extends Module {
 
   // issuing instructions to pc
   val toDecode = IO(new issueInstrFrmFetch)
+  // Fetch-time next-PC, captured with this instruction in PC_fifo. Side-band
+  // (not on issueInstrFrmFetch) so Frontend/ports.scala stays untouched.
+  val predictedNextPC = IO(Output(UInt(64.W)))
 
   // receiving results of branches in order
   val branchRes   = IO(new branchResToFetch)
@@ -261,19 +264,19 @@ class fetch(val fifo_size: Int) extends Module {
     else new legacyPredictor(fe.gshareCounterDepth, fe.gshareBtbSize))
   predictor.io.branchres <> branchRes
   predictor.io.curr_pc := PC
-  val PC_fifo = Module(new regFifo(UInt(128.W), fifo_size))
-
-  // Each in-flight fetch carries the RAS pointer as of its own push/pop, in the
-  // spare upper bits of the 128-bit fifo entry, so a redirect can roll the
-  // stack back to the last correct-path state. Everything downstream of the
-  // fifo must therefore take the low 64 bits explicitly.
+  // Each in-flight fetch carries: PC (64) | RAS checkpoint (ckptW) |
+  // predicted next-PC (64). A redirect rolls the stack back from the
+  // checkpoint; decode snapshots next-PC with every CFI.
   private val ckptW = configuration.frontend.rasCheckpointWidth
+  private val pcFifoW = 64 + ckptW + 64
+  val PC_fifo = Module(new regFifo(UInt(pcFifoW.W), fifo_size))
 
   //Connect PC fifo
-  PC_fifo.io.enq.bits := Cat(predictor.rasCheckpoint, PC)
+  PC_fifo.io.enq.bits := Cat(predictor.io.next_pc, predictor.rasCheckpoint, PC)
   PC_fifo.io.enq.valid := cache.req.valid & cache.req.ready
   PC_fifo.io.deq.ready := cache.resp.valid & cache.resp.ready
   toDecode.pc := PC_fifo.io.deq.bits(63, 0)
+  predictedNextPC := PC_fifo.io.deq.bits(64 + ckptW + 63, 64 + ckptW)
 
   //fence.I
   val is_fenceI = (toDecode.instruction(6,2) === "b00011".U) & (toDecode.instruction(14,13) === 0.U) & (toDecode.fired)
@@ -327,6 +330,9 @@ class fetch(val fifo_size: Int) extends Module {
   // Backend redirect wins. A TAGE override only fires the cycle after the
   // branch itself was requested, and blocks this cycle's I$ issue so the
   // bimodal successor is never fetched — agreement costs no bubble.
+  // Fetch-side JAL override (PC:=pc+jimm + block I$ while JAL at fifo head)
+  // was tried and reverted: Linux 15M produced empty UART, C0 IPC 0.043,
+  // 95% ROB stall. Decode's JAL issue-fence remains the backstop.
   when(redirect_bit===1.U) {
     PC := toDecode.expected.pc
   }.elsewhen(is_fenceI) {

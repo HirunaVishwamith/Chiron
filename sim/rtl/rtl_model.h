@@ -46,6 +46,13 @@
 
 class simulator {
  public:
+  // Optional mirror for guest console bytes. stdout stays THE console (see
+  // linux_sim.cpp's contract); this lets a harness additionally record what the
+  // kernel printed, so one debug log can carry the boot narrative and the
+  // harness/checkpoint bookkeeping on the same timeline. nullptr = off, and the
+  // stdout path is byte-for-byte unchanged either way.
+  void (*tx_mirror)(char) = nullptr;
+
   uint64_t      prev_pc   = 0;   // PC of the most recently committed instruction
   int           prev_hart = 0;   // hart that produced prev_pc (multi-hart step)
   uint64_t      last_commit_pc[4] = {};  // per-hart PC of last commit seen
@@ -399,7 +406,10 @@ class simulator {
     const char tx_b[4] = {(char)tb->core0OutChar_byte, (char)tb->core1OutChar_byte,
                           (char)tb->core2OutChar_byte, (char)tb->core3OutChar_byte};
     for (int p = 0; p < 4; ++p) {
-      if (tx_v[p] && !tx_prev_valid_[p]) std::cout << tx_b[p] << std::flush;
+      if (tx_v[p] && !tx_prev_valid_[p]) {
+        std::cout << tx_b[p] << std::flush;
+        if (tx_mirror) tx_mirror(tx_b[p]);
+      }
       tx_prev_valid_[p] = tx_v[p];
     }
 #endif

@@ -252,6 +252,11 @@ class advancedPredictor extends nextPCPredictor {
   // Only taken outcomes define a BTB target. Writing pc+4 for a not-taken
   // branch (as the original did) makes the BTB actively wrong the moment the
   // direction predictor says "taken".
+  //
+  // Predecode BTB fill of backward COND hung Linux after bootconsole
+  // (C0 ~0.66 / 98% BPred): a BTB-taken snapshot lets execute PASS on
+  // stale rs1/rs2. Do not fill from predecode. JAL/CALL still train at
+  // taken resolve (and JAL has the decode issue-fence).
   when(io.branchres.fired && takenR) {
     btbValid := btbValid | UIntToOH(btbIdx(io.branchres.pc), cfg.btbEntries)
     btbTags(btbIdx(io.branchres.pc))  := btbTag(io.branchres.pc)
@@ -387,22 +392,37 @@ class advancedPredictor extends nextPCPredictor {
   }
 
   // ──────────────────────────── next-PC selection ─────────────────────────
-  // Unconditional transfers are taken by definition; COND (and not-yet-classified
-  // PCs, which fall back to the old behaviour) ask the direction predictor.
-  val takenP = Mux(cfiType.alwaysTaken(typeP), true.B, dirTaken)
-  val useRAS = cfg.enableRAS.B && !rasEmpty &&
-               ((typeP === cfiType.RET.U) || (typeP === cfiType.RETCALL.U))
-
-  // A "taken" direction the BTB has no target for cannot actually be followed —
-  // fetch falls through to pc+4. The history must record what the frontend *did*,
-  // not what the direction predictor wished for, or a BTB miss on a not-taken
-  // branch desynchronises ghrSpec from ghrCommit without any redirect to repair
-  // it. With this definition the two agree whenever no redirect occurred, and a
-  // redirect reloads ghrSpec anyway.
-  val fetchedTaken = btbHitP && takenP
+  // BTB hit ⇒ taken. That is how every simple 1-wide OoO frontend uses a
+  // taken-target cache: the BTB is only written on a taken resolve, so a hit
+  // *is* the prediction. AND-ing with TAGE/bimodal (`takenP`) made Linux
+  // C0 BPred collapse to ~5%: cold bimodal is weakly not-taken, a CFI-table
+  // miss classifies the PC as NONE (which also asked the direction
+  // predictor), and a valid BTB entry was ignored — fetch issued pc+4,
+  // execute computed the taken target, flush. Loop-back paid that every
+  // iteration instead of once per loop exit.
+  //
+  // Fetching the BTB target means the snapshot decode hands execute *is*
+  // the taken path, so a PASS cannot commit sequential (the failure mode
+  // of the decode-side BTFNT fence). Cold JALs still go pc+4; decode's
+  // issue-fence redirects those.
+  //
+  // RAS vs BTB on returns: wrong-path CALL after a wrong-path RET overwrites
+  // rasMem at a live slot; pipelineFlush only restores the stack pointer, so
+  // the top can stay corrupt. 540k C0 flushes in the 15M window made RAS
+  // systematically lose to a BTB that *was* trained with the architectural
+  // return. Prefer RAS only when the BTB missed or the two agree; a BTB hit
+  // that disagrees is the last resolved return site. Shared-RET (one function,
+  // many callers) then behaves like a simple BTB rather than a clobbered stack.
+  //
+  // History records what fetch actually did (BTB hit or not), not what
+  // TAGE wished for, so ghrSpec stays aligned with the path in the fifo.
+  val rasEligible = cfg.enableRAS.B && !rasEmpty &&
+                    ((typeP === cfiType.RET.U) || (typeP === cfiType.RETCALL.U))
+  val useRAS = rasEligible && (!btbHitP || (rasTop === btbTargetP))
+  val fetchedTaken = btbHitP || useRAS
 
   io.next_pc := Mux(useRAS, rasTop,
-                Mux(fetchedTaken, btbTargetP, io.curr_pc + 4.U))
+                Mux(btbHitP, btbTargetP, io.curr_pc + 4.U))
 
   // ──────────────────── TAGE override (next cycle, disagreement only) ─────
   val ov = RegInit(0.U.asTypeOf(new tageOverrideSnap))
