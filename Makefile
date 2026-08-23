@@ -25,6 +25,7 @@ include mk/bins.mk
 include mk/bins_quad.mk
 include mk/bins_scale.mk
 include mk/run.mk
+include mk/ci_smp.mk
 
 .DEFAULT_GOAL := help
 

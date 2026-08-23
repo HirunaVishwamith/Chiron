@@ -833,3 +833,6 @@ done-pcs:   ## Print each benchmark's current exit PC (the *_DONE table in mk/be
 	        | awk '$$3=="exit"{print $$1}'); \
 	  [ -n "$$pc" ] && printf "%-10s exit = 0x%08x\n" "$$fam" $$((0x80000000 + 0x$$pc)); \
 	done
+
+$(BUILD)/llist_stall_probe.out: $(HARNESS)/probes/llist_stall_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/llist_stall_probe.cpp $(VSYS_LIB_FAST) -o $@

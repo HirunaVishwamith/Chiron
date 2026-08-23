@@ -137,15 +137,44 @@ object coreConfiguration {
     val ramBaseAddress = 0x0000000080000000L
     val ramHighAddress = 0x00000000ffffffffL
     val iCacheOffsetWidth = 4
-    // Direct-mapped I$ in iCacheRegisters.v: depth = 2^lineWidth lines,
-    // each 2^offsetWidth instructions. 6 → 64 lines × 16 × 4 B = 4 KB.
-    // 9 → 512 lines × 16 × 4 B = 32 KB. Matches the 32 KB 4-way D$
-    // (Dcache.constants.cacheSize). Do not grow D$ to 256 KB: fence.i
-    // walks every set×way and that would 8× the walker, which is the
-    // opposite of what Linux wants.
-    val iCacheLineWidth = 6
+    // Set-associative I$ in iCacheRegisters.v:
+    //   2^lineWidth sets × 2^wayWidth ways × 2^offsetWidth instructions.
+    //   4 / 2 / 4 → 16 sets × 4 ways × 16 × 4 B = 4 KB.
+    //
+    // Same 64 lines as the original direct-mapped 4 KB, now 4-way. Capacity
+    // was measured and is NOT the lever: 4 KB → 32 KB (8x) moved the Linux
+    // miss rate by ~7% and bought no IPC, because the I$ already ran a 99.35%
+    // hit rate and the residual misses are compulsory -- cold code spread over
+    // 3.4 MB of kernel text, which no size fixes. What actually cost ~130
+    // cycles per miss was queueing in the CCU (see Interconnect/ccu.scala).
+    //
+    // So this stays at the original 4 KB: iCacheRegisters.v is a REGISTER
+    // array, and 32 KB is 8x the flip-flops per core for nothing. The ways are
+    // free relative to that -- same storage, fewer conflict misses. Way
+    // selection lives inside the Verilog, so ICache.scala's hit test is
+    // unchanged.
+    //
+    // Unlike the D$ this costs nothing at fence.i: the I$ invalidate is a
+    // flash clear of the packed validBits vector, not a set×way walk. That is
+    // why the I$ may grow and the D$ may not.
+    val iCacheLineWidth = 4
+    val iCacheWayWidth = 2
     val iCacheTagWidth = 32 - iCacheLineWidth - iCacheOffsetWidth - 2
     val iCacheBlockSize = (1 << iCacheOffsetWidth) // number of instructions
+
+    // Next-line instruction prefetch (Icache/ICache.scala). Kernel text runs
+    // mostly straight-line, so when the fill for line L lands, L+1 is very
+    // likely the next miss -- fetch it while the core still has L's 16
+    // instructions to chew through, and keep running ahead up to
+    // iCachePrefetchDepth lines until a demand miss interrupts.
+    //
+    // Off by default: there is one fill engine and no MSHRs, so a demand miss
+    // raised while a prefetch is in flight has to wait for it, and a wrong
+    // prefetch is pure added load on a CCU that is the machine's throughput
+    // limit. Only worth enabling once that has headroom -- measure, do not
+    // assume.
+    val iCachePrefetch = false
+    val iCachePrefetchDepth = 4
     val dCacheDoubleWordOffsetWidth = 3
     val dCacheLineWidth = 6
     val dCacheTagWidth = 32 - dCacheLineWidth - dCacheDoubleWordOffsetWidth - 3
