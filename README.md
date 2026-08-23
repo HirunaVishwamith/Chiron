@@ -114,7 +114,7 @@ flowchart LR
 | Issue queue | 8 entries, centralized |
 | Commit width | 1-wide (decode is also 1-wide) |
 | Divider | Radix-4 (2 bits/cycle), clz-normalized, /0 /1 /small early-out |
-| L1 I-Cache | Direct-mapped · 64 lines · 16-instr (4 KB) |
+| L1 I-Cache | 4-way · 16 sets · 16-instr lines (4 KB) |
 | L1 D-Cache | 4-way · 256 sets · 64-byte lines (64 KB) |
 | Branch predictor | Bimodal + BTB + 4×512 TAGE |
 | Clock target | 75 MHz |
@@ -274,13 +274,13 @@ make profile-all-sc              # → build/profile_results/<fam>-s<N>.json + c
 
 | Benchmark | Cycles | IPC | Branch Acc | D$ Miss | ROB stall | DRAM RD BW |
 |---|---|---|---|---|---|---|
-| matmul-s1 | 478 849 | **0.649** | 97.1 % | 0.39 % | 26.1 % | 1.05 MB/s |
-| filter-s1 | 445 745 | **0.532** | 91.1 % | 3.32 % | 34.9 % | 3.61 MB/s |
-| histo-s1 | 462 175 | **0.346** | 99.97 % | 4.04 % | 52.8 % | 4.81 MB/s |
-| vvadd-s1 | 64 369 | **0.294** | 99.7 % | 9.30 % | 65.7 % | 7.68 MB/s |
-| csaxpy-s1 | 55 275 | **0.262** | 85.6 % | 10.22 % | 53.8 % | 6.86 MB/s |
+| matmul-s1 | 469 381 | **0.662** | 97.1 % | 0.39 % | 24.6 % | 1.07 MB/s |
+| filter-s1 | 414 717 | **0.572** | 91.1 % | 3.31 % | 29.5 % | 3.87 MB/s |
+| histo-s1 | 428 813 | **0.373** | 100.0 % | 4.04 % | 51.4 % | 5.18 MB/s |
+| vvadd-s1 | 54 271 | **0.349** | 99.7 % | 9.30 % | 58.9 % | 9.11 MB/s |
+| csaxpy-s1 | 47 717 | **0.303** | 85.6 % | 10.22 % | 44.9 % | 7.95 MB/s |
 
-> Single-core IPC sits at 0.26–0.65 against a hard 1.0 ceiling (decode, issue
+> Single-core IPC sits at 0.30–0.66 against a hard 1.0 ceiling (decode, issue
 > and commit are each 1-wide). **The ordering is now set by memory, not by
 > branches.** Accuracy is 85 % or better everywhere at `s1` and above 97 % on
 > three of the five families, so the ROB-stall column tracks the D$ miss column
@@ -376,54 +376,55 @@ family at every scale, single-core and quad-core.
 > off-by-one trained the right entry by accident — which is why accuracy used to
 > scale *backwards* with BTB size. Fixing it moved branch accuracy from as low
 > as 43.6 % to **85–100 %** and aggregate quad-core IPC from **0.77–2.27** to
-> **1.27–2.54**. Compare against this sweep, not the old one.
+> **1.37–2.63**. Compare against this sweep, not the old one.
 
 **Quad-core aggregate IPC, every family and scale:**
 
 | family | s1 | s2 | s3 | s4 | s5 |
 |---|---|---|---|---|---|
-| matmul | 2.157 | 2.467 | **2.537** | — | — |
-| filter | 1.849 | 1.905 | 1.893 | 1.893 | 1.893 |
-| histo  | 1.486 | 1.447 | 1.622 | 1.568 | 1.581 |
-| vvadd  | 1.344 | 1.405 | 1.440 | 1.448 | 1.468 |
-| csaxpy | 1.267 | 1.294 | 1.367 | 1.390 | 1.369 |
+| matmul | 2.310 | 2.566 | **2.634** | — | — |
+| filter | 1.970 | **2.017** | 2.003 | 2.003 | 2.003 |
+| histo  | 1.595 | 1.601 | 1.724 | **1.732** | 1.717 |
+| vvadd  | 1.512 | 1.583 | 1.601 | 1.603 | **1.641** |
+| csaxpy | 1.369 | 1.410 | 1.458 | 1.472 | **1.472** |
 
-Single-core IPC spans 0.249–0.684 over the same 46 runs (decode, issue and
+Single-core IPC spans 0.293–0.692 over the same 46 runs (decode, issue and
 commit are all 1-wide, so 1.0 is the per-core ceiling).
 
 ### vvadd-s1-q4 (vector-vector add, all 4 cores)
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **1.344** | 0.196 | ~0.383 |
-| Instructions retired | 83 514 | 12 195 | ~23 773 each |
-| Max cycles | 62 129 | — | — |
+| **IPC** | **1.512** | 0.259 | ~0.355 |
+| Instructions retired | 71 467 | 12 195 | ~19 757 each |
+| Max cycles | 47 255 | — | — |
 | Branch accuracy | — | 99.6 % | ~99.9 % |
-| D-cache miss rate | — | 14.8 % | ~3.5 % |
-| ROB stall % | — | 76.4 % | ~30.9 % |
-| Decode efficiency | — | 23.6 % | ~69.1 % |
+| D-cache miss rate | — | 14.8 % | ~3.7 % |
+| ROB stall % | — | 68.4 % | ~21.6 % |
+| Decode efficiency | — | 31.6 % | ~78.4 % |
 
 > Core 0 acts as the coordinator (barrier + result check), hence its lower IPC
 > and high ROB stall fraction. Cores 1–3 execute the compute kernel.
 > vvadd-s1-q4 is only 62 K cycles end to end, so fixed startup cost is a large
-> share of it; `vvadd-s5-q4` reaches **1.468** aggregate IPC on the same code.
+> share of it; `vvadd-s5-q4` reaches **1.641** aggregate IPC on the same code.
 
 ### histo-s1-q4 (histogram, all 4 cores)
 
 | Metric | Aggregate | Core 0 | Cores 1–3 |
 |---|---|---|---|
-| **IPC** | **1.486** | 0.247 | ~0.413 |
-| Instructions retired | 600 929 | 99 883 | ~167 015 each |
-| Max cycles | 404 273 | — | — |
-| Branch accuracy | — | 97.7 % | ~98.1 % |
-| D-cache miss rate | — | 6.8 % | ~1.2 % |
-| ROB stall % | — | 66.0 % | ~17.7 % |
+| **IPC** | **1.595** | 0.284 | ~0.434 |
+| Instructions retired | 561 423 | 99 883 | ~153 846 each |
+| Max cycles | 352 073 | — | — |
+| Branch accuracy | — | 97.7 % | ~97.8 % |
+| D-cache miss rate | — | 6.4 % | ~1.2 % |
+| ROB stall % | — | 62.4 % | ~13.5 % |
+| Decode efficiency | — | 34.3 % | ~82.0 % |
 
 > histo used to be the weakest family precisely because it was the one hurt most
 > by the training bug: its scatter kernel's loop bodies are too long for
 > `pc(k+1) == pc(k)` to mask an off-by-one, so the worker harts predicted at
 > **43.6 %** and the family sat at 0.768 aggregate IPC. With the BTB trained on
-> the right PC they run at ~98 % and the family is at **1.486** — a 93 % gain,
+> the right PC they run at ~98 % and the family is at **1.595** — a 108 % gain,
 > the largest in the suite.
 
 ---
@@ -515,6 +516,7 @@ sit above it:
 | Gate | Question it answers |
 |---|---|
 | `make ci-check` | Did the *microarchitecture* stay self-consistent? Per-cycle assertions (`sim/harness/invariants.h`) catch a completion landing on a ROB slot speculation already reallocated — the bug shape behind four separate wedges in this design. |
+| `make ci-smp` | Do the *SMP primitives* still hold? The benchmarks above are data-parallel — the harts share memory but barely contend for it. This runs the micros that do contend: cross-hart atomics, seqlocks, I-cache coherence, the illegal-instruction trap. They existed before but only ever ran by hand, so nothing stopped a commit that broke them. `mt-llist` is built but **held out of the gate** — see `CI_SMP_HOLD` in `mk/ci_smp.mk` for why. |
 | `make linux-check` | Does it still survive a *kernel*? The same assertions, but on a booting Linux instead of five numeric kernels — plus a check that no D-cache request was silently dropped. A green benchmark suite does not validate a speculation-path change. |
 | `make stress-sweep` | Seeded constrained-random programs aimed at the speculation corners the directed benchmarks never reach (divides in branch shadows, speculative MMIO, cross-hart AMO/LR-SC). |
 
@@ -564,17 +566,18 @@ parallel and compare every retired instruction.
 
 | Run | Cycles | Approx wall time |
 |---|---|---|
-| `make profile-sweep` (all 46 configs) | 72 954 022 | ~25 min at `PSWEEP_JOBS=2` |
-| matmul-s3 (single-core, longest run) | 27 975 789 | ~11 min |
-| matmul-s3-q4 | 7 941 963 | ~3 min |
-| filter-s5 / filter-s5-q4 | 3.0 M / 1.6 M | ~72 s / ~38 s |
-| vvadd-s1-q4 (shortest) | 62 129 | ~1.5 s |
+| `make profile-sweep` (all 46 configs) | 68 241 222 | ~23 min at `PSWEEP_JOBS=2` |
+| matmul-s3 (single-core, longest run) | 27 634 787 | ~11 min |
+| matmul-s3-q4 | 7 565 247 | ~3 min |
+| filter-s5 / filter-s5-q4 | 2.7 M / 1.4 M | ~65 s / ~32 s |
+| vvadd-s1-q4 (shortest) | 47 255 | ~1.1 s |
 | Full quad-core Linux boot to login | ~3.06 G | ~21 h |
 
-> The sweep's cycle total fell from 100 268 018 to 72 954 022 for identical
-> binaries — the same 46 programs, 27 % fewer cycles. That drop *is* the
-> branch-training fix, and it is why the wall times above no longer match any
-> figure published before 2026-08-22.
+> The sweep's cycle total fell from 100 268 018 to 68 241 222 for identical
+> binaries — the same 46 programs, 32 % fewer cycles. Two changes account for
+> it: the branch-training fix, and the CCU response-FSM rewrite that turned the
+> coherence unit from a relay into a pipeline. The wall times above match no
+> figure published before 2026-08-23.
 
 **`PSWEEP_JOBS` is not `nproc`.** The fast model is Verilated with
 `--threads $(VTHREADS)`, so one simulation already occupies `VTHREADS` cores and
@@ -610,6 +613,8 @@ this; override only if your host is bigger than the arithmetic.
 | `make gate` | Everyday gate: lockstep vvadd-s1 + vvadd-q4 vs baseline |
 | `make compare` | Diff `build/profile_results` against `testdata/baseline/q4` |
 | `make smp-repro` | Illegal-instruction trap + cross-hart `fence.i` |
+| `make ci-smp` | SMP/coherence gate: 7 atomics & coherence micros from committed bins (runs in CI) |
+| `make ci-smp-refresh` | Rebuild those bins and regenerate `mk/ci_smp_done.mk` (needs the RISC-V toolchain) |
 | `make linux-check` | Pre-boot gate: per-cycle invariants **on a booting kernel** + D-cache request accounting (`LINUX_CHECK_CYCLES`) |
 | `make uartrx-test` | Console-input (uartlite RX) round trip through the RTL |
 | `make profile BENCH=…` | Single-core cycle-accurate profile (fast model) |

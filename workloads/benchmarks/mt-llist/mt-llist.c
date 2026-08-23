@@ -33,6 +33,31 @@
 //   -DPUSH_CAS=1 (default) producers publish with cmpxchg  (the Linux shape)
 //   -DPUSH_CAS=0           producers publish with amoswap  (control: same-atomic
 //                          racing, which mt-lrsc-style tests already cover)
+//
+//--------------------------------------------------------------------------
+// LIVENESS (2026-08-23). The first version of this test hung on correct RTL,
+// for two reasons that both presented as an indistinguishable 120M-cycle
+// timeout. Both are fixed here; read this before "fixing" a hang in the RTL.
+//
+// 1. The consumer drained in an unthrottled loop, so hart 0 issued an
+//    amoswap.d on head.first every ~7 instructions, forever. RISC-V only
+//    guarantees forward progress for a constrained LR/SC sequence when no
+//    other hart writes the reservation set between the LR and the SC, so a
+//    peer's sc.d was free to fail indefinitely -- a spec-legal livelock, not
+//    an RTL bug. It is also not what it claimed to model: Linux calls
+//    llist_del_all() once per IPI and never spins on it. The consumer now
+//    peeks with a plain load and only swaps when there is something to take,
+//    so an idle consumer contributes no AMO traffic at all.
+//
+//    This made the test *anti*-correlated with machine quality: a better
+//    branch predictor tightened hart 0's drain loop, raised its AMO rate, and
+//    starved the producers harder. Two real branch-prediction improvements
+//    were nearly reverted chasing it.
+//
+// 2. WAIT_CAP was larger than the harness cycle budget, so the fail_hart
+//    escape was dead code and a genuinely lost entry could only ever surface
+//    as a hang rather than the clean "lost=N" this test exists to report. It
+//    is now a no-progress watchdog, sized to fire well inside the budget.
 //**************************************************************************
 
 #include "util.h"
@@ -46,7 +71,30 @@ extern void exit(int status);
 #endif
 
 #define NODES_PER_PRODUCER 512
-#define WAIT_CAP           40000000UL
+
+// No-progress watchdog: consecutive idle peeks with the queue empty, reset on
+// every drain. It exists so a lost entry reports itself as "lost=N" and exits
+// instead of dying as an anonymous harness timeout.
+//
+// Sized from the run, not from guesswork: a healthy run is ~1.9M cycles end to
+// end and the idle poll below cannot retire in under ~4 cycles on this 1-wide
+// machine, so consecutive idle cannot exceed ~475K. 4M leaves an order of
+// magnitude of headroom while still bounding a genuine wedge.
+//
+// Resist the temptation to make this smarter by watching a producer-side
+// counter. Two attempts did exactly that -- one polling pushed[], one polling
+// producers_done -- and BOTH hung the test outright, because the consumer then
+// holds a line producers need Exclusive, and .bss placement is not declaration
+// order so even a rarely-written counter can share a line with a hot one. The
+// idle path must read head.first and nothing else.
+#define WAIT_CAP           4000000UL
+
+// A node published by the amoswap control is visible at the head *before* its
+// next pointer is written, so the consumer must not read a next field that its
+// producer has not filled in yet. Producers stamp this sentinel before
+// publishing and overwrite it immediately after; the consumer waits for it to
+// clear. Unused when PUSH_CAS=1, where the CAS lets next be written first.
+#define NEXT_BUSY          ((volatile struct node *)~0UL)
 
 // A node is a whole cache line so this measures the atomics on the shared head,
 // not false sharing between the nodes themselves.
@@ -85,7 +133,17 @@ static int llist_add(node_t *n)
       return first == 0UL;
   }
 #else
+  // A single xchg cannot publish a Treiber node safely: the old head is not
+  // known until after the swap has already made n reachable, so there is no
+  // point at which next can be filled in first. Publishing it raw truncates
+  // the chain whenever the consumer drains inside that window, losing every
+  // node behind it -- which this test would then report as an RTL lost-update.
+  // Stamp the sentinel before publishing and clear it right after; the
+  // consumer waits it out.
+  n->next = NEXT_BUSY;
+  __sync_synchronize();
   unsigned long first = __sync_lock_test_and_set(&head.first, (unsigned long)n);
+  __sync_synchronize();
   n->next = (volatile struct node *)first;
   return first == 0UL;
 #endif
@@ -125,19 +183,38 @@ void thread_entry(int cid, int nc)
 
   if (cid == 0) {
     // Consumer: drain until every produced node has been accounted for.
-    unsigned long spin = 0;
+    unsigned long idle = 0;
     while (popped_total < expected) {
+      // Peek with a plain load. Swapping unconditionally would put an AMO on
+      // head.first every few instructions and starve the producers' lr/sc --
+      // see the LIVENESS note at the top. An idle consumer must be silent on
+      // the contended line.
+      // The idle path touches NOTHING a producer writes except head.first
+      // itself. Two earlier watchdogs polled a second shared word here --
+      // pushed[] (bumped on all 1536 pushes) and then producers_done -- and
+      // both starved the producers outright: .bss placement is not
+      // declaration order, so a "cheap" counter can share a 64-byte line with
+      // a hot one, and either way the consumer holds that line Shared while
+      // producers need it Exclusive. Both variants hung. Keep this loop
+      // reading one word and counting in a register.
+      if (head.first == 0UL) {
+        if (++idle > WAIT_CAP) { fail_hart[0] = 1; break; }
+        continue;
+      }
+
       node_t *n = llist_del_all();
+      idle = 0;                       // a drain is progress
       while (n) {
-        node_t *next = (node_t *)n->next;
+        // Wait out a producer that has published but not yet linked (the
+        // amoswap control only; the CAS path never stores the sentinel).
+        volatile struct node *nx;
+        while ((nx = n->next) == NEXT_BUSY)
+          ;
+        node_t *next = (node_t *)nx;
         if (n->owner < 4UL && n->seq < (unsigned long)NODES_PER_PRODUCER)
           seen[n->owner][n->seq]++;
         popped_total++;
         n = next;
-      }
-      if (++spin > WAIT_CAP) {
-        fail_hart[0] = 1;
-        break;
       }
     }
   } else {
@@ -148,7 +225,14 @@ void thread_entry(int cid, int nc)
     __sync_fetch_and_add(&producers_done, 1);
   }
 
-  barrier(nc);
+  // Do NOT join the barrier when the watchdog fired. It fires precisely when
+  // producers are not making progress, which means they are still spinning in
+  // llist_add and will never arrive here -- waiting for them would block hart 0
+  // forever and turn the diagnosis we just computed back into the anonymous
+  // hang this watchdog exists to prevent. Producers that did finish stay parked
+  // at the barrier; hart 0 reports and exits, which is what the harness reads.
+  if (!(cid == 0 && fail_hart[0]))
+    barrier(nc);
 
   if (cid != 0)
     exit(2);
@@ -171,12 +255,21 @@ void thread_entry(int cid, int nc)
   uart_send_integer((int)dup);
   uart_send_string(" cas=");
   uart_send_integer(PUSH_CAS);
+  uart_send_string(" stalled=");
+  uart_send_integer(fail_hart[0]);
   uart_send_string("\n");
 
   if (lost == 0UL && dup == 0UL && popped_total == expected && !fail_hart[0]) {
     uart_send_string("mt-llist: PASS\n");
     exit(0);
   }
-  uart_send_string("mt-llist: FAIL (queue lost or duplicated an entry)\n");
+  // Report rather than hang: the watchdog above guarantees we reach this even
+  // when entries went missing, so the failure names itself instead of showing
+  // up as a harness timeout.
+  if (fail_hart[0])
+    uart_send_string("mt-llist: FAIL (consumer starved: queue empty, "
+                     "producers never published)\n");
+  else
+    uart_send_string("mt-llist: FAIL (queue lost or duplicated an entry)\n");
   exit(1);
 }
