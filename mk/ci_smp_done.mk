@@ -2,6 +2,7 @@
 # Each entry is <name>:<bin in bins/>:<exit PC>, read from the
 # linked ELF with nm so it cannot drift from the committed bin.
 CI_SMP_TESTS := \
+  mt-llist:mt-llist-q4.bin:0x80000bdc \
   mt-seqlock:mt-seqlock-q4.bin:0x80000ab4 \
   mt-spinwait:mt-spinwait-q4.bin:0x80000ab0 \
   mt-fencei:mt-fencei-q4.bin:0x80000ba0 \
@@ -10,6 +11,3 @@ CI_SMP_TESTS := \
   mt-icoh-cross:mt-icoh-cross-q4.bin:0x80000a64 \
   mt-icoh-self:mt-icoh-self-q4.bin:0x80000a68 \
 
-# Built and committed, but deliberately NOT gating CI (CI_SMP_HOLD
-# in mk/ci_smp.mk carries the reason for each):
-#   mt-llist:mt-llist-q4.bin:0x80000bdc

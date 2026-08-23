@@ -90,17 +90,10 @@ ci-smp: $(BUILD)/profile_quad_fast.out  ## SMP/coherence micros from committed b
 # the generated CI_SMP_TESTS so they do not gate CI. Hold a test out only with
 # a written reason, and only while it is genuinely unresolved.
 #
-#   mt-llist -- does not pass on current RTL. Its consumer no longer issues the
-#   AMO storm that made it a spec-legal livelock (see the LIVENESS note in
-#   mt-llist.c), yet three producers doing cmpxchg on one word still make no
-#   progress while the consumer only reads. CAS lock-freedom says one of them
-#   should win each round, so this now looks like an LR/SC forward-progress
-#   weakness in the RTL rather than a testbench defect. Run it by hand with
-#   `make llist-bin && build/profile_quad_fast.out --image bins/mt-llist-q4.bin`.
-#   Do NOT re-add it to the gate until it passes on a harness that was relinked
-#   against the RTL under test -- an earlier "pass" here was a stale
-#   profile_quad_fast.out still linked to a previous model.
-CI_SMP_HOLD := mt-llist
+# (Empty. mt-llist was held here while it hung; that turned out to be its own
+# CAS loop fencing itself into a livelock, not an RTL fault -- see the LIVENESS
+# note in mt-llist.c. It is back in the gate.)
+CI_SMP_HOLD :=
 
 CI_SMP_BUILD := \
   llist-bin:PUSH_CAS=1:mt-llist:mt-llist-q4.bin \

@@ -516,7 +516,7 @@ sit above it:
 | Gate | Question it answers |
 |---|---|
 | `make ci-check` | Did the *microarchitecture* stay self-consistent? Per-cycle assertions (`sim/harness/invariants.h`) catch a completion landing on a ROB slot speculation already reallocated — the bug shape behind four separate wedges in this design. |
-| `make ci-smp` | Do the *SMP primitives* still hold? The benchmarks above are data-parallel — the harts share memory but barely contend for it. This runs the micros that do contend: cross-hart atomics, seqlocks, I-cache coherence, the illegal-instruction trap. They existed before but only ever ran by hand, so nothing stopped a commit that broke them. `mt-llist` is built but **held out of the gate** — see `CI_SMP_HOLD` in `mk/ci_smp.mk` for why. |
+| `make ci-smp` | Do the *SMP primitives* still hold? The benchmarks above are data-parallel — the harts share memory but barely contend for it. This runs the eight micros that do contend: cross-hart atomics, LR/SC cmpxchg racing amoswap on one word, seqlocks, I-cache coherence, the illegal-instruction trap. They existed before but only ever ran by hand, so nothing stopped a commit that broke them. |
 | `make linux-check` | Does it still survive a *kernel*? The same assertions, but on a booting Linux instead of five numeric kernels — plus a check that no D-cache request was silently dropped. A green benchmark suite does not validate a speculation-path change. |
 | `make stress-sweep` | Seeded constrained-random programs aimed at the speculation corners the directed benchmarks never reach (divides in branch shadows, speculative MMIO, cross-hart AMO/LR-SC). |
 
@@ -613,7 +613,7 @@ this; override only if your host is bigger than the arithmetic.
 | `make gate` | Everyday gate: lockstep vvadd-s1 + vvadd-q4 vs baseline |
 | `make compare` | Diff `build/profile_results` against `testdata/baseline/q4` |
 | `make smp-repro` | Illegal-instruction trap + cross-hart `fence.i` |
-| `make ci-smp` | SMP/coherence gate: 7 atomics & coherence micros from committed bins (runs in CI) |
+| `make ci-smp` | SMP/coherence gate: 8 atomics & coherence micros from committed bins (runs in CI) |
 | `make ci-smp-refresh` | Rebuild those bins and regenerate `mk/ci_smp_done.mk` (needs the RISC-V toolchain) |
 | `make linux-check` | Pre-boot gate: per-cycle invariants **on a booting kernel** + D-cache request accounting (`LINUX_CHECK_CYCLES`) |
 | `make uartrx-test` | Console-input (uartlite RX) round trip through the RTL |

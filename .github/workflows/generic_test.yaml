@@ -212,12 +212,15 @@ jobs:
     # each exit symbol from the freshly linked ELF. Never hand-edit it.
     #
     # A note for whoever debugs a failure here: mt-llist is a liveness test as
-    # much as a correctness one, and it is sensitive to how hard hart 0 drives
-    # the contended cache line. It reports "stalled=1" if its consumer starved
-    # rather than hanging anonymously -- that means the producers never
-    # published, which is a starvation/forward-progress question, not
-    # necessarily a lost update. See the LIVENESS note in mt-llist.c before
-    # concluding the RTL dropped a store.
+    # much as a correctness one. It hung once already, and the cause was its own
+    # CAS loop -- GCC's __sync builtins plus a redundant __sync_synchronize()
+    # put two full fences between the load of head.first and the lr.d that must
+    # observe it, so the compare failed before sc.d was ever reached. The RTL
+    # was fine; mt-lrsc runs the same algorithm and passed throughout. Read the
+    # LIVENESS note in mt-llist.c before concluding the processor dropped a
+    # store, and check that build/profile_quad_fast.out is newer than
+    # sim/rtl/obj_dir_fast/Vsystem__ALL.a -- it links the model statically, so a
+    # stale harness silently tests the previous RTL.
     # =========================
     - name: Run SMP / coherence gate
       run: make ci-smp
