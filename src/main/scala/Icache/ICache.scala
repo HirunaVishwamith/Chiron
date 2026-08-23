@@ -17,8 +17,9 @@ import common.coreConfiguration._
 import os.write
 
 class iCacheRegisters extends BlackBox(
-  Map("offset_width " -> iCacheOffsetWidth,
-  "line_width" -> iCacheLineWidth)
+  Map("offset_width" -> iCacheOffsetWidth,
+      "line_width"   -> iCacheLineWidth,
+      "way_width"    -> iCacheWayWidth)
 ) with HasBlackBoxResource {
 
   val io = IO(new Bundle {
@@ -103,9 +104,31 @@ class iCache(
   val cacheMissed = !(results(next).tagValid && (results(next).address >> (32-iCacheTagWidth)) === results(next).tag) && results(next).valid 
   val arvalid , rready = RegInit(false.B)
 
+  // ---- next-line prefetch ------------------------------------------------
+  // One fill engine, no MSHRs: a prefetch and a demand miss cannot overlap. So
+  // a prefetch is only ever started when nothing is missing (`!cacheMissed`),
+  // and a demand miss raised mid-prefetch waits it out -- bounded by one line
+  // fill. `prefetchRun` caps how far ahead of the last demand fill the engine
+  // will stream, so a wrong-path run cannot keep fetching forever.
+  private val lineOffW  = 2 + iCacheOffsetWidth
+  private val lineBytes = 1 << lineOffW
+
+  val prefetchAddr  = RegInit(0.U(32.W))   // line-aligned target of the pending prefetch
+  val prefetchArmed = RegInit(false.B)     // a prefetch is wanted
+  val prefetchBusy  = RegInit(false.B)     // the fill in flight IS that prefetch
+  val prefetchRun   = RegInit(0.U(log2Ceil(iCachePrefetchDepth + 1).W))
+
+  val demandLine = Cat(results(next).address(31, lineOffW), 0.U(lineOffW.W))
+  val fillIdle   = !arvalid && !rready && !cacheFill.valid
+  // Stay inside RAM: instruction fetch from MMIO goes through peripheralHandler,
+  // and speculating a line fill at a device address would be a real bus access.
+  val prefetchInRam = prefetchAddr >= ramBaseAddress.U(32.W)
+  val startPrefetch = iCachePrefetch.B && prefetchArmed && !prefetchBusy &&
+                      !cacheMissed && fillIdle && !commitFence && prefetchInRam
+
   when(lowLevelMem.RREADY && lowLevelMem.RVALID) { cacheFill.block := Cat(lowLevelMem.RDATA, cacheFill.block(32*iCacheBlockSize-1, 64)) }
 
-  when(!arvalid) { arvalid := cacheMissed && !rready && !cacheFill.valid } 
+  when(!arvalid) { arvalid := (cacheMissed || startPrefetch) && !rready && !cacheFill.valid } 
   .otherwise { arvalid := !(lowLevelMem.ARVALID && lowLevelMem.ARREADY) }
 
   when(!rready) { rready := (lowLevelMem.ARVALID && lowLevelMem.ARREADY) }
@@ -114,10 +137,47 @@ class iCache(
   when(!cacheFill.valid) { cacheFill.valid := lowLevelMem.RLAST && lowLevelMem.RREADY && lowLevelMem.RVALID }
   .otherwise { cacheFill.valid := false.B }
 
+  // Every prefetch register is driven from this one chain. Chisel takes the
+  // last connection, so splitting these across several `when`s is how a
+  // released prefetch silently comes back to life.
+  when(cacheFill.valid) {
+    prefetchBusy := false.B
+    when(prefetchBusy) {
+      // a prefetch landed -- keep running ahead until the depth cap
+      when(prefetchRun < iCachePrefetchDepth.U) {
+        prefetchAddr  := prefetchAddr + lineBytes.U
+        prefetchArmed := true.B
+        prefetchRun   := prefetchRun + 1.U
+      }.otherwise {
+        prefetchArmed := false.B
+      }
+    }.otherwise {
+      // a demand fill landed -- restart the run one line past it
+      prefetchAddr  := demandLine + lineBytes.U
+      prefetchArmed := true.B
+      prefetchRun   := 1.U
+    }
+  }.elsewhen(startPrefetch) {
+    prefetchBusy  := true.B
+    prefetchArmed := false.B
+  }
+
+  // The line the fill in flight belongs to: the demand address, or the
+  // prefetch target when the engine is running ahead.
+  val fillAddr = Mux(prefetchBusy, prefetchAddr, results(next).address(31,0))
+  // A prefetch that happens to land on the very line the core is now stalled
+  // on still counts as a hit -- patch it through instead of refetching it.
+  val prefetchCoversDemand = prefetchBusy &&
+    (results(next).address(31, lineOffW) === prefetchAddr(31, lineOffW))
+  val fillFeedsDemand = !prefetchBusy || prefetchCoversDemand
+
   cache.io.write_block := cacheFill.block
   cache.io.write_in := cacheFill.valid
-  cache.io.write_line_index := results(next).address(iCacheLineWidth + iCacheOffsetWidth + 2, iCacheOffsetWidth + 2)
-  cache.io.write_tag := results(next).address(iCacheTagWidth + iCacheLineWidth + iCacheOffsetWidth + 2, iCacheLineWidth + iCacheOffsetWidth + 2)
+  // Exact ranges: fillAddr is 32 bits, and the tag is everything above the
+  // set index. The 64-bit form these replaced ran one bit past the top and
+  // leaned on Chisel truncating it back.
+  cache.io.write_line_index := fillAddr(iCacheLineWidth + iCacheOffsetWidth + 1, iCacheOffsetWidth + 2)
+  cache.io.write_tag := fillAddr(31, iCacheLineWidth + iCacheOffsetWidth + 2)
   cache.io.clock := clock
   cache.io.reset := reset
 
@@ -131,7 +191,7 @@ class iCache(
       results(next).tag := cache.io.tag
       results(next).tagValid := cache.io.tag_valid
     }
-  }.elsewhen(cacheMissed && cacheFill.valid) {
+  }.elsewhen(cacheMissed && cacheFill.valid && fillFeedsDemand) {
     results(next).instruction := (VecInit.tabulate(1 << iCacheOffsetWidth)(i => cacheFill.block(31 + 32*i, 32*i)))(results(next).address(iCacheOffsetWidth+2, 2))
     results(next).tag := results(next).address(iCacheTagWidth + iCacheLineWidth + iCacheOffsetWidth + 2, iCacheLineWidth + iCacheOffsetWidth + 2)
     results(next).tagValid := true.B
@@ -143,7 +203,7 @@ class iCache(
     results(buffered).instruction := cache.io.instruction
     results(buffered).tag := cache.io.tag
     results(buffered).tagValid := cache.io.tag_valid
-  }.elsewhen(cacheMissed && cacheFill.valid && (results(next).address(31, iCacheOffsetWidth + 2) === results(buffered).address(31, iCacheOffsetWidth + 2))) {
+  }.elsewhen(cacheMissed && cacheFill.valid && fillFeedsDemand && (results(next).address(31, iCacheOffsetWidth + 2) === results(buffered).address(31, iCacheOffsetWidth + 2))) {
     results(buffered).instruction := (VecInit.tabulate(1 << iCacheOffsetWidth)(i => cacheFill.block(31 + 32*i, 32*i)))(results(buffered).address(iCacheOffsetWidth+2, 2))
     results(buffered).tag := results(next).address(iCacheTagWidth + iCacheLineWidth + iCacheOffsetWidth + 2, iCacheLineWidth + iCacheOffsetWidth + 2)
     results(buffered).tagValid := true.B
@@ -188,7 +248,7 @@ class iCache(
   cache.io.invalidate_all := cachelinesUpdatesResp.fired
   // cache misses prompts requests to low level mem
 
-  lowLevelMem.ARADDR := Cat(results(next).address(31, 2+iCacheOffsetWidth), 0.U((2+iCacheOffsetWidth).W))
+  lowLevelMem.ARADDR := Cat(fillAddr(31, 2+iCacheOffsetWidth), 0.U((2+iCacheOffsetWidth).W))
   lowLevelMem.ARBURST := 1.U
   lowLevelMem.ARCACHE := 2.U
   lowLevelMem.ARID := iPort_id.U

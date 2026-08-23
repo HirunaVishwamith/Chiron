@@ -1660,111 +1660,117 @@ class ccu extends Module {
 				select_buff := "b1000".U(4.W)
 			}
 		}
-		is(2.U){//SYNC wait untill all the data available channels asserted its valid signal
+		is(2.U){//CAPTURE: take one beat and close the source handshake
+			// Was three states: SYNC(2) waited for the source beat, BUFFER(3)
+			// latched it, COMPLETE_HANDSHAKE_RCV(4) then asserted the source
+			// READY. That is 4 cycles per beat with RSP(5), so a 64 B line fill
+			// held the CCU for >=32 cycles -- and the CCU serves every L1 miss
+			// in the machine one at a time. At ~6.2 M misses per Linux boot that
+			// put it near saturation, and the queueing turned an L2 *hit* into
+			// ~130 cycles of frontend starvation.
+			//
+			// Latching the beat and asserting READY in the same cycle is exactly
+			// what one AXI/ACE transfer means: the guard below already proves
+			// VALID is up on every source we are about to read, so the data is
+			// on the bus this cycle. Collapsing them costs no beat and halves
+			// the loop to 2 cycles.
 			when((!crpbuf_3_0(0) || core0.CDVALID) && (!crpbuf_3_1(0) || core1.CDVALID) && (!crpbuf_3_2(0) || core2.CDVALID) && (!crpbuf_3_3(0) || core3.CDVALID) && (!crpbuf_3_4(0) || core4.CDVALID) && (!crpbuf_3_5(0) || core5.CDVALID) && (!crpbuf_3_6(0) || core6.CDVALID) && (!crpbuf_3_7(0) || core7.CDVALID) && (L2.RVALID || (tran_pbuf_3 === "b1011".U(4.W)))){
-				stateReg_12 := 3.U
+				stateReg_12 := 5.U
+				when(select_buff === "b0000".U(4.W)){
+					beat_buff := core0.CDDATA
+					last_buff := core0.CDLAST
+					rsp_buff := Cat(crpbuf_3_0(3),crpbuf_3_0(2),"b00".U(2.W))
+				}.elsewhen(select_buff === "b0001".U(4.W)){
+					beat_buff := core1.CDDATA
+					last_buff := core1.CDLAST
+					rsp_buff := Cat(crpbuf_3_1(3),crpbuf_3_1(2),"b00".U(2.W))
+				}.elsewhen(select_buff === "b0010".U(4.W)){
+					beat_buff := core2.CDDATA
+					last_buff := core2.CDLAST
+					rsp_buff := Cat(crpbuf_3_2(3),crpbuf_3_2(2),"b00".U(2.W))
+				}.elsewhen(select_buff === "b0011".U(4.W)){
+					beat_buff := core3.CDDATA
+					last_buff := core3.CDLAST
+					rsp_buff := Cat(crpbuf_3_3(3),crpbuf_3_3(2),"b00".U(2.W))
+				}.elsewhen(select_buff === "b0100".U(4.W)){
+					beat_buff := core4.CDDATA
+					last_buff := core4.CDLAST
+					rsp_buff := Cat(crpbuf_3_4(3),crpbuf_3_4(2),"b00".U(2.W))
+				}.elsewhen(select_buff === "b0101".U(4.W)){
+					beat_buff := core5.CDDATA
+					last_buff := core5.CDLAST
+					rsp_buff := Cat(crpbuf_3_5(3),crpbuf_3_5(2),"b00".U(2.W))
+				}.elsewhen(select_buff === "b0110".U(4.W)){
+					beat_buff := core6.CDDATA
+					last_buff := core6.CDLAST
+					rsp_buff := Cat(crpbuf_3_6(3),crpbuf_3_6(2),"b00".U(2.W))
+				}.elsewhen(select_buff === "b0111".U(4.W)){
+					beat_buff := core7.CDDATA
+					last_buff := core7.CDLAST
+					rsp_buff := Cat(crpbuf_3_7(3),crpbuf_3_7(2),"b00".U(2.W))
+				}.otherwise{
+					// Data from L2 (no peer supplied a copy). For ReadShared
+					// (tran 0001) force ACE IsShared=1 so the requester never
+					// installs Exclusive from a cold L2 fill. Otherwise two cores
+					// racing ReadShared→L2 both get Unique and silently diverge
+					// on later stores (seqlock / ktime_get hang). ReadUnique
+					// (0111) and other types keep IsShared=0.
+					beat_buff := L2.RDATA
+					last_buff := L2.RLAST
+					when(tran_pbuf_3 === "b0001".U(4.W)) {
+						rsp_buff := Cat("b1".U(1.W), "b0".U(1.W), L2.RRESP) // IsShared=1
+					}.otherwise {
+						rsp_buff := Cat("b0".U(1.W), "b0".U(1.W), L2.RRESP)
+					}
+				}
+
+				when(crpbuf_3_0(0)){
+					core0.CDREADY := true.B
+				}.otherwise{
+					core0.CDREADY := false.B
+				}
+				when(crpbuf_3_1(0)){
+					core1.CDREADY := true.B
+				}.otherwise{
+					core1.CDREADY := false.B
+				}
+				when(crpbuf_3_2(0)){
+					core2.CDREADY := true.B
+				}.otherwise{
+					core2.CDREADY := false.B
+				}
+				when(crpbuf_3_3(0)){
+					core3.CDREADY := true.B
+				}.otherwise{
+					core3.CDREADY := false.B
+				}
+				when(crpbuf_3_4(0)){
+					core4.CDREADY := true.B
+				}.otherwise{
+					core4.CDREADY := false.B
+				}
+				when(crpbuf_3_5(0)){
+					core5.CDREADY := true.B
+				}.otherwise{
+					core5.CDREADY := false.B
+				}
+				when(crpbuf_3_6(0)){
+					core6.CDREADY := true.B
+				}.otherwise{
+					core6.CDREADY := false.B
+				}
+				when(crpbuf_3_7(0)){
+					core7.CDREADY := true.B
+				}.otherwise{
+					core7.CDREADY := false.B
+				}
+				when((tran_pbuf_3 === "b1011".U(4.W))){
+					L2.RREADY := false.B
+				}.otherwise{
+					L2.RREADY := true.B
+				}
 			}.otherwise{
 				stateReg_12 := 2.U
-			}
-
-		}
-		is(3.U){//BUFFER
-			stateReg_12 := 4.U
-			when(select_buff === "b0000".U(4.W)){
-				beat_buff := core0.CDDATA
-				last_buff := core0.CDLAST
-				rsp_buff := Cat(crpbuf_3_0(3),crpbuf_3_0(2),"b00".U(2.W))
-			}.elsewhen(select_buff === "b0001".U(4.W)){
-				beat_buff := core1.CDDATA
-				last_buff := core1.CDLAST
-				rsp_buff := Cat(crpbuf_3_1(3),crpbuf_3_1(2),"b00".U(2.W))
-			}.elsewhen(select_buff === "b0010".U(4.W)){
-				beat_buff := core2.CDDATA
-				last_buff := core2.CDLAST
-				rsp_buff := Cat(crpbuf_3_2(3),crpbuf_3_2(2),"b00".U(2.W))
-			}.elsewhen(select_buff === "b0011".U(4.W)){
-				beat_buff := core3.CDDATA
-				last_buff := core3.CDLAST
-				rsp_buff := Cat(crpbuf_3_3(3),crpbuf_3_3(2),"b00".U(2.W))
-			}.elsewhen(select_buff === "b0100".U(4.W)){
-				beat_buff := core4.CDDATA
-				last_buff := core4.CDLAST
-				rsp_buff := Cat(crpbuf_3_4(3),crpbuf_3_4(2),"b00".U(2.W))
-			}.elsewhen(select_buff === "b0101".U(4.W)){
-				beat_buff := core5.CDDATA
-				last_buff := core5.CDLAST
-				rsp_buff := Cat(crpbuf_3_5(3),crpbuf_3_5(2),"b00".U(2.W))
-			}.elsewhen(select_buff === "b0110".U(4.W)){
-				beat_buff := core6.CDDATA
-				last_buff := core6.CDLAST
-				rsp_buff := Cat(crpbuf_3_6(3),crpbuf_3_6(2),"b00".U(2.W))
-			}.elsewhen(select_buff === "b0111".U(4.W)){
-				beat_buff := core7.CDDATA
-				last_buff := core7.CDLAST
-				rsp_buff := Cat(crpbuf_3_7(3),crpbuf_3_7(2),"b00".U(2.W))
-			}.otherwise{
-				// Data from L2 (no peer supplied a copy). For ReadShared
-				// (tran 0001) force ACE IsShared=1 so the requester never
-				// installs Exclusive from a cold L2 fill. Otherwise two cores
-				// racing ReadShared→L2 both get Unique and silently diverge
-				// on later stores (seqlock / ktime_get hang). ReadUnique
-				// (0111) and other types keep IsShared=0.
-				beat_buff := L2.RDATA
-				last_buff := L2.RLAST
-				when(tran_pbuf_3 === "b0001".U(4.W)) {
-					rsp_buff := Cat("b1".U(1.W), "b0".U(1.W), L2.RRESP) // IsShared=1
-				}.otherwise {
-					rsp_buff := Cat("b0".U(1.W), "b0".U(1.W), L2.RRESP)
-				}
-			}
-
-		}
-		is(4.U){//COMPLETE_HANDSHAKE_RCV
-			stateReg_12 := 5.U
-			when(crpbuf_3_0(0)){
-				core0.CDREADY := true.B
-			}.otherwise{
-				core0.CDREADY := false.B
-			}
-			when(crpbuf_3_1(0)){
-				core1.CDREADY := true.B
-			}.otherwise{
-				core1.CDREADY := false.B
-			}
-			when(crpbuf_3_2(0)){
-				core2.CDREADY := true.B
-			}.otherwise{
-				core2.CDREADY := false.B
-			}
-			when(crpbuf_3_3(0)){
-				core3.CDREADY := true.B
-			}.otherwise{
-				core3.CDREADY := false.B
-			}
-			when(crpbuf_3_4(0)){
-				core4.CDREADY := true.B
-			}.otherwise{
-				core4.CDREADY := false.B
-			}
-			when(crpbuf_3_5(0)){
-				core5.CDREADY := true.B
-			}.otherwise{
-				core5.CDREADY := false.B
-			}
-			when(crpbuf_3_6(0)){
-				core6.CDREADY := true.B
-			}.otherwise{
-				core6.CDREADY := false.B
-			}
-			when(crpbuf_3_7(0)){
-				core7.CDREADY := true.B
-			}.otherwise{
-				core7.CDREADY := false.B
-			}
-			when((tran_pbuf_3 === "b1011".U(4.W))){
-				L2.RREADY := false.B
-			}.otherwise{
-				L2.RREADY := true.B
 			}
 		}
 		is(5.U){//RSP
