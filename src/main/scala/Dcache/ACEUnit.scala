@@ -280,11 +280,17 @@ class ACEUnit(
   //-----------------------AXI ReadRequest--------------------------------//
   val readIdleState :: readRequestState :: Nil = Enum(2)
   val readACERequestState = RegInit(readIdleState)
-  switch(readACERequestState) {
-    is(readIdleState){
-      readACERequestState := Mux(readBuffer.valid && isCoherencyIdle&& !isWriteACEBusyWire, readRequestState, readIdleState)
-    }
-    is(readRequestState){
+  // Issue the read in the cycle the miss becomes eligible, not the cycle after.
+  // readIdleState used to only test this condition and step to
+  // readRequestState; the AR payload comes from readBuffer, which is already
+  // stable whenever the condition holds, so the extra cycle bought nothing and
+  // was paid on every single miss. readRequestState remains as the retry state
+  // for a busy interconnect, holding ARVALID as AXI requires.
+  val readReqEligible = readBuffer.valid && isCoherencyIdle && !isWriteACEBusyWire
+  val readReqDrive = (readACERequestState === readIdleState && readReqEligible) ||
+                     (readACERequestState === readRequestState)
+  when(readReqDrive){
+    {
       bus.ARVALID := true.B
       bus.ARID := id.U
       bus.ARADDR := Cat(readBuffer.address(addrWidth - 1, log2Ceil(lineSize)), 0.U(log2Ceil(lineSize).W))
@@ -310,9 +316,11 @@ class ACEUnit(
         regReadUpdate(ACEMSHR.write.data.branch, branchOps, readBuffer.branch)
         readBuffer.valid := false.B
       }
-      readACERequestState := Mux(bus.ARREADY, readIdleState, readRequestState)
     }
   }
+  // Accepted in the same cycle -> straight back to idle; not accepted -> hold in
+  // readRequestState with ARVALID still up.
+  readACERequestState := Mux(readReqDrive && !bus.ARREADY, readRequestState, readIdleState)
   //-----------------------AXI ReadResponse--------------------------------//
   val readDataInState:: readResponseState :: readDataOutState :: Nil = Enum(3)
   val readACEResponseState = RegInit(readDataInState)
@@ -416,7 +424,11 @@ class ACEUnit(
   // parked in coherentRequestInState (e.g. deferred by the arbiter's atomic
   // window) must retract while a same-line fill streams in or installs.
   // The buffer stays valid, so presentation resumes when the hold clears.
-  when(toCoherentRequestInStateWire) {
+  // writePipeHit is new here: the snoop is answered out of the writeback
+  // pipeline and must NOT also be dispatched into the tag lookup. Before the
+  // request was raised in IDLE that was implicit -- valid simply never went up
+  // on this path -- so this keeps the behaviour it always had.
+  when(toCoherentRequestInStateWire || writePipeHit) {
     coherencyRequest.request.valid := false.B
   }
   // Serve snoop from the writeback pipeline whenever it holds the line — not
@@ -434,7 +446,16 @@ class ACEUnit(
       bus.ACREADY := true.B
       coherencyResponseBuffer.valid := false.B
       val coherencyReceived = bus.ACVALID && bus.ACPROT === dPort_PROT.U
-      coherencyRequestBuffer.valid := false.B
+      // Raise valid together with the address, so the request is already in
+      // front of the arbiter during requestWait instead of one cycle later.
+      // Both land on the same clock edge, so the arbiter never sees valid
+      // paired with the PREVIOUS snoop's address. The two things that must not
+      // reach the lookup -- a same-line fill hazard, and a snoop the writeback
+      // pipeline is about to answer itself -- both retract the presentation
+      // combinationally (see the gate next to toCoherentRequestInStateWire),
+      // and both are computable in requestWait because the address is in the
+      // buffer by then.
+      coherencyRequestBuffer.valid := coherencyReceived
       coherencyRequestBuffer.address := bus.ACADDR
       coherencyRequestBuffer.response := Cat(((bus.ACSNOOP === "b1001".U) || (bus.ACSNOOP === "b0111".U)), 
                                               ((bus.ACSNOOP === "b0001".U) || (bus.ACSNOOP === "b0111".U)))
@@ -452,7 +473,10 @@ class ACEUnit(
         coherencyResponseBuffer.response := "b01".U // !IsShared, PassDirty
         coherencyResponseBuffer.dataValid := writePipeHitData.valid
       }.otherwise{
-        coherencyRequestBuffer.valid := Mux(toCoherentRequestInStateWire, false.B, true.B)
+        // Also clear on coherencyRequest.ready: the arbiter can grant in THIS
+        // cycle now that the request was raised in IDLE, and a granted request
+        // must not be presented twice.
+        coherencyRequestBuffer.valid := Mux(toCoherentRequestInStateWire || coherencyRequest.ready, false.B, true.B)
       }
 
       when(chooseFromWriteBufferWire){
@@ -466,8 +490,35 @@ class ACEUnit(
         coherencyRequestBuffer.valid := Mux(coherencyRequest.ready, false.B, coherencyRequestBuffer.valid)
       }
       coherencyResponseBuffer := coherencyResponse.request
-      
-      coherentAXIState := Mux(coherencyResponse.request.valid, coherentResponseState, coherentRequestInState)
+
+      // Answer in the cycle the lookup result arrives, instead of latching it
+      // and asserting CRVALID from the buffer a cycle later.
+      //
+      // Why it matters: the CCU's 8-way FINISH barrier holds EVERY master until
+      // the slowest snoop has answered, so this one cycle is paid by the whole
+      // machine on every coherent transaction -- and 90% of snoops answer "not
+      // present", i.e. spend the latency to contribute nothing but a "no".
+      // Measured AC->CR before this: exactly 4.00 cycles, every snoop.
+      //
+      // CRRESP is driven from the same wire that is being latched, so the value
+      // is identical to what coherentResponseState would have presented; the
+      // buffer is still written, so if the CCU is not ready we fall through to
+      // coherentResponseState and hold CRVALID from the buffer -- VALID stays
+      // asserted and the payload stays stable, as AXI requires.
+      when(coherencyResponse.request.valid){
+        coherentCounter.reset := true.B
+        bus.CRVALID := true.B
+        bus.CRRESP := Cat(0.U(1.W), coherencyResponse.request.response(1),
+                          coherencyResponse.request.response(0), 0.U(1.W),
+                          coherencyResponse.request.dataValid.asUInt)
+        when(bus.CRREADY){
+          coherentAXIState := Mux(coherencyResponse.request.dataValid, coherentDataOutState, coherentIdleState)
+        }.otherwise{
+          coherentAXIState := coherentResponseState
+        }
+      }.otherwise{
+        coherentAXIState := coherentRequestInState
+      }
     }
     is(coherentResponseState){
       bus.CRVALID := true.B

@@ -1267,14 +1267,14 @@ class chironCore extends Module {
   interconnect.io.L2.AWREADY := LLC.io.cache_axi.AWREADY
   LLC.io.cache_axi.AWID := interconnect.io.L2.AWID
   LLC.io.cache_axi.AWADDR := interconnect.io.L2.AWADDR
-  LLC.io.cache_axi.AWLEN := 7.U
+  LLC.io.cache_axi.AWLEN := 3.U   // 4 x 128b beats
 
   //AR
   LLC.io.cache_axi.ARVALID := interconnect.io.L2.ARVALID
   interconnect.io.L2.ARREADY := LLC.io.cache_axi.ARREADY
   LLC.io.cache_axi.ARID := interconnect.io.L2.ARID
   LLC.io.cache_axi.ARADDR := interconnect.io.L2.ARADDR
-  LLC.io.cache_axi.ARLEN := 7.U
+  LLC.io.cache_axi.ARLEN := 3.U   // 4 x 128b beats
 
   //W
   LLC.io.cache_axi.WVALID := interconnect.io.L2.WVALID

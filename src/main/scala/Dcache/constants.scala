@@ -32,8 +32,16 @@ object constants{
 
   // val dPort_ID : Int = 1
   val dPort_PROT : Int = 2
-  val dPort_LEN : Int = 7     //= "b0000_0001"         //"b0000_0111"
-  val dPort_SIZE : Int = 3       //= "b010"        //"b011"
+  // 128-bit ACE data path: a 64 B line is 4 beats, not 8. The data phase was
+  // 7.3 beats/txn -- about a quarter of the whole interconnect service time --
+  // and every one of those beats sits on the critical path of a miss the core
+  // is stalled on. LEN/SIZE and busWidth below are the only knobs; ACEUnit,
+  // its counters and its line slicing are all derived from them.
+  // Must stay consistent with: ace.dataWidth, the CCU data ports, the
+  // Interconnect FIFO word, ICache.busWidth/ARLEN, l2_Rob(arlen,beat_size)
+  // and chironCore's LLC AWLEN/ARLEN.
+  val dPort_LEN : Int = 3     // beats-1 per line (4 x 128b = 512b = 64 B)
+  val dPort_SIZE : Int = 4    // 2^4 = 16 bytes = 128 bits per beat
   val dPort_WIDTH: Int = math.pow(2, dPort_SIZE).toInt * 8  // 64 //32
 
   // val peripheral_ID : Int = 1

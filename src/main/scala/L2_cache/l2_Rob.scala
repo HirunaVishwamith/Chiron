@@ -16,7 +16,7 @@ class fifo_line (idWidth: Int = 3 , addressWidth: Int=32) extends Bundle{
 
 
 
-class l2_Rob(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 3, addressWidth: Int = 32, dataWidth: Int = 64,mem_dataWidth : Int = 256) extends Module {
+class l2_Rob(arlen:Int=3,beat_size:Int=128 ,addr_w: Int = 3,idWidth: Int = 3, addressWidth: Int = 32, dataWidth: Int = 128,mem_dataWidth : Int = 256) extends Module {
     val io = IO(new Bundle {  
     val axi = new AXIlite(idWidth,addressWidth,dataWidth)
     val Rob_out = new Rob_out(8,32)
@@ -28,7 +28,7 @@ class l2_Rob(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 3, add
     //input buffer
     val inputBuffer = RegInit(new Bundle {
         val addr = UInt(addressWidth.W)
-        val data = Vec(8, UInt(64.W))
+        val data = Vec(arlen+1, UInt(beat_size.W))
         val is_R = Bool()
         val valid = Bool()
         val id = UInt(idWidth.W)
@@ -65,7 +65,7 @@ class l2_Rob(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 3, add
     val readyOutputBuffer = WireDefault(true.B) 
 
     val concatData = Cat(inputBuffer.data.reverse)
-    val arlen_ = 7.U
+    val arlen_ = arlen.U
 
 
 
@@ -177,7 +177,7 @@ class l2_Rob(arlen:Int=7,beat_size:Int=64 ,addr_w: Int = 3,idWidth: Int = 3, add
                 inputBuffer.id := io.axi.ARID
                 inputBuffer.addr := io.axi.ARADDR
                 inputBuffer.is_R := true.B
-                inputBuffer.data := VecInit(Seq.fill(8)(0.U(64.W)))
+                inputBuffer.data := VecInit(Seq.fill(arlen+1)(0.U(beat_size.W)))
                 inputBuffer.valid := true.B
                 inputBufferState := full
             }

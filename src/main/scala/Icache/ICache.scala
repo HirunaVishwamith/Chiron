@@ -67,7 +67,7 @@ class iCache(
 
   val pendingInvalidate = RegInit(false.B)
 
-  val lowLevelMem = IO(new ACE(busWidth = 64))
+  val lowLevelMem = IO(new ACE(busWidth = 128))
 
   val next :: buffered :: servicing :: Nil = Enum(3)
   val requests = RegInit(VecInit(Seq.fill(3)(RegInit((new Bundle{
@@ -126,7 +126,7 @@ class iCache(
   val startPrefetch = iCachePrefetch.B && prefetchArmed && !prefetchBusy &&
                       !cacheMissed && fillIdle && !commitFence && prefetchInRam
 
-  when(lowLevelMem.RREADY && lowLevelMem.RVALID) { cacheFill.block := Cat(lowLevelMem.RDATA, cacheFill.block(32*iCacheBlockSize-1, 64)) }
+  when(lowLevelMem.RREADY && lowLevelMem.RVALID) { cacheFill.block := Cat(lowLevelMem.RDATA, cacheFill.block(32*iCacheBlockSize-1, 128)) }
 
   when(!arvalid) { arvalid := (cacheMissed || startPrefetch) && !rready && !cacheFill.valid } 
   .otherwise { arvalid := !(lowLevelMem.ARVALID && lowLevelMem.ARREADY) }
@@ -252,7 +252,7 @@ class iCache(
   lowLevelMem.ARBURST := 1.U
   lowLevelMem.ARCACHE := 2.U
   lowLevelMem.ARID := iPort_id.U
-  lowLevelMem.ARLEN := 7.U
+  lowLevelMem.ARLEN := 3.U   // 4 x 128b beats per 64 B line
   lowLevelMem.ARLOCK := 0.U
   lowLevelMem.ARPROT := 0.U
   lowLevelMem.ARQOS := 0.U

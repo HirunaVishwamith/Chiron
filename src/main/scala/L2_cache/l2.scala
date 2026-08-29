@@ -6,7 +6,7 @@ import chisel3.util._
 import java.rmi.server.UID
 
 
-class l2_mem(arlen:Int=7 ,addr_w: Int = 3,idWidth: Int = 3, addressWidth: Int = 32, dataWidth: Int = 64,mem_dataWidth : Int = 256)extends Module{
+class l2_mem(arlen:Int=7 ,addr_w: Int = 3,idWidth: Int = 3, addressWidth: Int = 32, dataWidth: Int = 128,mem_dataWidth : Int = 256)extends Module{
    val io = IO(new Bundle {  
     val cache_axi = new AXIlite(idWidth,addressWidth,dataWidth)
     val mem_read_axi = Flipped(new AXIlite1(idWidth, addressWidth, mem_dataWidth))
@@ -15,7 +15,9 @@ class l2_mem(arlen:Int=7 ,addr_w: Int = 3,idWidth: Int = 3, addressWidth: Int = 
 
 
   //front end rob structure
-  val l2_front_Rob = Module(new l2_Rob())
+  // Front port is 128-bit / 4 beats; the memory side stays 256-bit and the
+  // internal line stays 512-bit, so only the beat split changes.
+  val l2_front_Rob = Module(new l2_Rob(arlen = 3, beat_size = 128, dataWidth = 128))
 
   //cache
   val cache = Module (new Memory())

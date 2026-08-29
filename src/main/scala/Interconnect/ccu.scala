@@ -47,7 +47,10 @@ class ccu extends Module {
 	val deq = IO(new Bundle {
 		val ready = Output(Bool())
 		val valid = Input(Bool())
-		val data  = Input(UInt(71.W))
+		// 135-bit FIFO word: a W entry carries 128-bit WDATA in the field that
+		// AR/AW use for the address. ID (70,68) / ADDR (67,4) / TYPE (3,0) keep
+		// their positions; only the writeback-data slice widened.
+		val data  = Input(UInt(135.W))
 	})
 
 	// L2 AXI port
@@ -88,7 +91,7 @@ class ccu extends Module {
 		val WVALID = Output(Bool())
 		val WREADY = Input(Bool())
 		//metadata
-		val WDATA = Output(UInt(64.W))
+		val WDATA = Output(UInt(128.W))
 		//val WSTRB = Output(UInt((dataWidth/8).W))
 		val WLAST = Output(Bool())
 		//val WUSER = Output(UInt())
@@ -98,7 +101,7 @@ class ccu extends Module {
 		val RREADY = Output(Bool())
 		//metadata
 		val RID = Input(UInt(3.W))
-		val RDATA = Input(UInt(64.W))
+		val RDATA = Input(UInt(128.W))
 		val RRESP = Input(UInt(2.W))          //0:1 is AXI
 		val RLAST = Input(Bool())
 		//val RUSER = Input(UInt())
@@ -132,7 +135,7 @@ class ccu extends Module {
 		val CDVALID = Input(Bool())
 		val CDREADY = Output(Bool())
 		//metadata
-		val CDDATA = Input(UInt(64.W))
+		val CDDATA = Input(UInt(128.W))
 		val CDLAST = Input(Bool())
 
 		//R
@@ -140,7 +143,7 @@ class ccu extends Module {
 		val RREADY = Input(Bool())
 		//metadata
 		val RID = Output(UInt(3.W))
-		val RDATA = Output(UInt(64.W))
+		val RDATA = Output(UInt(128.W))
 		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
 		val RLAST = Output(Bool())
 		//val RUSER = Output(UInt())
@@ -174,7 +177,7 @@ class ccu extends Module {
 		val CDVALID = Input(Bool())
 		val CDREADY = Output(Bool())
 		//metadata
-		val CDDATA = Input(UInt(64.W))
+		val CDDATA = Input(UInt(128.W))
 		val CDLAST = Input(Bool())
 
 		//R
@@ -182,7 +185,7 @@ class ccu extends Module {
 		val RREADY = Input(Bool())
 		//metadata
 		val RID = Output(UInt(3.W))
-		val RDATA = Output(UInt(64.W))
+		val RDATA = Output(UInt(128.W))
 		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
 		val RLAST = Output(Bool())
 		//val RUSER = Output(UInt())
@@ -216,7 +219,7 @@ class ccu extends Module {
 		val CDVALID = Input(Bool())
 		val CDREADY = Output(Bool())
 		//metadata
-		val CDDATA = Input(UInt(64.W))
+		val CDDATA = Input(UInt(128.W))
 		val CDLAST = Input(Bool())
 
 		//R
@@ -224,7 +227,7 @@ class ccu extends Module {
 		val RREADY = Input(Bool())
 		//metadata
 		val RID = Output(UInt(3.W))
-		val RDATA = Output(UInt(64.W))
+		val RDATA = Output(UInt(128.W))
 		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
 		val RLAST = Output(Bool())
 		//val RUSER = Output(UInt())
@@ -258,7 +261,7 @@ class ccu extends Module {
 		val CDVALID = Input(Bool())
 		val CDREADY = Output(Bool())
 		//metadata
-		val CDDATA = Input(UInt(64.W))
+		val CDDATA = Input(UInt(128.W))
 		val CDLAST = Input(Bool())
 
 		//R
@@ -266,7 +269,7 @@ class ccu extends Module {
 		val RREADY = Input(Bool())
 		//metadata
 		val RID = Output(UInt(3.W))
-		val RDATA = Output(UInt(64.W))
+		val RDATA = Output(UInt(128.W))
 		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
 		val RLAST = Output(Bool())
 		//val RUSER = Output(UInt())
@@ -300,7 +303,7 @@ class ccu extends Module {
 		val CDVALID = Input(Bool())
 		val CDREADY = Output(Bool())
 		//metadata
-		val CDDATA = Input(UInt(64.W))
+		val CDDATA = Input(UInt(128.W))
 		val CDLAST = Input(Bool())
 
 		//R
@@ -308,7 +311,7 @@ class ccu extends Module {
 		val RREADY = Input(Bool())
 		//metadata
 		val RID = Output(UInt(3.W))
-		val RDATA = Output(UInt(64.W))
+		val RDATA = Output(UInt(128.W))
 		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
 		val RLAST = Output(Bool())
 		//val RUSER = Output(UInt())
@@ -342,7 +345,7 @@ class ccu extends Module {
 		val CDVALID = Input(Bool())
 		val CDREADY = Output(Bool())
 		//metadata
-		val CDDATA = Input(UInt(64.W))
+		val CDDATA = Input(UInt(128.W))
 		val CDLAST = Input(Bool())
 
 		//R
@@ -350,7 +353,7 @@ class ccu extends Module {
 		val RREADY = Input(Bool())
 		//metadata
 		val RID = Output(UInt(3.W))
-		val RDATA = Output(UInt(64.W))
+		val RDATA = Output(UInt(128.W))
 		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
 		val RLAST = Output(Bool())
 		//val RUSER = Output(UInt())
@@ -384,7 +387,7 @@ class ccu extends Module {
 		val CDVALID = Input(Bool())
 		val CDREADY = Output(Bool())
 		//metadata
-		val CDDATA = Input(UInt(64.W))
+		val CDDATA = Input(UInt(128.W))
 		val CDLAST = Input(Bool())
 
 		//R
@@ -392,7 +395,7 @@ class ccu extends Module {
 		val RREADY = Input(Bool())
 		//metadata
 		val RID = Output(UInt(3.W))
-		val RDATA = Output(UInt(64.W))
+		val RDATA = Output(UInt(128.W))
 		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
 		val RLAST = Output(Bool())
 		//val RUSER = Output(UInt())
@@ -426,7 +429,7 @@ class ccu extends Module {
 		val CDVALID = Input(Bool())
 		val CDREADY = Output(Bool())
 		//metadata
-		val CDDATA = Input(UInt(64.W))
+		val CDDATA = Input(UInt(128.W))
 		val CDLAST = Input(Bool())
 
 		//R
@@ -434,7 +437,7 @@ class ccu extends Module {
 		val RREADY = Input(Bool())
 		//metadata
 		val RID = Output(UInt(3.W))
-		val RDATA = Output(UInt(64.W))
+		val RDATA = Output(UInt(128.W))
 		val RRESP = Output(UInt(4.W))          //0:1 is AXI, 2:3 is ACE
 		val RLAST = Output(Bool())
 		//val RUSER = Output(UInt())
@@ -453,7 +456,10 @@ class ccu extends Module {
 	L2.AWID := deq.data(70,68)
 	L2.AWADDR := deq.data(67,4)
 	L2.WVALID := false.B
-	L2.WDATA := deq.data(67,4)
+	// Writeback data rides the same FIFO field as the address, which widened
+	// with the data path. ID (70,68), address (67,4) and type (3,0) are
+	// unchanged -- only this slice grew.
+	L2.WDATA := deq.data(131,4)
 	L2.WLAST := deq.data(0)
 
 	//Default values for L2 AR channel
@@ -521,6 +527,41 @@ class ccu extends Module {
 	deq.ready := false.B
 
   //*************************************************************************************************************************************************************************************************************************
+	// ==================== Snoop filter (directory) =========================
+	// See the block comment in the patch notes: may over-report presence, must
+	// never under-report it. Every unknown resolves to "snoop everyone".
+	val SF_SETS  = 256
+	val SF_WAYS  = 16                       // 4 D$ x 4 ways can collide in one set
+	val SF_TAGW  = 18                       // addr(31,14)
+	val SF_ENTW  = 1 + SF_TAGW + 8          // valid ## tag ## presence[8]
+	val SF_WORDW = SF_WAYS * SF_ENTW + 1    // + sticky per-set overflow bit
+	// Async-read Mem (same style as the request ringbuffer) so the lookup costs
+	// no extra pipeline stage: the snoop FSMs consult it combinationally in the
+	// cycle they would otherwise start a broadcast.
+	val sfMem = Mem(SF_SETS, UInt(SF_WORDW.W))
+
+	def sfIndex(a: UInt): UInt = a(13, 6)
+	def sfTag(a: UInt): UInt   = a(31, 14)
+	def sfWay(word: UInt, i: Int): UInt = word((i + 1) * SF_ENTW - 1, i * SF_ENTW)
+	def sfValid(e: UInt): Bool = e(SF_ENTW - 1)
+	def sfEntTag(e: UInt): UInt = e(SF_ENTW - 2, 8)
+	def sfPres(e: UInt): UInt  = e(7, 0)
+	def sfOverflow(word: UInt): Bool = word(SF_WORDW - 1)
+	def sfPack(ovf: Bool, ways: Seq[UInt]): UInt = Cat(ovf, Cat(ways.reverse))
+	def sfEnt(v: Bool, t: UInt, pres: UInt): UInt = Cat(v, t, pres)
+
+	// ---- update port ----------------------------------------------------------
+	val sfUpdValid = WireDefault(false.B)
+	val sfUpdAddr  = WireDefault(0.U(64.W))
+	val sfUpdCore  = WireDefault(0.U(3.W))
+	val sfUpdExcl  = WireDefault(false.B)   // ReadUnique/CleanUnique: others lose it
+
+	// Effectiveness is measured from outside: ccu_thruput_probe samples sfPeers
+	// once per dispatch (FSM_3 is in SNOOP for exactly one cycle). RTL counters
+	// were tried first and silently vanished -- FIRRTL prunes a register nothing
+	// reads, so they never reached the Verilog.
+
+
   //Handeling writebacks and writeevicts
   //FSM_1
 
@@ -553,6 +594,21 @@ class ccu extends Module {
 				stateReg_1 := 1.U
 			}
 			L2.AWVALID := true.B
+			// NO directory clear here, deliberately. A WriteBack on this port is not
+			// proof of an eviction: the fence.i clean walker also writes lines back
+			// while the L1 KEEPS them (writeBackWire.retain), and `retain` never
+			// leaves the D-cache -- it is not on the AW channel and not in the FIFO
+			// encoding, so the CCU genuinely cannot tell the two apart. Clearing
+			// presence for a retained line would let a later ReadUnique skip
+			// invalidating that cache and leave a live stale copy: silent corruption,
+			// and exactly the failure mode of the dual-Unique bug. The filter instead
+			// reclaims only via ReadUnique/CleanUnique (which really do invalidate
+			// every other copy), and over-reports presence otherwise -- the safe
+			// direction, costing a pointless snoop and nothing else.
+			//
+			// To reclaim on eviction properly, `retain` has to reach the CCU: widen the
+			// ringbuffer word and carry it on AW. Worth doing if directory pressure
+			// ever shows up as set overflow (ccu_thruput_probe prints the poison rate).
 		}
 		is(2.U){//DEQ_1
 			stateReg_1 := 3.U
@@ -793,20 +849,44 @@ class ccu extends Module {
     val stateReg_12 = RegInit(0.U(3.W))
 
 
+	// ---- lookup, for the transaction the snoop stage is about to broadcast ----
+	val sfLookWord = sfMem(sfIndex(addr_pbuf_2))
+	val sfLookWays = VecInit(Seq.tabulate(SF_WAYS)(i => sfWay(sfLookWord, i)))
+	val sfLookHit  = VecInit(sfLookWays.map(e => sfValid(e) && sfEntTag(e) === sfTag(addr_pbuf_2)))
+	val sfLookPres = Mux1H(sfLookHit, sfLookWays.map(sfPres))
+	// "Known absent" only when this set has never overflowed AND no way matches.
+	// Anything else -- overflow, or a hit -- falls back to the recorded presence
+	// or to all-ones, so the broadcast still happens.
+	val sfKnown    = !sfOverflow(sfLookWord)
+	val sfPeers    = Mux(!sfKnown, "hff".U(8.W),
+		           Mux(sfLookHit.reduce(_ || _), sfLookPres, 0.U(8.W)))
+
+
 	//FSM_3, 0000 : readNoSnoop, 0100 : read memory barrier, 0001: readshared, 0111: read unique, 1011 : clean unique
     switch(stateReg_3){
-		is(0.U){//IDLE
+		is(0.U){//IDLE: claim the head and issue the L2 read in the same cycle
+			// L2.ARADDR/ARID are wired straight off the FIFO head (see the defaults
+			// above), so the read address is already valid here -- the AR state existed
+			// only to raise ARVALID a cycle later. Issuing it now pulls the L2 lookup
+			// one cycle earlier on every read miss, which is also one more cycle of
+			// head start before FSM_12 asks for the first beat. AR stays as the retry
+			// state for a busy L2; ARVALID holds there, as AXI requires.
 			when(write_back){
 				stateReg_3 := 0.U
 			}.elsewhen(deq.valid && ((deq.data(3,0) === "b0001".U(4.W)) || (deq.data(3,0) === "b0111".U(4.W)) || (deq.data(3,0) === "b0000".U(4.W)))){
-				stateReg_3 := 1.U
+				L2.ARVALID := true.B
+				when(L2.ARREADY){
+					stateReg_3 := 2.U
+				}.otherwise{
+					stateReg_3 := 1.U
+				}
 			}.elsewhen(deq.valid && ((deq.data(3,0) === "b0100".U(4.W)) || (deq.data(3,0) === "b1011".U(4.W)))){
 				stateReg_3 := 2.U
 			}.otherwise{
 				stateReg_3 := 0.U
 			}
 		}
-		is(1.U){//AR
+		is(1.U){//AR: retry -- L2 was not ready when IDLE offered the address
 			when(!L2.ARREADY){
 				stateReg_3 := 1.U
 			}.otherwise{
@@ -814,28 +894,30 @@ class ccu extends Module {
 			}
 			L2.ARVALID := true.B
 		}
-		is(2.U){//BUFF_1
+		is(2.U){//BUFF_1 + DEQ: latch the request and pop it in the same cycle
+			// These were two states. Latching the head and asserting deq.ready together
+			// is just what one FIFO handshake is -- and the head cannot move underneath
+			// us, because FSM_1 only claims writeback/barrier entries and FSM_3 only
+			// claims read/upgrade entries, so whichever of the two owns the head keeps
+			// it until it pops. Splitting them only widened that window.
 			core_id_pbuf_1 := deq.data(70,68)
 			tran_pbuf_1 := deq.data(3,0)
 			addr_pbuf_1 := deq.data(67,4)
-			stateReg_3 := 3.U
-		}
-		is(3.U){//DEQ
 			deq_3 := true.B
 			stateReg_3 := 4.U
 		}
-		is(4.U){//SYNC
+		is(4.U){//SYNC: wait for the snoop stage, then hand off in the same cycle
+			// BUFF_2 was a state that did nothing but this copy. Same removal as the
+			// BUF states in the snoop FSMs. SNOOP (6) stays: the snoop FSMs key off
+			// stateReg_3 === 6, and pbuf_2 must be written before they look at it.
 			when(stateReg_4 === "b0000".U(4.W) && stateReg_5 === "b0000".U(4.W) && stateReg_6 === "b0000".U(4.W) && stateReg_7 === "b0000".U(4.W) && stateReg_8 === "b0000".U(4.W) && stateReg_9 === "b0000".U(4.W) && stateReg_10 === "b0000".U(4.W) && stateReg_11 === "b0000".U(4.W)){
-				stateReg_3 := 5.U
+				core_id_pbuf_2 := core_id_pbuf_1
+				tran_pbuf_2 := tran_pbuf_1
+				addr_pbuf_2 := addr_pbuf_1
+				stateReg_3 := 6.U
 			}.otherwise{
 				stateReg_3 := 4.U
 			}
-		}
-		is(5.U){//BUFF_2
-			core_id_pbuf_2 := core_id_pbuf_1
-			tran_pbuf_2 := tran_pbuf_1
-			addr_pbuf_2 := addr_pbuf_1
-			stateReg_3 := 6.U
 		}
 		is(6.U){//SNOOP
 			stateReg_3 := 0.U
@@ -858,6 +940,12 @@ class ccu extends Module {
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (addr_pbuf_3 === addr_pbuf_2)){
 				stateReg_4 := 8.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b000".U(3.W))){
+				stateReg_4 := 4.U
+			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !sfPeers(0)){
+				// Directory says this master cannot hold the line: skip AC/CR and
+				// go straight to the barrier. crpbuf_2_0 is already cleared below,
+				// which is exactly the "no data, not shared" answer the broadcast
+				// would have produced.
 				stateReg_4 := 4.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b000".U(3.W))){
 				stateReg_4 := 1.U
@@ -885,17 +973,18 @@ class ccu extends Module {
 			}
 
 		}
-		is(2.U){//CR_BUFF
-			when(!core0.CRVALID){
-				stateReg_4 := 2.U
+		is(2.U){//CR: latch the snoop response and close the handshake together
+			// Was CR_BUFF (wait for CRVALID, latch CRRESP) then CR (assert
+			// CRREADY) -- two cycles for one transfer. CRRESP is on the bus in
+			// the cycle CRVALID is high, so latching and acknowledging together
+			// is the whole handshake. Nothing else reads state 3, so it is gone.
+			when(core0.CRVALID){
+				crpbuf_2_0 := core0.CRRESP
+				core0.CRREADY := true.B
+				stateReg_4 := 4.U
 			}.otherwise{
-				stateReg_4 := 3.U
+				stateReg_4 := 2.U
 			}
-			crpbuf_2_0 := core0.CRRESP
-		}
-		is(3.U){//CR
-			core0.CRREADY := true.B
-			stateReg_4 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
 			when((stateReg_4 === "b0100".U(4.W)) && (stateReg_5 === "b0100".U(4.W)) && (stateReg_6 === "b0100".U(4.W)) && (stateReg_7 === "b0100".U(4.W)) && (stateReg_8 === "b0100".U(4.W)) && (stateReg_9 === "b0100".U(4.W)) && (stateReg_10 === "b0100".U(4.W)) && (stateReg_11 === "b0100".U(4.W)) ){
@@ -904,19 +993,20 @@ class ccu extends Module {
 				stateReg_4 := 4.U
 			}
 		}
-		is(5.U){//SYNC
+		is(5.U){//SYNC: wait for the response stage, then hand off in one cycle
+			// BUF was a separate state that did nothing but this copy. Doing it on
+			// the cycle the wait ends is free. RSP (7) stays a state of its own:
+			// FSM_12 keys its handoff off stateReg === 7, and pbuf_3 has to be
+			// written BEFORE it looks -- which is exactly what this ordering gives.
 			when(stateReg_12 === "b000".U(3.W)){
-				stateReg_4 := 6.U
+				core_id_pbuf_3 := core_id_pbuf_2	//This is done only in FSM_4
+				tran_pbuf_3 := tran_pbuf_2			//This is done only in FSM_4
+				addr_pbuf_3 := addr_pbuf_2			//This is done only in FSM_4
+				crpbuf_3_0 := crpbuf_2_0
+				stateReg_4 := 7.U
 			}.otherwise{
 				stateReg_4 := 5.U
 			}
-		}
-		is(6.U){//BUF
-			core_id_pbuf_3 := core_id_pbuf_2	//This is done only in FSM_4
-			tran_pbuf_3 := tran_pbuf_2			//This is done only in FSM_4
-			addr_pbuf_3 := addr_pbuf_2			//This is done only in FSM_4
-			crpbuf_3_0 := crpbuf_2_0
-			stateReg_4 := 7.U
 		}
 		is(7.U){//RSP
 			stateReg_4 := 0.U
@@ -950,6 +1040,12 @@ class ccu extends Module {
 				stateReg_5 := 8.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b001".U(3.W))){
 				stateReg_5 := 4.U
+			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !sfPeers(1)){
+				// Directory says this master cannot hold the line: skip AC/CR and
+				// go straight to the barrier. crpbuf_2_1 is already cleared below,
+				// which is exactly the "no data, not shared" answer the broadcast
+				// would have produced.
+				stateReg_5 := 4.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b001".U(3.W))){
 				stateReg_5 := 1.U
 			}.otherwise{
@@ -977,17 +1073,18 @@ class ccu extends Module {
 			}
 
 		}
-		is(2.U){//CR_BUFF
-			when(!core1.CRVALID){
-				stateReg_5 := 2.U
+		is(2.U){//CR: latch the snoop response and close the handshake together
+			// Was CR_BUFF (wait for CRVALID, latch CRRESP) then CR (assert
+			// CRREADY) -- two cycles for one transfer. CRRESP is on the bus in
+			// the cycle CRVALID is high, so latching and acknowledging together
+			// is the whole handshake. Nothing else reads state 3, so it is gone.
+			when(core1.CRVALID){
+				crpbuf_2_1 := core1.CRRESP
+				core1.CRREADY := true.B
+				stateReg_5 := 4.U
 			}.otherwise{
-				stateReg_5 := 3.U
+				stateReg_5 := 2.U
 			}
-			crpbuf_2_1 := core1.CRRESP
-		}
-		is(3.U){//CR
-			core1.CRREADY := true.B
-			stateReg_5 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
 			when((stateReg_4 === "b0100".U(4.W)) && (stateReg_5 === "b0100".U(4.W)) && (stateReg_6 === "b0100".U(4.W)) && (stateReg_7 === "b0100".U(4.W)) && (stateReg_8 === "b0100".U(4.W)) && (stateReg_9 === "b0100".U(4.W)) && (stateReg_10 === "b0100".U(4.W)) && (stateReg_11 === "b0100".U(4.W)) ){
@@ -996,16 +1093,17 @@ class ccu extends Module {
 				stateReg_5 := 4.U
 			}
 		}
-		is(5.U){//SYNC
+		is(5.U){//SYNC: wait for the response stage, then hand off in one cycle
+			// BUF was a separate state that did nothing but this copy. Doing it on
+			// the cycle the wait ends is free. RSP (7) stays a state of its own:
+			// FSM_12 keys its handoff off stateReg === 7, and pbuf_3 has to be
+			// written BEFORE it looks -- which is exactly what this ordering gives.
 			when(stateReg_12 === "b000".U(3.W)){
-				stateReg_5 := 6.U
+				crpbuf_3_1 := crpbuf_2_1
+				stateReg_5 := 7.U
 			}.otherwise{
 				stateReg_5 := 5.U
 			}
-		}
-		is(6.U){//BUF
-			crpbuf_3_1 := crpbuf_2_1
-			stateReg_5 := 7.U
 		}
 		is(7.U){//RSP
 			stateReg_5 := 0.U
@@ -1038,6 +1136,12 @@ class ccu extends Module {
 				stateReg_6 := 8.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b010".U(3.W))){
 				stateReg_6 := 4.U
+			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !sfPeers(2)){
+				// Directory says this master cannot hold the line: skip AC/CR and
+				// go straight to the barrier. crpbuf_2_2 is already cleared below,
+				// which is exactly the "no data, not shared" answer the broadcast
+				// would have produced.
+				stateReg_6 := 4.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b010".U(3.W))){
 				stateReg_6 := 1.U
 			}.otherwise{
@@ -1064,17 +1168,18 @@ class ccu extends Module {
 			}
 
 		}
-		is(2.U){//CR_BUFF
-			when(!core2.CRVALID){
-				stateReg_6 := 2.U
+		is(2.U){//CR: latch the snoop response and close the handshake together
+			// Was CR_BUFF (wait for CRVALID, latch CRRESP) then CR (assert
+			// CRREADY) -- two cycles for one transfer. CRRESP is on the bus in
+			// the cycle CRVALID is high, so latching and acknowledging together
+			// is the whole handshake. Nothing else reads state 3, so it is gone.
+			when(core2.CRVALID){
+				crpbuf_2_2 := core2.CRRESP
+				core2.CRREADY := true.B
+				stateReg_6 := 4.U
 			}.otherwise{
-				stateReg_6 := 3.U
+				stateReg_6 := 2.U
 			}
-			crpbuf_2_2 := core2.CRRESP
-		}
-		is(3.U){//CR
-			core2.CRREADY := true.B
-			stateReg_6 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
 			when((stateReg_4 === "b0100".U(4.W)) && (stateReg_5 === "b0100".U(4.W)) && (stateReg_6 === "b0100".U(4.W)) && (stateReg_7 === "b0100".U(4.W)) && (stateReg_8 === "b0100".U(4.W)) && (stateReg_9 === "b0100".U(4.W)) && (stateReg_10 === "b0100".U(4.W)) && (stateReg_11 === "b0100".U(4.W))){
@@ -1083,16 +1188,17 @@ class ccu extends Module {
 				stateReg_6 := 4.U
 			}
 		}
-		is(5.U){//SYNC
+		is(5.U){//SYNC: wait for the response stage, then hand off in one cycle
+			// BUF was a separate state that did nothing but this copy. Doing it on
+			// the cycle the wait ends is free. RSP (7) stays a state of its own:
+			// FSM_12 keys its handoff off stateReg === 7, and pbuf_3 has to be
+			// written BEFORE it looks -- which is exactly what this ordering gives.
 			when(stateReg_12 === "b000".U(3.W)){
-				stateReg_6 := 6.U
+				crpbuf_3_2 := crpbuf_2_2
+				stateReg_6 := 7.U
 			}.otherwise{
 				stateReg_6 := 5.U
 			}
-		}
-		is(6.U){//BUF
-			crpbuf_3_2 := crpbuf_2_2
-			stateReg_6 := 7.U
 		}
 		is(7.U){//RSP
 			stateReg_6 := 0.U
@@ -1126,6 +1232,12 @@ class ccu extends Module {
 				stateReg_7 := 8.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b011".U(3.W))){
 				stateReg_7 := 4.U
+			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !sfPeers(3)){
+				// Directory says this master cannot hold the line: skip AC/CR and
+				// go straight to the barrier. crpbuf_2_3 is already cleared below,
+				// which is exactly the "no data, not shared" answer the broadcast
+				// would have produced.
+				stateReg_7 := 4.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b011".U(3.W))){
 				stateReg_7 := 1.U
 			}.otherwise{
@@ -1152,17 +1264,18 @@ class ccu extends Module {
 			}
 
 		}
-		is(2.U){//CR_BUFF
-			when(!core3.CRVALID){
-				stateReg_7 := 2.U
+		is(2.U){//CR: latch the snoop response and close the handshake together
+			// Was CR_BUFF (wait for CRVALID, latch CRRESP) then CR (assert
+			// CRREADY) -- two cycles for one transfer. CRRESP is on the bus in
+			// the cycle CRVALID is high, so latching and acknowledging together
+			// is the whole handshake. Nothing else reads state 3, so it is gone.
+			when(core3.CRVALID){
+				crpbuf_2_3 := core3.CRRESP
+				core3.CRREADY := true.B
+				stateReg_7 := 4.U
 			}.otherwise{
-				stateReg_7 := 3.U
+				stateReg_7 := 2.U
 			}
-			crpbuf_2_3 := core3.CRRESP
-		}
-		is(3.U){//CR
-			core3.CRREADY := true.B
-			stateReg_7 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
 			when((stateReg_4 === "b0100".U(4.W)) && (stateReg_5 === "b0100".U(4.W)) && (stateReg_6 === "b0100".U(4.W)) && (stateReg_7 === "b0100".U(4.W)) && (stateReg_8 === "b0100".U(4.W)) && (stateReg_9 === "b0100".U(4.W)) && (stateReg_10 === "b0100".U(4.W)) && (stateReg_11 === "b0100".U(4.W))){
@@ -1171,16 +1284,17 @@ class ccu extends Module {
 				stateReg_7 := 4.U
 			}
 		}
-		is(5.U){//SYNC
+		is(5.U){//SYNC: wait for the response stage, then hand off in one cycle
+			// BUF was a separate state that did nothing but this copy. Doing it on
+			// the cycle the wait ends is free. RSP (7) stays a state of its own:
+			// FSM_12 keys its handoff off stateReg === 7, and pbuf_3 has to be
+			// written BEFORE it looks -- which is exactly what this ordering gives.
 			when(stateReg_12 === "b000".U(3.W)){
-				stateReg_7 := 6.U
+				crpbuf_3_3 := crpbuf_2_3
+				stateReg_7 := 7.U
 			}.otherwise{
 				stateReg_7 := 5.U
 			}
-		}
-		is(6.U){//BUF
-			crpbuf_3_3 := crpbuf_2_3
-			stateReg_7 := 7.U
 		}
 		is(7.U){//RSP
 			stateReg_7 := 0.U
@@ -1213,6 +1327,12 @@ class ccu extends Module {
 				stateReg_8 := 8.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b100".U(3.W))){
 				stateReg_8 := 4.U
+			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !sfPeers(4)){
+				// Directory says this master cannot hold the line: skip AC/CR and
+				// go straight to the barrier. crpbuf_2_4 is already cleared below,
+				// which is exactly the "no data, not shared" answer the broadcast
+				// would have produced.
+				stateReg_8 := 4.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b100".U(3.W))){
 				stateReg_8 := 1.U
 			}.otherwise{
@@ -1239,17 +1359,18 @@ class ccu extends Module {
 			}
 
 		}
-		is(2.U){//CR_BUFF
-			when(!core4.CRVALID){
-				stateReg_8 := 2.U
+		is(2.U){//CR: latch the snoop response and close the handshake together
+			// Was CR_BUFF (wait for CRVALID, latch CRRESP) then CR (assert
+			// CRREADY) -- two cycles for one transfer. CRRESP is on the bus in
+			// the cycle CRVALID is high, so latching and acknowledging together
+			// is the whole handshake. Nothing else reads state 3, so it is gone.
+			when(core4.CRVALID){
+				crpbuf_2_4 := core4.CRRESP
+				core4.CRREADY := true.B
+				stateReg_8 := 4.U
 			}.otherwise{
-				stateReg_8 := 3.U
+				stateReg_8 := 2.U
 			}
-			crpbuf_2_4 := core4.CRRESP
-		}
-		is(3.U){//CR
-			core4.CRREADY := true.B
-			stateReg_8 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
 			when((stateReg_4 === "b0100".U(4.W)) && (stateReg_5 === "b0100".U(4.W)) && (stateReg_6 === "b0100".U(4.W)) && (stateReg_7 === "b0100".U(4.W)) && (stateReg_8 === "b0100".U(4.W)) && (stateReg_9 === "b0100".U(4.W)) && (stateReg_10 === "b0100".U(4.W)) && (stateReg_11 === "b0100".U(4.W))){
@@ -1258,16 +1379,17 @@ class ccu extends Module {
 				stateReg_8 := 4.U
 			}
 		}
-		is(5.U){//SYNC
+		is(5.U){//SYNC: wait for the response stage, then hand off in one cycle
+			// BUF was a separate state that did nothing but this copy. Doing it on
+			// the cycle the wait ends is free. RSP (7) stays a state of its own:
+			// FSM_12 keys its handoff off stateReg === 7, and pbuf_3 has to be
+			// written BEFORE it looks -- which is exactly what this ordering gives.
 			when(stateReg_12 === "b000".U(3.W)){
-				stateReg_8 := 6.U
+				crpbuf_3_4 := crpbuf_2_4
+				stateReg_8 := 7.U
 			}.otherwise{
 				stateReg_8 := 5.U
 			}
-		}
-		is(6.U){//BUF
-			crpbuf_3_4 := crpbuf_2_4
-			stateReg_8 := 7.U
 		}
 		is(7.U){//RSP
 			stateReg_8 := 0.U
@@ -1300,6 +1422,12 @@ class ccu extends Module {
 				stateReg_9 := 8.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b101".U(3.W))){
 				stateReg_9 := 4.U
+			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !sfPeers(5)){
+				// Directory says this master cannot hold the line: skip AC/CR and
+				// go straight to the barrier. crpbuf_2_5 is already cleared below,
+				// which is exactly the "no data, not shared" answer the broadcast
+				// would have produced.
+				stateReg_9 := 4.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b101".U(3.W))){
 				stateReg_9 := 1.U
 			}.otherwise{
@@ -1326,17 +1454,18 @@ class ccu extends Module {
 			}
 
 		}
-		is(2.U){//CR_BUFF
-			when(!core5.CRVALID){
-				stateReg_9 := 2.U
+		is(2.U){//CR: latch the snoop response and close the handshake together
+			// Was CR_BUFF (wait for CRVALID, latch CRRESP) then CR (assert
+			// CRREADY) -- two cycles for one transfer. CRRESP is on the bus in
+			// the cycle CRVALID is high, so latching and acknowledging together
+			// is the whole handshake. Nothing else reads state 3, so it is gone.
+			when(core5.CRVALID){
+				crpbuf_2_5 := core5.CRRESP
+				core5.CRREADY := true.B
+				stateReg_9 := 4.U
 			}.otherwise{
-				stateReg_9 := 3.U
+				stateReg_9 := 2.U
 			}
-			crpbuf_2_5 := core5.CRRESP
-		}
-		is(3.U){//CR
-			core5.CRREADY := true.B
-			stateReg_9 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
 			when((stateReg_4 === "b0100".U(4.W)) && (stateReg_5 === "b0100".U(4.W)) && (stateReg_6 === "b0100".U(4.W)) && (stateReg_7 === "b0100".U(4.W)) && (stateReg_8 === "b0100".U(4.W)) && (stateReg_9 === "b0100".U(4.W)) && (stateReg_10 === "b0100".U(4.W)) && (stateReg_11 === "b0100".U(4.W))){
@@ -1345,16 +1474,17 @@ class ccu extends Module {
 				stateReg_9 := 4.U
 			}
 		}
-		is(5.U){//SYNC
+		is(5.U){//SYNC: wait for the response stage, then hand off in one cycle
+			// BUF was a separate state that did nothing but this copy. Doing it on
+			// the cycle the wait ends is free. RSP (7) stays a state of its own:
+			// FSM_12 keys its handoff off stateReg === 7, and pbuf_3 has to be
+			// written BEFORE it looks -- which is exactly what this ordering gives.
 			when(stateReg_12 === "b000".U(3.W)){
-				stateReg_9 := 6.U
+				crpbuf_3_5 := crpbuf_2_5
+				stateReg_9 := 7.U
 			}.otherwise{
 				stateReg_9 := 5.U
 			}
-		}
-		is(6.U){//BUF
-			crpbuf_3_5 := crpbuf_2_5
-			stateReg_9 := 7.U
 		}
 		is(7.U){//RSP
 			stateReg_9 := 0.U
@@ -1387,6 +1517,12 @@ class ccu extends Module {
 				stateReg_10 := 8.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b110".U(3.W))){
 				stateReg_10 := 4.U
+			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !sfPeers(6)){
+				// Directory says this master cannot hold the line: skip AC/CR and
+				// go straight to the barrier. crpbuf_2_6 is already cleared below,
+				// which is exactly the "no data, not shared" answer the broadcast
+				// would have produced.
+				stateReg_10 := 4.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b110".U(3.W))){
 				stateReg_10 := 1.U
 			}.otherwise{
@@ -1413,17 +1549,18 @@ class ccu extends Module {
 			}
 
 		}
-		is(2.U){//CR_BUFF
-			when(!core6.CRVALID){
-				stateReg_10 := 2.U
+		is(2.U){//CR: latch the snoop response and close the handshake together
+			// Was CR_BUFF (wait for CRVALID, latch CRRESP) then CR (assert
+			// CRREADY) -- two cycles for one transfer. CRRESP is on the bus in
+			// the cycle CRVALID is high, so latching and acknowledging together
+			// is the whole handshake. Nothing else reads state 3, so it is gone.
+			when(core6.CRVALID){
+				crpbuf_2_6 := core6.CRRESP
+				core6.CRREADY := true.B
+				stateReg_10 := 4.U
 			}.otherwise{
-				stateReg_10 := 3.U
+				stateReg_10 := 2.U
 			}
-			crpbuf_2_6 := core6.CRRESP
-		}
-		is(3.U){//CR
-			core6.CRREADY := true.B
-			stateReg_10 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
 			when((stateReg_4 === "b0100".U(4.W)) && (stateReg_5 === "b0100".U(4.W)) && (stateReg_6 === "b0100".U(4.W)) && (stateReg_7 === "b0100".U(4.W)) && (stateReg_8 === "b0100".U(4.W)) && (stateReg_9 === "b0100".U(4.W)) && (stateReg_10 === "b0100".U(4.W)) && (stateReg_11 === "b0100".U(4.W))){
@@ -1432,16 +1569,17 @@ class ccu extends Module {
 				stateReg_10 := 4.U
 			}
 		}
-		is(5.U){//SYNC
+		is(5.U){//SYNC: wait for the response stage, then hand off in one cycle
+			// BUF was a separate state that did nothing but this copy. Doing it on
+			// the cycle the wait ends is free. RSP (7) stays a state of its own:
+			// FSM_12 keys its handoff off stateReg === 7, and pbuf_3 has to be
+			// written BEFORE it looks -- which is exactly what this ordering gives.
 			when(stateReg_12 === "b000".U(3.W)){
-				stateReg_10 := 6.U
+				crpbuf_3_6 := crpbuf_2_6
+				stateReg_10 := 7.U
 			}.otherwise{
 				stateReg_10 := 5.U
 			}
-		}
-		is(6.U){//BUF
-			crpbuf_3_6 := crpbuf_2_6
-			stateReg_10 := 7.U
 		}
 		is(7.U){//RSP
 			stateReg_10 := 0.U
@@ -1474,6 +1612,12 @@ class ccu extends Module {
 				stateReg_11 := 8.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && (core_id_pbuf_2 === "b111".U(3.W))){
 				stateReg_11 := 4.U
+			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !sfPeers(7)){
+				// Directory says this master cannot hold the line: skip AC/CR and
+				// go straight to the barrier. crpbuf_2_7 is already cleared below,
+				// which is exactly the "no data, not shared" answer the broadcast
+				// would have produced.
+				stateReg_11 := 4.U
 			}.elsewhen((stateReg_3 === "b110".U(3.W)) && !(core_id_pbuf_2 === "b111".U(3.W))){
 				stateReg_11 := 1.U
 			}.otherwise{
@@ -1500,17 +1644,18 @@ class ccu extends Module {
 			}
 
 		}
-		is(2.U){//CR_BUFF
-			when(!core7.CRVALID){
-				stateReg_11 := 2.U
+		is(2.U){//CR: latch the snoop response and close the handshake together
+			// Was CR_BUFF (wait for CRVALID, latch CRRESP) then CR (assert
+			// CRREADY) -- two cycles for one transfer. CRRESP is on the bus in
+			// the cycle CRVALID is high, so latching and acknowledging together
+			// is the whole handshake. Nothing else reads state 3, so it is gone.
+			when(core7.CRVALID){
+				crpbuf_2_7 := core7.CRRESP
+				core7.CRREADY := true.B
+				stateReg_11 := 4.U
 			}.otherwise{
-				stateReg_11 := 3.U
+				stateReg_11 := 2.U
 			}
-			crpbuf_2_7 := core7.CRRESP
-		}
-		is(3.U){//CR
-			core7.CRREADY := true.B
-			stateReg_11 := 4.U
 		}
 		is(4.U){//FINISH after this state all 4 controllers synchronized
 			when((stateReg_4 === "b0100".U(4.W)) && (stateReg_5 === "b0100".U(4.W)) && (stateReg_6 === "b0100".U(4.W)) && (stateReg_7 === "b0100".U(4.W)) && (stateReg_8 === "b0100".U(4.W)) && (stateReg_9 === "b0100".U(4.W)) && (stateReg_10 === "b0100".U(4.W)) && (stateReg_11 === "b0100".U(4.W))){
@@ -1519,16 +1664,17 @@ class ccu extends Module {
 				stateReg_11 := 4.U
 			}
 		}
-		is(5.U){//SYNC
+		is(5.U){//SYNC: wait for the response stage, then hand off in one cycle
+			// BUF was a separate state that did nothing but this copy. Doing it on
+			// the cycle the wait ends is free. RSP (7) stays a state of its own:
+			// FSM_12 keys its handoff off stateReg === 7, and pbuf_3 has to be
+			// written BEFORE it looks -- which is exactly what this ordering gives.
 			when(stateReg_12 === "b000".U(3.W)){
-				stateReg_11 := 6.U
+				crpbuf_3_7 := crpbuf_2_7
+				stateReg_11 := 7.U
 			}.otherwise{
 				stateReg_11 := 5.U
 			}
-		}
-		is(6.U){//BUF
-			crpbuf_3_7 := crpbuf_2_7
-			stateReg_11 := 7.U
 		}
 		is(7.U){//RSP
 			stateReg_11 := 0.U
@@ -1549,7 +1695,7 @@ class ccu extends Module {
 
 	//FSM_12
 	val	select_buff = RegInit(0.U(4.W))  //0000:CD0, 0001:CD1, 0010:CD2, 0011:CD3, 0100:CD4, 0101:CD5, 0110:CD6, 0111:CD7, 1000:L2
-	val	beat_buff = RegInit(0.U(64.W))	//buffer to store a one beat
+	val	beat_buff = RegInit(0.U(128.W))	//buffer to store a one beat
 	val	last_buff = RegInit(false.B)	//buffer to store last signal
 	val rsp_buff = RegInit(0.U(4.W))	//buffer to store RRSP
 	core0.RVALID := false.B
@@ -1599,83 +1745,18 @@ class ccu extends Module {
 	core7.RDATA := beat_buff
 	core7.RLAST := last_buff
 	core7.RRESP := rsp_buff
-	switch(stateReg_12){
-		is(0.U){//IDLE
-			when(stateReg_4 === "b0111".U(4.W) && ((tran_pbuf_3 === "b0001".U(4.W)) || (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b0000".U(4.W)))){
-				stateReg_12 := 1.U
-			}.elsewhen(stateReg_4 === "b0111".U(4.W) && ((tran_pbuf_3 === "b0100".U(4.W)))){
-				stateReg_12 := 6.U
-			}.elsewhen(stateReg_4 === "b0111".U(4.W) && ((tran_pbuf_3 === "b1011".U(4.W)))){
-				when(crpbuf_3_0(0) || crpbuf_3_1(0)  || crpbuf_3_2(0) ||  crpbuf_3_3(0) || crpbuf_3_4(0) || crpbuf_3_5(0) || crpbuf_3_6(0) || crpbuf_3_7(0)){
-					stateReg_12 := 1.U
-				}.otherwise{
-					stateReg_12 := 6.U
-					last_buff := true.B
-				}
-			}.otherwise{
-				stateReg_12 := 0.U
-			}
-		}
-		is(1.U){//SELECT
-			stateReg_12 := 2.U
-			// Prefer the PassDirty responder (CRRESP bit2) over any clean
-			// DataTransfer: when a dirty owner and clean sharers both offer
-			// data, index-priority used to pick a clean sharer, dropping
-			// PassDirty — the requester installed the line clean, nobody
-			// owned the writeback, and L2 silently went stale (mt-lrscirq
-			// barrier corruption / stale-fill after the last copy died).
-			when(crpbuf_3_0(0) && crpbuf_3_0(2)){
-				select_buff := "b0000".U(4.W)
-			}.elsewhen(crpbuf_3_1(0) && crpbuf_3_1(2)){
-				select_buff := "b0001".U(4.W)
-			}.elsewhen(crpbuf_3_2(0) && crpbuf_3_2(2)){
-				select_buff := "b0010".U(4.W)
-			}.elsewhen(crpbuf_3_3(0) && crpbuf_3_3(2)){
-				select_buff := "b0011".U(4.W)
-			}.elsewhen(crpbuf_3_4(0) && crpbuf_3_4(2)){
-				select_buff := "b0100".U(4.W)
-			}.elsewhen(crpbuf_3_5(0) && crpbuf_3_5(2)){
-				select_buff := "b0101".U(4.W)
-			}.elsewhen(crpbuf_3_6(0) && crpbuf_3_6(2)){
-				select_buff := "b0110".U(4.W)
-			}.elsewhen(crpbuf_3_7(0) && crpbuf_3_7(2)){
-				select_buff := "b0111".U(4.W)
-			}.elsewhen(crpbuf_3_0(0)){
-				select_buff := "b0000".U(4.W)
-			}.elsewhen(crpbuf_3_1(0)){
-				select_buff := "b0001".U(4.W)
-			}.elsewhen(crpbuf_3_2(0)){
-				select_buff := "b0010".U(4.W)
-			}.elsewhen(crpbuf_3_3(0)){
-				select_buff := "b0011".U(4.W)
-			}.elsewhen(crpbuf_3_4(0)){
-				select_buff := "b0100".U(4.W)
-			}.elsewhen(crpbuf_3_5(0)){
-				select_buff := "b0101".U(4.W)
-			}.elsewhen(crpbuf_3_6(0)){
-				select_buff := "b0110".U(4.W)
-			}.elsewhen(crpbuf_3_7(0)){
-				select_buff := "b0111".U(4.W)
-			}.otherwise{          //if it is data is not shared even if it is in the other local caches i take from L2
-				select_buff := "b1000".U(4.W)
-			}
-		}
-		is(2.U){//CAPTURE: take one beat and close the source handshake
-			// Was three states: SYNC(2) waited for the source beat, BUFFER(3)
-			// latched it, COMPLETE_HANDSHAKE_RCV(4) then asserted the source
-			// READY. That is 4 cycles per beat with RSP(5), so a 64 B line fill
-			// held the CCU for >=32 cycles -- and the CCU serves every L1 miss
-			// in the machine one at a time. At ~6.2 M misses per Linux boot that
-			// put it near saturation, and the queueing turned an L2 *hit* into
-			// ~130 cycles of frontend starvation.
-			//
-			// Latching the beat and asserting READY in the same cycle is exactly
-			// what one AXI/ACE transfer means: the guard below already proves
-			// VALID is up on every source we are about to read, so the data is
-			// on the bus this cycle. Collapsing them costs no beat and halves
-			// the loop to 2 cycles.
-			when((!crpbuf_3_0(0) || core0.CDVALID) && (!crpbuf_3_1(0) || core1.CDVALID) && (!crpbuf_3_2(0) || core2.CDVALID) && (!crpbuf_3_3(0) || core3.CDVALID) && (!crpbuf_3_4(0) || core4.CDVALID) && (!crpbuf_3_5(0) || core5.CDVALID) && (!crpbuf_3_6(0) || core6.CDVALID) && (!crpbuf_3_7(0) || core7.CDVALID) && (L2.RVALID || (tran_pbuf_3 === "b1011".U(4.W)))){
-				stateReg_12 := 5.U
+
+	// -- FSM_12 beat engine ------------------------------------------------------
+	// srcBeatValid: every snooper that promised data (CRRESP bit0 = DataTransfer)
+	// has its beat on CD this cycle, and L2 has its beat on R -- except for
+	// CleanUnique (1011), which is an upgrade and takes no data from memory.
+	val srcBeatValid = (!crpbuf_3_0(0) || core0.CDVALID) && (!crpbuf_3_1(0) || core1.CDVALID) && (!crpbuf_3_2(0) || core2.CDVALID) && (!crpbuf_3_3(0) || core3.CDVALID) && (!crpbuf_3_4(0) || core4.CDVALID) && (!crpbuf_3_5(0) || core5.CDVALID) && (!crpbuf_3_6(0) || core6.CDVALID) && (!crpbuf_3_7(0) || core7.CDVALID) && (L2.RVALID || (tran_pbuf_3 === "b1011".U(4.W)))
+
+	// captureBeat: latch one beat from the selected source and close EVERY source
+	// handshake in the same cycle. Called from CAPTURE and, for the back-to-back
+	// case, from RSP -- the two callers are mutually exclusive by state, so the
+	// duplicated when-scopes never both drive in one cycle.
+	def captureBeat(): Unit = {
 				when(select_buff === "b0000".U(4.W)){
 					beat_buff := core0.CDDATA
 					last_buff := core0.CDLAST
@@ -1709,12 +1790,11 @@ class ccu extends Module {
 					last_buff := core7.CDLAST
 					rsp_buff := Cat(crpbuf_3_7(3),crpbuf_3_7(2),"b00".U(2.W))
 				}.otherwise{
-					// Data from L2 (no peer supplied a copy). For ReadShared
-					// (tran 0001) force ACE IsShared=1 so the requester never
-					// installs Exclusive from a cold L2 fill. Otherwise two cores
-					// racing ReadShared→L2 both get Unique and silently diverge
-					// on later stores (seqlock / ktime_get hang). ReadUnique
-					// (0111) and other types keep IsShared=0.
+					// Data from L2 (no peer supplied a copy). For ReadShared (tran 0001)
+					// force ACE IsShared=1 so the requester never installs Exclusive from a
+					// cold L2 fill. Otherwise two cores racing ReadShared->L2 both get Unique
+					// and silently diverge on later stores (seqlock / ktime_get hang).
+					// ReadUnique (0111) and other types keep IsShared=0.
 					beat_buff := L2.RDATA
 					last_buff := L2.RLAST
 					when(tran_pbuf_3 === "b0001".U(4.W)) {
@@ -1726,70 +1806,151 @@ class ccu extends Module {
 
 				when(crpbuf_3_0(0)){
 					core0.CDREADY := true.B
-				}.otherwise{
-					core0.CDREADY := false.B
 				}
 				when(crpbuf_3_1(0)){
 					core1.CDREADY := true.B
-				}.otherwise{
-					core1.CDREADY := false.B
 				}
 				when(crpbuf_3_2(0)){
 					core2.CDREADY := true.B
-				}.otherwise{
-					core2.CDREADY := false.B
 				}
 				when(crpbuf_3_3(0)){
 					core3.CDREADY := true.B
-				}.otherwise{
-					core3.CDREADY := false.B
 				}
 				when(crpbuf_3_4(0)){
 					core4.CDREADY := true.B
-				}.otherwise{
-					core4.CDREADY := false.B
 				}
 				when(crpbuf_3_5(0)){
 					core5.CDREADY := true.B
-				}.otherwise{
-					core5.CDREADY := false.B
 				}
 				when(crpbuf_3_6(0)){
 					core6.CDREADY := true.B
-				}.otherwise{
-					core6.CDREADY := false.B
 				}
 				when(crpbuf_3_7(0)){
 					core7.CDREADY := true.B
-				}.otherwise{
-					core7.CDREADY := false.B
 				}
-				when((tran_pbuf_3 === "b1011".U(4.W))){
-					L2.RREADY := false.B
-				}.otherwise{
+				when(!(tran_pbuf_3 === "b1011".U(4.W))){
 					L2.RREADY := true.B
 				}
+	}
+
+
+	switch(stateReg_12){
+		is(0.U){//IDLE: accept the handoff and pick the data source in one cycle
+			// SELECT used to be a state of its own. It is a pure priority encoder over
+			// crpbuf_3_*, and those are already stable here -- FSM_4 writes them in its
+			// BUF state, the cycle BEFORE it reaches RSP, which is the condition this
+			// state waits on. So the pick costs nothing and the state was a dead cycle
+			// on every transaction.
+			//
+			// Prefer the PassDirty responder (CRRESP bit2) over any clean DataTransfer:
+			// when a dirty owner and clean sharers both offer data, index-priority used
+			// to pick a clean sharer, dropping PassDirty -- the requester installed the
+			// line clean, nobody owned the writeback, and L2 silently went stale
+			// (mt-lrscirq barrier corruption / stale-fill after the last copy died).
+			val handoff = stateReg_4 === "b0111".U(4.W)
+			when(handoff){
+					when(crpbuf_3_0(0) && crpbuf_3_0(2)){
+						select_buff := "b0000".U(4.W)
+					}.elsewhen(crpbuf_3_1(0) && crpbuf_3_1(2)){
+						select_buff := "b0001".U(4.W)
+					}.elsewhen(crpbuf_3_2(0) && crpbuf_3_2(2)){
+						select_buff := "b0010".U(4.W)
+					}.elsewhen(crpbuf_3_3(0) && crpbuf_3_3(2)){
+						select_buff := "b0011".U(4.W)
+					}.elsewhen(crpbuf_3_4(0) && crpbuf_3_4(2)){
+						select_buff := "b0100".U(4.W)
+					}.elsewhen(crpbuf_3_5(0) && crpbuf_3_5(2)){
+						select_buff := "b0101".U(4.W)
+					}.elsewhen(crpbuf_3_6(0) && crpbuf_3_6(2)){
+						select_buff := "b0110".U(4.W)
+					}.elsewhen(crpbuf_3_7(0) && crpbuf_3_7(2)){
+						select_buff := "b0111".U(4.W)
+					}.elsewhen(crpbuf_3_0(0)){
+						select_buff := "b0000".U(4.W)
+					}.elsewhen(crpbuf_3_1(0)){
+						select_buff := "b0001".U(4.W)
+					}.elsewhen(crpbuf_3_2(0)){
+						select_buff := "b0010".U(4.W)
+					}.elsewhen(crpbuf_3_3(0)){
+						select_buff := "b0011".U(4.W)
+					}.elsewhen(crpbuf_3_4(0)){
+						select_buff := "b0100".U(4.W)
+					}.elsewhen(crpbuf_3_5(0)){
+						select_buff := "b0101".U(4.W)
+					}.elsewhen(crpbuf_3_6(0)){
+						select_buff := "b0110".U(4.W)
+					}.elsewhen(crpbuf_3_7(0)){
+						select_buff := "b0111".U(4.W)
+					}.otherwise{
+						// nobody offered data -- take the line from L2
+						select_buff := "b1000".U(4.W)
+					}
+			}
+
+			when(handoff && ((tran_pbuf_3 === "b0001".U(4.W)) || (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b0000".U(4.W)))){
+				stateReg_12 := 2.U
+			}.elsewhen(handoff && ((tran_pbuf_3 === "b0100".U(4.W)))){
+				stateReg_12 := 6.U
+			}.elsewhen(handoff && ((tran_pbuf_3 === "b1011".U(4.W)))){
+				when(crpbuf_3_0(0) || crpbuf_3_1(0)  || crpbuf_3_2(0) ||  crpbuf_3_3(0) || crpbuf_3_4(0) || crpbuf_3_5(0) || crpbuf_3_6(0) || crpbuf_3_7(0)){
+					stateReg_12 := 2.U
+				}.otherwise{
+					stateReg_12 := 6.U
+					last_buff := true.B
+				}
+			}.otherwise{
+				stateReg_12 := 0.U
+			}
+		}
+		is(2.U){//CAPTURE: take one beat and close the source handshake
+			// Was three states: SYNC(2) waited for the source beat, BUFFER(3) latched
+			// it, COMPLETE_HANDSHAKE_RCV(4) then asserted the source READY -- 4 cycles
+			// per beat with RSP(5). Latching and asserting READY together is exactly
+			// what one AXI/ACE transfer means (the guard proves VALID is up on every
+			// source we are about to read), which took it to 2. RSP now also captures,
+			// so in steady state the loop never re-enters this state and a line moves
+			// at ONE beat per cycle; CAPTURE is the entry point and the restart point
+			// for when a source stalls mid-burst.
+			when(srcBeatValid){
+				stateReg_12 := 5.U
+				captureBeat()
 			}.otherwise{
 				stateReg_12 := 2.U
 			}
 		}
-		is(5.U){//RSP
+		is(5.U){//RSP: hand this beat to the requester, and pull the next one in the
+		       //     same cycle when both sides are ready.
+			// The source (CD/R) and destination (R) are independent channels, so one
+			// beat can leave while the next arrives. Both endpoints already support
+			// it: the requester holds RREADY for its whole response state, and a
+			// snooper holds CDVALID for its whole data-out state, stepping on READY.
+			// Only the CCU was serialising them, which cost 8 dead cycles on every
+			// 64 B line -- on every L1 miss in the machine, one at a time.
+			//
+			// Ordering note: the branch below tests last_buff BEFORE captureBeat()
+			// overwrites it, so the decision is always made on the beat that is
+			// actually being handed over this cycle. captureBeat() is only reached
+			// when !last_buff, so the final beat can never be clobbered.
+			val destTook = ((core_id_pbuf_3 === "b000".U(3.W)) && core0.RREADY) || ((core_id_pbuf_3 === "b001".U(3.W)) && core1.RREADY) || ((core_id_pbuf_3 === "b010".U(3.W)) && core2.RREADY) || ((core_id_pbuf_3 === "b011".U(3.W)) && core3.RREADY) || ((core_id_pbuf_3 === "b100".U(3.W)) && core4.RREADY) || ((core_id_pbuf_3 === "b101".U(3.W)) && core5.RREADY) || ((core_id_pbuf_3 === "b110".U(3.W)) && core6.RREADY) || ((core_id_pbuf_3 === "b111".U(3.W)) && core7.RREADY)
 
-			/*
-			when(last_buff){
-				stateReg_8 := 0.U
-			}.otherwise{
-				stateReg_8 := 2.U
-			}
-			*/
-			when(!(((core_id_pbuf_3 === "b000".U(3.W)) && core0.RREADY) || ((core_id_pbuf_3 === "b001".U(3.W)) && core1.RREADY) || ((core_id_pbuf_3 === "b010".U(3.W)) && core2.RREADY) || ((core_id_pbuf_3 === "b011".U(3.W)) && core3.RREADY) || ((core_id_pbuf_3 === "b100".U(3.W)) && core4.RREADY) || ((core_id_pbuf_3 === "b101".U(3.W)) && core5.RREADY) || ((core_id_pbuf_3 === "b110".U(3.W)) && core6.RREADY) || ((core_id_pbuf_3 === "b111".U(3.W)) && core7.RREADY) )){
+			when(!destTook){
 				stateReg_12 := 5.U
 			}.elsewhen(last_buff){
-				stateReg_12 := 7.U
+				// Last beat handed over: retire here. State 7 used to do only
+				// "go to 0, clear last_buff" -- one dead cycle that FSM_4's SYNC
+				// barrier sat through on every single transaction.
+				stateReg_12 := 0.U
+				last_buff := false.B
+				sfUpdValid := true.B
+				sfUpdAddr  := addr_pbuf_3
+				sfUpdCore  := core_id_pbuf_3
+				sfUpdExcl  := (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W))
+			}.elsewhen(srcBeatValid){
+				stateReg_12 := 5.U        // back-to-back: 1 beat/cycle
+				captureBeat()
 			}.otherwise{
-				stateReg_12 := 2.U
+				stateReg_12 := 2.U        // source stalled -- wait for it in CAPTURE
 			}
-
 
 			when(core_id_pbuf_3 === "b000".U(3.W)){
 				core0.RVALID := true.B
@@ -1811,28 +1972,68 @@ class ccu extends Module {
 		}
 		is(6.U){//RSP_ARBAR
 			when((core_id_pbuf_3 === "b000".U(3.W)) && core0.RREADY){
-				stateReg_12 := 7.U
+				stateReg_12 := 0.U
+				last_buff := false.B
+				sfUpdValid := true.B
+				sfUpdAddr  := addr_pbuf_3
+				sfUpdCore  := core_id_pbuf_3
+				sfUpdExcl  := (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W))
 				core0.RVALID := true.B
 			}.elsewhen((core_id_pbuf_3 === "b001".U(3.W)) && core1.RREADY){
-				stateReg_12 := 7.U
+				stateReg_12 := 0.U
+				last_buff := false.B
+				sfUpdValid := true.B
+				sfUpdAddr  := addr_pbuf_3
+				sfUpdCore  := core_id_pbuf_3
+				sfUpdExcl  := (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W))
 				core1.RVALID := true.B
 			}.elsewhen((core_id_pbuf_3 === "b010".U(3.W)) && core2.RREADY){
-				stateReg_12 := 7.U
+				stateReg_12 := 0.U
+				last_buff := false.B
+				sfUpdValid := true.B
+				sfUpdAddr  := addr_pbuf_3
+				sfUpdCore  := core_id_pbuf_3
+				sfUpdExcl  := (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W))
 				core2.RVALID := true.B
 			}.elsewhen((core_id_pbuf_3 === "b011".U(3.W)) && core3.RREADY){
-				stateReg_12 := 7.U
+				stateReg_12 := 0.U
+				last_buff := false.B
+				sfUpdValid := true.B
+				sfUpdAddr  := addr_pbuf_3
+				sfUpdCore  := core_id_pbuf_3
+				sfUpdExcl  := (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W))
 				core3.RVALID := true.B
 			}.elsewhen((core_id_pbuf_3 === "b100".U(3.W)) && core4.RREADY){
-				stateReg_12 := 7.U
+				stateReg_12 := 0.U
+				last_buff := false.B
+				sfUpdValid := true.B
+				sfUpdAddr  := addr_pbuf_3
+				sfUpdCore  := core_id_pbuf_3
+				sfUpdExcl  := (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W))
 				core4.RVALID := true.B
 			}.elsewhen((core_id_pbuf_3 === "b101".U(3.W)) && core5.RREADY){
-				stateReg_12 := 7.U
+				stateReg_12 := 0.U
+				last_buff := false.B
+				sfUpdValid := true.B
+				sfUpdAddr  := addr_pbuf_3
+				sfUpdCore  := core_id_pbuf_3
+				sfUpdExcl  := (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W))
 				core5.RVALID := true.B
 			}.elsewhen((core_id_pbuf_3 === "b110".U(3.W)) && core6.RREADY){
-				stateReg_12 := 7.U
+				stateReg_12 := 0.U
+				last_buff := false.B
+				sfUpdValid := true.B
+				sfUpdAddr  := addr_pbuf_3
+				sfUpdCore  := core_id_pbuf_3
+				sfUpdExcl  := (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W))
 				core6.RVALID := true.B
 			}.elsewhen((core_id_pbuf_3 === "b111".U(3.W)) && core7.RREADY){
-				stateReg_12 := 7.U
+				stateReg_12 := 0.U
+				last_buff := false.B
+				sfUpdValid := true.B
+				sfUpdAddr  := addr_pbuf_3
+				sfUpdCore  := core_id_pbuf_3
+				sfUpdExcl  := (tran_pbuf_3 === "b0111".U(4.W)) || (tran_pbuf_3 === "b1011".U(4.W))
 				core7.RVALID := true.B
 			}.otherwise{
 				stateReg_12 := 6.U
@@ -1847,11 +2048,57 @@ class ccu extends Module {
 			core6.RRESP := "b0000".U(4.W)
 			core7.RRESP := "b0000".U(4.W)
 		}
-		is(7.U){
-			stateReg_12 := 0.U
-			last_buff := false.B
-		}
 	}
+	// ==================== Snoop filter update engine =======================
+	// Read-modify-write one set. Async-read Mem returns the pre-write value, so
+	// reading and writing the same index in one cycle is well defined.
+	//
+	// Conflict rule: FSM_12's insert is written textually last and therefore
+	// wins over FSM_1's clear. That direction is the safe one -- dropping an
+	// insert would leave a live line unrecorded and could later suppress a snoop
+	// that coherence needs; dropping a clear only leaves a stale presence bit,
+	// which costs one pointless snoop.
+	when(sfUpdValid){
+		val idx   = sfIndex(sfUpdAddr)
+		val tg    = sfTag(sfUpdAddr)
+		val word  = sfMem(idx)
+		val ways  = VecInit(Seq.tabulate(SF_WAYS)(i => sfWay(word, i)))
+		val hits  = VecInit(ways.map(e => sfValid(e) && sfEntTag(e) === tg))
+		val hit   = hits.reduce(_ || _)
+		val freeV = VecInit(ways.map(e => !sfValid(e)))
+		val hasFree = freeV.reduce(_ || _)
+		val freeIdx = PriorityEncoder(freeV)
+		val hitIdx  = PriorityEncoder(hits)
+		val coreBit = UIntToOH(sfUpdCore, 8)
+
+		// Presence after this update. An exclusive access (ReadUnique /
+		// CleanUnique) really does invalidate every other copy, so the mask
+		// collapses to just the requester -- that is the ONLY reclamation the
+		// filter has, and it is what keeps sets from filling up.
+		val curPres = Mux(hit, Mux1H(hits, ways.map(sfPres)), 0.U(8.W))
+		val setPres = Mux(sfUpdExcl, coreBit, curPres | coreBit)
+
+		val newWays = Wire(Vec(SF_WAYS, UInt(SF_ENTW.W)))
+		val newOvf  = Wire(Bool())
+		newOvf := sfOverflow(word)
+		for (i <- 0 until SF_WAYS) { newWays(i) := ways(i) }
+
+		when(hit){
+			newWays(hitIdx) := sfEnt(true.B, tg, setPres)
+		}.elsewhen(hasFree){
+			newWays(freeIdx) := sfEnt(true.B, tg, setPres)
+		}.otherwise{
+			// Set full. Evicting a directory entry would let this set answer "absent"
+			// about a line that is still cached, so instead the set is poisoned and
+			// reports "snoop everyone" from here on -- sticky and conservative.
+			// ccu_thruput_probe prints how often lookups land in a poisoned set; it is
+			// 0% on the benchmarks at 16 ways, which is why the ways are sized to
+			// 4 D-caches x 4 ways colliding in one index.
+			newOvf := true.B
+		}
+		sfMem(idx) := sfPack(newOvf, newWays)
+	}
+
 	/**
 
 	//debug signal connecetion

@@ -39,7 +39,11 @@ class core (
 )extends Module {
   val icache = Module(new Icache.iCache(iPort_id = iPort_id))
 
-  val iPort = IO(new ACE(busWidth = 64))
+  // Width comes from the same constant as dPort. Hardcoding 64 here silently
+  // TRUNCATED the interconnect's wider beats: the I-cache still assembled a
+  // full line, but the top half of every beat arrived as zeros, so every
+  // other 8 bytes of instruction were garbage.
+  val iPort = IO(new ACE(busWidth = Dcache.constants.dPort_WIDTH))
   iPort <> icache.lowLevelMem
 
   // Fence functionality is ignored for now
