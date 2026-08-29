@@ -78,6 +78,11 @@ int main(int argc, char *argv[]) {
     // else is real recorded presence. That distinguishes "the filter is
     // working but the line really is shared" from "the directory gave up".
     uint64_t sf_poison = 0, sf_real = 0;
+    // Read-behind-write serialisation: ONE in-order FIFO carries AR, AW and W,
+    // and FSM_3's dispatch is gated on `write_back`. Any read queued behind a
+    // writeback waits for the whole writeback (AW + data beats + B). This is
+    // the cost that separate read/write paths would remove.
+    uint64_t wb_busy = 0, wb_blocking_read = 0;
     int prev3 = 0;
     int prev12 = 0;
     int exit_code = 2;
@@ -104,6 +109,9 @@ int main(int argc, char *argv[]) {
         if (s3  != 0) disp_busy++;
         if (s4  != 0) snoop_busy++;
         if (s12 != 0) { resp_busy++; resp_service++; }
+        bool wb = CCU(write_back) != 0;
+        bool qne = FIFO(emptyReg) == 0;
+        if (wb) { wb_busy++; if (qne) wb_blocking_read++; }
         int nbusy = (s3 != 0) + (s4 != 0) + (s12 != 0);
         // the other seven snoop FSMs move in lockstep with FSM_4, so counting
         // core0's is enough to say "the snoop stage is busy"
@@ -164,6 +172,8 @@ int main(int argc, char *argv[]) {
            100.0 * q_nonempty / (cyc ? cyc : 1),
            100.0 * backlog / (cyc ? cyc : 1),
            (double)fifo_occ / (cyc ? cyc : 1));
+    printf("writeback blocks dispatch: %.2f%% of cycles (%.2f%% with something queued behind it)\n",
+           100.0 * wb_busy / (cyc ? cyc : 1), 100.0 * wb_blocking_read / (cyc ? cyc : 1));
     printf("snoop filter: %llu txns fully skipped, %llu broadcast, %.2f%% skipped;"
            " mean masters snooped %.2f of 8\n",
            (unsigned long long)sf_skip, (unsigned long long)sf_bcast,
