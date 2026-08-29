@@ -33,6 +33,19 @@ $(BUILD)/lockstep_linux_fast.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SI
 $(BUILD)/ccu_line_probe.out: $(HARNESS)/probes/ccu_line_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/ccu_line_probe.cpp $(VSYS_LIB_FAST) -o $@
 
+# ccu_thruput_probe answers "is the interconnect latency-bound or
+# throughput-bound?" -- per-stage state histograms, transactions, mean service
+# time and occupancy over any quad benchmark. Occupancy is the number that
+# decides whether shaving dead states or widening the data path is what pays.
+$(BUILD)/ccu_thruput_probe.out: $(HARNESS)/probes/ccu_thruput_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ccu_thruput_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# snoop_latency_probe drills into the slow half of that answer: which state of
+# a peer D-cache's snoop FSM (ACEUnit.coherentAXIState) the ~4.5-cycle AC->CR
+# latency actually sits in.
+$(BUILD)/snoop_latency_probe.out: $(HARNESS)/probes/snoop_latency_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/snoop_latency_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 $(BUILD)/div_park_probe.out: $(HARNESS)/probes/div_park_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/div_park_probe.cpp $(VSYS_LIB_FAST) -o $@
 
