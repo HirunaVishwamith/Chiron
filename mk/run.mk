@@ -46,6 +46,11 @@ $(BUILD)/ccu_thruput_probe.out: $(HARNESS)/probes/ccu_thruput_probe.cpp $(SIM_HD
 $(BUILD)/snoop_latency_probe.out: $(HARNESS)/probes/snoop_latency_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/snoop_latency_probe.cpp $(VSYS_LIB_FAST) -o $@
 
+# Attributes rnr_store_gate cycles to the D-cache arbiter's FSM state, to bound
+# what a post-commit store buffer could recover before building one.
+$(BUILD)/store_gate_probe.out: $(HARNESS)/probes/store_gate_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/store_gate_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 $(BUILD)/div_park_probe.out: $(HARNESS)/probes/div_park_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/div_park_probe.cpp $(VSYS_LIB_FAST) -o $@
 
