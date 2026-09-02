@@ -145,7 +145,22 @@ class arbiter extends Module {
           operationBuffer.valid := false.B
         } .elsewhen(operationWires.isWrite){
 
-          operationState := commitReadyState
+          // Dead-state removal: commitReadyState's only job is to assert
+          // writeCommit.ready, so a store used to burn a cycle here just to
+          // reach it. Offer the handshake in the same cycle the store lands
+          // and take the identical transitions; commitReadyState remains for
+          // the store that does not fire immediately (and for waitState's
+          // atomics, which still enter it explicitly).
+          writeCommit.ready := true.B
+          when(writeCommit.fired && writeDataIn.valid){
+            inorderBuffer := operationBuffer
+            inorderBuffer.writeData.data := writeDataIn.data
+            inorderBuffer.writeData.valid := writeDataIn.valid
+            operationBuffer.valid := false.B
+            operationState := writeInstructionFiredState
+          }.otherwise{
+            operationState := Mux(writeCommit.fired, commitFiredState, commitReadyState)
+          }
         } .elsewhen(operationWires.isLR || operationWires.isSC || operationWires.rAtomics){
 
           inorderBuffer := operationBuffer
