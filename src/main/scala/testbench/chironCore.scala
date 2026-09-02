@@ -80,6 +80,13 @@ class chironCore extends Module {
     val pc_hnrAmo    = RegInit(0.U(64.W))
     val pc_hnrOther  = RegInit(0.U(64.W))
     val pc_rnrStoreGate = RegInit(0.U(64.W))
+    // Stores actually retired. rnrStoreGate/storeCommits = mean cycles the ROB
+    // head spent waiting on the 1-deep, untagged store-commit handshake.
+    val pc_storeCommits = RegInit(0.U(64.W))
+    // Of the store-gate cycles, the ones where the D-cache would not even
+    // ACCEPT the request (arbiter/port contention) as opposed to the ones
+    // spent waiting for an accepted store's lookup to complete.
+    val pc_storeIssueBlocked = RegInit(0.U(64.W))
     val pc_rnrWbGate    = RegInit(0.U(64.W))
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
     val pc_issueReadyGE2 = RegInit(0.U(64.W))
@@ -147,6 +154,12 @@ class chironCore extends Module {
         pc_rnrLoadGate := pc_rnrLoadGate + 1.U
       }
     }
+    when(memAccess.writeInstructionCommit.fired) { pc_storeCommits := pc_storeCommits + 1.U }
+    when(rob.commit.ready && !rob.commit.fired &&
+         (rob.commit.instruction(6, 4) === "b010".U) &&
+         !memAccess.writeInstructionCommit.ready && !memAccess.writeCommit.ready) {
+      pc_storeIssueBlocked := pc_storeIssueBlocked + 1.U
+    }
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
@@ -184,6 +197,8 @@ class chironCore extends Module {
       val hnrAmo          = UInt(64.W)
       val hnrOther        = UInt(64.W)
       val rnrStoreGate    = UInt(64.W)
+      val storeCommits    = UInt(64.W)
+      val storeIssueBlocked = UInt(64.W)
       val rnrWbGate       = UInt(64.W)
       val rnrLoadGate     = UInt(64.W)
       val issueReadyGE2   = UInt(64.W)
@@ -216,6 +231,8 @@ class chironCore extends Module {
     perfCnt.hnrAmo          := pc_hnrAmo
     perfCnt.hnrOther        := pc_hnrOther
     perfCnt.rnrStoreGate    := pc_rnrStoreGate
+    perfCnt.storeCommits    := pc_storeCommits
+    perfCnt.storeIssueBlocked := pc_storeIssueBlocked
     perfCnt.rnrWbGate       := pc_rnrWbGate
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
     perfCnt.issueReadyGE2   := pc_issueReadyGE2
@@ -273,6 +290,13 @@ class chironCore extends Module {
     val pc_hnrAmo    = RegInit(0.U(64.W))
     val pc_hnrOther  = RegInit(0.U(64.W))
     val pc_rnrStoreGate = RegInit(0.U(64.W))
+    // Stores actually retired. rnrStoreGate/storeCommits = mean cycles the ROB
+    // head spent waiting on the 1-deep, untagged store-commit handshake.
+    val pc_storeCommits = RegInit(0.U(64.W))
+    // Of the store-gate cycles, the ones where the D-cache would not even
+    // ACCEPT the request (arbiter/port contention) as opposed to the ones
+    // spent waiting for an accepted store's lookup to complete.
+    val pc_storeIssueBlocked = RegInit(0.U(64.W))
     val pc_rnrWbGate    = RegInit(0.U(64.W))
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
     val pc_issueReadyGE2 = RegInit(0.U(64.W))
@@ -340,6 +364,12 @@ class chironCore extends Module {
         pc_rnrLoadGate := pc_rnrLoadGate + 1.U
       }
     }
+    when(memAccess.writeInstructionCommit.fired) { pc_storeCommits := pc_storeCommits + 1.U }
+    when(rob.commit.ready && !rob.commit.fired &&
+         (rob.commit.instruction(6, 4) === "b010".U) &&
+         !memAccess.writeInstructionCommit.ready && !memAccess.writeCommit.ready) {
+      pc_storeIssueBlocked := pc_storeIssueBlocked + 1.U
+    }
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
@@ -377,6 +407,8 @@ class chironCore extends Module {
       val hnrAmo          = UInt(64.W)
       val hnrOther        = UInt(64.W)
       val rnrStoreGate    = UInt(64.W)
+      val storeCommits    = UInt(64.W)
+      val storeIssueBlocked = UInt(64.W)
       val rnrWbGate       = UInt(64.W)
       val rnrLoadGate     = UInt(64.W)
       val issueReadyGE2   = UInt(64.W)
@@ -409,6 +441,8 @@ class chironCore extends Module {
     perfCnt.hnrAmo          := pc_hnrAmo
     perfCnt.hnrOther        := pc_hnrOther
     perfCnt.rnrStoreGate    := pc_rnrStoreGate
+    perfCnt.storeCommits    := pc_storeCommits
+    perfCnt.storeIssueBlocked := pc_storeIssueBlocked
     perfCnt.rnrWbGate       := pc_rnrWbGate
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
     perfCnt.issueReadyGE2   := pc_issueReadyGE2
@@ -466,6 +500,13 @@ class chironCore extends Module {
     val pc_hnrAmo    = RegInit(0.U(64.W))
     val pc_hnrOther  = RegInit(0.U(64.W))
     val pc_rnrStoreGate = RegInit(0.U(64.W))
+    // Stores actually retired. rnrStoreGate/storeCommits = mean cycles the ROB
+    // head spent waiting on the 1-deep, untagged store-commit handshake.
+    val pc_storeCommits = RegInit(0.U(64.W))
+    // Of the store-gate cycles, the ones where the D-cache would not even
+    // ACCEPT the request (arbiter/port contention) as opposed to the ones
+    // spent waiting for an accepted store's lookup to complete.
+    val pc_storeIssueBlocked = RegInit(0.U(64.W))
     val pc_rnrWbGate    = RegInit(0.U(64.W))
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
     val pc_issueReadyGE2 = RegInit(0.U(64.W))
@@ -533,6 +574,12 @@ class chironCore extends Module {
         pc_rnrLoadGate := pc_rnrLoadGate + 1.U
       }
     }
+    when(memAccess.writeInstructionCommit.fired) { pc_storeCommits := pc_storeCommits + 1.U }
+    when(rob.commit.ready && !rob.commit.fired &&
+         (rob.commit.instruction(6, 4) === "b010".U) &&
+         !memAccess.writeInstructionCommit.ready && !memAccess.writeCommit.ready) {
+      pc_storeIssueBlocked := pc_storeIssueBlocked + 1.U
+    }
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
@@ -570,6 +617,8 @@ class chironCore extends Module {
       val hnrAmo          = UInt(64.W)
       val hnrOther        = UInt(64.W)
       val rnrStoreGate    = UInt(64.W)
+      val storeCommits    = UInt(64.W)
+      val storeIssueBlocked = UInt(64.W)
       val rnrWbGate       = UInt(64.W)
       val rnrLoadGate     = UInt(64.W)
       val issueReadyGE2   = UInt(64.W)
@@ -602,6 +651,8 @@ class chironCore extends Module {
     perfCnt.hnrAmo          := pc_hnrAmo
     perfCnt.hnrOther        := pc_hnrOther
     perfCnt.rnrStoreGate    := pc_rnrStoreGate
+    perfCnt.storeCommits    := pc_storeCommits
+    perfCnt.storeIssueBlocked := pc_storeIssueBlocked
     perfCnt.rnrWbGate       := pc_rnrWbGate
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
     perfCnt.issueReadyGE2   := pc_issueReadyGE2
@@ -659,6 +710,13 @@ class chironCore extends Module {
     val pc_hnrAmo    = RegInit(0.U(64.W))
     val pc_hnrOther  = RegInit(0.U(64.W))
     val pc_rnrStoreGate = RegInit(0.U(64.W))
+    // Stores actually retired. rnrStoreGate/storeCommits = mean cycles the ROB
+    // head spent waiting on the 1-deep, untagged store-commit handshake.
+    val pc_storeCommits = RegInit(0.U(64.W))
+    // Of the store-gate cycles, the ones where the D-cache would not even
+    // ACCEPT the request (arbiter/port contention) as opposed to the ones
+    // spent waiting for an accepted store's lookup to complete.
+    val pc_storeIssueBlocked = RegInit(0.U(64.W))
     val pc_rnrWbGate    = RegInit(0.U(64.W))
     val pc_rnrLoadGate  = RegInit(0.U(64.W))
     val pc_issueReadyGE2 = RegInit(0.U(64.W))
@@ -726,6 +784,12 @@ class chironCore extends Module {
         pc_rnrLoadGate := pc_rnrLoadGate + 1.U
       }
     }
+    when(memAccess.writeInstructionCommit.fired) { pc_storeCommits := pc_storeCommits + 1.U }
+    when(rob.commit.ready && !rob.commit.fired &&
+         (rob.commit.instruction(6, 4) === "b010".U) &&
+         !memAccess.writeInstructionCommit.ready && !memAccess.writeCommit.ready) {
+      pc_storeIssueBlocked := pc_storeIssueBlocked + 1.U
+    }
     when(scheduler.readyCount >= 2.U)          { pc_issueReadyGE2 := pc_issueReadyGE2 + 1.U }
     when(rob.commit.fired && rob.secondReady)   { pc_commitTwoOpp  := pc_commitTwoOpp  + 1.U }
 
@@ -763,6 +827,8 @@ class chironCore extends Module {
       val hnrAmo          = UInt(64.W)
       val hnrOther        = UInt(64.W)
       val rnrStoreGate    = UInt(64.W)
+      val storeCommits    = UInt(64.W)
+      val storeIssueBlocked = UInt(64.W)
       val rnrWbGate       = UInt(64.W)
       val rnrLoadGate     = UInt(64.W)
       val issueReadyGE2   = UInt(64.W)
@@ -795,6 +861,8 @@ class chironCore extends Module {
     perfCnt.hnrAmo          := pc_hnrAmo
     perfCnt.hnrOther        := pc_hnrOther
     perfCnt.rnrStoreGate    := pc_rnrStoreGate
+    perfCnt.storeCommits    := pc_storeCommits
+    perfCnt.storeIssueBlocked := pc_storeIssueBlocked
     perfCnt.rnrWbGate       := pc_rnrWbGate
     perfCnt.rnrLoadGate     := pc_rnrLoadGate
     perfCnt.issueReadyGE2   := pc_issueReadyGE2
@@ -1519,8 +1587,8 @@ class chironCore extends Module {
   perfCountersOut0(24) := core0.perfCnt.flushBranch
   perfCountersOut0(25) := core0.perfCnt.flushCoherent
   perfCountersOut0(26) := core0.perfCnt.retiredBranch
-  perfCountersOut0(27) := 0.U
-  perfCountersOut0(28) := 0.U
+  perfCountersOut0(27) := core0.perfCnt.storeCommits
+  perfCountersOut0(28) := core0.perfCnt.storeIssueBlocked
   perfCountersOut0(29) := core0.perfCnt.robHeadNotReady
   perfCountersOut0(30) := core0.perfCnt.robReadyBlocked
   perfCountersOut0(31) := core0.perfCnt.hnrLoad
@@ -1562,8 +1630,8 @@ class chironCore extends Module {
   perfCountersOut1(24) := core1.perfCnt.flushBranch
   perfCountersOut1(25) := core1.perfCnt.flushCoherent
   perfCountersOut1(26) := core1.perfCnt.retiredBranch
-  perfCountersOut1(27) := 0.U
-  perfCountersOut1(28) := 0.U
+  perfCountersOut1(27) := core1.perfCnt.storeCommits
+  perfCountersOut1(28) := core1.perfCnt.storeIssueBlocked
   perfCountersOut1(29) := core1.perfCnt.robHeadNotReady
   perfCountersOut1(30) := core1.perfCnt.robReadyBlocked
   perfCountersOut1(31) := core1.perfCnt.hnrLoad
@@ -1605,8 +1673,8 @@ class chironCore extends Module {
   perfCountersOut2(24) := core2.perfCnt.flushBranch
   perfCountersOut2(25) := core2.perfCnt.flushCoherent
   perfCountersOut2(26) := core2.perfCnt.retiredBranch
-  perfCountersOut2(27) := 0.U
-  perfCountersOut2(28) := 0.U
+  perfCountersOut2(27) := core2.perfCnt.storeCommits
+  perfCountersOut2(28) := core2.perfCnt.storeIssueBlocked
   perfCountersOut2(29) := core2.perfCnt.robHeadNotReady
   perfCountersOut2(30) := core2.perfCnt.robReadyBlocked
   perfCountersOut2(31) := core2.perfCnt.hnrLoad
@@ -1648,8 +1716,8 @@ class chironCore extends Module {
   perfCountersOut3(24) := core3.perfCnt.flushBranch
   perfCountersOut3(25) := core3.perfCnt.flushCoherent
   perfCountersOut3(26) := core3.perfCnt.retiredBranch
-  perfCountersOut3(27) := 0.U
-  perfCountersOut3(28) := 0.U
+  perfCountersOut3(27) := core3.perfCnt.storeCommits
+  perfCountersOut3(28) := core3.perfCnt.storeIssueBlocked
   perfCountersOut3(29) := core3.perfCnt.robHeadNotReady
   perfCountersOut3(30) := core3.perfCnt.robReadyBlocked
   perfCountersOut3(31) := core3.perfCnt.hnrLoad

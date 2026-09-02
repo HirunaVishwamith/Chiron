@@ -114,6 +114,8 @@ public:
             case 24: return tb->perfCountersOut0_24;
             case 25: return tb->perfCountersOut0_25;
             case 26: return tb->perfCountersOut0_26;
+            case 27: return tb->perfCountersOut0_27;
+            case 28: return tb->perfCountersOut0_28;
             case 29: return tb->perfCountersOut0_29;
             case 30: return tb->perfCountersOut0_30;
             case 31: return tb->perfCountersOut0_31;
@@ -155,6 +157,8 @@ public:
             case 24: return tb->perfCountersOut1_24;
             case 25: return tb->perfCountersOut1_25;
             case 26: return tb->perfCountersOut1_26;
+            case 27: return tb->perfCountersOut1_27;
+            case 28: return tb->perfCountersOut1_28;
             case 29: return tb->perfCountersOut1_29;
             case 30: return tb->perfCountersOut1_30;
             case 31: return tb->perfCountersOut1_31;
@@ -196,6 +200,8 @@ public:
             case 24: return tb->perfCountersOut2_24;
             case 25: return tb->perfCountersOut2_25;
             case 26: return tb->perfCountersOut2_26;
+            case 27: return tb->perfCountersOut2_27;
+            case 28: return tb->perfCountersOut2_28;
             case 29: return tb->perfCountersOut2_29;
             case 30: return tb->perfCountersOut2_30;
             case 31: return tb->perfCountersOut2_31;
@@ -237,6 +243,8 @@ public:
             case 24: return tb->perfCountersOut3_24;
             case 25: return tb->perfCountersOut3_25;
             case 26: return tb->perfCountersOut3_26;
+            case 27: return tb->perfCountersOut3_27;
+            case 28: return tb->perfCountersOut3_28;
             case 29: return tb->perfCountersOut3_29;
             case 30: return tb->perfCountersOut3_30;
             case 31: return tb->perfCountersOut3_31;
@@ -297,6 +305,8 @@ public:
         m.hnr_amo             = r[34];
         m.hnr_other           = r[35];
         m.rnr_store_gate      = r[36];
+        m.store_commits       = r[27];
+        m.store_issue_blocked = r[28];
         m.rnr_wb_gate         = r[37];
         m.rnr_load_gate       = r[38];
         m.fe_resp_valid_idle  = 0;  // no lineStreamer in quad-core fetch
@@ -419,6 +429,9 @@ public:
             ss << "        \"hnr_amo\": "             << m.hnr_amo            << ",\n";
             ss << "        \"hnr_other\": "           << m.hnr_other          << ",\n";
             ss << "        \"rnr_store_gate\": "      << m.rnr_store_gate     << ",\n";
+            ss << "        \"store_commits\": "       << m.store_commits      << ",\n";
+            ss << "        \"store_issue_blocked\": " << m.store_issue_blocked << ",\n";
+            ss << "        \"store_gate_cyc_per_store\": " << (m.store_commits ? (double)m.rnr_store_gate/(double)m.store_commits : 0.0) << ",\n";
             ss << "        \"rnr_wb_gate\": "         << m.rnr_wb_gate        << ",\n";
             ss << "        \"rnr_load_gate\": "       << m.rnr_load_gate      << "\n";
             ss << "      },\n";

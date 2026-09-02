@@ -96,6 +96,8 @@ struct PerfMetrics {
     uint64_t hnr_amo;
     uint64_t hnr_other;
     uint64_t rnr_store_gate;
+    uint64_t store_commits;
+    uint64_t store_issue_blocked;
     uint64_t rnr_wb_gate;
     uint64_t rnr_load_gate;
 
