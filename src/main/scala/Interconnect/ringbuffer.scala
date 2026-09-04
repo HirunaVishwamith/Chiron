@@ -4,11 +4,11 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.BundleLiterals._
 
-class ringbuffer(depth:Int) extends Module with RequireSyncReset{
+class ringbuffer(depth:Int, width:Int = 71) extends Module with RequireSyncReset{
 	assert(depth > 0, "Number of buffer elements needs to be larger than 0")
 	val io = IO(new Bundle{
-	val enq = Flipped(new DecoupledIO(UInt(71.W))) //width=32
-	val deq = new DecoupledIO(UInt(71.W))
+	val enq = Flipped(new DecoupledIO(UInt(width.W)))
+	val deq = new DecoupledIO(UInt(width.W))
   })
 
     val readReg=RegInit(0.U(log2Ceil(depth).W))
@@ -16,7 +16,7 @@ class ringbuffer(depth:Int) extends Module with RequireSyncReset{
     val nextRead=Mux(readReg===(depth-1).U,0.U,readReg+1.U)
     val nextWrite=Mux(writeReg===(depth-1).U,0.U,writeReg+1.U)
 
-    val memReg= Mem(depth,UInt(71.W))
+    val memReg= Mem(depth,UInt(width.W))
     val readPtr=readReg
     val writePtr=writeReg
     val fullReg=RegInit(false.B)

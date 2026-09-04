@@ -33,6 +33,24 @@ $(BUILD)/lockstep_linux_fast.out: $(HARNESS)/lockstep_linux.cpp $(EMU_HDRS) $(SI
 $(BUILD)/ccu_line_probe.out: $(HARNESS)/probes/ccu_line_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/ccu_line_probe.cpp $(VSYS_LIB_FAST) -o $@
 
+# ccu_thruput_probe answers "is the interconnect latency-bound or
+# throughput-bound?" -- per-stage state histograms, transactions, mean service
+# time and occupancy over any quad benchmark. Occupancy is the number that
+# decides whether shaving dead states or widening the data path is what pays.
+$(BUILD)/ccu_thruput_probe.out: $(HARNESS)/probes/ccu_thruput_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/ccu_thruput_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# snoop_latency_probe drills into the slow half of that answer: which state of
+# a peer D-cache's snoop FSM (ACEUnit.coherentAXIState) the ~4.5-cycle AC->CR
+# latency actually sits in.
+$(BUILD)/snoop_latency_probe.out: $(HARNESS)/probes/snoop_latency_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/snoop_latency_probe.cpp $(VSYS_LIB_FAST) -o $@
+
+# Attributes rnr_store_gate cycles to the D-cache arbiter's FSM state, to bound
+# what a post-commit store buffer could recover before building one.
+$(BUILD)/store_gate_probe.out: $(HARNESS)/probes/store_gate_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/store_gate_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 $(BUILD)/div_park_probe.out: $(HARNESS)/probes/div_park_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/div_park_probe.cpp $(VSYS_LIB_FAST) -o $@
 
@@ -592,21 +610,32 @@ runLockStep: $(BUILD)/lockstep.out   ## CI: quick single lock-step (vvadd-s1) --
 	   echo "runLockStep: FAILED (register mismatch, timeout, or nonzero exit)"; exit 1; \
 	 fi
 
+# test_results.txt is SHARED: runLockStep, test_all_images and ci-bench all
+# append to it, and .github/workflows/generic_test.yaml greps the whole file for
+# ": fail" after both the ISA step and the benchmark step. That contract is kept
+# below -- but the ISA pass/total must be tallied from a PRIVATE file, because
+# counting the shared one mixes in whatever another target appended. Running
+# `make isa` and `make ci-bench` concurrently reported "ISA passed: 89 / 89" for
+# an 84-image suite (84 ISA + 5 benchmark lines); a failing benchmark would have
+# been blamed on the ISA suite.
+ISA_RESULTS := $(BUILD)/isa_results.txt
+
 test_all_images: $(BUILD)/lockstep_isa.out   ## CI: lock-step every ISA test image
 	@rm -f test_results.txt
+	@mkdir -p $(BUILD); : > $(ISA_RESULTS)
 	@for img in $(ISA_IMAGES)/*; do \
 	  name=$$(basename $$img); \
 	  printf "[isa] %-42s " "$$name"; \
 	  if $(BUILD)/lockstep_isa.out --image $$img >/dev/null 2>&1; then \
-	    printf "pass\n"; echo "$$name: pass" >> test_results.txt; \
+	    printf "pass\n"; echo "$$name: pass" | tee -a $(ISA_RESULTS) >> test_results.txt; \
 	  else \
-	    printf "FAIL\n"; echo "$$name: fail" >> test_results.txt; \
+	    printf "FAIL\n"; echo "$$name: fail" | tee -a $(ISA_RESULTS) >> test_results.txt; \
 	  fi; \
 	done
-	@PASSED=$$(grep -c ': pass' test_results.txt); \
-	 TOTAL=$$(wc -l < test_results.txt); \
+	@PASSED=$$(grep -c ': pass' $(ISA_RESULTS)); \
+	 TOTAL=$$(wc -l < $(ISA_RESULTS)); \
 	 echo "ISA passed: $$PASSED / $$TOTAL"; \
-	 [ $$PASSED -eq $$TOTAL ] || { echo "REGRESSION: $$PASSED/$$TOTAL passed (expected ALL to pass -- any FAIL, incl. fence_i, fails CI)"; grep -i ': fail' test_results.txt || true; exit 1; }
+	 [ $$PASSED -eq $$TOTAL ] || { echo "REGRESSION: $$PASSED/$$TOTAL passed (expected ALL to pass -- any FAIL, incl. fence_i, fails CI)"; grep -i ': fail' $(ISA_RESULTS) || true; exit 1; }
 
 $(BUILD)/lrsc_wedge_probe.out: $(HARNESS)/probes/lrsc_wedge_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/lrsc_wedge_probe.cpp $(VSYS_LIB_FAST) -o $@

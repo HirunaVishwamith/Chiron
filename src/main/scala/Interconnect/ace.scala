@@ -8,7 +8,7 @@ import chisel3.experimental.BundleLiterals._
 class ace(
   idWidth: Int = 3,
   addressWidth: Int = 64,
-  dataWidth: Int = 64
+  dataWidth: Int = 128
 )extends Bundle {
 	val AWVALID = Input(Bool())
 	val AWREADY = Output(Bool())

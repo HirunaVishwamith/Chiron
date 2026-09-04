@@ -53,7 +53,7 @@ class Interconnect extends Module {
 		val WVALID = Output(Bool())
 		val WREADY = Input(Bool())
 		//metadata
-		val WDATA = Output(UInt(64.W))
+		val WDATA = Output(UInt(128.W))
 		//val WSTRB = Output(UInt((dataWidth/8).W))
 		val WLAST = Output(Bool())
 		//val WUSER = Output(UInt())
@@ -63,7 +63,7 @@ class Interconnect extends Module {
 		val RREADY = Output(Bool())
 		//metadata
 		val RID = Input(UInt(3.W))
-		val RDATA = Input(UInt(64.W))
+		val RDATA = Input(UInt(128.W))
 		val RRESP = Input(UInt(2.W))          //0:1 is AXI
 		val RLAST = Input(Bool())
 		//val RUSER = Input(UInt())
@@ -168,7 +168,10 @@ class Interconnect extends Module {
 
 
   // Instantiate RingBuffer with a given depth
-  val FIFO = Module(new ringbuffer(depth = 32)) //width is 71 bits
+  // 135-bit word: a W entry is 3 ## WDATA(128) ## 3 ## WLAST, and WDATA grew
+  // with the data path. AR/AW entries still use ID(70,68) / ADDR(67,4) /
+  // TYPE(3,0) and are zero-padded up to the wider word.
+  val FIFO = Module(new ringbuffer(depth = 32, width = 135))
 
   //FIFO connecting
   FIFO.io.enq.valid := Arbiter.io.enq_valid
@@ -186,55 +189,55 @@ class Interconnect extends Module {
 
 
   when(Arbiter.io.select === "b00000".U){        //0.U AR_0
-    FIFO.io.enq.bits := Cat(io.acePort0.ARID, io.acePort0.ARADDR,Mux(io.acePort0.ARBAR(0),"b0100".U(4.W),io.acePort0.ARSNOOP))
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort0.ARID, io.acePort0.ARADDR,Mux(io.acePort0.ARBAR(0),"b0100".U(4.W),io.acePort0.ARSNOOP))
   }.elsewhen(Arbiter.io.select === "b00001".U){  //1.U AW_0
-    FIFO.io.enq.bits := Cat(io.acePort0.AWID, io.acePort0.AWADDR, io.acePort0.AWBAR(0),io.acePort0.AWSNOOP)
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort0.AWID, io.acePort0.AWADDR, io.acePort0.AWBAR(0),io.acePort0.AWSNOOP)
   }.elsewhen(Arbiter.io.select === "b00010".U){  //2.U W_0
     FIFO.io.enq.bits := Cat("b000".U(3.W), io.acePort0.WDATA, "b000".U(3.W), io.acePort0.WLAST)
   }.elsewhen(Arbiter.io.select === "b00100".U){  //4.U AR_1
-    FIFO.io.enq.bits := Cat(io.acePort1.ARID, io.acePort1.ARADDR,Mux(io.acePort1.ARBAR(0),"b0100".U(4.W),io.acePort1.ARSNOOP))
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort1.ARID, io.acePort1.ARADDR,Mux(io.acePort1.ARBAR(0),"b0100".U(4.W),io.acePort1.ARSNOOP))
   }.elsewhen(Arbiter.io.select === "b00101".U){  //5.U AW_1
-    FIFO.io.enq.bits := Cat(io.acePort1.AWID, io.acePort1.AWADDR, io.acePort1.AWBAR(0),io.acePort1.AWSNOOP)
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort1.AWID, io.acePort1.AWADDR, io.acePort1.AWBAR(0),io.acePort1.AWSNOOP)
   }.elsewhen(Arbiter.io.select === "b00110".U){  //6.U W_1
     FIFO.io.enq.bits := Cat("b000".U(3.W), io.acePort1.WDATA, "b000".U(3.W), io.acePort1.WLAST)
   }.elsewhen(Arbiter.io.select === "b01000".U){  //8.U AR_2
-    FIFO.io.enq.bits := Cat(io.acePort2.ARID, io.acePort2.ARADDR,Mux(io.acePort2.ARBAR(0),"b0100".U(4.W),io.acePort2.ARSNOOP))
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort2.ARID, io.acePort2.ARADDR,Mux(io.acePort2.ARBAR(0),"b0100".U(4.W),io.acePort2.ARSNOOP))
   }.elsewhen(Arbiter.io.select === "b01001".U){  //9.U AW_2
-    FIFO.io.enq.bits := Cat(io.acePort2.AWID, io.acePort2.AWADDR, io.acePort2.AWBAR(0),io.acePort2.AWSNOOP)
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort2.AWID, io.acePort2.AWADDR, io.acePort2.AWBAR(0),io.acePort2.AWSNOOP)
   }.elsewhen(Arbiter.io.select === "b01010".U){  //10.U W_2
     FIFO.io.enq.bits := Cat("b000".U(3.W), io.acePort2.WDATA, "b000".U(3.W), io.acePort2.WLAST)
   }.elsewhen(Arbiter.io.select === "b01100".U){  //12.U AR_3
-    FIFO.io.enq.bits := Cat(io.acePort3.ARID, io.acePort3.ARADDR,Mux(io.acePort3.ARBAR(0),"b0100".U(4.W),io.acePort3.ARSNOOP))
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort3.ARID, io.acePort3.ARADDR,Mux(io.acePort3.ARBAR(0),"b0100".U(4.W),io.acePort3.ARSNOOP))
   }.elsewhen(Arbiter.io.select === "b01101".U){  //13.U AW_3
-    FIFO.io.enq.bits := Cat(io.acePort3.AWID, io.acePort3.AWADDR, io.acePort3.AWBAR(0),io.acePort3.AWSNOOP)
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort3.AWID, io.acePort3.AWADDR, io.acePort3.AWBAR(0),io.acePort3.AWSNOOP)
   }.elsewhen(Arbiter.io.select === "b01110".U){  //14.U W_3
     FIFO.io.enq.bits := Cat("b000".U(3.W), io.acePort3.WDATA, "b000".U(3.W), io.acePort3.WLAST)
   }.elsewhen(Arbiter.io.select === "b10000".U){  //16.U AR_4
-    FIFO.io.enq.bits := Cat(io.acePort4.ARID, io.acePort4.ARADDR,Mux(io.acePort4.ARBAR(0),"b0100".U(4.W),io.acePort4.ARSNOOP))
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort4.ARID, io.acePort4.ARADDR,Mux(io.acePort4.ARBAR(0),"b0100".U(4.W),io.acePort4.ARSNOOP))
   }.elsewhen(Arbiter.io.select === "b10001".U){  //17.U AW_4
-    FIFO.io.enq.bits := Cat(io.acePort4.AWID, io.acePort4.AWADDR, io.acePort4.AWBAR(0),io.acePort4.AWSNOOP)
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort4.AWID, io.acePort4.AWADDR, io.acePort4.AWBAR(0),io.acePort4.AWSNOOP)
   }.elsewhen(Arbiter.io.select === "b10010".U){  //18.U W_4
     FIFO.io.enq.bits := Cat("b000".U(3.W), io.acePort4.WDATA, "b000".U(3.W), io.acePort4.WLAST)
   }.elsewhen(Arbiter.io.select === "b10100".U){  //20.U AR_5
-    FIFO.io.enq.bits := Cat(io.acePort5.ARID, io.acePort5.ARADDR,Mux(io.acePort5.ARBAR(0),"b0100".U(4.W),io.acePort5.ARSNOOP))
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort5.ARID, io.acePort5.ARADDR,Mux(io.acePort5.ARBAR(0),"b0100".U(4.W),io.acePort5.ARSNOOP))
   }.elsewhen(Arbiter.io.select === "b10101".U){  //21.U AW_5
-    FIFO.io.enq.bits := Cat(io.acePort5.AWID, io.acePort5.AWADDR, io.acePort5.AWBAR(0),io.acePort5.AWSNOOP)
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort5.AWID, io.acePort5.AWADDR, io.acePort5.AWBAR(0),io.acePort5.AWSNOOP)
   }.elsewhen(Arbiter.io.select === "b10110".U){  //22.U W_5
     FIFO.io.enq.bits := Cat("b000".U(3.W), io.acePort5.WDATA, "b000".U(3.W), io.acePort5.WLAST)
   }.elsewhen(Arbiter.io.select === "b11000".U){  //24.U AR_6
-    FIFO.io.enq.bits := Cat(io.acePort6.ARID, io.acePort6.ARADDR,Mux(io.acePort6.ARBAR(0),"b0100".U(4.W),io.acePort6.ARSNOOP))
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort6.ARID, io.acePort6.ARADDR,Mux(io.acePort6.ARBAR(0),"b0100".U(4.W),io.acePort6.ARSNOOP))
   }.elsewhen(Arbiter.io.select === "b11001".U){  //25.U AW_6
-    FIFO.io.enq.bits := Cat(io.acePort6.AWID, io.acePort6.AWADDR, io.acePort6.AWBAR(0),io.acePort6.AWSNOOP)
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort6.AWID, io.acePort6.AWADDR, io.acePort6.AWBAR(0),io.acePort6.AWSNOOP)
   }.elsewhen(Arbiter.io.select === "b11010".U){  //26.U W_6
     FIFO.io.enq.bits := Cat("b000".U(3.W), io.acePort6.WDATA, "b000".U(3.W), io.acePort6.WLAST)
   }.elsewhen(Arbiter.io.select === "b11100".U){  //28.U AR_7
-    FIFO.io.enq.bits := Cat(io.acePort7.ARID, io.acePort7.ARADDR,Mux(io.acePort7.ARBAR(0),"b0100".U(4.W),io.acePort7.ARSNOOP))
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort7.ARID, io.acePort7.ARADDR,Mux(io.acePort7.ARBAR(0),"b0100".U(4.W),io.acePort7.ARSNOOP))
   }.elsewhen(Arbiter.io.select === "b11101".U){  //29.U AW_7
-    FIFO.io.enq.bits := Cat(io.acePort7.AWID, io.acePort7.AWADDR, io.acePort7.AWBAR(0),io.acePort7.AWSNOOP)
+    FIFO.io.enq.bits := Cat(0.U(64.W), io.acePort7.AWID, io.acePort7.AWADDR, io.acePort7.AWBAR(0),io.acePort7.AWSNOOP)
   }.elsewhen(Arbiter.io.select === "b11110".U){  //30.U W_7
     FIFO.io.enq.bits := Cat("b000".U(3.W), io.acePort7.WDATA, "b000".U(3.W), io.acePort7.WLAST)
   }.otherwise{
-    FIFO.io.enq.bits := 0.U(71.W)
+    FIFO.io.enq.bits := 0.U(135.W)
   }
 
   // Instantiate CCU
