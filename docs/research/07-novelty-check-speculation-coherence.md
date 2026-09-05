@@ -132,3 +132,45 @@ job. Compare against the fixed-config baseline in `mlp-limiters-and-spec-depth-t
 **Do not skip the control.** `mt-lrsc` phase 2 running the same algorithm with
 hand-written atomics is what separates "RTL cannot guarantee progress" from
 "this test's CAS loop is fragile".
+
+---
+
+## 7. Experiment 1 result (2026-09-05) — suggestive, control still missing
+
+Ran `ci-smp` at both configurations, same tree, rebuilt each time.
+
+| config | `ci-smp` | `mt-llist` |
+|---|---|---|
+| **baseline** `robAddrWidth=4` / `branchMaskWidth=4` (ROB 16, mask 4) | **ALL PASS** | passes (~1.07M cycles) |
+| **deep** `robAddrWidth=5` / `branchMaskWidth=6` (ROB 32, mask 6) | **FAILURES** | **hit the 30,000,000-cycle cap** |
+
+Every other gated micro passed at both settings (seqlock 7.9M, spinwait 7040,
+fencei 583902, crosscall 389070, illegal 1400, icoh-cross 372433, icoh-self
+387557). **Only `mt-llist` fails, and only at depth.**
+
+**This is stronger than the note it came from.** The original observation was
+made when `mt-llist` still had its own testbench bug (the redundant
+`__sync_synchronize()`); that was fixed in `74bf2aa` and the committed bin was
+refreshed, so **this failure is on the FIXED test**. The confound identified in
+§5 no longer explains it.
+
+**But it is not settled, for two reasons:**
+
+1. **The control was never run.** `mt-lrsc` is *not* in `CI_SMP_TESTS`, so the
+   discriminating experiment — phase 2 runs the same push/drain algorithm with
+   hand-written atomics — did not execute. Required next:
+   `make litmus`-style run of `mt-lrsc-q4` at deep settings.
+   - `mt-lrsc` also fails at depth → a general forward-progress failure, and the
+     claim is real.
+   - `mt-lrsc` passes → specific to `mt-llist`'s CAS loop, and the honest
+     reading is a timing-fragile test rather than an architectural ceiling.
+2. **"Did not finish in 30M cycles" is not yet "livelock".** `mt-llist` has its
+   own no-progress watchdog that reports `stalled=1`; the gate's grep discarded
+   the failure dump. Re-run capturing full output to distinguish livelock from
+   28× slowdown.
+
+If the control confirms, the claim becomes: **speculation depth in an OoO
+multicore is bounded by coherence liveness — not by area or timing — and the
+bound is reachable at ordinary parameter values (ROB 32 / mask 6).** That is
+simulation-only, needs no FPGA, and is directly relevant to SMT, which raises
+contention further.
