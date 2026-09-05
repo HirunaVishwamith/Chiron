@@ -162,3 +162,53 @@ Three deliverables, in increasing order of value:
 | R3: no design-flow / verification / DSE discussion for an EDA venue | The whole paper is a verification-flow result; the DSE sweep is correctness-constrained (widening the branch mask gains ~2% IPC and **livelocks `mt-llist`**). |
 
 Every complaint lands somewhere. That is the test a resubmission has to pass.
+
+---
+
+## 7. Feasibility check (2026-09-05) — Layer 1 is simpler than designed
+
+Before committing to the mechanism, I checked whether the state it needs is
+actually observable. It is, and more directly than §3 assumed.
+
+`sim/harness/probes/lrsc_wedge_probe7.cpp` already reads, **per core, per set,
+per way, every cycle**, straight out of the Verilated model:
+
+```c
+#define CORE_T(n)     ...core##n##__DOT__memAccess__DOT__cacheLookup__DOT__tagBRAM__DOT__mem
+#define CORE_D(n, w)  ...core##n##__DOT__memAccess__DOT__cacheLookup__DOT__dataBRAM_##w##__DOT__mem
+```
+
+and decodes the flags from the tag entry (`cacheLookupUnit.scala:429-432`):
+`V = tagSize`, `dirty = tagSize+1`, `shared = tagSize+2`, `PLRU = tagSize+3`,
+with `tagSection = 4 + tagSize`.
+
+**Consequence: the shadow directory does not need to be reconstructed from ACE
+transactions at all.** SWMR can be checked against ground truth directly —
+scan the four L1 tag arrays and assert that no line is held Unique
+(`valid && !shared`) by two cores at once. That is exactly the condition that
+was hand-dumped to diagnose CO-1 (`V1 M1 S0` in two L1s simultaneously); the
+contribution is turning that one-off manual dump into a continuous, automatic,
+cycle-level invariant.
+
+This removes the main implementation risk. It also means the probe
+infrastructure is already most of the way there: **53 probes** exist under
+`sim/harness/probes/`, and `lrsc_wedge_probe7` is described in its own header as
+a *"line-state change tracker with STALE-FILL detector (golden lastValid
+compare)"* — i.e. a single-line, hand-aimed prototype of Layers 1 and its
+data-value check. Generalizing it from one set to all sets, from one line to
+all lines, and from "print on change" to "assert an invariant" **is** the
+mechanism.
+
+**Cost estimate:** 4 cores × 128 sets × 4 ways = 2048 way-entries to diff per
+cycle in the naive form. Tractable in C++ but it will slow simulation; the
+obvious optimizations are (a) maintain an incremental shadow keyed by tag and
+only re-check lines whose tag entry changed, and (b) make the full sweep
+periodic with the incremental check continuous. Measure the slowdown — it is a
+column in the results table, not an implementation detail.
+
+**Honest caveat:** reading the tag arrays gives *cache state*, which makes SWMR
+directly checkable. The data-value invariant additionally needs to know the
+coherence *order* of writes, which the tag arrays alone do not give. For DVI,
+the golden model's memory image remains the reference (this is where lockstep is
+load-bearing, exactly as §3 argued), and in-flight transactions still have to be
+tracked. Do not let the SWMR result make DVI look free.
