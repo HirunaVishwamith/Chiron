@@ -83,7 +83,7 @@ litmus-bin:    ## Build bins/mt-litmus-q4.bin (LITMUS=SB|LB)
 	rm -f $(BENCH_SRC)/mt-litmus.o $(BENCH_SRC)/crt.o $(BENCH_SRC)/syscalls.o
 	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
 	    bmarks="mt-litmus" \
-	    RISCV_GCC_OPTS="$(QUAD_GCC_OPTS) -DLITMUS_SB=$(if $(filter SB,$(LITMUS)),1,0) -DLITMUS_FENCE=$(if $(filter 1,$(FENCE)),1,0) -DITERS=$(if $(ITERS),$(ITERS),2000)"
+	    RISCV_GCC_OPTS="$(QUAD_GCC_OPTS) -DLITMUS_SB=$(if $(filter SB,$(LITMUS)),1,0) -DLITMUS_FENCE=$(if $(filter 1,$(FENCE)),1,0) -DITERS=$(if $(ITERS),$(ITERS),2000) -DRAND_DELAY=$(if $(filter 0,$(RAND)),0,1)"
 	@mkdir -p $(BINS)
 	cp $(BENCH_SRC)/mt-litmus.bin $(BINS)/mt-litmus-q4.bin
 	@echo "[litmus-bin] staged: $(BINS)/mt-litmus-q4.bin  (LITMUS=$(LITMUS))"

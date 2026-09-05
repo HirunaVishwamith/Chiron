@@ -63,6 +63,10 @@ extern void exit(int status);
 // fence, the measurement is not measuring what it claims -- either the harness
 // is wrong, or the RTL violates RVWMO. Either way, do not report a number
 // until LITMUS_FENCE=1 gives zero.
+#ifndef RAND_DELAY
+#define RAND_DELAY 1
+#endif
+
 #ifndef LITMUS_FENCE
 #define LITMUS_FENCE 0
 #endif
@@ -78,16 +82,30 @@ typedef struct { volatile unsigned long v; unsigned char pad[56]; } cell_t;
 static cell_t xv __attribute__((aligned(64)));
 static cell_t yv __attribute__((aligned(64)));
 
-// Per-iteration observations, written by the hart that made them and only
-// read after the final barrier, so recording never perturbs the test itself.
-static volatile unsigned long obs0[ITERS];
-static volatile unsigned long obs1[ITERS];
+// Recording must have a CONSTANT memory footprint. The first version of this
+// harness loggedper-iteration results into two ITERS-long arrays; at ITERS=2000
+// those fit in the 64 KB D-cache and at ITERS=20000 they were 160 KB each and
+// thrashed it. The relaxed-outcome rate moved from 0.05% to 13.4% -- a 268x
+// swing caused by the RECORDER, not the machine. So: one shared line, reused
+// every iteration, read only after a barrier closes the test window.
+typedef struct { volatile unsigned long a, b; unsigned char pad[48]; } pair_t;
+static pair_t res __attribute__((aligned(64)));
+
+// Per-hart LCG. Litmus harnesses decorrelate the threads with a randomised
+// delay; a fixed barrier release makes both harts start in lockstep every
+// time, which samples only one interleaving.
+static inline unsigned long lcg(unsigned long *st) {
+  *st = *st * 6364136223846793005UL + 1442695040888963407UL;
+  return *st >> 33;
+}
 
 void thread_entry(int cid, int nc)
 {
   if (cid >= nc) { while (1) ; }
 
   initialize_count_asm(0);
+  unsigned long rnd = 0x9e3779b97f4a7c15UL ^ (unsigned long)(cid + 1);
+  int h[2][2] = {{0, 0}, {0, 0}};
   barrier(nc);
 
   for (unsigned long i = 0; i < ITERS; i++) {
@@ -95,6 +113,11 @@ void thread_entry(int cid, int nc)
     // and starts both threads together.
     if (cid == 0) { xv.v = 0; yv.v = 0; }
     barrier(nc);
+
+#if RAND_DELAY
+    { unsigned long d = lcg(&rnd) & 0x3f;
+      for (unsigned long k = 0; k < d; k++) __asm__ __volatile__("" ::: "memory"); }
+#endif
 
     unsigned long r = 0;
 
@@ -108,7 +131,7 @@ void thread_entry(int cid, int nc)
           : [r] "=&r"(r)
           : [one] "r"(1UL), [px] "r"(&xv.v), [py] "r"(&yv.v)
           : "memory");
-      obs0[i] = r;
+      res.a = r;
     } else if (cid == 1) {
       // P1: sd 1,(y) ; ld r,(x)
       __asm__ __volatile__(
@@ -118,7 +141,7 @@ void thread_entry(int cid, int nc)
           : [r] "=&r"(r)
           : [one] "r"(1UL), [py] "r"(&yv.v), [px] "r"(&xv.v)
           : "memory");
-      obs1[i] = r;
+      res.b = r;
     }
 #else
     if (cid == 0) {
@@ -132,7 +155,7 @@ void thread_entry(int cid, int nc)
           : [r] "=&r"(r)
           : [px] "r"(&xv.v), [py] "r"(&yv.v), [one] "r"(1UL)
           : "memory");
-      obs0[i] = r;
+      res.a = r;
     } else if (cid == 1) {
       // P1: ld r,(y) ; sd 1,(x)   -- no dependency
       __asm__ __volatile__(
@@ -142,11 +165,17 @@ void thread_entry(int cid, int nc)
           : [r] "=&r"(r)
           : [py] "r"(&yv.v), [px] "r"(&xv.v), [one] "r"(1UL)
           : "memory");
-      obs1[i] = r;
+      res.b = r;
     }
 #endif
 
+    // Close the test window before reading the pair, so accumulating the
+    // histogram can never overlap the next iteration's measurement.
     barrier(nc);
+    if (cid == 0) {
+      unsigned long a = res.a, b = res.b;
+      if (a <= 1 && b <= 1) h[a][b]++;
+    }
   }
 
   barrier(nc);
@@ -154,14 +183,7 @@ void thread_entry(int cid, int nc)
   if (cid != 0)
     exit(2);
 
-  // Histogram of (r0, r1) over the four possible outcomes.
-  int h[2][2] = {{0, 0}, {0, 0}};
-  int odd = 0;
-  for (unsigned long i = 0; i < ITERS; i++) {
-    unsigned long a = obs0[i], b = obs1[i];
-    if (a > 1 || b > 1) { odd++; continue; }
-    h[a][b]++;
-  }
+  int odd = ITERS - (h[0][0] + h[0][1] + h[1][0] + h[1][1]);
 
 #if LITMUS_SB
   uart_send_string("LITMUS SB  P0:{x=1;r0=y}  P1:{y=1;r1=x}\n");
