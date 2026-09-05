@@ -155,6 +155,11 @@ class system extends Module {
   chiron.uartClient2 <> peripherals.client2
   chiron.uartClient3 <> peripherals.client3
 
+  // Kairos schedule-exploration input, forwarded straight to chironCore.
+  val scheduleStall = if (common.configuration.enableScheduleControl)
+    Some(IO(Input(UInt(4.W)))) else None
+  if (scheduleStall.isDefined) { chiron.scheduleStall.get := scheduleStall.get }
+
   chiron.mtip0 := peripherals.MTIP0
   chiron.mtip1 := peripherals.MTIP1
   chiron.mtip2 := peripherals.MTIP2

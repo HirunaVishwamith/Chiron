@@ -1376,6 +1376,17 @@ class chironCore extends Module {
   core2.MTIP := mtip2
   core3.MTIP := mtip3
 
+  // Kairos: one delay bit per hart. Bit i holds core i's fetch->decode
+  // handshake. Held low (or compiled out) this is inert -- see core.scala.
+  val scheduleStall = if (common.configuration.enableScheduleControl)
+    Some(IO(Input(UInt(4.W)))) else None
+  if (scheduleStall.isDefined) {
+    core0.scheduleStall.get := scheduleStall.get(0)
+    core1.scheduleStall.get := scheduleStall.get(1)
+    core2.scheduleStall.get := scheduleStall.get(2)
+    core3.scheduleStall.get := scheduleStall.get(3)
+  }
+
   val msip0 = IO(Input(Bool()))
   val msip1 = IO(Input(Bool()))
   val msip2 = IO(Input(Bool()))

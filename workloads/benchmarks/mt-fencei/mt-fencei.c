@@ -107,7 +107,9 @@ void thread_entry(int cid, int nc)
       ;
   }
 
-  initialize_count_asm(0);
+  /* initialize_count_asm(0) removed — every hart ran it unsynchronised and
+     it clobbered the shared barrier state (8-byte store over count+sense).
+     crt.S zeroes them now that test.ld covers .sbss. See docs/research/12. */
   csd[cid].word      = 0;
   csd[cid].scratch   = 0;
   doorbell[cid].word = 0;

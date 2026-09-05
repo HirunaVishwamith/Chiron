@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{0}
+\begin{thebibliography}{18}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -35,5 +35,212 @@
 \providecommand\bibinfo[2]{#2}
 \providecommand\natexlab[1]{#1}
 \providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Alglave et~al\mbox{.}(2014)]%
+        {alglave2014herding}
+\bibfield{author}{\bibinfo{person}{Jade Alglave}, \bibinfo{person}{Luc
+  Maranget}, {and} \bibinfo{person}{Michael Tautschnig}.}
+  \bibinfo{year}{2014}\natexlab{}.
+\newblock \showarticletitle{Herding Cats: Modelling, Simulation, Testing, and
+  Data Mining for Weak Memory}.
+\newblock \bibinfo{journal}{\emph{ACM Transactions on Programming Languages and
+  Systems (TOPLAS)}} \bibinfo{volume}{36}, \bibinfo{number}{2}
+  (\bibinfo{year}{2014}).
+\newblock
+
+
+\bibitem[Burckhardt et~al\mbox{.}(2010)]%
+        {burckhardt2010pct}
+\bibfield{author}{\bibinfo{person}{Sebastian Burckhardt},
+  \bibinfo{person}{Pravesh Kothari}, \bibinfo{person}{Madanlal Musuvathi},
+  {and} \bibinfo{person}{Santosh Nagarakatte}.}
+  \bibinfo{year}{2010}\natexlab{}.
+\newblock \showarticletitle{A Randomized Scheduler with Probabilistic
+  Guarantees of Finding Bugs}. In \bibinfo{booktitle}{\emph{Proceedings of the
+  15th International Conference on Architectural Support for Programming
+  Languages and Operating Systems (ASPLOS)}}.
+\newblock
+
+
+\bibitem[Canakci et~al\mbox{.}(2023)]%
+        {canakci2023processorfuzz}
+\bibfield{author}{\bibinfo{person}{Sadullah Canakci}, \bibinfo{person}{Leila
+  Delshadtehrani}, \bibinfo{person}{Furkan Eris},
+  \bibinfo{person}{Michael~Taylor Le}, \bibinfo{person}{Ajay Joshi}, {and}
+  \bibinfo{person}{Manuel Egele}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{{ProcessorFuzz}: Processor Fuzzing with Control and
+  Status Registers Guidance}. In \bibinfo{booktitle}{\emph{{IEEE} International
+  Symposium on Hardware Oriented Security and Trust ({HOST})}}.
+\newblock
+
+
+\bibitem[Elver and Nagarajan(2016)]%
+        {elver2016mcversi}
+\bibfield{author}{\bibinfo{person}{Marco Elver} {and} \bibinfo{person}{Vijay
+  Nagarajan}.} \bibinfo{year}{2016}\natexlab{}.
+\newblock \showarticletitle{McVerSi: A Test Generation Framework for Fast
+  Memory Consistency Verification in Simulation}. In
+  \bibinfo{booktitle}{\emph{IEEE International Symposium on High Performance
+  Computer Architecture (HPCA)}}.
+\newblock
+
+
+\bibitem[Hangal et~al\mbox{.}(2004)]%
+        {hangal2004tsotool}
+\bibfield{author}{\bibinfo{person}{Sudheendra Hangal}, \bibinfo{person}{Durgam
+  Vahia}, \bibinfo{person}{Chaiyasit Manovit}, \bibinfo{person}{Juin-Yeu~Joseph
+  Lu}, {and} \bibinfo{person}{Sridhar Narayanan}.}
+  \bibinfo{year}{2004}\natexlab{}.
+\newblock \showarticletitle{TSOtool: A Program for Verifying Memory Systems
+  Using the Memory Consistency Model}. In \bibinfo{booktitle}{\emph{Proceedings
+  of the 31st Annual International Symposium on Computer Architecture (ISCA)}}.
+\newblock
+
+
+\bibitem[Hur et~al\mbox{.}(2021)]%
+        {hur2021difuzzrtl}
+\bibfield{author}{\bibinfo{person}{Jaewon Hur}, \bibinfo{person}{Suhwan Song},
+  \bibinfo{person}{Dongup Kwon}, \bibinfo{person}{Eunjin Baek},
+  \bibinfo{person}{Jangwoo Kim}, {and} \bibinfo{person}{Byoungyoung Lee}.}
+  \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{DifuzzRTL: Differential Fuzz Testing to Find CPU
+  Bugs}. In \bibinfo{booktitle}{\emph{IEEE Symposium on Security and Privacy
+  (S\&P)}}.
+\newblock
+
+
+\bibitem[{IEEE}(2020)]%
+        {ieee1800uvm}
+\bibfield{author}{\bibinfo{person}{{IEEE}}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{{IEEE} Standard for Universal Verification
+  Methodology Language Reference Manual}}.
+\newblock
+\shownote{{IEEE} Std 1800.2-2020}.
+\newblock
+
+
+\bibitem[Kande et~al\mbox{.}(2022)]%
+        {kande2022thehuzz}
+\bibfield{author}{\bibinfo{person}{Rahul Kande}, \bibinfo{person}{Addison
+  Crump}, \bibinfo{person}{Garrett Persyn}, \bibinfo{person}{Patrick Jauernig},
+  \bibinfo{person}{Ahmad-Reza Sadeghi}, \bibinfo{person}{Aakash Tyagi}, {and}
+  \bibinfo{person}{Jeyavijayan Rajendran}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{{TheHuzz}: Instruction Fuzzing of Processors Using
+  Golden-Reference Models for Finding Software-Exploitable Vulnerabilities}. In
+  \bibinfo{booktitle}{\emph{31st {USENIX} Security Symposium}}.
+\newblock
+
+
+\bibitem[Laeufer et~al\mbox{.}(2018)]%
+        {laeufer2018rfuzz}
+\bibfield{author}{\bibinfo{person}{Kevin Laeufer}, \bibinfo{person}{Jack
+  Koenig}, \bibinfo{person}{Donggyu Kim}, \bibinfo{person}{Jonathan Bachrach},
+  {and} \bibinfo{person}{Koushik Sen}.} \bibinfo{year}{2018}\natexlab{}.
+\newblock \showarticletitle{RFUZZ: Coverage-Directed Fuzz Testing of RTL on
+  FPGAs}. In \bibinfo{booktitle}{\emph{IEEE/ACM International Conference on
+  Computer-Aided Design (ICCAD)}}.
+\newblock
+
+
+\bibitem[Lee and Bertacco(2017)]%
+        {lee2017mtracecheck}
+\bibfield{author}{\bibinfo{person}{Doowon Lee} {and} \bibinfo{person}{Valeria
+  Bertacco}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{MTraceCheck: Validating Non-Deterministic Behavior
+  of Memory Consistency Models in Post-Silicon Validation}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 44th Annual International
+  Symposium on Computer Architecture (ISCA)}}.
+\newblock
+
+
+\bibitem[Ma et~al\mbox{.}(2025)]%
+        {ma2025difftesth}
+\bibfield{author}{\bibinfo{person}{Yifei Ma} {et~al\mbox{.}}}
+  \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{{DiffTest-H}: Toward Cost-Effective {CPU}
+  Verification with Expanding Architectural States}. In
+  \bibinfo{booktitle}{\emph{58th {IEEE/ACM} International Symposium on
+  Microarchitecture ({MICRO})}}.
+\newblock
+
+
+\bibitem[Musuvathi and Qadeer(2007)]%
+        {musuvathi2007chess}
+\bibfield{author}{\bibinfo{person}{Madanlal Musuvathi} {and}
+  \bibinfo{person}{Shaz Qadeer}.} \bibinfo{year}{2007}\natexlab{}.
+\newblock \showarticletitle{Iterative Context Bounding for Systematic Testing
+  of Multithreaded Programs}. In \bibinfo{booktitle}{\emph{ACM SIGPLAN
+  Conference on Programming Language Design and Implementation (PLDI)}}.
+\newblock
+
+
+\bibitem[Musuvathi et~al\mbox{.}(2008)]%
+        {musuvathi2008chess}
+\bibfield{author}{\bibinfo{person}{Madanlal Musuvathi}, \bibinfo{person}{Shaz
+  Qadeer}, \bibinfo{person}{Thomas Ball}, \bibinfo{person}{Gerard Basler},
+  \bibinfo{person}{Piramanayagam~Arumuga Nainar}, {and} \bibinfo{person}{Iulian
+  Neamtiu}.} \bibinfo{year}{2008}\natexlab{}.
+\newblock \showarticletitle{Finding and Reproducing {Heisenbugs} in Concurrent
+  Programs}. In \bibinfo{booktitle}{\emph{8th {USENIX} Symposium on Operating
+  Systems Design and Implementation ({OSDI})}}.
+\newblock
+
+
+\bibitem[Solt et~al\mbox{.}(2024)]%
+        {solt2024cascade}
+\bibfield{author}{\bibinfo{person}{Flavien Solt}, \bibinfo{person}{Katharina
+  Ceesay-Seitz}, {and} \bibinfo{person}{Kaveh Razavi}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Cascade: CPU Fuzzing via Intricate Program
+  Generation}. In \bibinfo{booktitle}{\emph{33rd USENIX Security Symposium}}.
+\newblock
+
+
+\bibitem[Sorin et~al\mbox{.}(2011)]%
+        {sorin2011primer}
+\bibfield{author}{\bibinfo{person}{Daniel~J. Sorin}, \bibinfo{person}{Mark~D.
+  Hill}, {and} \bibinfo{person}{David~A. Wood}.}
+  \bibinfo{year}{2011}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{A Primer on Memory Consistency and Cache
+  Coherence}}.
+\newblock \bibinfo{publisher}{Morgan \& Claypool}.
+\newblock
+
+
+\bibitem[Xu et~al\mbox{.}(2023)]%
+        {xu2023morfuzz}
+\bibfield{author}{\bibinfo{person}{Jinyan Xu}, \bibinfo{person}{Yiyuan Liu},
+  \bibinfo{person}{Sirui He}, \bibinfo{person}{Haoran Lin},
+  \bibinfo{person}{Yajin Zhou}, {and} \bibinfo{person}{Cong Wang}.}
+  \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{{MorFuzz}: Fuzzing Processor via Runtime
+  Instruction Morphing enhanced Synchronizable Co-simulation}. In
+  \bibinfo{booktitle}{\emph{32nd {USENIX} Security Symposium}}.
+\newblock
+
+
+\bibitem[Xu et~al\mbox{.}(2022)]%
+        {xu2022xiangshan}
+\bibfield{author}{\bibinfo{person}{Yinan Xu}, \bibinfo{person}{Zihao Yu},
+  \bibinfo{person}{Dan Tang}, \bibinfo{person}{Guokai Chen},
+  \bibinfo{person}{Lu Chen}, \bibinfo{person}{Lingrui Gou},
+  \bibinfo{person}{Yue Jin}, \bibinfo{person}{Qianruo Li}, \bibinfo{person}{Xin
+  Li}, \bibinfo{person}{Zuojun Li}, {et~al\mbox{.}}}
+  \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{Towards Developing High Performance RISC-V
+  Processors Using Agile Methodology}. In \bibinfo{booktitle}{\emph{55th
+  IEEE/ACM International Symposium on Microarchitecture (MICRO)}}.
+\newblock
+
+
+\bibitem[Zeller and Hildebrandt(2002)]%
+        {zeller2002ddmin}
+\bibfield{author}{\bibinfo{person}{Andreas Zeller} {and} \bibinfo{person}{Ralf
+  Hildebrandt}.} \bibinfo{year}{2002}\natexlab{}.
+\newblock \showarticletitle{Simplifying and Isolating Failure-Inducing Input}.
+\newblock \bibinfo{journal}{\emph{IEEE Transactions on Software Engineering}}
+  \bibinfo{volume}{28}, \bibinfo{number}{2} (\bibinfo{year}{2002}).
+\newblock
+
 
 \end{thebibliography}

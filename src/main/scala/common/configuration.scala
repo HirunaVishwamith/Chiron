@@ -28,6 +28,14 @@ object configuration {
   // dual-model path (walker off) is no longer needed: walkerWriteBackBuffer
   // decouples the walker's writebacks from the request/snoop path so SMP boot
   // no longer circular-waits on the single writeBackBuffer.
+  // Kairos schedule-exploration hook. When true the core exposes a one-bit
+  // `scheduleStall` input that gates the fetch->decode handshake, letting an
+  // external scheduler DELAY a hart (never reorder, never inject). When false
+  // the port and the gate are not elaborated at all and the emitted Verilog is
+  // identical to a build that never heard of Kairos -- proved by
+  // tools/kairos/equiv_check.sh. See sim/kairos/README.md.
+  val enableScheduleControl = true
+
   val disableFenceIWalker = false
   val instrIssueDepth = 8
   // ROB depth = 2^robAddrWidth. 5 → 32 entries (was 4 → 16). Wider window

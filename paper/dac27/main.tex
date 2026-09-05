@@ -1,17 +1,18 @@
 \documentclass[sigconf,anonymous,review]{acmart}
-%% DAC submissions are double-blind: keep [anonymous,review] until camera-ready.
-%% DAC research papers have historically been 6 pages in this format.
-%% Re-check the DAC 2027 CFP when posted and adjust DAC_PAGE_LIMIT in compile.sh.
+%% DAC submissions are double-blind. DAC 2026 CFP: 6 pages of content plus
+%% one additional page of references only. Re-check the DAC 2027 CFP.
 
 \usepackage{placeins}
 \usepackage{enumitem}
 \usepackage{booktabs}
-\setlist[itemize]{topsep=4pt plus 0pt minus 0pt, itemsep=3pt plus 0pt minus 0pt, parsep=0pt}
+\usepackage{graphicx}
+\usepackage{multirow}
+\setlist[itemize]{topsep=3pt plus 0pt minus 0pt, itemsep=2pt plus 0pt minus 0pt, parsep=0pt}
+\setlist[enumerate]{topsep=3pt plus 0pt minus 0pt, itemsep=2pt plus 0pt minus 0pt, parsep=0pt}
 
 \AtBeginDocument{%
   \providecommand\BibTeX{{Bib\TeX}}}
 
-%% Rights placeholders -- replace from the ACM rights e-mail on acceptance.
 \setcopyright{acmlicensed}
 \copyrightyear{2027}
 \acmYear{2027}
@@ -19,72 +20,740 @@
 \acmConference[DAC '27]{64th ACM/IEEE Design Automation Conference}{July 2027}{San Jose, CA, USA}
 \acmISBN{978-1-4503-XXXX-X/27/07}
 
+\usepackage{stfloats}   % allows a double-column float at the bottom too
+
+%% Float placement. The defaults reject a page that is mostly floats, which on
+%% a 6-page paper pushed both result figures past their own discussion.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.50}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\dbltopfraction}{0.92}
+\renewcommand{\dblfloatpagefraction}{0.72}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+\setcounter{dbltopnumber}{3}
+
+\graphicspath{{figures/}}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{6pt plus 2pt minus 2pt}
+\captionsetup{font=small, skip=4pt, justification=justified}
+
 \begin{document}
 
-%% TITLE -- placeholder. Settle once the headline result exists; do not
-%% pre-commit the framing before the measurement.
-\title{Schedule Exploration for Multicore RTL Simulation}
+\title{Kairos: Schedule Exploration for Multicore RTL Simulation}
 
 \begin{abstract}
-%% Write this LAST, from the results. A placeholder here on purpose: an
-%% abstract written before the numbers is a hypothesis, and hypotheses have
-%% been wrong repeatedly on this project.
+Cycle-accurate RTL simulation of a multicore is deterministic: a test
+program explores exactly one interleaving, no matter how many times it
+is run. Silicon does not have this limitation---timing jitter is why
+post-silicon multicore validation works at all. We measure the resulting
+coverage wall: reverting a real dual-Unique coherence bug changes
+nothing observable on five directed reproducers, because the schedule
+never varies. \emph{Kairos} restores schedule diversity pre-silicon by
+delaying harts under a reproducible policy. The RTL cost is one bit per
+core gating an existing handshake; compiled out, the generated netlist
+is identical to the original design (0 differing lines). Because a stall
+is always architecturally legal, every induced schedule is one the
+hardware could reach unaided---there is no false-positive class from the
+mechanism. On a quad-core out-of-order RISC-V, eight runs of a
+conventional regression explore one interleaving; the same eight runs
+under Kairos explore up to eight. Two latent races in the shared SMP
+boot code---missed by years of green CI---were found in under ten runs
+of workloads below 7{,}000 cycles and reduced to one named-hart delay.
+Both are software races, not RTL bugs.
 \end{abstract}
+
+\begin{CCSXML}
+<ccs2012>
+ <concept>
+  <concept_id>10010583.10010662.10010674</concept_id>
+  <concept_desc>Hardware~Hardware validation</concept_desc>
+  <concept_significance>500</concept_significance>
+ </concept>
+ <concept>
+  <concept_id>10010583.10010662.10010680</concept_id>
+  <concept_desc>Hardware~Simulation and emulation</concept_desc>
+  <concept_significance>300</concept_significance>
+ </concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[500]{Hardware~Hardware validation}
+\ccsdesc[300]{Hardware~Simulation and emulation}
+\keywords{RTL simulation, multicore, schedule exploration, cache coherence}
+
+\begin{teaserfigure}
+\centering
+\includegraphics[width=\textwidth]{fig1_teaser.pdf}
+\Description{Line chart: deterministic stays at 1 interleaving across 8 runs; PCT reaches 8; windowed 6; random 3. Gantt: hart 2 held 343 cycles at cycle 1383.}
+\caption{The claim, on one workload (\texttt{mt-spinwait}).
+(a)~Eight runs of a deterministic RTL simulation explore one
+interleaving; the same eight runs under schedule exploration explore up
+to eight. (b)~The failure that windowed delay found, after automatic
+reduction: hart~2 held for 343 cycles at cycle 1383. Replaying that
+one-line file reproduces the livelock; after the race was fixed, the
+same file completes cleanly.}
+\label{fig:teaser}
+\end{teaserfigure}
 
 \maketitle
 
 \section{Introduction}
-%% The observation: cycle-accurate RTL simulation of a multicore is
-%% deterministic, so it explores one interleaving per test program regardless of
-%% how many times it is run. Silicon does not have this problem, which is why
-%% post-silicon multicore validation works; simulation loses that coverage
-%% source precisely pre-silicon, where bugs are cheapest to fix.
-%% Evidence: docs/research/12, section 2.
+\label{sec:intro}
 
-\section{Background and Related Work}
-%% Two axes, and they are orthogonal. Program generation: TSOtool (ISCA'04),
-%% McVerSi (HPCA'16), MTraceCheck, DifuzzRTL, TheHuzz, Cascade, ProcessorFuzz.
-%% Schedule exploration: CHESS (OSDI'08), PCT (ASPLOS'10), SegFuzz -- all
-%% SOFTWARE. Oracles: DiffTest (multicore, commit-level -- state this
-%% correctly), RTLcheck, RealityCheck.
-%% Do NOT claim "first multicore fuzzer" or "unsolved oracle problem".
-%% See docs/research/11 section 0 for the retracted claims.
+A cycle-accurate RTL simulator is a pure function of its inputs. Given
+the same binary, the same reset, and the same device tree, a multicore
+simulation produces the same interleaving of memory events on every
+run. Repeating a regression a thousand times therefore explores one
+schedule, not a thousand.
 
-\section{Motivation: Determinism as a Coverage Wall}
-%% Fig.~\ref{fig:determinism}
+Silicon does not have this problem. Clock jitter, interrupt arrival,
+DRAM refresh, voltage droop and thermal throttling re-order the machine
+on every execution, which is why post-silicon multicore validation
+keeps finding coherence and memory-ordering bugs that pre-silicon
+simulation ran past~\cite{hangal2004tsotool,lee2017mtracecheck}. That
+variation is a \emph{coverage source}. Simulation throws it away
+precisely at the stage where bugs are cheapest to fix.
 
-\section{Schedule Exploration}
-\subsection{Perturbation Mechanism}
-%% One stall input per core gating a single ready signal. Tied low, the design
-%% is bit-identical to the unmodified RTL.
-\subsection{Soundness}
-%% Delay injection cannot create a schedule the hardware could not itself
-%% reach, so there are no false positives by construction. Contrast with fault
-%% injection, which manufactures impossible states and requires triage.
-\subsection{Scheduling Policy}
-%% PCT-style bounded priority changes; bug depth at cycle granularity is a
-%% genuine open question -- say so.
+The gap is not hypothetical. Five directed reproducers for a dual-Unique
+coherence violation in the processor studied here---two L1s holding the
+same line Unique at once---passed on both the buggy and the fixed RTL.
+The only known activation was an 871-million-cycle Linux boot. Measured
+directly: with the fix reverted, all five workloads produced
+\emph{bit-identical} cache tag-transition counts to the fixed model
+(Section~\ref{sec:wall}). Removing a real coherence bug changed
+nothing observable, because the schedule never varied.
 
-\section{Experimental Setup}
-%% Chiron: quad-core RV64IMA OoO, AXI-ACE coherence, boots SMP Linux.
-%% Verilator 4.038. Oracles: quad lockstep, swmr_probe, mt-litmus.
-%% Corpus: docs/research/04.
+This paper treats that determinism as a coverage wall and asks whether
+it can be lifted without putting a Linux-booting design at risk.
+\emph{Kairos} delays harts according to a controlled, reproducible
+policy so that one test program samples many interleavings. The RTL
+change is one input per core, gating a handshake the frontend already
+de-asserts on every I-cache miss (Figure~\ref{fig:mechanism}). Tied low, or
+compiled out, the design is the original design---measured, not
+asserted. Because a core is always permitted to stall, every schedule
+Kairos induces is a schedule the unmodified hardware could reach, and
+any failure it finds is a real failure.
+
+The ideas are imported from software concurrency
+testing~\cite{musuvathi2007chess,musuvathi2008chess,burckhardt2010pct}
+and the paper is generous about that debt. What does not transfer---no
+blocking signal, a scheduling-point count in the hundreds of thousands,
+a livelock oracle that must discount the tool's own stalls---is
+measured, and is the interesting part of the work.
+
+This paper makes four contributions:
+
+\begin{itemize}
+\item \textbf{The determinism wall, measured.} Eight runs of a
+  conventional RTL regression explore one interleaving, on every
+  workload we ran (Figure~\ref{fig:teaser}a, Figure~\ref{fig:explore}).
+  Reverting a real coherence bug does not change a single tag
+  transition (Section~\ref{sec:wall}).
+\item \textbf{A sound perturbation.} One bit per core, four lines of
+  logic, netlist-identical when compiled out. Stalling cannot manufacture
+  a state the design could not reach unaided.
+\item \textbf{A four-policy ablation on one DUT.} Deterministic
+  regression, UVM-style random delay, PCT, and windowed delay: 96
+  runs, two coverage metrics, time to first finding
+  (Section~\ref{sec:eval}).
+\item \textbf{Two reduced, replayable findings} in boot code that
+  every SMP test in the repository links. Both survived years of a
+  green deterministic regression. Both are software races, not RTL
+  bugs; stating that is part of the result.
+\end{itemize}
+
+\section{Related Work}
+\label{sec:related}
+
+Figure~\ref{fig:compare} is the map. Almost all dynamic hardware
+verification varies the \emph{program}. Kairos varies the
+\emph{schedule} of a fixed program. Those multiply; they do not
+compete. Table~\ref{tab:method} records stimulus, coverage, oracle, and
+the baseline each paper actually ran on one DUT---the comparison those
+papers make, not a cross-DUT bug count. The ablation we run here is in
+Section~\ref{sec:compare}.
+
+%% VERIFY BEFORE SUBMISSION -- every count below is a claim about
+%% someone else's paper and must be read off that paper, not recalled:
+%%   DifuzzRTL  16 new bugs / CVE count  (CVE count previously written
+%%              as 6 here and removed; check the S&P'21 abstract)
+%%   TheHuzz    11 bugs, 8 new, 3.33x over DifuzzRTL
+%%   ProcessorFuzz 8 new bugs + 1 in a reference model, 1.23x
+%%   Cascade    37 new bugs, 28 CVEs, 28.2--97x coverage
+%%   MorFuzz    19 bugs, 13 CVEs
+%%   McVerSi    2 new gem5 bugs, 11/11 studied bugs in one day vs 2/11
+%%   DiffTest-H 151 complex bugs in XiangShan (and fix the \cite author
+%%              list -- refs.bib currently has "and others")
+\paragraph{Program fuzzers for RTL.}
+RFUZZ~\cite{laeufer2018rfuzz} mutates mux inputs under mux-toggle
+coverage. DifuzzRTL~\cite{hur2021difuzzrtl} guides on control-register
+coverage and found 16 new bugs in Mor1kx, Rocket and BOOM.
+TheHuzz~\cite{kande2022thehuzz} generates assembly against a golden
+model: 11 bugs, 8 of them new, on four cores, 3.33$\times$ the speed of
+DifuzzRTL. ProcessorFuzz~\cite{canakci2023processorfuzz} uses CSR
+transitions: 8 new bugs plus one in a reference model, 1.23$\times$ vs
+DifuzzRTL. Cascade~\cite{solt2024cascade} generates long valid RISC-V
+programs and detects bugs by non-termination: 37 new bugs in
+five CPUs, and 28.2--97$\times$ the coverage of prior fuzzers.
+MorFuzz~\cite{xu2023morfuzz} reports 19 bugs. All of these
+evaluations are single-core. None controls the interleaving of a
+coherent multicore, and none checks live cache state or stall-aware
+liveness.
+
+\paragraph{Multicore oracles and MCM testers.}
+DiffTest~\cite{xu2022xiangshan} and DiffTest-H~\cite{ma2025difftesth}
+are commit-level lockstep, including multicore; DiffTest-H reports 151
+complex bugs in XiangShan. That is oracle layer~1 here, and we keep
+it. It is silent on hangs and on illegal microarchitectural states
+that have not yet corrupted a commit---the dual-Unique bug was a
+Linux hang $\sim$10$^8$ cycles later. TSOtool~\cite{hangal2004tsotool}
+and McVerSi~\cite{elver2016mcversi} vary the \emph{program} and check
+values against a memory model, on silicon or gem5, where timing
+already varies. McVerSi found 2 new gem5 bugs and all 11 studied bugs
+in one day, against 2/11 for litmus tests. MTraceCheck~\cite{lee2017mtracecheck}
+is post-silicon. Litmus tests~\cite{alglave2014herding} enumerate
+allowed outcomes. Kairos is the complement: fix the program, vary the
+schedule, observe the microarchitecture, minimise the result.
+
+\paragraph{Software schedule exploration.}
+CHESS~\cite{musuvathi2007chess,musuvathi2008chess} and
+PCT~\cite{burckhardt2010pct} explore thread schedules; delta
+debugging~\cite{zeller2002ddmin} minimises failing inputs. The ideas
+are theirs. Section~\ref{sec:design} states what breaks in hardware.
+UVM testbenches randomise interface delays~\cite{ieee1800uvm} with no
+coverage notion; Kairos controls the cores.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_compare.pdf}
+\Description{Capability matrix. Rows are tools, columns are properties. Kairos is the only row that varies schedule, runs on multicore RTL, observes microarchitecture, checks liveness, and minimises failures.}
+\caption{What each tool does. Blue is yes; tan is silicon or full-system
+simulation, not RTL. ``RTL cov.'' is mux, register, VCS, or live cache
+coverage. Cascade minimises \emph{programs}; CHESS/PCT and Kairos
+minimise \emph{schedules}. No row except Kairos is yes in schedule +
+multicore RTL + RTL coverage together.}
+\label{fig:compare}
+\end{figure*}
+
+\begin{table*}[t]
+\caption{How each paper evaluates: stimulus, coverage, oracle, and the
+baseline it actually ran on the same DUT. Bug counts belong in each
+paper's own findings table, not here.}
+\label{tab:method}
+\centering
+\scriptsize
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Tool & Stimulus & Coverage metric & Oracle & Same-DUT baseline \\
+\midrule
+RFUZZ~\cite{laeufer2018rfuzz}
+  & mux bit stream
+  & mux-toggle
+  & assertions
+  & vs.\ random \\
+DifuzzRTL~\cite{hur2021difuzzrtl}
+  & assembly
+  & control-register
+  & Spike / or1ksim
+  & vs.\ RFUZZ ($A_{12}$) \\
+TheHuzz~\cite{kande2022thehuzz}
+  & assembly
+  & stmt/branch/toggle (VCS)
+  & Spike / or1ksim
+  & vs.\ random + DifuzzRTL, $n{=}10$ \\
+ProcessorFuzz~\cite{canakci2023processorfuzz}
+  & assembly
+  & CSR transitions
+  & Spike / Dromajo
+  & TTE vs.\ DifuzzRTL, 48\,h \\
+Cascade~\cite{solt2024cascade}
+  & long RV programs
+  & mux + register + simulator
+  & non-termination
+  & RFUZZ reimpl.\ + DifuzzRTL docker \\
+McVerSi~\cite{elver2016mcversi}
+  & GP programs
+  & protocol transitions
+  & MCM checker
+  & vs.\ random + litmus \\
+\textbf{Kairos}
+  & schedule of a fixed binary
+  & distinct schedules, order pairs
+  & result + liveness + SWMR
+  & vs.\ det.\ + random + PCT \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{The Determinism Wall}
+\label{sec:wall}
+
+The strongest single argument in this paper was produced as a
+by-product of a failed experiment. A continuous SWMR probe over all
+four L1 tag arrays was pointed at five SMP workloads, once on the
+fixed RTL and once with the dual-Unique fix reverted. Tag-state
+transition counts over 6 million cycles per workload were
+\emph{identical to the digit}: 4{,}091 / 4{,}158 / 26{,}090 /
+160{,}148 / 139{,}716 on \texttt{mt-fencei}, \texttt{mt-crosscall},
+\texttt{mt-llist}, \texttt{mt-seqlock}, \texttt{mt-lrsc}. The programs
+were not wrong; each ran one schedule, and that schedule did not
+contain the race. The Linux boot found the bug by brute force at
+$\sim$8.7$\times$10$^8$ cycles---coverage by accident.
+
+The same wall appears as a coverage number. Under the deterministic
+policy, eight runs of each of three SMP micros produce one distinct
+interleaving (Figure~\ref{fig:explore}, top row of each panel).
+Novelty rate is $1/8$. That is what a conventional RTL regression does
+today, written as a fraction.
+
+\section{Kairos}
+\label{sec:design}
+
+Kairos is a host-side scheduler around a one-bit RTL hook
+(Figure~\ref{fig:mechanism}). Everything above the DUT boundary---policies,
+coverage, oracles, reduction, replay---is written against an
+eleven-method interface (\mbox{\texttt{dut.h}}). Porting to another multicore
+RTL model means implementing that interface and adding one stall bit
+per hart.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_mechanism.pdf}
+\Description{Three panels: (a) Fetch-AND-Decode-Backend with scheduleStall into the AND. (b) Four cores plus CCU and L2. (c) Policy, coverage, oracles, shrinker, ksched file. Footer: 0 netlist lines, SMP 8/8, ISA 84/84, benches 5/5.}
+\caption{The mechanism. (a)~One AND into a handshake the frontend already
+de-asserts; a stall is fetch-not-ready. (b)~The stall bit is a bus into
+every hart; observation is read-only. (c)~The host loop. Footer: gates
+that protect the Linux-booting design, measured.}
+\label{fig:mechanism}
+\end{figure*}
+
+\subsection{Perturbation and soundness}
+\label{sec:soundness}
+
+The RTL change is one input per core, \texttt{scheduleStall}, ANDed
+into the fetch$\rightarrow$decode handshake (Figure~\ref{fig:mechanism}a). Holding it high is behaviourally identical to fetch not being
+ready, a condition the design already produces on every I-cache miss.
+So:
+
+\begin{itemize}
+\item A stall can only \emph{delay} a hart. It cannot skip work, force
+  progress, win an arbitration, or change a value.
+\item Every induced schedule is one the unmodified design could reach
+  on its own. A failure under Kairos is a failure of the design (or of
+  the software running on it), not an artefact of the tool. There is
+  no false-positive class from the mechanism.
+\item With the mask held at zero the design behaves as it does without
+  Kairos. With the feature compiled out, the generated Verilog is
+  identical to a build that never heard of Kairos.
+\end{itemize}
+
+That last claim took four tries: Chisel derives identifiers from
+elaboration order, so a refactor that looks equivalent is not
+netlist-neutral. Writing the disabled path as the literal original
+statement is the only form that gives 0 differing lines. This
+separates the mechanism from fault injection: a stall produces only
+states the silicon could reach.
+
+\subsection{Policies}
+\label{sec:policies}
+
+A policy decides, each cycle, which harts to hold. Every policy is a
+pure function of $(\textit{seed}, \textit{cycle}, \textit{progress})$---no
+wall-clock, no I/O---so a finding is reproducible from its seed alone.
+Four policies ship, and three of them exist to be argued with:
+
+\begin{itemize}
+\item \texttt{deterministic} never stalls. It is the control: what a
+  conventional regression does today.
+\item \texttt{random}$(p)$ holds each hart independently with
+  probability $p$ per cycle. This is the honest strawman---roughly
+  what a UVM testbench does with randomised delays~\cite{ieee1800uvm}.
+  If it matches PCT, PCT is not earning its complexity.
+\item \texttt{pct}$(d)$ is PCT~\cite{burckhardt2010pct} transferred to
+  hardware: random hart priorities plus $d{-}1$ random priority-change
+  points, with bounded leadership tenure (below).
+\item \texttt{windowed}$(w)$ holds one hart for one contiguous window.
+  Wide races (a walker writeback outliving a peer's refill) need a
+  contiguous delay; per-cycle coin flips reopen and reclose them
+  immediately.
+\end{itemize}
+
+\paragraph{What does not transfer from PCT.}
+Software PCT runs the highest-priority enabled thread; the
+runtime knows when a thread blocks. Hardware has no such signal, and
+``has not retired'' is not a substitute: a hart spinning on a flag
+retires forever and would hold the machine forever. Measured, before
+bounded tenure: \texttt{pct:3} left two harts with zero retired
+instructions after 662{,}901 cycles. Leadership therefore expires
+after 4{,}096 cycles. This adds priority changes the original
+guarantee does not account for, and is stated rather than hidden.
+
+Three further caveats, all load-bearing. (1)~In software, $k$ is the
+number of scheduling steps; in hardware every cycle is one, so $k$ is
+far larger and the bound correspondingly weaker. (2)~The depth of a
+coherence race is not obviously the same notion as the depth of a data
+race. (3)~Kairos transfers PCT's \emph{structure} and measures how the
+bound behaves; it does not inherit the guarantee.
+
+\paragraph{Calibration, not assumption.}
+A policy has to know \emph{when} to perturb. Spreading delays over the
+cycle \emph{budget} is wrong whenever the budget is a safety cap rather
+than a prediction. The first working build placed one delay window
+uniformly over a 400{,}000-cycle budget for a 6{,}629-cycle workload,
+so in $\sim$98\% of runs the window landed after the program had
+already ended. Six runs, six identical digests, a campaign that looked
+perfectly healthy while exploring nothing. Kairos now measures the
+unperturbed run length first and spreads over that. The same run is
+the control: if the workload does not pass unperturbed, the campaign
+refuses to start.
+
+\subsection{Oracles}
+\label{sec:oracles}
+
+Four layers run on every cycle of every run. Each answers a different
+question, and each is reported separately.
+
+\begin{enumerate}
+\item \textbf{Result.} Did the workload compute the right answer?
+\item \textbf{Liveness.} Hang: a hart stops retiring.
+  Livelock: every hart retires and the workload never finishes. Both
+  produce no values, so layer~1 and every value-based multicore oracle
+  in the literature are structurally blind to them. Four of the
+  hardest bugs in this project's history were hangs.
+\item \textbf{Structural.} SWMR on the live L1 tag arrays, every
+  cycle~\cite{sorin2011primer}. Fires at the transaction, not at the
+  symptom $\sim$10$^8$ cycles later.
+\item \textbf{Architectural.} Committed state versus a golden model,
+  excluding legitimately racy commits. The strongest oracle when a
+  reference exists.
+\end{enumerate}
+
+Liveness and perturbation interact, and getting this wrong invalidates
+every result: a hart Kairos is deliberately holding is \emph{supposed}
+to stop retiring. Both liveness layers therefore count only
+\emph{unstalled} cycles. A livelock verdict additionally requires that
+no hart has been held for more than $1/8$ of the elapsed run; past
+that the run is a \texttt{timeout}, which is not a finding. Without
+that discount the first four-policy sweep reported seven livelock
+``bugs'', all of them Kairos holding harts. The soundness argument
+constrains which \emph{states} a stall can produce; it says nothing
+about what an \emph{oracle} may infer from a run the tool itself
+stalled into silence.
+
+Known limitation: PCT stalls all but one hart, so on four harts every
+hart is held far more than $1/8$ of any run and the livelock layer
+cannot fire under it. PCT contributes structural and wrong-result
+findings, not liveness ones. That is the price of a rule chosen never
+to cry wolf.
+
+\subsection{Coverage}
+\label{sec:coverage}
+
+Two metrics, sensitive to different things.
+
+\emph{Distinct schedules} counts 64-bit digests over the ordered
+sequence of cross-hart memory events. The digest excludes retirements
+and cycle numbers: two runs that produce the same event order at
+different absolute times are the same interleaving, and counting them
+separately is exactly the mistake a naive ``hash the whole trace''
+metric makes.
+
+\emph{Order pairs} are the observed $(\textit{hart }A\textit{ touched
+line }L\textit{ before hart }B)$ orderings. Coarser, harder to saturate
+by accident, and the number to look at when someone asks whether
+``distinct schedules'' is doing real work. Section~\ref{sec:eval}
+shows PCT leading on the first metric and losing on the second.
+
+\subsection{Reduction and replay}
+\label{sec:reduce}
+
+A campaign that finds a bug hands over a schedule holding harts
+thousands of times across millions of cycles. Kairos reduces it.
+The failing run is re-recorded as stall spans
+$[\textit{start},\textit{end})\ \textit{mask}$. Delta
+debugging~\cite{zeller2002ddmin} drops spans until no remaining span
+can be dropped without losing the failure; a second pass binary-searches
+each surviving span from both ends. The predicate is ``does this still
+reproduce the \emph{same} verdict'', not merely ``does this still
+fail''---reducing a hang into a wrong-result failure would silently
+retarget the reduction onto a different bug.
+
+Delta debugging normally struggles with concurrency because the
+predicate is flaky. Here it is not: the DUT is a cycle-accurate
+simulator and the candidate schedule is fully specified, so the
+predicate is a pure function. The same determinism that makes RTL
+simulation blind to interleavings is what makes reduction over them
+exact. The output is a five-line \texttt{.ksched} file that replays
+on any host, after the RTL changes, without a seed.
 
 \section{Evaluation}
-\subsection{Bugs Found per Simulated Cycle}
-\subsection{Comparison with Existing Practice}
-%% Ablations, not unfair cross-tool claims: repeated deterministic runs;
-%% ad-hoc random delay injection (UVM practice); long-run brute force (Linux
-%% boot); ours. Cascade/DifuzzRTL are single-core and target other DUTs -- say
-%% why a direct comparison would be misleading rather than manufacturing one.
-\subsection{Interleaving Coverage}
-\subsection{Sensitivity and Cost}
+\label{sec:eval}
+
+\paragraph{Setup.}
+Chiron is a 4-core RV64IMA out-of-order processor with AXI-ACE
+snoops, private L1s and a shared L2, simulated under Verilator.
+Kairos links the fast (no-trace, threaded) model. Workloads are the
+in-tree SMP micros. Campaigns calibrate against an unperturbed run and
+refuse to start if that run does not pass. Self-tests of the
+design-independent half assert 100{,}052 checks against a mock DUT in
+one second, and are mutation-tested against nine deliberate regressions.
+
+\begin{table}[ht]
+\caption{RTL and simulation cost. The 13\% is the SWMR tag scan used as
+an oracle, not the stall bit.}
+\label{tab:overhead}
+\centering
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Build & vs.\ original netlist & Gates \\
+\midrule
+compiled out
+  & 0 lines
+  & ISA 84/84, SMP 8/8, benches 5/5 \\
+in, mask~$=$~0
+  & 1 bit + AND / core
+  & same tests, bit-identical \\
++~tag scan
+  & same
+  & 36.5 vs.\ 42\,K\,cyc/s ($-$13\%) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Compiled out, the generated Verilog differs from the pre-Kairos design
+in 0 lines once Chisel provenance comments are stripped (21{,}216 raw
+comment-only differences, from line-number shift). Compiled in with the
+mask held at zero, every SMP micro passes exactly as under the ordinary
+regression (Table~\ref{tab:overhead}).
+
+\subsection{Does a deterministic simulator explore one interleaving?}
+\label{sec:one}
+
+Yes. Figure~\ref{fig:explore} audits the claim run by run. Four
+policies, three workloads, eight seeds (96 runs). The
+\texttt{deterministic} row is one filled cell and seven hollow ones,
+on every workload. Distinct-schedule counts: \texttt{mt-illegal} (1.4\,K~cyc)
+1 / 1 / 7 / 4; \texttt{mt-spinwait} (6.6\,K)
+1 / 3 / 8 / 6; \texttt{mt-crosscall} (390\,K)
+1 / 8 / 8 / 5, for deterministic / random / PCT / windowed.
+
+On the current tree, after the races below were fixed, twelve
+deterministic runs of \texttt{mt-spinwait} still produce one digest
+and 29 order pairs; twelve windowed runs produce seven digests and 35
+order pairs, and all twelve complete. The wall is a property of the
+simulator, not of a particular binary.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_exploration.pdf}
+\Description{Three fingerprint matrices of policies versus eight seeds, plus bar charts of distinct order pairs. Deterministic row is one filled cell and seven hollow ones on every workload.}
+\caption{Schedule coverage, audited run by run. Top: each cell is one
+run; filled is an interleaving not seen before in that row, hollow is a
+repeat of class $n$, and white hatching marks a run that hit the cycle
+budget without finishing the program. The deterministic row \emph{is}
+the paper's thesis. PCT leads or ties on distinct schedules---but on
+\texttt{mt-spinwait} and \texttt{mt-crosscall} every one of its runs is
+hatched, so those counts are over truncated executions. Bottom:
+order-pair coverage, the coarser metric. PCT produces \emph{fewer}
+distinct cross-hart orderings on \texttt{mt-crosscall} (48 vs.\ 144):
+serialising harts explores different schedules without exploring
+different orderings.}
+\label{fig:explore}
+\end{figure*}
+
+\subsection{Which policy finds what?}
+\label{sec:compare}
+
+Table~\ref{tab:results} is the same-DUT comparison: four policies, three
+workloads, eight seeds (96 runs), one budget. We cannot port DifuzzRTL
+or Cascade onto this 4-core ACE out-of-order design---Cascade notes
+that instruction-granular lockstep on an OoO CPU is a non-trivial
+port, and said the same of TheHuzz when it was not
+open-source~\cite{solt2024cascade}---so we do not invent a number for
+them. The empty cell in Figure~\ref{fig:compare} is the positioning:
+no published tool varies the schedule of a fixed program on multicore
+RTL and observes cache state. The experiment we can run is this
+ablation.
+
+\begin{table}[ht]
+\caption{Same-DUT ablation: 4 policies $\times$ 3 workloads $\times$ 8
+seeds, one budget. Per-cell order is
+\texttt{illegal}/\texttt{spinwait}/\texttt{crosscall}. A finding is a
+stall-aware livelock; a timeout is not a finding.}
+\label{tab:results}
+\centering
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Policy & Distinct schedules & Runs completed & Findings \\
+\midrule
+deterministic     & 1 / 1 / 1 & 8 / 8 / 8 & 0 \\
+random delay      & 1 / 3 / 8 & 8 / 8 / 8 & 0 \\
+PCT               & 7 / 8 / 8 & 8 / 0 / 0$^\dagger$ & 0$^\ddagger$ \\
+windowed          & 4 / 6 / 5 & 8 / 7 / 8 & 1 \\
+\bottomrule
+\end{tabular}\\[2pt]
+\begin{minipage}{\columnwidth}\scriptsize
+$^\dagger$PCT holds three of four harts, so the workload runs
+$\sim$100$\times$ slower: 16 of its 24 runs hit the budget, and those
+digests are of \emph{truncated} executions (hatched in
+Figure~\ref{fig:explore}). $^\ddagger$The liveness layer cannot fire
+under PCT at all (Section~\ref{sec:oracles}). Finding~2 is absent here:
+it came from \texttt{windowed:400} on \texttt{mt-illegal} in 4 runs
+($5.6{\times}10^3$ cyc), outside this ablation---\texttt{windowed:2000}
+passes that workload 8/8.
+\end{minipage}
+\end{table}
+
+Random delay is a weak strawman on short workloads: $1/8$ distinct on
+\texttt{mt-illegal}, competitive only on the 390\,K-cycle workload,
+where a 2\%-per-cycle coin flip has 390{,}000 cycles to land somewhere
+useful. Per-cycle randomisation targets nothing.
+
+PCT explores most and finds least, and the reason belongs in the text
+rather than a footnote. It leads or ties on distinct schedules
+everywhere---but on two of the three workloads it never finished the
+program: holding three of four harts costs $\sim$100$\times$ in run
+length, so 16 of its 24 runs ended at the budget and those digests are
+of partial executions. Its order-pair count is also \emph{lower} on
+\texttt{mt-crosscall}, 48 against 144, because serialising harts visits
+many schedules without visiting many orderings. A single
+distinct-schedule number would have shown PCT winning three times over.
+That is an argument about the coverage model, not against PCT.
+
+Windowed delay found both bugs: one contiguous delay of one named
+hart, the corner of the schedule space both findings lived in.
+
+\paragraph{The experiment that did not work.}
+We do not claim a $10^3$--$10^4\times$ improvement on the dual-Unique
+bug, and we ran the experiment that would have supported it. On the
+buggy RTL of Section~\ref{sec:wall}, rebuilt with the hook, all four
+policies over \texttt{mt-fencei} and \texttt{mt-crosscall}, 12 seeds
+each, gave \textbf{96 runs and 0 findings}---while PCT reached 12/12
+distinct schedules and windowed 8/12. Diversity went up; the bug still
+did not fire within $\sim$10$^6$ cycles, against the
+$8.7{\times}10^8$ the Linux boot needed. That measured negative is the
+evidence for Section~\ref{sec:limit}: a whole-core stall delays
+everything a hart does, and this race needs one walker writeback to
+outlive one peer's refill of one line.
+
+\subsection{Findings}
+\label{sec:findings}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_finding.pdf}
+\Description{Left: committed instructions versus cycle; a shaded window marks hart 2 held 343 cycles; unperturbed run finishes at 6629. Right: shrinker trajectory from 1181 down to 343 hart-cycles over 20 trials.}
+\caption{Finding 1, end to end. (a)~A 343-cycle delay of hart~2, early
+in a 6{,}629-cycle workload. The unperturbed run finishes; the
+perturbed run is still retiring at 100$\times$ that length.
+(b)~Delta debugging over that one span. The predicate is a pure
+function of the schedule, so every trial is tested once and the
+answer never changes.}
+\label{fig:finding}
+\end{figure*}
+
+Kairos produced two findings (Table~\ref{tab:findings}). Both are
+software races in this repository's own test infrastructure. Both are now fixed and confirmed
+by A/B replay. Neither is an RTL bug. A fuzzing paper that
+misattributes its findings loses on the first reviewer who checks one.
+
+\begin{table}[ht]
+\caption{Findings. Software races, not RTL bugs. Both new relative to
+this repository; both fixed and confirmed by A/B replay.}
+\label{tab:findings}
+\centering
+\scriptsize
+\begin{tabular}{@{}llllll@{}}
+\toprule
+\# & Workload & Location & Class & Detected & Reduced \\
+\midrule
+1 & \texttt{mt-spinwait}
+  & \texttt{.sbss} / \texttt{sd}
+  & SW race & 8 seeds & 343 cyc, h2 \\
+2 & \texttt{mt-illegal}
+  & \texttt{crt.S} flag
+  & SW race & $4{\times}1404$ cyc & 220 cyc, h2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Finding 2 --- a latent race in the project's own boot code.}
+Found on \texttt{mt-illegal} (baseline 1{,}404 cycles) under
+\texttt{windowed:400}, shrunk to hart~2 held for 220 cycles at
+cycle 284. All four harts spin forever in \texttt{crt.S}: every hart
+stores 1 to \texttt{hart\_init\_sync}, hart~0 later stores 0 to
+release everyone, and nothing orders a slow hart's store against that
+release. If any hart is delayed past hart~0's clear, its store re-arms
+the flag and every hart waits forever. The register dump is
+conclusive: \texttt{a2 = 1} on all four harts, including hart~0, the
+hart that executed the clearing store.
+
+This defect is in code every SMP test in the repository links. It
+survived years of a green deterministic regression because a
+deterministic simulator always produces the one interleaving in which
+hart~0's \texttt{.bss} loop happens to take long enough. It was found
+in four runs of a 1{,}404-cycle workload.
+
+\paragraph{Finding 1 --- three compounding bugs around a barrier.}
+Figure~\ref{fig:finding} is the anatomy. Under \texttt{windowed:2000},
+seed~3, delaying hart~2 leaves a 6{,}629-cycle workload still running
+at 662{,}901 cycles with all four harts retiring inside their first
+barrier. The shrinker reduced 1{,}181 hart-cycles of delay to 343, in
+20 simulation runs (Figure~\ref{fig:finding}b). The cause was three
+defects stacked: the linker script did not cover \texttt{.sbss}, so
+the shared barrier state sat past \texttt{\_ebss} and was never
+zeroed; every hart ``initialised'' it with an unsynchronised store at
+thread entry; and that store was an 8-byte \texttt{sd} on an
+\texttt{int *}, clobbering the adjacent sense flag. After the fix,
+replaying the same 343-cycle schedule on the new binary completes in
+8{,}213 cycles with all four harts at \texttt{exit}.
+
+\paragraph{Attribution discipline.}
+Kairos reports ``this schedule wedges the machine''. Triage decides
+whether the fault is in the hardware or the software. The project's
+own history says why that matters: \texttt{mt-llist} spent weeks as a
+suspected coherence bug before turning out to be its own CAS loop
+fencing itself into a livelock. We do not count either finding as an
+RTL bug, and we do not inflate the finding count with timeouts.
 
 \section{Limitations}
-%% Whole-core stalls may be too coarse for line-level races; PCT's bug-depth
-%% notion needs redefining at cycle granularity; single DUT.
+\label{sec:limit}
+
+Whole-core stalls are too coarse for at least one line-level race,
+and we measured that rather than suspecting it: 96 exploring runs on
+the RTL with the dual-Unique fix reverted produced no finding
+(Section~\ref{sec:compare}). That bug needs a walker writeback to
+outlive a peer's refill of a particular line; stalling a hart delays
+everything that hart does. Optional next knobs---snoop-response delay,
+arbiter priority---act at the transaction rather than the core, are
+equally sound by the same argument, and are not evaluated here. PCT's bug-depth guarantee does not transfer cleanly
+(Section~\ref{sec:policies}), and PCT cannot contribute liveness
+findings under the conservative oracle rule. The evaluation is one
+DUT. Timeouts are not findings; a campaign that under-provisions its
+budget reports nothing, which is the honest outcome.
 
 \section{Conclusion}
+\label{sec:conc}
+
+RTL simulation of a multicore explores one interleaving per program.
+We measured that wall, on a real coherence bug that five directed
+tests could not distinguish from its fix, and we lifted it with one
+bit per core and a host-side scheduler. The failures are real because
+a stall is always legal; the disabled design is the original design
+because the netlist matches to the line; the findings replay because
+the DUT is deterministic and the schedule is a file. Schedule
+exploration is not a better fuzzer. It is the other axis.
+
+\begin{acks}
+Anonymised for review. The scheduler, policies, oracles, reducer,
+self-tests, and every schedule file and campaign report behind the
+figures and tables here are released with the paper.
+\end{acks}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{refs}

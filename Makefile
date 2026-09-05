@@ -26,6 +26,7 @@ include mk/bins_quad.mk
 include mk/bins_scale.mk
 include mk/run.mk
 include mk/ci_smp.mk
+include mk/kairos.mk
 
 .DEFAULT_GOAL := help
 

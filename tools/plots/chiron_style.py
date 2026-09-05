@@ -39,10 +39,25 @@ CATEGORICAL = [
 ]
 
 # Named roles, so a figure says what it means rather than an index.
-OURS      = CATEGORICAL[0]
-BASELINE  = CATEGORICAL[1]
-RANDOM    = CATEGORICAL[2]
-BRUTE     = CATEGORICAL[3]
+OURS      = CATEGORICAL[0]  # blue        — windowed (the policy that found bugs)
+BASELINE  = CATEGORICAL[1]  # vermillion  — deterministic regression
+RANDOM    = CATEGORICAL[2]  # green       — per-cycle random delay
+BRUTE     = CATEGORICAL[3]  # purple      — long-run brute force / Linux boot
+PCT       = CATEGORICAL[4]  # orange      — PCT transferred from software
+
+# Policy identity is fixed across every figure in the paper.
+POLICY_COLOR = {
+    "deterministic": BASELINE,
+    "random":        RANDOM,
+    "pct":           PCT,
+    "windowed":      OURS,
+}
+POLICY_LABEL = {
+    "deterministic": "deterministic",
+    "random":        "random delay",
+    "pct":           "PCT",
+    "windowed":      "windowed",
+}
 
 # Single-hue ramp for magnitude (light -> dark). Never a rainbow.
 SEQUENTIAL = ["#DEEBF7", "#9ECAE1", "#4292C6", "#2171B5", "#08519C"]
@@ -92,7 +107,8 @@ def use_paper_style():
         "savefig.dpi": 600,          # camera-ready needs 600 for line art
         "savefig.bbox": "tight",
         "savefig.pad_inches": 0.01,
-        "pdf.fonttype": 42,          # embed TrueType; ACM rejects Type 3
+        "pdf.fonttype": 42,
+        "hatch.linewidth": 0.45,          # embed TrueType; ACM rejects Type 3
         "ps.fonttype": 42,
         "axes.prop_cycle": mpl.cycler(color=CATEGORICAL),
     })
@@ -106,17 +122,33 @@ def figsize(kind="single"):
     tall    — one column, taller, for stacked panels
     """
     return {
-        "single": (3.33, 2.1),
-        "double": (7.00, 2.4),
-        "tall":   (3.33, 3.4),
-        "square": (3.33, 3.0),
+        "single": (3.33, 2.15),
+        "double": (7.00, 2.40),
+        "tall":   (3.33, 3.40),
+        "square": (3.33, 3.00),
+        "teaser": (7.00, 2.15),
+        "arch":   (7.00, 2.72),
+        "hook":   (3.33, 2.35),
+        "explore":(7.00, 2.35),
+        "find":   (7.00, 1.72),
+        "pos":    (3.33, 2.55),
     }[kind]
 
 
-def save(fig, path):
-    """Save as PDF (vector, for LaTeX) and PNG (for quick review)."""
-    fig.savefig(f"{path}.pdf")
-    fig.savefig(f"{path}.png")
+def save(fig, path, exact=True):
+    """Save as PDF (vector, for LaTeX) and PNG (for quick review).
+
+    `exact` writes the figure at exactly its declared figsize instead of
+    cropping to the ink. This matters more than it sounds: with a tight bbox a
+    7.0in figure comes out ~5.7in, LaTeX then scales it back up to the text
+    width, and every 8pt label silently renders at ~10pt. Figures in the same
+    paper end up with different effective type sizes depending on how much
+    whitespace each one happened to have. Declaring the size and filling it
+    keeps one type size across the whole paper.
+    """
+    kw = dict(bbox_inches=None, pad_inches=0.0) if exact else {}
+    fig.savefig(f"{path}.pdf", **kw)
+    fig.savefig(f"{path}.png", **kw)
     plt.close(fig)
     return f"{path}.pdf"
 

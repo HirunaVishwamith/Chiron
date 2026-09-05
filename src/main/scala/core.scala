@@ -63,11 +63,31 @@ class core (
     registersOut.foreach(_ := 0.U)
     registersOut.head := mstatus
   })
-  Seq(fetch.toDecode.fired, decode.fromFetch.fired).foreach(
-    _ := decode.fromFetch.ready && fetch.toDecode.ready && (
-      !decode.fromFetch.expected.valid || (decode.fromFetch.expected.pc === fetch.toDecode.pc)
+  // Kairos schedule-exploration hook (compiled out when the knob is false).
+  val scheduleStall = if (configuration.enableScheduleControl)
+    Some(IO(Input(Bool()))) else None
+
+  // The two arms below are deliberately NOT factored together. Chisel derives
+  // emitted identifiers from elaboration order and val binding, so a
+  // "logically neutral" refactor is not netlist-neutral: getOrElse(false.B)
+  // gave 24 differing lines against the pre-Kairos netlist, hoisting the
+  // handshake into a shared val gave 16,228, and wrapping the whole thing in a
+  // match gave 20. Writing the disabled path as the LITERAL original statement
+  // is the only form that gives 0. Do not "clean this up".
+  if (scheduleStall.isEmpty) {
+    Seq(fetch.toDecode.fired, decode.fromFetch.fired).foreach(
+      _ := decode.fromFetch.ready && fetch.toDecode.ready && (
+        !decode.fromFetch.expected.valid || (decode.fromFetch.expected.pc === fetch.toDecode.pc)
+      )
     )
-  )
+  } else {
+    val stall = scheduleStall.get
+    Seq(fetch.toDecode.fired, decode.fromFetch.fired).foreach(
+      _ := decode.fromFetch.ready && fetch.toDecode.ready && !stall && (
+        !decode.fromFetch.expected.valid || (decode.fromFetch.expected.pc === fetch.toDecode.pc)
+      )
+    )
+  }
   fetch.toDecode.expected := decode.fromFetch.expected
   decode.fromFetch.instruction := fetch.toDecode.instruction
   decode.fromFetch.pc := fetch.toDecode.pc

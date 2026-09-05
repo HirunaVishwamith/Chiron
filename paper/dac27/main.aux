@@ -16,31 +16,122 @@
 \gdef\HyperFirstAtBeginDocument#1{#1}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{hangal2004tsotool,lee2017mtracecheck}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The claim, on one workload (\texttt  {mt-spinwait}). (a)\nonbreakingspace Eight runs of a deterministic RTL simulation explore one interleaving; the same eight runs under schedule exploration explore up to eight. (b)\nonbreakingspace The failure that windowed delay found, after automatic reduction: hart\nonbreakingspace 2 held for 343 cycles at cycle 1383. Replaying that one-line file reproduces the livelock; after the race was fixed, the same file completes cleanly.\relax }}{1}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:teaser}{{1}{1}{The claim, on one workload (\texttt {mt-spinwait}). (a)~Eight runs of a deterministic RTL simulation explore one interleaving; the same eight runs under schedule exploration explore up to eight. (b)~The failure that windowed delay found, after automatic reduction: hart~2 held for 343 cycles at cycle 1383. Replaying that one-line file reproduces the livelock; after the race was fixed, the same file completes cleanly.\relax }{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {section}{Abstract}{1}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\citation{musuvathi2007chess,musuvathi2008chess,burckhardt2010pct}
+\citation{laeufer2018rfuzz}
+\citation{hur2021difuzzrtl}
+\citation{kande2022thehuzz}
+\citation{canakci2023processorfuzz}
+\citation{solt2024cascade}
+\citation{xu2023morfuzz}
+\citation{xu2022xiangshan}
+\citation{ma2025difftesth}
+\citation{hangal2004tsotool}
+\citation{elver2016mcversi}
+\citation{lee2017mtracecheck}
+\citation{alglave2014herding}
+\citation{musuvathi2007chess,musuvathi2008chess}
+\citation{burckhardt2010pct}
+\citation{zeller2002ddmin}
+\citation{ieee1800uvm}
+\citation{laeufer2018rfuzz}
+\citation{hur2021difuzzrtl}
+\citation{kande2022thehuzz}
+\citation{canakci2023processorfuzz}
+\citation{solt2024cascade}
+\citation{elver2016mcversi}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Program fuzzers for RTL.}{2}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Multicore oracles and MCM testers.}{2}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Software schedule exploration.}{2}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}The Determinism Wall}{2}{section.3}\protected@file@percent }
+\newlabel{sec:wall}{{3}{2}{The Determinism Wall}{section.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Kairos}{2}{section.4}\protected@file@percent }
+\newlabel{sec:design}{{4}{2}{Kairos}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Perturbation and soundness}{2}{subsection.4.1}\protected@file@percent }
+\newlabel{sec:soundness}{{4.1}{2}{Perturbation and soundness}{subsection.4.1}{}}
+\citation{ieee1800uvm}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces What each tool does. Blue is yes; tan is silicon or full-system simulation, not RTL. ``RTL cov.'' is mux, register, VCS, or live cache coverage. Cascade minimises \emph  {programs}; CHESS/PCT and Kairos minimise \emph  {schedules}. No row except Kairos is yes in schedule + multicore RTL + RTL coverage together.\relax }}{3}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:compare}{{2}{3}{What each tool does. Blue is yes; tan is silicon or full-system simulation, not RTL. ``RTL cov.'' is mux, register, VCS, or live cache coverage. Cascade minimises \emph {programs}; CHESS/PCT and Kairos minimise \emph {schedules}. No row except Kairos is yes in schedule + multicore RTL + RTL coverage together.\relax }{figure.caption.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces How each paper evaluates: stimulus, coverage, oracle, and the baseline it actually ran on the same DUT. Bug counts belong in each paper's own findings table, not here.\relax }}{3}{table.caption.10}\protected@file@percent }
+\newlabel{tab:method}{{1}{3}{How each paper evaluates: stimulus, coverage, oracle, and the baseline it actually ran on the same DUT. Bug counts belong in each paper's own findings table, not here.\relax }{table.caption.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The mechanism. (a)\nonbreakingspace One AND into a handshake the frontend already de-asserts; a stall is fetch-not-ready. (b)\nonbreakingspace The stall bit is a bus into every hart; observation is read-only. (c)\nonbreakingspace The host loop. Footer: gates that protect the Linux-booting design, measured.\relax }}{3}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:mechanism}{{3}{3}{The mechanism. (a)~One AND into a handshake the frontend already de-asserts; a stall is fetch-not-ready. (b)~The stall bit is a bus into every hart; observation is read-only. (c)~The host loop. Footer: gates that protect the Linux-booting design, measured.\relax }{figure.caption.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Policies}{3}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:policies}{{4.2}{3}{Policies}{subsection.4.2}{}}
+\citation{burckhardt2010pct}
+\citation{sorin2011primer}
+\citation{zeller2002ddmin}
+\@writefile{toc}{\contentsline {paragraph}{What does not transfer from PCT.}{4}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Calibration, not assumption.}{4}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Oracles}{4}{subsection.4.3}\protected@file@percent }
+\newlabel{sec:oracles}{{4.3}{4}{Oracles}{subsection.4.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Coverage}{4}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:coverage}{{4.4}{4}{Coverage}{subsection.4.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Reduction and replay}{4}{subsection.4.5}\protected@file@percent }
+\newlabel{sec:reduce}{{4.5}{4}{Reduction and replay}{subsection.4.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Evaluation}{4}{section.5}\protected@file@percent }
+\newlabel{sec:eval}{{5}{4}{Evaluation}{section.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Setup.}{4}{section*.14}\protected@file@percent }
+\citation{solt2024cascade}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Schedule coverage, audited run by run. Top: each cell is one run; filled is an interleaving not seen before in that row, hollow is a repeat of class $n$, and white hatching marks a run that hit the cycle budget without finishing the program. The deterministic row \emph  {is} the paper's thesis. PCT leads or ties on distinct schedules---but on \texttt  {mt-spinwait} and \texttt  {mt-crosscall} every one of its runs is hatched, so those counts are over truncated executions. Bottom: order-pair coverage, the coarser metric. PCT produces \emph  {fewer} distinct cross-hart orderings on \texttt  {mt-crosscall} (48 vs.\ 144): serialising harts explores different schedules without exploring different orderings.\relax }}{5}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:explore}{{4}{5}{Schedule coverage, audited run by run. Top: each cell is one run; filled is an interleaving not seen before in that row, hollow is a repeat of class $n$, and white hatching marks a run that hit the cycle budget without finishing the program. The deterministic row \emph {is} the paper's thesis. PCT leads or ties on distinct schedules---but on \texttt {mt-spinwait} and \texttt {mt-crosscall} every one of its runs is hatched, so those counts are over truncated executions. Bottom: order-pair coverage, the coarser metric. PCT produces \emph {fewer} distinct cross-hart orderings on \texttt {mt-crosscall} (48 vs.\ 144): serialising harts explores different schedules without exploring different orderings.\relax }{figure.caption.16}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces RTL and simulation cost. The 13\% is the SWMR tag scan used as an oracle, not the stall bit.\relax }}{5}{table.caption.15}\protected@file@percent }
+\newlabel{tab:overhead}{{2}{5}{RTL and simulation cost. The 13\% is the SWMR tag scan used as an oracle, not the stall bit.\relax }{table.caption.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Does a deterministic simulator explore one interleaving?}{5}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:one}{{5.1}{5}{Does a deterministic simulator explore one interleaving?}{subsection.5.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Which policy finds what?}{5}{subsection.5.2}\protected@file@percent }
+\newlabel{sec:compare}{{5.2}{5}{Which policy finds what?}{subsection.5.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Same-DUT ablation: 4 policies $\times $ 3 workloads $\times $ 8 seeds, one budget. Per-cell order is \texttt  {illegal}/\texttt  {spinwait}/\texttt  {crosscall}. A finding is a stall-aware livelock; a timeout is not a finding.\relax }}{5}{table.caption.17}\protected@file@percent }
+\newlabel{tab:results}{{3}{5}{Same-DUT ablation: 4 policies $\times $ 3 workloads $\times $ 8 seeds, one budget. Per-cell order is \texttt {illegal}/\texttt {spinwait}/\texttt {crosscall}. A finding is a stall-aware livelock; a timeout is not a finding.\relax }{table.caption.17}{}}
+\@writefile{toc}{\contentsline {paragraph}{The experiment that did not work.}{5}{section*.18}\protected@file@percent }
 \bibstyle{ACM-Reference-Format}
 \bibdata{refs}
+\bibcite{alglave2014herding}{{1}{2014}{{Alglave et~al\mbox  {.}}}{{}}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Finding 1, end to end. (a)\nonbreakingspace A 343-cycle delay of hart\nonbreakingspace 2, early in a 6{,}629-cycle workload. The unperturbed run finishes; the perturbed run is still retiring at 100$\times $ that length. (b)\nonbreakingspace Delta debugging over that one span. The predicate is a pure function of the schedule, so every trial is tested once and the answer never changes.\relax }}{6}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:finding}{{5}{6}{Finding 1, end to end. (a)~A 343-cycle delay of hart~2, early in a 6{,}629-cycle workload. The unperturbed run finishes; the perturbed run is still retiring at 100$\times $ that length. (b)~Delta debugging over that one span. The predicate is a pure function of the schedule, so every trial is tested once and the answer never changes.\relax }{figure.caption.19}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Findings}{6}{subsection.5.3}\protected@file@percent }
+\newlabel{sec:findings}{{5.3}{6}{Findings}{subsection.5.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Findings. Software races, not RTL bugs. Both new relative to this repository; both fixed and confirmed by A/B replay.\relax }}{6}{table.caption.20}\protected@file@percent }
+\newlabel{tab:findings}{{4}{6}{Findings. Software races, not RTL bugs. Both new relative to this repository; both fixed and confirmed by A/B replay.\relax }{table.caption.20}{}}
+\@writefile{toc}{\contentsline {paragraph}{Finding 2 --- a latent race in the project's own boot code.}{6}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Finding 1 --- three compounding bugs around a barrier.}{6}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Attribution discipline.}{6}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Limitations}{6}{section.6}\protected@file@percent }
+\newlabel{sec:limit}{{6}{6}{Limitations}{section.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{6}{section.7}\protected@file@percent }
+\newlabel{sec:conc}{{7}{6}{Conclusion}{section.7}{}}
+\bibcite{burckhardt2010pct}{{2}{2010}{{Burckhardt et~al\mbox  {.}}}{{}}}
+\bibcite{canakci2023processorfuzz}{{3}{2023}{{Canakci et~al\mbox  {.}}}{{}}}
+\bibcite{elver2016mcversi}{{4}{2016}{{Elver and Nagarajan}}{{}}}
+\bibcite{hangal2004tsotool}{{5}{2004}{{Hangal et~al\mbox  {.}}}{{}}}
+\bibcite{hur2021difuzzrtl}{{6}{2021}{{Hur et~al\mbox  {.}}}{{}}}
+\bibcite{ieee1800uvm}{{7}{2020}{{IEEE}}{{}}}
+\bibcite{kande2022thehuzz}{{8}{2022}{{Kande et~al\mbox  {.}}}{{}}}
+\bibcite{laeufer2018rfuzz}{{9}{2018}{{Laeufer et~al\mbox  {.}}}{{}}}
+\bibcite{lee2017mtracecheck}{{10}{2017}{{Lee and Bertacco}}{{}}}
+\bibcite{ma2025difftesth}{{11}{2025}{{Ma et~al\mbox  {.}}}{{}}}
+\bibcite{musuvathi2007chess}{{12}{2007}{{Musuvathi and Qadeer}}{{}}}
+\bibcite{musuvathi2008chess}{{13}{2008}{{Musuvathi et~al\mbox  {.}}}{{}}}
+\bibcite{solt2024cascade}{{14}{2024}{{Solt et~al\mbox  {.}}}{{}}}
+\bibcite{sorin2011primer}{{15}{2011}{{Sorin et~al\mbox  {.}}}{{}}}
+\bibcite{xu2023morfuzz}{{16}{2023}{{Xu et~al\mbox  {.}}}{{}}}
+\bibcite{xu2022xiangshan}{{17}{2022}{{Xu et~al\mbox  {.}}}{{}}}
+\bibcite{zeller2002ddmin}{{18}{2002}{{Zeller and Hildebrandt}}{{}}}
 \newlabel{tocindent-1}{0pt}
 \newlabel{tocindent0}{0pt}
-\newlabel{tocindent1}{4.185pt}
-\newlabel{tocindent2}{10.34999pt}
+\newlabel{tocindent1}{4.65pt}
+\newlabel{tocindent2}{11.49998pt}
 \newlabel{tocindent3}{0pt}
 \newlabel{tocindent4}{0pt}
 \newlabel{tocindent5}{0pt}
-\@writefile{toc}{\contentsline {section}{Abstract}{1}{section*.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Background and Related Work}{1}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Motivation: Determinism as a Coverage Wall}{1}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Schedule Exploration}{1}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Perturbation Mechanism}{1}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Soundness}{1}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Scheduling Policy}{1}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Experimental Setup}{1}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Evaluation}{1}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Bugs Found per Simulated Cycle}{1}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Comparison with Existing Practice}{1}{subsection.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Interleaving Coverage}{1}{subsection.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Sensitivity and Cost}{1}{subsection.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}Limitations}{1}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{1}{section.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{References}{1}{section*.4}\protected@file@percent }
-\newlabel{TotPages}{{1}{1}{}{page.1}{}}
-\gdef \@abspage@last{1}
+\@writefile{toc}{\contentsline {section}{References}{7}{section*.25}\protected@file@percent }
+\newlabel{TotPages}{{7}{7}{}{page.7}{}}
+\gdef \@abspage@last{7}

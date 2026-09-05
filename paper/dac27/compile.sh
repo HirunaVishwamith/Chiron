@@ -31,11 +31,16 @@ fi
 
 PAGES=$(pdfinfo "$SRC.pdf" 2>/dev/null | awk '/^Pages:/{print $2}')
 echo ""
-LIMIT=${DAC_PAGE_LIMIT:-6}
+# DAC 2026 CFP (and every recent DAC): 6 pages of content + 1 page of
+# references only. Page 7 must contain nothing but the bibliography.
+LIMIT=${DAC_PAGE_LIMIT:-7}
 echo ""
 echo "Done: $SRC.pdf ($PAGES pages total, references included). Logs in $LOGDIR/."
 if [ -n "$PAGES" ] && [ "$PAGES" -gt "$LIMIT" ]; then
-  echo "OVER BUDGET: $PAGES pages > $LIMIT. DAC research papers have historically"
-  echo "been 6 pages in ACM sigconf. Re-check the DAC 2027 CFP when it is posted;"
-  echo "override with DAC_PAGE_LIMIT=n if it differs."
+  echo "OVER BUDGET: $PAGES pages > $LIMIT (6 content + 1 references)."
+  echo "Override with DAC_PAGE_LIMIT=n if the DAC 2027 CFP differs."
+  exit 1
+fi
+if [ -n "$PAGES" ] && [ "$PAGES" -eq "$LIMIT" ]; then
+  echo "On budget: $PAGES pages (6 + 1 references). Confirm page 7 is refs only."
 fi

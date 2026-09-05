@@ -47,6 +47,14 @@ SECTIONS
     .bss : ALIGN(8) {
         _sbss = .;         /* Start of .bss */
         *(.bss .bss.*)     /* Uninitialized data */
+        /* .sbss/.scommon MUST be here. RISC-V puts small zero-initialised
+           statics in .sbss, and omitting it left `count` and `sense` -- the
+           shared barrier state in common/util.h -- at and just past _ebss,
+           so crt.S's clear loop never zeroed them. The harness compensated by
+           having EVERY hart zero them at thread entry, unsynchronised, which
+           is the race Kairos found (see docs/research/12). */
+        *(.sbss .sbss.* .gnu.linkonce.sb.*)
+        *(.scommon)
         *(COMMON)
         _ebss = .;         /* End of .bss */
     } > ram

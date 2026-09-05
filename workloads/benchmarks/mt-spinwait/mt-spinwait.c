@@ -29,7 +29,13 @@ static volatile int fail_hart[MAX_CORES];
 void thread_entry(int cid, int nc)
 {
   int i;
-  initialize_count_asm(0);
+  /* initialize_count_asm(0) removed: every hart called it, unsynchronised,
+     and it is an 8-byte store at &count that also clobbers the adjacent
+     `sense`. A hart running it after a peer had already entered barrier()
+     wiped that peer's amoadd increment, so no hart ever saw the "last
+     arriver" count and all four spun forever. Found by Kairos, reduced to a
+     343-cycle delay of hart 2. The barrier state is zero-initialised by
+     crt.S now that the linker script covers .sbss. */
   stack_ptr[cid] = 0;
   task_ptr[cid]  = 0;
   online[cid]    = 0;

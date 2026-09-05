@@ -168,6 +168,12 @@ chiron/
 │   │   ├── profile.cpp    #     single-core cycle-accurate profiler
 │   │   ├── profile_quad.cpp   # quad-core profiler (all 4 cores + aggregate IPC)
 │   │   └── fire.cpp       #     bare-metal UART → terminal streamer
+│   ├── kairos/            #   Kairos — schedule exploration (see below)
+│   │   ├── dut.h          #     portable DUT boundary (implement this to port)
+│   │   ├── dut_chiron.h   #     Chiron binding: stall · retire · L1 tag decode
+│   │   ├── policy.h · coverage.h · oracle.h   # policies · metrics · 4 oracles
+│   │   ├── schedule.h · shrink.h              # schedules as files · delta debugging
+│   │   └── campaign.h · main_kairos.cpp       # run · sweep · replay · shrink
 │   ├── tests/riscv-isa/   #   ISA regression images (images · avoid · dumps)
 │   └── data/              #   runtime inputs: Image · qemu.dtb · boot.bin
 ├── workloads/
@@ -183,6 +189,7 @@ chiron/
 │   ├── rtl.mk             #   Chisel → Verilog → Verilator
 │   ├── bins.mk            #   single-core .bin build + stage
 │   ├── bins_quad.mk       #   quad-core .bin build + stage (NUM_CORES=4)
+│   ├── kairos.mk          #   schedule exploration targets
 │   └── run.mk             #   all harness build + run targets
 ├── mc-linux/              # submodule: kernel + buildroot + bbl image pipeline
 ├── scripts/ · tools/      # profiling visualisation, log decoders, stress generator
@@ -426,6 +433,64 @@ commit are all 1-wide, so 1.0 is the per-core ceiling).
 > **43.6 %** and the family sat at 0.768 aggregate IPC. With the BTB trained on
 > the right PC they run at ~98 % and the family is at **1.595** — a 108 % gain,
 > the largest in the suite.
+
+---
+
+## Schedule exploration (Kairos)
+
+A cycle-accurate RTL simulation of a multicore is **deterministic**: it executes
+exactly one interleaving of a test program, and the same one every time. Running
+your SMP regression a thousand times explores one schedule, not a thousand.
+Silicon does not have that problem — jitter, interrupts and refresh re-order the
+machine on every execution, which is why post-silicon validation keeps finding
+coherence bugs that simulation ran straight past.
+
+**Kairos** (`sim/kairos/`) puts that variation back. It *delays* harts under a
+reproducible policy, so one program samples many interleavings, then decides
+whether each one was legal and reduces any failure to the few delays that caused
+it.
+
+```sh
+make kairos          # build the tool
+make kairos-gate     # prove the RTL hook is inert when the mask is zero
+make kairos-smoke    # 4 schedules on one SMP micro
+make kairos-sweep    # every policy across every SMP micro -> build/kairos/*.json
+```
+
+```
+$ build/kairos.out run --image bins/mt-spinwait-q4.bin --done-pc 0x80000ab0 \
+      --done-a0 0 --policy windowed:2000 --runs 8
+baseline (unperturbed): ok after 6629 cycles, 3687 instructions retired
+  seed 1      ok            cyc 7739     digest 43a24267981b77f8 NEW
+  seed 3      livelock      cyc 662901   digest d12919a3f1cc8b22 NEW
+  >>> FINDING (livelock) at cycle 662901
+      reproduce: kairos replay --image bins/mt-spinwait-q4.bin --policy windowed:2000 --seed 3
+  --- windowed:2000  6/8 distinct schedules, 32 order pairs, novelty 0.750
+```
+
+**Why its failures are real.** Kairos may only *delay* a hart — never make one
+go faster, skip work, or win an arbitration it would have lost. On Chiron that
+is one signal gating the fetch→decode handshake, which the design already
+de-asserts on every I-cache miss. Every schedule Kairos induces is therefore one
+the unmodified design could reach on its own, so there is no false-positive class
+to triage. With the feature compiled out the generated Verilog is identical to a
+build that never heard of Kairos — `tools/kairos/equiv_check.sh` elaborates the
+pre-Kairos design in a throwaway git worktree and diffs it: **zero differing
+lines** once Chisel's source-location comments are stripped. With it compiled in
+but idle, every SMP test behaves exactly as before (`make kairos-gate`).
+
+**Four oracles**, reported separately: wrong result; **hang** (a hart stops
+retiring); **livelock** (everyone retires, nobody finishes); and **structural**
+— SWMR and per-line state checked on all four L1 tag arrays every cycle, which
+fires at the offending transaction rather than at a symptom 10⁸ cycles later.
+
+**Findings shrink.** A failing schedule is re-recorded as stall spans and
+reduced by delta debugging until no span can be dropped, then each survivor's
+width is binary-searched. What comes out is one line — *hart 2 held for 41
+cycles at 812,004* — plus a `.ksched` file you can replay, check in as a
+regression, or attach to a bug report.
+
+Design, soundness argument and porting guide: **[`sim/kairos/README.md`](sim/kairos/README.md)**.
 
 ---
 

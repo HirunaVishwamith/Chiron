@@ -101,10 +101,21 @@ _start:
 
   # get core id
   csrr a0, mhartid
-  la x12, hart_init_sync
-  li x6,1
-  sb x6,0(x12)
-  fence
+
+    # NOTE: every hart used to store 1 to hart_init_sync here, before the
+    # branch below. That store was redundant AND it was a race, found by
+    # Kairos (sim/kairos/) on mt-illegal and reduced to a single 220-cycle
+    # delay of one hart:
+    #
+    #   hart_init_sync already starts at 1 -- it lives in .data (see the
+    #   bottom of this file) and the .bss clear loop never touches it. But
+    #   nothing ordered a slow hart's `sb 1` against hart 0's releasing
+    #   `sw 0` below. Delay any hart past that release and its store
+    #   re-arms the flag, so every hart spins here forever.
+    #
+    # A deterministic simulator never showed it, because hart 0's .bss loop
+    # always happened to take long enough. Deleting the store fixes it: the
+    # image already provides the 1.
 
     # Only core 0 should perform data initialization
     bnez a0,sync_all_harts #If hard id !=0, skip initialization

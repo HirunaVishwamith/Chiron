@@ -335,6 +335,14 @@ class simulator {
   // signals rtl_model.h doesn't wrap. Read-only use intended.
   Vsystem *raw() { return tb; }
 
+  // Advance exactly one clock, no VCD. step_nodump() runs until a commit, so a
+  // harness that has to observe or drive something EVERY cycle (Kairos's
+  // per-cycle stall mask, the coherence probes' tag scan) cannot use it. Those
+  // harnesses used to hand-copy the eval/clock/eval sequence out of
+  // tick_nodump(), which works until the model's stepping changes and then
+  // silently diverges in one copy at a time. This is the single entry point.
+  void tick_one() { advance(/*dump=*/false); }
+
   // Read an aligned 64-bit word straight out of the Verilated DRAM backing
   // array (same array load_segment writes). This is the DRAM truth — it does
   // NOT see dirty lines still in the L1/L2 caches. Used by the lock-step

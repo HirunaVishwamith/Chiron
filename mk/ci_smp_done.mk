@@ -4,10 +4,10 @@
 CI_SMP_TESTS := \
   mt-llist:mt-llist-q4.bin:0x80000bdc \
   mt-seqlock:mt-seqlock-q4.bin:0x80000ab4 \
-  mt-spinwait:mt-spinwait-q4.bin:0x80000ab0 \
-  mt-fencei:mt-fencei-q4.bin:0x80000ba0 \
-  mt-crosscall:mt-crosscall-q4.bin:0x80000d10 \
-  mt-illegal:mt-illegal-q4.bin:0x800008e0 \
+  mt-spinwait:mt-spinwait-q4.bin:0x80000a8c \
+  mt-fencei:mt-fencei-q4.bin:0x80000b7c \
+  mt-crosscall:mt-crosscall-q4.bin:0x80000cec \
+  mt-illegal:mt-illegal-q4.bin:0x800008cc \
   mt-icoh-cross:mt-icoh-cross-q4.bin:0x80000a64 \
   mt-icoh-self:mt-icoh-self-q4.bin:0x80000a68 \
 
