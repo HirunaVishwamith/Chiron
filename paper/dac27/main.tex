@@ -1,0 +1,92 @@
+\documentclass[sigconf,anonymous,review]{acmart}
+%% DAC submissions are double-blind: keep [anonymous,review] until camera-ready.
+%% DAC research papers have historically been 6 pages in this format.
+%% Re-check the DAC 2027 CFP when posted and adjust DAC_PAGE_LIMIT in compile.sh.
+
+\usepackage{placeins}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\setlist[itemize]{topsep=4pt plus 0pt minus 0pt, itemsep=3pt plus 0pt minus 0pt, parsep=0pt}
+
+\AtBeginDocument{%
+  \providecommand\BibTeX{{Bib\TeX}}}
+
+%% Rights placeholders -- replace from the ACM rights e-mail on acceptance.
+\setcopyright{acmlicensed}
+\copyrightyear{2027}
+\acmYear{2027}
+\acmDOI{XXXXXXX.XXXXXXX}
+\acmConference[DAC '27]{64th ACM/IEEE Design Automation Conference}{July 2027}{San Jose, CA, USA}
+\acmISBN{978-1-4503-XXXX-X/27/07}
+
+\begin{document}
+
+%% TITLE -- placeholder. Settle once the headline result exists; do not
+%% pre-commit the framing before the measurement.
+\title{Schedule Exploration for Multicore RTL Simulation}
+
+\begin{abstract}
+%% Write this LAST, from the results. A placeholder here on purpose: an
+%% abstract written before the numbers is a hypothesis, and hypotheses have
+%% been wrong repeatedly on this project.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+%% The observation: cycle-accurate RTL simulation of a multicore is
+%% deterministic, so it explores one interleaving per test program regardless of
+%% how many times it is run. Silicon does not have this problem, which is why
+%% post-silicon multicore validation works; simulation loses that coverage
+%% source precisely pre-silicon, where bugs are cheapest to fix.
+%% Evidence: docs/research/12, section 2.
+
+\section{Background and Related Work}
+%% Two axes, and they are orthogonal. Program generation: TSOtool (ISCA'04),
+%% McVerSi (HPCA'16), MTraceCheck, DifuzzRTL, TheHuzz, Cascade, ProcessorFuzz.
+%% Schedule exploration: CHESS (OSDI'08), PCT (ASPLOS'10), SegFuzz -- all
+%% SOFTWARE. Oracles: DiffTest (multicore, commit-level -- state this
+%% correctly), RTLcheck, RealityCheck.
+%% Do NOT claim "first multicore fuzzer" or "unsolved oracle problem".
+%% See docs/research/11 section 0 for the retracted claims.
+
+\section{Motivation: Determinism as a Coverage Wall}
+%% Fig.~\ref{fig:determinism}
+
+\section{Schedule Exploration}
+\subsection{Perturbation Mechanism}
+%% One stall input per core gating a single ready signal. Tied low, the design
+%% is bit-identical to the unmodified RTL.
+\subsection{Soundness}
+%% Delay injection cannot create a schedule the hardware could not itself
+%% reach, so there are no false positives by construction. Contrast with fault
+%% injection, which manufactures impossible states and requires triage.
+\subsection{Scheduling Policy}
+%% PCT-style bounded priority changes; bug depth at cycle granularity is a
+%% genuine open question -- say so.
+
+\section{Experimental Setup}
+%% Chiron: quad-core RV64IMA OoO, AXI-ACE coherence, boots SMP Linux.
+%% Verilator 4.038. Oracles: quad lockstep, swmr_probe, mt-litmus.
+%% Corpus: docs/research/04.
+
+\section{Evaluation}
+\subsection{Bugs Found per Simulated Cycle}
+\subsection{Comparison with Existing Practice}
+%% Ablations, not unfair cross-tool claims: repeated deterministic runs;
+%% ad-hoc random delay injection (UVM practice); long-run brute force (Linux
+%% boot); ours. Cascade/DifuzzRTL are single-core and target other DUTs -- say
+%% why a direct comparison would be misleading rather than manufacturing one.
+\subsection{Interleaving Coverage}
+\subsection{Sensitivity and Cost}
+
+\section{Limitations}
+%% Whole-core stalls may be too coarse for line-level races; PCT's bug-depth
+%% notion needs redefining at cycle granularity; single DUT.
+
+\section{Conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs}
+
+\end{document}
