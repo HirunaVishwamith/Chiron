@@ -1,5 +1,10 @@
 # Software-only novelty: fuzzing a coherent multicore, and the oracle problem
 
+> ## ⚠ CORRECTED 2026-09-05 — the headline claims below do NOT survive review.
+> Three claims in the original draft are unsafe and must not be published.
+> **§0 (added at the end) has the corrections and the defensible residual.**
+> Read §0 before using anything in this file.
+
 2026-09-05. Constraint set by the team: a contribution of SMT's weight, but
 **implemented in software** (like the lockstep flow), with **minimal RTL
 change** — the RTL boots quad-core Linux and is not worth destabilising.
@@ -123,3 +128,100 @@ speculation × coherence bugs."**
 Everything built this session becomes a component: `swmr_probe` is layer 2,
 `mt-litmus` is layer 3, quad lockstep is layer 1, and the corpus is the
 evaluation.
+
+
+---
+
+# §0. CORRECTIONS — what does not survive, and what does
+
+Raised by the team as reviewer bait, then checked. **All three objections are
+correct, and one is worse than flagged.**
+
+## Unsafe claim 1 — "DiffTest does not do multicore"
+
+**False, and the ASP-DAC reviewer already cited the paper.** XiangShan's
+DiffTest has supported multicore since ~2021 (Y. Xu et al., MICRO 2022). The
+draft above says *"DiffTest and every published CPU fuzzer stop at the commit
+boundary of a single instruction stream"* — that conflates DiffTest (multicore,
+commit-level) with the fuzzers (single-core). **Never write this.**
+
+**Defensible version:** DiffTest's oracle is a *commit-boundary architectural
+diff*. It decides from architectural state at commit. It therefore cannot decide
+anything when there are no commits (a hang), and it fires only once a wrong
+value has reached a committed architectural register.
+
+## Unsafe claim 2 — "the first fuzzer to target a coherent multicore"
+
+**False. Two decades false.**
+
+- **[TSOtool, ISCA 2004](http://xenon.stanford.edu/~hangal/tsotool.pdf)** runs
+  *pseudo-randomly generated multiprocessor programs with data races* on a
+  shared-memory system and checks the results against the formal TSO
+  specification, using a novel polynomial-time algorithm (full TSO checking is
+  NP-complete). It found real bugs in shipping Sun systems.
+- **[McVerSi, HPCA 2016](https://users.cs.utah.edu/~vijay/papers/hpca16.pdf)**
+  is a genetic-programming test-generation framework for memory-consistency
+  verification in full-system simulation, with a crossover function that
+  *prioritises memory operations contributing to non-determinism*. That is
+  guided fuzzing of a multicore, explicitly.
+- **MTraceCheck** validates non-deterministic MCM behaviour in post-silicon.
+
+**Never claim the "first multicore fuzzer".**
+
+## Unsafe claim 3 — "the multicore oracle problem is unsolved"
+
+**False.** TSOtool's polynomial-time checker *is* a solution to the multicore
+oracle problem for TSO; `herd` supplies allowed-outcome sets for RVWMO; our own
+quad lockstep with `racy=` and `mt-litmus` are instances of the same idea. The
+draft's framing writes those out of existence.
+
+## What actually survives
+
+The distinction is **not** novelty of multicore testing. It is **what the oracle
+can see**:
+
+> Every prior multicore oracle — TSOtool, McVerSi, MTraceCheck, DiffTest — is
+> **value/outcome-based**: it decides legality from observed values, and needs
+> the program to produce them. That leaves two blind spots, both of which this
+> project hit repeatedly on real RTL:
+>
+> 1. **Liveness failures** — a hang produces no values to check. Four of the
+>    hardest bugs here were hangs.
+> 2. **Latent microarchitectural-state violations** — dual-Unique put the same
+>    line in Unique state in two L1s at once; the wrong *value* surfaced ~10⁸
+>    cycles later as a Linux `/init` hang, and five directed reproducers passed
+>    on both the buggy and fixed RTL.
+>
+> A **microarchitectural-state layer**, checked on RTL cycle by cycle
+> (`swmr_probe`: SWMR + data-value + dup-way), fires at the transaction that
+> causes the violation rather than at the outcome that eventually reveals it.
+
+That is honest, it is defensible, and it is **exactly the reframing the team
+proposed**: DiffTest's commit diff is layer 1; layers 2–3 catch what never shows
+up as a non-racy commit mismatch.
+
+## Consequence for venue — say this plainly
+
+With those corrections the contribution is **oracle layering and detection
+latency**, evaluated on a real-bug corpus. That is a good **DATE / TCAD / ITC**
+paper and an excellent **section** of a larger one.
+
+**It is not a DAC headline.** It is a refinement of prior oracles, not a new
+capability, and a reviewer who knows TSOtool will say so.
+
+**Therefore: SMT (`10`) remains the stronger bet for DAC 2027,** and this work
+belongs inside it as the verification-credibility section — which is also its
+natural role, since a speculation-touching change like SMT cannot be claimed
+correct without exactly these layers.
+
+## The one residual that is arguably still open
+
+TSOtool and McVerSi target **memory-consistency** bugs and are value-based.
+Most of the CHIRON-BUGS corpus is *not* MCM violations — it is deadlock,
+starvation, reallocated ROB/PRF slots, and lost stores, none of which a
+completing-program value check would catch. So *"guided random testing for
+speculation × coherence **liveness and microarchitectural-state** bugs on RTL"*
+is a narrower claim that may still be open.
+
+**But it is the same paper as `01`–`06`, which was already judged
+section-sized.** Do not re-pitch it as a headline.
