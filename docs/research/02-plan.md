@@ -74,6 +74,27 @@ first cycle at which reverted and fixed builds diverge in *any* observed signal
 — a bisect over a cycle-by-cycle state hash. This needs building; it is the one
 genuinely new piece of infrastructure in Phase 1.
 
+### 1.4 Build the new oracle layers (`03-the-idea.md`)
+The mechanism the corpus is used to evaluate. Built **on top of** the existing
+lockstep, which stays as the architectural backstop and supplies the reference
+values the new layers compare against.
+
+- [ ] **Layer 1 — shadow coherence directory.** Reconstruct per-line ownership
+      and state in the golden model from the RTL's observed ACE transactions;
+      check **SWMR** and the **data-value invariant** every cycle. Targets the
+      dual-Unique, stale-`CleanUnique`, and word-granular-snoop-kill classes.
+- [ ] **Layer 2 — slot-ownership tracking.** Tag every ROB/PRF slot with its
+      allocating instruction and check each completion against that tag at the
+      write port. Closes the reallocated-slot class that recurred four times.
+- [ ] **Layer 3 — RVWMO conformance** (shared with Phase 2).
+
+### 1.5 Hunt for new bugs — **do not defer this**
+Run the new oracle on stress, litmus, and the Linux boot and record anything it
+catches that no existing gate did. One or two previously-unknown bugs converts
+the paper from "we measured a thing" to "we measured a thing and it worked."
+This is the highest-value experiment in the plan and the one most likely to be
+squeezed out by the deadline, so schedule it early.
+
 **Exit criterion:** a table of N real bugs × 8 techniques, with detection
 latency in cycles. That table *is* the paper.
 
@@ -89,7 +110,9 @@ Answers B3 and B4. Independent of Phase 1; can run in parallel.
 - [ ] **Splash-3 integer kernels** (`radix` first) — the suite Culsans and
       OpenPiton report, so the multicore comparison is apples-to-apples.
 - [ ] **RVWMO litmus tests** on RTL — from `litmus-tests/litmus-tests-riscv`,
-      checked against the herd7 axiomatic model. Doubles as a Phase-1 technique.
+      checked against the `model-results/` outcomes shipped in that repo (no
+      herdtools/OCaml install needed). Doubles as oracle Layer 3 and as a
+      Phase-1 detection technique.
 - [ ] Comparison table vs BOOM/SonicBOOM, CVA6(+Culsans), OpenPiton, Rocket,
       C910 — from published numbers where re-running is infeasible, clearly
       marked as such.
@@ -126,18 +149,40 @@ evidence."* The processor becomes the instrument, not the claim.
 
 ---
 
-## Open questions for the user
+## Decisions taken (2026-09-05)
 
-1. **Direction** — commit to the bug-corpus paper, or keep the
-   processor-and-flow framing and only patch the reviews? (Recommendation:
-   commit to the corpus. The old framing was rejected on novelty by two
-   reviewers and will be again.)
-2. **Venue** — DATE / ICCAD (deadline-driven) vs TCAD / TODAES (no page
-   squeeze, better fit for ~20 case studies)?
-3. **Downloads needed** (all small, none vendored into this repo):
-   `litmus-tests-riscv` + `herdtools7`, CoreMark, Dhrystone, Embench-IoT,
-   Splash-3. Confirm and say where they should live.
-4. **FPGA access** — is the Virtex UltraScale+ board still available for
-   re-running utilization and on-board measurements?
-5. **Team split** — five co-authors. Phase 1 (corpus) and Phase 2 (workloads)
-   are cleanly separable and can run in parallel.
+- **Direction:** bug-corpus paper, with the **lockstep mechanism retained and
+  extended, not replaced** — it stays the foundation the new oracle layers are
+  built on. See `03-the-idea.md`.
+- **Venue:** **DAC 2027**, deadline ~mid-November 2026 (DAC 2026 closed
+  2025-11-18, DAC 2025 closed 2024-11-19; DAC 2027 not yet officially posted —
+  *re-check the official CFP before committing the schedule*). ~10 weeks.
+  Fallback: extend to TCAD / TODAES rather than chase the next conference.
+- **Downloads approved**, sizes measured via the GitHub API before fetching:
+
+  | repo | size | needed for |
+  |---|---|---|
+  | `litmus-tests/litmus-tests-riscv` | **3.9 MB** | RVWMO conformance (Layer 3) |
+  | `eembc/coremark` | **0.5 MB** | CoreMark/MHz cross-core comparison |
+  | `embench/embench-iot` | **1.6 MB** | standard integer workload |
+  | `SakalisC/Splash-3` | **13.4 MB** | multicore comparison vs Culsans/OpenPiton |
+  | *(Dhrystone)* | ~0.1 MB | classic comparison point |
+  | ~~`herd/herdtools7`~~ | ~~60 MB + OCaml toolchain~~ | **not needed** |
+
+  **~19 MB total.** herdtools7 is avoided because `litmus-tests-riscv` ships
+  `model-results/` — the precomputed axiomatic outcomes are enough to check RTL
+  outcomes against the model. Only build herd7 if we need to author *new* litmus
+  tests, and ask first.
+
+  Everything lands outside the repo (or under an ignored path); nothing is
+  vendored into `chiron`.
+- **Compute:** long runs are allowed but **ask before starting one**. Multi-hour
+  jobs (Linux boots, full sweeps, the per-bug measurement matrix) are night
+  work — batch them and propose them as a set rather than one at a time.
+- **FPGA:** not confirmed available. Plan assumes simulation-only results; the
+  synthesis/utilization fix (A5) is parked until board access is confirmed.
+
+## Still open
+
+- **Team split** — five co-authors. Phase 1 (corpus) and Phase 2 (workloads) are
+  cleanly separable and can run in parallel.
