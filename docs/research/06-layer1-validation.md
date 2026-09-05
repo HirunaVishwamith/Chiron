@@ -142,3 +142,46 @@ the Linux workload to detect CO-1. Report whichever happens.
   by construction. Do not let Result 1 imply Layer 1 is finished.
 - Layer 2 (slot-ownership tags) not started.
 - Only the D-cache is checked; the I-cache is not in the invariant.
+
+---
+
+## Addendum — the CO-1 true-positive experiment (negative result)
+
+Ran 2026-09-05. `bc4a4ab` reverted; revert confirmed to have reached the
+Verilog (`grep -c retain sim/rtl/system.v`: **185 → 0**); both harnesses
+relinked and mtime-checked against the rebuilt library.
+
+| workload | answer | SWMR | MULTI-DIRTY | DUP-WAY | tag changes (buggy) | tag changes (fixed) |
+|---|---|---:|---:|---:|---:|---:|
+| `mt-fencei` | PASS | 0 | 0 | 0 | 4,091 | **4,091** |
+| `mt-crosscall` | PASS | 0 | 0 | 0 | 4,158 | **4,158** |
+| `mt-llist` | PASS | 0 | 0 | 0 | 26,090 | **26,090** |
+| `mt-seqlock` | PASS | 0 | 0 | 0 | 160,148 | **160,148** |
+| `mt-lrsc` | — | 0 | 0 | 0 | 139,716 | **139,716** |
+
+**SWMR did not fire — and the counts are identical to the digit on all five.**
+The buggy and fixed models are bit-identical on every one of these workloads,
+so the reverted code path is never exercised. **This is a failure of activation,
+not of detection**: the checker was never given a violation to see.
+
+That matches the record — six directed tests, none of which activate CO-1. The
+bug's only known activation is the Linux boot at ~8.7×10⁸ cycles.
+
+Reading `mt-fencei.c` shows why. The bug needs: hart A's walker captures line L
+into the writeback buffer → A stores to L (tag untouched, A still owns it) →
+**hart B's snoop arrives while that buffer entry is still live**. `mt-fencei`
+builds the first two deliberately, but hart 0 spins on the flag holding a
+*shared* copy, so it only re-snoops after A's store has already invalidated it,
+by which point the buffer has drained. `DIRTY_LINES=512` does not widen the
+window — the sweep is FIFO, so reaching the line early drains its entry and
+reaching it late leaves a short queue.
+
+**Detection power therefore remains undemonstrated**, and two readings are still
+open: (a) detection works but activation does not, or (b) SWMR is the wrong
+invariant for CO-1 because the stale handoff completes without ever leaving two
+tags Unique at once — in which case this needs DVI. Do not claim Layer 1 detects
+anything until one of these is settled.
+
+**Corpus consequence, recorded against CO-1:** *activation window unknown; not
+reachable by any of six directed tests; only known activation is a ~10⁹-cycle
+Linux boot.* That is a finding about the bug class and belongs in the paper.
