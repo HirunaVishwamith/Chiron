@@ -42,6 +42,12 @@ $(BUILD)/wedge_dump_probe.out: $(HARNESS)/probes/wedge_dump_probe.cpp $(SIM_HDR)
 $(BUILD)/tag_dump_probe.out: $(HARNESS)/probes/tag_dump_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/tag_dump_probe.cpp $(VSYS_LIB_FAST) -o $@
 
+# swmr_probe: continuous coherence-invariant checker over all four L1 D-caches
+# (oracle Layer 1, docs/research/03-the-idea.md). Exits non-zero on a SWMR /
+# MULTI-DIRTY / DUP-WAY violation, so it can gate.
+$(BUILD)/swmr_probe.out: $(HARNESS)/probes/swmr_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
+	$(CXX_FAST) $(HARNESS)/probes/swmr_probe.cpp $(VSYS_LIB_FAST) -o $@
+
 $(BUILD)/ipi_hang_probe.out: $(HARNESS)/probes/ipi_hang_probe.cpp $(SIM_HDR) $(VSYS_LIB_FAST) | $(BUILD)
 	$(CXX_FAST) $(HARNESS)/probes/ipi_hang_probe.cpp $(VSYS_LIB_FAST) -o $@
 
