@@ -75,6 +75,19 @@ spinwait-bin:    ## Build just bins/mt-spinwait-q4.bin (fast iteration, no clean
 	cp $(BENCH_SRC)/mt-spinwait.bin $(BINS)/mt-spinwait-q4.bin
 	@echo "[spinwait-bin] staged: $(BINS)/mt-spinwait-q4.bin"
 
+# mt-litmus: memory-model litmus test on two harts (LITMUS=SB or LB).
+# See workloads/benchmarks/mt-litmus/mt-litmus.c and docs/research/08.
+LITMUS ?= SB
+.PHONY: litmus-bin
+litmus-bin:    ## Build bins/mt-litmus-q4.bin (LITMUS=SB|LB)
+	rm -f $(BENCH_SRC)/mt-litmus.o $(BENCH_SRC)/crt.o $(BENCH_SRC)/syscalls.o
+	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
+	    bmarks="mt-litmus" \
+	    RISCV_GCC_OPTS="$(QUAD_GCC_OPTS) -DLITMUS_SB=$(if $(filter SB,$(LITMUS)),1,0) -DLITMUS_FENCE=$(if $(filter 1,$(FENCE)),1,0) -DITERS=$(if $(ITERS),$(ITERS),2000)"
+	@mkdir -p $(BINS)
+	cp $(BENCH_SRC)/mt-litmus.bin $(BINS)/mt-litmus-q4.bin
+	@echo "[litmus-bin] staged: $(BINS)/mt-litmus-q4.bin  (LITMUS=$(LITMUS))"
+
 .PHONY: radix-bin
 radix-bin:    ## Build just bins/mt-radix-q4.bin (fast iteration, no clean)
 	$(TOOLPATH) $(MAKE) -C $(BENCH_SRC) riscv \
